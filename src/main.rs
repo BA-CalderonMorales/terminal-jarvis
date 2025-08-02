@@ -1,10 +1,10 @@
+mod api;
+mod api_base;
+mod api_client;
 mod cli;
 mod cli_logic;
 mod config;
 mod services;
-mod api;
-mod api_base;
-mod api_client;
 
 use cli::Cli;
 

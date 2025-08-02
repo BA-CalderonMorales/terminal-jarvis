@@ -35,35 +35,47 @@ pub struct ApiConfig {
 impl Default for Config {
     fn default() -> Self {
         let mut tools = HashMap::new();
-        
+
         // Default tool configurations
-        tools.insert("claude-code".to_string(), ToolConfig {
-            enabled: true,
-            auto_update: true,
-            install_command: Some("npm install -g @anthropic-ai/claude-cli".to_string()),
-            update_command: Some("npm update -g @anthropic-ai/claude-cli".to_string()),
-        });
-        
-        tools.insert("gemini-cli".to_string(), ToolConfig {
-            enabled: true,
-            auto_update: false,
-            install_command: Some("npm install -g @google/generative-ai-cli".to_string()),
-            update_command: Some("npm update -g @google/generative-ai-cli".to_string()),
-        });
-        
-        tools.insert("qwen-code".to_string(), ToolConfig {
-            enabled: true,
-            auto_update: true,
-            install_command: Some("cargo install qwen-code".to_string()),
-            update_command: Some("cargo install --force qwen-code".to_string()),
-        });
-        
-        tools.insert("opencode".to_string(), ToolConfig {
-            enabled: false,
-            auto_update: false,
-            install_command: Some("npm install -g opencode".to_string()),
-            update_command: Some("npm update -g opencode".to_string()),
-        });
+        tools.insert(
+            "claude-code".to_string(),
+            ToolConfig {
+                enabled: true,
+                auto_update: true,
+                install_command: Some("npm install -g @anthropic-ai/claude-cli".to_string()),
+                update_command: Some("npm update -g @anthropic-ai/claude-cli".to_string()),
+            },
+        );
+
+        tools.insert(
+            "gemini-cli".to_string(),
+            ToolConfig {
+                enabled: true,
+                auto_update: false,
+                install_command: Some("npm install -g @google/generative-ai-cli".to_string()),
+                update_command: Some("npm update -g @google/generative-ai-cli".to_string()),
+            },
+        );
+
+        tools.insert(
+            "qwen-code".to_string(),
+            ToolConfig {
+                enabled: true,
+                auto_update: true,
+                install_command: Some("cargo install qwen-code".to_string()),
+                update_command: Some("cargo install --force qwen-code".to_string()),
+            },
+        );
+
+        tools.insert(
+            "opencode".to_string(),
+            ToolConfig {
+                enabled: false,
+                auto_update: false,
+                install_command: Some("npm install -g opencode".to_string()),
+                update_command: Some("npm update -g opencode".to_string()),
+            },
+        );
 
         Self {
             tools,
@@ -109,7 +121,7 @@ impl Config {
             .join("terminal-jarvis");
 
         std::fs::create_dir_all(&config_dir)?;
-        
+
         let config_path = config_dir.join("config.toml");
         let content = toml::to_string_pretty(self)?;
         std::fs::write(config_path, content)?;

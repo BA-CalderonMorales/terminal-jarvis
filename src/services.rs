@@ -1,7 +1,7 @@
+use crate::config::Config;
 use anyhow::{anyhow, Result};
 use std::process::Command;
 use tokio::process::Command as AsyncCommand;
-use crate::config::Config;
 
 /// Service for managing AI coding tool packages
 pub struct PackageService {
@@ -16,19 +16,18 @@ impl PackageService {
 
     /// Check if a tool is installed on the system
     pub async fn is_tool_installed(&self, tool: &str) -> Result<bool> {
-        let output = AsyncCommand::new("which")
-            .arg(tool)
-            .output()
-            .await?;
-        
+        let output = AsyncCommand::new("which").arg(tool).output().await?;
+
         Ok(output.status.success())
     }
 
     /// Install a tool using the appropriate package manager
     pub async fn install_tool(&self, tool: &str) -> Result<()> {
-        let tool_config = self.config.get_tool_config(tool)
+        let tool_config = self
+            .config
+            .get_tool_config(tool)
             .ok_or_else(|| anyhow!("Tool {} not found in configuration", tool))?;
-        
+
         if !tool_config.enabled {
             return Err(anyhow!("Tool {} is disabled in configuration", tool));
         }
@@ -49,9 +48,11 @@ impl PackageService {
 
     /// Update a tool to the latest version
     pub async fn update_tool(&self, tool: &str) -> Result<()> {
-        let tool_config = self.config.get_tool_config(tool)
+        let tool_config = self
+            .config
+            .get_tool_config(tool)
             .ok_or_else(|| anyhow!("Tool {} not found in configuration", tool))?;
-        
+
         if !tool_config.enabled {
             return Err(anyhow!("Tool {} is disabled in configuration", tool));
         }
@@ -72,27 +73,24 @@ impl PackageService {
     pub async fn run_tool(&self, tool: &str, args: &[String]) -> Result<()> {
         let mut cmd = AsyncCommand::new(tool);
         cmd.args(args);
-        
+
         let status = cmd.status().await?;
-        
+
         if !status.success() {
             return Err(anyhow!("Tool {} exited with status: {}", tool, status));
         }
-        
+
         Ok(())
     }
 
     /// Get the version of an installed tool
     pub async fn get_tool_version(&self, tool: &str) -> Result<String> {
-        let output = AsyncCommand::new(tool)
-            .arg("--version")
-            .output()
-            .await?;
-        
+        let output = AsyncCommand::new(tool).arg("--version").output().await?;
+
         if !output.status.success() {
             return Err(anyhow!("Failed to get version for {}", tool));
         }
-        
+
         let version = String::from_utf8(output.stdout)?;
         Ok(version.trim().to_string())
     }
@@ -103,15 +101,12 @@ impl PackageService {
         let cmd = parts.next().ok_or_else(|| anyhow!("Empty command"))?;
         let args: Vec<&str> = parts.collect();
 
-        let status = AsyncCommand::new(cmd)
-            .args(&args)
-            .status()
-            .await?;
-        
+        let status = AsyncCommand::new(cmd).args(&args).status().await?;
+
         if !status.success() {
             return Err(anyhow!("Command failed: {}", command));
         }
-        
+
         Ok(())
     }
 
@@ -120,11 +115,11 @@ impl PackageService {
             .args(&["install", "-g", package])
             .status()
             .await?;
-        
+
         if !status.success() {
             return Err(anyhow!("Failed to install npm package: {}", package));
         }
-        
+
         Ok(())
     }
 
@@ -133,11 +128,11 @@ impl PackageService {
             .args(&["install", package])
             .status()
             .await?;
-        
+
         if !status.success() {
             return Err(anyhow!("Failed to install cargo package: {}", package));
         }
-        
+
         Ok(())
     }
 
@@ -146,11 +141,11 @@ impl PackageService {
             .args(&["update", "-g", package])
             .status()
             .await?;
-        
+
         if !status.success() {
             return Err(anyhow!("Failed to update npm package: {}", package));
         }
-        
+
         Ok(())
     }
 
@@ -159,11 +154,11 @@ impl PackageService {
             .args(&["install", "--force", package])
             .status()
             .await?;
-        
+
         if !status.success() {
             return Err(anyhow!("Failed to update cargo package: {}", package));
         }
-        
+
         Ok(())
     }
 }
@@ -182,21 +177,26 @@ impl GitHubService {
     /// Initialize a template repository using GitHub CLI
     pub async fn init_template_repository(&self) -> Result<()> {
         // Check if gh CLI is installed
-        let output = AsyncCommand::new("gh")
-            .arg("--version")
-            .output()
-            .await?;
-        
+        let output = AsyncCommand::new("gh").arg("--version").output().await?;
+
         if !output.status.success() {
-            return Err(anyhow!("GitHub CLI (gh) is not installed. Please install it first."));
+            return Err(anyhow!(
+                "GitHub CLI (gh) is not installed. Please install it first."
+            ));
         }
 
         // Create repository
         let status = AsyncCommand::new("gh")
-            .args(&["repo", "create", "jarvis-templates", "--private", "--confirm"])
+            .args(&[
+                "repo",
+                "create",
+                "jarvis-templates",
+                "--private",
+                "--confirm",
+            ])
             .status()
             .await?;
-        
+
         if !status.success() {
             return Err(anyhow!("Failed to create template repository"));
         }

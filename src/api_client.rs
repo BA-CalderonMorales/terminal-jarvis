@@ -1,8 +1,8 @@
+use crate::api_base::ApiBase;
+use anyhow::{anyhow, Result};
 use reqwest::{Client, ClientBuilder, Response};
-use anyhow::{Result, anyhow};
 use serde::de::DeserializeOwned;
 use std::time::Duration;
-use crate::api_base::ApiBase;
 
 /// HTTP client abstraction layer
 pub struct ApiClient {
@@ -37,7 +37,7 @@ impl ApiClient {
     {
         let url = self.config.endpoint_url(path);
         let response = self.client.get(&url).send().await?;
-        
+
         self.handle_response(response).await
     }
 
@@ -48,12 +48,8 @@ impl ApiClient {
         B: serde::Serialize,
     {
         let url = self.config.endpoint_url(path);
-        let response = self.client
-            .post(&url)
-            .json(body)
-            .send()
-            .await?;
-        
+        let response = self.client.post(&url).json(body).send().await?;
+
         self.handle_response(response).await
     }
 
@@ -64,12 +60,8 @@ impl ApiClient {
         B: serde::Serialize,
     {
         let url = self.config.endpoint_url(path);
-        let response = self.client
-            .put(&url)
-            .json(body)
-            .send()
-            .await?;
-        
+        let response = self.client.put(&url).json(body).send().await?;
+
         self.handle_response(response).await
     }
 
@@ -80,7 +72,7 @@ impl ApiClient {
     {
         let url = self.config.endpoint_url(path);
         let response = self.client.delete(&url).send().await?;
-        
+
         self.handle_response(response).await
     }
 
@@ -90,9 +82,12 @@ impl ApiClient {
         T: DeserializeOwned,
     {
         let status = response.status();
-        
+
         if !status.is_success() {
-            let error_text = response.text().await.unwrap_or_else(|_| "Unknown error".to_string());
+            let error_text = response
+                .text()
+                .await
+                .unwrap_or_else(|_| "Unknown error".to_string());
             return Err(anyhow!("HTTP {} error: {}", status, error_text));
         }
 

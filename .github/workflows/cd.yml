@@ -63,18 +63,24 @@ jobs:
         run: echo "RELEASE_VERSION=${GITHUB_REF:11}" >> $GITHUB_ENV
 
       - name: Install Rust toolchain
-        uses: actions-rs/toolchain@v1
+        uses: dtolnay/rust-toolchain@stable
         with:
           toolchain: ${{ matrix.build.TOOLCHAIN }}
-          target: ${{ matrix.build.TARGET }}
-          override: true
+          targets: ${{ matrix.build.TARGET }}
+
+      - name: Install cross-compilation tools
+        if: matrix.build.OS == 'ubuntu-20.04'
+        run: |
+          cargo install cross --git https://github.com/cross-rs/cross
 
       - name: Build
-        uses: actions-rs/cargo@v1
-        with:
-          command: build
-          args: --release --locked --target ${{ matrix.build.TARGET }}
-          use-cross: ${{ matrix.build.OS == 'ubuntu-20.04' }}
+        shell: bash
+        run: |
+          if [ "${{ matrix.build.OS }}" = "ubuntu-20.04" ]; then
+            cross build --release --target ${{ matrix.build.TARGET }}
+          else
+            cargo build --release --target ${{ matrix.build.TARGET }}
+          fi
 
       - name: Install node
         uses: actions/setup-node@v4

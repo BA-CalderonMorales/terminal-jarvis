@@ -37,7 +37,11 @@ impl ApiBase {
 
     /// Get the full URL for an endpoint
     pub fn endpoint_url(&self, path: &str) -> String {
-        format!("{}/{}", self.base_url.trim_end_matches('/'), path.trim_start_matches('/'))
+        format!(
+            "{}/{}",
+            self.base_url.trim_end_matches('/'),
+            path.trim_start_matches('/')
+        )
     }
 }
 
