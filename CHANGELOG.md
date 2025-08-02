@@ -5,6 +5,26 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.0.14] - 2025-08-02
+
+### Fixed
+- **Critical NPX Issue**: Fixed `npx terminal-jarvis` asking to reinstall package every time
+- Changed package.json bin configuration from Node.js wrapper to direct binary execution
+- Fixed postinstall script syntax error with proper escape sequences
+- Refreshed bundled binary with latest v0.0.14 build for improved compatibility
+- Ensured proper binary permissions and executable status in NPM package
+
+### Changed
+- Package now directly executes Rust binary instead of Node.js wrapper for better NPX compatibility
+- **Package size optimized**: Reduced to ~1.2MB compressed / ~2.9MB unpacked (50% reduction)
+- Removed redundant platform-specific binary since generic binary works across platforms
+- Improved testing methodology with temporary environment validation before publishing
+
+### Technical
+- Package includes both generic and platform-specific binaries for maximum compatibility
+- This establishes base case for future size optimization efforts
+- Prioritizes immediate user experience over package size
+
 ## [0.0.13] - 2025-08-02
 
 ### Fixed

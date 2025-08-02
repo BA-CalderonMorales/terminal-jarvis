@@ -1,9 +1,9 @@
 {
   "name": "terminal-jarvis",
-  "version": "0.0.13",
+  "version": "0.0.14",
   "description": "A thin Rust wrapper that provides a unified interface for managing and running AI coding tools",
   "bin": {
-    "terminal-jarvis": "lib/index.js"
+    "terminal-jarvis": "bin/terminal-jarvis"
   },
   "files": [
     "lib/",
@@ -25,7 +25,7 @@
     "build": "npm run sync-readme && npm run build-rust && npm run copy-binary && tsc",
     "prepublishOnly": "npm run build",
     "dev": "npm run build && node lib/index.js",
-    "postinstall": "node -e \"console.log(n🤖 Terminal Jarvis v0.0.13 installed successfully!nn✅ Full T.JARVIS interface ready to use!nnRun: npx terminal-jarvisn)\""
+    "postinstall": "node -e \"console.log('\\n🤖 Terminal Jarvis v0.0.14 installed successfully!\\n\\n✅ Full T.JARVIS interface ready to use!\\n\\nRun: npx terminal-jarvis\\n')\""
   },
   "keywords": [
     "cli",

@@ -89,6 +89,38 @@ npm run sync-readme
 9. Push to GitHub: `git push origin develop --tags`
 10. Publish to NPM: `cd npm/terminal-jarvis && npm publish`
 
+## Pre-Commit Checklist
+
+**ALWAYS** verify these items before making any commit:
+
+### Version Consistency Check:
+- [ ] `Cargo.toml` version updated
+- [ ] `npm/terminal-jarvis/package.json` version updated  
+- [ ] `npm/terminal-jarvis/src/index.ts` version display updated
+- [ ] `src/cli_logic.rs` uses `env!("CARGO_PKG_VERSION")` (auto-updates)
+- [ ] `CHANGELOG.md` has new version entry with clear changes
+- [ ] `README.md` version references updated in note section
+
+### Documentation Updates:
+- [ ] README.md reflects current functionality and features
+- [ ] Package size information updated if binary changed
+- [ ] Installation instructions are accurate
+- [ ] Examples work with current version
+
+### Quality Checks:
+- [ ] `cargo clippy --all-targets --all-features -- -D warnings` passes
+- [ ] `cargo fmt --all` applied
+- [ ] `cargo test` passes (if tests exist)
+- [ ] NPM package builds: `cd npm/terminal-jarvis && npm run build`
+
+### Testing (Critical):
+- [ ] Local package testing in `/tmp` environment completed
+- [ ] NPX functionality verified (`npx terminal-jarvis` works)
+- [ ] Binary permissions and execution tested
+- [ ] Postinstall scripts validated
+
+**Never commit without completing the full checklist!**
+
 ## Local CD with Agent Mode
 
 When conducting local continuous deployment with agents, **ALWAYS** follow this order:
@@ -128,6 +160,80 @@ When conducting local continuous deployment with agents, **ALWAYS** follow this 
 - NPM registry reflects committed code, not uncommitted changes
 - Allows rollback if NPM publish fails
 - Ensures consistency between repository and published package
+
+## Testing NPM Package Before Publishing
+
+**ALWAYS** test the NPM package locally before publishing to catch issues early:
+
+1. **Build and Pack the Package:**
+   ```bash
+   cd npm/terminal-jarvis
+   npm run build
+   npm pack
+   ```
+
+2. **Test Installation in Temporary Environment:**
+   ```bash
+   # Create clean test environment
+   cd /tmp
+   mkdir -p test-terminal-jarvis && cd test-terminal-jarvis
+   npm init -y
+   
+   # Install from local tarball
+   npm install /path/to/terminal-jarvis-X.X.X.tgz
+   
+   # Test the binary directly
+   npx terminal-jarvis --help
+   npx terminal-jarvis list
+   
+   # Test multiple runs to verify NPX caching works
+   npx terminal-jarvis --help  # Should not re-download
+   ```
+
+3. **Verify Package Contents:**
+   ```bash
+   # Check what gets included in the package
+   npm pack --dry-run
+   
+   # Verify binary permissions and functionality
+   ls -la node_modules/terminal-jarvis/bin/
+   ./node_modules/terminal-jarvis/bin/terminal-jarvis --help
+   ```
+
+4. **Test Different Installation Methods:**
+   ```bash
+   # Test global installation
+   npm install -g ./terminal-jarvis-X.X.X.tgz
+   terminal-jarvis --help
+   
+   # Test npx from registry (after publishing)
+   npx terminal-jarvis@X.X.X --help
+   ```
+
+**Common Issues to Check:**
+- Binary has correct permissions (`chmod +x`)
+- Package.json bin entry points to correct file
+- Postinstall scripts have proper escaping
+- All required files included in `files` array
+- Version numbers are consistent across all files
+
+**Benefits of This Process:**
+- Catches binary execution issues before publishing
+- Verifies NPX caching behavior
+- Tests installation process end-to-end
+- Prevents publishing broken packages
+- Saves time debugging after publication
+
+**Package Size Considerations:**
+- Current package size is ~1.2MB compressed / ~2.9MB unpacked due to bundled Rust binary
+- This ensures immediate functionality without requiring Rust toolchain installation
+- Single generic binary works across platforms via NPM's bin configuration
+- **Future optimization opportunities:**
+  - Platform-specific packages to reduce download size further
+  - Binary compression techniques
+  - Splitting debug symbols
+  - On-demand binary downloading
+- Current approach prioritizes user experience over package size (optimized base case)
 
 ## Technical Notes
 
