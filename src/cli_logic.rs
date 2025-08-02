@@ -223,11 +223,11 @@ pub async fn handle_interactive_mode() -> Result<()> {
         } else {
             String::new()
         };
-        
+
         let top_border = "╔".to_string() + &"═".repeat(border_width.saturating_sub(2)) + "╗";
         let empty_border = "║".to_string() + &" ".repeat(border_width.saturating_sub(2)) + "║";
         let bottom_border = "╚".to_string() + &"═".repeat(border_width.saturating_sub(2)) + "╝";
-        
+
         println!("{border_padding}{top_border}");
         println!("{border_padding}{empty_border}");
 
@@ -242,12 +242,12 @@ pub async fn handle_interactive_mode() -> Result<()> {
         ];
 
         let inner_width = border_width.saturating_sub(2);
-        
+
         for line in logo_lines {
             // Use char count for proper Unicode handling
             let line_chars: Vec<char> = line.chars().collect();
             let line_char_len = line_chars.len();
-            
+
             if line_char_len <= inner_width {
                 let content_padding = (inner_width - line_char_len) / 2;
                 let left_padding = " ".repeat(content_padding);
@@ -270,8 +270,11 @@ pub async fn handle_interactive_mode() -> Result<()> {
         if version_text.len() <= inner_width {
             let version_content_padding = (inner_width - version_text.len()) / 2;
             let version_left_padding = " ".repeat(version_content_padding);
-            let version_right_padding = " ".repeat(inner_width - version_content_padding - version_text.len());
-            println!("{border_padding}║{version_left_padding}{version_text}{version_right_padding}║");
+            let version_right_padding =
+                " ".repeat(inner_width - version_content_padding - version_text.len());
+            println!(
+                "{border_padding}║{version_left_padding}{version_text}{version_right_padding}║"
+            );
         }
 
         // Tagline centered within border
@@ -281,7 +284,8 @@ pub async fn handle_interactive_mode() -> Result<()> {
         if tagline_display_len <= inner_width {
             let tagline_content_padding = (inner_width - tagline_display_len) / 2;
             let tagline_left_padding = " ".repeat(tagline_content_padding);
-            let tagline_right_padding = " ".repeat(inner_width - tagline_content_padding - tagline_display_len);
+            let tagline_right_padding =
+                " ".repeat(inner_width - tagline_content_padding - tagline_display_len);
             println!("{border_padding}║{tagline_left_padding}{tagline}{tagline_right_padding}║");
         }
 
