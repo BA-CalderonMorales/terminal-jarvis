@@ -1,3 +1,7 @@
+# Rust
+/target/
+
+# NPM and Node.js
 # Logs
 logs
 *.log
@@ -44,8 +48,9 @@ jspm_packages/
 # Snowpack dependency directory (https://snowpack.dev/)
 web_modules/
 
-# TypeScript cache
+# TypeScript
 *.tsbuildinfo
+lib/
 
 # Optional npm cache directory
 .npm
@@ -137,3 +142,13 @@ dist
 # Vite logs files
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db

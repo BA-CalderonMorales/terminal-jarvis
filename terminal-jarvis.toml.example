@@ -1,0 +1,14 @@
+[tools]
+claude-code = { enabled = true, auto_update = true }
+gemini-cli = { enabled = true, auto_update = false }
+qwen-code = { enabled = true, auto_update = true }
+opencode = { enabled = false, auto_update = false }
+
+[templates]
+repository = "your-username/jarvis-templates"
+auto_sync = true
+
+[api]
+base_url = "https://api.terminal-jarvis.dev"
+timeout_seconds = 30
+max_retries = 3
