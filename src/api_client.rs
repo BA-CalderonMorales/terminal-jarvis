@@ -1,3 +1,5 @@
+#![allow(dead_code)]
+
 use crate::api_base::ApiBase;
 use anyhow::{anyhow, Result};
 use reqwest::{Client, ClientBuilder, Response};
@@ -8,6 +10,12 @@ use std::time::Duration;
 pub struct ApiClient {
     client: Client,
     config: ApiBase,
+}
+
+impl Default for ApiClient {
+    fn default() -> Self {
+        Self::new()
+    }
 }
 
 impl ApiClient {

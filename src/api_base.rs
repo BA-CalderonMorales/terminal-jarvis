@@ -1,4 +1,6 @@
-/// Base API configuration and route definitions
+#![allow(dead_code)]
+
+/// Base configuration for API clients
 pub struct ApiBase {
     pub base_url: String,
     pub timeout_seconds: u64,

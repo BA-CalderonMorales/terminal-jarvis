@@ -1,6 +1,5 @@
 use crate::config::Config;
 use anyhow::{anyhow, Result};
-use std::process::Command;
 use tokio::process::Command as AsyncCommand;
 
 /// Service for managing AI coding tool packages
@@ -112,7 +111,7 @@ impl PackageService {
 
     async fn install_npm_package(&self, package: &str) -> Result<()> {
         let status = AsyncCommand::new("npm")
-            .args(&["install", "-g", package])
+            .args(["install", "-g", package])
             .status()
             .await?;
 
@@ -125,7 +124,7 @@ impl PackageService {
 
     async fn install_cargo_package(&self, package: &str) -> Result<()> {
         let status = AsyncCommand::new("cargo")
-            .args(&["install", package])
+            .args(["install", package])
             .status()
             .await?;
 
@@ -138,7 +137,7 @@ impl PackageService {
 
     async fn update_npm_package(&self, package: &str) -> Result<()> {
         let status = AsyncCommand::new("npm")
-            .args(&["update", "-g", package])
+            .args(["update", "-g", package])
             .status()
             .await?;
 
@@ -151,7 +150,7 @@ impl PackageService {
 
     async fn update_cargo_package(&self, package: &str) -> Result<()> {
         let status = AsyncCommand::new("cargo")
-            .args(&["install", "--force", package])
+            .args(["install", "--force", package])
             .status()
             .await?;
 
@@ -163,8 +162,9 @@ impl PackageService {
     }
 }
 
-/// Service for GitHub operations and template management
+/// Service for managing GitHub operations and templates
 pub struct GitHubService {
+    #[allow(dead_code)]
     config: Config,
 }
 
@@ -187,7 +187,7 @@ impl GitHubService {
 
         // Create repository
         let status = AsyncCommand::new("gh")
-            .args(&[
+            .args([
                 "repo",
                 "create",
                 "jarvis-templates",
@@ -209,7 +209,7 @@ impl GitHubService {
     pub async fn create_template(&self, name: &str) -> Result<()> {
         // This would implement template creation logic
         // For now, just a placeholder
-        println!("Template '{}' would be created here", name);
+        println!("Template '{name}' would be created here");
         Ok(())
     }
 
@@ -224,7 +224,7 @@ impl GitHubService {
     pub async fn apply_template(&self, name: &str) -> Result<()> {
         // This would implement template application logic
         // For now, just a placeholder
-        println!("Template '{}' would be applied here", name);
+        println!("Template '{name}' would be applied here");
         Ok(())
     }
 }

@@ -1,10 +1,19 @@
+#![allow(dead_code)]
+
 use crate::api_client::ApiClient;
 use anyhow::Result;
 use std::collections::HashMap;
 
 /// API layer for tool-related operations
 pub struct ToolApi {
+    #[allow(dead_code)]
     client: ApiClient,
+}
+
+impl Default for ToolApi {
+    fn default() -> Self {
+        Self::new()
+    }
 }
 
 impl ToolApi {
@@ -49,7 +58,7 @@ impl ToolApi {
     pub async fn check_tool_availability(&self, tool: &str) -> Result<bool> {
         // This could make an API call to check if a tool is available
         // For now, just check against supported tools
-        let supported_tools = vec!["claude-code", "gemini-cli", "qwen-code", "opencode"];
+        let supported_tools = ["claude-code", "gemini-cli", "qwen-code", "opencode"];
         Ok(supported_tools.contains(&tool))
     }
 
@@ -62,7 +71,7 @@ impl ToolApi {
             name: tool.to_string(),
             description,
             version: "latest".to_string(),
-            homepage: format!("https://github.com/example/{}", tool),
+            homepage: format!("https://github.com/example/{tool}"),
         })
     }
 }

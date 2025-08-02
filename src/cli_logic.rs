@@ -1,7 +1,6 @@
 use crate::api::ToolApi;
 use crate::services::{GitHubService, PackageService};
 use anyhow::{anyhow, Result};
-use std::collections::HashMap;
 
 /// Supported AI coding tools
 const SUPPORTED_TOOLS: &[&str] = &["claude-code", "gemini-cli", "qwen-code", "opencode"];
@@ -15,12 +14,12 @@ pub async fn handle_run_tool(tool: &str, args: &[String]) -> Result<()> {
         ));
     }
 
-    println!("Running {} with args: {:?}", tool, args);
+    println!("Running {tool} with args: {args:?}");
 
     // Check if tool is installed
     let package_service = PackageService::new()?;
     if !package_service.is_tool_installed(tool).await? {
-        println!("Tool {} is not installed. Installing...", tool);
+        println!("Tool {tool} is not installed. Installing...");
         package_service.install_tool(tool).await?;
     }
 
@@ -40,15 +39,15 @@ pub async fn handle_update_packages(package: Option<&str>) -> Result<()> {
                     SUPPORTED_TOOLS
                 ));
             }
-            println!("Updating package: {}", pkg);
+            println!("Updating package: {pkg}");
             package_service.update_tool(pkg).await
         }
         None => {
             println!("Updating all packages...");
             for tool in SUPPORTED_TOOLS {
-                println!("Updating {}...", tool);
+                println!("Updating {tool}...");
                 if let Err(e) = package_service.update_tool(tool).await {
-                    eprintln!("Failed to update {}: {}", tool, e);
+                    eprintln!("Failed to update {tool}: {e}");
                 }
             }
             Ok(())
@@ -78,7 +77,7 @@ pub async fn handle_list_tools() -> Result<()> {
             .await
             .unwrap_or_else(|_| "No description available".to_string());
 
-        println!("  {} - {} ({})", tool, description, status);
+        println!("  {tool} - {description} ({status})");
     }
 
     Ok(())
@@ -107,9 +106,9 @@ pub async fn handle_tool_info(tool: &str) -> Result<()> {
         "Not installed".to_string()
     };
 
-    println!("Tool Information: {}", tool);
-    println!("Description: {}", description);
-    println!("Version: {}", version);
+    println!("Tool Information: {tool}");
+    println!("Description: {description}");
+    println!("Version: {version}");
     println!(
         "Status: {}",
         if is_installed {
@@ -134,7 +133,7 @@ pub async fn handle_templates_init() -> Result<()> {
 pub async fn handle_templates_create(name: &str) -> Result<()> {
     let github_service = GitHubService::new()?;
 
-    println!("Creating template: {}", name);
+    println!("Creating template: {name}");
     github_service.create_template(name).await
 }
 
@@ -148,7 +147,7 @@ pub async fn handle_templates_list() -> Result<()> {
         println!("  No templates found. Use 'terminal-jarvis templates create <name>' to create a template.");
     } else {
         for template in templates {
-            println!("  - {}", template);
+            println!("  - {template}");
         }
     }
 
@@ -158,6 +157,6 @@ pub async fn handle_templates_list() -> Result<()> {
 pub async fn handle_templates_apply(name: &str) -> Result<()> {
     let github_service = GitHubService::new()?;
 
-    println!("Applying template: {}", name);
+    println!("Applying template: {name}");
     github_service.apply_template(name).await
 }

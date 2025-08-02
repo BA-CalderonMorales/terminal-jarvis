@@ -60,6 +60,12 @@ pub enum TemplateCommands {
     },
 }
 
+impl Default for Cli {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl Cli {
     pub fn new() -> Self {
         Self::parse()
