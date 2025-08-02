@@ -18,6 +18,8 @@ npx terminal-jarvis
 npm install -g terminal-jarvis
 ```
 
+> **Note**: The current NPM version (0.0.1) is a preview release. Full binary functionality will be available in upcoming releases through automated GitHub Actions builds for multiple platforms.
+
 ## Features
 
 Terminal Jarvis serves as a command-line orchestrator for various AI coding tools, providing:
