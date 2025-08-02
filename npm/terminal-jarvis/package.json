@@ -1,6 +1,6 @@
 {
   "name": "terminal-jarvis",
-  "version": "0.0.6",
+  "version": "0.0.7",
   "description": "A thin Rust wrapper that provides a unified interface for managing and running AI coding tools",
   "bin": "lib/index.js",
   "files": [
@@ -19,7 +19,8 @@
     "check:fix": "biome check --write src/",
     "build": "npm run sync-readme && tsc",
     "prepublishOnly": "npm run build",
-    "dev": "npm run build && node lib/index.js"
+    "dev": "npm run build && node lib/index.js",
+    "postinstall": "node -e \"console.log('\\n🤖 Terminal Jarvis installed!\\n\\nFor the full T.JARVIS experience, install the Rust binary:\\n  cargo install --git https://github.com/BA-CalderonMorales/terminal-jarvis\\n\\nThen run: npx terminal-jarvis\\n')\""
   },
   "keywords": [
     "cli",
@@ -42,5 +43,8 @@
     "@biomejs/biome": "^2.1.3",
     "@types/node": "^20.0.0",
     "typescript": "^5.0.0"
+  },
+  "engines": {
+    "node": ">=16.0.0"
   }
 }
