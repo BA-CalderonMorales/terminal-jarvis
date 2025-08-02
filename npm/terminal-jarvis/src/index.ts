@@ -20,7 +20,7 @@ async function findRustBinary(): Promise<string | null> {
         }
     }
     
-    // Then check if terminal-jarvis is available in PATH (but avoid NPM version)
+    // Then check if terminal-jarvis is available in PATH and verify it's the Rust binary
     return new Promise((resolve) => {
         const child = spawn('which', ['terminal-jarvis'], { stdio: 'pipe' });
         let output = '';
@@ -32,12 +32,24 @@ async function findRustBinary(): Promise<string | null> {
         child.on('close', (code) => {
             if (code === 0 && output.trim()) {
                 const binaryPath = output.trim();
-                // Avoid using NPM-installed versions (they'd be in node_modules or nvm)
-                if (!binaryPath.includes('node_modules') && !binaryPath.includes('nvm')) {
-                    resolve(binaryPath);
-                } else {
-                    resolve(null);
-                }
+                // Test if this is actually the Rust binary by running it with --version
+                const testChild = spawn(binaryPath, ['--version'], { stdio: 'pipe' });
+                let versionOutput = '';
+                
+                testChild.stdout.on('data', (data) => {
+                    versionOutput += data.toString();
+                });
+                
+                testChild.on('close', (testCode) => {
+                    // If it responds to --version and mentions terminal-jarvis, it's likely the Rust binary
+                    if (testCode === 0 && versionOutput.toLowerCase().includes('terminal-jarvis')) {
+                        resolve(binaryPath);
+                    } else {
+                        resolve(null);
+                    }
+                });
+                
+                testChild.on('error', () => resolve(null));
             } else {
                 resolve(null);
             }
@@ -71,9 +83,15 @@ async function main() {
 }
 
 function showFallbackMessage() {
-    console.log("🤖 Terminal Jarvis v0.0.7");
+    console.log("🤖 Terminal Jarvis v0.0.8");
     console.log("");
     console.log("⚠️  The full T.JARVIS interactive interface requires the Rust binary.");
+    console.log("");
+    console.log("🔍 Debug: Searched for binary in:");
+    console.log("  • Local builds (target/debug, target/release)");
+    console.log("  • ~/.cargo/bin/terminal-jarvis");
+    console.log("  • /usr/local/bin/terminal-jarvis");
+    console.log("  • PATH (verified with --version check)");
     console.log("");
     console.log("🚀 Install for full functionality:");
     console.log("  cargo install --git https://github.com/BA-CalderonMorales/terminal-jarvis");
