@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
-console.log("Terminal Jarvis v0.0.1");
-console.log("This is a test version - full binary support coming soon!");
+console.log("Terminal Jarvis v0.0.2");
+console.log("This is a preview release - full binary support coming soon!");
 console.log("");
 console.log("Available commands:");
 console.log("  list      - List available AI coding tools");

@@ -1,6 +1,6 @@
 {
   "name": "terminal-jarvis",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "A thin Rust wrapper that provides a unified interface for managing and running AI coding tools",
   "bin": "lib/index.js",
   "scripts": {
@@ -10,7 +10,16 @@
     "build": "tsc",
     "dev": "yarn build && node lib/index.js"
   },
-  "keywords": ["cli", "ai", "tools", "wrapper", "claude", "gemini", "qwen", "opencode"],
+  "keywords": [
+    "cli",
+    "ai",
+    "tools",
+    "wrapper",
+    "claude",
+    "gemini",
+    "qwen",
+    "opencode"
+  ],
   "author": "BA-CalderonMorales",
   "license": "MIT",
   "repository": {
