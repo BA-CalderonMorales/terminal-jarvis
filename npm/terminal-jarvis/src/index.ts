@@ -1,41 +1,15 @@
 #!/usr/bin/env node
 
-import { spawnSync } from "child_process";
+console.log("Terminal Jarvis v0.0.1");
+console.log("This is a test version - full binary support coming soon!");
+console.log("");
+console.log("Available commands:");
+console.log("  list      - List available AI coding tools");
+console.log("  run       - Run a specific tool");
+console.log("  update    - Update packages");
+console.log("  templates - Manage templates");
+console.log("");
+console.log("Note: Please install the Rust binary version for full functionality:");
+console.log("  cargo install terminal-jarvis");
 
-/**
- * Returns the executable path which is located inside `node_modules`
- * The naming convention is terminal-jarvis-${os}-${arch}
- * If the platform is `win32` or `cygwin`, executable will include a `.exe` extension.
- * @see https://nodejs.org/api/os.html#osarch
- * @see https://nodejs.org/api/os.html#osplatform
- * @example "x/xx/node_modules/terminal-jarvis-darwin-arm64"
- */
-function getExePath() {
-  const arch = process.arch;
-  let os = process.platform as string;
-  let extension = "";
-  if (["win32", "cygwin"].includes(process.platform)) {
-    os = "windows";
-    extension = ".exe";
-  }
-
-  try {
-    // Since the binary will be located inside `node_modules`, we can simply call `require.resolve`
-    return require.resolve(`terminal-jarvis-${os}-${arch}/bin/terminal-jarvis${extension}`);
-  } catch (e) {
-    throw new Error(
-      `Couldn't find terminal-jarvis binary inside node_modules for ${os}-${arch}`
-    );
-  }
-}
-
-/**
- * Runs terminal-jarvis with args using nodejs spawn
- */
-function run() {
-  const args = process.argv.slice(2);
-  const processResult = spawnSync(getExePath(), args, { stdio: "inherit" });
-  process.exit(processResult.status ?? 0);
-}
-
-run();
+process.exit(0);

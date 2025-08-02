@@ -1,6 +1,22 @@
 # Terminal Jarvis
 
+[![NPM Version](https://img.shields.io/npm/v/terminal-jarvis.svg)](https://www.npmjs.com/package/terminal-jarvis)
+[![NPM Downloads](https://img.shields.io/npm/dm/terminal-jarvis.svg)](https://www.npmjs.com/package/terminal-jarvis)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
 A thin Rust wrapper that provides a unified interface for managing and running AI coding tools. In the midst of all the tools out there that you can possibly use to keep track of them, here's a "shovel" that just works to try them all out.
+
+🎉 **Now available on NPM!** Get started instantly with `npx terminal-jarvis`
+
+## Quick Start
+
+```bash
+# Try it instantly with npx (no installation required)
+npx terminal-jarvis
+
+# Or install globally
+npm install -g terminal-jarvis
+```
 
 ## Features
 
@@ -20,6 +36,18 @@ Terminal Jarvis serves as a command-line orchestrator for various AI coding tool
 - **Template Management**: Create and maintain your own GitHub repository for agent templates (requires `gh` CLI and user consent)
 
 ## Installation
+
+### NPM (Recommended)
+
+```bash
+# Install globally via NPM
+npm install -g terminal-jarvis
+
+# Or run directly with npx (no installation required)
+npx terminal-jarvis
+```
+
+### From Source
 
 ```bash
 # Clone the repository
