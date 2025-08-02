@@ -1,6 +1,6 @@
 {
   "name": "terminal-jarvis",
-  "version": "0.0.12",
+  "version": "0.0.11",
   "description": "A thin Rust wrapper that provides a unified interface for managing and running AI coding tools",
   "bin": "lib/index.js",
   "files": [
@@ -12,7 +12,7 @@
   "scripts": {
     "sync-readme": "cp ../../README.md .",
     "build-rust": "cd ../.. && cargo build --release",
-    "copy-binary": "mkdir -p bin && cp ../../target/release/terminal-jarvis bin/terminal-jarvis && chmod +x bin/terminal-jarvis",
+    "copy-binary": "node build-binaries.js",
     "typecheck": "tsc --noEmit",
     "lint": "biome lint src/",
     "lint:fix": "biome lint --write src/",
@@ -20,10 +20,10 @@
     "format:fix": "biome format --write src/",
     "check": "biome check src/",
     "check:fix": "biome check --write src/",
-    "build": "npm run sync-readme && npm run build-rust && npm run copy-binary && tsc",
+    "build": "npm run sync-readme && npm run copy-binary && tsc",
     "prepublishOnly": "npm run build",
     "dev": "npm run build && node lib/index.js",
-    "postinstall": "node -e \"console.log(n🤖 Terminal Jarvis v0.0.12 installed successfully!nn✅ Full T.JARVIS interface ready to use!nnRun: npx terminal-jarvisn)\""
+    "postinstall": "node -e \"console.log('\\n🤖 Terminal Jarvis v0.0.11 installed successfully!\\n\\n✅ Full T.JARVIS interface ready to use!\\n\\nRun: npx terminal-jarvis\\n')\""
   },
   "keywords": [
     "cli",

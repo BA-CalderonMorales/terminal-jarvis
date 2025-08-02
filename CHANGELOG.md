@@ -5,6 +5,24 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.0.12] - 2025-08-02
+
+### Added
+- Bundled Rust binary directly in NPM package for immediate full functionality
+- Users now get complete T.JARVIS interface out-of-the-box with `npm install -g terminal-jarvis`
+- No external dependencies or Rust installation required
+- Enhanced build process with binary bundling and platform detection
+
+### Changed  
+- NPM package now includes pre-compiled binary in `bin/` directory
+- TypeScript wrapper prioritizes bundled binary over external installations
+- Updated postinstall message to reflect immediate availability of full interface
+- Improved error messages for better troubleshooting
+
+### Fixed
+- Eliminated fallback mode for users without Rust installation
+- Resolved issue where users saw installation instructions instead of T.JARVIS interface
+
 ## [0.0.6] - 2025-08-02
 
 ### Added

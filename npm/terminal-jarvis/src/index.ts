@@ -3,9 +3,42 @@
 import { spawn } from 'child_process';
 import { existsSync } from 'fs';
 import { join } from 'path';
+import { platform, arch } from 'os';
+
+function getBundledBinaryPath(): string {
+    const currentPlatform = platform();
+    const currentArch = arch();
+    
+    // Map Node.js platform/arch to our binary naming convention
+    let binaryName = 'terminal-jarvis';
+    
+    if (currentPlatform === 'linux') {
+        binaryName += '-linux';
+    } else if (currentPlatform === 'darwin') {
+        binaryName += '-macos';
+    } else if (currentPlatform === 'win32') {
+        binaryName += '-windows.exe';
+    } else {
+        binaryName += '-linux'; // fallback
+    }
+    
+    if (currentPlatform !== 'win32') {
+        if (currentArch === 'x64' || currentArch === 'x86_64') {
+            binaryName += '-x64';
+        } else if (currentArch === 'arm64') {
+            binaryName += '-arm64';
+        } else {
+            binaryName += '-x64'; // fallback
+        }
+    }
+    
+    return join(__dirname, '..', 'bin', binaryName);
+}
 
 // Try to find the Rust binary in common locations
 const possibleBinaries = [
+    join(__dirname, '..', 'bin', 'terminal-jarvis'),  // Bundled binary (generic)
+    join(__dirname, '..', 'bin', 'terminal-jarvis-linux-x64'),  // Bundled binary (platform-specific)
     join(__dirname, '..', '..', '..', 'target', 'debug', 'terminal-jarvis'),    // Local debug build
     join(__dirname, '..', '..', '..', 'target', 'release', 'terminal-jarvis'),  // Local release build
     join(process.env.HOME || '', '.cargo', 'bin', 'terminal-jarvis'),  // Cargo home
@@ -80,32 +113,29 @@ async function main() {
 }
 
 function showFallbackMessage() {
-    console.log("🤖 Terminal Jarvis v0.0.11");
+    console.log("🤖 Terminal Jarvis v0.0.12");
     console.log("");
-    console.log("⚠️  The full T.JARVIS interactive interface requires the Rust binary.");
+    console.log("❌ Error: Could not find or execute the T.JARVIS binary.");
     console.log("");
     console.log("🔍 Debug: Searched for binary in:");
+    console.log("  • Bundled binary (bin/terminal-jarvis)");
     console.log("  • Local builds (target/debug, target/release)");
     console.log("  • ~/.cargo/bin/terminal-jarvis");
     console.log("  • /usr/local/bin/terminal-jarvis");
     console.log("  • PATH (excluding node_modules)");
     console.log("");
-    console.log("🚀 Install for full functionality:");
+    console.log("� This should not happen! The binary should be bundled with this package.");
+    console.log("");
+    console.log("🔧 Troubleshooting:");
+    console.log("  • Try reinstalling: npm uninstall -g terminal-jarvis && npm install -g terminal-jarvis");
+    console.log("  • Check if binary exists: ls -la $(npm root -g)/terminal-jarvis/bin/");
+    console.log("  • Verify executable permissions: chmod +x $(npm root -g)/terminal-jarvis/bin/terminal-jarvis");
+    console.log("");
+    console.log("� Alternative - Install directly from source:");
     console.log("  cargo install --git https://github.com/BA-CalderonMorales/terminal-jarvis");
     console.log("");
-    console.log("📦 Or install Rust first:");
-    console.log("  curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh");
-    console.log("  source ~/.cargo/env");
-    console.log("  cargo install --git https://github.com/BA-CalderonMorales/terminal-jarvis");
-    console.log("");
-    console.log("✨ Features you'll get with the full version:");
-    console.log("  • Interactive T.JARVIS interface with ASCII art");
-    console.log("  • One-click tool installation (claude, gemini, qwen, opencode)");
-    console.log("  • Smart tool detection and management");
-    console.log("  • Real-time status checking");
-    console.log("  • Responsive terminal design");
-    console.log("");
-    console.log("💡 This NPM package serves as a convenient installer and launcher.");
+    console.log("� If this persists, please report this issue:");
+    console.log("  https://github.com/BA-CalderonMorales/terminal-jarvis/issues");
     process.exit(1);
 }
 
