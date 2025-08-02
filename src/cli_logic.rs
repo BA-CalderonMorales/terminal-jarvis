@@ -215,35 +215,78 @@ pub async fn handle_interactive_mode() -> Result<()> {
             80 // fallback width
         };
 
-        // Create centered, minimalist header
+        // Create full border around title section
         println!();
-        let title_line = "══════════════════════════════════════════════════════════════════";
-        let title_padding = " ".repeat((term_width.saturating_sub(title_line.len())) / 2);
-        println!("{title_padding}{title_line}");
-        println!();
+        let border_width = std::cmp::min(70, term_width.saturating_sub(4)); // Ensure border fits in terminal
+        let border_padding = if term_width > border_width {
+            " ".repeat((term_width - border_width) / 2)
+        } else {
+            String::new()
+        };
+        
+        let top_border = "╔".to_string() + &"═".repeat(border_width.saturating_sub(2)) + "╗";
+        let empty_border = "║".to_string() + &" ".repeat(border_width.saturating_sub(2)) + "║";
+        let bottom_border = "╚".to_string() + &"═".repeat(border_width.saturating_sub(2)) + "╝";
+        
+        println!("{border_padding}{top_border}");
+        println!("{border_padding}{empty_border}");
 
-        // Centered T.JARVIS logo with version
-        let logo_padding = " ".repeat((term_width.saturating_sub(30)) / 2);
-        println!("{logo_padding}████████╗       ██╗ █████╗ ██████╗ ██╗   ██╗██╗███████╗");
-        println!("{logo_padding}╚══██╔══╝       ██║██╔══██╗██╔══██╗██║   ██║██║██╔════╝");
-        println!("{logo_padding}   ██║          ██║███████║██████╔╝██║   ██║██║███████╗");
-        println!("{logo_padding}   ██║     ██   ██║██╔══██║██╔══██╗╚██╗ ██╔╝██║╚════██║");
-        println!("{logo_padding}   ██║  ██╗╚█████╔╝██║  ██║██║  ██║ ╚████╔╝ ██║███████║");
-        println!("{logo_padding}   ╚═╝  ╚═╝ ╚════╝ ╚═╝  ╚═╝╚═╝  ╚═╝  ╚═══╝  ╚═╝╚══════╝");
+        // Centered T.JARVIS ASCII art
+        let logo_lines = vec![
+            "████████╗       ██╗ █████╗ ██████╗ ██╗   ██╗██╗███████╗",
+            "╚══██╔══╝       ██║██╔══██╗██╔══██╗██║   ██║██║██╔════╝",
+            "   ██║          ██║███████║██████╔╝██║   ██║██║███████╗",
+            "   ██║     ██   ██║██╔══██║██╔══██╗╚██╗ ██╔╝██║╚════██║",
+            "   ██║  ██╗╚█████╔╝██║  ██║██║  ██║ ╚████╔╝ ██║███████║",
+            "   ╚═╝  ╚═╝ ╚════╝ ╚═╝  ╚═╝╚═╝  ╚═╝  ╚═══╝  ╚═╝╚══════╝",
+        ];
 
-        // Version and tagline centered
+        let inner_width = border_width.saturating_sub(2);
+        
+        for line in logo_lines {
+            // Use char count for proper Unicode handling
+            let line_chars: Vec<char> = line.chars().collect();
+            let line_char_len = line_chars.len();
+            
+            if line_char_len <= inner_width {
+                let content_padding = (inner_width - line_char_len) / 2;
+                let left_padding = " ".repeat(content_padding);
+                let right_padding = " ".repeat(inner_width - content_padding - line_char_len);
+                println!("{border_padding}║{left_padding}{line}{right_padding}║");
+            } else {
+                // For terminal display, use a simplified version if too wide
+                let simple_line = "T.JARVIS";
+                let content_padding = (inner_width - simple_line.len()) / 2;
+                let left_padding = " ".repeat(content_padding);
+                let right_padding = " ".repeat(inner_width - content_padding - simple_line.len());
+                println!("{border_padding}║{left_padding}{simple_line}{right_padding}║");
+            }
+        }
+
+        println!("{border_padding}{empty_border}");
+
+        // Version centered within border
         let version_text = format!("v{}", env!("CARGO_PKG_VERSION"));
-        let version_padding = " ".repeat((term_width.saturating_sub(version_text.len())) / 2);
-        println!();
-        println!("{version_padding}{version_text}");
+        if version_text.len() <= inner_width {
+            let version_content_padding = (inner_width - version_text.len()) / 2;
+            let version_left_padding = " ".repeat(version_content_padding);
+            let version_right_padding = " ".repeat(inner_width - version_content_padding - version_text.len());
+            println!("{border_padding}║{version_left_padding}{version_text}{version_right_padding}║");
+        }
 
+        // Tagline centered within border
         let tagline = "🤖 Your AI Coding Assistant Command Center";
-        let tagline_padding = " ".repeat((term_width.saturating_sub(tagline.len())) / 2);
-        println!("{tagline_padding}{tagline}");
-        println!();
+        // Account for emoji display width (emojis typically take 2 visual columns)
+        let tagline_display_len = tagline.chars().count() + 1; // +1 for emoji extra width
+        if tagline_display_len <= inner_width {
+            let tagline_content_padding = (inner_width - tagline_display_len) / 2;
+            let tagline_left_padding = " ".repeat(tagline_content_padding);
+            let tagline_right_padding = " ".repeat(inner_width - tagline_content_padding - tagline_display_len);
+            println!("{border_padding}║{tagline_left_padding}{tagline}{tagline_right_padding}║");
+        }
 
-        // Bottom border
-        println!("{title_padding}{title_line}");
+        println!("{border_padding}{empty_border}");
+        println!("{border_padding}{bottom_border}");
         println!();
 
         // Quick help tips (Gemini-inspired but Jarvis-themed)

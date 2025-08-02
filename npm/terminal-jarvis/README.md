@@ -21,7 +21,7 @@ npm install -g terminal-jarvis
 cargo install --git https://github.com/BA-CalderonMorales/terminal-jarvis
 ```
 
-> **Note**: The current NPM version (0.0.6) is a preview release. Full binary functionality with the interactive T.JARVIS interface is available when installed from source.
+> **Note**: The current NPM version (0.0.14) includes full binary functionality with the complete T.JARVIS interface. No additional installation required!
 
 ## Features
 
@@ -216,6 +216,20 @@ opencode = { enabled = false, auto_update = false }
 repository = "your-username/jarvis-templates"
 auto_sync = true
 ```
+
+## Package Information
+
+**NPM Package Size**: ~1.2MB compressed / ~2.9MB unpacked
+
+The NPM package includes pre-compiled Rust binaries for immediate functionality without requiring a Rust toolchain. This ensures you get the complete T.JARVIS experience out-of-the-box with `npx terminal-jarvis`.
+
+**What's Included:**
+- Full interactive T.JARVIS interface
+- Pre-compiled binary for your platform
+- Zero additional dependencies
+- Complete tool management capabilities
+
+Future versions will include size optimizations and platform-specific packages.
 
 ## Contributing
 
