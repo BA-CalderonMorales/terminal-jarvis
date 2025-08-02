@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.0.16] - 2025-08-02
+
+### Fixed
+- **CI/CD**: Resolved cargo fmt formatting issues in cli_logic.rs
+- Removed extra blank lines and reformatted long lines to meet rustfmt standards
+- Fixed GitHub Actions continuous integration pipeline failures
+
 ## [0.0.14] - 2025-08-02
 
 ### Fixed

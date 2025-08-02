@@ -1330,7 +1330,7 @@ dependencies = [
 
 [[package]]
 name = "terminal-jarvis"
-version = "0.0.15"
+version = "0.0.16"
 dependencies = [
  "anyhow",
  "clap",
