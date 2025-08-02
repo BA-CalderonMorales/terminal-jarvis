@@ -4,4 +4,6 @@ pub mod api_client;
 pub mod cli;
 pub mod cli_logic;
 pub mod config;
+pub mod installation_arguments;
 pub mod services;
+pub mod tools;

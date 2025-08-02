@@ -4,7 +4,9 @@ mod api_client;
 mod cli;
 mod cli_logic;
 mod config;
+mod installation_arguments;
 mod services;
+mod tools;
 
 use cli::Cli;
 

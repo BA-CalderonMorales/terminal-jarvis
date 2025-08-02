@@ -10,7 +10,7 @@ use clap::{Parser, Subcommand};
 )]
 pub struct Cli {
     #[command(subcommand)]
-    pub command: Commands,
+    pub command: Option<Commands>,
 }
 
 #[derive(Subcommand)]
@@ -22,6 +22,11 @@ pub enum Commands {
         /// Arguments to pass to the tool
         #[arg(trailing_var_arg = true, allow_hyphen_values = true)]
         args: Vec<String>,
+    },
+    /// Install a specific AI coding tool
+    Install {
+        /// The tool to install
+        tool: String,
     },
     /// Update packages
     Update {
@@ -73,13 +78,14 @@ impl Cli {
 
     pub async fn run(self) -> anyhow::Result<()> {
         match self.command {
-            Commands::Run { tool, args } => cli_logic::handle_run_tool(&tool, &args).await,
-            Commands::Update { package } => {
+            Some(Commands::Run { tool, args }) => cli_logic::handle_run_tool(&tool, &args).await,
+            Some(Commands::Install { tool }) => cli_logic::handle_install_tool(&tool).await,
+            Some(Commands::Update { package }) => {
                 cli_logic::handle_update_packages(package.as_deref()).await
             }
-            Commands::List => cli_logic::handle_list_tools().await,
-            Commands::Info { tool } => cli_logic::handle_tool_info(&tool).await,
-            Commands::Templates { action } => match action {
+            Some(Commands::List) => cli_logic::handle_list_tools().await,
+            Some(Commands::Info { tool }) => cli_logic::handle_tool_info(&tool).await,
+            Some(Commands::Templates { action }) => match action {
                 TemplateCommands::Init => cli_logic::handle_templates_init().await,
                 TemplateCommands::Create { name } => {
                     cli_logic::handle_templates_create(&name).await
@@ -87,6 +93,7 @@ impl Cli {
                 TemplateCommands::List => cli_logic::handle_templates_list().await,
                 TemplateCommands::Apply { name } => cli_logic::handle_templates_apply(&name).await,
             },
+            None => cli_logic::handle_interactive_mode().await,
         }
     }
 }

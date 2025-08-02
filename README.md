@@ -4,7 +4,7 @@
 [![NPM Downloads](https://img.shields.io/npm/dm/terminal-jarvis.svg)](https://www.npmjs.com/package/terminal-jarvis)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-A thin Rust wrapper that provides a unified interface for managing and running AI coding tools. In the midst of all the tools out there that you can possibly use to keep track of them, here's a "shovel" that just works to try them all out.
+A thin Rust wrapper that provides a unified interface for managing and running AI coding tools like claude-code, gemini-cli, qwen-code, and opencode. Think of it as a package manager and runner for AI coding assistants.
 
 🎉 **Now available on NPM!** Get started instantly with `npx terminal-jarvis`
 
@@ -16,26 +16,31 @@ npx terminal-jarvis
 
 # Or install globally
 npm install -g terminal-jarvis
+
+# For full functionality, install from source:
+cargo install --git https://github.com/BA-CalderonMorales/terminal-jarvis
 ```
 
-> **Note**: The current NPM version (0.0.5) is a preview release. Full binary functionality will be available in upcoming releases through automated GitHub Actions builds for multiple platforms.
+> **Note**: The current NPM version (0.0.6) is a preview release. Full binary functionality with the interactive T.JARVIS interface is available when installed from source.
 
 ## Features
 
-Terminal Jarvis serves as a command-line orchestrator for various AI coding tools, providing:
+Terminal Jarvis serves as your AI coding assistant command center, providing:
 
-- **Unified Interface**: Single CLI to manage multiple AI coding tools
-- **Built-in Tool Support**: 
-  - `claude-code`
-  - `gemini-cli`
-  - `qwen-code`
-  - `opencode`
-- **Extensible Architecture**: Easy addition of new CLI tools
-- **Package Management**: 
-  - Update all packages at once
-  - Update specific packages individually
-  - Run individual packages with custom arguments
-- **Template Management**: Create and maintain your own GitHub repository for agent templates (requires `gh` CLI and user consent)
+- **🤖 Interactive T.JARVIS Interface**: Sleek terminal UI with ASCII art logo and responsive design
+- **🚀 One-Click Tool Management**: Install, update, and run AI coding tools seamlessly
+- **📦 Smart Installation Detection**: Automatically detects installed tools and their status
+- **⚡ Quick Launch Mode**: Run tools directly from the interactive interface
+- **🔧 Built-in Tool Support**: 
+  - `claude` - Anthropic's Claude for code assistance
+  - `gemini` - Google's Gemini CLI tool
+  - `qwen` - Qwen coding assistant  
+  - `opencode` - OpenCode AI coding agent built for the terminal
+- **🎯 Intelligent NPM Validation**: Warns about missing dependencies and provides installation guidance
+- **📱 Responsive Design**: Adapts to your terminal width for optimal display
+- **🔄 Background Process Support**: Handles long-running tools appropriately
+- **💬 Interactive Argument Input**: Prompt-based argument collection for tools
+- **🛠️ Management Menu**: Organized options for installing, updating, and getting tool information
 
 ## Installation
 
@@ -68,22 +73,39 @@ cargo install --path .
 ### Basic Commands
 
 ```bash
-# Run a specific tool
-terminal-jarvis run claude-code --prompt "Refactor this function"
-terminal-jarvis run gemini-cli --file src/main.rs
-terminal-jarvis run qwen-code --analyze
+# Launch interactive T.JARVIS interface (recommended)
+terminal-jarvis
+
+# Or use direct commands:
+terminal-jarvis run claude --prompt "Refactor this function"
+terminal-jarvis run gemini --file src/main.rs
+terminal-jarvis run qwen --analyze
 terminal-jarvis run opencode --generate
+
+# Install specific tools
+terminal-jarvis install claude
+terminal-jarvis install gemini
 
 # Update packages
 terminal-jarvis update                    # Update all packages
-terminal-jarvis update claude-code        # Update specific package
+terminal-jarvis update claude             # Update specific package
 
-# List available tools
+# List available tools with status
 terminal-jarvis list
 
-# Show tool information
-terminal-jarvis info claude-code
+# Show detailed tool information
+terminal-jarvis info claude
 ```
+
+### Interactive Mode Features
+
+When you run `terminal-jarvis` without arguments, you get the full T.JARVIS experience:
+
+- **🎨 Beautiful ASCII Art Interface**: Clean, centered T.JARVIS logo
+- **📊 Real-time Tool Status**: See which tools are installed and ready to launch
+- **⚡ Quick Launch**: Select tools and provide arguments interactively
+- **🔧 Management Options**: Install, update, and get information about tools
+- **💡 Smart Guidance**: Helpful tips and warnings about missing dependencies
 
 ### Template Management
 
@@ -107,35 +129,39 @@ The project follows a modular architecture designed for maintainability and exte
 
 ```
 src/
-├── main.rs           # Entry point - minimal code, delegates to CLI
-├── cli.rs            # Clean, expressive CLI interface definitions
-├── cli_logic.rs      # Business logic separated from CLI implementation
-├── services.rs       # Service layer for external tools (gh CLI, etc.)
-├── api.rs            # Modular API endpoint definitions
-├── api_base.rs       # Base API route configurations
-└── api_client.rs     # HTTP client abstraction layer (reqwest wrapper)
+├── main.rs               # Entry point - minimal code, delegates to CLI
+├── cli.rs                # Clean, expressive CLI interface definitions  
+├── cli_logic.rs          # Business logic with interactive T.JARVIS interface
+├── tools.rs              # Tool management and detection logic
+├── installation_arguments.rs # Installation commands and NPM validation
+├── services.rs           # Service layer for external tools (gh CLI, etc.)
+├── config.rs             # TOML configuration management
+├── api.rs                # Modular API endpoint definitions (future use)
+├── api_base.rs           # Base API route configurations (future use)
+└── api_client.rs         # HTTP client abstraction layer (future use)
 ```
 
 ### Architecture Philosophy
 
 - **`main.rs`**: Entry point with minimal code - simply bootstraps the CLI
-- **`cli.rs`**: Expressive command definitions that clearly show what each command does
-- **`cli_logic.rs`**: All business logic separated from CLI parsing for better testability
+- **`cli.rs`**: Expressive command definitions with optional subcommands (defaults to interactive mode)
+- **`cli_logic.rs`**: Complete business logic including the interactive T.JARVIS interface with ASCII art
+- **`tools.rs`**: Comprehensive tool detection using multiple verification methods (`which`, `--version`, `--help`)
+- **`installation_arguments.rs`**: Centralized installation commands with NPM dependency validation
 - **`services.rs`**: Service layer for external integrations (GitHub CLI, package managers)
-- **`api.rs`**: Modular API layer for potential future web integrations
-- **`api_base.rs`**: Base configurations and route definitions
-- **`api_client.rs`**: HTTP client abstraction for easy swapping of underlying libraries
+- **`config.rs`**: TOML configuration file management
+- **API modules**: Framework code for future web integrations (currently unused)
 
-The `cli.rs` file maintains clean separation by calling services and API routes in an understandable, non-overwhelming manner.
+The interactive mode provides a complete T.JARVIS experience with real-time tool status, installation management, and a beautiful terminal interface.
 
 ## Supported Tools
 
-| Tool | Description | Status |
-|------|-------------|--------|
-| `claude-code` | Anthropic's Claude for code assistance | ✅ Supported |
-| `gemini-cli` | Google's Gemini CLI tool | ✅ Supported |
-| `qwen-code` | Qwen coding assistant | ✅ Supported |
-| `opencode` | Open-source coding tool | ✅ Supported |
+| Tool | Description | NPM Package | Status |
+|------|-------------|-------------|--------|
+| `claude` | Anthropic's Claude for code assistance | `@anthropic-ai/claude-code` | ✅ Supported |
+| `gemini` | Google's Gemini CLI tool | `@google/gemini-cli` | ✅ Supported |
+| `qwen` | Qwen coding assistant | `@qwen-code/qwen-code` | ✅ Supported |
+| `opencode` | OpenCode AI coding agent built for the terminal | Install script | ✅ Supported |
 
 ## Adding New Tools
 
@@ -163,9 +189,12 @@ pub struct NewToolArgs {
 
 ## Requirements
 
-- Rust 1.70 or later
-- `gh` CLI (for template management features)
-- Internet connection (for package updates)
+- **Node.js and NPM**: Required for most AI coding tools (automatic validation included)
+- **Rust 1.70 or later**: For building from source
+- **`gh` CLI**: Optional, for template management features
+- **Internet connection**: For package updates and installations
+
+Terminal Jarvis automatically detects missing dependencies and provides helpful installation guidance.
 
 ## Configuration
 
@@ -178,9 +207,9 @@ Example configuration:
 
 ```toml
 [tools]
-claude-code = { enabled = true, auto_update = true }
-gemini-cli = { enabled = true, auto_update = false }
-qwen-code = { enabled = true, auto_update = true }
+claude = { enabled = true, auto_update = true }
+gemini = { enabled = true, auto_update = false }
+qwen = { enabled = true, auto_update = true }
 opencode = { enabled = false, auto_update = false }
 
 [templates]
@@ -218,9 +247,14 @@ The NPM packaging approach follows the excellent guidance from [Packaging Rust A
 
 ## Roadmap
 
+- [x] **Interactive T.JARVIS Interface**: Complete ASCII art terminal UI
+- [x] **Smart Tool Detection**: Multi-method tool installation verification
+- [x] **One-Click Installation**: Seamless tool installation with NPM validation
+- [x] **Responsive Terminal Design**: Adaptive width and centered interface
 - [ ] Enhanced error handling and logging
 - [ ] Configuration file validation
 - [ ] Plugin system for custom tools
 - [ ] Shell completion scripts
 - [ ] Docker container support
 - [ ] Web dashboard for tool management
+- [ ] Automated GitHub Actions builds for platform-specific NPM binaries

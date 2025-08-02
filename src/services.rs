@@ -1,5 +1,6 @@
 use crate::config::Config;
 use anyhow::{anyhow, Result};
+use std::process::Command;
 use tokio::process::Command as AsyncCommand;
 
 /// Service for managing AI coding tool packages
@@ -14,13 +15,40 @@ impl PackageService {
     }
 
     /// Check if a tool is installed on the system
+    #[allow(dead_code)]
     pub async fn is_tool_installed(&self, tool: &str) -> Result<bool> {
-        let output = AsyncCommand::new("which").arg(tool).output().await?;
+        // First try 'which' command (Unix-like systems)
+        let which_result = Command::new("which").arg(tool).output();
 
-        Ok(output.status.success())
+        if let Ok(output) = which_result {
+            if output.status.success() {
+                return Ok(true);
+            }
+        }
+
+        // Also try running the tool with --version or --help to see if it exists
+        let version_result = Command::new(tool).arg("--version").output();
+
+        if let Ok(output) = version_result {
+            if output.status.success() {
+                return Ok(true);
+            }
+        }
+
+        // Try --help as fallback
+        let help_result = Command::new(tool).arg("--help").output();
+
+        if let Ok(output) = help_result {
+            if output.status.success() {
+                return Ok(true);
+            }
+        }
+
+        Ok(false)
     }
 
     /// Install a tool using the appropriate package manager
+    #[allow(dead_code)]
     pub async fn install_tool(&self, tool: &str) -> Result<()> {
         let tool_config = self
             .config
@@ -34,12 +62,21 @@ impl PackageService {
         if let Some(install_cmd) = &tool_config.install_command {
             self.execute_command(install_cmd).await
         } else {
-            // Fallback to default installation methods
+            // Fallback to default installation methods for real AI coding tools
             match tool {
-                "claude-code" => self.install_npm_package("@anthropic-ai/claude-cli").await,
-                "gemini-cli" => self.install_npm_package("@google/generative-ai-cli").await,
-                "qwen-code" => self.install_cargo_package("qwen-code").await,
-                "opencode" => self.install_npm_package("opencode").await,
+                "aider" => self.install_pip_package("aider-chat").await,
+                "cursor-cli" => {
+                    println!(
+                        "Cursor CLI installation requires manual setup from https://cursor.sh/"
+                    );
+                    println!("Please download and install Cursor, then the CLI will be available.");
+                    Ok(())
+                }
+                "codeium" => self.install_npm_package("@codeium/cli").await,
+                "copilot-cli" => {
+                    self.install_npm_package("@githubnext/github-copilot-cli")
+                        .await
+                }
                 _ => Err(anyhow!("Unknown tool: {}", tool)),
             }
         }
@@ -59,16 +96,21 @@ impl PackageService {
         if let Some(update_cmd) = &tool_config.update_command {
             self.execute_command(update_cmd).await
         } else {
-            // Fallback to default update methods
+            // Fallback to default update methods for real AI coding tools
             match tool {
-                "claude-code" | "gemini-cli" | "opencode" => self.update_npm_package(tool).await,
-                "qwen-code" => self.update_cargo_package(tool).await,
+                "aider" => self.update_pip_package("aider-chat").await,
+                "cursor-cli" => {
+                    println!("Cursor CLI updates are handled through the Cursor application.");
+                    Ok(())
+                }
+                "codeium" | "copilot-cli" => self.update_npm_package(tool).await,
                 _ => Err(anyhow!("Unknown tool: {}", tool)),
             }
         }
     }
 
     /// Run a tool with the given arguments
+    #[allow(dead_code)]
     pub async fn run_tool(&self, tool: &str, args: &[String]) -> Result<()> {
         let mut cmd = AsyncCommand::new(tool);
         cmd.args(args);
@@ -83,6 +125,7 @@ impl PackageService {
     }
 
     /// Get the version of an installed tool
+    #[allow(dead_code)]
     pub async fn get_tool_version(&self, tool: &str) -> Result<String> {
         let output = AsyncCommand::new(tool).arg("--version").output().await?;
 
@@ -109,6 +152,7 @@ impl PackageService {
         Ok(())
     }
 
+    #[allow(dead_code)]
     async fn install_npm_package(&self, package: &str) -> Result<()> {
         let status = AsyncCommand::new("npm")
             .args(["install", "-g", package])
@@ -122,6 +166,7 @@ impl PackageService {
         Ok(())
     }
 
+    #[allow(dead_code)]
     async fn install_cargo_package(&self, package: &str) -> Result<()> {
         let status = AsyncCommand::new("cargo")
             .args(["install", package])
@@ -148,6 +193,7 @@ impl PackageService {
         Ok(())
     }
 
+    #[allow(dead_code)]
     async fn update_cargo_package(&self, package: &str) -> Result<()> {
         let status = AsyncCommand::new("cargo")
             .args(["install", "--force", package])
@@ -156,6 +202,33 @@ impl PackageService {
 
         if !status.success() {
             return Err(anyhow!("Failed to update cargo package: {}", package));
+        }
+
+        Ok(())
+    }
+
+    #[allow(dead_code)]
+    async fn install_pip_package(&self, package: &str) -> Result<()> {
+        let status = AsyncCommand::new("pip")
+            .args(["install", package])
+            .status()
+            .await?;
+
+        if !status.success() {
+            return Err(anyhow!("Failed to install pip package: {}", package));
+        }
+
+        Ok(())
+    }
+
+    async fn update_pip_package(&self, package: &str) -> Result<()> {
+        let status = AsyncCommand::new("pip")
+            .args(["install", "--upgrade", package])
+            .status()
+            .await?;
+
+        if !status.success() {
+            return Err(anyhow!("Failed to update pip package: {}", package));
         }
 
         Ok(())

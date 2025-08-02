@@ -1,0 +1,174 @@
+use anyhow::Result;
+use std::collections::HashMap;
+use std::process::Command;
+
+#[derive(Clone, Debug)]
+#[allow(dead_code)]
+pub struct ToolCommand {
+    pub command: &'static str,
+    pub description: &'static str,
+}
+
+#[derive(Clone, Debug)]
+pub struct ToolInfo {
+    pub command: &'static str,
+    pub is_installed: bool,
+}
+
+pub struct ToolManager;
+
+impl ToolManager {
+    /// Map display names to actual CLI command names
+    fn get_command_mapping() -> HashMap<&'static str, &'static str> {
+        let mut mapping = HashMap::new();
+        // Map display names to actual CLI commands (no API key enforcement)
+        mapping.insert("claude", "claude"); // Assuming claude-code installs as 'claude'
+        mapping.insert("gemini", "gemini"); // Assuming gemini-cli installs as 'gemini'
+        mapping.insert("qwen", "qwen"); // Assuming qwen-code installs as 'qwen'
+        mapping.insert("opencode", "opencode"); // OpenCode installs as 'opencode'
+        mapping
+    }
+
+    /// Get actual CLI command from display name
+    pub fn get_cli_command(display_name: &str) -> &str {
+        Self::get_command_mapping()
+            .get(display_name)
+            .unwrap_or(&display_name)
+    }
+    /// Get all available tools as ToolCommand structs
+    #[allow(dead_code)]
+    pub fn get_all_tools() -> Vec<ToolCommand> {
+        vec![
+            ToolCommand {
+                command: "claude",
+                description: "Anthropic's Claude for code assistance",
+            },
+            ToolCommand {
+                command: "gemini",
+                description: "Google's Gemini CLI tool",
+            },
+            ToolCommand {
+                command: "qwen",
+                description: "Qwen coding assistant",
+            },
+            ToolCommand {
+                command: "opencode",
+                description: "OpenCode AI coding agent built for the terminal",
+            },
+        ]
+    }
+
+    /// Get all available tools with their installation status
+    pub fn get_available_tools() -> HashMap<&'static str, ToolInfo> {
+        let mut tools = HashMap::new();
+        let mapping = Self::get_command_mapping();
+
+        // Use display names (keys from mapping) for consistency with InstallationManager
+        for (display_name, cli_command) in mapping {
+            let is_installed = Self::check_tool_installed(cli_command);
+            tools.insert(
+                display_name,
+                ToolInfo {
+                    command: cli_command,
+                    is_installed,
+                },
+            );
+        }
+
+        tools
+    }
+
+    /// Check if a tool is installed by trying to run it
+    pub fn check_tool_installed(tool: &str) -> bool {
+        // Try 'which' command first (Unix-like systems)
+        if let Ok(output) = Command::new("which").arg(tool).output() {
+            if output.status.success() && !output.stdout.is_empty() {
+                return true;
+            }
+        }
+
+        // Try 'where' command (Windows)
+        if let Ok(output) = Command::new("where").arg(tool).output() {
+            if output.status.success() && !output.stdout.is_empty() {
+                return true;
+            }
+        }
+
+        // Try running the tool with --version
+        if let Ok(output) = Command::new(tool).arg("--version").output() {
+            if output.status.success() {
+                return true;
+            }
+        }
+
+        // Try running the tool with --help as fallback
+        if let Ok(output) = Command::new(tool).arg("--help").output() {
+            if output.status.success() {
+                return true;
+            }
+        }
+
+        false
+    }
+
+    /// Run a tool with arguments
+    pub async fn run_tool(display_name: &str, args: &[String]) -> Result<()> {
+        let cli_command = Self::get_cli_command(display_name);
+
+        if !Self::check_tool_installed(cli_command) {
+            return Err(anyhow::anyhow!(
+                "Tool '{}' is not installed. Use 'terminal-jarvis install {}' to install it.",
+                display_name,
+                display_name
+            ));
+        }
+
+        println!("🚀 Starting {display_name} with arguments: {args:?}");
+
+        let mut cmd = Command::new(cli_command);
+        cmd.args(args);
+
+        // For interactive tools, we want to inherit stdio so user can interact
+        let status = cmd
+            .status()
+            .map_err(|e| anyhow::anyhow!("Failed to execute {}: {}", cli_command, e))?;
+
+        if !status.success() {
+            return Err(anyhow::anyhow!(
+                "Tool '{}' exited with error code: {:?}",
+                display_name,
+                status.code()
+            ));
+        }
+
+        Ok(())
+    }
+
+    /// Get list of installed tools (display names)
+    pub fn get_installed_tools() -> Vec<&'static str> {
+        let mapping = Self::get_command_mapping();
+        mapping
+            .iter()
+            .filter(|(_, cli_command)| Self::check_tool_installed(cli_command))
+            .map(|(display_name, _)| *display_name)
+            .collect()
+    }
+
+    /// Get list of uninstalled tools (display names)
+    pub fn get_uninstalled_tools() -> Vec<&'static str> {
+        let mapping = Self::get_command_mapping();
+        mapping
+            .iter()
+            .filter(|(_, cli_command)| !Self::check_tool_installed(cli_command))
+            .map(|(display_name, _)| *display_name)
+            .collect()
+    }
+
+    /// Get tool information by name
+    #[allow(dead_code)]
+    pub fn get_tool_info(tool_name: &str) -> Option<ToolCommand> {
+        Self::get_all_tools()
+            .into_iter()
+            .find(|tool| tool.command == tool_name)
+    }
+}

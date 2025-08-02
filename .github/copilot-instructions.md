@@ -78,12 +78,56 @@ npm run sync-readme
 
 ## How To Release
 
-1. Update version numbers in both `Cargo.toml` and `package.json`
-2. Run `npm run sync-readme` to sync the README
-3. Commit with clear message: `feat: add new feature X`
-4. Create tag: `git tag v0.1.2`
-5. Push: `git push origin develop --tags`
-6. Publish to NPM: `cd npm/terminal-jarvis && npm publish`
+1. Update version numbers in both `Cargo.toml` and `npm/terminal-jarvis/package.json`
+2. Update version display in `npm/terminal-jarvis/src/index.ts`
+3. Update version display in `src/cli_logic.rs` (interactive mode version)
+4. Update CHANGELOG.md with new version and changes
+5. Update version references in README.md (root and NPM package will sync automatically)
+6. Run `npm run sync-readme` to sync the README
+7. Commit with clear message: `feat: add new feature X`
+8. Create tag: `git tag v0.0.6`
+9. Push to GitHub: `git push origin develop --tags`
+10. Publish to NPM: `cd npm/terminal-jarvis && npm publish`
+
+## Local CD with Agent Mode
+
+When conducting local continuous deployment with agents, **ALWAYS** follow this order:
+
+1. **Update All Version References:**
+   - `Cargo.toml` - version field
+   - `npm/terminal-jarvis/package.json` - version field
+   - `npm/terminal-jarvis/src/index.ts` - console.log version display
+   - `src/cli_logic.rs` - interactive mode version display
+   - `CHANGELOG.md` - add new version entry with changes
+   - `README.md` - version reference in the note section
+
+2. **Build and Test:**
+   ```bash
+   cd npm/terminal-jarvis
+   npm run build
+   ```
+
+3. **Commit and Push to GitHub FIRST:**
+   ```bash
+   git add .
+   git commit -m "version: bump to vX.X.X with description"
+   git tag vX.X.X
+   git push origin develop
+   git push origin vX.X.X
+   ```
+
+4. **Then Publish to NPM Registry:**
+   ```bash
+   cd npm/terminal-jarvis
+   npm publish --access public
+   ```
+
+**Why This Order Matters:**
+- GitHub serves as source of truth for version history
+- Git tags provide audit trail for releases
+- NPM registry reflects committed code, not uncommitted changes
+- Allows rollback if NPM publish fails
+- Ensures consistency between repository and published package
 
 ## Technical Notes
 
