@@ -92,7 +92,14 @@ async function main() {
         
         // Add a reasonable timeout to prevent indefinite hanging
         const timeout = setTimeout(() => {
-            console.log('\n⚠️  Process timed out after 60 seconds');
+            console.log('\n⚠️  T.JARVIS process timed out after 60 seconds');
+            console.log('   This usually happens with long-running interactive tools.');
+            console.log('');
+            console.log('💡 If this was intentional:');
+            console.log('   • The tool might still be running in the background');
+            console.log('   • Use Ctrl+C next time to stop manually');
+            console.log('   • Some AI tools take time to initialize');
+            console.log('');
             child.kill('SIGTERM');
             process.exit(1);
         }, 60000); // 60 second timeout
@@ -104,7 +111,23 @@ async function main() {
         
         child.on('error', (err) => {
             clearTimeout(timeout);
-            console.error('Error running terminal-jarvis binary:', err.message);
+            console.error('\n❌ Error running terminal-jarvis binary:');
+            console.error('   ' + err.message);
+            console.error('');
+            
+            // Provide specific error context
+            if (err.message.includes('ENOENT')) {
+                console.error('🔍 Binary not found or not executable.');
+                console.error('   This usually means the binary is missing or has wrong permissions.');
+            } else if (err.message.includes('EACCES')) {
+                console.error('🔒 Permission denied.');
+                console.error('   The binary exists but cannot be executed.');
+                console.error('   💡 Try: chmod +x ' + rustBinary);
+            } else if (err.message.includes('spawn')) {
+                console.error('🚫 Failed to spawn process.');
+                console.error('   This might be a system-level issue.');
+            }
+            console.error('');
             showFallbackMessage();
         });
     } else {
@@ -126,16 +149,24 @@ function showFallbackMessage() {
     console.log("");
     console.log("� This should not happen! The binary should be bundled with this package.");
     console.log("");
-    console.log("🔧 Troubleshooting:");
-    console.log("  • Try reinstalling: npm uninstall -g terminal-jarvis && npm install -g terminal-jarvis");
-    console.log("  • Check if binary exists: ls -la $(npm root -g)/terminal-jarvis/bin/");
-    console.log("  • Verify executable permissions: chmod +x $(npm root -g)/terminal-jarvis/bin/terminal-jarvis");
+    console.log("🔧 Quick Fix (try these in order):");
+    console.log("  1. npm uninstall -g terminal-jarvis");
+    console.log("  2. npm cache clean --force");
+    console.log("  3. npm install -g terminal-jarvis");
     console.log("");
-    console.log("� Alternative - Install directly from source:");
-    console.log("  cargo install --git https://github.com/BA-CalderonMorales/terminal-jarvis");
+    console.log("🔍 Detailed Troubleshooting:");
+    console.log("  • Check binary exists: ls -la $(npm root -g)/terminal-jarvis/bin/");
+    console.log("  • Fix permissions: chmod +x $(npm root -g)/terminal-jarvis/bin/*");
+    console.log("  • Check npm global: npm list -g terminal-jarvis");
+    console.log("  • Verify Node.js: node --version (need 16+)");
     console.log("");
-    console.log("� If this persists, please report this issue:");
-    console.log("  https://github.com/BA-CalderonMorales/terminal-jarvis/issues");
+    console.log("🚀 Alternative Installation Methods:");
+    console.log("  • From source: cargo install --git https://github.com/BA-CalderonMorales/terminal-jarvis");
+    console.log("  • Direct download: Check releases at github.com/BA-CalderonMorales/terminal-jarvis");
+    console.log("");
+    console.log("💬 Need Help?");
+    console.log("  • Report issue: https://github.com/BA-CalderonMorales/terminal-jarvis/issues");
+    console.log("  • Include output of: npm --version && node --version && npm list -g terminal-jarvis");
     process.exit(1);
 }
 

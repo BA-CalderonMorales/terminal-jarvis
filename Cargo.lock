@@ -187,6 +187,16 @@ dependencies = [
  "anstyle",
  "clap_lex",
  "strsim",
+ "terminal_size",
+]
+
+[[package]]
+name = "clap_complete"
+version = "4.5.55"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "a5abde44486daf70c5be8b8f8f1b66c49f86236edf6fa2abadb4d961c4c6229a"
+dependencies = [
+ "clap",
 ]
 
 [[package]]
@@ -1334,6 +1344,7 @@ version = "0.0.16"
 dependencies = [
  "anyhow",
  "clap",
+ "clap_complete",
  "dirs",
  "inquire",
  "reqwest",
@@ -1344,6 +1355,16 @@ dependencies = [
  "tokio",
  "tokio-test",
  "toml",
+]
+
+[[package]]
+name = "terminal_size"
+version = "0.4.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "45c6481c4829e4cc63825e62c49186a34538b7b2750b73b266581ffb612fb5ed"
+dependencies = [
+ "rustix",
+ "windows-sys 0.59.0",
 ]
 
 [[package]]
