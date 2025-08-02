@@ -232,7 +232,7 @@ pub async fn handle_interactive_mode() -> Result<()> {
         println!("{logo_padding}   ╚═╝  ╚═╝ ╚════╝ ╚═╝  ╚═╝╚═╝  ╚═╝  ╚═══╝  ╚═╝╚══════╝");
 
         // Version and tagline centered
-        let version_text = "v0.0.6";
+        let version_text = format!("v{}", env!("CARGO_PKG_VERSION"));
         let version_padding = " ".repeat((term_width.saturating_sub(version_text.len())) / 2);
         println!();
         println!("{version_padding}{version_text}");
