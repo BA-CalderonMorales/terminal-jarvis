@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-console.log("Terminal Jarvis v0.0.2");
+console.log("Terminal Jarvis v0.0.4");
 console.log("This is a preview release - full binary support coming soon!");
 console.log("");
 console.log("Available commands:");
