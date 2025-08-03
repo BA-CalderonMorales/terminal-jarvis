@@ -74,8 +74,8 @@ impl Default for Config {
             ToolConfig {
                 enabled: false,
                 auto_update: false,
-                install_command: Some("npm install -g opencode".to_string()),
-                update_command: Some("npm update -g opencode".to_string()),
+                install_command: Some("curl -fsSL https://opencode.ai/install | bash".to_string()),
+                update_command: Some("opencode upgrade".to_string()),
             },
         );
 

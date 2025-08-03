@@ -126,7 +126,21 @@ impl ToolManager {
         println!("🚀 Starting {display_name} with arguments: {args:?}");
 
         let mut cmd = Command::new(cli_command);
-        cmd.args(args);
+
+        // Special handling for opencode which has different command structure
+        if display_name == "opencode" {
+            if args.is_empty() {
+                // No arguments - start TUI mode in current directory
+                cmd.arg(".");
+            } else {
+                // Arguments provided - use 'run' subcommand
+                cmd.arg("run");
+                cmd.args(args);
+            }
+        } else {
+            // For other tools, pass arguments directly
+            cmd.args(args);
+        }
 
         // For interactive tools, we want to inherit stdio so user can interact
         let status = cmd
