@@ -3,6 +3,8 @@
 [![NPM Version](https://img.shields.io/npm/v/terminal-jarvis.svg)](https://www.npmjs.com/package/terminal-jarvis)
 [![NPM Downloads](https://img.shields.io/npm/dm/terminal-jarvis.svg)](https://www.npmjs.com/package/terminal-jarvis)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![NPM Stable](https://img.shields.io/npm/v/terminal-jarvis/stable.svg?label=stable&color=green)](https://www.npmjs.com/package/terminal-jarvis)
+[![NPM Beta](https://img.shields.io/npm/v/terminal-jarvis/beta.svg?label=beta&color=orange)](https://www.npmjs.com/package/terminal-jarvis)
 
 A thin Rust wrapper that provides a unified interface for managing and running AI coding tools like claude-code, gemini-cli, qwen-code, and opencode. Think of it as a package manager and runner for AI coding assistants.
 
@@ -10,18 +12,32 @@ A thin Rust wrapper that provides a unified interface for managing and running A
 
 ## Quick Start
 
+### Choose Your Installation Channel
+
 ```bash
 # Try it instantly with npx (no installation required)
 npx terminal-jarvis
 
-# Or install globally
+# Install latest version (default)
 npm install -g terminal-jarvis
+
+# Install stable version (recommended for production)
+npm install -g terminal-jarvis@stable
+
+# Install beta version (for testing new features)
+npm install -g terminal-jarvis@beta
 
 # For full functionality, install from source:
 cargo install --git https://github.com/BA-CalderonMorales/terminal-jarvis
 ```
 
-> **Note**: The current NPM version (0.0.19) includes full binary functionality with the complete T.JARVIS interface. No additional installation required!
+### Installation Channels Explained
+
+- **Latest** (`terminal-jarvis`): Most recently published version
+- **Stable** (`terminal-jarvis@stable`): Production-ready, thoroughly tested releases
+- **Beta** (`terminal-jarvis@beta`): Preview versions with experimental features
+
+> **Note**: The current NPM version (0.0.21) includes full binary functionality with the complete T.JARVIS interface. No additional installation required!
 
 ## Features
 

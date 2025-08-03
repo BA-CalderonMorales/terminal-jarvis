@@ -88,6 +88,38 @@ npm run sync-readme
 8. Create tag: `git tag v0.0.6`
 9. Push to GitHub: `git push origin develop --tags`
 10. Publish to NPM: `cd npm/terminal-jarvis && npm publish`
+11. **Add Distribution Tags** (optional - choose one or both):
+    - For stable releases: `npm dist-tag add terminal-jarvis@X.X.X stable`
+    - For beta releases: `npm dist-tag add terminal-jarvis@X.X.X beta`
+
+## NPM Distribution Tags
+
+We use npm dist-tags to provide users with different release channels:
+
+- **latest** - Default npm tag for the most recently published version
+- **stable** - For production-ready, thoroughly tested versions
+- **beta** - For preview versions that may contain experimental features
+
+**Usage Examples:**
+```bash
+# Install latest version (default)
+npm install -g terminal-jarvis
+
+# Install stable version (recommended for production)
+npm install -g terminal-jarvis@stable
+
+# Install beta version (for testing new features)
+npm install -g terminal-jarvis@beta
+
+# Check current dist-tags
+npm dist-tag ls terminal-jarvis
+```
+
+**Best Practices:**
+- Use `stable` tag for releases that have been tested and are production-ready
+- Use `beta` tag for releases with new features that need user testing
+- A single version can have both tags if it serves both purposes
+- Always update tags after publishing a new version
 
 ## Pre-Commit Checklist
 
