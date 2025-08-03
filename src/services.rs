@@ -1,4 +1,5 @@
 use crate::config::Config;
+use crate::progress_utils::ProgressUtils;
 use anyhow::{anyhow, Result};
 use std::process::Command;
 use tokio::process::Command as AsyncCommand;
@@ -100,7 +101,10 @@ impl PackageService {
             match tool {
                 "aider" => self.update_pip_package("aider-chat").await,
                 "cursor-cli" => {
-                    println!("Cursor CLI updates are handled through the Cursor application.");
+                    // Cursor CLI updates are handled through the Cursor application
+                    ProgressUtils::info_message(
+                        "Cursor CLI updates are handled through the Cursor application.",
+                    );
                     Ok(())
                 }
                 "codeium" | "copilot-cli" => self.update_npm_package(tool).await,
@@ -143,7 +147,12 @@ impl PackageService {
         let cmd = parts.next().ok_or_else(|| anyhow!("Empty command"))?;
         let args: Vec<&str> = parts.collect();
 
-        let status = AsyncCommand::new(cmd).args(&args).status().await?;
+        let status = AsyncCommand::new(cmd)
+            .args(&args)
+            .stdout(std::process::Stdio::null())
+            .stderr(std::process::Stdio::null())
+            .status()
+            .await?;
 
         if !status.success() {
             return Err(anyhow!("Command failed: {}", command));
@@ -156,6 +165,8 @@ impl PackageService {
     async fn install_npm_package(&self, package: &str) -> Result<()> {
         let status = AsyncCommand::new("npm")
             .args(["install", "-g", package])
+            .stdout(std::process::Stdio::null())
+            .stderr(std::process::Stdio::null())
             .status()
             .await?;
 
@@ -170,6 +181,8 @@ impl PackageService {
     async fn install_cargo_package(&self, package: &str) -> Result<()> {
         let status = AsyncCommand::new("cargo")
             .args(["install", package])
+            .stdout(std::process::Stdio::null())
+            .stderr(std::process::Stdio::null())
             .status()
             .await?;
 
@@ -183,6 +196,8 @@ impl PackageService {
     async fn update_npm_package(&self, package: &str) -> Result<()> {
         let status = AsyncCommand::new("npm")
             .args(["update", "-g", package])
+            .stdout(std::process::Stdio::null())
+            .stderr(std::process::Stdio::null())
             .status()
             .await?;
 
@@ -197,6 +212,8 @@ impl PackageService {
     async fn update_cargo_package(&self, package: &str) -> Result<()> {
         let status = AsyncCommand::new("cargo")
             .args(["install", "--force", package])
+            .stdout(std::process::Stdio::null())
+            .stderr(std::process::Stdio::null())
             .status()
             .await?;
 
@@ -211,6 +228,8 @@ impl PackageService {
     async fn install_pip_package(&self, package: &str) -> Result<()> {
         let status = AsyncCommand::new("pip")
             .args(["install", package])
+            .stdout(std::process::Stdio::null())
+            .stderr(std::process::Stdio::null())
             .status()
             .await?;
 

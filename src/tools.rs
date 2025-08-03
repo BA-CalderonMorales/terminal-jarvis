@@ -123,7 +123,9 @@ impl ToolManager {
             ));
         }
 
-        println!("🚀 Starting {display_name} with arguments: {args:?}");
+        // Clear any remaining progress indicators and ensure clean terminal state
+        print!("\x1b[2K\r"); // Clear current line
+        print!("\x1b[?25h"); // Show cursor
 
         let mut cmd = Command::new(cli_command);
 

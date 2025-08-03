@@ -5,6 +5,7 @@ mod cli;
 mod cli_logic;
 mod config;
 mod installation_arguments;
+mod progress_utils;
 mod services;
 mod tools;
 
