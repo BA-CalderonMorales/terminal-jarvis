@@ -485,7 +485,25 @@ pub async fn handle_interactive_mode() -> Result<()> {
                     })
                 };
 
-                println!("\n{neon_cyan}🚀 Launching {tool_name} with args: {args:?}{reset}\n");
+                // Show loading indicator before launching tool - keep it running longer
+                let launch_progress = ProgressContext::new(&format!("Launching {tool_name}"));
+
+                // Show more detailed progress steps
+                launch_progress.update_message(&format!("Preparing {tool_name} environment"));
+                tokio::time::sleep(tokio::time::Duration::from_millis(200)).await;
+
+                launch_progress.update_message(&format!("Initializing {tool_name}"));
+                tokio::time::sleep(tokio::time::Duration::from_millis(200)).await;
+
+                launch_progress
+                    .update_message(&format!("Starting {tool_name} with args: {args:?}"));
+                tokio::time::sleep(tokio::time::Duration::from_millis(150)).await;
+
+                // Finish progress right before starting the tool
+                launch_progress.finish_success(&format!("{tool_name} ready - starting now"));
+
+                // Clear any remaining progress indicators
+                print!("\x1b[2K\r");
 
                 match ToolManager::run_tool(tool_name, &args).await {
                     Ok(_) => {
