@@ -97,8 +97,10 @@ npm run sync-readme
 - [ ] `Cargo.toml` version updated
 - [ ] `npm/terminal-jarvis/package.json` version updated  
 - [ ] `npm/terminal-jarvis/src/index.ts` version display updated
+- [ ] `npm/terminal-jarvis/package.json` postinstall script version updated
 - [ ] `src/cli_logic.rs` uses `env!("CARGO_PKG_VERSION")` (auto-updates)
 - [ ] `CHANGELOG.md` has new version entry with clear changes
+- [ ] `README.md` version references updated in note section
 - [ ] `README.md` version references updated in note section
 
 ### Documentation Updates:

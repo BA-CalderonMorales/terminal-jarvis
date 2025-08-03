@@ -5,6 +5,28 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.0.18] - 2025-08-03
+
+### Fixed
+- **Version Consistency**: Fixed version inconsistencies across all project files
+- Updated README.md version reference from 0.0.16 to 0.0.18
+- Fixed NPM package.json postinstall script version from 0.0.14 to 0.0.18
+- Ensured all version references are synchronized before release
+
+## [0.0.17] - 2025-08-02
+
+### Added
+- **Futuristic Terminal UX**: Implemented stunning neon cyan color scheme for T.JARVIS interface
+- **Responsive ASCII Art**: T.JARVIS logo adapts to terminal width with fallback for small screens
+- **Clean Minimal Design**: Removed cluttered "Ready to Launch" sections for streamlined experience
+- **Seamless Navigation**: Moved settings to dedicated submenu for better organization
+- **Interactive Mode**: Enhanced user experience with consistent color theming throughout
+
+### Fixed
+- **Clippy Issues**: Resolved all format string inlining warnings
+- **Code Quality**: Fixed collapsible else-if patterns and improved readability
+- Complete CI/CD pipeline validation with format, clippy, and tests
+
 ## [0.0.16] - 2025-08-02
 
 ### Fixed

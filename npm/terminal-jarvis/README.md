@@ -21,7 +21,7 @@ npm install -g terminal-jarvis
 cargo install --git https://github.com/BA-CalderonMorales/terminal-jarvis
 ```
 
-> **Note**: The current NPM version (0.0.16) includes full binary functionality with the complete T.JARVIS interface. No additional installation required!
+> **Note**: The current NPM version (0.0.18) includes full binary functionality with the complete T.JARVIS interface. No additional installation required!
 
 ## Features
 
