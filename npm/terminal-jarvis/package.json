@@ -22,7 +22,7 @@
     "format:fix": "biome format --write src/",
     "check": "biome check src/",
     "check:fix": "biome check --write src/",
-    "build": "npm run sync-readme && npm run build-rust && npm run copy-binary && tsc",
+    "build": "npm run sync-readme && npx tsc",
     "prepublishOnly": "npm run build",
     "dev": "npm run build && node lib/index.js",
     "postinstall": "node -e \"console.log('\\n🤖 Terminal Jarvis v0.0.21 installed successfully!\\n\\n✅ Full T.JARVIS interface ready to use!\\n\\nRun: npx terminal-jarvis\\n')\""

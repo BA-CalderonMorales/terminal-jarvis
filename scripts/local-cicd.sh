@@ -185,6 +185,33 @@ if [ "$SHOULD_PUBLISH" = true ]; then
         npm publish --access public
         cd ../..
         echo -e "${GREEN}✅ Published to NPM registry!${RESET}"
+        
+        # Ask about distribution tags
+        echo ""
+        echo -e "${CYAN}📦 NPM Distribution Tags${RESET}"
+        echo -e "${BLUE}Would you like to add distribution tags for this release?${RESET}"
+        echo -e "${YELLOW}Available tags: stable (production-ready), beta (experimental features)${RESET}"
+        echo ""
+        
+        read -p "Add 'stable' tag? (y/N): " add_stable
+        if [[ $add_stable =~ ^[Yy]$ ]]; then
+            npm dist-tag add terminal-jarvis@${NEW_VERSION} stable
+            echo -e "${GREEN}✅ Added 'stable' tag${RESET}"
+        fi
+        
+        read -p "Add 'beta' tag? (y/N): " add_beta
+        if [[ $add_beta =~ ^[Yy]$ ]]; then
+            npm dist-tag add terminal-jarvis@${NEW_VERSION} beta
+            echo -e "${GREEN}✅ Added 'beta' tag${RESET}"
+        fi
+        
+        # Show current tags
+        if [[ $add_stable =~ ^[Yy]$ ]] || [[ $add_beta =~ ^[Yy]$ ]]; then
+            echo ""
+            echo -e "${BLUE}→ Current distribution tags:${RESET}"
+            npm dist-tag ls terminal-jarvis
+        fi
+        
     else
         echo -e "${YELLOW}⏭️  Skipped NPM publish${RESET}"
     fi
