@@ -102,6 +102,11 @@ impl Config {
             dirs::config_dir().map(|p| p.join("terminal-jarvis").join("config.toml")),
             Some(PathBuf::from("./terminal-jarvis.toml")),
             Some(PathBuf::from("./terminal-jarvis.toml.example")),
+            // Add NPM package config path - look relative to binary location
+            std::env::current_exe()
+                .ok()
+                .and_then(|exe| exe.parent().map(|p| p.join("../config/default.toml")))
+                .filter(|p| p.exists()),
         ];
 
         // Start with default configuration

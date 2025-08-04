@@ -5,6 +5,19 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.0.28] - 2025-01-26
+
+### Fixed
+- **NPM Package Configuration**: Fixed "Tool not found in configuration" errors in NPM package installations
+- **Configuration Loading**: Added NPM package config path to configuration loading sequence
+- **Package Bundling**: Included default configuration files (`config/default.toml`) in NPM package
+- **NPX Execution**: Resolved configuration loading issues when using `npx terminal-jarvis` commands
+
+### Enhanced
+- **Configuration System**: Improved config path resolution to handle NPM package installations
+- **Package Structure**: Added proper config directory bundling for standalone NPM package functionality
+- **Debugging**: Enhanced configuration loading to work across different installation methods
+
 ## [0.0.23] - 2025-08-03
 
 ### Added

@@ -133,9 +133,10 @@ if [ "$SHOULD_PUBLISH" = true ]; then
     echo "2) Minor (0.X.0) - New features, no breaking changes"  
     echo "3) Major (X.0.0) - Breaking changes"
     echo "4) Skip version bump"
+    echo "5) Publish current version to NPM registry only"
     echo ""
     
-    read -p "Enter your choice (1-4): " version_choice
+    read -p "Enter your choice (1-5): " version_choice
     
     case $version_choice in
         1)
@@ -157,6 +158,11 @@ if [ "$SHOULD_PUBLISH" = true ]; then
         4)
             echo -e "${BLUE}→ Skipping version bump...${RESET}"
             NEW_VERSION=$CURRENT_VERSION
+            ;;
+        5)
+            echo -e "${BLUE}→ Publishing current version to NPM registry only...${RESET}"
+            NEW_VERSION=$CURRENT_VERSION
+            SKIP_GIT_OPERATIONS=true
             ;;
         *)
             echo -e "${RED}❌ Invalid choice. Using current version.${RESET}"
@@ -193,20 +199,30 @@ if [ "$SHOULD_PUBLISH" = true ]; then
     cargo build --release
     cd npm/terminal-jarvis && npm run build && cd ../..
     
-    # Commit and tag
-    echo -e "${BLUE}→ Committing changes...${RESET}"
-    git add .
-    git commit -m "version: bump to v${NEW_VERSION} with futuristic UX improvements"
-    git tag "v${NEW_VERSION}"
+    # Commit and tag (skip if only publishing to NPM)
+    if [ "${SKIP_GIT_OPERATIONS:-false}" != "true" ]; then
+        echo -e "${BLUE}→ Committing changes...${RESET}"
+        git add .
+        git commit -m "version: bump to v${NEW_VERSION} with futuristic UX improvements"
+        git tag "v${NEW_VERSION}"
+        
+        # Push to GitHub
+        echo -e "${BLUE}→ Pushing to GitHub...${RESET}"
+        git push origin $DEFAULT_BRANCH
+        git push origin "v${NEW_VERSION}"
+    else
+        echo -e "${YELLOW}→ Skipping git operations (NPM-only publish)...${RESET}"
+    fi
     
-    # Push to GitHub
-    echo -e "${BLUE}→ Pushing to GitHub...${RESET}"
-    git push origin $DEFAULT_BRANCH
-    git push origin "v${NEW_VERSION}"
-    
-    # Ask about NPM publish
+    # Ask about NPM publish (or auto-publish for NPM-only option)
     echo ""
-    read -p "Publish to NPM registry? (y/N): " publish_npm
+    if [ "${SKIP_GIT_OPERATIONS:-false}" = "true" ]; then
+        echo -e "${CYAN}Publishing current version v${NEW_VERSION} to NPM registry...${RESET}"
+        publish_npm="y"
+    else
+        read -p "Publish to NPM registry? (y/N): " publish_npm
+    fi
+    
     if [[ $publish_npm =~ ^[Yy]$ ]]; then
         echo -e "${BLUE}→ Publishing to NPM...${RESET}"
         cd npm/terminal-jarvis

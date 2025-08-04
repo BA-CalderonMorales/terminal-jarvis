@@ -75,6 +75,25 @@ npm run sync-readme
 - No force pushing to main or develop branches
 - No `.unwrap()` without good error handling
 - No magic numbers - use named constants
+- **No multi-line bash commands in terminal suggestions** - Always use single-line commands
+
+## Terminal Command Guidelines
+
+When suggesting terminal commands or using the `run_in_terminal` tool:
+
+- **ALWAYS use single-line commands** - Multi-line bash commands cause terminal input issues
+- Use `&&` to chain commands instead of separate lines
+- Use `;` for sequential execution when `&&` isn't appropriate
+- Wrap complex logic in parentheses if needed
+- Example: `cargo build --release && cd npm/terminal-jarvis && npm run build`
+- **NEVER** suggest commands like:
+  ```bash
+  if [ condition ]; then
+    command1
+    command2
+  fi
+  ```
+- **INSTEAD** use: `[ condition ] && command1 && command2`
 
 ## How To Release
 

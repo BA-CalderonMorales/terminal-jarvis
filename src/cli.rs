@@ -5,6 +5,7 @@ use clap::{Parser, Subcommand};
 #[derive(Parser)]
 #[command(name = "terminal-jarvis")]
 #[command(about = "A thin Rust wrapper for managing and running AI coding tools")]
+#[command(version = env!("CARGO_PKG_VERSION"))]
 #[command(
     long_about = "Terminal Jarvis provides a unified interface for managing multiple AI coding tools like claude-code, gemini-cli, qwen-code, and opencode."
 )]

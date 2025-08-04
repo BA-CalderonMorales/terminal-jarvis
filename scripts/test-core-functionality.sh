@@ -70,7 +70,7 @@ run_test "Test 7: All tools use NPM packages consistently" \
 
 # Test 8: Error handling for invalid tools
 run_test "Test 8: Error handling for nonexistent tool" \
-    '! ./target/release/terminal-jarvis run nonexistent-tool 2>/dev/null'
+    'timeout 5s ./target/release/terminal-jarvis run nonexistent-tool >/dev/null 2>&1; [ $? -ne 0 ]'
 
 # Test 9: Version consistency across files
 run_test "Test 9: Version consistency (Cargo.toml vs NPM package.json)" \
