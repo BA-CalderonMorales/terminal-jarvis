@@ -104,16 +104,30 @@ impl Config {
             Some(PathBuf::from("./terminal-jarvis.toml.example")),
         ];
 
+        // Start with default configuration
+        let mut config = Config::default();
+
+        // Try to load user configuration and merge it
         for path in config_paths.into_iter().flatten() {
             if path.exists() {
                 let content = std::fs::read_to_string(&path)?;
-                let config: Config = toml::from_str(&content)?;
+                let user_config: Config = toml::from_str(&content)?;
+
+                // Merge user config with defaults (user settings override defaults)
+                for (tool_name, tool_config) in user_config.tools {
+                    config.tools.insert(tool_name, tool_config);
+                }
+
+                // Update other settings if they exist in user config
+                config.templates = user_config.templates;
+                config.api = user_config.api;
+
                 return Ok(config);
             }
         }
 
         // Return default config if no file found
-        Ok(Config::default())
+        Ok(config)
     }
 
     /// Save configuration to the user config directory
@@ -139,5 +153,15 @@ impl Config {
     /// Check if a tool is enabled
     pub fn is_tool_enabled(&self, tool: &str) -> bool {
         self.tools.get(tool).map(|c| c.enabled).unwrap_or(false)
+    }
+
+    /// Ensure all default tools are present in the configuration
+    pub fn ensure_default_tools(&mut self) {
+        let default_config = Config::default();
+
+        // Add any missing default tools
+        for (tool_name, tool_config) in default_config.tools {
+            self.tools.entry(tool_name).or_insert(tool_config);
+        }
     }
 }

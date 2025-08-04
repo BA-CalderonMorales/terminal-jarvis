@@ -45,6 +45,21 @@ pub enum Commands {
         #[command(subcommand)]
         action: TemplateCommands,
     },
+    /// Configuration management commands
+    Config {
+        #[command(subcommand)]
+        action: ConfigCommands,
+    },
+}
+
+#[derive(Subcommand)]
+pub enum ConfigCommands {
+    /// Reset configuration to defaults
+    Reset,
+    /// Show current configuration
+    Show,
+    /// Show configuration file path
+    Path,
 }
 
 #[derive(Subcommand)]
@@ -92,6 +107,11 @@ impl Cli {
                 }
                 TemplateCommands::List => cli_logic::handle_templates_list().await,
                 TemplateCommands::Apply { name } => cli_logic::handle_templates_apply(&name).await,
+            },
+            Some(Commands::Config { action }) => match action {
+                ConfigCommands::Reset => cli_logic::handle_config_reset().await,
+                ConfigCommands::Show => cli_logic::handle_config_show().await,
+                ConfigCommands::Path => cli_logic::handle_config_path().await,
             },
             None => cli_logic::handle_interactive_mode().await,
         }

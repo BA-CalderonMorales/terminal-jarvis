@@ -12,7 +12,11 @@ pub struct PackageService {
 
 impl PackageService {
     pub fn new() -> Result<Self> {
-        let config = Config::load()?;
+        let mut config = Config::load()?;
+
+        // Ensure all default tools are present
+        config.ensure_default_tools();
+
         Ok(Self { config })
     }
 
@@ -109,10 +113,16 @@ impl PackageService {
         let tool_config = self
             .config
             .get_tool_config(config_key)
-            .ok_or_else(|| anyhow!("Tool {} not found in configuration", tool))?;
+            .ok_or_else(|| {
+                // Provide helpful error message
+                anyhow!(
+                    "Tool '{}' not found in configuration. This might be due to an outdated config file. Try deleting ~/.config/terminal-jarvis/config.toml to reset to defaults.",
+                    tool
+                )
+            })?;
 
         if !tool_config.enabled {
-            return Err(anyhow!("Tool {} is disabled in configuration", tool));
+            return Err(anyhow!("Tool '{}' is disabled in configuration", tool));
         }
 
         if let Some(update_cmd) = &tool_config.update_command {

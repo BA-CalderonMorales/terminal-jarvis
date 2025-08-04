@@ -777,3 +777,67 @@ fn extract_tool_name_from_selection<'a>(
     }
     None
 }
+
+// Configuration management handlers
+
+pub async fn handle_config_reset() -> Result<()> {
+    let config_path = match dirs::config_dir() {
+        Some(dir) => dir.join("terminal-jarvis").join("config.toml"),
+        None => {
+            ProgressUtils::error_message("Could not determine config directory");
+            return Err(anyhow!("Could not determine config directory"));
+        }
+    };
+
+    if config_path.exists() {
+        let confirm = Confirm::new("Are you sure you want to reset configuration to defaults? This will delete your current config file.")
+            .with_default(false)
+            .prompt()?;
+
+        if confirm {
+            std::fs::remove_file(&config_path)?;
+            ProgressUtils::success_message("Configuration reset to defaults");
+            ProgressUtils::info_message(
+                "The config file has been deleted. Default settings will be used.",
+            );
+        } else {
+            ProgressUtils::info_message("Configuration reset cancelled");
+        }
+    } else {
+        ProgressUtils::info_message("No configuration file found. Using defaults already.");
+    }
+
+    Ok(())
+}
+
+pub async fn handle_config_show() -> Result<()> {
+    use crate::config::Config;
+
+    let config = Config::load()?;
+    let config_str = toml::to_string_pretty(&config)?;
+
+    println!("Current configuration:");
+    println!("{config_str}");
+
+    Ok(())
+}
+
+pub async fn handle_config_path() -> Result<()> {
+    let config_path = match dirs::config_dir() {
+        Some(dir) => dir.join("terminal-jarvis").join("config.toml"),
+        None => {
+            ProgressUtils::error_message("Could not determine config directory");
+            return Err(anyhow!("Could not determine config directory"));
+        }
+    };
+
+    println!("Configuration file path: {}", config_path.display());
+
+    if config_path.exists() {
+        ProgressUtils::success_message("Configuration file exists");
+    } else {
+        ProgressUtils::info_message("Configuration file does not exist (using defaults)");
+    }
+
+    Ok(())
+}
