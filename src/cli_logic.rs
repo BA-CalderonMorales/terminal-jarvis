@@ -101,14 +101,28 @@ pub async fn handle_install_tool(tool: &str) -> Result<()> {
     if status.success() {
         progress.finish_success(&format!("{tool} installed successfully!"));
 
-        // Verify installation with progress
+        // Verify installation with progress - add delay for PATH updates
         let verify_progress = ProgressContext::new(&format!("Verifying {tool} installation"));
+
+        // Wait a bit for PATH updates and system to recognize new binary
+        tokio::time::sleep(tokio::time::Duration::from_millis(1000)).await;
         ProgressUtils::simulate_verification_progress(&verify_progress.spinner, tool).await;
 
-        if ToolManager::check_tool_installed(ToolManager::get_cli_command(tool)) {
+        let cli_command = ToolManager::get_cli_command(tool);
+        if ToolManager::check_tool_installed(cli_command) {
             verify_progress.finish_success(&format!("{tool} is ready to use"));
         } else {
             verify_progress.finish_error(&format!("{tool} installation could not be verified"));
+
+            // For opencode, provide additional guidance
+            if tool == "opencode" {
+                ProgressUtils::warning_message(
+                    "OpenCode may require a shell restart to be available in PATH.",
+                );
+                ProgressUtils::info_message(
+                    "Try running: source ~/.bashrc or restart your terminal.",
+                );
+            }
         }
 
         Ok(())
@@ -123,37 +137,52 @@ pub async fn handle_update_packages(package: Option<&str>) -> Result<()> {
 
     match package {
         Some(pkg) => {
-            let update_progress = ProgressContext::new(&format!("Updating {pkg}"));
+            let update_progress = ProgressContext::new(&format!("⚡ Updating {pkg}"));
+
+            // Add a small delay to show the progress indicator
+            tokio::time::sleep(tokio::time::Duration::from_millis(200)).await;
+            update_progress.update_message(&format!("📦 Downloading latest version of {pkg}..."));
+
             let result = package_service.update_tool(pkg).await;
 
             match result {
                 Ok(_) => {
-                    update_progress.finish_success(&format!("{pkg} updated successfully"));
+                    update_progress.finish_success(&format!("✅ {pkg} updated successfully"));
                     Ok(())
                 }
                 Err(e) => {
-                    update_progress.finish_error(&format!("Failed to update {pkg}"));
+                    update_progress.finish_error(&format!("❌ Failed to update {pkg}"));
                     Err(e)
                 }
             }
         }
         None => {
-            let overall_progress = ProgressContext::new("Updating all packages");
+            // This should not be called anymore from the updated menu, but keeping for compatibility
+            let overall_progress = ProgressContext::new("⚡ Updating all packages");
             let tools = InstallationManager::get_tool_names();
             let mut had_errors = false;
 
-            for tool in tools {
-                overall_progress.update_message(&format!("Updating {tool}"));
+            for (index, tool) in tools.iter().enumerate() {
+                overall_progress.update_message(&format!(
+                    "⚡ Updating {tool} ({}/{})...",
+                    index + 1,
+                    tools.len()
+                ));
+
+                tokio::time::sleep(tokio::time::Duration::from_millis(100)).await;
+
                 if let Err(e) = package_service.update_tool(tool).await {
-                    ProgressUtils::error_message(&format!("Failed to update {tool}: {e}"));
+                    ProgressUtils::error_message(&format!("❌ Failed to update {tool}: {e}"));
                     had_errors = true;
+                } else {
+                    ProgressUtils::success_message(&format!("✅ {tool} updated successfully"));
                 }
             }
 
             if had_errors {
-                overall_progress.finish_error("Some packages failed to update");
+                overall_progress.finish_error("⚠️  Some packages failed to update");
             } else {
-                overall_progress.finish_success("All packages updated successfully");
+                overall_progress.finish_success("🎉 All packages updated successfully");
             }
 
             Ok(())
@@ -609,8 +638,8 @@ async fn handle_install_tools_menu() -> Result<()> {
 
 async fn handle_update_tools_menu() -> Result<()> {
     // Check for installed tools with progress
-    let scan_progress = ProgressContext::new("Scanning for installed tools");
-    tokio::time::sleep(tokio::time::Duration::from_millis(300)).await;
+    let scan_progress = ProgressContext::new("🔍 Scanning for installed tools");
+    tokio::time::sleep(tokio::time::Duration::from_millis(500)).await;
 
     let installed_tools: Vec<String> = ToolManager::get_installed_tools()
         .into_iter()
@@ -618,14 +647,18 @@ async fn handle_update_tools_menu() -> Result<()> {
         .collect();
 
     if installed_tools.is_empty() {
-        scan_progress.finish_error("No tools are installed yet");
+        scan_progress.finish_error("❌ No tools are installed yet");
         ProgressUtils::info_message("No tools are installed yet!");
+        println!("   Install tools first using the main menu.");
         println!("Press Enter to continue...");
         std::io::stdin().read_line(&mut String::new())?;
         return Ok(());
     }
 
-    scan_progress.finish_success(&format!("Found {} installed tools", installed_tools.len()));
+    scan_progress.finish_success(&format!(
+        "✅ Found {} installed tools",
+        installed_tools.len()
+    ));
 
     let mut options = installed_tools.clone();
     options.push("All Tools".to_string());
@@ -634,20 +667,78 @@ async fn handle_update_tools_menu() -> Result<()> {
 
     println!();
     if selection == "All Tools" {
-        let update_progress = ProgressContext::new("Updating all installed tools");
-        match handle_update_packages(None).await {
-            Ok(_) => update_progress.finish_success("All tools updated successfully"),
-            Err(e) => {
-                update_progress.finish_error("Some tools failed to update");
-                ProgressUtils::error_message(&format!("Update error: {e}"));
+        let update_progress = ProgressContext::new("⚡ Updating all installed tools concurrently");
+
+        // Use concurrent updates for better performance
+        let mut update_futures = Vec::new();
+
+        for (index, tool) in installed_tools.iter().enumerate() {
+            let tool_name = tool.clone();
+            let total_tools = installed_tools.len();
+            let current_index = index + 1;
+
+            let future = async move {
+                let tool_progress = ProgressContext::new(&format!(
+                    "⚡ Updating {tool_name} ({current_index}/{total_tools})"
+                ));
+
+                match handle_update_packages(Some(&tool_name)).await {
+                    Ok(_) => {
+                        tool_progress.finish_success(&format!("✅ {tool_name} updated"));
+                        Ok(tool_name.clone())
+                    }
+                    Err(e) => {
+                        tool_progress.finish_error(&format!("❌ {tool_name} failed"));
+                        Err((tool_name.clone(), e))
+                    }
+                }
+            };
+
+            update_futures.push(future);
+        }
+
+        // Execute all updates concurrently
+        let results = futures::future::join_all(update_futures).await;
+
+        let mut success_count = 0;
+        let mut error_count = 0;
+        let mut failed_tools = Vec::new();
+
+        for result in results {
+            match result {
+                Ok(tool_name) => {
+                    success_count += 1;
+                    ProgressUtils::success_message(&format!("✅ {tool_name} updated successfully"));
+                }
+                Err((tool_name, e)) => {
+                    error_count += 1;
+                    failed_tools.push(tool_name.clone());
+                    ProgressUtils::error_message(&format!("❌ Failed to update {tool_name}: {e}"));
+                }
             }
         }
+
+        if error_count == 0 {
+            update_progress.finish_success(&format!(
+                "🎉 All {success_count} tools updated successfully"
+            ));
+        } else if success_count > 0 {
+            update_progress.finish_error(&format!(
+                "⚠️  {success_count} tools updated, {error_count} failed"
+            ));
+            ProgressUtils::warning_message(&format!("Failed tools: {}", failed_tools.join(", ")));
+        } else {
+            update_progress.finish_error(&format!("❌ All {error_count} tools failed to update"));
+        }
     } else {
-        let update_progress = ProgressContext::new(&format!("Updating {selection}"));
+        let update_progress = ProgressContext::new(&format!("⚡ Updating {selection}"));
         match handle_update_packages(Some(&selection)).await {
-            Ok(_) => update_progress.finish_success(&format!("{selection} updated successfully")),
+            Ok(_) => {
+                update_progress.finish_success(&format!("✅ {selection} updated successfully"));
+                ProgressUtils::success_message(&format!("{selection} is now up to date!"));
+            }
             Err(e) => {
-                update_progress.finish_error(&format!("Failed to update {selection}"));
+                update_progress.finish_error(&format!("❌ Failed to update {selection}"));
                 ProgressUtils::error_message(&format!("Update error: {e}"));
             }
         }

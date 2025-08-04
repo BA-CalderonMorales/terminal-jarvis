@@ -13,8 +13,8 @@ fn test_default_config() {
     // Test that claude-code is enabled by default
     assert!(config.is_tool_enabled("claude-code"));
 
-    // Test that opencode is disabled by default
-    assert!(!config.is_tool_enabled("opencode"));
+    // Test that opencode is enabled by default (changed for better UX)
+    assert!(config.is_tool_enabled("opencode"));
 }
 
 #[test]

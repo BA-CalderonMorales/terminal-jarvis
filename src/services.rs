@@ -1,6 +1,7 @@
 use crate::config::Config;
 use crate::progress_utils::ProgressUtils;
 use anyhow::{anyhow, Result};
+use std::collections::HashMap;
 use std::process::Command;
 use tokio::process::Command as AsyncCommand;
 
@@ -13,6 +14,23 @@ impl PackageService {
     pub fn new() -> Result<Self> {
         let config = Config::load()?;
         Ok(Self { config })
+    }
+
+    /// Map display names to configuration keys
+    fn get_display_name_to_config_mapping() -> HashMap<&'static str, &'static str> {
+        let mut mapping = HashMap::new();
+        mapping.insert("claude", "claude-code");
+        mapping.insert("gemini", "gemini-cli");
+        mapping.insert("qwen", "qwen-code");
+        mapping.insert("opencode", "opencode");
+        mapping
+    }
+
+    /// Get the configuration key for a display name
+    fn get_config_key_for_tool<'a>(&self, display_name: &'a str) -> &'a str {
+        Self::get_display_name_to_config_mapping()
+            .get(display_name)
+            .unwrap_or(&display_name)
     }
 
     /// Check if a tool is installed on the system
@@ -85,9 +103,12 @@ impl PackageService {
 
     /// Update a tool to the latest version
     pub async fn update_tool(&self, tool: &str) -> Result<()> {
+        // Map display name to configuration key
+        let config_key = self.get_config_key_for_tool(tool);
+
         let tool_config = self
             .config
-            .get_tool_config(tool)
+            .get_tool_config(config_key)
             .ok_or_else(|| anyhow!("Tool {} not found in configuration", tool))?;
 
         if !tool_config.enabled {
@@ -98,7 +119,7 @@ impl PackageService {
             self.execute_command(update_cmd).await
         } else {
             // Fallback to default update methods for real AI coding tools
-            match tool {
+            match config_key {
                 "aider" => self.update_pip_package("aider-chat").await,
                 "cursor-cli" => {
                     // Cursor CLI updates are handled through the Cursor application
@@ -107,7 +128,14 @@ impl PackageService {
                     );
                     Ok(())
                 }
-                "codeium" | "copilot-cli" => self.update_npm_package(tool).await,
+                "codeium" | "copilot-cli" => self.update_npm_package(config_key).await,
+                "claude-code" => self.update_npm_package("@anthropic-ai/claude-code").await,
+                "gemini-cli" => self.update_npm_package("@google/gemini-cli").await,
+                "qwen-code" => self.update_npm_package("@qwen-code/qwen-code").await,
+                "opencode" => {
+                    // OpenCode has its own update mechanism
+                    self.execute_command("opencode upgrade").await
+                }
                 _ => Err(anyhow!("Unknown tool: {}", tool)),
             }
         }
@@ -317,6 +345,41 @@ impl GitHubService {
         // This would implement template application logic
         // For now, just a placeholder
         println!("Template '{name}' would be applied here");
+        Ok(())
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_display_name_to_config_mapping() {
+        let mapping = PackageService::get_display_name_to_config_mapping();
+
+        // Test that all expected mappings exist
+        assert_eq!(mapping.get("claude"), Some(&"claude-code"));
+        assert_eq!(mapping.get("gemini"), Some(&"gemini-cli"));
+        assert_eq!(mapping.get("qwen"), Some(&"qwen-code"));
+        assert_eq!(mapping.get("opencode"), Some(&"opencode"));
+    }
+
+    #[tokio::test]
+    async fn test_config_key_resolution() -> Result<()> {
+        let service = PackageService::new()?;
+
+        // Test that display names are correctly mapped to config keys
+        assert_eq!(service.get_config_key_for_tool("qwen"), "qwen-code");
+        assert_eq!(service.get_config_key_for_tool("claude"), "claude-code");
+        assert_eq!(service.get_config_key_for_tool("gemini"), "gemini-cli");
+        assert_eq!(service.get_config_key_for_tool("opencode"), "opencode");
+
+        // Test that unknown tools return themselves
+        assert_eq!(
+            service.get_config_key_for_tool("unknown-tool"),
+            "unknown-tool"
+        );
+
         Ok(())
     }
 }

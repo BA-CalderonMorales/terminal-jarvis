@@ -94,6 +94,40 @@ impl ToolManager {
             }
         }
 
+        // For opencode specifically, check common installation paths
+        if tool == "opencode" {
+            let common_paths = [
+                "/usr/local/bin/opencode",
+                "/home/vscode/.local/bin/opencode",
+                "/root/.local/bin/opencode",
+                &format!(
+                    "{}/.local/bin/opencode",
+                    std::env::var("HOME").unwrap_or_default()
+                ),
+            ];
+
+            for path in &common_paths {
+                if std::path::Path::new(path).exists() {
+                    if let Ok(output) = Command::new(path).arg("--version").output() {
+                        if output.status.success() {
+                            return true;
+                        }
+                    }
+                }
+            }
+
+            // Try with shell environment loaded
+            if let Ok(output) = Command::new("sh")
+                .arg("-c")
+                .arg("source ~/.bashrc 2>/dev/null; source ~/.profile 2>/dev/null; which opencode 2>/dev/null")
+                .output()
+            {
+                if output.status.success() && !output.stdout.is_empty() {
+                    return true;
+                }
+            }
+        }
+
         // Try running the tool with --version
         if let Ok(output) = Command::new(tool).arg("--version").output() {
             if output.status.success() {

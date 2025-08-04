@@ -48,7 +48,7 @@ impl InstallationManager {
             "opencode",
             InstallCommand {
                 command: "sh",
-                args: vec!["-c", "curl -fsSL https://opencode.ai/install | bash"],
+                args: vec!["-c", "curl -fsSL https://opencode.ai/install | bash && export PATH=\"$HOME/.local/bin:$PATH\""],
                 description: "OpenCode AI coding agent built for the terminal",
                 requires_npm: false,
             },

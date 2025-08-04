@@ -72,7 +72,7 @@ impl Default for Config {
         tools.insert(
             "opencode".to_string(),
             ToolConfig {
-                enabled: false,
+                enabled: true,
                 auto_update: false,
                 install_command: Some("curl -fsSL https://opencode.ai/install | bash".to_string()),
                 update_command: Some("opencode upgrade".to_string()),

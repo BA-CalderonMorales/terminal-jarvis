@@ -1,6 +1,6 @@
 {
   "name": "terminal-jarvis",
-  "version": "0.0.23",
+  "version": "0.0.24",
   "description": "A thin Rust wrapper that provides a unified interface for managing and running AI coding tools",
   "bin": {
     "terminal-jarvis": "bin/terminal-jarvis"

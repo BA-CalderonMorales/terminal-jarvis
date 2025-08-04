@@ -1,6 +1,6 @@
 [package]
 name = "terminal-jarvis"
-version = "0.0.23"
+version = "0.0.24"
 edition = "2021"
 description = "A thin Rust wrapper that provides a unified interface for managing and running AI coding tools"
 authors = ["BA-CalderonMorales"]
@@ -28,6 +28,7 @@ anyhow = "1.0"
 toml = "0.8"
 dirs = "5.0"
 inquire = "0.7"
+futures = "0.3"
 shell-words = "1.1"
 term_size = "0.3"
 indicatif = "0.18.0"

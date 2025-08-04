@@ -2,6 +2,11 @@
 
 # Terminal Jarvis Local CI/CD Script
 # Handles feature branch workflow with merge decisions
+#
+# Release Tagging Strategy:
+# - All releases automatically get 'beta' tag (for testing/preview)
+# - Production-ready releases also get 'stable' tag (optional)
+# - Users can install: @beta (latest features), @stable (production), or @version (specific)
 
 set -e  # Exit on any error
 
@@ -186,31 +191,32 @@ if [ "$SHOULD_PUBLISH" = true ]; then
         cd ../..
         echo -e "${GREEN}✅ Published to NPM registry!${RESET}"
         
-        # Ask about distribution tags
+        # Automatically add beta tag for all releases
         echo ""
         echo -e "${CYAN}📦 NPM Distribution Tags${RESET}"
-        echo -e "${BLUE}Would you like to add distribution tags for this release?${RESET}"
-        echo -e "${YELLOW}Available tags: stable (production-ready), beta (experimental features)${RESET}"
-        echo ""
+        echo -e "${BLUE}→ Adding 'beta' tag automatically...${RESET}"
+        npm dist-tag add terminal-jarvis@${NEW_VERSION} beta
+        echo -e "${GREEN}✅ Added 'beta' tag${RESET}"
         
-        read -p "Add 'stable' tag? (y/N): " add_stable
+        # Ask about stable tag
+        echo ""
+        echo -e "${YELLOW}🏷️  Release Channel Decision${RESET}"
+        echo -e "${BLUE}This release has been tagged as 'beta' by default.${RESET}"
+        echo ""
+        read -p "Is this a stable, production-ready release? Add 'stable' tag? (y/N): " add_stable
         if [[ $add_stable =~ ^[Yy]$ ]]; then
             npm dist-tag add terminal-jarvis@${NEW_VERSION} stable
-            echo -e "${GREEN}✅ Added 'stable' tag${RESET}"
-        fi
-        
-        read -p "Add 'beta' tag? (y/N): " add_beta
-        if [[ $add_beta =~ ^[Yy]$ ]]; then
-            npm dist-tag add terminal-jarvis@${NEW_VERSION} beta
-            echo -e "${GREEN}✅ Added 'beta' tag${RESET}"
+            echo -e "${GREEN}✅ Added 'stable' tag - this is now a production release${RESET}"
+            RELEASE_CHANNEL="beta + stable"
+        else
+            echo -e "${BLUE}📋 Release will remain as beta-only${RESET}"
+            RELEASE_CHANNEL="beta"
         fi
         
         # Show current tags
-        if [[ $add_stable =~ ^[Yy]$ ]] || [[ $add_beta =~ ^[Yy]$ ]]; then
-            echo ""
-            echo -e "${BLUE}→ Current distribution tags:${RESET}"
-            npm dist-tag ls terminal-jarvis
-        fi
+        echo ""
+        echo -e "${BLUE}→ Current distribution tags:${RESET}"
+        npm dist-tag ls terminal-jarvis
         
     else
         echo -e "${YELLOW}⏭️  Skipped NPM publish${RESET}"
@@ -220,7 +226,17 @@ if [ "$SHOULD_PUBLISH" = true ]; then
     echo -e "${GREEN}🎉 Full CI/CD pipeline completed successfully!${RESET}"
     echo -e "${BLUE}Version: ${NEW_VERSION}${RESET}"
     echo -e "${BLUE}Branch: ${DEFAULT_BRANCH}${RESET}"
-    echo -e "${BLUE}Published: $([ "$publish_npm" = "y" ] && echo "Yes" || echo "No")${RESET}"
+    echo -e "${BLUE}NPM Published: $([ "$publish_npm" = "y" ] && echo "Yes" || echo "No")${RESET}"
+    if [[ $publish_npm =~ ^[Yy]$ ]]; then
+        echo -e "${BLUE}Release Channel: ${RELEASE_CHANNEL:-"beta"}${RESET}"
+        echo ""
+        echo -e "${CYAN}📦 Installation Commands:${RESET}"
+        echo -e "${YELLOW}  Beta release:   ${RESET}npm install -g terminal-jarvis@beta"
+        if [[ $add_stable =~ ^[Yy]$ ]]; then
+            echo -e "${YELLOW}  Stable release: ${RESET}npm install -g terminal-jarvis@stable"
+        fi
+        echo -e "${YELLOW}  Latest version: ${RESET}npm install -g terminal-jarvis@${NEW_VERSION}"
+    fi
     
 else
     echo -e "${GREEN}🎉 Quality checks completed for feature branch!${RESET}"
