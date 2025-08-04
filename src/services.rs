@@ -139,12 +139,48 @@ impl PackageService {
                     Ok(())
                 }
                 "codeium" | "copilot-cli" => self.update_npm_package(config_key).await,
-                "claude-code" => self.update_npm_package("@anthropic-ai/claude-code").await,
-                "gemini-cli" => self.update_npm_package("@google/gemini-cli").await,
-                "qwen-code" => self.update_npm_package("@qwen-code/qwen-code").await,
+                "claude-code" => {
+                    // Try different package names for Claude
+                    match self.update_npm_package("@anthropic-ai/claude-code").await {
+                        Ok(result) => Ok(result),
+                        Err(_) => {
+                            // Fallback to try other possible names
+                            match self.update_npm_package("claude-cli").await {
+                                Ok(result) => Ok(result),
+                                Err(_) => self.update_npm_package("claude").await,
+                            }
+                        }
+                    }
+                }
+                "gemini-cli" => {
+                    // Try different package names for Gemini
+                    match self.update_npm_package("@google/generative-ai-cli").await {
+                        Ok(result) => Ok(result),
+                        Err(_) => match self.update_npm_package("gemini-cli").await {
+                            Ok(result) => Ok(result),
+                            Err(_) => self.update_npm_package("@google/gemini-cli").await,
+                        },
+                    }
+                }
+                "qwen-code" => {
+                    // Try different package names for Qwen
+                    match self.update_npm_package("@qwen-code/qwen-code").await {
+                        Ok(result) => Ok(result),
+                        Err(_) => match self.update_npm_package("qwen-code").await {
+                            Ok(result) => Ok(result),
+                            Err(_) => self.update_npm_package("qwen").await,
+                        },
+                    }
+                }
                 "opencode" => {
-                    // OpenCode has its own update mechanism
-                    self.execute_command("opencode upgrade").await
+                    // Try different package names for OpenCode
+                    match self.update_npm_package("opencode-ai").await {
+                        Ok(result) => Ok(result),
+                        Err(_) => match self.update_npm_package("opencode").await {
+                            Ok(result) => Ok(result),
+                            Err(_) => self.update_npm_package("@opencode/cli").await,
+                        },
+                    }
                 }
                 _ => Err(anyhow!("Unknown tool: {}", tool)),
             }
@@ -185,15 +221,18 @@ impl PackageService {
         let cmd = parts.next().ok_or_else(|| anyhow!("Empty command"))?;
         let args: Vec<&str> = parts.collect();
 
-        let status = AsyncCommand::new(cmd)
-            .args(&args)
-            .stdout(std::process::Stdio::null())
-            .stderr(std::process::Stdio::null())
-            .status()
-            .await?;
+        let output = AsyncCommand::new(cmd).args(&args).output().await?;
 
-        if !status.success() {
-            return Err(anyhow!("Command failed: {}", command));
+        if !output.status.success() {
+            let stderr = String::from_utf8_lossy(&output.stderr);
+            let stdout = String::from_utf8_lossy(&output.stdout);
+
+            return Err(anyhow!(
+                "Command '{}' failed. Error: {} {}",
+                command,
+                stderr.trim(),
+                stdout.trim()
+            ));
         }
 
         Ok(())
@@ -232,15 +271,46 @@ impl PackageService {
     }
 
     async fn update_npm_package(&self, package: &str) -> Result<()> {
-        let status = AsyncCommand::new("npm")
-            .args(["update", "-g", package])
+        // First try to check if the package exists
+        let check_status = AsyncCommand::new("npm")
+            .args(["view", package, "version"])
             .stdout(std::process::Stdio::null())
             .stderr(std::process::Stdio::null())
             .status()
+            .await;
+
+        match check_status {
+            Ok(status) if !status.success() => {
+                return Err(anyhow!(
+                    "Package '{}' not found in npm registry. This might be a configuration error.",
+                    package
+                ));
+            }
+            Err(e) => {
+                return Err(anyhow!(
+                    "Failed to check npm package '{}': {}. Is npm installed and working?",
+                    package,
+                    e
+                ));
+            }
+            _ => {} // Package exists, continue with update
+        }
+
+        let output = AsyncCommand::new("npm")
+            .args(["update", "-g", package])
+            .output()
             .await?;
 
-        if !status.success() {
-            return Err(anyhow!("Failed to update npm package: {}", package));
+        if !output.status.success() {
+            let stderr = String::from_utf8_lossy(&output.stderr);
+            let stdout = String::from_utf8_lossy(&output.stdout);
+
+            return Err(anyhow!(
+                "Failed to update npm package '{}'. Error: {} {}",
+                package,
+                stderr.trim(),
+                stdout.trim()
+            ));
         }
 
         Ok(())
@@ -248,15 +318,21 @@ impl PackageService {
 
     #[allow(dead_code)]
     async fn update_cargo_package(&self, package: &str) -> Result<()> {
-        let status = AsyncCommand::new("cargo")
+        let output = AsyncCommand::new("cargo")
             .args(["install", "--force", package])
-            .stdout(std::process::Stdio::null())
-            .stderr(std::process::Stdio::null())
-            .status()
+            .output()
             .await?;
 
-        if !status.success() {
-            return Err(anyhow!("Failed to update cargo package: {}", package));
+        if !output.status.success() {
+            let stderr = String::from_utf8_lossy(&output.stderr);
+            let stdout = String::from_utf8_lossy(&output.stdout);
+
+            return Err(anyhow!(
+                "Failed to update cargo package '{}'. Error: {} {}",
+                package,
+                stderr.trim(),
+                stdout.trim()
+            ));
         }
 
         Ok(())

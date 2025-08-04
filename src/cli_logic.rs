@@ -678,68 +678,97 @@ async fn handle_update_tools_menu() -> Result<()> {
             let current_index = index + 1;
 
             let future = async move {
-                let tool_progress = ProgressContext::new(&format!(
+                let individual_progress = ProgressContext::new(&format!(
                     "⚡ Updating {tool_name} ({current_index}/{total_tools})"
                 ));
+                tokio::time::sleep(tokio::time::Duration::from_millis(300)).await;
+                individual_progress
+                    .update_message(&format!("📦 Downloading latest version of {tool_name}..."));
 
                 match handle_update_packages(Some(&tool_name)).await {
                     Ok(_) => {
-                        tool_progress.finish_success(&format!("✅ {tool_name} updated"));
-                        Ok(tool_name.clone())
+                        individual_progress
+                            .finish_success(&format!("✅ {tool_name} updated successfully"));
+                        Ok(tool_name)
                     }
                     Err(e) => {
-                        tool_progress.finish_error(&format!("❌ {tool_name} failed"));
-                        Err((tool_name.clone(), e))
+                        individual_progress
+                            .finish_error(&format!("❌ Failed to update {tool_name}"));
+                        Err((tool_name, e))
                     }
                 }
             };
-
             update_futures.push(future);
         }
 
-        // Execute all updates concurrently
+        // Wait for all updates to complete
         let results = futures::future::join_all(update_futures).await;
+        update_progress.finish_success("🎯 Concurrent updates completed");
 
-        let mut success_count = 0;
-        let mut error_count = 0;
+        // Analyze results and show detailed summary
+        let mut successful_tools = Vec::new();
         let mut failed_tools = Vec::new();
 
         for result in results {
             match result {
-                Ok(tool_name) => {
-                    success_count += 1;
-                    ProgressUtils::success_message(&format!("✅ {tool_name} updated successfully"));
-                }
-                Err((tool_name, e)) => {
-                    error_count += 1;
-                    failed_tools.push(tool_name.clone());
-                    ProgressUtils::error_message(&format!("❌ Failed to update {tool_name}: {e}"));
-                }
+                Ok(tool_name) => successful_tools.push(tool_name),
+                Err((tool_name, error)) => failed_tools.push((tool_name, error)),
             }
         }
 
-        if error_count == 0 {
-            update_progress.finish_success(&format!(
-                "🎉 All {success_count} tools updated successfully"
-            ));
-        } else if success_count > 0 {
-            update_progress.finish_error(&format!(
-                "⚠️  {success_count} tools updated, {error_count} failed"
-            ));
-            ProgressUtils::warning_message(&format!("Failed tools: {}", failed_tools.join(", ")));
+        // Display comprehensive results
+        println!("\n🎯 Update Results Summary:");
+
+        if !successful_tools.is_empty() {
+            println!("✅ Successfully updated {} tools:", successful_tools.len());
+            for tool in &successful_tools {
+                println!("   ✓ {tool}");
+            }
+        }
+
+        if !failed_tools.is_empty() {
+            println!("\n❌ Failed to update {} tools:", failed_tools.len());
+            for (tool, error) in &failed_tools {
+                println!("   ✗ {tool}: {error}");
+            }
+
+            println!("\n💡 Troubleshooting tips:");
+            println!("   • Check your internet connection");
+            println!(
+                "   • Ensure you have the required package managers installed (npm, cargo, pip)"
+            );
+            println!("   • Some tools might need to be manually updated");
+            println!("   • Try updating individual tools to see specific error messages");
+        }
+
+        if successful_tools.is_empty() && !failed_tools.is_empty() {
+            println!("\n⚠️  All updates failed. Please check your environment setup.");
+        } else if !successful_tools.is_empty() && !failed_tools.is_empty() {
+            println!(
+                "\n🎯 Partial success: {}/{} tools updated successfully",
+                successful_tools.len(),
+                installed_tools.len()
+            );
         } else {
-            update_progress.finish_error(&format!("❌ All {error_count} tools failed to update"));
+            println!("\n🎉 All tools updated successfully!");
         }
     } else {
         let update_progress = ProgressContext::new(&format!("⚡ Updating {selection}"));
         match handle_update_packages(Some(&selection)).await {
             Ok(_) => {
                 update_progress.finish_success(&format!("✅ {selection} updated successfully"));
-                ProgressUtils::success_message(&format!("{selection} is now up to date!"));
+                println!("\n🎉 Update completed successfully!");
+                println!("✅ {selection} is now up to date!");
             }
             Err(e) => {
                 update_progress.finish_error(&format!("❌ Failed to update {selection}"));
-                ProgressUtils::error_message(&format!("Update error: {e}"));
+                println!("\n⚠️  Update failed!");
+                println!("❌ Error: {e}");
+                println!("\n💡 Troubleshooting tips:");
+                println!("   • Check your internet connection");
+                println!("   • Ensure the required package manager is installed");
+                println!("   • Try running the update command manually");
+                println!("   • Some tools may require manual updates");
             }
         }
     }

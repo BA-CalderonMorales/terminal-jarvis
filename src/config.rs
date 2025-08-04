@@ -64,8 +64,8 @@ impl Default for Config {
             ToolConfig {
                 enabled: true,
                 auto_update: true,
-                install_command: Some("cargo install qwen-code".to_string()),
-                update_command: Some("cargo install --force qwen-code".to_string()),
+                install_command: Some("npm install -g @qwen-code/qwen-code@latest".to_string()),
+                update_command: Some("npm update -g @qwen-code/qwen-code".to_string()),
             },
         );
 
@@ -73,9 +73,9 @@ impl Default for Config {
             "opencode".to_string(),
             ToolConfig {
                 enabled: true,
-                auto_update: false,
-                install_command: Some("curl -fsSL https://opencode.ai/install | bash".to_string()),
-                update_command: Some("opencode upgrade".to_string()),
+                auto_update: true,
+                install_command: Some("npm install -g opencode-ai@latest".to_string()),
+                update_command: Some("npm update -g opencode-ai".to_string()),
             },
         );
 
@@ -110,23 +110,49 @@ impl Config {
         // Try to load user configuration and merge it
         for path in config_paths.into_iter().flatten() {
             if path.exists() {
-                let content = std::fs::read_to_string(&path)?;
-                let user_config: Config = toml::from_str(&content)?;
+                match std::fs::read_to_string(&path) {
+                    Ok(content) => {
+                        // Try to parse as partial TOML first, then fallback to full Config
+                        match toml::from_str::<Config>(&content) {
+                            Ok(user_config) => {
+                                // Merge user config with defaults (user settings override defaults)
+                                for (tool_name, tool_config) in user_config.tools {
+                                    config.tools.insert(tool_name, tool_config);
+                                }
 
-                // Merge user config with defaults (user settings override defaults)
-                for (tool_name, tool_config) in user_config.tools {
-                    config.tools.insert(tool_name, tool_config);
+                                // Update other settings if they exist in user config
+                                config.templates = user_config.templates;
+                                config.api = user_config.api;
+
+                                // Ensure all defaults are still present
+                                config.ensure_default_tools();
+                                return Ok(config);
+                            }
+                            Err(e) => {
+                                eprintln!(
+                                    "Warning: Failed to parse config file {}: {}",
+                                    path.display(),
+                                    e
+                                );
+                                eprintln!("Using default configuration");
+                                continue;
+                            }
+                        }
+                    }
+                    Err(e) => {
+                        eprintln!(
+                            "Warning: Failed to read config file {}: {}",
+                            path.display(),
+                            e
+                        );
+                        continue;
+                    }
                 }
-
-                // Update other settings if they exist in user config
-                config.templates = user_config.templates;
-                config.api = user_config.api;
-
-                return Ok(config);
             }
         }
 
-        // Return default config if no file found
+        // Return default config if no file found (ensure defaults are present)
+        config.ensure_default_tools();
         Ok(config)
     }
 

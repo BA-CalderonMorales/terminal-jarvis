@@ -18,7 +18,7 @@ impl InstallationManager {
             "claude",
             InstallCommand {
                 command: "npm",
-                args: vec!["install", "-g", "@anthropic-ai/claude-code"],
+                args: vec!["install", "-g", "@anthropic-ai/claude-cli"],
                 description: "Anthropic's Claude for code assistance",
                 requires_npm: true,
             },
@@ -28,7 +28,7 @@ impl InstallationManager {
             "gemini",
             InstallCommand {
                 command: "npm",
-                args: vec!["install", "-g", "@google/gemini-cli"],
+                args: vec!["install", "-g", "@google/generative-ai-cli"],
                 description: "Google's Gemini CLI tool",
                 requires_npm: true,
             },
@@ -38,7 +38,7 @@ impl InstallationManager {
             "qwen",
             InstallCommand {
                 command: "npm",
-                args: vec!["install", "-g", "@qwen-code/qwen-code"],
+                args: vec!["install", "-g", "@qwen-code/qwen-code@latest"],
                 description: "Qwen coding assistant",
                 requires_npm: true,
             },
@@ -47,10 +47,10 @@ impl InstallationManager {
         commands.insert(
             "opencode",
             InstallCommand {
-                command: "sh",
-                args: vec!["-c", "curl -fsSL https://opencode.ai/install | bash && export PATH=\"$HOME/.local/bin:$PATH\""],
+                command: "npm",
+                args: vec!["install", "-g", "opencode-ai@latest"],
                 description: "OpenCode AI coding agent built for the terminal",
-                requires_npm: false,
+                requires_npm: true,
             },
         );
 

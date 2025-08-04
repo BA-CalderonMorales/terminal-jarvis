@@ -40,6 +40,20 @@ cargo test
 echo -e "${GREEN}✅ All quality checks passed!${RESET}"
 echo ""
 
+# Step 1.5: Core Functionality Tests
+echo -e "${CYAN}🧪 Step 1.5: Core Functionality Tests${RESET}"
+echo -e "${BLUE}Running comprehensive functionality validation...${RESET}"
+
+# Run our dedicated test suite
+if ! ./scripts/test-core-functionality.sh; then
+    echo -e "${RED}❌ Core functionality tests failed!${RESET}"
+    echo -e "${YELLOW}Please fix the issues before proceeding with release.${RESET}"
+    exit 1
+fi
+
+echo -e "${GREEN}🎉 All core functionality tests passed!${RESET}"
+echo ""
+
 # Step 2: Build Release Binary
 echo -e "${CYAN}📦 Step 2: Building Release Binary${RESET}"
 cargo build --release
@@ -54,7 +68,7 @@ cd ../..
 echo -e "${GREEN}✅ NPM package built successfully!${RESET}"
 echo ""
 
-# Step 4: Branch Decision (only if not on default branch)
+# Step 3: Branch Decision (only if not on default branch)
 if [ "$CURRENT_BRANCH" != "$DEFAULT_BRANCH" ]; then
     echo -e "${YELLOW}🔀 Branch Management Decision${RESET}"
     echo -e "${BLUE}You are currently on branch: ${CURRENT_BRANCH}${RESET}"
@@ -104,9 +118,9 @@ fi
 
 echo ""
 
-# Step 5: Publishing Workflow (only if merging or on default branch)
+# Step 4: Publishing Workflow (only if merging or on default branch)
 if [ "$SHOULD_PUBLISH" = true ]; then
-    echo -e "${CYAN}🚀 Step 5: Publishing Workflow${RESET}"
+    echo -e "${CYAN}🚀 Step 4: Publishing Workflow${RESET}"
     
     # Get current version
     CURRENT_VERSION=$(grep '^version = ' Cargo.toml | sed 's/version = "\(.*\)"/\1/')
@@ -161,6 +175,15 @@ if [ "$SHOULD_PUBLISH" = true ]; then
         
         # Update version display in TypeScript
         sed -i "s/console.log('Terminal Jarvis v.*/console.log('Terminal Jarvis v$NEW_VERSION');/" npm/terminal-jarvis/src/index.ts
+        
+        # Update version references in README (both root and NPM package)
+        echo -e "${BLUE}→ Updating version references in documentation...${RESET}"
+        
+        # Update root README.md - find and update version references
+        sed -i "s/terminal-jarvis@[0-9]\+\.[0-9]\+\.[0-9]\+/terminal-jarvis@$NEW_VERSION/g" README.md
+        
+        # Update NPM package README.md (will be synced later)
+        sed -i "s/terminal-jarvis@[0-9]\+\.[0-9]\+\.[0-9]\+/terminal-jarvis@$NEW_VERSION/g" npm/terminal-jarvis/README.md
         
         echo -e "${GREEN}✅ Version updated to ${NEW_VERSION}${RESET}"
     fi
@@ -217,6 +240,64 @@ if [ "$SHOULD_PUBLISH" = true ]; then
         echo ""
         echo -e "${BLUE}→ Current distribution tags:${RESET}"
         npm dist-tag ls terminal-jarvis
+        
+        # Update documentation with tag information
+        echo -e "${BLUE}→ Updating README with installation tags...${RESET}"
+        
+        # Create installation section text based on available tags
+        if [[ $add_stable =~ ^[Yy]$ ]]; then
+            # Both beta and stable available
+            INSTALL_SECTION="## Installation
+
+Terminal Jarvis is available through multiple release channels:
+
+\`\`\`bash
+# Stable release (recommended for production)
+npm install -g terminal-jarvis@stable
+
+# Beta release (latest features, may be unstable)  
+npm install -g terminal-jarvis@beta
+
+# Specific version
+npm install -g terminal-jarvis@${NEW_VERSION}
+
+# Latest published version (same as @${NEW_VERSION})
+npm install -g terminal-jarvis
+\`\`\`"
+        else
+            # Only beta available
+            INSTALL_SECTION="## Installation
+
+Terminal Jarvis is available through NPM:
+
+\`\`\`bash
+# Beta release (latest version with newest features)
+npm install -g terminal-jarvis@beta
+
+# Specific version
+npm install -g terminal-jarvis@${NEW_VERSION}
+
+# Latest published version (same as @${NEW_VERSION})
+npm install -g terminal-jarvis
+\`\`\`
+
+> **Note:** This version is tagged as beta. Stable releases will be available soon."
+        fi
+        
+        # Also update the welcome message in the TypeScript file to show tag info
+        if [[ $add_stable =~ ^[Yy]$ ]]; then
+            sed -i "s/console.log('Terminal Jarvis v.*/console.log('Terminal Jarvis v$NEW_VERSION (stable + beta)');/" npm/terminal-jarvis/src/index.ts
+            WELCOME_TAG_INFO="stable + beta"
+        else
+            sed -i "s/console.log('Terminal Jarvis v.*/console.log('Terminal Jarvis v$NEW_VERSION (beta)');/" npm/terminal-jarvis/src/index.ts
+            WELCOME_TAG_INFO="beta"
+        fi
+        
+        # Rebuild NPM package with updated version info
+        echo -e "${BLUE}→ Rebuilding NPM package with updated tag info...${RESET}"
+        cd npm/terminal-jarvis && npm run build && cd ../..
+        
+        echo -e "${GREEN}✅ Documentation updated with tag information${RESET}"
         
     else
         echo -e "${YELLOW}⏭️  Skipped NPM publish${RESET}"

@@ -1,5 +1,6 @@
 use anyhow::Result;
 use std::collections::HashMap;
+use std::io::Write;
 use std::process::Command;
 
 #[derive(Clone, Debug)]
@@ -160,6 +161,7 @@ impl ToolManager {
         // Clear any remaining progress indicators and ensure clean terminal state
         print!("\x1b[2K\r"); // Clear current line
         print!("\x1b[?25h"); // Show cursor
+        std::io::stdout().flush().unwrap_or_default();
 
         let mut cmd = Command::new(cli_command);
 
@@ -178,7 +180,12 @@ impl ToolManager {
             cmd.args(args);
         }
 
-        // For interactive tools, we want to inherit stdio so user can interact
+        // For interactive tools, we MUST inherit all stdio streams
+        // This is critical for tools like claude-code that use Ink/React components
+        cmd.stdin(std::process::Stdio::inherit())
+            .stdout(std::process::Stdio::inherit())
+            .stderr(std::process::Stdio::inherit());
+
         let status = cmd
             .status()
             .map_err(|e| anyhow::anyhow!("Failed to execute {}: {}", cli_command, e))?;
