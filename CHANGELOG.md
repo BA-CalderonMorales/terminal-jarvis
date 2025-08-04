@@ -5,6 +5,19 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.0.23] - 2025-08-03
+
+### Added
+- **NPM Distribution Tags**: Added support for stable and beta release channels
+- New installation options: `npm install -g terminal-jarvis@stable` and `npm install -g terminal-jarvis@beta`
+- Enhanced README with stable/beta badges and installation channel explanations
+- Interactive dist-tag prompts in local CI/CD script for optional tagging
+
+### Enhanced
+- **Release Process**: Improved local-cicd.sh with interactive npm dist-tag management
+- **Documentation**: Updated copilot instructions with comprehensive npm dist-tags guidance
+- **User Experience**: Clear visual indicators for different release channels
+
 ## [0.0.19] - 2025-08-03
 
 ### Fixed

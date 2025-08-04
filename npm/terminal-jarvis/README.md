@@ -37,7 +37,7 @@ cargo install --git https://github.com/BA-CalderonMorales/terminal-jarvis
 - **Stable** (`terminal-jarvis@stable`): Production-ready, thoroughly tested releases
 - **Beta** (`terminal-jarvis@beta`): Preview versions with experimental features
 
-> **Note**: The current NPM version (0.0.21) includes full binary functionality with the complete T.JARVIS interface. No additional installation required!
+> **Note**: The current NPM version (0.0.23) includes full binary functionality with the complete T.JARVIS interface. No additional installation required!
 
 ## Features
 
