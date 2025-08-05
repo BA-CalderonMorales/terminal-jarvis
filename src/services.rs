@@ -100,6 +100,10 @@ impl PackageService {
                     self.install_npm_package("@githubnext/github-copilot-cli")
                         .await
                 }
+                "claude-code" => self.install_npm_package("@anthropic-ai/claude-code").await,
+                "gemini-cli" => self.install_npm_package("@google/gemini-cli").await,
+                "qwen-code" => self.install_npm_package("@qwen-code/qwen-code").await,
+                "opencode" => self.install_npm_package("opencode-ai").await,
                 _ => Err(anyhow!("Unknown tool: {}", tool)),
             }
         }
@@ -154,11 +158,11 @@ impl PackageService {
                 }
                 "gemini-cli" => {
                     // Try different package names for Gemini
-                    match self.update_npm_package("@google/generative-ai-cli").await {
+                    match self.update_npm_package("@google/gemini-cli").await {
                         Ok(result) => Ok(result),
                         Err(_) => match self.update_npm_package("gemini-cli").await {
                             Ok(result) => Ok(result),
-                            Err(_) => self.update_npm_package("@google/gemini-cli").await,
+                            Err(_) => self.update_npm_package("@google/generative-ai-cli").await,
                         },
                     }
                 }

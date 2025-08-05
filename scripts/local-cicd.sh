@@ -26,6 +26,86 @@ echo -e "${CYAN}🚀 Terminal Jarvis Local CI/CD Pipeline${RESET}"
 echo -e "${BLUE}Current branch: ${CURRENT_BRANCH}${RESET}"
 echo ""
 
+# Step 0: CHANGELOG.md Check
+echo -e "${CYAN}📝 Step 0: CHANGELOG.md Verification${RESET}"
+
+# Get current version from Cargo.toml
+CURRENT_VERSION=$(grep '^version = ' Cargo.toml | sed 's/version = "\(.*\)"/\1/')
+echo -e "${BLUE}Current version in Cargo.toml: ${CURRENT_VERSION}${RESET}"
+
+# Check if CHANGELOG.md has entry for current version
+if ! grep -q "\[${CURRENT_VERSION}\]" CHANGELOG.md; then
+    echo -e "${YELLOW}⚠️  CHANGELOG.md does not contain an entry for version ${CURRENT_VERSION}${RESET}"
+    echo ""
+    echo -e "${BLUE}The CHANGELOG.md should be updated BEFORE running this CI/CD script.${RESET}"
+    echo -e "${BLUE}This ensures proper documentation of changes for the release.${RESET}"
+    echo ""
+    echo "What would you like to do?"
+    echo "1) Edit CHANGELOG.md now (opens in default editor)"
+    echo "2) I'll update it manually and re-run this script"
+    echo "3) Continue without CHANGELOG.md update (not recommended)"
+    echo "4) Exit and handle this later"
+    echo ""
+    
+    read -p "Enter your choice (1-4): " changelog_choice
+    
+    case $changelog_choice in
+        1)
+            echo -e "${BLUE}→ Opening CHANGELOG.md in editor...${RESET}"
+            echo ""
+            echo -e "${YELLOW}📋 Add an entry like this at the top (after the header):${RESET}"
+            echo ""
+            echo "## [${CURRENT_VERSION}] - $(date +%Y-%m-%d)"
+            echo ""
+            echo "### Added"
+            echo "- New feature descriptions"
+            echo ""
+            echo "### Fixed"
+            echo "- Bug fixes and improvements"
+            echo ""
+            echo "### Enhanced"
+            echo "- Improvements to existing features"
+            echo ""
+            echo -e "${BLUE}Press Enter to open the editor...${RESET}"
+            read -p ""
+            
+            # Open CHANGELOG.md in default editor
+            ${EDITOR:-nano} CHANGELOG.md
+            
+            # Check again if the entry was added
+            if grep -q "\[${CURRENT_VERSION}\]" CHANGELOG.md; then
+                echo -e "${GREEN}✅ CHANGELOG.md updated successfully!${RESET}"
+            else
+                echo -e "${RED}❌ No entry for version ${CURRENT_VERSION} found in CHANGELOG.md${RESET}"
+                echo -e "${YELLOW}Please add the entry and re-run this script.${RESET}"
+                exit 1
+            fi
+            ;;
+        2)
+            echo -e "${BLUE}📝 Please update CHANGELOG.md with changes for version ${CURRENT_VERSION}${RESET}"
+            echo -e "${YELLOW}Add an entry at the top following the existing format.${RESET}"
+            echo -e "${YELLOW}Then re-run this script: ./scripts/local-cicd.sh${RESET}"
+            exit 0
+            ;;
+        3)
+            echo -e "${YELLOW}⚠️  Continuing without CHANGELOG.md update${RESET}"
+            echo -e "${RED}This is not recommended for proper release documentation.${RESET}"
+            ;;
+        4)
+            echo -e "${BLUE}👋 Exiting. Update CHANGELOG.md and re-run when ready.${RESET}"
+            exit 0
+            ;;
+        *)
+            echo -e "${RED}❌ Invalid choice. Exiting.${RESET}"
+            exit 1
+            ;;
+    esac
+else
+    echo -e "${GREEN}✅ CHANGELOG.md contains entry for version ${CURRENT_VERSION}${RESET}"
+fi
+
+echo ""
+
 # Step 1: Run Quality Checks
 echo -e "${CYAN}📋 Step 1: Running Quality Checks${RESET}"
 echo -e "${BLUE}→ Running cargo fmt...${RESET}"
@@ -40,18 +120,28 @@ cargo test
 echo -e "${GREEN}✅ All quality checks passed!${RESET}"
 echo ""
 
-# Step 1.5: Core Functionality Tests
-echo -e "${CYAN}🧪 Step 1.5: Core Functionality Tests${RESET}"
-echo -e "${BLUE}Running comprehensive functionality validation...${RESET}"
+# Step 1.5: Comprehensive Test Suite (Core Functionality + NPM Package Validation)
+echo -e "${CYAN}🧪 Step 1.5: Comprehensive Test Suite${RESET}"
+echo -e "${BLUE}Running core functionality and NPM package validation...${RESET}"
+echo -e "${BLUE}This validates:${RESET}"
+echo -e "${BLUE}  • Core CLI functionality and commands${RESET}"
+echo -e "${BLUE}  • All 4 AI tools are properly configured${RESET}"
+echo -e "${BLUE}  • NPM packages exist and are installable${RESET}"
+echo -e "${BLUE}  • Configuration consistency across all files${RESET}"
+echo -e "${BLUE}  • Binary name mappings are correct${RESET}"
+echo ""
 
-# Run our dedicated test suite
-if ! ./scripts/test-core-functionality.sh; then
-    echo -e "${RED}❌ Core functionality tests failed!${RESET}"
+# Run our comprehensive smoke test which includes NPM package validation
+if ! ./scripts/smoke-test.sh; then
+    echo -e "${RED}❌ Comprehensive tests failed!${RESET}"
+    echo -e "${YELLOW}This includes core functionality and NPM package validation.${RESET}"
     echo -e "${YELLOW}Please fix the issues before proceeding with release.${RESET}"
     exit 1
 fi
 
-echo -e "${GREEN}🎉 All core functionality tests passed!${RESET}"
+echo -e "${GREEN}🎉 All comprehensive tests passed!${RESET}"
+echo -e "${BLUE}Core functionality works and all NPM packages are valid and installable.${RESET}"
+echo -e "${BLUE}This prevents the Claude/Gemini installation issues from happening again.${RESET}"
 echo ""
 
 # Step 2: Build Release Binary

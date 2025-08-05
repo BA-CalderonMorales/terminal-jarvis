@@ -44,8 +44,8 @@ impl Default for Config {
             ToolConfig {
                 enabled: true,
                 auto_update: true,
-                install_command: Some("npm install -g @anthropic-ai/claude-cli".to_string()),
-                update_command: Some("npm update -g @anthropic-ai/claude-cli".to_string()),
+                install_command: Some("npm install -g @anthropic-ai/claude-code".to_string()),
+                update_command: Some("npm update -g @anthropic-ai/claude-code".to_string()),
             },
         );
 
@@ -54,8 +54,8 @@ impl Default for Config {
             ToolConfig {
                 enabled: true,
                 auto_update: false,
-                install_command: Some("npm install -g @google/generative-ai-cli".to_string()),
-                update_command: Some("npm update -g @google/generative-ai-cli".to_string()),
+                install_command: Some("npm install -g @google/gemini-cli".to_string()),
+                update_command: Some("npm update -g @google/gemini-cli".to_string()),
             },
         );
 

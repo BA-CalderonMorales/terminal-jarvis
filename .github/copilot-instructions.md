@@ -97,10 +97,17 @@ When suggesting terminal commands or using the `run_in_terminal` tool:
 
 ## How To Release
 
+**Recommended: Use Local CI/CD Script (see "Local CD with Agent Mode" section below for details)**
+
+1. **FIRST: Update CHANGELOG.md** - Add entry for current version with clear change descriptions
+2. **THEN: Run automated script** - `./scripts/local-cicd.sh` (handles all steps below automatically)
+
+**Manual Release Process (if needed):**
+
 1. Update version numbers in both `Cargo.toml` and `npm/terminal-jarvis/package.json`
 2. Update version display in `npm/terminal-jarvis/src/index.ts`
 3. Update version display in `src/cli_logic.rs` (interactive mode version)
-4. Update CHANGELOG.md with new version and changes
+4. **Update CHANGELOG.md with new version and changes** (CRITICAL - must be done first)
 5. Update version references in README.md (root and NPM package will sync automatically)
 6. Run `npm run sync-readme` to sync the README
 7. Commit with clear message: `feat: add new feature X`
@@ -110,6 +117,8 @@ When suggesting terminal commands or using the `run_in_terminal` tool:
 11. **Add Distribution Tags** (optional - choose one or both):
     - For stable releases: `npm dist-tag add terminal-jarvis@X.X.X stable`
     - For beta releases: `npm dist-tag add terminal-jarvis@X.X.X beta`
+
+**Note: The local-cicd.sh script automates steps 1-11 and includes additional quality checks.**
 
 ## NPM Distribution Tags
 
@@ -178,41 +187,68 @@ npm dist-tag ls terminal-jarvis
 
 When conducting local continuous deployment with agents, **ALWAYS** follow this order:
 
-1. **Update All Version References:**
+### CRITICAL: Pre-CI/CD CHANGELOG.md Update
+
+**BEFORE running `./scripts/local-cicd.sh`**, the CHANGELOG.md MUST be updated:
+
+1. **Update CHANGELOG.md FIRST** - Add entry for current version with clear change descriptions
+2. **The local-cicd.sh script will check for this** - If missing, it will prompt you to:
+   - Edit CHANGELOG.md immediately (opens in editor)
+   - Update manually and re-run the script
+   - Continue without update (not recommended)
+   - Exit to handle later
+
+**CHANGELOG.md Entry Format:**
+```markdown
+## [X.X.X] - YYYY-MM-DD
+
+### Added
+- New feature descriptions
+
+### Fixed
+- Bug fixes and improvements  
+
+### Enhanced
+- Improvements to existing features
+```
+
+### Agent Workflow Process:
+
+1. **Update All Version References (if bumping version):**
    - `Cargo.toml` - version field
    - `npm/terminal-jarvis/package.json` - version field
    - `npm/terminal-jarvis/src/index.ts` - console.log version display
    - `src/cli_logic.rs` - interactive mode version display
-   - `CHANGELOG.md` - add new version entry with changes
+   - `CHANGELOG.md` - add new version entry with changes (**REQUIRED BEFORE SCRIPT**)
    - `README.md` - version reference in the note section
 
-2. **Build and Test:**
+2. **Run the Local CI/CD Script:**
    ```bash
-   cd npm/terminal-jarvis
-   npm run build
+   ./scripts/local-cicd.sh
    ```
+   - The script will verify CHANGELOG.md is updated
+   - If not updated, it will prompt for immediate action
+   - No manual build/test/commit commands needed
 
-3. **Commit and Push to GitHub FIRST:**
-   ```bash
-   git add .
-   git commit -m "version: bump to vX.X.X with description"
-   git tag vX.X.X
-   git push origin develop
-   git push origin vX.X.X
-   ```
+3. **Script Handles Everything Else:**
+   - Quality checks (clippy, fmt, tests)
+   - Core functionality validation
+   - Version bumping (if requested)
+   - Building and testing
+   - Git operations (commit, tag, push)
+   - NPM publishing and dist-tags
 
-4. **Then Publish to NPM Registry:**
-   ```bash
-   cd npm/terminal-jarvis
-   npm publish --access public
-   ```
+**Why CHANGELOG.md First Matters:**
+- Ensures proper documentation of changes before release
+- Prevents rushed or incomplete release notes
+- Maintains high quality project documentation
+- Script enforces this requirement automatically
+- No releases without proper change documentation
 
-**Why This Order Matters:**
-- GitHub serves as source of truth for version history
-- Git tags provide audit trail for releases
-- NPM registry reflects committed code, not uncommitted changes
-- Allows rollback if NPM publish fails
-- Ensures consistency between repository and published package
+**Agent Instructions:**
+- **ALWAYS ask the user to update CHANGELOG.md** before suggesting `./scripts/local-cicd.sh`
+- **NEVER run the CI/CD script** without confirming CHANGELOG.md is updated
+- **If user runs script without CHANGELOG.md update**, the script will catch this and prompt appropriately
 
 ## Testing NPM Package Before Publishing
 

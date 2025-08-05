@@ -18,7 +18,7 @@ impl InstallationManager {
             "claude",
             InstallCommand {
                 command: "npm",
-                args: vec!["install", "-g", "@anthropic-ai/claude-cli"],
+                args: vec!["install", "-g", "@anthropic-ai/claude-code"],
                 description: "Anthropic's Claude for code assistance",
                 requires_npm: true,
             },
@@ -28,7 +28,7 @@ impl InstallationManager {
             "gemini",
             InstallCommand {
                 command: "npm",
-                args: vec!["install", "-g", "@google/generative-ai-cli"],
+                args: vec!["install", "-g", "@google/gemini-cli"],
                 description: "Google's Gemini CLI tool",
                 requires_npm: true,
             },

@@ -5,6 +5,26 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.0.31] - 2025-08-05
+
+### Fixed
+- **Claude/Gemini Installation**: Fixed incorrect NPM package names causing installation failures
+  - Claude: `@anthropic-ai/claude-cli` → `@anthropic-ai/claude-code`
+  - Gemini: `@google/generative-ai-cli` → `@google/gemini-cli`
+- **Configuration Consistency**: Updated all configuration files to use correct package names
+- **Services Installation Logic**: Added missing installation cases for Claude and Gemini tools
+
+### Enhanced
+- **CI/CD Pipeline**: Added comprehensive NPM package validation to prevent future package name issues
+- **Test Suite**: Consolidated testing into single comprehensive script (`smoke-test.sh`)
+- **Package Validation**: Validates package existence, installability, and binary name consistency
+- **Configuration Validation**: Ensures consistency across installation_arguments.rs, config.rs, and example files
+
+### Added
+- **NPM Package Tests**: Automatic validation of all NPM packages before release
+- **Dry-run Installation Tests**: Validates packages can be installed without actually installing them
+- **Binary Name Verification**: Ensures NPM packages provide expected binary names (claude, gemini, etc.)
+
 ## [0.0.28] - 2025-01-26
 
 ### Fixed

@@ -1,6 +1,6 @@
 [tools]
-claude-code = { enabled = true, auto_update = true, install_command = "npm install -g @anthropic-ai/claude-cli", update_command = "npm update -g @anthropic-ai/claude-cli" }
-gemini-cli = { enabled = true, auto_update = false, install_command = "npm install -g @google/generative-ai-cli", update_command = "npm update -g @google/generative-ai-cli" }
+claude-code = { enabled = true, auto_update = true, install_command = "npm install -g @anthropic-ai/claude-code", update_command = "npm update -g @anthropic-ai/claude-code" }
+gemini-cli = { enabled = true, auto_update = false, install_command = "npm install -g @google/gemini-cli", update_command = "npm update -g @google/gemini-cli" }
 qwen-code = { enabled = true, auto_update = true, install_command = "npm install -g @qwen-code/qwen-code@latest", update_command = "npm update -g @qwen-code/qwen-code" }
 opencode = { enabled = true, auto_update = true, install_command = "npm install -g opencode-ai@latest", update_command = "npm update -g opencode-ai" }
 

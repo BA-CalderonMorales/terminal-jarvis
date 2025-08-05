@@ -62,7 +62,7 @@ Our test suite validates these essential behaviors:
 - ✅ Command structure remains stable
 
 ### 4. **Package Management**
-- ✅ NPM packages: `@anthropic-ai/claude-cli`, `@google/generative-ai-cli`, `@qwen-code/qwen-code@latest`, `opencode-ai@latest`
+- ✅ NPM packages: `@anthropic-ai/claude-code`, `@google/gemini-cli`, `@qwen-code/qwen-code@latest`, `opencode-ai@latest`
 - ✅ Concurrent updates work properly
 - ✅ Individual tool updates function correctly
 
