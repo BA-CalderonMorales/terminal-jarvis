@@ -5,6 +5,64 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.0.36] - 2025-08-06
+
+### Added
+
+- **Real-time NPM Distribution Tag Detection**: Dynamic display of all applicable NPM distribution tags
+  - Shows all matching tags (e.g., "v0.0.36 (@stable, beta, latest)") for complete transparency
+  - Smart progress indicators during NPM tag fetching with "🔍 Checking NPM distribution tags"
+  - Development builds show matching tags with "-dev" suffix to distinguish from published versions
+- **Enhanced Welcome Interface**: Integrated GitHub and NPM package links directly in T.JARVIS interface
+  - Direct GitHub link: https://github.com/BA-CalderonMorales/terminal-jarvis
+  - Direct NPM package link: https://www.npmjs.com/package/terminal-jarvis
+  - Professional integration within the futuristic ASCII art border design
+
+### Enhanced
+
+- **User Experience**: Comprehensive progress feedback for all network operations
+  - NPM tag detection shows clear progress and completion status
+  - Users always know when Terminal Jarvis is fetching external information
+- **Transparency**: Complete visibility into distribution channel status
+  - No more confusion about which NPM tag a user is running
+  - Clear distinction between development builds and published versions
+- **Debugging Support**: Easy access to source code and package information for troubleshooting
+
+### Fixed
+
+- **NPM Tag Display Logic**: Resolved edge cases where multiple tags point to the same version
+  - Previously showed only prioritized tag, now shows all applicable tags
+  - Eliminates user confusion when installing via specific tags (e.g., @beta)
+
+## [0.0.35] - 2025-08-06
+
+### Added
+
+- **NPM Distribution Tag Detection**: Dynamic detection and display of NPM distribution tags (@stable, @beta, @latest)
+  - Smart tag prioritization: stable > beta > latest when multiple tags point to same version
+  - Development builds show all matching tags with "-dev" suffix for transparency
+  - Real-time NPM tag fetching with progress indicators
+- **Enhanced Welcome Interface**: Added GitHub and NPM package links for easy debugging
+  - Direct links to source code: https://github.com/BA-CalderonMorales/terminal-jarvis
+  - Direct links to NPM package: https://www.npmjs.com/package/terminal-jarvis
+  - Professional integration within the futuristic ASCII art interface
+
+### Enhanced
+
+- **User Experience**: Progress indicators for all network operations (NPM tag detection, tool status loading)
+- **Transparency**: Users can now see exactly which distribution channel they're running
+- **Documentation**: Updated README.md with limitations, installation guides, and architecture docs
+  - Created docs/LIMITATIONS.md for known issues and workarounds
+  - Created docs/INSTALLATION.md for platform-specific setup instructions
+  - Created docs/ARCHITECTURE.md for technical implementation details
+- **Version Display**: Complete version information including distribution channel visibility
+
+### Fixed
+
+- **Authentication Documentation**: Documented known Gemini and Qwen login issues with workarounds
+- **macOS Prerequisites**: Clear documentation that Rust toolchain is required on macOS
+- **Tool Status Indicators**: Enhanced tool testing status for Opencode and LLxprt
+
 ## [0.0.34] - 2025-08-05
 
 ### Fixed

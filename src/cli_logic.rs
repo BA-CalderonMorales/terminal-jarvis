@@ -390,8 +390,22 @@ pub async fn handle_interactive_mode() -> Result<()> {
 
         println!("{border_padding}{empty_border}");
 
-        // Version and tagline in futuristic style
-        let version_text = format!("v{}", env!("CARGO_PKG_VERSION"));
+        // Version and tagline in futuristic style - with NPM distribution tag if available
+        let base_version = env!("CARGO_PKG_VERSION");
+
+        // Show progress for NPM tag detection
+        let npm_progress = ProgressContext::new("🔍 Checking NPM distribution tags");
+        let npm_tag = PackageService::get_npm_dist_tag_info()
+            .await
+            .unwrap_or(None);
+        npm_progress.finish_success("NPM tag info loaded");
+
+        let version_text = if let Some(tag) = npm_tag {
+            format!("v{base_version} (@{tag})")
+        } else {
+            format!("v{base_version}")
+        };
+
         if version_text.len() <= inner_width {
             let version_content_padding = (inner_width - version_text.len()) / 2;
             let version_left_padding = " ".repeat(version_content_padding);
@@ -411,6 +425,30 @@ pub async fn handle_interactive_mode() -> Result<()> {
                 " ".repeat(inner_width - tagline_content_padding - tagline_display_len);
             println!(
                 "{border_padding}{dim_cyan}║ {tagline_left_padding}{neon_white}{tagline}{tagline_right_padding} ║{reset}"
+            );
+        }
+
+        println!("{border_padding}{empty_border}");
+
+        // Add GitHub and NPM links
+        let github_link = "GitHub: https://github.com/BA-CalderonMorales/terminal-jarvis";
+        if github_link.len() <= inner_width {
+            let github_content_padding = (inner_width - github_link.len()) / 2;
+            let github_left_padding = " ".repeat(github_content_padding);
+            let github_right_padding =
+                " ".repeat(inner_width - github_content_padding - github_link.len());
+            println!(
+                "{border_padding}{dim_cyan}║ {github_left_padding}{dim_cyan}{github_link}{github_right_padding} ║{reset}"
+            );
+        }
+
+        let npm_link = "NPM: https://www.npmjs.com/package/terminal-jarvis";
+        if npm_link.len() <= inner_width {
+            let npm_content_padding = (inner_width - npm_link.len()) / 2;
+            let npm_left_padding = " ".repeat(npm_content_padding);
+            let npm_right_padding = " ".repeat(inner_width - npm_content_padding - npm_link.len());
+            println!(
+                "{border_padding}{dim_cyan}║ {npm_left_padding}{dim_cyan}{npm_link}{npm_right_padding} ║{reset}"
             );
         }
 

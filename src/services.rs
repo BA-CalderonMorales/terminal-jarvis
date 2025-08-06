@@ -228,6 +228,141 @@ impl PackageService {
         Ok(version.trim().to_string())
     }
 
+    /// Get NPM distribution tag information for terminal-jarvis
+    pub async fn get_npm_dist_tag_info() -> Result<Option<String>> {
+        // First check if npm is available
+        let npm_available = AsyncCommand::new("npm").args(["--version"]).output().await;
+
+        if npm_available.is_err() {
+            // NPM not available, return None
+            return Ok(None);
+        }
+
+        // Check if we're running from an NPM installation by looking for global install
+        let npm_check = AsyncCommand::new("npm")
+            .args(["list", "-g", "terminal-jarvis", "--depth=0"])
+            .output()
+            .await;
+
+        if let Ok(output) = npm_check {
+            if output.status.success() {
+                // We're installed via NPM, get the actual installed version and tag
+                let installed_output = String::from_utf8(output.stdout).unwrap_or_default();
+
+                // Extract version number from output
+                if let Some(at_pos) = installed_output.rfind('@') {
+                    let current_version = installed_output[at_pos + 1..].trim();
+
+                    // Get distribution tags for terminal-jarvis
+                    let tags_output = AsyncCommand::new("npm")
+                        .args(["dist-tag", "ls", "terminal-jarvis"])
+                        .output()
+                        .await;
+
+                    if let Ok(tags_result) = tags_output {
+                        if tags_result.status.success() {
+                            let tags_str =
+                                String::from_utf8(tags_result.stdout).unwrap_or_default();
+
+                            // Collect all tags that match our version
+                            let mut matching_tags = Vec::new();
+
+                            for line in tags_str.lines() {
+                                if let Some((tag, version)) = line.split_once(':') {
+                                    let tag = tag.trim();
+                                    let version = version.trim();
+
+                                    if version == current_version {
+                                        matching_tags.push(tag);
+                                    }
+                                }
+                            }
+
+                            // Return all matching tags as a comma-separated string
+                            if !matching_tags.is_empty() {
+                                // Sort tags for consistent display: stable, beta, latest, others
+                                matching_tags.sort_by(|a, b| {
+                                    let order_a = match *a {
+                                        "stable" => 0,
+                                        "beta" => 1,
+                                        "latest" => 2,
+                                        _ => 3,
+                                    };
+                                    let order_b = match *b {
+                                        "stable" => 0,
+                                        "beta" => 1,
+                                        "latest" => 2,
+                                        _ => 3,
+                                    };
+                                    order_a.cmp(&order_b)
+                                });
+
+                                return Ok(Some(matching_tags.join(", ")));
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        // Not installed via NPM or couldn't determine tag, but for development purposes,
+        // let's show if this is a development version by comparing with published tags
+        let current_version = env!("CARGO_PKG_VERSION");
+
+        let tags_output = AsyncCommand::new("npm")
+            .args(["dist-tag", "ls", "terminal-jarvis"])
+            .output()
+            .await;
+
+        if let Ok(output) = tags_output {
+            if output.status.success() {
+                let tags_str = String::from_utf8(output.stdout).unwrap_or_default();
+
+                // Collect all tags that match our version
+                let mut matching_tags = Vec::new();
+
+                for line in tags_str.lines() {
+                    if let Some((tag, version)) = line.split_once(':') {
+                        let version = version.trim();
+                        let tag = tag.trim();
+
+                        if version == current_version {
+                            matching_tags.push(tag);
+                        }
+                    }
+                }
+
+                // For development, show all matching tags with "-dev" suffix
+                if !matching_tags.is_empty() {
+                    // Sort tags for consistent display: stable, beta, latest, others
+                    matching_tags.sort_by(|a, b| {
+                        let order_a = match *a {
+                            "stable" => 0,
+                            "beta" => 1,
+                            "latest" => 2,
+                            _ => 3,
+                        };
+                        let order_b = match *b {
+                            "stable" => 0,
+                            "beta" => 1,
+                            "latest" => 2,
+                            _ => 3,
+                        };
+                        order_a.cmp(&order_b)
+                    });
+
+                    let tags_string = matching_tags.join(", ");
+                    return Ok(Some(format!("{tags_string}-dev")));
+                }
+
+                // Current version doesn't match any published version
+                return Ok(Some("dev".to_string()));
+            }
+        }
+
+        Ok(None)
+    }
+
     /// Execute a shell command
     async fn execute_command(&self, command: &str) -> Result<()> {
         let mut parts = command.split_whitespace();
