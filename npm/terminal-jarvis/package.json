@@ -1,6 +1,6 @@
 {
   "name": "terminal-jarvis",
-  "version": "0.0.33",
+  "version": "0.0.35",
   "description": "A thin Rust wrapper that provides a unified interface for managing and running AI coding tools",
   "bin": {
     "terminal-jarvis": "bin/terminal-jarvis"
@@ -26,7 +26,7 @@
     "build": "npm run sync-readme && npm run copy-binary && npx tsc",
     "prepublishOnly": "npm run build",
     "dev": "npm run build && node lib/index.js",
-    "postinstall": "node -e \"console.log('\\n🤖 Terminal Jarvis v0.0.23 installed successfully!\\n\\n✅ Full T.JARVIS interface ready to use!\\n\\nRun: npx terminal-jarvis\\n')\""
+    "postinstall": "node -e \"console.log('\\n🤖 Terminal Jarvis v0.0.34 installed successfully!\\n\\n✅ Full T.JARVIS interface ready to use!\\n\\nRun: npx terminal-jarvis\\n')\""
   },
   "keywords": [
     "cli",
@@ -36,7 +36,8 @@
     "claude",
     "gemini",
     "qwen",
-    "opencode"
+    "opencode",
+    "llxprt"
   ],
   "author": "BA-CalderonMorales",
   "license": "MIT",

@@ -4,8 +4,10 @@ This document outlines our comprehensive testing approach to ensure core functio
 
 ## Testing Scripts
 
-### 1. `scripts/smoke-test.sh` 
+### 1. `scripts/smoke-test.sh`
+
 **Quick validation** - Runs in ~5 seconds
+
 - Basic CLI functionality
 - Tool listing
 - Configuration loading (5 tools present)
@@ -16,7 +18,9 @@ This document outlines our comprehensive testing approach to ensure core functio
 ```
 
 ### 2. `scripts/test-core-functionality.sh`
+
 **Comprehensive testing** - Runs in ~15-30 seconds
+
 - All smoke test validations
 - Command structure validation (update, install, run, info, templates)
 - Error handling verification
@@ -29,7 +33,9 @@ This document outlines our comprehensive testing approach to ensure core functio
 ```
 
 ### 3. `scripts/local-cicd.sh`
+
 **Full CI/CD pipeline** with integrated testing
+
 - Quality checks (fmt, clippy, tests)
 - Core functionality validation (calls test-core-functionality.sh)
 - Build and packaging
@@ -45,23 +51,27 @@ This document outlines our comprehensive testing approach to ensure core functio
 Our test suite validates these essential behaviors:
 
 ### 1. **Tool Management**
+
 - ✅ All 5 AI tools are available: claude, gemini, qwen, opencode, llxprt
 - ✅ All tools use consistent NPM package installation
 - ✅ Tool listing shows proper status and requirements
 - ✅ Install/update commands work for each tool
 
 ### 2. **Configuration System**
+
 - ✅ Default configuration loads properly
 - ✅ All tools have NPM install/update commands
 - ✅ Example configuration file is maintained
 - ✅ Version consistency across Cargo.toml and package.json
 
 ### 3. **CLI Interface**
+
 - ✅ Help commands work for all subcommands
 - ✅ Error handling for invalid inputs
 - ✅ Command structure remains stable
 
 ### 4. **Package Management**
+
 - ✅ NPM packages: `@anthropic-ai/claude-code`, `@google/gemini-cli`, `@qwen-code/qwen-code@latest`, `opencode-ai@latest`, `@vybestack/llxprt-code`
 - ✅ Concurrent updates work properly
 - ✅ Individual tool updates function correctly
@@ -69,18 +79,21 @@ Our test suite validates these essential behaviors:
 ## Integration with Development Workflow
 
 ### Pre-commit Testing
+
 ```bash
 # Quick validation before commits
 ./scripts/smoke-test.sh
 ```
 
-### Pre-release Testing  
+### Pre-release Testing
+
 ```bash
 # Comprehensive validation before releases
 ./scripts/test-core-functionality.sh
 ```
 
 ### Full Release Pipeline
+
 ```bash
 # Complete CI/CD with testing
 ./scripts/local-cicd.sh
@@ -115,6 +128,7 @@ This ensures that new features are protected against future regressions.
 - **Maintainable**: Tests are documented and easy to extend
 
 This testing strategy allows developers to:
+
 - Code freely without fear of breaking existing functionality
 - Get immediate feedback on core behavior
 - Ensure consistent package management across all tools
