@@ -8,6 +8,10 @@
 
 A unified command center for AI coding tools. Manage and run claude-code, gemini-cli, qwen-code, opencode, and llxprt from one beautiful terminal interface.
 
+<img src="screenshots/promo_image_for_readme.png" alt="Terminal Jarvis Interface" width="100%">
+
+----
+
 🎉 **Try it instantly:** `npx terminal-jarvis`
 
 ⚠️ **Known Issues**: [View current limitations and workarounds](docs/LIMITATIONS.md)

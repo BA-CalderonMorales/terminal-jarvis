@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.0.37] - 2025-08-06
+
+### Enhanced
+- **README Visual Improvements**: Added promo image at 50% width for better visual presentation
+- **Documentation Alignment**: Fixed terminal header alignment in text documentation files
+
 ## [0.0.36] - 2025-08-06
 
 ### Added
