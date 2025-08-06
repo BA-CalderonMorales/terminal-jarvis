@@ -8,7 +8,7 @@ This document outlines our comprehensive testing approach to ensure core functio
 **Quick validation** - Runs in ~5 seconds
 - Basic CLI functionality
 - Tool listing
-- Configuration loading (4 tools present)
+- Configuration loading (5 tools present)
 - NPM package consistency
 
 ```bash
@@ -45,7 +45,7 @@ This document outlines our comprehensive testing approach to ensure core functio
 Our test suite validates these essential behaviors:
 
 ### 1. **Tool Management**
-- ✅ All 4 AI tools are available: claude, gemini, qwen, opencode
+- ✅ All 5 AI tools are available: claude, gemini, qwen, opencode, llxprt
 - ✅ All tools use consistent NPM package installation
 - ✅ Tool listing shows proper status and requirements
 - ✅ Install/update commands work for each tool
@@ -62,7 +62,7 @@ Our test suite validates these essential behaviors:
 - ✅ Command structure remains stable
 
 ### 4. **Package Management**
-- ✅ NPM packages: `@anthropic-ai/claude-code`, `@google/gemini-cli`, `@qwen-code/qwen-code@latest`, `opencode-ai@latest`
+- ✅ NPM packages: `@anthropic-ai/claude-code`, `@google/gemini-cli`, `@qwen-code/qwen-code@latest`, `opencode-ai@latest`, `@vybestack/llxprt-code`
 - ✅ Concurrent updates work properly
 - ✅ Individual tool updates function correctly
 

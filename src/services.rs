@@ -27,6 +27,7 @@ impl PackageService {
         mapping.insert("gemini", "gemini-cli");
         mapping.insert("qwen", "qwen-code");
         mapping.insert("opencode", "opencode");
+        mapping.insert("llxprt", "llxprt-code");
         mapping
     }
 
@@ -104,6 +105,7 @@ impl PackageService {
                 "gemini-cli" => self.install_npm_package("@google/gemini-cli").await,
                 "qwen-code" => self.install_npm_package("@qwen-code/qwen-code").await,
                 "opencode" => self.install_npm_package("opencode-ai").await,
+                "llxprt-code" => self.install_npm_package("@vybestack/llxprt-code").await,
                 _ => Err(anyhow!("Unknown tool: {}", tool)),
             }
         }
@@ -184,6 +186,13 @@ impl PackageService {
                             Ok(result) => Ok(result),
                             Err(_) => self.update_npm_package("@opencode/cli").await,
                         },
+                    }
+                }
+                "llxprt-code" => {
+                    // Try @vybestack/llxprt-code package
+                    match self.update_npm_package("@vybestack/llxprt-code").await {
+                        Ok(result) => Ok(result),
+                        Err(_) => self.update_npm_package("llxprt-code").await,
                     }
                 }
                 _ => Err(anyhow!("Unknown tool: {}", tool)),

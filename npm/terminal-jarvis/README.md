@@ -47,11 +47,12 @@ Terminal Jarvis serves as your AI coding assistant command center, providing:
 - **🚀 One-Click Tool Management**: Install, update, and run AI coding tools seamlessly
 - **📦 Smart Installation Detection**: Automatically detects installed tools and their status
 - **⚡ Quick Launch Mode**: Run tools directly from the interactive interface
-- **🔧 Built-in Tool Support**: 
+- **🔧 Built-in Tool Support**:
   - `claude` - Anthropic's Claude for code assistance
   - `gemini` - Google's Gemini CLI tool
-  - `qwen` - Qwen coding assistant  
+  - `qwen` - Qwen coding assistant
   - `opencode` - OpenCode AI coding agent built for the terminal
+  - `llxprt` - LLxprt Code multi-provider AI coding assistant with enhanced features
 - **🎯 Intelligent NPM Validation**: Warns about missing dependencies and provides installation guidance
 - **📱 Responsive Design**: Adapts to your terminal width for optimal display
 - **🔄 Background Process Support**: Handles long-running tools appropriately
@@ -97,10 +98,12 @@ terminal-jarvis run claude --prompt "Refactor this function"
 terminal-jarvis run gemini --file src/main.rs
 terminal-jarvis run qwen --analyze
 terminal-jarvis run opencode --generate
+terminal-jarvis run llxprt --help
 
 # Install specific tools
 terminal-jarvis install claude
 terminal-jarvis install gemini
+terminal-jarvis install llxprt
 
 # Update packages
 terminal-jarvis update                    # Update all packages
@@ -146,7 +149,7 @@ The project follows a modular architecture designed for maintainability and exte
 ```
 src/
 ├── main.rs               # Entry point - minimal code, delegates to CLI
-├── cli.rs                # Clean, expressive CLI interface definitions  
+├── cli.rs                # Clean, expressive CLI interface definitions
 ├── cli_logic.rs          # Business logic with interactive T.JARVIS interface
 ├── tools.rs              # Tool management and detection logic
 ├── installation_arguments.rs # Installation commands and NPM validation
@@ -172,12 +175,12 @@ The interactive mode provides a complete T.JARVIS experience with real-time tool
 
 ## Supported Tools
 
-| Tool | Description | NPM Package | Status |
-|------|-------------|-------------|--------|
-| `claude` | Anthropic's Claude for code assistance | `@anthropic-ai/claude-code` | ✅ Supported |
-| `gemini` | Google's Gemini CLI tool | `@google/gemini-cli` | ✅ Supported |
-| `qwen` | Qwen coding assistant | `@qwen-code/qwen-code` | ✅ Supported |
-| `opencode` | OpenCode AI coding agent built for the terminal | Install script | ✅ Supported |
+| Tool       | Description                                     | NPM Package                 | Status       |
+| ---------- | ----------------------------------------------- | --------------------------- | ------------ |
+| `claude`   | Anthropic's Claude for code assistance          | `@anthropic-ai/claude-code` | ✅ Supported |
+| `gemini`   | Google's Gemini CLI tool                        | `@google/gemini-cli`        | ✅ Supported |
+| `qwen`     | Qwen coding assistant                           | `@qwen-code/qwen-code`      | ✅ Supported |
+| `opencode` | OpenCode AI coding agent built for the terminal | Install script              | ✅ Supported |
 
 ## Adding New Tools
 
@@ -240,6 +243,7 @@ auto_sync = true
 The NPM package includes pre-compiled Rust binaries for immediate functionality without requiring a Rust toolchain. This ensures you get the complete T.JARVIS experience out-of-the-box with `npx terminal-jarvis`.
 
 **What's Included:**
+
 - Full interactive T.JARVIS interface
 - Pre-compiled binary for your platform
 - Zero additional dependencies

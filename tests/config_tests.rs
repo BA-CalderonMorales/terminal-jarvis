@@ -9,6 +9,7 @@ fn test_default_config() {
     assert!(config.get_tool_config("gemini-cli").is_some());
     assert!(config.get_tool_config("qwen-code").is_some());
     assert!(config.get_tool_config("opencode").is_some());
+    assert!(config.get_tool_config("llxprt-code").is_some());
 
     // Test that claude-code is enabled by default
     assert!(config.is_tool_enabled("claude-code"));

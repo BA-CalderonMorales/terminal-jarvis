@@ -53,11 +53,11 @@ run_test "CLI help command works" \
 run_test "Tool listing functionality" \
     "$BINARY list > /dev/null 2>&1"
 
-run_test "All 4 tools loaded from configuration" \
-    'TOOL_COUNT=$('$BINARY' list 2>/dev/null | grep -E "^  (claude|gemini|qwen|opencode)" | wc -l); [ "$TOOL_COUNT" -eq 4 ]'
+run_test "All 5 tools loaded from configuration" \
+    'TOOL_COUNT=$('$BINARY' list 2>/dev/null | grep -E "^  (claude|gemini|qwen|opencode|llxprt)" | wc -l); [ "$TOOL_COUNT" -eq 5 ]'
 
 run_test "All tools use NPM packages consistently" \
-    'NPM_TOOLS=$('$BINARY' list 2>/dev/null | grep -c "Requires: NPM"); [ "$NPM_TOOLS" -eq 4 ]'
+    'NPM_TOOLS=$('$BINARY' list 2>/dev/null | grep -c "Requires: NPM"); [ "$NPM_TOOLS" -eq 5 ]'
 
 run_test "Update command help" \
     "$BINARY update --help > /dev/null 2>&1"
@@ -74,11 +74,11 @@ run_test "Error handling for nonexistent tool" \
 run_test "Version consistency (Cargo.toml vs NPM package.json)" \
     'CARGO_VERSION=$(grep "^version = " Cargo.toml | sed "s/version = \"\(.*\)\"/\1/"); NPM_VERSION=$(grep "\"version\":" npm/terminal-jarvis/package.json | sed "s/.*\"version\": \"\(.*\)\".*/\1/"); [ "$CARGO_VERSION" = "$NPM_VERSION" ]'
 
-run_test "Example configuration file has all 4 tools" \
-    'CONFIG_TOOLS=$(grep -E "(claude-code|gemini-cli|qwen-code|opencode)" terminal-jarvis.toml.example | wc -l); [ "$CONFIG_TOOLS" -eq 4 ]'
+run_test "Example configuration file has all 5 tools" \
+    'CONFIG_TOOLS=$(grep -E "(claude-code|gemini-cli|qwen-code|opencode|llxprt-code)" terminal-jarvis.toml.example | wc -l); [ "$CONFIG_TOOLS" -eq 5 ]'
 
 run_test "Example config uses NPM for all installs" \
-    'NPM_INSTALL_COMMANDS=$(grep -c "npm install" terminal-jarvis.toml.example); [ "$NPM_INSTALL_COMMANDS" -eq 4 ]'
+    'NPM_INSTALL_COMMANDS=$(grep -c "npm install" terminal-jarvis.toml.example); [ "$NPM_INSTALL_COMMANDS" -eq 5 ]'
 
 echo ""
 
@@ -98,8 +98,9 @@ else
     GEMINI_PACKAGE=$(grep -A5 'gemini",' src/installation_arguments.rs | grep 'args: vec!' | sed 's/.*"\([^"]*\)".*/\1/' | tail -1)
     QWEN_PACKAGE=$(grep -A5 'qwen",' src/installation_arguments.rs | grep 'args: vec!' | sed 's/.*"\([^"]*\)".*/\1/' | tail -1)
     OPENCODE_PACKAGE=$(grep -A5 'opencode",' src/installation_arguments.rs | grep 'args: vec!' | sed 's/.*"\([^"]*\)".*/\1/' | tail -1)
+    LLXPRT_PACKAGE=$(grep -A5 'llxprt",' src/installation_arguments.rs | grep 'args: vec!' | sed 's/.*"\([^"]*\)".*/\1/' | tail -1)
     
-    echo -e "${BLUE}Validating packages: $CLAUDE_PACKAGE, $GEMINI_PACKAGE, $QWEN_PACKAGE, $OPENCODE_PACKAGE${RESET}"
+    echo -e "${BLUE}Validating packages: $CLAUDE_PACKAGE, $GEMINI_PACKAGE, $QWEN_PACKAGE, $OPENCODE_PACKAGE, $LLXPRT_PACKAGE${RESET}"
     echo ""
     
     run_test "Claude package exists in NPM registry" \
@@ -114,21 +115,31 @@ else
     run_test "OpenCode package exists in NPM registry" \
         "npm view $OPENCODE_PACKAGE version > /dev/null 2>&1"
     
+    run_test "LLxprt package exists in NPM registry" \
+        "npm view $LLXPRT_PACKAGE version > /dev/null 2>&1"
+    
     run_test "Claude package provides 'claude' binary" \
         "npm view $CLAUDE_PACKAGE bin | grep -q 'claude'"
     
     run_test "Gemini package provides 'gemini' binary" \
         "npm view $GEMINI_PACKAGE bin | grep -q 'gemini'"
     
+    run_test "LLxprt package provides 'llxprt' binary" \
+        "npm view $LLXPRT_PACKAGE bin | grep -q 'llxprt'"
+    
     # Validate configuration consistency across files
     CONFIG_CLAUDE=$(grep -A2 'claude-code' src/config.rs | grep 'install_command' | sed 's/.*npm install -g \([^ "]*\).*/\1/')
     CONFIG_GEMINI=$(grep -A2 'gemini-cli' src/config.rs | grep 'install_command' | sed 's/.*npm install -g \([^ "]*\).*/\1/')
+    CONFIG_LLXPRT=$(grep -A2 'llxprt-code' src/config.rs | grep 'install_command' | sed 's/.*npm install -g \([^ "]*\).*/\1/')
     
     run_test "Claude package consistent between installation_arguments.rs and config.rs" \
         "[ '$CLAUDE_PACKAGE' = '$CONFIG_CLAUDE' ]"
     
     run_test "Gemini package consistent between installation_arguments.rs and config.rs" \
         "[ '$GEMINI_PACKAGE' = '$CONFIG_GEMINI' ]"
+    
+    run_test "LLxprt package consistent between installation_arguments.rs and config.rs" \
+        "[ '$LLXPRT_PACKAGE' = '$CONFIG_LLXPRT' ]"
     
     # Validate package installation compatibility (dry run)
     run_test "Claude package can be installed (dry run)" \
@@ -143,14 +154,22 @@ else
     run_test "OpenCode package can be installed (dry run)" \
         "npm install -g $OPENCODE_PACKAGE --dry-run > /dev/null 2>&1"
     
+    run_test "LLxprt package can be installed (dry run)" \
+        "npm install -g $LLXPRT_PACKAGE --dry-run > /dev/null 2>&1"
+    
     # Validate services.rs update logic has correct package names
     SERVICES_CLAUDE_PRIMARY=$(grep -A10 'claude-code.*=>' src/services.rs | grep 'update_npm_package' | head -1 | sed 's/.*update_npm_package("\([^"]*\)").*/\1/')
     SERVICES_GEMINI_PRIMARY=$(grep -A10 'gemini-cli.*=>' src/services.rs | grep 'update_npm_package' | head -1 | sed 's/.*update_npm_package("\([^"]*\)").*/\1/')
+    SERVICES_LLXPRT_PRIMARY=$(grep -A10 'llxprt-code.*=>' src/services.rs | grep 'update_npm_package' | head -1 | sed 's/.*update_npm_package("\([^"]*\)").*/\1/')
     
     run_test "Claude update logic uses correct primary package" \
         "[ '$CLAUDE_PACKAGE' = '$SERVICES_CLAUDE_PRIMARY' ]"
     
     run_test "Gemini update logic uses correct primary package" \
+        "[ '$GEMINI_PACKAGE' = '$SERVICES_GEMINI_PRIMARY' ]"
+    
+    run_test "LLxprt update logic uses correct primary package" \
+        "[ '$LLXPRT_PACKAGE' = '$SERVICES_LLXPRT_PRIMARY' ]" \
         "[ '$GEMINI_PACKAGE' = '$SERVICES_GEMINI_PRIMARY' ]"
     
     # Validate documentation consistency
@@ -159,6 +178,9 @@ else
     
     run_test "TESTING.md uses correct Gemini package name" \
         "grep -q '$GEMINI_PACKAGE' docs/TESTING.md"
+    
+    run_test "TESTING.md uses correct LLxprt package name" \
+        "grep -q '$LLXPRT_PACKAGE' docs/TESTING.md"
 fi
 
 echo ""

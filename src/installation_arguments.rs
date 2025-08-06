@@ -54,6 +54,17 @@ impl InstallationManager {
             },
         );
 
+        commands.insert(
+            "llxprt",
+            InstallCommand {
+                command: "npm",
+                args: vec!["install", "-g", "@vybestack/llxprt-code"],
+                description:
+                    "LLxprt Code - Multi-provider AI coding assistant with enhanced features",
+                requires_npm: true,
+            },
+        );
+
         commands
     }
 

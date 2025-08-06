@@ -27,6 +27,7 @@ impl ToolManager {
         mapping.insert("gemini", "gemini"); // Assuming gemini-cli installs as 'gemini'
         mapping.insert("qwen", "qwen"); // Assuming qwen-code installs as 'qwen'
         mapping.insert("opencode", "opencode"); // OpenCode installs as 'opencode'
+        mapping.insert("llxprt", "llxprt"); // LLxprt Code installs as 'llxprt'
         mapping
     }
 
@@ -55,6 +56,11 @@ impl ToolManager {
             ToolCommand {
                 command: "opencode",
                 description: "OpenCode AI coding agent built for the terminal",
+            },
+            ToolCommand {
+                command: "llxprt",
+                description:
+                    "LLxprt Code - Multi-provider AI coding assistant with enhanced features",
             },
         ]
     }
@@ -175,6 +181,10 @@ impl ToolManager {
                 cmd.arg("run");
                 cmd.args(args);
             }
+        } else if display_name == "llxprt" {
+            // For llxprt, when no arguments are provided, it opens the interactive TUI
+            // This is expected behavior and should work seamlessly
+            cmd.args(args);
         } else {
             // For other tools, pass arguments directly
             cmd.args(args);

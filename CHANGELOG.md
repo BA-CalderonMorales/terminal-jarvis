@@ -5,9 +5,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [0.0.31] - 2025-08-05
+## [0.0.33] - 2025-08-05
+
+### Added
+
+- **LLxprt Code Integration**: Added support for LLxprt Code multi-provider AI coding assistant
+  - New tool: `@vybestack/llxprt-code` for enhanced AI coding features
+  - Comprehensive multi-provider AI support with advanced capabilities
+  - Integrated into installation and configuration systems
 
 ### Fixed
+
 - **Claude/Gemini Installation**: Fixed incorrect NPM package names causing installation failures
   - Claude: `@anthropic-ai/claude-cli` → `@anthropic-ai/claude-code`
   - Gemini: `@google/generative-ai-cli` → `@google/gemini-cli`
@@ -15,12 +23,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Services Installation Logic**: Added missing installation cases for Claude and Gemini tools
 
 ### Enhanced
+
 - **CI/CD Pipeline**: Added comprehensive NPM package validation to prevent future package name issues
 - **Test Suite**: Consolidated testing into single comprehensive script (`smoke-test.sh`)
 - **Package Validation**: Validates package existence, installability, and binary name consistency
 - **Configuration Validation**: Ensures consistency across installation_arguments.rs, config.rs, and example files
+- **Tool Ecosystem**: Expanded supported AI coding tools from 4 to 5 tools
+
+## [0.0.32] - 2025-08-06
 
 ### Added
+
 - **NPM Package Tests**: Automatic validation of all NPM packages before release
 - **Dry-run Installation Tests**: Validates packages can be installed without actually installing them
 - **Binary Name Verification**: Ensures NPM packages provide expected binary names (claude, gemini, etc.)
@@ -28,12 +41,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.0.28] - 2025-01-26
 
 ### Fixed
+
 - **NPM Package Configuration**: Fixed "Tool not found in configuration" errors in NPM package installations
 - **Configuration Loading**: Added NPM package config path to configuration loading sequence
 - **Package Bundling**: Included default configuration files (`config/default.toml`) in NPM package
 - **NPX Execution**: Resolved configuration loading issues when using `npx terminal-jarvis` commands
 
 ### Enhanced
+
 - **Configuration System**: Improved config path resolution to handle NPM package installations
 - **Package Structure**: Added proper config directory bundling for standalone NPM package functionality
 - **Debugging**: Enhanced configuration loading to work across different installation methods
@@ -41,12 +56,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.0.23] - 2025-08-03
 
 ### Added
+
 - **NPM Distribution Tags**: Added support for stable and beta release channels
 - New installation options: `npm install -g terminal-jarvis@stable` and `npm install -g terminal-jarvis@beta`
 - Enhanced README with stable/beta badges and installation channel explanations
 - Interactive dist-tag prompts in local CI/CD script for optional tagging
 
 ### Enhanced
+
 - **Release Process**: Improved local-cicd.sh with interactive npm dist-tag management
 - **Documentation**: Updated copilot instructions with comprehensive npm dist-tags guidance
 - **User Experience**: Clear visual indicators for different release channels
@@ -54,6 +71,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.0.19] - 2025-08-03
 
 ### Fixed
+
 - **OpenCode Integration**: Fixed opencode command structure to work correctly with Terminal Jarvis
 - OpenCode now uses proper command structure: `opencode .` for TUI mode and `opencode run [args]` for message mode
 - Updated opencode installation configuration from incorrect NPM package to proper curl install script
@@ -62,6 +80,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.0.18] - 2025-08-03
 
 ### Fixed
+
 - **Version Consistency**: Fixed version inconsistencies across all project files
 - Updated README.md version reference from 0.0.16 to 0.0.18
 - Fixed NPM package.json postinstall script version from 0.0.14 to 0.0.18
@@ -70,6 +89,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.0.17] - 2025-08-02
 
 ### Added
+
 - **Futuristic Terminal UX**: Implemented stunning neon cyan color scheme for T.JARVIS interface
 - **Responsive ASCII Art**: T.JARVIS logo adapts to terminal width with fallback for small screens
 - **Clean Minimal Design**: Removed cluttered "Ready to Launch" sections for streamlined experience
@@ -77,6 +97,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Interactive Mode**: Enhanced user experience with consistent color theming throughout
 
 ### Fixed
+
 - **Clippy Issues**: Resolved all format string inlining warnings
 - **Code Quality**: Fixed collapsible else-if patterns and improved readability
 - Complete CI/CD pipeline validation with format, clippy, and tests
@@ -84,6 +105,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.0.16] - 2025-08-02
 
 ### Fixed
+
 - **CI/CD**: Resolved cargo fmt formatting issues in cli_logic.rs
 - Removed extra blank lines and reformatted long lines to meet rustfmt standards
 - Fixed GitHub Actions continuous integration pipeline failures
@@ -91,6 +113,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.0.14] - 2025-08-02
 
 ### Fixed
+
 - **Critical NPX Issue**: Fixed `npx terminal-jarvis` asking to reinstall package every time
 - Changed package.json bin configuration from Node.js wrapper to direct binary execution
 - Fixed postinstall script syntax error with proper escape sequences
@@ -98,12 +121,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Ensured proper binary permissions and executable status in NPM package
 
 ### Changed
+
 - Package now directly executes Rust binary instead of Node.js wrapper for better NPX compatibility
 - **Package size optimized**: Reduced to ~1.2MB compressed / ~2.9MB unpacked (50% reduction)
 - Removed redundant platform-specific binary since generic binary works across platforms
 - Improved testing methodology with temporary environment validation before publishing
 
 ### Technical
+
 - Package includes both generic and platform-specific binaries for maximum compatibility
 - This establishes base case for future size optimization efforts
 - Prioritizes immediate user experience over package size
@@ -111,6 +136,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.0.13] - 2025-08-02
 
 ### Fixed
+
 - Fixed NPX compatibility issue where `npx terminal-jarvis` would re-download package every time
 - Changed package.json bin configuration from string to object format for proper NPX recognition
 - NPX now correctly caches and reuses the installed package instead of asking to install repeatedly
@@ -118,24 +144,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.0.12] - 2025-08-02
 
 ### Added
+
 - Bundled Rust binary directly in NPM package for immediate full functionality
 - Users now get complete T.JARVIS interface out-of-the-box with `npm install -g terminal-jarvis`
 - No external dependencies or Rust installation required
 - Enhanced build process with binary bundling and platform detection
 
-### Changed  
+### Changed
+
 - NPM package now includes pre-compiled binary in `bin/` directory
 - TypeScript wrapper prioritizes bundled binary over external installations
 - Updated postinstall message to reflect immediate availability of full interface
 - Improved error messages for better troubleshooting
 
 ### Fixed
+
 - Eliminated fallback mode for users without Rust installation
 - Resolved issue where users saw installation instructions instead of T.JARVIS interface
 
 ## [0.0.6] - 2025-08-02
 
 ### Added
+
 - Complete interactive mode with sleek T.JARVIS terminal interface
 - Tool installation management through InstallationManager
 - Comprehensive tool detection using ToolManager
@@ -153,6 +183,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Background process support for long-running tools
 
 ### Changed
+
 - Refactored CLI to support optional subcommands
 - Updated tool detection logic to use multiple verification methods
 - Improved error messages with emoji indicators
@@ -160,6 +191,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Restructured codebase with separate modules for installation and tools
 
 ### Technical
+
 - Added inquire, shell-words, and term_size dependencies
 - Implemented proper clippy compliance with #[allow(dead_code)] attributes
 - Fixed all format string warnings for better performance
@@ -167,22 +199,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Implemented async tool execution with proper stdio inheritance
 
 ## [0.0.5] - Previous Release
+
 - Basic CLI structure and commands
 - Initial package management functionality
 - GitHub service integration
 - Template system foundation
 
 ## [0.0.4] - Previous Release
+
 - Core CLI framework implementation
 - Basic tool detection
 
 ## [0.0.3] - Previous Release
+
 - Initial project structure
 - NPM packaging setup
 
 ## [0.0.2] - Previous Release
+
 - Basic Rust CLI foundation
 
 ## [0.0.1] - Initial Release
+
 - Project initialization
 - Basic project structure

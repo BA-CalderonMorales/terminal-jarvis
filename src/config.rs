@@ -79,6 +79,16 @@ impl Default for Config {
             },
         );
 
+        tools.insert(
+            "llxprt-code".to_string(),
+            ToolConfig {
+                enabled: true,
+                auto_update: true,
+                install_command: Some("npm install -g @vybestack/llxprt-code".to_string()),
+                update_command: Some("npm update -g @vybestack/llxprt-code".to_string()),
+            },
+        );
+
         Self {
             tools,
             templates: TemplateConfig {
