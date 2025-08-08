@@ -29,6 +29,7 @@ impl ToolManager {
         mapping.insert("qwen", "qwen"); // Assuming qwen-code installs as 'qwen'
         mapping.insert("opencode", "opencode"); // OpenCode installs as 'opencode'
         mapping.insert("llxprt", "llxprt"); // LLxprt Code installs as 'llxprt'
+        mapping.insert("codex", "codex"); // OpenAI Codex CLI installs as 'codex'
         mapping
     }
 
@@ -62,6 +63,10 @@ impl ToolManager {
                 command: "llxprt",
                 description:
                     "LLxprt Code - Multi-provider AI coding assistant with enhanced features",
+            },
+            ToolCommand {
+                command: "codex",
+                description: "OpenAI Codex CLI - AI coding agent that runs locally",
             },
         ]
     }
@@ -194,6 +199,18 @@ impl ToolManager {
             } else {
                 // Multiple arguments or non-directory arguments - use 'run' subcommand
                 cmd.arg("run");
+                cmd.args(args);
+            }
+        } else if display_name == "codex" {
+            if args.is_empty() {
+                // No arguments - start interactive TUI mode
+                // This allows users to interact with codex directly
+            } else if args.len() == 1 && !args[0].starts_with("--") {
+                // Single prompt argument - pass directly for interactive mode with initial prompt
+                cmd.args(args);
+            } else {
+                // Multiple arguments or flags - pass them directly
+                // Codex CLI handles various combinations of arguments and flags
                 cmd.args(args);
             }
         } else if display_name == "llxprt" {

@@ -5,13 +5,42 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.0.43] - 2025-08-08
+
+### Added
+
+- **OpenAI Codex CLI Integration**: Added complete support for OpenAI Codex CLI as the 6th AI coding tool
+  - New tool: `@openai/codex` NPM package for AI coding agent that runs locally
+  - Comprehensive codex functionality with authentication via OpenAI API key or ChatGPT account
+  - Added 6 dedicated codex functionality tests covering authentication, NPM packages, and terminal compatibility
+  - Enhanced smoke tests with 7 codex-specific validation checks
+  - Added codex to example configuration file with proper NPM package setup
+  - All authentication mechanisms properly tested including CODEX_NO_BROWSER environment handling
+
+### Enhanced
+
+- **CI/CD Pipeline Improvements**: Enhanced local-ci.sh with comprehensive codex validation and improved testing accuracy
+  - Updated all tool count references from 5 to 6 tools throughout the codebase
+  - Enhanced test suite descriptions to accurately reflect 6-tool validation
+  - Improved final validation summary with specific codex functionality mentions
+  - All tests now properly validate the complete 6-tool ecosystem (claude, gemini, qwen, opencode, llxprt, codex)
+  - Comprehensive test coverage now includes 46 total tests (up from 44)
+
+### Fixed
+
+- **Test Pattern Accuracy**: Fixed codex-specific test patterns in smoke test suite
+  - Corrected grep patterns for codex API key detection to work with multi-line auth configuration
+  - Fixed codex help message validation to properly detect OpenAI platform URL references
+  - All 46 tests now pass consistently, providing reliable CI/CD validation
+
 ## [0.0.42] - 2025-08-08
 
 ### Enhanced
 
-- Updated version to 0.0.42 for new release
-- All CI/CD validation passing with comprehensive test suite
-- Quality gates and NPM package validation working correctly
+- **CI/CD Testing Infrastructure**: Improved test coverage and validation systems in preparation for codex integration
+  - Enhanced NPM package validation framework to support additional tools
+  - Improved authentication testing mechanisms
+  - Strengthened configuration consistency validation across all files
 
 ## [0.0.41] - 2025-08-08
 

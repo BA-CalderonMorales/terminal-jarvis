@@ -6,7 +6,7 @@
 [![NPM Stable](https://img.shields.io/npm/v/terminal-jarvis/stable.svg?label=stable&color=green)](https://www.npmjs.com/package/terminal-jarvis)
 [![NPM Beta](https://img.shields.io/npm/v/terminal-jarvis/beta.svg?label=beta&color=orange)](https://www.npmjs.com/package/terminal-jarvis)
 
-A unified command center for AI coding tools. Manage and run claude-code, gemini-cli, qwen-code, opencode, and llxprt from one beautiful terminal interface.
+A unified command center for AI coding tools. Manage and run claude-code, gemini-cli, qwen-code, opencode, llxprt, and codex from one beautiful terminal interface.
 
 <img src="screenshots/promo_image_for_readme.png" alt="Terminal Jarvis Interface" width="100%">
 
@@ -48,6 +48,7 @@ Terminal Jarvis is your AI coding assistant command center:
   - `qwen` - Qwen coding assistant
   - `opencode` - Terminal-based AI coding agent 🧪
   - `llxprt` - Multi-provider AI coding assistant 🧪
+  - `codex` - OpenAI Codex CLI for local AI coding 🧪
 - **📊 Smart Status Detection**: See which tools are installed and ready to use
 - **� Interactive Workflows**: Guided prompts for running tools with the right arguments
 

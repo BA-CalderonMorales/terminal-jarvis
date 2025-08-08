@@ -65,6 +65,16 @@ impl InstallationManager {
             },
         );
 
+        commands.insert(
+            "codex",
+            InstallCommand {
+                command: "npm",
+                args: vec!["install", "-g", "@openai/codex"],
+                description: "OpenAI Codex CLI - AI coding agent that runs locally",
+                requires_npm: true,
+            },
+        );
+
         commands
     }
 

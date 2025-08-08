@@ -59,6 +59,7 @@ impl AuthManager {
         env::set_var("GEMINI_NO_BROWSER", "1");
         env::set_var("QWEN_NO_BROWSER", "1");
         env::set_var("CLAUDE_NO_BROWSER", "1");
+        env::set_var("CODEX_NO_BROWSER", "1");
 
         // Disable GUI-related features that might trigger browser opening
         env::set_var("DISABLE_GUI", "1");
@@ -109,6 +110,7 @@ impl AuthManager {
                 env::var("QWEN_CODE_API_KEY").is_ok() || env::var("DASHSCOPE_API_KEY").is_ok()
             }
             "claude" => env::var("ANTHROPIC_API_KEY").is_ok() || env::var("CLAUDE_API_KEY").is_ok(),
+            "codex" => env::var("OPENAI_API_KEY").is_ok(),
             _ => true, // Assume other tools don't need API keys or handle auth differently
         }
     }
@@ -138,6 +140,15 @@ impl AuthManager {
                  export CLAUDE_API_KEY=\"your-api-key\"\n\
                  \n\
                  Get your API key from: https://console.anthropic.com/"
+                    .to_string()
+            }
+            "codex" => {
+                "OpenAI Codex CLI supports two authentication methods:\n\
+                 1. ChatGPT account (Plus/Pro/Team): Run 'codex' and select 'Sign in with ChatGPT'\n\
+                 2. OpenAI API key (usage-based billing):\n\
+                    export OPENAI_API_KEY=\"your-api-key\"\n\
+                 \n\
+                 Get your API key from: https://platform.openai.com/api-keys"
                     .to_string()
             }
             _ => {
@@ -281,6 +292,14 @@ mod tests {
         env::set_var("QWEN_CODE_API_KEY", "test-key");
         assert!(AuthManager::check_api_keys_for_tool("qwen"));
         env::remove_var("QWEN_CODE_API_KEY");
+
+        // Test Codex API key detection
+        env::remove_var("OPENAI_API_KEY");
+        assert!(!AuthManager::check_api_keys_for_tool("codex"));
+
+        env::set_var("OPENAI_API_KEY", "test-key");
+        assert!(AuthManager::check_api_keys_for_tool("codex"));
+        env::remove_var("OPENAI_API_KEY");
     }
 
     #[test]
@@ -292,5 +311,9 @@ mod tests {
         let qwen_help = AuthManager::get_api_key_help_message("qwen");
         assert!(qwen_help.contains("QWEN_CODE_API_KEY"));
         assert!(qwen_help.contains("dashscope.console.aliyun.com"));
+
+        let codex_help = AuthManager::get_api_key_help_message("codex");
+        assert!(codex_help.contains("OPENAI_API_KEY"));
+        assert!(codex_help.contains("platform.openai.com"));
     }
 }

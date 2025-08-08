@@ -18,7 +18,7 @@ pub struct Cli {
 pub enum Commands {
     /// Run a specific AI coding tool
     Run {
-        /// The tool to run (claude, gemini, qwen, opencode, llxprt)
+        /// The tool to run (claude, gemini, qwen, opencode, llxprt, codex)
         tool: String,
         /// Arguments to pass to the tool
         #[arg(trailing_var_arg = true, allow_hyphen_values = true)]

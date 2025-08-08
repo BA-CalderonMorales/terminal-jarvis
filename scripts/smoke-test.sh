@@ -53,11 +53,11 @@ run_test "CLI help command works" \
 run_test "Tool listing functionality" \
     "$BINARY list > /dev/null 2>&1"
 
-run_test "All 5 tools loaded from configuration" \
-    'TOOL_COUNT=$('$BINARY' list 2>/dev/null | grep -E "^  (claude|gemini|qwen|opencode|llxprt)" | wc -l); [ "$TOOL_COUNT" -eq 5 ]'
+run_test "All 6 tools loaded from configuration" \
+    'TOOL_COUNT=$('$BINARY' list 2>/dev/null | grep -E "^  (claude|gemini|qwen|opencode|llxprt|codex)" | wc -l); [ "$TOOL_COUNT" -eq 6 ]'
 
 run_test "All tools use NPM packages consistently" \
-    'NPM_TOOLS=$('$BINARY' list 2>/dev/null | grep -c "Requires: NPM"); [ "$NPM_TOOLS" -eq 5 ]'
+    'NPM_TOOLS=$('$BINARY' list 2>/dev/null | grep -c "Requires: NPM"); [ "$NPM_TOOLS" -eq 6 ]'
 
 run_test "Update command help" \
     "$BINARY update --help > /dev/null 2>&1"
@@ -74,11 +74,11 @@ run_test "Error handling for nonexistent tool" \
 run_test "Version consistency (Cargo.toml vs NPM package.json)" \
     'CARGO_VERSION=$(grep "^version = " Cargo.toml | sed "s/version = \"\(.*\)\"/\1/"); NPM_VERSION=$(grep "\"version\":" npm/terminal-jarvis/package.json | sed "s/.*\"version\": \"\(.*\)\".*/\1/"); [ "$CARGO_VERSION" = "$NPM_VERSION" ]'
 
-run_test "Example configuration file has all 5 tools" \
-    'CONFIG_TOOLS=$(grep -E "(claude-code|gemini-cli|qwen-code|opencode|llxprt-code)" terminal-jarvis.toml.example | wc -l); [ "$CONFIG_TOOLS" -eq 5 ]'
+run_test "Example configuration file has all 6 tools" \
+    'CONFIG_TOOLS=$(grep -E "(claude-code|gemini-cli|qwen-code|opencode|llxprt-code|codex)" terminal-jarvis.toml.example | wc -l); [ "$CONFIG_TOOLS" -eq 6 ]'
 
 run_test "Example config uses NPM for all installs" \
-    'NPM_INSTALL_COMMANDS=$(grep -c "npm install" terminal-jarvis.toml.example); [ "$NPM_INSTALL_COMMANDS" -eq 5 ]'
+    'NPM_INSTALL_COMMANDS=$(grep -c "npm install" terminal-jarvis.toml.example); [ "$NPM_INSTALL_COMMANDS" -eq 6 ]'
 
 # Test the opencode input focus fix specifically
 run_test "OpenCode input focus tests pass" \
@@ -89,6 +89,28 @@ run_test "OpenCode terminal state preparation method exists" \
 
 run_test "OpenCode special handling in interactive mode exists" \
     'grep -q "opencode.*extra time and careful terminal state management" src/cli_logic.rs'
+
+# Test codex functionality specifically
+run_test "Codex tool is properly configured" \
+    '$BINARY list | grep -q "codex.*OpenAI Codex CLI"'
+
+run_test "Codex auth environment variable handling exists" \
+    'grep -q "CODEX_NO_BROWSER" src/auth_manager.rs'
+
+run_test "Codex API key detection works" \
+    'grep -A1 -B1 "codex.*=>" src/auth_manager.rs | grep -q "OPENAI_API_KEY"'
+
+run_test "Codex help message includes OpenAI API setup" \
+    'grep -A10 "codex.*=>" src/auth_manager.rs | grep -q "platform.openai.com"'
+
+run_test "Codex binary mapping is correct" \
+    'grep -q "codex.*codex" src/tools.rs'
+
+run_test "Codex tool description is informative" \
+    'grep -A2 "command: \"codex\"" src/tools.rs | grep -q "description.*AI coding agent"'
+
+run_test "Codex functionality tests pass" \
+    "cargo test codex_functionality >/dev/null 2>&1"
 
 echo ""
 
@@ -109,8 +131,9 @@ else
     QWEN_PACKAGE=$(grep -A5 'qwen",' src/installation_arguments.rs | grep 'args: vec!' | sed 's/.*"\([^"]*\)".*/\1/' | tail -1)
     OPENCODE_PACKAGE=$(grep -A5 'opencode",' src/installation_arguments.rs | grep 'args: vec!' | sed 's/.*"\([^"]*\)".*/\1/' | tail -1)
     LLXPRT_PACKAGE=$(grep -A5 'llxprt",' src/installation_arguments.rs | grep 'args: vec!' | sed 's/.*"\([^"]*\)".*/\1/' | tail -1)
+    CODEX_PACKAGE=$(grep -A5 'codex",' src/installation_arguments.rs | grep 'args: vec!' | sed 's/.*"\([^"]*\)".*/\1/' | tail -1)
     
-    echo -e "${BLUE}Validating packages: $CLAUDE_PACKAGE, $GEMINI_PACKAGE, $QWEN_PACKAGE, $OPENCODE_PACKAGE, $LLXPRT_PACKAGE${RESET}"
+    echo -e "${BLUE}Validating packages: $CLAUDE_PACKAGE, $GEMINI_PACKAGE, $QWEN_PACKAGE, $OPENCODE_PACKAGE, $LLXPRT_PACKAGE, $CODEX_PACKAGE${RESET}"
     echo ""
     
     run_test "Claude package exists in NPM registry" \
@@ -128,6 +151,9 @@ else
     run_test "LLxprt package exists in NPM registry" \
         "npm view $LLXPRT_PACKAGE version > /dev/null 2>&1"
     
+    run_test "Codex package exists in NPM registry" \
+        "npm view $CODEX_PACKAGE version > /dev/null 2>&1"
+    
     run_test "Claude package provides 'claude' binary" \
         "npm view $CLAUDE_PACKAGE bin | grep -q 'claude'"
     
@@ -136,6 +162,9 @@ else
     
     run_test "LLxprt package provides 'llxprt' binary" \
         "npm view $LLXPRT_PACKAGE bin | grep -q 'llxprt'"
+    
+    run_test "Codex package provides 'codex' binary" \
+        "npm view $CODEX_PACKAGE bin | grep -q 'codex'"
     
     # Validate configuration consistency across files
     CONFIG_CLAUDE=$(grep -A2 'claude-code' src/config.rs | grep 'install_command' | sed 's/.*npm install -g \([^ "]*\).*/\1/')
@@ -166,6 +195,9 @@ else
     
     run_test "LLxprt package can be installed (dry run)" \
         "npm install -g $LLXPRT_PACKAGE --dry-run > /dev/null 2>&1"
+    
+    run_test "Codex package can be installed (dry run)" \
+        "npm install -g $CODEX_PACKAGE --dry-run > /dev/null 2>&1"
     
     # Validate services.rs update logic has correct package names
     SERVICES_CLAUDE_PRIMARY=$(grep -A10 'claude-code.*=>' src/services.rs | grep 'update_npm_package' | head -1 | sed 's/.*update_npm_package("\([^"]*\)").*/\1/')

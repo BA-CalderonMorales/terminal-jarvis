@@ -53,7 +53,7 @@ This document outlines our comprehensive testing approach to ensure core functio
 ### Required TDD Process
 
 1. **Identify the Bug**: Understand exact problem and reproduction steps
-2. **Write Failing Test FIRST**: 
+2. **Write Failing Test FIRST**:
    - Create test that reproduces the bug behavior
    - Test MUST fail initially (proving bug exists)
    - Place in appropriate location:
@@ -65,18 +65,20 @@ This document outlines our comprehensive testing approach to ensure core functio
 6. **Commit**: Include both test and fix with clear message
 
 ### Example Test Structure
+
 ```rust
 #[test]
 fn test_bug_opencode_input_focus_on_fresh_install() {
     // Reproduces issue where opencode input box lacks focus on fresh installs
     // Bug: User cannot type directly without manual focus
     // Expected: Input box should be automatically focused
-    
+
     // Test implementation here
 }
 ```
 
 ### Recent TDD Success Stories
+
 - **OpenCode Input Focus** (v0.0.41): Added `opencode_input_focus_tests.rs` with failing → passing tests
 - **Browser Prevention** (v0.0.40): Added `integration_auth_tests.rs` for authentication behavior
 
@@ -86,7 +88,7 @@ Our test suite validates these essential behaviors:
 
 ### 1. **Tool Management**
 
-- ✅ All 5 AI tools are available: claude, gemini, qwen, opencode, llxprt
+- ✅ All 6 AI tools are available: claude, gemini, qwen, opencode, llxprt, codex
 - ✅ All tools use consistent NPM package installation
 - ✅ Tool listing shows proper status and requirements
 - ✅ Install/update commands work for each tool
