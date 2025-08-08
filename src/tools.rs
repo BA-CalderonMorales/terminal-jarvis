@@ -169,10 +169,15 @@ impl ToolManager {
         AuthManager::prepare_auth_safe_environment()?;
         AuthManager::warn_if_browser_likely(display_name)?;
 
-        // Clear any remaining progress indicators and ensure clean terminal state
-        print!("\x1b[2K\r"); // Clear current line
-        print!("\x1b[?25h"); // Show cursor
-        std::io::stdout().flush().unwrap_or_default();
+        // Special terminal preparation for opencode to ensure proper input focus
+        if display_name == "opencode" {
+            Self::prepare_opencode_terminal_state()?;
+        } else {
+            // Clear any remaining progress indicators and ensure clean terminal state for other tools
+            print!("\x1b[2K\r"); // Clear current line
+            print!("\x1b[?25h"); // Show cursor
+            std::io::stdout().flush().unwrap_or_default();
+        }
 
         let mut cmd = Command::new(cli_command);
 
@@ -215,6 +220,24 @@ impl ToolManager {
                 status.code()
             ));
         }
+
+        Ok(())
+    }
+
+    /// Prepare terminal state specifically for opencode to ensure proper input focus
+    fn prepare_opencode_terminal_state() -> Result<()> {
+        use std::io::Write;
+
+        // For opencode, we need a very careful terminal preparation sequence
+        // to ensure the input box gets proper focus on fresh installs
+        // Use only the most essential terminal sequences to avoid strange output
+
+        // 1. Just clear the screen and ensure cursor is visible - minimal approach
+        print!("\x1b[H\x1b[2J"); // Home cursor + clear screen (combined)
+        std::io::stdout().flush()?;
+
+        // 2. Brief delay to let opencode initialize properly
+        std::thread::sleep(std::time::Duration::from_millis(75));
 
         Ok(())
     }

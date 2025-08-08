@@ -600,8 +600,15 @@ pub async fn handle_interactive_mode() -> Result<()> {
                 // Finish progress right before starting the tool
                 launch_progress.finish_success(&format!("{tool_name} ready - starting now"));
 
-                // Clear any remaining progress indicators
-                print!("\x1b[2K\r");
+                // Special handling for opencode to ensure input focus works properly
+                if *tool_name == "opencode" {
+                    // For opencode, we need extra time and careful terminal state management
+                    // to prevent input focus issues on fresh installs
+                    tokio::time::sleep(tokio::time::Duration::from_millis(100)).await;
+                } else {
+                    // Clear any remaining progress indicators for other tools
+                    print!("\x1b[2K\r");
+                }
 
                 match ToolManager::run_tool(tool_name, &args).await {
                     Ok(_) => {

@@ -4,7 +4,7 @@
 
 Terminal Jarvis is a Rust-based CLI wrapper that provides a unified interface for managing AI coding tools (claude-code, gemini-cli, qwen-code, opencode, llxprt). It's packaged via NPM for easy distribution while maintaining the performance of a native Rust binary.
 
-**Current Version**: 0.0.40  
+**Current Version**: 0.0.41  
 **License**: MIT  
 **Repository**: https://github.com/BA-CalderonMorales/terminal-jarvis
 
@@ -128,6 +128,42 @@ npm run sync-readme
 
 ## Testing Requirements
 
+### Test-Driven Bugfixes (MANDATORY)
+
+**EVERY** bugfix session MUST follow this exact workflow:
+
+1. **Identify the Bug**: Understand the exact problem and reproduction steps
+2. **Write Failing Test FIRST**: 
+   - Create a test that reproduces the bug behavior
+   - Test MUST fail initially (proving the bug exists)
+   - Place in appropriate location:
+     - `tests/` directory for integration tests
+     - `src/` with `#[cfg(test)]` for unit tests
+   - Use descriptive test names: `test_bug_opencode_input_focus_on_fresh_install`
+3. **Run Test**: Verify it fails for the expected reason
+4. **Implement Fix**: Make minimal changes to make the test pass
+5. **Verify Fix**: Test passes, no regressions in other tests
+6. **Commit**: Include both test and fix in same commit with clear message
+
+**Test File Guidelines:**
+- Integration tests go in `tests/` directory as `.rs` files
+- Unit tests go in `src/` files using `#[cfg(test)]` mod test blocks
+- **NO SHELL SCRIPTS** in `tests/` directory - only Rust test files
+- Test names should clearly describe the bug being fixed
+- Include comments explaining the bug scenario
+
+**Example Test Structure:**
+```rust
+#[test]
+fn test_bug_opencode_input_focus_on_fresh_install() {
+    // Reproduces issue where opencode input box lacks focus on fresh installs
+    // Bug: User cannot type directly in input box without manual focus
+    // Expected: Input box should be automatically focused
+    
+    // Test implementation here
+}
+```
+
 ### Pre-Commit Checklist
 **Version Consistency:**
 - [ ] Cargo.toml version updated
@@ -149,6 +185,7 @@ npm run sync-readme
 - [ ] `cargo clippy --all-targets --all-features -- -D warnings` passes
 - [ ] `cargo fmt --all` applied
 - [ ] `cargo test` passes
+- [ ] **Failing test added for bugfixes** - If this is a bugfix, verify failing test was created first
 - [ ] `cd npm/terminal-jarvis && npm run build` succeeds
 
 **NPM Package Testing:**
@@ -195,6 +232,11 @@ center_output = true
 4. Update tool registry and detection logic
 
 ### Fixing Rust Code Issues
+- **MANDATORY: Write Failing Test First** - For EVERY bugfix session:
+  - Create a failing test that reproduces the exact bug behavior
+  - Place test in appropriate location: `tests/` for integration tests, `src/` for unit tests
+  - Test must fail initially and pass after the fix is implemented
+  - This is **NON-NEGOTIABLE** - no bug fixes without failing tests
 - Check `cargo clippy` warnings first
 - Ensure proper error handling with `anyhow::Result`
 - Add doc comments for public functions
@@ -223,6 +265,7 @@ center_output = true
 - **No multi-line bash commands** in terminal suggestions - use single-line with `&&`
 - **Never commit** without running the pre-commit checklist
 - **Never publish NPM** without local testing first
+- **NO BUGFIXES WITHOUT FAILING TESTS** - Every bug must have a failing test written first
 
 ## Current Package Details
 - **Size**: ~1.2MB compressed / ~2.9MB unpacked

@@ -78,6 +78,7 @@ npm run sync-readme
 - **No shell scripts (.sh files) in tests/ directory** - Only Rust test files (.rs) belong in tests/
 - **All shell scripts must go in scripts/ directory** - This keeps testing and scripting concerns separate
 - **No multi-line bash commands in terminal suggestions** - Always use single-line commands
+- **NO BUGFIXES WITHOUT FAILING TESTS** - Every bug must have a failing test written first
 
 ## Terminal Command Guidelines
 
@@ -96,6 +97,57 @@ When suggesting terminal commands or using the `run_in_terminal` tool:
   fi
   ```
 - **INSTEAD** use: `[ condition ] && command1 && command2`
+
+## Test-Driven Bugfixes (MANDATORY)
+
+**CRITICAL REQUIREMENT**: Every bugfix session MUST follow Test-Driven Development:
+
+### Bugfix Workflow (NON-NEGOTIABLE):
+
+1. **Write Failing Test FIRST**:
+   - Create a test that reproduces the exact bug behavior
+   - Test MUST fail initially (proving the bug exists)  
+   - Use descriptive names: `test_bug_opencode_input_focus_on_fresh_install`
+   - Include detailed comments explaining the bug scenario
+
+2. **Test Placement**:
+   - **Integration tests**: `tests/` directory as `.rs` files
+   - **Unit tests**: `src/` files using `#[cfg(test)]` mod test blocks
+   - **NEVER** put shell scripts in `tests/` directory
+
+3. **Verify Failure**: Run `cargo test` to confirm the test fails for expected reasons
+
+4. **Implement Fix**: Make minimal code changes to make test pass
+
+5. **Verify Success**: Test passes, no regressions in existing tests
+
+6. **Commit Together**: Include both test and fix in same commit
+
+### Example Test Structure:
+```rust
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_bug_opencode_input_focus_on_fresh_install() {
+        // Bug: opencode input box lacks focus on fresh installs
+        // User cannot type directly without manual focus intervention
+        // Expected: Input box should be automatically focused on startup
+        
+        // Test implementation reproducing the bug
+        assert_eq!(expected_behavior, actual_behavior);
+    }
+}
+```
+
+### Why This Matters:
+- **Prevents regression**: Test ensures bug never returns
+- **Documents behavior**: Test serves as living documentation
+- **Validates fix**: Proves the fix actually works
+- **Quality assurance**: Maintains high code quality standards
+
+**ABSOLUTE RULE**: No bugfix commits without accompanying failing test. This is enforced during code review.
 
 ## How To Release
 
@@ -183,6 +235,7 @@ npm dist-tag ls terminal-jarvis
 - [ ] `cargo clippy --all-targets --all-features -- -D warnings` passes
 - [ ] `cargo fmt --all` applied
 - [ ] `cargo test` passes (if tests exist)
+- [ ] **Failing test added for bugfixes** - If this is a bugfix, verify failing test was created first
 - [ ] NPM package builds: `cd npm/terminal-jarvis && npm run build`
 
 ### Testing (Critical):

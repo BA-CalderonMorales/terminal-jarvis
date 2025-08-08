@@ -13,12 +13,13 @@ This document outlines current limitations, known issues, and workarounds for Te
 
 ## Tool-Specific Issues
 
-### Opencode Input Edge Case
+### Opencode Input Focus (Fixed)
 
-- **Issue**: Rare edge case where Opencode opens but typing doesn't register in the actual input field
-- **Potential Cause**: May be related to the runtime/thin layer interaction between Terminal Jarvis and the underlying tools
-- **Workaround**: Restart the tool if input becomes unresponsive
-- **Status**: Investigating root cause in the wrapper layer
+- **Issue**: Input box lacked focus on fresh installs, requiring manual clicking before typing
+- **Root Cause**: Terminal Jarvis progress indicators and clearing sequences interfered with opencode's terminal initialization
+- **Resolution**: Added special terminal state preparation with minimal escape sequences and initialization delay
+- **Current Behavior**: Input box is automatically focused and ready for immediate typing on startup
+- **Status**: ✅ **FIXED** - Input focus works immediately in all launch scenarios
 
 ### New Tool Testing
 

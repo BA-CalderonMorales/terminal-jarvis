@@ -10,7 +10,7 @@ A unified command center for AI coding tools. Manage and run claude-code, gemini
 
 <img src="screenshots/promo_image_for_readme.png" alt="Terminal Jarvis Interface" width="100%">
 
-----
+---
 
 🎉 **Try it instantly:** `npx terminal-jarvis`
 

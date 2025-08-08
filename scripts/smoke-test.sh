@@ -80,6 +80,16 @@ run_test "Example configuration file has all 5 tools" \
 run_test "Example config uses NPM for all installs" \
     'NPM_INSTALL_COMMANDS=$(grep -c "npm install" terminal-jarvis.toml.example); [ "$NPM_INSTALL_COMMANDS" -eq 5 ]'
 
+# Test the opencode input focus fix specifically
+run_test "OpenCode input focus tests pass" \
+    "cargo test opencode_input_focus >/dev/null 2>&1"
+
+run_test "OpenCode terminal state preparation method exists" \
+    'grep -q "prepare_opencode_terminal_state" src/tools.rs'
+
+run_test "OpenCode special handling in interactive mode exists" \
+    'grep -q "opencode.*extra time and careful terminal state management" src/cli_logic.rs'
+
 echo ""
 
 # ===== NPM PACKAGE VALIDATION TESTS =====

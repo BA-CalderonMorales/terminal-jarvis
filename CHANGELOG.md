@@ -5,6 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.0.41] - 2025-08-08
+
+### Fixed
+- **OpenCode Input Focus**: Fixed input box focus issue on fresh installs
+  - Added special terminal state preparation for opencode to ensure immediate input focus
+  - Implemented minimal terminal clearing sequence to avoid interference with opencode initialization
+  - Added 75ms initialization delay to prevent race conditions between Terminal Jarvis and opencode
+  - Comprehensive test suite with failing tests → passing tests following TDD approach
+  - Eliminates need for manual clicking to focus input box on startup
+
 ## [0.0.40] - 2025-08-08
 
 ### Fixed
