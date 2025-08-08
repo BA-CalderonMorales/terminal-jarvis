@@ -4,7 +4,7 @@
 
 Terminal Jarvis is a Rust-based CLI wrapper that provides a unified interface for managing AI coding tools (claude-code, gemini-cli, qwen-code, opencode, llxprt). It's packaged via NPM for easy distribution while maintaining the performance of a native Rust binary.
 
-**Current Version**: 0.0.37  
+**Current Version**: 0.0.40  
 **License**: MIT  
 **Repository**: https://github.com/BA-CalderonMorales/terminal-jarvis
 
@@ -34,12 +34,19 @@ Terminal Jarvis is a Rust-based CLI wrapper that provides a unified interface fo
 - `TESTING.md` - Testing procedures
 
 ### Scripts (`/scripts/`)
-- `local-cicd.sh` - Automated CI/CD pipeline
+- `local-ci.sh` - Continuous Integration (validation only)
+- `local-cd.sh` - Continuous Deployment (commit/tag/push)
+- `workflow-dashboard.sh` - Development workflow status and recommendations
 - `smoke-test.sh` - Basic functionality tests
-- `status.sh` - Status checking utilities
+- `manual_auth_test.sh` - Manual authentication behavior testing
+- `interactive_auth_test.sh` - Interactive authentication testing scenarios
 
 ### Tests (`/tests/`)
 - `config_tests.rs` - Configuration system tests
+- `integration_auth_tests.rs` - Authentication and browser prevention integration tests
+- `auth_behavior_tests.rs` - Authentication behavior testing utilities
+
+**IMPORTANT**: The `tests/` directory is **ONLY** for Rust test files (`.rs`). **NO SHELL SCRIPTS** (`.sh`) are allowed in tests/. All shell scripts must be placed in `scripts/` directory.
 
 ## Development Standards
 
@@ -87,6 +94,20 @@ cd npm/terminal-jarvis
 npm run sync-readme
 ```
 
+**MANDATORY: docs/ Directory Review**: **EVERY TIME** you modify CHANGELOG.md, you **MUST** review and update the docs/ directory:
+- Check if any docs/ files need updates based on the changes in CHANGELOG.md
+- Update version references in docs/ files if version was bumped
+- Verify that new features/fixes are properly documented
+- Update docs/ARCHITECTURE.md, docs/INSTALLATION.md, docs/TESTING.md, docs/LIMITATIONS.md as needed
+- This is **NON-NEGOTIABLE** - no CHANGELOG.md updates without docs/ review
+
+**MANDATORY: README.md Updates**: **EVERY TIME** you modify CHANGELOG.md or docs/ files, you **MUST** review and update README.md:
+- Ensure README.md reflects any changes made to documentation structure
+- Update feature descriptions if new functionality was added
+- Verify installation instructions are current if docs/INSTALLATION.md was updated
+- Update known issues section if docs/LIMITATIONS.md was modified
+- This is **NON-NEGOTIABLE** - no docs/ or CHANGELOG.md updates without README.md review
+
 ## Release Process
 
 ### Automated (Recommended)
@@ -114,6 +135,15 @@ npm run sync-readme
 - [ ] npm/terminal-jarvis/src/index.ts version display updated
 - [ ] CHANGELOG.md has new version entry
 - [ ] README.md version references updated
+
+**MANDATORY Documentation Review:**
+- [ ] **docs/ directory reviewed** - REQUIRED when CHANGELOG.md is modified
+- [ ] docs/ARCHITECTURE.md updated if architectural changes were made
+- [ ] docs/INSTALLATION.md updated if installation procedures changed
+- [ ] docs/TESTING.md updated if testing procedures changed
+- [ ] docs/LIMITATIONS.md updated if new limitations were introduced
+- [ ] Version references in docs/ files updated if version was bumped
+- [ ] **README.md reviewed and updated** - REQUIRED when CHANGELOG.md or docs/ are modified
 
 **Quality Checks:**
 - [ ] `cargo clippy --all-targets --all-features -- -D warnings` passes

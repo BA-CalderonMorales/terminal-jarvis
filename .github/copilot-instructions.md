@@ -75,6 +75,8 @@ npm run sync-readme
 - No force pushing to main or develop branches
 - No `.unwrap()` without good error handling
 - No magic numbers - use named constants
+- **No shell scripts (.sh files) in tests/ directory** - Only Rust test files (.rs) belong in tests/
+- **All shell scripts must go in scripts/ directory** - This keeps testing and scripting concerns separate
 - **No multi-line bash commands in terminal suggestions** - Always use single-line commands
 
 ## Terminal Command Guidelines
@@ -100,7 +102,13 @@ When suggesting terminal commands or using the `run_in_terminal` tool:
 **Recommended: Use Local CI/CD Script (see "Local CD with Agent Mode" section below for details)**
 
 1. **FIRST: Update CHANGELOG.md** - Add entry for current version with clear change descriptions
-2. **THEN: Run automated script** - `./scripts/local-cicd.sh` (handles all steps below automatically)
+2. **MANDATORY: Review docs/ Directory** - **EVERY TIME** CHANGELOG.md is modified, you **MUST** review and update docs/
+   - Check docs/ARCHITECTURE.md, docs/INSTALLATION.md, docs/TESTING.md, docs/LIMITATIONS.md
+   - Update version references in docs/ files if version was bumped
+   - Verify new features/fixes are properly documented
+   - This is **NON-NEGOTIABLE** - no CHANGELOG.md updates without docs/ review
+   - **ALSO MANDATORY: Review and update README.md** - Required when CHANGELOG.md or docs/ are modified
+3. **THEN: Run automated script** - `./scripts/local-cicd.sh` (handles all steps below automatically)
 
 **Manual Release Process (if needed):**
 
@@ -108,13 +116,15 @@ When suggesting terminal commands or using the `run_in_terminal` tool:
 2. Update version display in `npm/terminal-jarvis/src/index.ts`
 3. Update version display in `src/cli_logic.rs` (interactive mode version)
 4. **Update CHANGELOG.md with new version and changes** (CRITICAL - must be done first)
-5. Update version references in README.md (root and NPM package will sync automatically)
-6. Run `npm run sync-readme` to sync the README
-7. Commit with clear message: `feat: add new feature X`
-8. Create tag: `git tag v0.0.6`
-9. Push to GitHub: `git push origin develop --tags`
-10. Publish to NPM: `cd npm/terminal-jarvis && npm publish`
-11. **Add Distribution Tags** (optional - choose one or both):
+5. **MANDATORY: Review and update docs/ directory** - Required whenever CHANGELOG.md is modified
+6. **MANDATORY: Review and update README.md** - Required when CHANGELOG.md or docs/ are modified
+7. Update version references in README.md (root and NPM package will sync automatically)
+8. Run `npm run sync-readme` to sync the README
+9. Commit with clear message: `feat: add new feature X`
+10. Create tag: `git tag v0.0.6`
+11. Push to GitHub: `git push origin develop --tags`
+12. Publish to NPM: `cd npm/terminal-jarvis && npm publish`
+13. **Add Distribution Tags** (optional - choose one or both):
     - For stable releases: `npm dist-tag add terminal-jarvis@X.X.X stable`
     - For beta releases: `npm dist-tag add terminal-jarvis@X.X.X beta`
 

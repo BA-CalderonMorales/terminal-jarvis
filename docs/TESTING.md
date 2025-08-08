@@ -76,6 +76,14 @@ Our test suite validates these essential behaviors:
 - ✅ Concurrent updates work properly
 - ✅ Individual tool updates function correctly
 
+### 5. **Authentication & Environment Management**
+
+- ✅ Browser opening prevention in headless/CI environments
+- ✅ Environment detection (CI, Codespaces, SSH, containers)
+- ✅ API key validation and guidance for Gemini CLI and Qwen Code
+- ✅ AuthManager integration testing with real tool behavior
+- ✅ Regression tests to prevent browser opening in terminal environments
+
 ## Integration with Development Workflow
 
 ### Pre-commit Testing

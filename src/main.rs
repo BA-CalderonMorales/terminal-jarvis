@@ -1,6 +1,7 @@
 mod api;
 mod api_base;
 mod api_client;
+mod auth_manager;
 mod cli;
 mod cli_logic;
 mod config;

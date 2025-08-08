@@ -1,3 +1,4 @@
+use crate::auth_manager::AuthManager;
 use anyhow::Result;
 use std::collections::HashMap;
 use std::io::Write;
@@ -164,6 +165,10 @@ impl ToolManager {
             ));
         }
 
+        // Prepare authentication-safe environment and warn about browser opening
+        AuthManager::prepare_auth_safe_environment()?;
+        AuthManager::warn_if_browser_likely(display_name)?;
+
         // Clear any remaining progress indicators and ensure clean terminal state
         print!("\x1b[2K\r"); // Clear current line
         print!("\x1b[?25h"); // Show cursor
@@ -199,6 +204,9 @@ impl ToolManager {
         let status = cmd
             .status()
             .map_err(|e| anyhow::anyhow!("Failed to execute {}: {}", cli_command, e))?;
+
+        // Restore environment after tool execution
+        AuthManager::restore_environment()?;
 
         if !status.success() {
             return Err(anyhow::anyhow!(

@@ -102,12 +102,12 @@ terminal-jarvis templates apply my-template
 | Tool       | Description                            | Status           | Package                     |
 | ---------- | -------------------------------------- | ---------------- | --------------------------- |
 | `claude`   | Anthropic's Claude for code assistance | ✅ Stable        | `@anthropic-ai/claude-code` |
-| `gemini`   | Google's Gemini CLI tool               | ⚠️ Auth Issues\* | `@google/gemini-cli`        |
-| `qwen`     | Qwen coding assistant                  | ⚠️ Auth Issues\* | `@qwen-code/qwen-code`      |
+| `gemini`   | Google's Gemini CLI tool               | ✅ Stable        | `@google/gemini-cli`        |
+| `qwen`     | Qwen coding assistant                  | ✅ Stable        | `@qwen-code/qwen-code`      |
 | `opencode` | Terminal-based AI coding agent         | 🧪 Testing       | Install script              |
 | `llxprt`   | Multi-provider AI coding assistant     | 🧪 Testing       | NPM package                 |
 
-\*See [limitations](docs/LIMITATIONS.md) for authentication workarounds
+\*See [limitations](docs/LIMITATIONS.md) for known issues and workarounds
 
 ## Configuration (Optional)
 
@@ -164,7 +164,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - [x] Smart tool detection and status reporting
 - [x] One-click installation with NPM validation
 - [x] Responsive terminal design
-- [ ] Enhanced authentication flows (addressing current login issues)
+- [x] Enhanced authentication flows (addressing current login issues)
 - [ ] Improved wrapper layer stability
 - [ ] Plugin system for custom tools
 - [ ] Shell completion scripts

@@ -25,9 +25,16 @@ pub async fn handle_run_tool(tool: &str, args: &[String]) -> Result<()> {
     if !ToolManager::check_tool_installed(cli_command) {
         check_progress.finish_error(&format!("Tool '{tool}' is not installed"));
 
-        let should_install = Confirm::new(&format!("📦 Install '{tool}' now?"))
+        let should_install = match Confirm::new(&format!("📦 Install '{tool}' now?"))
             .with_default(true)
-            .prompt()?;
+            .prompt()
+        {
+            Ok(result) => result,
+            Err(_) => {
+                // User interrupted - treat as "no"
+                return Err(anyhow!("Installation cancelled"));
+            }
+        };
 
         if should_install {
             handle_install_tool(tool).await?;
@@ -502,9 +509,18 @@ pub async fn handle_interactive_mode() -> Result<()> {
         options.push("🚪 Exit".to_string());
         tool_mapping.push(None);
 
-        let selection = Select::new("Select an AI tool to launch:", options.clone())
+        let selection = match Select::new("Select an AI tool to launch:", options.clone())
             .with_page_size(15)
-            .prompt()?;
+            .prompt()
+        {
+            Ok(selection) => selection,
+            Err(_) => {
+                // User interrupted (Ctrl+C) - show clean exit message
+                println!();
+                println!("👋 Goodbye!");
+                return Ok(());
+            }
+        };
 
         // Handle selection
         if selection.contains("⚙️") {
@@ -520,11 +536,19 @@ pub async fn handle_interactive_mode() -> Result<()> {
                 let tool_info = tools.get(tool_name).unwrap();
 
                 if !tool_info.is_installed {
-                    let should_install = Confirm::new(&format!(
+                    let should_install = match Confirm::new(&format!(
                         "{neon_blue}📦 '{tool_name}' is not installed. Install it now?{reset}"
                     ))
                     .with_default(true)
-                    .prompt()?;
+                    .prompt()
+                    {
+                        Ok(result) => result,
+                        Err(_) => {
+                            // User interrupted - go back to main menu
+                            println!("\n{neon_cyan}🔙 Installation cancelled{reset}");
+                            false
+                        }
+                    };
 
                     if should_install {
                         println!("\n{neon_cyan}📦 Installing {tool_name}...{reset}");
@@ -535,11 +559,18 @@ pub async fn handle_interactive_mode() -> Result<()> {
                     }
                 }
 
-                let args_input = Text::new(&format!(
+                let args_input = match Text::new(&format!(
                     "{neon_white}Enter arguments for {tool_name} (or press Enter for default):{reset}"
                 ))
                 .with_default("")
-                .prompt()?;
+                .prompt() {
+                    Ok(input) => input,
+                    Err(_) => {
+                        // User interrupted - go back to main menu
+                        println!("\n{neon_cyan}🔙 Operation cancelled{reset}");
+                        continue;
+                    }
+                };
 
                 let args: Vec<String> = if args_input.trim().is_empty() {
                     vec![]
@@ -606,9 +637,16 @@ async fn handle_manage_tools_menu() -> Result<()> {
         "🔙 Back to Main Menu".to_string(),
     ];
 
-    let selection = Select::new("Choose an option:", options)
+    let selection = match Select::new("Choose an option:", options)
         .with_page_size(10)
-        .prompt()?;
+        .prompt()
+    {
+        Ok(selection) => selection,
+        Err(_) => {
+            // User interrupted - return to main menu
+            return Ok(());
+        }
+    };
 
     match selection.as_str() {
         s if s.starts_with("📦") => handle_install_tools_menu().await,
@@ -660,7 +698,13 @@ async fn handle_install_tools_menu() -> Result<()> {
     ));
 
     let tools_to_install =
-        MultiSelect::new("Select tools to install:", uninstalled_tools).prompt()?;
+        match MultiSelect::new("Select tools to install:", uninstalled_tools).prompt() {
+            Ok(tools) => tools,
+            Err(_) => {
+                // User interrupted - return to previous menu
+                return Ok(());
+            }
+        };
 
     println!();
     for tool in tools_to_install {
@@ -701,7 +745,13 @@ async fn handle_update_tools_menu() -> Result<()> {
     let mut options = installed_tools.clone();
     options.push("All Tools".to_string());
 
-    let selection = Select::new("Select tools to update:", options).prompt()?;
+    let selection = match Select::new("Select tools to update:", options).prompt() {
+        Ok(selection) => selection,
+        Err(_) => {
+            // User interrupted - return to previous menu
+            return Ok(());
+        }
+    };
 
     println!();
     if selection == "All Tools" {
@@ -821,7 +871,13 @@ async fn handle_tool_info_menu() -> Result<()> {
         .into_iter()
         .map(String::from)
         .collect();
-    let tool = Select::new("Select a tool for information:", tool_names).prompt()?;
+    let tool = match Select::new("Select a tool for information:", tool_names).prompt() {
+        Ok(selection) => selection,
+        Err(_) => {
+            // User interrupted - return to previous menu
+            return Ok(());
+        }
+    };
 
     println!();
     handle_tool_info(&tool).await?;
@@ -857,9 +913,16 @@ pub async fn handle_config_reset() -> Result<()> {
     };
 
     if config_path.exists() {
-        let confirm = Confirm::new("Are you sure you want to reset configuration to defaults? This will delete your current config file.")
+        let confirm = match Confirm::new("Are you sure you want to reset configuration to defaults? This will delete your current config file.")
             .with_default(false)
-            .prompt()?;
+            .prompt() {
+                Ok(result) => result,
+                Err(_) => {
+                    // User interrupted - cancel the operation
+                    ProgressUtils::info_message("Configuration reset cancelled");
+                    return Ok(());
+                }
+            };
 
         if confirm {
             std::fs::remove_file(&config_path)?;

@@ -1428,7 +1428,7 @@ dependencies = [
 
 [[package]]
 name = "terminal-jarvis"
-version = "0.0.39"
+version = "0.0.40"
 dependencies = [
  "anyhow",
  "clap",
@@ -1441,6 +1441,7 @@ dependencies = [
  "serde",
  "serde_json",
  "shell-words",
+ "tempfile",
  "term_size",
  "tokio",
  "tokio-test",

@@ -4,11 +4,12 @@ This document outlines current limitations, known issues, and workarounds for Te
 
 ## Authentication Issues
 
-### Gemini and Qwen Login Problems
+### ~~Gemini and Qwen Login Problems~~ (RESOLVED in v0.0.40)
 
-- **Issue**: Login may fail on the first attempt for Gemini and Qwen tools
-- **Workaround**: If login fails, try logging in a second time - this typically resolves the authentication issue
-- **Status**: Under investigation to reduce authentication friction
+- **Previous Issue**: Login would fail on first attempt due to browser opening in headless environments
+- **Resolution**: Added AuthManager system that detects CI/headless environments and prevents unwanted browser opening
+- **Current Behavior**: Tools now properly prompt for API keys instead of opening browsers in terminal environments
+- **Status**: ✅ **FIXED** - Browser authentication issues resolved
 
 ## Tool-Specific Issues
 

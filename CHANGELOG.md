@@ -5,6 +5,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.0.40] - 2025-08-08
+
+### Fixed
+- **Browser Opening Prevention**: Fixed unwanted browser authentication behavior for Gemini CLI and Qwen Code
+  - Added AuthManager system to detect headless/CI environments and prevent browser opening
+  - Tools now properly prompt for API keys instead of opening browsers in terminal environments
+  - Comprehensive integration tests to prevent regression of browser opening behavior
+  - Fixed failing integration test for environment variable setup
+
 ## [0.0.39] - 2025-08-08
 
 ### Fixed

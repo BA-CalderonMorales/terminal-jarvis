@@ -12,6 +12,7 @@ src/
 ├── cli.rs                # Clean, expressive CLI interface definitions
 ├── cli_logic.rs          # Business logic with interactive T.JARVIS interface
 ├── tools.rs              # Tool management and detection logic
+├── auth_manager.rs       # Authentication management and browser prevention
 ├── installation_arguments.rs # Installation commands and NPM validation
 ├── services.rs           # Service layer for external tools (gh CLI, etc.)
 ├── config.rs             # TOML configuration management
@@ -26,6 +27,7 @@ src/
 - **`cli.rs`**: Expressive command definitions with optional subcommands (defaults to interactive mode)
 - **`cli_logic.rs`**: Complete business logic including the interactive T.JARVIS interface with ASCII art
 - **`tools.rs`**: Comprehensive tool detection using multiple verification methods (`which`, `--version`, `--help`)
+- **`auth_manager.rs`**: Authentication management, environment detection, and browser opening prevention for headless/CI environments
 - **`installation_arguments.rs`**: Centralized installation commands with NPM dependency validation
 - **`services.rs`**: Service layer for external integrations (GitHub CLI, package managers)
 - **`config.rs`**: TOML configuration file management
