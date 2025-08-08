@@ -27,13 +27,30 @@ src/
 - **`cli.rs`**: Expressive command definitions with optional subcommands (defaults to interactive mode)
 - **`cli_logic.rs`**: Complete business logic including the interactive T.JARVIS interface with ASCII art
 - **`tools.rs`**: Comprehensive tool detection using multiple verification methods (`which`, `--version`, `--help`)
-- **`auth_manager.rs`**: Authentication management, environment detection, and browser opening prevention for headless/CI environments
+- **Authentication & Browser Prevention**: Built-in system for detecting headless/CI environments and preventing unwanted browser authentication flows
 - **`installation_arguments.rs`**: Centralized installation commands with NPM dependency validation
 - **`services.rs`**: Service layer for external integrations (GitHub CLI, package managers)
 - **`config.rs`**: TOML configuration file management
 - **API modules**: Framework code for future web integrations (currently unused)
 
 The interactive mode provides a complete T.JARVIS experience with real-time tool status, installation management, and a beautiful terminal interface.
+
+## Authentication & Environment Management
+
+Terminal Jarvis includes sophisticated authentication management to prevent browser opening in headless environments:
+
+- **Environment Detection**: Automatically detects CI environments, SSH sessions, Docker containers, and Codespaces
+- **Browser Prevention**: Prevents tools like Gemini CLI and Qwen Code from opening browsers in terminal environments
+- **API Key Guidance**: Provides clear instructions for API key setup when browser authentication is blocked
+- **Seamless Integration**: Works transparently with all supported AI coding tools
+
+## Terminal State Management
+
+For optimal tool integration, Terminal Jarvis implements careful terminal state management:
+
+- **Minimal Interference**: Uses minimal terminal clearing sequences to avoid conflicts with tool initialization
+- **State Preparation**: Prepares terminal state for tools that require specific input focus (like OpenCode)
+- **Race Condition Prevention**: Includes initialization delays to prevent conflicts between Terminal Jarvis and launched tools
 
 ## Adding New Tools
 

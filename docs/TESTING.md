@@ -46,6 +46,40 @@ This document outlines our comprehensive testing approach to ensure core functio
 ./scripts/local-cicd.sh
 ```
 
+## Test-Driven Bugfix Workflow
+
+**MANDATORY for ALL Bugfixes**: Terminal Jarvis follows a strict test-driven development approach for bug resolution:
+
+### Required TDD Process
+
+1. **Identify the Bug**: Understand exact problem and reproduction steps
+2. **Write Failing Test FIRST**: 
+   - Create test that reproduces the bug behavior
+   - Test MUST fail initially (proving bug exists)
+   - Place in appropriate location:
+     - `tests/` directory for integration tests
+     - `src/` with `#[cfg(test)]` for unit tests
+3. **Run Test**: Verify it fails for expected reason
+4. **Implement Fix**: Make minimal changes to make test pass
+5. **Verify Fix**: Test passes, no regressions
+6. **Commit**: Include both test and fix with clear message
+
+### Example Test Structure
+```rust
+#[test]
+fn test_bug_opencode_input_focus_on_fresh_install() {
+    // Reproduces issue where opencode input box lacks focus on fresh installs
+    // Bug: User cannot type directly without manual focus
+    // Expected: Input box should be automatically focused
+    
+    // Test implementation here
+}
+```
+
+### Recent TDD Success Stories
+- **OpenCode Input Focus** (v0.0.41): Added `opencode_input_focus_tests.rs` with failing → passing tests
+- **Browser Prevention** (v0.0.40): Added `integration_auth_tests.rs` for authentication behavior
+
 ## Core Functionality Guarantees
 
 Our test suite validates these essential behaviors:
@@ -81,8 +115,15 @@ Our test suite validates these essential behaviors:
 - ✅ Browser opening prevention in headless/CI environments
 - ✅ Environment detection (CI, Codespaces, SSH, containers)
 - ✅ API key validation and guidance for Gemini CLI and Qwen Code
-- ✅ AuthManager integration testing with real tool behavior
+- ✅ Authentication behavior integration testing with real tool scenarios
 - ✅ Regression tests to prevent browser opening in terminal environments
+
+### 6. **Terminal State & Tool Integration**
+
+- ✅ OpenCode input focus works immediately on fresh installs
+- ✅ Terminal state preparation doesn't interfere with tool initialization
+- ✅ Minimal terminal clearing sequences prevent race conditions
+- ✅ Tool-specific launch optimizations (initialization delays, state management)
 
 ## Integration with Development Workflow
 

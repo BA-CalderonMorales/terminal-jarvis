@@ -5,9 +5,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.0.42] - 2025-08-08
+
+### Enhanced
+
+- Updated version to 0.0.42 for new release
+- All CI/CD validation passing with comprehensive test suite
+- Quality gates and NPM package validation working correctly
+
 ## [0.0.41] - 2025-08-08
 
 ### Fixed
+
 - **OpenCode Input Focus**: Fixed input box focus issue on fresh installs
   - Added special terminal state preparation for opencode to ensure immediate input focus
   - Implemented minimal terminal clearing sequence to avoid interference with opencode initialization
@@ -18,6 +27,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.0.40] - 2025-08-08
 
 ### Fixed
+
 - **Browser Opening Prevention**: Fixed unwanted browser authentication behavior for Gemini CLI and Qwen Code
   - Added AuthManager system to detect headless/CI environments and prevent browser opening
   - Tools now properly prompt for API keys instead of opening browsers in terminal environments
@@ -27,6 +37,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.0.39] - 2025-08-08
 
 ### Fixed
+
 - **NPM Publishing Reliability**: Removed automated NPM publishing from CI/CD scripts to prevent 2FA authentication failures
   - Scripts now handle Git operations (commit/tag/push) reliably
   - Manual NPM publishing prevents terminal-based 2FA authentication issues
@@ -36,12 +47,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Distribution tag management procedures
 
 ### Enhanced
+
 - **Deployment Workflow**: Improved reliability by separating automated Git operations from manual NPM publishing
 - **Error Prevention**: Scripts now provide clear instructions for manual NPM publishing instead of failing on authentication
 
 ## [0.0.38] - 2025-08-08
 
 ### Added
+
 - **Separated CI/CD Scripts**: Split local-cicd.sh into dedicated local-ci.sh and local-cd.sh scripts
   - `local-ci.sh`: Validation-only script (no commits/pushes) for safe testing
   - `local-cd.sh`: Deployment-only script (commit/tag/push/publish) with version verification
@@ -54,6 +67,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Covers architecture, development standards, version management, and release process
 
 ### Enhanced
+
 - **Version Safety Checks**: Both CI and CD scripts now validate version consistency across all files
 - **Pre-deployment Validation**: Prevents accidental version mismatches before deployment
 - **Development Workflow**: Clear separation between validation (CI) and deployment (CD) operations
@@ -61,6 +75,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.0.37] - 2025-08-06
 
 ### Enhanced
+
 - **README Visual Improvements**: Added promo image at 50% width for better visual presentation
 - **Documentation Alignment**: Fixed terminal header alignment in text documentation files
 

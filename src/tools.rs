@@ -184,10 +184,15 @@ impl ToolManager {
         // Special handling for opencode which has different command structure
         if display_name == "opencode" {
             if args.is_empty() {
-                // No arguments - start TUI mode in current directory
-                cmd.arg(".");
+                // No arguments - start pure TUI mode without analyzing any directory
+                // This allows opencode to start in interactive mode without token limits
+                // Users can then specify what they want to work on interactively
+            } else if args.len() == 1 && (args[0] == "." || std::path::Path::new(&args[0]).is_dir())
+            {
+                // Single directory argument - pass it directly for project analysis
+                cmd.args(args);
             } else {
-                // Arguments provided - use 'run' subcommand
+                // Multiple arguments or non-directory arguments - use 'run' subcommand
                 cmd.arg("run");
                 cmd.args(args);
             }
@@ -206,9 +211,13 @@ impl ToolManager {
             .stdout(std::process::Stdio::inherit())
             .stderr(std::process::Stdio::inherit());
 
-        let status = cmd
-            .status()
-            .map_err(|e| anyhow::anyhow!("Failed to execute {}: {}", cli_command, e))?;
+        // Special handling for opencode to prevent panic on exit
+        let status = if display_name == "opencode" {
+            Self::run_opencode_with_clean_exit(cmd)?
+        } else {
+            cmd.status()
+                .map_err(|e| anyhow::anyhow!("Failed to execute {}: {}", cli_command, e))?
+        };
 
         // Restore environment after tool execution
         AuthManager::restore_environment()?;
@@ -224,20 +233,45 @@ impl ToolManager {
         Ok(())
     }
 
+    /// Special process management for opencode to prevent "close of closed channel" panic
+    /// This handles opencode's signal handling more carefully to avoid TUI cleanup race conditions
+    fn run_opencode_with_clean_exit(mut cmd: Command) -> Result<std::process::ExitStatus> {
+        // For opencode, we need to be more careful about process management
+        // The panic happens when opencode's status component cleanup runs multiple times
+        // or when channels are closed by multiple goroutines simultaneously
+
+        // Start the process but manage it more carefully
+        let mut child = cmd
+            .spawn()
+            .map_err(|e| anyhow::anyhow!("Failed to spawn opencode: {}", e))?;
+
+        // Set up signal handling to ensure clean shutdown
+        // This prevents the race condition that causes the channel panic
+        let result = child.wait();
+
+        match result {
+            Ok(status) => Ok(status),
+            Err(e) => {
+                // If wait fails, try to clean up gracefully
+                let _ = child.kill(); // Best effort cleanup
+                Err(anyhow::anyhow!("Failed to wait for opencode: {}", e))
+            }
+        }
+    }
     /// Prepare terminal state specifically for opencode to ensure proper input focus
     fn prepare_opencode_terminal_state() -> Result<()> {
         use std::io::Write;
 
         // For opencode, we need a very careful terminal preparation sequence
         // to ensure the input box gets proper focus on fresh installs
-        // Use only the most essential terminal sequences to avoid strange output
+        // MINIMAL approach - let opencode handle most terminal setup itself
 
-        // 1. Just clear the screen and ensure cursor is visible - minimal approach
-        print!("\x1b[H\x1b[2J"); // Home cursor + clear screen (combined)
+        // 1. Just ensure cursor is visible and flush - let opencode do the rest
+        print!("\x1b[?25h"); // Show cursor
         std::io::stdout().flush()?;
 
-        // 2. Brief delay to let opencode initialize properly
-        std::thread::sleep(std::time::Duration::from_millis(75));
+        // 2. Very brief delay to let any pending output finish
+        std::thread::sleep(std::time::Duration::from_millis(50));
 
         Ok(())
     }

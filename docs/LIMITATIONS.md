@@ -7,25 +7,25 @@ This document outlines current limitations, known issues, and workarounds for Te
 ### ~~Gemini and Qwen Login Problems~~ (RESOLVED in v0.0.40)
 
 - **Previous Issue**: Login would fail on first attempt due to browser opening in headless environments
-- **Resolution**: Added AuthManager system that detects CI/headless environments and prevents unwanted browser opening
+- **Resolution**: Added comprehensive environment detection system that prevents unwanted browser opening
 - **Current Behavior**: Tools now properly prompt for API keys instead of opening browsers in terminal environments
-- **Status**: ✅ **FIXED** - Browser authentication issues resolved
+- **Status**: ✅ **FIXED** - Browser authentication issues resolved with robust environment detection
 
 ## Tool-Specific Issues
 
-### Opencode Input Focus (Fixed)
+### ~~OpenCode Input Focus~~ (RESOLVED in v0.0.41)
 
-- **Issue**: Input box lacked focus on fresh installs, requiring manual clicking before typing
+- **Previous Issue**: Input box lacked focus on fresh installs, requiring manual clicking before typing
 - **Root Cause**: Terminal Jarvis progress indicators and clearing sequences interfered with opencode's terminal initialization
-- **Resolution**: Added special terminal state preparation with minimal escape sequences and initialization delay
+- **Resolution**: Implemented careful terminal state preparation with minimal escape sequences and 75ms initialization delay
 - **Current Behavior**: Input box is automatically focused and ready for immediate typing on startup
-- **Status**: ✅ **FIXED** - Input focus works immediately in all launch scenarios
+- **Status**: ✅ **FIXED** - Input focus works immediately with comprehensive test coverage
 
 ### New Tool Testing
 
-- **Opencode**: Relatively new addition, actively seeking user feedback and testing
-- **LLxprt**: Recently added tool, looking for community testers to validate functionality
-- **Feedback**: Please report any issues or unexpected behavior with these tools via GitHub issues
+- **LLxprt**: Recently added multi-provider AI coding assistant, actively seeking community feedback
+- **Feedback**: Please report any issues or unexpected behavior with tools via GitHub issues
+- **Testing**: All tools undergo comprehensive integration testing, but real-world usage patterns help identify edge cases
 
 ## Platform-Specific Requirements
 

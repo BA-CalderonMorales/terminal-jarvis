@@ -60,6 +60,15 @@ pub async fn handle_run_tool(tool: &str, args: &[String]) -> Result<()> {
     tokio::time::sleep(tokio::time::Duration::from_millis(400)).await;
     startup_progress.finish_success(&format!("Starting {tool}"));
 
+    // Special handling for opencode - ensure clean terminal state
+    if tool == "opencode" {
+        use std::io::Write;
+        // Force flush any remaining output and reset terminal
+        print!("\x1b[2J\x1b[H\x1b[?25h"); // Clear screen, home cursor, show cursor
+        std::io::stdout().flush().unwrap_or_default();
+        tokio::time::sleep(tokio::time::Duration::from_millis(300)).await;
+    }
+
     ToolManager::run_tool(tool, args).await
 }
 

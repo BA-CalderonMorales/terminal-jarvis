@@ -185,5 +185,6 @@ cargo uninstall terminal-jarvis
 - **Contents**: Pre-compiled binaries, TypeScript wrapper
 - **Dependencies**: Zero runtime dependencies
 - **Platforms**: Cross-platform support (Windows, macOS, Linux)
+- **Current Version**: v0.0.42 with enhanced authentication management and terminal state improvements
 
 > **Note**: The current NPM version includes full binary functionality with the complete T.JARVIS interface. No additional installation required!

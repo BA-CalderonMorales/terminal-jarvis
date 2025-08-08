@@ -2,8 +2,8 @@
 
 import { spawn } from 'child_process';
 import { existsSync } from 'fs';
+import { arch, platform } from 'os';
 import { join } from 'path';
-import { platform, arch } from 'os';
 
 function getBundledBinaryPath(): string {
     const currentPlatform = platform();
@@ -136,7 +136,7 @@ async function main() {
 }
 
 function showFallbackMessage() {
-    console.log("🤖 Terminal Jarvis v0.0.41");
+    console.log("🤖 Terminal Jarvis v0.0.42");
     console.log("");
     console.log("❌ Error: Could not find or execute the T.JARVIS binary.");
     console.log("");
