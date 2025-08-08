@@ -334,126 +334,32 @@ if [ "$SHOULD_PUBLISH" = true ]; then
         echo -e "${YELLOW}→ Skipping git operations (NPM-only publish)...${RESET}"
     fi
     
-    # Ask about NPM publish (or auto-publish for NPM-only option)
+    # NPM Publishing Instructions  
     echo ""
-    if [ "${SKIP_GIT_OPERATIONS:-false}" = "true" ]; then
-        echo -e "${CYAN}Publishing current version v${NEW_VERSION} to NPM registry...${RESET}"
-        publish_npm="y"
-    else
-        read -p "Publish to NPM registry? (y/N): " publish_npm
-    fi
-    
-    if [[ $publish_npm =~ ^[Yy]$ ]]; then
-        echo -e "${BLUE}→ Publishing to NPM...${RESET}"
-        cd npm/terminal-jarvis
-        npm publish --access public
-        cd ../..
-        echo -e "${GREEN}✅ Published to NPM registry!${RESET}"
-        
-        # Automatically add beta tag for all releases
-        echo ""
-        echo -e "${CYAN}📦 NPM Distribution Tags${RESET}"
-        echo -e "${BLUE}→ Adding 'beta' tag automatically...${RESET}"
-        npm dist-tag add terminal-jarvis@${NEW_VERSION} beta
-        echo -e "${GREEN}✅ Added 'beta' tag${RESET}"
-        
-        # Ask about stable tag
-        echo ""
-        echo -e "${YELLOW}🏷️  Release Channel Decision${RESET}"
-        echo -e "${BLUE}This release has been tagged as 'beta' by default.${RESET}"
-        echo ""
-        read -p "Is this a stable, production-ready release? Add 'stable' tag? (y/N): " add_stable
-        if [[ $add_stable =~ ^[Yy]$ ]]; then
-            npm dist-tag add terminal-jarvis@${NEW_VERSION} stable
-            echo -e "${GREEN}✅ Added 'stable' tag - this is now a production release${RESET}"
-            RELEASE_CHANNEL="beta + stable"
-        else
-            echo -e "${BLUE}📋 Release will remain as beta-only${RESET}"
-            RELEASE_CHANNEL="beta"
-        fi
-        
-        # Show current tags
-        echo ""
-        echo -e "${BLUE}→ Current distribution tags:${RESET}"
-        npm dist-tag ls terminal-jarvis
-        
-        # Update documentation with tag information
-        echo -e "${BLUE}→ Updating README with installation tags...${RESET}"
-        
-        # Create installation section text based on available tags
-        if [[ $add_stable =~ ^[Yy]$ ]]; then
-            # Both beta and stable available
-            INSTALL_SECTION="## Installation
-
-Terminal Jarvis is available through multiple release channels:
-
-\`\`\`bash
-# Stable release (recommended for production)
-npm install -g terminal-jarvis@stable
-
-# Beta release (latest features, may be unstable)  
-npm install -g terminal-jarvis@beta
-
-# Specific version
-npm install -g terminal-jarvis@${NEW_VERSION}
-
-# Latest published version (same as @${NEW_VERSION})
-npm install -g terminal-jarvis
-\`\`\`"
-        else
-            # Only beta available
-            INSTALL_SECTION="## Installation
-
-Terminal Jarvis is available through NPM:
-
-\`\`\`bash
-# Beta release (latest version with newest features)
-npm install -g terminal-jarvis@beta
-
-# Specific version
-npm install -g terminal-jarvis@${NEW_VERSION}
-
-# Latest published version (same as @${NEW_VERSION})
-npm install -g terminal-jarvis
-\`\`\`
-
-> **Note:** This version is tagged as beta. Stable releases will be available soon."
-        fi
-        
-        # Also update the welcome message in the TypeScript file to show tag info
-        if [[ $add_stable =~ ^[Yy]$ ]]; then
-            sed -i "s/console.log('Terminal Jarvis v.*/console.log('Terminal Jarvis v$NEW_VERSION (stable + beta)');/" npm/terminal-jarvis/src/index.ts
-            WELCOME_TAG_INFO="stable + beta"
-        else
-            sed -i "s/console.log('Terminal Jarvis v.*/console.log('Terminal Jarvis v$NEW_VERSION (beta)');/" npm/terminal-jarvis/src/index.ts
-            WELCOME_TAG_INFO="beta"
-        fi
-        
-        # Rebuild NPM package with updated version info
-        echo -e "${BLUE}→ Rebuilding NPM package with updated tag info...${RESET}"
-        cd npm/terminal-jarvis && npm run build && cd ../..
-        
-        echo -e "${GREEN}✅ Documentation updated with tag information${RESET}"
-        
-    else
-        echo -e "${YELLOW}⏭️  Skipped NPM publish${RESET}"
-    fi
+    echo -e "${CYAN}📦 NPM Publishing${RESET}"
+    echo -e "${BLUE}Git operations completed successfully!${RESET}"
+    echo -e "${YELLOW}📋 Manual NPM Publishing Required${RESET}"
+    echo ""
+    echo -e "${BLUE}To avoid authentication issues with 2FA, NPM publishing must be done manually.${RESET}"
+    echo -e "${BLUE}See docs/MAINTAINERS.md for detailed NPM publishing instructions.${RESET}"
+    echo ""
+    echo -e "${CYAN}Quick NPM Publishing Commands:${RESET}"
+    echo -e "${YELLOW}  cd npm/terminal-jarvis${RESET}"
+    echo -e "${YELLOW}  npm publish --otp=<your-2fa-code>${RESET}"
+    echo -e "${YELLOW}  npm dist-tag add terminal-jarvis@${NEW_VERSION} beta${RESET}"
+    echo -e "${YELLOW}  npm dist-tag add terminal-jarvis@${NEW_VERSION} stable${RESET}"
+    echo ""
     
     echo ""
-    echo -e "${GREEN}🎉 Full CI/CD pipeline completed successfully!${RESET}"
+    echo -e "${GREEN}🎉 Git operations completed successfully!${RESET}"
     echo -e "${BLUE}Version: ${NEW_VERSION}${RESET}"
     echo -e "${BLUE}Branch: ${DEFAULT_BRANCH}${RESET}"
-    echo -e "${BLUE}NPM Published: $([ "$publish_npm" = "y" ] && echo "Yes" || echo "No")${RESET}"
-    if [[ $publish_npm =~ ^[Yy]$ ]]; then
-        echo -e "${BLUE}Release Channel: ${RELEASE_CHANNEL:-"beta"}${RESET}"
-        echo ""
-        echo -e "${CYAN}📦 Installation Commands:${RESET}"
-        echo -e "${YELLOW}  Beta release:   ${RESET}npm install -g terminal-jarvis@beta"
-        if [[ $add_stable =~ ^[Yy]$ ]]; then
-            echo -e "${YELLOW}  Stable release: ${RESET}npm install -g terminal-jarvis@stable"
-        fi
-        echo -e "${YELLOW}  Latest version: ${RESET}npm install -g terminal-jarvis@${NEW_VERSION}"
-    fi
+    echo -e "${BLUE}NPM Publishing: Manual (see docs/MAINTAINERS.md)${RESET}"
+    echo ""
+    echo -e "${CYAN}📦 After NPM Publishing, users can install with:${RESET}"
+    echo -e "${YELLOW}  Latest version:  ${RESET}npm install -g terminal-jarvis@${NEW_VERSION}"
+    echo -e "${YELLOW}  Beta release:    ${RESET}npm install -g terminal-jarvis@beta"
+    echo -e "${YELLOW}  Stable release:  ${RESET}npm install -g terminal-jarvis@stable"
     
 else
     echo -e "${GREEN}🎉 Quality checks completed for feature branch!${RESET}"

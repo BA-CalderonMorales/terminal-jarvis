@@ -5,6 +5,21 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.0.39] - 2025-08-08
+
+### Fixed
+- **NPM Publishing Reliability**: Removed automated NPM publishing from CI/CD scripts to prevent 2FA authentication failures
+  - Scripts now handle Git operations (commit/tag/push) reliably
+  - Manual NPM publishing prevents terminal-based 2FA authentication issues
+- **Maintainer Documentation**: Added comprehensive docs/MAINTAINERS.md with detailed NPM publishing procedures
+  - Step-by-step manual publishing instructions with 2FA handling
+  - Troubleshooting guide for common NPM publishing issues
+  - Distribution tag management procedures
+
+### Enhanced
+- **Deployment Workflow**: Improved reliability by separating automated Git operations from manual NPM publishing
+- **Error Prevention**: Scripts now provide clear instructions for manual NPM publishing instead of failing on authentication
+
 ## [0.0.38] - 2025-08-08
 
 ### Added
