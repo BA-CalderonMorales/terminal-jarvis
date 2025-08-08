@@ -18,9 +18,119 @@ RESET='\033[0m'
 CURRENT_BRANCH=$(git branch --show-current)
 DEFAULT_BRANCH="develop"
 
+# Function to display version status
+display_version_status() {
+    local cargo_version=$(grep '^version = ' Cargo.toml | sed 's/version = "\(.*\)"/\1/')
+    local npm_version=$(grep '"version":' npm/terminal-jarvis/package.json | sed 's/.*"version": "\(.*\)".*/\1/')
+    local ts_version=$(grep "console.log.*Terminal Jarvis v" npm/terminal-jarvis/src/index.ts | sed 's/.*Terminal Jarvis v\([0-9.]*\).*/\1/')
+    
+    echo -e "${BLUE}📍 Current Version Status:${RESET}"
+    echo -e "${BLUE}  • Cargo.toml: ${cargo_version}${RESET}"
+    echo -e "${BLUE}  • npm/terminal-jarvis/package.json: ${npm_version}${RESET}"
+    echo -e "${BLUE}  • npm/terminal-jarvis/src/index.ts: ${ts_version}${RESET}"
+    echo -e "${BLUE}  • src/cli_logic.rs: Auto-synced from Cargo.toml${RESET}"
+    
+    local readme_versions=$(grep -o 'terminal-jarvis@[0-9.]*' README.md 2>/dev/null || echo "none")
+    echo -e "${BLUE}  • README.md version refs: ${readme_versions}${RESET}"
+    
+    # Check if all versions match
+    if [ "$cargo_version" = "$npm_version" ] && [ "$cargo_version" = "$ts_version" ]; then
+        echo -e "${GREEN}✅ All versions are synchronized${RESET}"
+    else
+        echo -e "${YELLOW}⚠️  Version mismatch detected${RESET}"
+    fi
+}
+
+# Function to get canonical version (Cargo.toml)
+get_canonical_version() {
+    grep '^version = ' Cargo.toml | sed 's/version = "\(.*\)"/\1/'
+}
+
+# Function to update all version references programmatically
+update_all_versions() {
+    local new_version="$1"
+    local current_version="$2"
+    
+    if [ -z "$new_version" ] || [ -z "$current_version" ]; then
+        echo -e "${RED}❌ Error: update_all_versions requires new_version and current_version parameters${RESET}"
+        return 1
+    fi
+    
+    echo -e "${BLUE}🔄 Updating all version references from ${current_version} to ${new_version}...${RESET}"
+    
+    # Update Cargo.toml
+    echo -e "${BLUE}  • Updating Cargo.toml${RESET}"
+    sed -i "s/^version = \".*\"/version = \"$new_version\"/" Cargo.toml
+    
+    # Update NPM package.json
+    echo -e "${BLUE}  • Updating npm/terminal-jarvis/package.json${RESET}"
+    sed -i "s/\"version\": \".*\"/\"version\": \"$new_version\"/" npm/terminal-jarvis/package.json
+    
+    # Update version display in TypeScript
+    echo -e "${BLUE}  • Updating npm/terminal-jarvis/src/index.ts${RESET}"
+    sed -i "s/console.log(\"🤖 Terminal Jarvis v[0-9.]*\")/console.log(\"🤖 Terminal Jarvis v$new_version\")/g" npm/terminal-jarvis/src/index.ts
+    
+    # Update version references in README files (if any exist)
+    echo -e "${BLUE}  • Updating version references in documentation${RESET}"
+    sed -i "s/terminal-jarvis@[0-9]\+\.[0-9]\+\.[0-9]\+/terminal-jarvis@$new_version/g" README.md 2>/dev/null || echo -e "${BLUE}    (No version references found in README.md)${RESET}"
+    sed -i "s/terminal-jarvis@[0-9]\+\.[0-9]\+\.[0-9]\+/terminal-jarvis@$new_version/g" npm/terminal-jarvis/README.md 2>/dev/null || echo -e "${BLUE}    (No version references found in npm README.md)${RESET}"
+    
+    # Note: src/cli_logic.rs uses env!("CARGO_PKG_VERSION") so it auto-updates from Cargo.toml
+    echo -e "${BLUE}  • src/cli_logic.rs: Auto-syncs from Cargo.toml via env!(\"CARGO_PKG_VERSION\")${RESET}"
+    
+    echo -e "${GREEN}✅ All version references updated to ${new_version}${RESET}"
+}
+
+# Handle standalone version check command
+if [ "$1" = "--check-versions" ] || [ "$1" = "-v" ]; then
+    echo -e "${CYAN}🔍 Terminal Jarvis Version Status Check${RESET}"
+    echo ""
+    display_version_status
+    echo ""
+    echo -e "${BLUE}💡 To update all versions programmatically:${RESET}"
+    echo -e "${BLUE}   ./scripts/local-cd.sh --update-version <new_version>${RESET}"
+    echo -e "${BLUE}   Example: ./scripts/local-cd.sh --update-version 0.0.46${RESET}"
+    exit 0
+fi
+
+# Handle standalone version update command
+if [ "$1" = "--update-version" ] && [ -n "$2" ]; then
+    echo -e "${CYAN}🔄 Terminal Jarvis Programmatic Version Update${RESET}"
+    echo ""
+    
+    # Get current version
+    CURRENT_VERSION=$(grep '^version = ' Cargo.toml | sed 's/version = "\(.*\)"/\1/')
+    NEW_VERSION="$2"
+    
+    echo -e "${BLUE}Updating from version ${CURRENT_VERSION} to ${NEW_VERSION}...${RESET}"
+    echo ""
+    
+    # Validate version format
+    if [[ ! "$NEW_VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+        echo -e "${RED}❌ Invalid version format. Use semantic versioning (e.g., 0.0.46)${RESET}"
+        exit 1
+    fi
+    
+    # Update all versions
+    update_all_versions "$NEW_VERSION" "$CURRENT_VERSION"
+    
+    echo ""
+    echo -e "${GREEN}✅ Version update completed!${RESET}"
+    echo -e "${BLUE}💡 Next steps:${RESET}"
+    echo -e "${BLUE}   1. Update CHANGELOG.md with changes for v${NEW_VERSION}${RESET}"
+    echo -e "${BLUE}   2. Run ./scripts/local-ci.sh to validate${RESET}"
+    echo -e "${BLUE}   3. Run ./scripts/local-cd.sh to deploy${RESET}"
+    exit 0
+fi
+
 echo -e "${CYAN}🚀 Terminal Jarvis Local CD (Deployment) Pipeline${RESET}"
 echo -e "${BLUE}Current branch: ${CURRENT_BRANCH}${RESET}"
 echo -e "${YELLOW}This will commit, tag, push, and publish${RESET}"
+echo ""
+
+# Show current version status
+display_version_status
+CANONICAL_VERSION=$(get_canonical_version)
 echo ""
 
 # Prerequisite check
@@ -221,6 +331,7 @@ case $version_choice in
         echo -e "${BLUE}  Cargo.toml: ${CURRENT_VERSION}${RESET}"
         echo -e "${BLUE}  package.json: ${NPM_VERSION}${RESET}"
         echo -e "${BLUE}  index.ts: ${TS_VERSION}${RESET}"
+        echo -e "${BLUE}  cli_logic.rs: Uses env!(\"CARGO_PKG_VERSION\") - auto-synced${RESET}"
         
         if [ "$CURRENT_VERSION" = "$NPM_VERSION" ] && [ "$CURRENT_VERSION" = "$TS_VERSION" ]; then
             echo -e "${GREEN}✅ All versions are synchronized${RESET}"
@@ -231,8 +342,10 @@ case $version_choice in
             echo -e "${YELLOW}Please update all version references manually before using this option.${RESET}"
             echo ""
             echo -e "${BLUE}Files that need updating:${RESET}"
-            [ "$CURRENT_VERSION" != "$NPM_VERSION" ] && echo -e "${YELLOW}  • npm/terminal-jarvis/package.json${RESET}"
-            [ "$CURRENT_VERSION" != "$TS_VERSION" ] && echo -e "${YELLOW}  • npm/terminal-jarvis/src/index.ts${RESET}"
+            [ "$CURRENT_VERSION" != "$NPM_VERSION" ] && echo -e "${YELLOW}  • npm/terminal-jarvis/package.json (currently ${NPM_VERSION})${RESET}"
+            [ "$CURRENT_VERSION" != "$TS_VERSION" ] && echo -e "${YELLOW}  • npm/terminal-jarvis/src/index.ts (currently ${TS_VERSION})${RESET}"
+            echo ""
+            echo -e "${BLUE}Note: src/cli_logic.rs auto-updates from Cargo.toml${RESET}"
             exit 1
         fi
         ;;
@@ -244,26 +357,8 @@ esac
 
 if [ "$NEW_VERSION" != "$CURRENT_VERSION" ] && [ "${MANUAL_VERSION_UPDATE:-false}" != "true" ]; then
     echo -e "${BLUE}→ Updating version to ${NEW_VERSION}...${RESET}"
-    
-    # Update Cargo.toml
-    sed -i "s/^version = \".*\"/version = \"$NEW_VERSION\"/" Cargo.toml
-    
-    # Update NPM package.json
-    sed -i "s/\"version\": \".*\"/\"version\": \"$NEW_VERSION\"/" npm/terminal-jarvis/package.json
-    
-    # Update version display in TypeScript
-    sed -i "s/console.log('Terminal Jarvis v.*/console.log('Terminal Jarvis v$NEW_VERSION');/" npm/terminal-jarvis/src/index.ts
-    
-    # Update version references in README (both root and NPM package)
-    echo -e "${BLUE}→ Updating version references in documentation...${RESET}"
-    
-    # Update root README.md - find and update version references
-    sed -i "s/terminal-jarvis@[0-9]\+\.[0-9]\+\.[0-9]\+/terminal-jarvis@$NEW_VERSION/g" README.md
-    
-    # Update NPM package README.md (will be synced later)
-    sed -i "s/terminal-jarvis@[0-9]\+\.[0-9]\+\.[0-9]\+/terminal-jarvis@$NEW_VERSION/g" npm/terminal-jarvis/README.md
-    
-    echo -e "${GREEN}✅ Version updated to ${NEW_VERSION}${RESET}"
+    update_all_versions "$NEW_VERSION" "$CURRENT_VERSION"
+    echo -e "${GREEN}✅ Version updated to ${NEW_VERSION} in all locations${RESET}"
 fi
 
 # Rebuild with new version

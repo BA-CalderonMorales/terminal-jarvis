@@ -4,9 +4,26 @@
 
 Terminal Jarvis is a Rust-based CLI wrapper that provides a unified interface for managing AI coding tools (claude-code, gemini-cli, qwen-code, opencode, llxprt). It's packaged via NPM for easy distribution while maintaining the performance of a native Rust binary.
 
-**Current Version**: 0.0.41  
+**Current Version**: 0.0.45  
 **License**: MIT  
 **Repository**: https://github.com/BA-CalderonMorales/terminal-jarvis
+
+## Key Features & Capabilities
+
+### Session Continuation System (v0.0.44+)
+
+- **Intelligent Backslash Command Handling**: Prevents users from being kicked out of AI tools during authentication
+- **Seamless Tool Restart**: Tools that exit after authentication flows are automatically restarted
+- **Smart Command Detection**: Distinguishes between internal commands (`/auth`, `/login`, `/config`, `/setup`) and intentional exits (`/exit`, `/quit`, `/bye`)
+- **Multi-Tool Support**: Works with all 6 AI coding tools (claude, gemini, qwen, opencode, llxprt, codex)
+- **Anti-Pattern Prevention**: Eliminates user frustration from authentication workflows that previously forced tool exits
+
+### Enhanced Deployment Workflow (v0.0.45+)
+
+- **Programmatic Version Management**: Enhanced local-cd.sh with `--check-versions` and `--update-version` commands
+- **Controlled Deployment**: Separation of CI validation (local-ci.sh) from deployment (local-cd.sh)
+- **Version Synchronization**: Automated version updates across all project files
+- **Workflow Flexibility**: Choose between programmatic management and one-shot deployments
 
 ## Architecture & Code Organization
 
@@ -14,8 +31,8 @@ Terminal Jarvis is a Rust-based CLI wrapper that provides a unified interface fo
 
 - `main.rs` - Entry point, minimal delegation to CLI
 - `cli.rs` - Command definitions using clap (run, update, list, info, templates)
-- `cli_logic.rs` - Business logic + interactive T.JARVIS interface with ASCII art
-- `tools.rs` - Tool detection using multiple verification methods (`which`, `--version`, `--help`)
+- `cli_logic.rs` - Business logic + interactive T.JARVIS interface with ASCII art + session continuation system
+- `tools.rs` - Tool detection, command mapping + session continuation logic with smart restart capability
 - `installation_arguments.rs` - Installation commands with NPM validation
 - `services.rs` - PackageService and GitHubService for external integrations
 - `config.rs` - TOML configuration management
@@ -38,8 +55,11 @@ Terminal Jarvis is a Rust-based CLI wrapper that provides a unified interface fo
 
 ### Scripts (`/scripts/`)
 
-- `local-ci.sh` - Continuous Integration (validation only)
-- `local-cd.sh` - Continuous Deployment (commit/tag/push)
+- `local-ci.sh` - Continuous Integration (validation only, no commits/pushes)
+- `local-cd.sh` - Continuous Deployment (commit/tag/push/publish) with enhanced version management
+  - `--check-versions` - Verify version synchronization across all files
+  - `--update-version X.X.X` - Programmatically update all version references
+- `local-cicd.sh` - Combined CI/CD script (legacy, prefer separated scripts)
 - `workflow-dashboard.sh` - Development workflow status and recommendations
 - `smoke-test.sh` - Basic functionality tests
 - `manual_auth_test.sh` - Manual authentication behavior testing
@@ -50,6 +70,8 @@ Terminal Jarvis is a Rust-based CLI wrapper that provides a unified interface fo
 - `config_tests.rs` - Configuration system tests
 - `integration_auth_tests.rs` - Authentication and browser prevention integration tests
 - `auth_behavior_tests.rs` - Authentication behavior testing utilities
+- `opencode_input_focus_tests.rs` - OpenCode input focus bug validation tests
+- `codex_functionality_tests.rs` - Comprehensive codex tool functionality tests
 
 **IMPORTANT**: The `tests/` directory is **ONLY** for Rust test files (`.rs`). **NO SHELL SCRIPTS** (`.sh`) are allowed in tests/. All shell scripts must be placed in `scripts/` directory.
 
@@ -149,7 +171,41 @@ npm run sync-readme
 
 ## Release Process
 
-### Automated (Recommended)
+### Optimal Workflow (Enhanced Deployment)
+
+We've developed an optimal workflow that balances automation with control:
+
+**Phase 1: Development & Version Management**
+
+```bash
+# Check current version synchronization
+./scripts/local-cd.sh --check-versions
+
+# Update version programmatically (if needed)
+./scripts/local-cd.sh --update-version 0.0.X
+
+# Validate changes with CI
+./scripts/local-ci.sh
+```
+
+**Phase 2: Documentation Updates (MANDATORY)**
+
+1. **Update CHANGELOG.md first** - Add entry for current version with detailed change descriptions
+2. **Review docs/ directory** - Check docs/ARCHITECTURE.md, docs/INSTALLATION.md, docs/TESTING.md, docs/LIMITATIONS.md
+3. **Update README.md** - Ensure consistency with CHANGELOG.md and docs/ updates
+
+**Phase 3: Deployment**
+
+```bash
+# Deploy with controlled workflow
+./scripts/local-cd.sh
+
+# Manual NPM publishing (due to 2FA requirements)
+cd npm/terminal-jarvis && npm publish
+npm dist-tag add terminal-jarvis@X.X.X stable  # optional
+```
+
+### Legacy Automated (One-Shot)
 
 1. **Update CHANGELOG.md first** - Add entry for current version
 2. **Run**: `./scripts/local-cicd.sh` - Handles everything automatically
@@ -312,10 +368,41 @@ center_output = true
 
 ### Debugging CI/CD Issues
 
-- Check CHANGELOG.md is updated before running `./scripts/local-cicd.sh`
-- Verify all version numbers are synchronized
+- Check CHANGELOG.md is updated before running deployment scripts
+- Verify all version numbers are synchronized with `./scripts/local-cd.sh --check-versions`
 - Test NPM package locally in `/tmp` environment
 - Ensure binary has correct permissions
+- Use `./scripts/local-ci.sh` for validation without deployment
+
+### Debugging Session Continuation Issues
+
+**Common Issues:**
+
+- Tool exits unexpectedly during authentication → Check `should_continue_session()` logic in `tools.rs`
+- Infinite restart loops → Verify exit commands (`/exit`, `/quit`, `/bye`) are properly excluded
+- Tool doesn't restart after authentication → Check command matching in session continuation logic
+
+**Debug Commands:**
+
+```bash
+# Test session continuation with specific tool
+RUST_LOG=debug cargo run -- run claude
+
+# Check tool command mapping
+cargo run -- list
+
+# Validate session continuation logic
+cargo test --lib tools -- session_continuation
+```
+
+**Session Continuation Logic Flow:**
+
+1. User runs tool through Terminal Jarvis
+2. Tool exits with status code
+3. `should_continue_session()` checks last user input
+4. If internal command (`/auth`, `/login`, `/config`, `/setup`) → restart tool
+5. If exit command (`/exit`, `/quit`, `/bye`) → return to main menu
+6. If quick completion (< 3 seconds) → return to main menu (prevent false positives)
 
 ## Don'ts
 

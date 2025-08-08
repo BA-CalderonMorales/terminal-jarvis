@@ -2,9 +2,21 @@
 
 ## What This Project Does
 
-Terminal Jarvis is a thin Rust wrapper that provides a unified interface for managing and running AI coding tools like claude-code, gemini-cli, qwen-code, and opencode. Think of it as a package manager and runner for AI coding assistants.
+Terminal Jarvis is a thin Rust wrapper that provides a unified interface for managing and running AI coding tools like claude-code, gemini-cli, qwen-code, opencode, llxprt, and codex. Think of it as a package manager and runner for AI coding assistants.
+
+Key innovation: **Session Continuation System** prevents users from being kicked out of tools during authentication workflows.
 
 The project follows Orhun Parmaksız's approach for packaging Rust applications via NPM, making it easy to install with `npm install -g terminal-jarvis`.
+
+## Current Version & Key Features
+
+**Version**: 0.0.45
+**Major Features**:
+
+- Session Continuation System (v0.0.44+) - Intelligent handling of authentication workflows
+- Enhanced Deployment Workflow (v0.0.45+) - Programmatic version management
+- 6 AI Tools Integration - claude, gemini, qwen, opencode, llxprt, codex
+- Infinite Loop Prevention (v0.0.45) - Smart detection of exit vs internal commands
 
 ## How The Code Is Organized
 
@@ -14,7 +26,8 @@ The repository has two main parts:
 
 - `main.rs` - Entry point that starts the CLI
 - `cli.rs` - Command definitions using clap (run, update, list, info, templates)
-- `cli_logic.rs` - The actual business logic for each command
+- `cli_logic.rs` - The actual business logic for each command + session continuation system
+- `tools.rs` - Tool detection, command mapping + session continuation logic with intelligent restart
 - `services.rs` - PackageService and GitHubService for managing tools
 - `config.rs` - TOML configuration management
 - `api.rs`, `api_client.rs`, `api_base.rs` - Future API framework (currently unused)
@@ -215,9 +228,95 @@ mod tests {
 
 **ABSOLUTE RULE**: No bugfix commits without accompanying failing test. This is enforced during code review.
 
+## Session Continuation System (v0.0.44+)
+
+**Key Innovation**: Prevents users from being kicked out of AI tools during authentication workflows.
+
+### How It Works:
+
+1. **Smart Command Detection**: Distinguishes between internal commands and intentional exits
+
+   - **Internal commands trigger restart**: `/auth`, `/login`, `/config`, `/setup`
+   - **Exit commands terminate properly**: `/exit`, `/quit`, `/bye`
+   - **Quick completions return to menu**: Prevents false positive restarts
+
+2. **Session Flow**:
+
+   ```
+   User runs tool → Tool exits → Check last input → Decision:
+   ├── Internal command → Restart tool seamlessly
+   ├── Exit command → Return to Terminal Jarvis menu
+   └── Quick completion → Return to menu (prevent false positives)
+   ```
+
+3. **Infinite Loop Prevention (v0.0.45)**:
+   - **Problem**: Exit commands were incorrectly triggering session continuation
+   - **Solution**: Explicit exclusion of exit commands from restart logic
+   - **Result**: Exit commands now properly terminate and return to interface
+
+### Debugging Session Issues:
+
+```bash
+# Debug session continuation
+RUST_LOG=debug cargo run -- run claude
+
+# Test session continuation logic
+cargo test --lib tools -- session_continuation
+
+# Check command mapping
+cargo run -- list
+```
+
+**Code Location**: `src/tools.rs` → `should_continue_session()` function
+
+**ABSOLUTE RULE**: No bugfix commits without accompanying failing test. This is enforced during code review.
+
+## Enhanced Deployment Workflow
+
+### Optimal CI/CD Process (v0.0.45+)
+
+We use a controlled deployment approach with programmatic version management:
+
+**Phase 1: Development & Validation**
+
+```bash
+# Check version synchronization
+./scripts/local-cd.sh --check-versions
+
+# Update version programmatically (if needed)
+./scripts/local-cd.sh --update-version X.X.X
+
+# Validate with CI (no commits/pushes)
+./scripts/local-ci.sh
+```
+
+**Phase 2: Documentation (MANDATORY)**
+
+- Update CHANGELOG.md with version entry and detailed changes
+- Review docs/ directory for consistency
+- Update README.md to reflect any documentation changes
+
+**Phase 3: Deployment**
+
+```bash
+# Deploy changes (commit/tag/push)
+./scripts/local-cd.sh
+
+# Manual NPM publishing (due to 2FA)
+cd npm/terminal-jarvis && npm publish
+npm dist-tag add terminal-jarvis@X.X.X stable  # optional
+```
+
+**Key Benefits:**
+
+- **Controlled workflow**: Separate validation from deployment
+- **Programmatic version management**: No manual file editing
+- **Version synchronization**: Automated consistency across all files
+- **Flexibility**: Choose between programmatic and one-shot approaches
+
 ## How To Release
 
-**Recommended: Use Local CI/CD Script (see "Local CD with Agent Mode" section below for details)**
+**Recommended: Use Enhanced Deployment Workflow (see section above for details)**
 
 1. **FIRST: Update CHANGELOG.md** - Add entry for current version with clear change descriptions
 2. **MANDATORY: Review docs/ Directory** - **EVERY TIME** CHANGELOG.md is modified, you **MUST** review and update docs/
@@ -226,7 +325,12 @@ mod tests {
    - Verify new features/fixes are properly documented
    - This is **NON-NEGOTIABLE** - no CHANGELOG.md updates without docs/ review
    - **ALSO MANDATORY: Review and update README.md** - Required when CHANGELOG.md or docs/ are modified
-3. **THEN: Run automated script** - `./scripts/local-cicd.sh` (handles all steps below automatically)
+3. **THEN: Use Enhanced Workflow** - `./scripts/local-cd.sh --check-versions`, validation with `./scripts/local-ci.sh`, then deployment with `./scripts/local-cd.sh`
+
+**Legacy One-Shot: Use Local CI/CD Script**
+
+1. **Update CHANGELOG.md** - Add entry with clear change descriptions
+2. **Run automated script** - `./scripts/local-cicd.sh` (handles all steps below automatically)
 
 **Manual Release Process (if needed):**
 
@@ -292,7 +396,7 @@ npm dist-tag ls terminal-jarvis
 - [ ] `src/cli_logic.rs` uses `env!("CARGO_PKG_VERSION")` (auto-updates)
 - [ ] `CHANGELOG.md` has new version entry with clear changes
 - [ ] `README.md` version references updated in note section
-- [ ] `README.md` version references updated in note section
+- [ ] **Version synchronization verified**: `./scripts/local-cd.sh --check-versions` passes
 
 ### Documentation Updates:
 
@@ -324,23 +428,54 @@ npm dist-tag ls terminal-jarvis
 - [ ] NPX functionality verified (`npx terminal-jarvis` works)
 - [ ] Binary permissions and execution tested
 - [ ] Postinstall scripts validated
+- [ ] **Enhanced workflow tested**: `./scripts/local-ci.sh` passes validation
 
 **Never commit without completing the full checklist!**
 
+## Optimal Development Environment
+
+This workspace is designed for optimal AI-assisted development with the following principles:
+
+### Controlled Deployment Workflow (Preferred)
+
+**Use the enhanced workflow instead of one-shot deployments:**
+
+1. **Version Management**: `./scripts/local-cd.sh --check-versions` and `--update-version`
+2. **Validation**: `./scripts/local-ci.sh` for safe testing without commits
+3. **Documentation**: Manual CHANGELOG.md and docs/ updates with quality review
+4. **Deployment**: `./scripts/local-cd.sh` for controlled Git operations
+5. **Publishing**: Manual NPM publishing with proper 2FA handling
+
+**Benefits:**
+
+- Better process control and visibility
+- Separation of concerns (CI vs CD)
+- Programmatic version management prevents human error
+- Quality gates at each phase
+- Flexibility to skip or repeat phases as needed
+
+### Session Continuation Excellence
+
+**Our session continuation system represents best-in-class UX:**
+
+- Users never get kicked out during authentication workflows
+- Intelligent command detection prevents false positives
+- Clean exit handling respects user intent
+- Comprehensive test coverage ensures reliability
+
+This creates **the optimal environment** for working with AI coding tools.
+
 ## Local CD with Agent Mode
 
-When conducting local continuous deployment with agents, **ALWAYS** follow this order:
+When conducting local continuous deployment with agents, **ALWAYS** follow this enhanced workflow:
 
 ### CRITICAL: Pre-CI/CD CHANGELOG.md Update
 
-**BEFORE running `./scripts/local-cicd.sh`**, the CHANGELOG.md MUST be updated:
+**BEFORE running deployment scripts**, the CHANGELOG.md MUST be updated:
 
 1. **Update CHANGELOG.md FIRST** - Add entry for current version with clear change descriptions
-2. **The local-cicd.sh script will check for this** - If missing, it will prompt you to:
-   - Edit CHANGELOG.md immediately (opens in editor)
-   - Update manually and re-run the script
-   - Continue without update (not recommended)
-   - Exit to handle later
+2. **Enhanced workflow checks for this** - Scripts will validate CHANGELOG.md is updated
+3. **Controlled approach preferred** - Use `./scripts/local-cd.sh --check-versions` then `./scripts/local-ci.sh` then `./scripts/local-cd.sh`
 
 **CHANGELOG.md Entry Format:**
 
@@ -360,48 +495,52 @@ When conducting local continuous deployment with agents, **ALWAYS** follow this 
 - Improvements to existing features
 ```
 
-### Agent Workflow Process:
+### Enhanced Agent Workflow Process:
 
-1. **Update All Version References (if bumping version):**
+**Phase 1: Version Management**
 
-   - `Cargo.toml` - version field
-   - `npm/terminal-jarvis/package.json` - version field
-   - `npm/terminal-jarvis/src/index.ts` - console.log version display
-   - `src/cli_logic.rs` - interactive mode version display
-   - `CHANGELOG.md` - add new version entry with changes (**REQUIRED BEFORE SCRIPT**)
-   - `README.md` - version reference in the note section
+```bash
+# Check current version synchronization
+./scripts/local-cd.sh --check-versions
 
-2. **Run the Local CI/CD Script:**
+# Update version programmatically if needed
+./scripts/local-cd.sh --update-version 0.0.X
+```
 
-   ```bash
-   ./scripts/local-cicd.sh
-   ```
+**Phase 2: Validation**
 
-   - The script will verify CHANGELOG.md is updated
-   - If not updated, it will prompt for immediate action
-   - No manual build/test/commit commands needed
+```bash
+# Validate all changes without deployment
+./scripts/local-ci.sh
+```
 
-3. **Script Handles Everything Else:**
-   - Quality checks (clippy, fmt, tests)
-   - Core functionality validation
-   - Version bumping (if requested)
-   - Building and testing
-   - Git operations (commit, tag, push)
-   - NPM publishing and dist-tags
+**Phase 3: Documentation (MANDATORY)**
 
-**Why CHANGELOG.md First Matters:**
+1. **Update CHANGELOG.md** - Add detailed entry for current version
+2. **Review docs/ directory** - Update all relevant documentation
+3. **Update README.md** - Ensure consistency with changes
 
-- Ensures proper documentation of changes before release
-- Prevents rushed or incomplete release notes
-- Maintains high quality project documentation
-- Script enforces this requirement automatically
-- No releases without proper change documentation
+**Phase 4: Deployment**
+
+```bash
+# Deploy with controlled workflow
+./scripts/local-cd.sh
+```
+
+**Why Enhanced Workflow Matters:**
+
+- **Controlled deployment**: Separate validation from deployment
+- **Version consistency**: Programmatic management prevents human error
+- **Quality assurance**: CI validation catches issues before deployment
+- **Documentation completeness**: Enforced CHANGELOG.md and docs/ updates
+- **Flexibility**: Choose validation vs deployment vs combined approach
 
 **Agent Instructions:**
 
-- **ALWAYS ask the user to update CHANGELOG.md** before suggesting `./scripts/local-cicd.sh`
-- **NEVER run the CI/CD script** without confirming CHANGELOG.md is updated
-- **If user runs script without CHANGELOG.md update**, the script will catch this and prompt appropriately
+- **ALWAYS use enhanced workflow** - Prefer controlled approach over one-shot deployments
+- **NEVER skip CHANGELOG.md update** - Required before any deployment
+- **USE programmatic version management** - `--update-version` instead of manual editing
+- **VALIDATE before deployment** - Always run `./scripts/local-ci.sh` first
 
 ## Testing NPM Package Before Publishing
 

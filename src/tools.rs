@@ -158,8 +158,78 @@ impl ToolManager {
         false
     }
 
-    /// Run a tool with arguments
+    /// Run a tool with arguments - automatically handles session continuation for internal commands
     pub async fn run_tool(display_name: &str, args: &[String]) -> Result<()> {
+        let start_time = std::time::Instant::now();
+
+        // Run the tool normally first
+        let result = Self::run_tool_once(display_name, args).await;
+        let execution_time = start_time.elapsed();
+
+        match result {
+            Ok(()) => {
+                // Tool completed successfully - check if this looks like an internal command
+                // that should continue the session rather than exit to menu
+                if Self::should_continue_session(display_name, args, execution_time) {
+                    println!(
+                        "🔄 Internal command completed - continuing {display_name} session..."
+                    );
+                    tokio::time::sleep(tokio::time::Duration::from_millis(1000)).await;
+
+                    // Restart the tool without arguments to continue the interactive session
+                    Self::run_tool_once(display_name, &[]).await
+                } else {
+                    // Normal completion
+                    Ok(())
+                }
+            }
+            Err(e) => Err(e),
+        }
+    }
+
+    /// Check if a tool should continue its session after completing
+    fn should_continue_session(
+        _display_name: &str,
+        args: &[String],
+        _execution_time: std::time::Duration,
+    ) -> bool {
+        // First check: if this is explicitly an exit command, never continue
+        let is_exit_command = args.iter().any(|arg| {
+            matches!(
+                arg.as_str(),
+                "/exit" | "/quit" | "/bye" | "--exit" | "--quit" | "exit" | "quit" | "bye"
+            )
+        });
+
+        if is_exit_command {
+            return false; // Exit commands should never continue sessions
+        }
+
+        // ONLY continue sessions for explicit authentication/setup commands
+        // This prevents false positives from user exits, normal completions, etc.
+        let explicit_auth_setup_args = args.iter().any(|arg| {
+            // Very specific commands that indicate setup/auth workflows
+            matches!(
+                arg.as_str(),
+                "/auth"
+                    | "/login"
+                    | "--auth"
+                    | "--login"
+                    | "/setup"
+                    | "--setup"
+                    | "/config"
+                    | "--config"
+            ) || arg.contains("authenticate")
+                || arg.contains("oauth")
+        });
+
+        // Only continue if it's an explicit auth/setup command
+        // Remove the "quick completion + problematic tool" logic as it causes false positives
+        explicit_auth_setup_args
+    }
+
+    /// Run a tool with arguments (single execution without continuation logic)
+    pub async fn run_tool_once(display_name: &str, args: &[String]) -> Result<()> {
         let cli_command = Self::get_cli_command(display_name);
 
         if !Self::check_tool_installed(cli_command) {

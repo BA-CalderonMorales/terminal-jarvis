@@ -5,6 +5,50 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.0.45] - 2025-08-08
+
+### Fixed
+
+- **Session Continuation Infinite Loop**: Fixed critical issue where exit commands in AI tools caused infinite restart loops
+  - **Problem**: Users typing `/exit`, `/quit`, `/bye` in tools like claude would trigger session continuation and endlessly restart the tool
+  - **Solution**: Modified session continuation logic to explicitly exclude exit commands from restart triggers
+  - **Result**: Exit commands now properly terminate tools and return to Terminal Jarvis interface
+  - Only explicit authentication/setup commands (`/auth`, `/login`, `/config`, `/setup`) now trigger session continuation
+  - Eliminated false positives from quick tool completions that previously caused unwanted restarts
+
+### Enhanced
+
+- **Version Management**: Improved local-cd.sh script with comprehensive programmatic version updates
+  - Added automated version synchronization across all project files (Cargo.toml, package.json, index.ts)
+  - Enhanced version validation and consistency checking
+  - Improved error handling for version mismatches during deployment
+
+## [0.0.44] - 2025-08-08
+
+### Added
+
+- **Session Continuation System**: Implemented intelligent session continuation for AI coding tools
+  - **Backslash Command Fix**: Prevents users from being kicked out of tools when using internal commands like `/auth`, `/help`, `/config`
+  - **Seamless Authentication**: Tools that exit after authentication flows are automatically restarted to continue user sessions
+  - **Smart Detection**: Identifies internal commands vs intentional exits to provide appropriate behavior
+  - **Multi-Tool Support**: Works with llxprt, gemini, claude, and other AI coding assistants
+  - Added comprehensive test suite for session continuation validation
+
+### Enhanced
+
+- **Documentation**: Created comprehensive NPM package source documentation
+  - Added [`docs/SOURCES.md`](docs/SOURCES.md) with complete installation guide for all 6 AI coding tools
+  - Detailed NPM package mappings, installation commands, and troubleshooting information
+  - Security considerations and alternative installation methods documented
+  - Enhanced user experience with clear package source references
+
+### Fixed
+
+- **CLI User Experience**: Eliminated anti-pattern where users were forced to exit tools during authentication workflows
+  - **Previous behavior**: User runs tool → types `/auth` → tool exits → shows completion message → returns to main menu
+  - **New behavior**: User runs tool → types `/auth` → authentication completes → tool session continues seamlessly
+  - Maintains backward compatibility while improving user workflow continuity
+
 ## [0.0.43] - 2025-08-08
 
 ### Added
