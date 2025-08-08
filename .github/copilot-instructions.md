@@ -11,6 +11,7 @@ The project follows Orhun Parmaksız's approach for packaging Rust applications 
 The repository has two main parts:
 
 **Rust Application** (`/src/`):
+
 - `main.rs` - Entry point that starts the CLI
 - `cli.rs` - Command definitions using clap (run, update, list, info, templates)
 - `cli_logic.rs` - The actual business logic for each command
@@ -19,6 +20,7 @@ The repository has two main parts:
 - `api.rs`, `api_client.rs`, `api_base.rs` - Future API framework (currently unused)
 
 **NPM Package** (`/npm/terminal-jarvis/`):
+
 - `src/index.ts` - Simple TypeScript wrapper that calls the Rust binary
 - `package.json` - NPM package configuration
 - `biome.json` - Biome linting configuration (we use Biome, not ESLint)
@@ -28,7 +30,7 @@ The repository has two main parts:
 We use semantic versioning with **NO EMOJIS** and **NO DECORATIONS**. Just clean version numbers:
 
 - `0.0.1` - Bug fixes, docs, small improvements
-- `0.1.0` - New features that don't break existing functionality  
+- `0.1.0` - New features that don't break existing functionality
 - `1.0.0` - Breaking changes that require users to update their code
 
 Always update BOTH `Cargo.toml` and `npm/terminal-jarvis/package.json` at the same time.
@@ -49,12 +51,14 @@ Types to use: `fix`, `feat`, `break`, `docs`, `style`, `refactor`, `test`, `chor
 ## Code Quality Rules
 
 **Rust Code:**
+
 - Must pass `cargo clippy --all-targets --all-features -- -D warnings`
 - Must be formatted with `cargo fmt --all`
 - Use `anyhow::Result` for error handling
 - Add doc comments for public functions
 
 **TypeScript Code:**
+
 - Use Biome for linting and formatting, NOT ESLint
 - Run `npm run lint` and `npm run format` before committing
 
@@ -98,6 +102,64 @@ When suggesting terminal commands or using the `run_in_terminal` tool:
   ```
 - **INSTEAD** use: `[ condition ] && command1 && command2`
 
+## Tool Configuration Consistency (CRITICAL FOR NEW FEATURES)
+
+**When adding new AI coding tools**, these files MUST be updated together to prevent "Tool not found in configuration" errors:
+
+### Required File Updates (ALL MANDATORY):
+
+1. **`src/tools.rs`**:
+
+   - Add tool to `get_command_mapping()` HashMap
+   - Add tool to `get_tool_commands()` Vec with proper description
+   - Example: `mapping.insert("newtool", "newtool-cli");`
+
+2. **`src/services.rs`**:
+
+   - Add display name mapping in `get_display_name_to_config_mapping()`
+   - Example: `mapping.insert("newtool", "newtool-cli");`
+   - **CRITICAL**: This mapping is what connects the CLI display name to the config file key
+
+3. **`terminal-jarvis.toml.example`**:
+
+   - Add tool configuration with install/update commands
+   - Example: `newtool-cli = { enabled = true, auto_update = true, install_command = "npm install -g newtool-cli", update_command = "npm update -g newtool-cli" }`
+
+4. **Test Updates**:
+
+   - Update `test_display_name_to_config_mapping()` in `src/services.rs`
+   - Update `test_config_key_resolution()` in `src/services.rs`
+   - Add assertions for the new tool mapping
+
+5. **Documentation**:
+   - Update README.md tool list and descriptions
+   - Update CLI help text and package descriptions
+   - Update any relevant docs/ files
+
+### Common Failure Pattern:
+
+Adding a tool to `tools.rs` and config file but **forgetting the mapping in `services.rs`**. This causes the update system to fail with "Tool not found in configuration" because it can't translate the display name to the config key.
+
+### Verification Commands:
+
+```bash
+# Verify all tools are listed correctly
+cargo run -- list
+
+# Test services module mappings
+cargo test --lib services
+
+# Test end-to-end functionality
+cargo run -- update --help
+```
+
+### Why This Matters:
+
+- **Prevents runtime failures**: Missing mappings cause user-facing errors
+- **Maintains consistency**: All parts of the system stay synchronized
+- **Enables proper testing**: Tests catch mapping issues before release
+- **Improves user experience**: Users can update all tools without errors
+
 ## Test-Driven Bugfixes (MANDATORY)
 
 **CRITICAL REQUIREMENT**: Every bugfix session MUST follow Test-Driven Development:
@@ -105,12 +167,14 @@ When suggesting terminal commands or using the `run_in_terminal` tool:
 ### Bugfix Workflow (NON-NEGOTIABLE):
 
 1. **Write Failing Test FIRST**:
+
    - Create a test that reproduces the exact bug behavior
-   - Test MUST fail initially (proving the bug exists)  
+   - Test MUST fail initially (proving the bug exists)
    - Use descriptive names: `test_bug_opencode_input_focus_on_fresh_install`
    - Include detailed comments explaining the bug scenario
 
 2. **Test Placement**:
+
    - **Integration tests**: `tests/` directory as `.rs` files
    - **Unit tests**: `src/` files using `#[cfg(test)]` mod test blocks
    - **NEVER** put shell scripts in `tests/` directory
@@ -124,6 +188,7 @@ When suggesting terminal commands or using the `run_in_terminal` tool:
 6. **Commit Together**: Include both test and fix in same commit
 
 ### Example Test Structure:
+
 ```rust
 #[cfg(test)]
 mod tests {
@@ -134,7 +199,7 @@ mod tests {
         // Bug: opencode input box lacks focus on fresh installs
         // User cannot type directly without manual focus intervention
         // Expected: Input box should be automatically focused on startup
-        
+
         // Test implementation reproducing the bug
         assert_eq!(expected_behavior, actual_behavior);
     }
@@ -142,6 +207,7 @@ mod tests {
 ```
 
 ### Why This Matters:
+
 - **Prevents regression**: Test ensures bug never returns
 - **Documents behavior**: Test serves as living documentation
 - **Validates fix**: Proves the fix actually works
@@ -191,6 +257,7 @@ We use npm dist-tags to provide users with different release channels:
 - **beta** - For preview versions that may contain experimental features
 
 **Usage Examples:**
+
 ```bash
 # Install latest version (default)
 npm install -g terminal-jarvis
@@ -206,6 +273,7 @@ npm dist-tag ls terminal-jarvis
 ```
 
 **Best Practices:**
+
 - Use `stable` tag for releases that have been tested and are production-ready
 - Use `beta` tag for releases with new features that need user testing
 - A single version can have both tags if it serves both purposes
@@ -216,8 +284,9 @@ npm dist-tag ls terminal-jarvis
 **ALWAYS** verify these items before making any commit:
 
 ### Version Consistency Check:
+
 - [ ] `Cargo.toml` version updated
-- [ ] `npm/terminal-jarvis/package.json` version updated  
+- [ ] `npm/terminal-jarvis/package.json` version updated
 - [ ] `npm/terminal-jarvis/src/index.ts` version display updated
 - [ ] `npm/terminal-jarvis/package.json` postinstall script version updated
 - [ ] `src/cli_logic.rs` uses `env!("CARGO_PKG_VERSION")` (auto-updates)
@@ -226,19 +295,31 @@ npm dist-tag ls terminal-jarvis
 - [ ] `README.md` version references updated in note section
 
 ### Documentation Updates:
+
 - [ ] README.md reflects current functionality and features
 - [ ] Package size information updated if binary changed
 - [ ] Installation instructions are accurate
 - [ ] Examples work with current version
 
 ### Quality Checks:
+
 - [ ] `cargo clippy --all-targets --all-features -- -D warnings` passes
 - [ ] `cargo fmt --all` applied
 - [ ] `cargo test` passes (if tests exist)
 - [ ] **Failing test added for bugfixes** - If this is a bugfix, verify failing test was created first
 - [ ] NPM package builds: `cd npm/terminal-jarvis && npm run build`
 
+### Tool Configuration Consistency (if adding new tools):
+
+- [ ] Tool added to `src/tools.rs` command mapping and tool commands
+- [ ] Tool added to `src/services.rs` display name mapping
+- [ ] Tool configuration added to `terminal-jarvis.toml.example`
+- [ ] Tests updated in `services.rs` for new tool mapping
+- [ ] Documentation updated (README.md, CLI descriptions)
+- [ ] Verification commands run successfully (`cargo run -- list`, `cargo test --lib services`)
+
 ### Testing (Critical):
+
 - [ ] Local package testing in `/tmp` environment completed
 - [ ] NPX functionality verified (`npx terminal-jarvis` works)
 - [ ] Binary permissions and execution tested
@@ -262,22 +343,27 @@ When conducting local continuous deployment with agents, **ALWAYS** follow this 
    - Exit to handle later
 
 **CHANGELOG.md Entry Format:**
+
 ```markdown
 ## [X.X.X] - YYYY-MM-DD
 
 ### Added
+
 - New feature descriptions
 
 ### Fixed
-- Bug fixes and improvements  
+
+- Bug fixes and improvements
 
 ### Enhanced
+
 - Improvements to existing features
 ```
 
 ### Agent Workflow Process:
 
 1. **Update All Version References (if bumping version):**
+
    - `Cargo.toml` - version field
    - `npm/terminal-jarvis/package.json` - version field
    - `npm/terminal-jarvis/src/index.ts` - console.log version display
@@ -286,9 +372,11 @@ When conducting local continuous deployment with agents, **ALWAYS** follow this 
    - `README.md` - version reference in the note section
 
 2. **Run the Local CI/CD Script:**
+
    ```bash
    ./scripts/local-cicd.sh
    ```
+
    - The script will verify CHANGELOG.md is updated
    - If not updated, it will prompt for immediate action
    - No manual build/test/commit commands needed
@@ -302,6 +390,7 @@ When conducting local continuous deployment with agents, **ALWAYS** follow this 
    - NPM publishing and dist-tags
 
 **Why CHANGELOG.md First Matters:**
+
 - Ensures proper documentation of changes before release
 - Prevents rushed or incomplete release notes
 - Maintains high quality project documentation
@@ -309,6 +398,7 @@ When conducting local continuous deployment with agents, **ALWAYS** follow this 
 - No releases without proper change documentation
 
 **Agent Instructions:**
+
 - **ALWAYS ask the user to update CHANGELOG.md** before suggesting `./scripts/local-cicd.sh`
 - **NEVER run the CI/CD script** without confirming CHANGELOG.md is updated
 - **If user runs script without CHANGELOG.md update**, the script will catch this and prompt appropriately
@@ -318,6 +408,7 @@ When conducting local continuous deployment with agents, **ALWAYS** follow this 
 **ALWAYS** test the NPM package locally before publishing to catch issues early:
 
 1. **Build and Pack the Package:**
+
    ```bash
    cd npm/terminal-jarvis
    npm run build
@@ -325,44 +416,48 @@ When conducting local continuous deployment with agents, **ALWAYS** follow this 
    ```
 
 2. **Test Installation in Temporary Environment:**
+
    ```bash
    # Create clean test environment
    cd /tmp
    mkdir -p test-terminal-jarvis && cd test-terminal-jarvis
    npm init -y
-   
+
    # Install from local tarball
    npm install /path/to/terminal-jarvis-X.X.X.tgz
-   
+
    # Test the binary directly
    npx terminal-jarvis --help
    npx terminal-jarvis list
-   
+
    # Test multiple runs to verify NPX caching works
    npx terminal-jarvis --help  # Should not re-download
    ```
 
 3. **Verify Package Contents:**
+
    ```bash
    # Check what gets included in the package
    npm pack --dry-run
-   
+
    # Verify binary permissions and functionality
    ls -la node_modules/terminal-jarvis/bin/
    ./node_modules/terminal-jarvis/bin/terminal-jarvis --help
    ```
 
 4. **Test Different Installation Methods:**
+
    ```bash
    # Test global installation
    npm install -g ./terminal-jarvis-X.X.X.tgz
    terminal-jarvis --help
-   
+
    # Test npx from registry (after publishing)
    npx terminal-jarvis@X.X.X --help
    ```
 
 **Common Issues to Check:**
+
 - Binary has correct permissions (`chmod +x`)
 - Package.json bin entry points to correct file
 - Postinstall scripts have proper escaping
@@ -370,6 +465,7 @@ When conducting local continuous deployment with agents, **ALWAYS** follow this 
 - Version numbers are consistent across all files
 
 **Benefits of This Process:**
+
 - Catches binary execution issues before publishing
 - Verifies NPX caching behavior
 - Tests installation process end-to-end
@@ -377,6 +473,7 @@ When conducting local continuous deployment with agents, **ALWAYS** follow this 
 - Saves time debugging after publication
 
 **Package Size Considerations:**
+
 - Current package size is ~1.2MB compressed / ~2.9MB unpacked due to bundled Rust binary
 - This ensures immediate functionality without requiring Rust toolchain installation
 - Single generic binary works across platforms via NPM's bin configuration

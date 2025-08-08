@@ -28,6 +28,7 @@ impl PackageService {
         mapping.insert("qwen", "qwen-code");
         mapping.insert("opencode", "opencode");
         mapping.insert("llxprt", "llxprt-code");
+        mapping.insert("codex", "codex");
         mapping
     }
 
@@ -596,6 +597,8 @@ mod tests {
         assert_eq!(mapping.get("gemini"), Some(&"gemini-cli"));
         assert_eq!(mapping.get("qwen"), Some(&"qwen-code"));
         assert_eq!(mapping.get("opencode"), Some(&"opencode"));
+        assert_eq!(mapping.get("llxprt"), Some(&"llxprt-code"));
+        assert_eq!(mapping.get("codex"), Some(&"codex"));
     }
 
     #[tokio::test]
@@ -607,6 +610,8 @@ mod tests {
         assert_eq!(service.get_config_key_for_tool("claude"), "claude-code");
         assert_eq!(service.get_config_key_for_tool("gemini"), "gemini-cli");
         assert_eq!(service.get_config_key_for_tool("opencode"), "opencode");
+        assert_eq!(service.get_config_key_for_tool("llxprt"), "llxprt-code");
+        assert_eq!(service.get_config_key_for_tool("codex"), "codex");
 
         // Test that unknown tools return themselves
         assert_eq!(
