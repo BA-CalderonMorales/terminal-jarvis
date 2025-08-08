@@ -38,15 +38,15 @@ echo -e "${CYAN}🛠️  Available Actions:${RESET}"
 echo ""
 
 if [ "$CURRENT_BRANCH" != "$DEFAULT_BRANCH" ]; then
-    echo -e "${BLUE}1. 🧪 Quick CI Test${RESET}"
-    echo -e "   └─ Run quality checks (fmt, clippy, tests, build)"
-    echo -e "   └─ Command: ${YELLOW}./scripts/quick-ci.sh${RESET}"
+    echo -e "${BLUE}1. 🧪 Local CI (Validation)${RESET}"
+    echo -e "   └─ Run quality checks, tests, builds (no commits/pushes)"
+    echo -e "   └─ Command: ${YELLOW}./scripts/local-ci.sh${RESET}"
     echo ""
     
-    echo -e "${BLUE}2. 🚀 Full CI/CD Pipeline${RESET}"
-    echo -e "   └─ Quality checks + merge decision + optional publish"
-    echo -e "   └─ Will ask: merge to ${DEFAULT_BRANCH} or keep as feature branch"
-    echo -e "   └─ Command: ${YELLOW}./scripts/local-cicd.sh${RESET}"
+    echo -e "${BLUE}2. 🚀 Local CD (Deployment)${RESET}"
+    echo -e "   └─ Commit, tag, push, publish (run local-ci.sh first)"
+    echo -e "   └─ Will ask: merge to ${DEFAULT_BRANCH} or deploy from branch"
+    echo -e "   └─ Command: ${YELLOW}./scripts/local-cd.sh${RESET}"
     echo ""
     
     echo -e "${BLUE}3. 🔀 Manual Git Workflow${RESET}"
@@ -57,13 +57,14 @@ if [ "$CURRENT_BRANCH" != "$DEFAULT_BRANCH" ]; then
 else
     echo -e "${GREEN}✅ You're on the ${DEFAULT_BRANCH} branch${RESET}"
     echo ""
-    echo -e "${BLUE}1. 🧪 Quick CI Test${RESET}"
-    echo -e "   └─ Command: ${YELLOW}./scripts/quick-ci.sh${RESET}"
+    echo -e "${BLUE}1. 🧪 Local CI (Validation)${RESET}"
+    echo -e "   └─ Run quality checks, tests, builds (no commits/pushes)"
+    echo -e "   └─ Command: ${YELLOW}./scripts/local-ci.sh${RESET}"
     echo ""
     
-    echo -e "${BLUE}2. 🚀 Full CI/CD Pipeline${RESET}"
-    echo -e "   └─ Quality checks + version bump + commit + push + publish"
-    echo -e "   └─ Command: ${YELLOW}./scripts/local-cicd.sh${RESET}"
+    echo -e "${BLUE}2. 🚀 Local CD (Deployment)${RESET}"
+    echo -e "   └─ Version bump + commit + tag + push + publish"
+    echo -e "   └─ Command: ${YELLOW}./scripts/local-cd.sh${RESET}"
     echo ""
 fi
 
@@ -76,14 +77,14 @@ echo -e "${CYAN}💡 Recommended Next Steps:${RESET}"
 if [ "$CURRENT_BRANCH" != "$DEFAULT_BRANCH" ]; then
     if [ $HAS_CHANGES -eq 0 ]; then
         echo -e "   ${GREEN}→ Your feature branch looks clean!${RESET}"
-        echo -e "   ${BLUE}→ Run: ${YELLOW}./scripts/local-cicd.sh${RESET} ${BLUE}to merge & publish${RESET}"
+        echo -e "   ${BLUE}→ Run: ${YELLOW}./scripts/local-ci.sh${RESET} ${BLUE}then ${YELLOW}./scripts/local-cd.sh${RESET}"
     else
         echo -e "   ${YELLOW}→ You have uncommitted changes${RESET}"
         echo -e "   ${BLUE}→ Commit changes first, then run CI/CD pipeline${RESET}"
     fi
 else
     echo -e "   ${GREEN}→ Ready for immediate publish from ${DEFAULT_BRANCH}${RESET}"
-    echo -e "   ${BLUE}→ Run: ${YELLOW}./scripts/local-cicd.sh${RESET}"
+    echo -e "   ${BLUE}→ Run: ${YELLOW}./scripts/local-ci.sh${RESET} ${BLUE}then ${YELLOW}./scripts/local-cd.sh${RESET}"
 fi
 
 echo ""

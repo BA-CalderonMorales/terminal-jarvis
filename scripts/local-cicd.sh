@@ -224,9 +224,10 @@ if [ "$SHOULD_PUBLISH" = true ]; then
     echo "3) Major (X.0.0) - Breaking changes"
     echo "4) Skip version bump"
     echo "5) Publish current version to NPM registry only"
+    echo "6) Push current version (I've already updated all version files manually)"
     echo ""
     
-    read -p "Enter your choice (1-5): " version_choice
+    read -p "Enter your choice (1-6): " version_choice
     
     case $version_choice in
         1)
@@ -254,13 +255,42 @@ if [ "$SHOULD_PUBLISH" = true ]; then
             NEW_VERSION=$CURRENT_VERSION
             SKIP_GIT_OPERATIONS=true
             ;;
+        6)
+            echo -e "${BLUE}→ Using current version (manually updated)...${RESET}"
+            NEW_VERSION=$CURRENT_VERSION
+            MANUAL_VERSION_UPDATE=true
+            
+            # Verify version consistency before proceeding
+            echo -e "${YELLOW}🔍 Verifying version consistency across files...${RESET}"
+            
+            NPM_VERSION=$(grep '"version":' npm/terminal-jarvis/package.json | sed 's/.*"version": "\(.*\)".*/\1/')
+            TS_VERSION=$(grep "console.log.*Terminal Jarvis v" npm/terminal-jarvis/src/index.ts | sed 's/.*Terminal Jarvis v\([0-9.]*\).*/\1/')
+            
+            echo -e "${BLUE}  Cargo.toml: ${CURRENT_VERSION}${RESET}"
+            echo -e "${BLUE}  package.json: ${NPM_VERSION}${RESET}"
+            echo -e "${BLUE}  index.ts: ${TS_VERSION}${RESET}"
+            
+            if [ "$CURRENT_VERSION" = "$NPM_VERSION" ] && [ "$CURRENT_VERSION" = "$TS_VERSION" ]; then
+                echo -e "${GREEN}✅ All versions are synchronized${RESET}"
+                echo -e "${BLUE}→ Will proceed with commit, tag v${CURRENT_VERSION}, and push${RESET}"
+            else
+                echo -e "${RED}❌ Version mismatch detected!${RESET}"
+                echo -e "${YELLOW}Expected all files to have version: ${CURRENT_VERSION}${RESET}"
+                echo -e "${YELLOW}Please update all version references manually before using this option.${RESET}"
+                echo ""
+                echo -e "${BLUE}Files that need updating:${RESET}"
+                [ "$CURRENT_VERSION" != "$NPM_VERSION" ] && echo -e "${YELLOW}  • npm/terminal-jarvis/package.json${RESET}"
+                [ "$CURRENT_VERSION" != "$TS_VERSION" ] && echo -e "${YELLOW}  • npm/terminal-jarvis/src/index.ts${RESET}"
+                exit 1
+            fi
+            ;;
         *)
             echo -e "${RED}❌ Invalid choice. Using current version.${RESET}"
             NEW_VERSION=$CURRENT_VERSION
             ;;
     esac
     
-    if [ "$NEW_VERSION" != "$CURRENT_VERSION" ]; then
+    if [ "$NEW_VERSION" != "$CURRENT_VERSION" ] && [ "${MANUAL_VERSION_UPDATE:-false}" != "true" ]; then
         echo -e "${BLUE}→ Updating version to ${NEW_VERSION}...${RESET}"
         
         # Update Cargo.toml

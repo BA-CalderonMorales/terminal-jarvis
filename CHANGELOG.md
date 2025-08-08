@@ -5,6 +5,25 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.0.38] - 2025-08-08
+
+### Added
+- **Separated CI/CD Scripts**: Split local-cicd.sh into dedicated local-ci.sh and local-cd.sh scripts
+  - `local-ci.sh`: Validation-only script (no commits/pushes) for safe testing
+  - `local-cd.sh`: Deployment-only script (commit/tag/push/publish) with version verification
+  - Both scripts include option 6 for manually pre-updated versions with safety validation
+- **Interactive Workflow Dashboard**: Renamed and enhanced status.sh to workflow-dashboard.sh
+  - Updated to reference new CI/CD script separation
+  - Provides contextual recommendations based on branch state
+- **Personalized CLAUDE.md**: Comprehensive AI assistant guide for project maintenance
+  - Enhanced from .github/copilot-instructions.md with project-specific guidance
+  - Covers architecture, development standards, version management, and release process
+
+### Enhanced
+- **Version Safety Checks**: Both CI and CD scripts now validate version consistency across all files
+- **Pre-deployment Validation**: Prevents accidental version mismatches before deployment
+- **Development Workflow**: Clear separation between validation (CI) and deployment (CD) operations
+
 ## [0.0.37] - 2025-08-06
 
 ### Enhanced
