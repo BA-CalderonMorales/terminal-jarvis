@@ -1,6 +1,9 @@
 # Rust
 /target/
 
+# Homebrew release artifacts (keep Formula directory structure)
+/homebrew/release/
+
 # NPM and Node.js
 # Logs
 logs
