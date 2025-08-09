@@ -16,8 +16,9 @@ Terminal Jarvis uses a **hybrid CI/CD approach** with automated Git operations a
 ```
 
 **What local-ci.sh does:**
+
 - ✅ Code formatting (`cargo fmt`)
-- ✅ Linting (`cargo clippy`)  
+- ✅ Linting (`cargo clippy`)
 - ✅ Test suite (33 comprehensive tests)
 - ✅ Version consistency validation
 - ✅ Release binary build
@@ -32,6 +33,7 @@ Terminal Jarvis uses a **hybrid CI/CD approach** with automated Git operations a
 ```
 
 **What local-cd.sh does:**
+
 - ✅ CHANGELOG.md verification
 - ✅ Version management (bump or manual)
 - ✅ Git commit with standardized message
@@ -62,9 +64,10 @@ npm dist-tag ls terminal-jarvis
 ```
 
 #### Expected Output
+
 ```
 beta: 0.0.X
-latest: 0.0.X  
+latest: 0.0.X
 stable: 0.0.X
 ```
 
@@ -73,6 +76,7 @@ stable: 0.0.X
 The deployment script automatically publishes to crates.io after pushing to GitHub but before NPM publishing.
 
 #### How It Works
+
 ```bash
 # This happens automatically in local-cd.sh after git push
 cargo publish
@@ -83,12 +87,14 @@ cargo publish
 If crates.io publishing fails:
 
 1. **Authentication**: Ensure you're logged in to crates.io
+
    ```bash
    cargo login
    # Enter your API token from https://crates.io/me
    ```
 
 2. **Version Conflicts**: Check if version already exists
+
    ```bash
    cargo search terminal-jarvis
    ```
@@ -99,6 +105,7 @@ If crates.io publishing fails:
    ```
 
 #### Crates.io Features
+
 - **Installation**: `cargo install terminal-jarvis`
 - **Updates**: `cargo install terminal-jarvis --force`
 - **Documentation**: Auto-generated at https://docs.rs/terminal-jarvis
@@ -107,15 +114,19 @@ If crates.io publishing fails:
 ## Version Management
 
 ### Automated Version Bumping
+
 The deployment scripts can automatically bump versions:
+
 - **Patch (0.0.X)**: Bug fixes, small improvements
-- **Minor (0.X.0)**: New features, no breaking changes  
+- **Minor (0.X.0)**: New features, no breaking changes
 - **Major (X.0.0)**: Breaking changes
 
 ### Manual Version Control
+
 For precise control, manually update all version files first, then use **option 6** in deployment scripts:
 
 1. **Update version files:**
+
    - `Cargo.toml` - version field
    - `npm/terminal-jarvis/package.json` - version field
    - `npm/terminal-jarvis/src/index.ts` - console.log display
@@ -131,14 +142,17 @@ The script will validate all versions match before proceeding.
 ## Distribution Tags Strategy
 
 ### Tag Types
+
 - **`latest`**: Automatically assigned when publishing (default install)
 - **`beta`**: Preview releases with newest features
 - **`stable`**: Production-ready, thoroughly tested releases
 
 ### Installation Commands
+
 Users can install through multiple channels:
 
 #### NPM Installation
+
 ```bash
 # Latest version (default)
 npm install -g terminal-jarvis
@@ -154,6 +168,7 @@ npm install -g terminal-jarvis@0.0.X
 ```
 
 #### Cargo Installation (Rust Users)
+
 ```bash
 # Install latest version from crates.io
 cargo install terminal-jarvis
@@ -166,6 +181,7 @@ cargo install terminal-jarvis --version 0.0.X
 ```
 
 **Benefits of Cargo Installation:**
+
 - Direct binary installation (no Node.js requirement)
 - Automatic compilation for target platform
 - Integration with Rust ecosystem
@@ -174,20 +190,24 @@ cargo install terminal-jarvis --version 0.0.X
 ## Pre-Release Checklist
 
 ### Before Running Scripts
+
 - [ ] All changes committed and pushed to feature branch
 - [ ] CI tests passing locally
 - [ ] Version numbers planned/updated (if manual)
 
 ### CHANGELOG.md Requirements
+
 - [ ] Entry added for current version
 - [ ] Format: `## [0.0.X] - YYYY-MM-DD`
 - [ ] Clear categorization: Added, Enhanced, Fixed
 - [ ] Descriptive change summaries
 
 ### Version Consistency Check
+
 All these files must have matching version numbers:
+
 - [ ] `Cargo.toml`
-- [ ] `npm/terminal-jarvis/package.json`  
+- [ ] `npm/terminal-jarvis/package.json`
 - [ ] `npm/terminal-jarvis/src/index.ts`
 
 ## Troubleshooting
@@ -195,12 +215,14 @@ All these files must have matching version numbers:
 ### NPM Publishing Issues
 
 **2FA Code Expired:**
+
 ```bash
 # Generate new code and retry
 npm publish --otp=<new-code>
 ```
 
 **Package Already Published:**
+
 ```bash
 # Check current version
 npm view terminal-jarvis version
@@ -210,17 +232,19 @@ npm view terminal-jarvis version
 ```
 
 **Permission Denied:**
+
 ```bash
 # Verify you're logged in
 npm whoami
 
-# Login if needed  
+# Login if needed
 npm login
 ```
 
 ### Git Issues
 
 **Push Rejected:**
+
 ```bash
 # Fetch latest changes
 git fetch origin develop
@@ -230,6 +254,7 @@ git pull origin develop
 ```
 
 **Tag Already Exists:**
+
 ```bash
 # Delete local tag
 git tag -d v0.0.X
@@ -243,12 +268,15 @@ git push origin --delete v0.0.X
 ## Script Safety Features
 
 ### Version Validation
+
 Both CI and CD scripts validate:
+
 - All version files synchronized
 - CHANGELOG.md entries present
 - No missing version references
 
 ### Error Prevention
+
 - Scripts exit on version mismatches
 - Clear error messages with fix instructions
 - Separate CI (validation) from CD (deployment)
@@ -256,6 +284,7 @@ Both CI and CD scripts validate:
 ## Emergency Procedures
 
 ### Rollback NPM Release
+
 ```bash
 # Unpublish recent version (within 24 hours)
 npm unpublish terminal-jarvis@0.0.X
@@ -265,6 +294,7 @@ npm deprecate terminal-jarvis@0.0.X "Use newer version"
 ```
 
 ### Rollback Git Release
+
 ```bash
 # Remove tag
 git tag -d v0.0.X
@@ -278,12 +308,14 @@ git push origin develop --force  # Use with caution
 ## Package Details
 
 ### Current Stats
+
 - **Package Size**: ~1.4MB compressed / ~3.7MB unpacked
 - **Node Requirement**: >=16.0.0
 - **Dependencies**: Zero runtime dependencies (self-contained binary)
 - **Registry**: https://www.npmjs.com/package/terminal-jarvis
 
 ### Architecture
+
 - **Rust binary**: Pre-compiled for immediate functionality
 - **NPM wrapper**: TypeScript integration layer
 - **Zero deps**: No additional runtime requirements
@@ -291,6 +323,7 @@ git push origin develop --force  # Use with caution
 ## Maintenance Commands
 
 ### Check Package Health
+
 ```bash
 # NPM package info
 npm view terminal-jarvis
@@ -303,6 +336,7 @@ npm view terminal-jarvis --json
 ```
 
 ### Local Testing
+
 ```bash
 # Test package locally
 cd npm/terminal-jarvis

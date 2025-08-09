@@ -105,14 +105,14 @@ terminal-jarvis templates apply my-template
 
 ## Supported AI Tools
 
-| Tool       | Description                            | Status           | Package                     |
-| ---------- | -------------------------------------- | ---------------- | --------------------------- |
-| `claude`   | Anthropic's Claude for code assistance | ✅ Stable        | `@anthropic-ai/claude-code` |
-| `gemini`   | Google's Gemini CLI tool               | ✅ Stable        | `@google/gemini-cli`        |
-| `qwen`     | Qwen coding assistant                  | ✅ Stable        | `@qwen-code/qwen-code`      |
-| `opencode` | Terminal-based AI coding agent         | 🧪 Testing       | Install script              |
-| `llxprt`   | Multi-provider AI coding assistant     | 🧪 Testing       | NPM package                 |
-| `codex`    | OpenAI Codex CLI for local AI coding   | 🧪 Testing       | NPM package                 |
+| Tool       | Description                            | Status     | Package                     |
+| ---------- | -------------------------------------- | ---------- | --------------------------- |
+| `claude`   | Anthropic's Claude for code assistance | ✅ Stable  | `@anthropic-ai/claude-code` |
+| `gemini`   | Google's Gemini CLI tool               | ✅ Stable  | `@google/gemini-cli`        |
+| `qwen`     | Qwen coding assistant                  | ✅ Stable  | `@qwen-code/qwen-code`      |
+| `opencode` | Terminal-based AI coding agent         | 🧪 Testing | Install script              |
+| `llxprt`   | Multi-provider AI coding assistant     | 🧪 Testing | NPM package                 |
+| `codex`    | OpenAI Codex CLI for local AI coding   | 🧪 Testing | NPM package                 |
 
 \*See [limitations](docs/LIMITATIONS.md) for known issues and workarounds
 

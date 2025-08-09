@@ -2,6 +2,8 @@
 
 [![NPM Version](https://img.shields.io/npm/v/terminal-jarvis.svg)](https://www.npmjs.com/package/terminal-jarvis)
 [![NPM Downloads](https://img.shields.io/npm/dm/terminal-jarvis.svg)](https://www.npmjs.com/package/terminal-jarvis)
+[![Crates.io Version](https://img.shields.io/crates/v/terminal-jarvis.svg)](https://crates.io/crates/terminal-jarvis)
+[![Crates.io Downloads](https://img.shields.io/crates/d/terminal-jarvis.svg)](https://crates.io/crates/terminal-jarvis)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![NPM Stable](https://img.shields.io/npm/v/terminal-jarvis/stable.svg?label=stable&color=green)](https://www.npmjs.com/package/terminal-jarvis)
 [![NPM Beta](https://img.shields.io/npm/v/terminal-jarvis/beta.svg?label=beta&color=orange)](https://www.npmjs.com/package/terminal-jarvis)
@@ -27,6 +29,9 @@ npm install -g terminal-jarvis
 
 # Install stable version (recommended for production)
 npm install -g terminal-jarvis@stable
+
+# Install via Cargo (Rust users)
+cargo install terminal-jarvis
 ```
 
 **📋 Prerequisites:**
@@ -100,13 +105,14 @@ terminal-jarvis templates apply my-template
 
 ## Supported AI Tools
 
-| Tool       | Description                            | Status           | Package                     |
-| ---------- | -------------------------------------- | ---------------- | --------------------------- |
-| `claude`   | Anthropic's Claude for code assistance | ✅ Stable        | `@anthropic-ai/claude-code` |
-| `gemini`   | Google's Gemini CLI tool               | ✅ Stable        | `@google/gemini-cli`        |
-| `qwen`     | Qwen coding assistant                  | ✅ Stable        | `@qwen-code/qwen-code`      |
-| `opencode` | Terminal-based AI coding agent         | 🧪 Testing       | Install script              |
-| `llxprt`   | Multi-provider AI coding assistant     | 🧪 Testing       | NPM package                 |
+| Tool       | Description                            | Status     | Package                     |
+| ---------- | -------------------------------------- | ---------- | --------------------------- |
+| `claude`   | Anthropic's Claude for code assistance | ✅ Stable  | `@anthropic-ai/claude-code` |
+| `gemini`   | Google's Gemini CLI tool               | ✅ Stable  | `@google/gemini-cli`        |
+| `qwen`     | Qwen coding assistant                  | ✅ Stable  | `@qwen-code/qwen-code`      |
+| `opencode` | Terminal-based AI coding agent         | 🧪 Testing | Install script              |
+| `llxprt`   | Multi-provider AI coding assistant     | 🧪 Testing | NPM package                 |
+| `codex`    | OpenAI Codex CLI for local AI coding   | 🧪 Testing | NPM package                 |
 
 \*See [limitations](docs/LIMITATIONS.md) for known issues and workarounds
 
@@ -128,6 +134,7 @@ gemini = { enabled = true, auto_update = false }
 qwen = { enabled = true, auto_update = true }
 opencode = { enabled = false, auto_update = false }
 llxprt = { enabled = true, auto_update = true }
+codex = { enabled = true, auto_update = true }
 
 [templates]
 repository = "your-username/jarvis-templates"
