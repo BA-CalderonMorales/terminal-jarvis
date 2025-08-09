@@ -4,7 +4,7 @@ This guide provides detailed instructions for maintainers to publish releases an
 
 ## Overview
 
-Terminal Jarvis uses a **hybrid CI/CD approach** with automated Git operations but **manual NPM publishing** to avoid authentication issues with 2FA in terminal environments.
+Terminal Jarvis uses a **hybrid CI/CD approach** with automated Git operations and crates.io publishing, but **manual NPM publishing** to avoid authentication issues with 2FA in terminal environments.
 
 ## Release Workflow
 
@@ -24,10 +24,10 @@ Terminal Jarvis uses a **hybrid CI/CD approach** with automated Git operations b
 - ✅ NPM package build
 - **❌ No commits, tags, or pushes**
 
-### 2. Git Deployment
+### 2. Git Deployment & Crates.io Publishing
 
 ```bash
-# Deploy to Git with version management
+# Deploy to Git and crates.io with version management
 ./scripts/local-cd.sh
 ```
 
@@ -37,6 +37,7 @@ Terminal Jarvis uses a **hybrid CI/CD approach** with automated Git operations b
 - ✅ Git commit with standardized message
 - ✅ Git tag creation (`v0.0.X`)
 - ✅ Push to GitHub with tags
+- ✅ Publish to crates.io automatically
 - **❌ No NPM publishing (manual only)**
 
 ### 3. Manual NPM Publishing
@@ -66,6 +67,42 @@ beta: 0.0.X
 latest: 0.0.X  
 stable: 0.0.X
 ```
+
+### 4. Crates.io Publishing (Automated)
+
+The deployment script automatically publishes to crates.io after pushing to GitHub but before NPM publishing.
+
+#### How It Works
+```bash
+# This happens automatically in local-cd.sh after git push
+cargo publish
+```
+
+#### Troubleshooting Crates.io Issues
+
+If crates.io publishing fails:
+
+1. **Authentication**: Ensure you're logged in to crates.io
+   ```bash
+   cargo login
+   # Enter your API token from https://crates.io/me
+   ```
+
+2. **Version Conflicts**: Check if version already exists
+   ```bash
+   cargo search terminal-jarvis
+   ```
+
+3. **Manual Retry**: If automated publishing fails
+   ```bash
+   cargo publish
+   ```
+
+#### Crates.io Features
+- **Installation**: `cargo install terminal-jarvis`
+- **Updates**: `cargo install terminal-jarvis --force`
+- **Documentation**: Auto-generated at https://docs.rs/terminal-jarvis
+- **Package Size**: ~5.0MB (includes pre-built binary)
 
 ## Version Management
 
@@ -99,7 +136,9 @@ The script will validate all versions match before proceeding.
 - **`stable`**: Production-ready, thoroughly tested releases
 
 ### Installation Commands
-Users can install specific channels:
+Users can install through multiple channels:
+
+#### NPM Installation
 ```bash
 # Latest version (default)
 npm install -g terminal-jarvis
@@ -113,6 +152,24 @@ npm install -g terminal-jarvis@stable
 # Specific version
 npm install -g terminal-jarvis@0.0.X
 ```
+
+#### Cargo Installation (Rust Users)
+```bash
+# Install latest version from crates.io
+cargo install terminal-jarvis
+
+# Force update to latest version
+cargo install terminal-jarvis --force
+
+# Install specific version
+cargo install terminal-jarvis --version 0.0.X
+```
+
+**Benefits of Cargo Installation:**
+- Direct binary installation (no Node.js requirement)
+- Automatic compilation for target platform
+- Integration with Rust ecosystem
+- Faster updates via Cargo registry
 
 ## Pre-Release Checklist
 

@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Terminal Jarvis Local CD (Continuous Deployment) Script
-# Handles deployment: committing, tagging, pushing to GitHub, and publishing to NPM
+# Handles deployment: committing, tagging, pushing to GitHub, publishing to crates.io, and publishing to NPM
 # Run local-ci.sh first to validate before using this script
 
 set -e  # Exit on any error
@@ -125,7 +125,7 @@ fi
 
 echo -e "${CYAN}🚀 Terminal Jarvis Local CD (Deployment) Pipeline${RESET}"
 echo -e "${BLUE}Current branch: ${CURRENT_BRANCH}${RESET}"
-echo -e "${YELLOW}This will commit, tag, push, and publish${RESET}"
+echo -e "${YELLOW}This will commit, tag, push to GitHub, publish to crates.io, and prepare for NPM publishing${RESET}"
 echo ""
 
 # Show current version status
@@ -390,8 +390,38 @@ fi
 
 echo ""
 
+# Crates.io Publishing
+echo -e "${CYAN}📦 Step 4: Crates.io Publishing${RESET}"
+if [ "${SKIP_GIT_OPERATIONS:-false}" != "true" ]; then
+    echo -e "${BLUE}→ Publishing to crates.io...${RESET}"
+    echo ""
+    echo -e "${YELLOW}📋 Publishing terminal-jarvis v${NEW_VERSION} to crates.io${RESET}"
+    
+    # Check if logged in to crates.io
+    if ! cargo login --registry crates-io --help >/dev/null 2>&1; then
+        echo -e "${RED}❌ Error: cargo login not available. Please ensure Rust/Cargo is installed.${RESET}"
+        exit 1
+    fi
+    
+    # Publish to crates.io
+    if cargo publish; then
+        echo -e "${GREEN}✅ Successfully published to crates.io${RESET}"
+        echo -e "${BLUE}📦 Crate available at: https://crates.io/crates/terminal-jarvis${RESET}"
+        echo -e "${YELLOW}Users can now install with: cargo install terminal-jarvis${RESET}"
+    else
+        echo -e "${RED}❌ Failed to publish to crates.io${RESET}"
+        echo -e "${YELLOW}⚠️  You may need to login first: cargo login${RESET}"
+        echo -e "${YELLOW}⚠️  Or check for version conflicts or other publishing issues${RESET}"
+        echo -e "${BLUE}💡 You can retry manually with: cargo publish${RESET}"
+    fi
+else
+    echo -e "${YELLOW}→ Skipping crates.io publishing (NPM-only publish)...${RESET}"
+fi
+
+echo ""
+
 # NPM Publishing
-echo -e "${CYAN}📦 Step 4: NPM Publishing${RESET}"
+echo -e "${CYAN}📦 Step 5: NPM Publishing${RESET}"
 echo -e "${BLUE}Git operations completed successfully!${RESET}"
 echo -e "${YELLOW}📋 Manual NPM Publishing Required${RESET}"
 echo ""
@@ -413,11 +443,13 @@ CURRENT_BRANCH=$(git branch --show-current)  # Refresh current branch
 echo -e "${BLUE}Version: ${NEW_VERSION}${RESET}"
 echo -e "${BLUE}Branch: ${CURRENT_BRANCH}${RESET}"
 echo -e "${BLUE}Git Operations: $([ "${SKIP_GIT_OPERATIONS:-false}" = "true" ] && echo "Skipped" || echo "Completed")${RESET}"
+echo -e "${BLUE}Crates.io Publishing: $([ "${SKIP_GIT_OPERATIONS:-false}" = "true" ] && echo "Skipped" || echo "Completed (check output above)")${RESET}"
 echo -e "${BLUE}NPM Publishing: Manual (see docs/MAINTAINERS.md)${RESET}"
 echo ""
 echo -e "${CYAN}📦 After NPM Publishing, users can install with:${RESET}"
-echo -e "${YELLOW}  Latest version:  ${RESET}npm install -g terminal-jarvis@${NEW_VERSION}"
-echo -e "${YELLOW}  Beta release:    ${RESET}npm install -g terminal-jarvis@beta"
+echo -e "${YELLOW}  Cargo (Rust):    ${RESET}cargo install terminal-jarvis"
+echo -e "${YELLOW}  NPM Latest:      ${RESET}npm install -g terminal-jarvis@${NEW_VERSION}"
+echo -e "${YELLOW}  NPM Beta:        ${RESET}npm install -g terminal-jarvis@beta"
 echo -e "${YELLOW}  Stable release:  ${RESET}npm install -g terminal-jarvis@stable"
 
 echo ""
