@@ -10,6 +10,9 @@
 [![Crates.io Version](https://img.shields.io/crates/v/terminal-jarvis.svg?logo=rust&label=Crates.io%20Version)](https://crates.io/crates/terminal-jarvis)
 [![Crates.io Downloads](https://img.shields.io/crates/d/terminal-jarvis.svg?logo=rust&label=Crates.io%20Downloads)](https://crates.io/crates/terminal-jarvis)
 
+<!-- Homebrew -->
+[![Homebrew](https://img.shields.io/badge/Homebrew-Available-blue.svg?logo=homebrew)](https://github.com/BA-CalderonMorales/homebrew-terminal-jarvis)
+
 <!-- General -->
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
@@ -37,6 +40,10 @@ npm install -g terminal-jarvis@stable
 
 # Install via Cargo (Rust users)
 cargo install terminal-jarvis
+
+# Install via Homebrew (macOS/Linux)
+brew tap ba-calderonmorales/terminal-jarvis
+brew install terminal-jarvis
 ```
 
 **📋 Prerequisites:**
