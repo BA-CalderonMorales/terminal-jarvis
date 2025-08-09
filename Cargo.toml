@@ -6,6 +6,8 @@ description = "A thin Rust wrapper that provides a unified interface for managin
 authors = ["BA-CalderonMorales"]
 license = "MIT"
 repository = "https://github.com/BA-CalderonMorales/terminal-jarvis"
+homepage = "https://github.com/BA-CalderonMorales/terminal-jarvis"
+readme = "README.md"
 keywords = ["cli", "ai", "tools", "wrapper"]
 categories = ["command-line-utilities"]
 
