@@ -22,6 +22,7 @@
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Mentioned in Awesome Gemini CLI](https://awesome.re/mentioned-badge.svg)](https://github.com/Piebald-AI/awesome-gemini-cli)
+[![Buy Me a Coffee](https://img.shields.io/badge/☕-Buy%20Me%20a%20Coffee-orange.svg)](https://www.buymeacoffee.com/brandoncalderonmorales)
 
 </div>
 
@@ -171,17 +172,29 @@ auto_sync = true
 
 ## Contributing
 
-We welcome contributions! Here's how to get started:
+We welcome contributions! Please join our [Discord community](https://discord.gg/zNuyC5uG) first to discuss your ideas.
 
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Make your changes following the [architecture guide](docs/ARCHITECTURE.md)
-4. Ensure tests pass (`cargo test`)
-5. Commit your changes (`git commit -m 'Add amazing feature'`)
-6. Push to the branch (`git push origin feature/amazing-feature`)
-7. Open a Pull Request
+**Quick Start:**
 
-**📖 See [Architecture Guide](docs/ARCHITECTURE.md)** for technical details and development setup.
+1. 💬 Join the [Terminal Jarvis Discord](https://discord.gg/zNuyC5uG)
+2. 🗣️ Discuss your contribution in `#features` or `#bugfix` channels
+3. 🍴 Fork the repository
+4. 🔧 Create a feature branch (`git checkout -b feature/amazing-feature`)
+5. ✅ Follow our [contribution guidelines](docs/CONTRIBUTIONS.md)
+6. 🧪 Ensure tests pass (`cargo test`)
+7. 📝 Use our PR template for submitting changes
+
+**📖 Full Guide:** [docs/CONTRIBUTIONS.md](docs/CONTRIBUTIONS.md) - Complete contributor guide with coding standards, testing requirements, and development workflow.
+
+**🏗️ Technical Details:** [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) - Architecture overview and development setup.
+
+## Support the Project
+
+If Terminal Jarvis has been helpful for your AI coding workflow, consider supporting development:
+
+[![Buy Me a Coffee](https://img.shields.io/badge/☕-Buy%20Me%20a%20Coffee-orange.svg?style=for-the-badge)](https://www.buymeacoffee.com/brandoncalderonmorales)
+
+Your support helps maintain and improve Terminal Jarvis for the entire community! 🙏
 
 ## License
 
