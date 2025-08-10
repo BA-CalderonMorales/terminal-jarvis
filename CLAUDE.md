@@ -158,12 +158,38 @@ sed -i 's/version ".*"/version "0.0.48"/' homebrew/Formula/terminal-jarvis.rb
 ./scripts/local-cd.sh  # Creates archives, commits, tags, pushes
 ```
 
-#### **Step 7: Homebrew Release**
+#### **Step 7: GitHub Release Creation - CRITICAL FOR HOMEBREW**
+
+**🚨 MANDATORY**: Homebrew formulas require GitHub releases with attached archives. The deployment script only creates Git tags, not releases.
 
 ```bash
-# After GitHub release is created by local-cd.sh
-./scripts/create-homebrew-release.sh  # Creates platform-specific archives
-# Manually upload terminal-jarvis-macos.tar.gz and terminal-jarvis-linux.tar.gz to GitHub release
+# Verify the tag was created
+git tag -l | grep v0.0.48
+
+# Create GitHub release with archives attached (REQUIRED for Homebrew)
+gh release create v0.0.48 \
+  homebrew/release/terminal-jarvis-mac.tar.gz \
+  homebrew/release/terminal-jarvis-linux.tar.gz \
+  --title "Release v0.0.48: [Brief Description]" \
+  --notes "Release notes content" \
+  --latest
+```
+
+**Verification**: Ensure release assets are accessible:
+
+```bash
+curl -I https://github.com/BA-CalderonMorales/terminal-jarvis/releases/download/v0.0.48/terminal-jarvis-mac.tar.gz
+curl -I https://github.com/BA-CalderonMorales/terminal-jarvis/releases/download/v0.0.48/terminal-jarvis-linux.tar.gz
+```
+
+**Both should return HTTP 302 (redirect) responses.**
+
+#### **Step 8: Homebrew Release Validation**
+
+```bash
+# After GitHub release is created
+./scripts/create-homebrew-release.sh  # Creates platform-specific archives if needed
+# Archives should already exist from local-cd.sh, this is just verification
 ```
 
 ### Version Management
