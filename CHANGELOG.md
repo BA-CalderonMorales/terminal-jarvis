@@ -5,11 +5,35 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.0.50] - 2025-08-10
+
+### Added
+
+- **Comprehensive Contribution System**: Complete contributor onboarding and governance framework
+
+  - **Discord-First Workflow**: Mandatory community discussion before PR submission via [Discord](https://discord.gg/zNuyC5uG)
+  - **Advanced PR Template**: 8 PR types (docs, feature, bugfix, security, UI, logic, maintenance, testing)
+  - **Complete CONTRIBUTIONS.md**: Full contributor guide with coding standards, testing requirements, and realistic expectations
+  - **Quality Gate Enforcement**: TDD requirements, code formatting, and comprehensive testing protocols
+
+- **Community Support Integration**: Professional project support and recognition system
+  - **Buy Me a Coffee**: Integrated support badges and dedicated project support section
+  - **Multi-Platform Badges**: Enhanced badge organization across NPM, Crates.io, and Homebrew distributions
+  - **Community-Focused Documentation**: Emphasis on community building and contributor recognition
+
+### Enhanced
+
+- **Developer Experience**: Streamlined contribution process with clear expectations and realistic contributor limitations
+- **Project Sustainability**: Professional support system enables continued development and maintenance
+- **Documentation Quality**: Comprehensive guides covering everything from first contribution to advanced tool integration
+- **Community Governance**: Clear communication channels and discussion framework via Discord
+
 ## [0.0.49] - 2025-08-10
 
 ### Added
 
 - **Enhanced Exit Options**: Revolutionary context switching system for AI tool workflows
+
   - **Smart Exit Menu**: Three strategic options after tool completion instead of simple "Press Enter"
   - **Rapid Context Switching**: "🤖 Switch to Another AI Tool" enables seamless LLM transitions
   - **Workflow Preservation**: Maintains user momentum with minimal navigation friction
@@ -17,7 +41,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - **Interactive UI Improvements**: Complete menu restructure with perfect visual alignment
   - **Emoji-Aware Border Calculation**: Proper visual width handling for 2-column emoji display
-  - **Menu Hierarchy**: Organized main menu with "AI CLI Tools" submenu for scalability  
+  - **Menu Hierarchy**: Organized main menu with "AI CLI Tools" submenu for scalability
   - **Comprehensive Resources**: "Important Links" menu with GitHub, NPM, Cargo, docs access
   - **Consistent Tool Ordering**: BTreeMap implementation ensures predictable tool sequence
 
