@@ -440,12 +440,23 @@ pub async fn handle_interactive_mode() -> Result<()> {
         }
 
         let tagline = "🤖 AI Coding Assistant Command Center";
-        let tagline_display_len = tagline.chars().count() + 1;
-        if tagline_display_len <= inner_width {
-            let tagline_content_padding = (inner_width - tagline_display_len) / 2;
+        // Calculate visual width accounting for emoji (which takes 2 columns)
+        let tagline_visual_width = tagline
+            .chars()
+            .map(|c| {
+                if c as u32 >= 0x1F300 {
+                    2
+                } else {
+                    1
+                } // Emoji range approximation
+            })
+            .sum::<usize>();
+
+        if tagline_visual_width <= inner_width {
+            let tagline_content_padding = (inner_width - tagline_visual_width) / 2;
             let tagline_left_padding = " ".repeat(tagline_content_padding);
             let tagline_right_padding =
-                " ".repeat(inner_width - tagline_content_padding - tagline_display_len);
+                " ".repeat(inner_width - tagline_content_padding - tagline_visual_width);
             println!(
                 "{border_padding}{dim_cyan}║ {tagline_left_padding}{neon_white}{tagline}{tagline_right_padding} ║{reset}"
             );
@@ -453,25 +464,27 @@ pub async fn handle_interactive_mode() -> Result<()> {
 
         println!("{border_padding}{empty_border}");
 
-        // Add GitHub and NPM links
-        let github_link = "GitHub: https://github.com/BA-CalderonMorales/terminal-jarvis";
-        if github_link.len() <= inner_width {
-            let github_content_padding = (inner_width - github_link.len()) / 2;
-            let github_left_padding = " ".repeat(github_content_padding);
-            let github_right_padding =
-                " ".repeat(inner_width - github_content_padding - github_link.len());
-            println!(
-                "{border_padding}{dim_cyan}║ {github_left_padding}{dim_cyan}{github_link}{github_right_padding} ║{reset}"
-            );
-        }
+        // Short hint about Important Links - shortened to fit border
+        let links_hint = "📚 See 'Important Links' menu";
+        // Calculate visual width accounting for emoji (which takes 2 columns)
+        let links_visual_width = links_hint
+            .chars()
+            .map(|c| {
+                if c as u32 >= 0x1F300 {
+                    2
+                } else {
+                    1
+                } // Emoji range approximation
+            })
+            .sum::<usize>();
 
-        let npm_link = "NPM: https://www.npmjs.com/package/terminal-jarvis";
-        if npm_link.len() <= inner_width {
-            let npm_content_padding = (inner_width - npm_link.len()) / 2;
-            let npm_left_padding = " ".repeat(npm_content_padding);
-            let npm_right_padding = " ".repeat(inner_width - npm_content_padding - npm_link.len());
+        if links_visual_width <= inner_width {
+            let links_content_padding = (inner_width - links_visual_width) / 2;
+            let links_left_padding = " ".repeat(links_content_padding);
+            let links_right_padding =
+                " ".repeat(inner_width - links_content_padding - links_visual_width);
             println!(
-                "{border_padding}{dim_cyan}║ {npm_left_padding}{dim_cyan}{npm_link}{npm_right_padding} ║{reset}"
+                "{border_padding}{dim_cyan}║ {links_left_padding}{dim_cyan}{links_hint}{links_right_padding} ║{reset}"
             );
         }
 
@@ -491,42 +504,18 @@ pub async fn handle_interactive_mode() -> Result<()> {
         // Add a small delay to show the progress
         tokio::time::sleep(tokio::time::Duration::from_millis(500)).await;
 
-        let tools = ToolManager::get_available_tools();
-        let install_commands = InstallationManager::get_install_commands();
+        loading_progress.finish_success("Interface initialized");
 
-        loading_progress.finish_success("AI tools status loaded");
+        // Main menu options - clean and organized
+        let options = vec![
+            "🤖 AI CLI Tools".to_string(),
+            "📚 Important Links".to_string(),
+            "⚙️  Settings".to_string(),
+            "🚪 Exit".to_string(),
+        ];
 
-        // Clean tool list - minimal and futuristic
-        let mut options = Vec::new();
-        let mut tool_mapping = Vec::new();
-
-        for (tool_name, tool_info) in tools.iter() {
-            let install_info = install_commands.get(tool_name).unwrap();
-            let status_icon = if tool_info.is_installed {
-                "🚀"
-            } else {
-                "📦"
-            };
-            let display_text = format!(
-                "{} {} - {}",
-                status_icon, tool_name, install_info.description
-            );
-            options.push(display_text);
-            tool_mapping.push(Some(*tool_name));
-        }
-
-        // Clean separator and settings
-        options.push("".to_string());
-        tool_mapping.push(None);
-
-        options.push("⚙️  Settings".to_string());
-        tool_mapping.push(None);
-
-        options.push("🚪 Exit".to_string());
-        tool_mapping.push(None);
-
-        let selection = match Select::new("Select an AI tool to launch:", options.clone())
-            .with_page_size(15)
+        let selection = match Select::new("Choose an option:", options.clone())
+            .with_page_size(10)
             .prompt()
         {
             Ok(selection) => selection,
@@ -539,107 +528,269 @@ pub async fn handle_interactive_mode() -> Result<()> {
         };
 
         // Handle selection
-        if selection.contains("⚙️") {
-            handle_manage_tools_menu().await?;
-        } else if selection.contains("🚪") {
-            println!("{neon_blue}👋 Goodbye!{reset}");
-            break;
-        } else if selection.is_empty() {
-            continue;
-        } else if let Some(index) = options.iter().position(|opt| opt == &selection) {
-            if let Some(Some(tool_name)) = tool_mapping.get(index) {
-                let tools = ToolManager::get_available_tools();
-                let tool_info = tools.get(tool_name).unwrap();
-
-                if !tool_info.is_installed {
-                    let should_install = match Confirm::new(&format!(
-                        "{neon_blue}📦 '{tool_name}' is not installed. Install it now?{reset}"
-                    ))
-                    .with_default(true)
-                    .prompt()
-                    {
-                        Ok(result) => result,
-                        Err(_) => {
-                            // User interrupted - go back to main menu
-                            println!("\n{neon_cyan}🔙 Installation cancelled{reset}");
-                            false
-                        }
-                    };
-
-                    if should_install {
-                        println!("\n{neon_cyan}📦 Installing {tool_name}...{reset}");
-                        handle_install_tool(tool_name).await?;
-                        println!("{neon_cyan}✅ Installation complete!{reset}\n");
-                    } else {
-                        continue;
-                    }
-                }
-
-                let args_input = match Text::new(&format!(
-                    "{neon_white}Enter arguments for {tool_name} (or press Enter for default):{reset}"
-                ))
-                .with_default("")
-                .prompt() {
-                    Ok(input) => input,
-                    Err(_) => {
-                        // User interrupted - go back to main menu
-                        println!("\n{neon_cyan}🔙 Operation cancelled{reset}");
-                        continue;
-                    }
-                };
-
-                let args: Vec<String> = if args_input.trim().is_empty() {
-                    vec![]
-                } else {
-                    shell_words::split(&args_input).unwrap_or_else(|_| {
-                        args_input
-                            .split_whitespace()
-                            .map(|s| s.to_string())
-                            .collect()
-                    })
-                };
-
-                // Show loading indicator before launching tool - keep it running longer
-                let launch_progress = ProgressContext::new(&format!("Launching {tool_name}"));
-
-                // Show more detailed progress steps
-                launch_progress.update_message(&format!("Preparing {tool_name} environment"));
-                tokio::time::sleep(tokio::time::Duration::from_millis(200)).await;
-
-                launch_progress.update_message(&format!("Initializing {tool_name}"));
-                tokio::time::sleep(tokio::time::Duration::from_millis(200)).await;
-
-                launch_progress
-                    .update_message(&format!("Starting {tool_name} with args: {args:?}"));
-                tokio::time::sleep(tokio::time::Duration::from_millis(150)).await;
-
-                // Finish progress right before starting the tool
-                launch_progress.finish_success(&format!("{tool_name} ready - starting now"));
-
-                // Special handling for opencode to ensure input focus works properly
-                if *tool_name == "opencode" {
-                    // For opencode, we need extra time and careful terminal state management
-                    // to prevent input focus issues on fresh installs
-                    tokio::time::sleep(tokio::time::Duration::from_millis(100)).await;
-                } else {
-                    // Clear any remaining progress indicators for other tools
-                    print!("\x1b[2K\r");
-                }
-
-                match ToolManager::run_tool(tool_name, &args).await {
-                    Ok(_) => {
-                        println!("\n{neon_cyan}✅ {tool_name} completed successfully!{reset}");
-                    }
-                    Err(e) => {
-                        eprintln!("\n{neon_cyan}❌ Error running {tool_name}: {e}{reset}");
-                    }
-                }
-
-                println!("\n{neon_blue}Press Enter to continue...{reset}");
-                let _ = std::io::stdin().read_line(&mut String::new());
+        match selection.as_str() {
+            s if s.starts_with("🤖") => {
+                handle_ai_tools_menu().await?;
             }
+            s if s.starts_with("📚") => {
+                handle_important_links().await?;
+            }
+            s if s.starts_with("⚙️") => {
+                handle_manage_tools_menu().await?;
+            }
+            s if s.starts_with("🚪") => {
+                println!("{neon_blue}👋 Goodbye!{reset}");
+                break;
+            }
+            _ => continue,
         }
     }
+    Ok(())
+}
+
+async fn handle_ai_tools_menu() -> Result<()> {
+    // Futuristic colors consistent with main interface
+    let neon_cyan = "\x1b[96m";
+    let neon_blue = "\x1b[94m";
+    let neon_white = "\x1b[97m";
+    let reset = "\x1b[0m";
+
+    print!("\x1b[2J\x1b[H"); // Clear screen
+
+    println!("{neon_cyan}🤖 AI CLI Tools{reset}\n");
+
+    // Show loading indicator
+    let loading_progress = ProgressContext::new("Loading AI tools status");
+    tokio::time::sleep(tokio::time::Duration::from_millis(300)).await;
+
+    let tools = ToolManager::get_available_tools();
+    let install_commands = InstallationManager::get_install_commands();
+
+    loading_progress.finish_success("AI tools status loaded");
+
+    // Build clean tool list with status indicators
+    let mut options = Vec::new();
+    let mut tool_mapping = Vec::new();
+
+    for (tool_name, tool_info) in tools.iter() {
+        let install_info = install_commands.get(tool_name).unwrap();
+        let status_icon = if tool_info.is_installed {
+            "🚀"
+        } else {
+            "📦"
+        };
+        let display_text = format!(
+            "{} {} - {}",
+            status_icon, tool_name, install_info.description
+        );
+        options.push(display_text);
+        tool_mapping.push(Some(*tool_name));
+    }
+
+    // Add back option
+    options.push("🔙 Back to Main Menu".to_string());
+    tool_mapping.push(None);
+
+    let selection = match Select::new("Select an AI tool to launch:", options.clone())
+        .with_page_size(15)
+        .prompt()
+    {
+        Ok(selection) => selection,
+        Err(_) => {
+            // User interrupted (Ctrl+C) - return to main menu
+            return Ok(());
+        }
+    };
+
+    // Handle selection
+    if selection.contains("🔙") {
+        return Ok(());
+    } else if let Some(index) = options.iter().position(|opt| opt == &selection) {
+        if let Some(Some(tool_name)) = tool_mapping.get(index) {
+            let tools = ToolManager::get_available_tools();
+            let tool_info = tools.get(tool_name).unwrap();
+
+            if !tool_info.is_installed {
+                let should_install = match Confirm::new(&format!(
+                    "{neon_blue}📦 '{tool_name}' is not installed. Install it now?{reset}"
+                ))
+                .with_default(true)
+                .prompt()
+                {
+                    Ok(result) => result,
+                    Err(_) => {
+                        // User interrupted - go back to main menu
+                        println!("\n{neon_cyan}🔙 Installation cancelled{reset}");
+                        return Ok(());
+                    }
+                };
+
+                if should_install {
+                    println!("\n{neon_cyan}📦 Installing {tool_name}...{reset}");
+                    handle_install_tool(tool_name).await?;
+                    println!("{neon_cyan}✅ Installation complete!{reset}\n");
+                } else {
+                    return Ok(());
+                }
+            }
+
+            let args_input = match Text::new(&format!(
+                "{neon_white}Enter arguments for {tool_name} (or press Enter for default):{reset}"
+            ))
+            .with_default("")
+            .prompt()
+            {
+                Ok(input) => input,
+                Err(_) => {
+                    // User interrupted - go back to main menu
+                    println!("\n{neon_cyan}🔙 Operation cancelled{reset}");
+                    return Ok(());
+                }
+            };
+
+            let args: Vec<String> = if args_input.trim().is_empty() {
+                vec![]
+            } else {
+                shell_words::split(&args_input).unwrap_or_else(|_| {
+                    args_input
+                        .split_whitespace()
+                        .map(|s| s.to_string())
+                        .collect()
+                })
+            };
+
+            // Show loading indicator before launching tool
+            let launch_progress = ProgressContext::new(&format!("Launching {tool_name}"));
+
+            // Show more detailed progress steps
+            launch_progress.update_message(&format!("Preparing {tool_name} environment"));
+            tokio::time::sleep(tokio::time::Duration::from_millis(200)).await;
+
+            launch_progress.update_message(&format!("Initializing {tool_name}"));
+            tokio::time::sleep(tokio::time::Duration::from_millis(200)).await;
+
+            launch_progress.update_message(&format!("Starting {tool_name} with args: {args:?}"));
+            tokio::time::sleep(tokio::time::Duration::from_millis(150)).await;
+
+            // Finish progress right before starting the tool
+            launch_progress.finish_success(&format!("{tool_name} ready - starting now"));
+
+            // Special handling for opencode to ensure input focus works properly
+            if *tool_name == "opencode" {
+                // For opencode, we need extra time and careful terminal state management
+                // to prevent input focus issues on fresh installs
+                tokio::time::sleep(tokio::time::Duration::from_millis(100)).await;
+            } else {
+                // Clear any remaining progress indicators for other tools
+                print!("\x1b[2K\r");
+            }
+
+            match ToolManager::run_tool(tool_name, &args).await {
+                Ok(_) => {
+                    println!("\n{neon_cyan}✅ {tool_name} completed successfully!{reset}");
+                }
+                Err(e) => {
+                    eprintln!("\n{neon_cyan}❌ Error running {tool_name}: {e}{reset}");
+                }
+            }
+
+            println!("\n{neon_blue}Press Enter to continue...{reset}");
+            let _ = std::io::stdin().read_line(&mut String::new());
+        }
+    }
+
+    Ok(())
+}
+
+async fn handle_important_links() -> Result<()> {
+    // Futuristic colors consistent with main interface
+    let neon_cyan = "\x1b[96m";
+    let neon_blue = "\x1b[94m";
+    let neon_green = "\x1b[92m";
+    let neon_magenta = "\x1b[95m";
+    let neon_yellow = "\x1b[93m";
+    let reset = "\x1b[0m";
+
+    print!("\x1b[2J\x1b[H"); // Clear screen
+
+    println!("{neon_cyan}📚 Important Links & Resources{reset}\n");
+
+    let options = vec![
+        format!("{neon_blue}🐙 GitHub Repository{reset}"),
+        format!("{neon_green}📦 NPM Package{reset}"),
+        format!("{neon_magenta}📝 CHANGELOG.md{reset}"),
+        format!("{neon_yellow}🔧 Cargo Package{reset}"),
+        format!("{neon_cyan}📖 Documentation{reset}"),
+        format!("{neon_blue}🚀 Homebrew Formula{reset}"),
+        "🔙 Back to Main Menu".to_string(),
+    ];
+
+    let selection = match Select::new("Choose a resource to view:", options)
+        .with_page_size(10)
+        .prompt()
+    {
+        Ok(selection) => selection,
+        Err(_) => {
+            // User interrupted - return to main menu
+            return Ok(());
+        }
+    };
+
+    match selection.as_str() {
+        s if s.contains("GitHub") => {
+            println!("\n{neon_blue}🐙 Opening GitHub Repository...{reset}");
+            println!("   📍 https://github.com/BA-CalderonMorales/terminal-jarvis");
+            println!("   - View source code and contribute");
+            println!("   - Report issues and feature requests");
+            println!("   - Check latest releases and changelogs");
+        }
+        s if s.contains("NPM") => {
+            println!("\n{neon_green}📦 NPM Package Information...{reset}");
+            println!("   📍 https://www.npmjs.com/package/terminal-jarvis");
+            println!("   - Install: npm install -g terminal-jarvis");
+            println!("   - Run: npx terminal-jarvis");
+            println!("   - Version history and statistics");
+        }
+        s if s.contains("CHANGELOG") => {
+            println!("\n{neon_magenta}📝 CHANGELOG.md - Version History{reset}");
+            println!("   📍 https://github.com/BA-CalderonMorales/terminal-jarvis/blob/main/CHANGELOG.md");
+            println!("   - Detailed release notes for each version");
+            println!("   - Feature additions and bug fixes");
+            println!("   - Breaking changes and migration guides");
+        }
+        s if s.contains("Cargo") => {
+            println!("\n{neon_yellow}🔧 Cargo Package Information{reset}");
+            println!("   📍 https://crates.io/crates/terminal-jarvis");
+            println!("   - Install: cargo install terminal-jarvis");
+            println!("   - Rust ecosystem integration");
+            println!("   - Development dependencies and features");
+        }
+        s if s.contains("Documentation") => {
+            println!("\n{neon_cyan}📖 Documentation Hub{reset}");
+            println!("   📍 https://github.com/BA-CalderonMorales/terminal-jarvis/tree/main/docs");
+            println!("   - Architecture overview and design decisions");
+            println!("   - Installation guides for all platforms");
+            println!("   - Testing procedures and contribution guidelines");
+            println!("   - Limitations and troubleshooting");
+        }
+        s if s.contains("Homebrew") => {
+            println!("\n{neon_blue}🚀 Homebrew Formula{reset}");
+            println!(
+                "   📍 https://github.com/BA-CalderonMorales/terminal-jarvis/tree/main/homebrew"
+            );
+            println!("   - macOS/Linux package management");
+            println!("   - Install: brew tap ba-calderonmorales/terminal-jarvis && brew install terminal-jarvis");
+            println!("   - System integration and automatic updates");
+        }
+        _ => {
+            // Back to main menu
+            return Ok(());
+        }
+    }
+
+    println!("\n{neon_cyan}Press Enter to continue...{reset}");
+    let _ = std::io::stdin().read_line(&mut String::new());
+
     Ok(())
 }
 
