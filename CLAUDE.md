@@ -4,15 +4,16 @@
 
 Terminal Jarvis is a Rust-based CLI wrapper that provides a unified interface for managing AI coding tools (claude-code, gemini-cli, qwen-code, opencode, llxprt). It's distributed through **three official channels**: NPM (Node.js ecosystem), Crates.io (Rust ecosystem), and Homebrew (macOS/Linux package manager).
 
-**Current Version**: 0.0.46  
+**Current Version**: 0.0.47  
 **License**: MIT  
 **Repository**: https://github.com/BA-CalderonMorales/terminal-jarvis
 
 ### Multi-Platform Distribution
 
 **Distribution Channels**:
+
 1. **NPM**: `npm install -g terminal-jarvis` (Node.js ecosystem)
-2. **Crates.io**: `cargo install terminal-jarvis` (Rust developers)  
+2. **Crates.io**: `cargo install terminal-jarvis` (Rust developers)
 3. **Homebrew**: `brew tap ba-calderonmorales/terminal-jarvis && brew install terminal-jarvis` (macOS/Linux package managers)
 
 ## Key Features & Capabilities
@@ -243,7 +244,7 @@ class TerminalJarvis < Formula
   end
 
   on_linux do
-    url "https://github.com/.../terminal-jarvis-linux.tar.gz"  
+    url "https://github.com/.../terminal-jarvis-linux.tar.gz"
     sha256 "..."
   end
 
@@ -281,12 +282,13 @@ brew test local/test/terminal-jarvis
 #### **Common Homebrew Pitfalls**:
 
 - **Archive Naming**: Must use consistent names: `terminal-jarvis-{macos|linux}.tar.gz`
-- **SHA256 Mismatch**: Always regenerate SHA256 after creating new archives  
+- **SHA256 Mismatch**: Always regenerate SHA256 after creating new archives
 - **Binary Permissions**: Archives must preserve execute permissions
 - **Formula Syntax**: Ruby syntax errors prevent Formula loading
 - **Cross-Platform**: Use `on_macos` and `on_linux` blocks for platform-specific handling
-cargo test --lib services
-```
+  cargo test --lib services
+
+````
 
 ## File Sync Requirements
 
@@ -295,7 +297,7 @@ cargo test --lib services
 ```bash
 cd npm/terminal-jarvis
 npm run sync-readme
-```
+````
 
 **MANDATORY: docs/ Directory Review**: **EVERY TIME** you modify CHANGELOG.md, you **MUST** review and update the docs/ directory:
 

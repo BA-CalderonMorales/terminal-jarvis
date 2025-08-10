@@ -32,7 +32,21 @@ This document outlines our comprehensive testing approach to ensure core functio
 ./scripts/test-core-functionality.sh
 ```
 
-### 3. `scripts/local-cicd.sh`
+### 3. `scripts/test-homebrew-formula.sh`
+
+**Homebrew Formula validation** - Multi-platform distribution testing
+
+- Formula syntax and structure validation
+- SHA256 checksum verification
+- Archive integrity testing
+- Ruby syntax checking
+- Cross-platform compatibility validation
+
+```bash
+./scripts/test-homebrew-formula.sh
+```
+
+### 4. `scripts/local-cicd.sh`
 
 **Full CI/CD pipeline** with integrated testing
 
@@ -126,6 +140,47 @@ Our test suite validates these essential behaviors:
 - ✅ Terminal state preparation doesn't interfere with tool initialization
 - ✅ Minimal terminal clearing sequences prevent race conditions
 - ✅ Tool-specific launch optimizations (initialization delays, state management)
+
+### 5. **Multi-Platform Distribution** (v0.0.47+)
+
+- ✅ Homebrew Formula syntax validation
+- ✅ Cross-platform archive creation (macOS/Linux)
+- ✅ SHA256 checksum verification
+- ✅ Binary permissions preservation in archives
+- ✅ Local tap testing workflow validation
+
+## Homebrew Testing Infrastructure
+
+### Local Formula Testing
+
+**Complete end-to-end validation** without requiring GitHub releases:
+
+```bash
+# 1. Validate Formula structure and syntax
+./scripts/test-homebrew-formula.sh
+
+# 2. Create local tap for testing
+mkdir -p /tmp/homebrew-test-tap/Formula
+cp homebrew/Formula/terminal-jarvis.rb /tmp/homebrew-test-tap/Formula/
+cd /tmp/homebrew-test-tap && git init && git add . && git commit -m "Test"
+
+# 3. Install via local tap
+brew tap local/test /tmp/homebrew-test-tap
+brew install local/test/terminal-jarvis
+
+# 4. Test functionality
+terminal-jarvis --version
+brew test local/test/terminal-jarvis
+```
+
+### Archive Testing
+
+**Validates multi-platform release artifacts**:
+
+- Creates platform-specific archives: `terminal-jarvis-{macos|linux}.tar.gz`
+- Verifies SHA256 checksums match Formula expectations
+- Tests binary extraction and permissions
+- Validates Formula URL structure for GitHub releases
 
 ## Integration with Development Workflow
 

@@ -10,7 +10,7 @@ The project follows Orhun Parmaksız's approach for packaging Rust applications 
 
 ## Current Version & Key Features
 
-**Version**: 0.0.46
+**Version**: 0.0.47
 **Major Features**:
 
 - **Multi-Platform Distribution** (v0.0.46+) - NPM, Crates.io, and Homebrew publishing
@@ -72,7 +72,7 @@ Always update BOTH `Cargo.toml` and `npm/terminal-jarvis/package.json` at the sa
 
 - **Feature completion**: When a major feature (like Homebrew integration) is complete, increment version
 - **Bug fixes only**: Use patch version increments (0.0.X)
-- **New major features**: Use minor version increments (0.X.0) 
+- **New major features**: Use minor version increments (0.X.0)
 - **Breaking changes**: Use major version increments (X.0.0)
 
 ### Example Workflow:
@@ -292,6 +292,7 @@ mod tests {
 ```
 
 This script:
+
 - Builds release binaries for macOS and Linux
 - Creates .tar.gz archives with proper naming (`terminal-jarvis-{platform}.tar.gz`)
 - Calculates SHA256 checksums for Formula verification
@@ -312,7 +313,7 @@ class TerminalJarvis < Formula
   end
 
   on_linux do
-    url "https://github.com/.../terminal-jarvis-linux.tar.gz"  
+    url "https://github.com/.../terminal-jarvis-linux.tar.gz"
     sha256 "..."
   end
 
@@ -352,7 +353,8 @@ brew test local/test/terminal-jarvis
 #### 4. **GitHub Release Integration**
 
 Archives must be uploaded to GitHub releases:
-- `terminal-jarvis-macos.tar.gz` 
+
+- `terminal-jarvis-macos.tar.gz`
 - `terminal-jarvis-linux.tar.gz`
 
 Formula URLs point to these release assets.
@@ -362,26 +364,31 @@ Formula URLs point to these release assets.
 #### **Distribution Channel Separation**
 
 1. **NPM Users** - JavaScript/Node.js ecosystem
-2. **Crates.io Users** - Rust developers who prefer `cargo install`  
+2. **Crates.io Users** - Rust developers who prefer `cargo install`
 3. **Homebrew Users** - macOS/Linux users preferring system package managers
 
 #### **README Badge Organization**
 
 Group badges by distribution channel for clarity:
+
 ```markdown
 <!-- NPM Distribution -->
+
 [![npm version](badge-url)](link) [![npm downloads](badge-url)](link)
 
-<!-- Crates.io Distribution -->  
+<!-- Crates.io Distribution -->
+
 [![Crates.io](badge-url)](link) [![Crates.io downloads](badge-url)](link)
 
 <!-- GitHub Stats -->
+
 [![GitHub release](badge-url)](link) [![GitHub stars](badge-url)](link)
 ```
 
 #### **Version Synchronization Requirements**
 
 ALL distribution channels must maintain version synchronization:
+
 - `Cargo.toml` - Core Rust package version
 - `npm/terminal-jarvis/package.json` - NPM package version
 - `homebrew/Formula/terminal-jarvis.rb` - Homebrew Formula version
@@ -390,22 +397,27 @@ ALL distribution channels must maintain version synchronization:
 ### Common Homebrew Integration Pitfalls
 
 #### **Archive Naming Issues**
+
 - **Problem**: Inconsistent archive naming breaks Formula URLs
 - **Solution**: Use standardized names: `terminal-jarvis-{macos|linux}.tar.gz`
 
-#### **SHA256 Mismatch** 
+#### **SHA256 Mismatch**
+
 - **Problem**: Formula SHA256 doesn't match actual archive checksum
 - **Solution**: Always regenerate SHA256 after creating new archives
 
 #### **Formula Syntax Errors**
+
 - **Problem**: Ruby syntax errors prevent Formula loading
 - **Solution**: Use `./scripts/test-homebrew-formula.sh` for validation
 
 #### **Binary Permissions**
+
 - **Problem**: Extracted binary lacks execute permissions
 - **Solution**: Archives must preserve file permissions (`tar -czf` with proper flags)
 
 #### **Cross-Platform Issues**
+
 - **Problem**: Formula doesn't handle macOS vs Linux differences
 - **Solution**: Use `on_macos` and `on_linux` blocks for platform-specific handling
 
@@ -414,6 +426,7 @@ ALL distribution channels must maintain version synchronization:
 **Local Testing Strategy** (when GitHub repo doesn't exist yet):
 
 1. **Create Local Tap Structure**:
+
    ```bash
    mkdir -p /tmp/homebrew-test-tap/Formula
    cp homebrew/Formula/terminal-jarvis.rb /tmp/homebrew-test-tap/Formula/
@@ -421,11 +434,13 @@ ALL distribution channels must maintain version synchronization:
    ```
 
 2. **Serve Archives Locally**:
+
    ```bash
    cd homebrew/release && python3 -m http.server 8000
    ```
 
 3. **Modify Formula for Testing**:
+
    ```ruby
    # Replace GitHub URLs with localhost for testing
    url "http://localhost:8000/terminal-jarvis-linux.tar.gz"

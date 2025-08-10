@@ -4,7 +4,9 @@ This document provides comprehensive installation instructions for Terminal Jarv
 
 ## Quick Installation
 
-### NPM Installation (Recommended)
+Terminal Jarvis is available through **three official distribution channels**:
+
+### 1. NPM Installation (Recommended for Most Users)
 
 ```bash
 # Try it instantly with npx (no installation required)
@@ -20,7 +22,38 @@ npm install -g terminal-jarvis@stable
 npm install -g terminal-jarvis@beta
 ```
 
-### Installation Channels
+### 2. Rust Crate Installation (For Rust Developers)
+
+```bash
+# Install directly via Cargo
+cargo install terminal-jarvis
+
+# Verify installation
+terminal-jarvis --help
+```
+
+### 3. Homebrew Installation (macOS/Linux Package Manager)
+
+```bash
+# Add the Terminal Jarvis tap
+brew tap ba-calderonmorales/terminal-jarvis
+
+# Install Terminal Jarvis
+brew install terminal-jarvis
+
+# Verify installation
+terminal-jarvis --version
+```
+
+### Distribution Channel Comparison
+
+| Method       | Best For                         | Pros                                        | Cons                    |
+| ------------ | -------------------------------- | ------------------------------------------- | ----------------------- |
+| **NPM**      | Node.js users, quick testing     | Instant with npx, multiple release channels | Requires Node.js        |
+| **Cargo**    | Rust developers                  | Native Rust toolchain integration           | Requires Rust toolchain |
+| **Homebrew** | macOS/Linux system package users | System package manager integration          | Limited to macOS/Linux  |
+
+### NPM Distribution Channels
 
 - **Latest** (`terminal-jarvis`): Most recently published version
 - **Stable** (`terminal-jarvis@stable`): Production-ready, thoroughly tested releases
