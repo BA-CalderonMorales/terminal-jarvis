@@ -116,7 +116,27 @@ When you see requests like "Let's now run local-cd.sh" or anything involving dep
 - **Minor (X.Y.0)**: New features, no breaking changes
 - **Major (Y.0.0)**: Breaking changes
 
-#### **Step 2: CHANGELOG.md Update - MANDATORY FIRST STEP**
+#### **Step 2: Pre-Commit Verification - MANDATORY**
+
+**🚨 CRITICAL**: Always check for uncommitted changes BEFORE proceeding with deployment:
+
+```bash
+# Check for any uncommitted changes
+git status
+
+# If you see "Changes not staged for commit" or "Changes to be committed":
+# STOP and commit those changes FIRST before proceeding with deployment
+git add <files>
+git commit -m "descriptive commit message"
+git push origin develop
+
+# Only proceed with deployment when git status shows:
+# "nothing to commit, working tree clean"
+```
+
+**Why This Matters**: The deployment process expects a clean working directory. Uncommitted changes, especially to documentation files (CLAUDE.md, copilot-instructions.md) or configuration files (homebrew/Formula/terminal-jarvis.rb), must be committed and pushed BEFORE deployment to ensure the complete state is published to GitHub.
+
+#### **Step 3: CHANGELOG.md Update - MANDATORY FIRST STEP**
 
 ```bash
 # Example: If live version is 0.0.47, next version should be 0.0.48
@@ -132,33 +152,33 @@ When you see requests like "Let's now run local-cd.sh" or anything involving dep
 - **Network Efficiency**: Reduced NPM registry calls with 1-hour cache TTL
 ```
 
-#### **Step 3: Version Synchronization**
+#### **Step 4: Version Synchronization**
 
 ```bash
 # Update version across all files automatically
 ./scripts/local-cd.sh --update-version 0.0.48
 ```
 
-#### **Step 4: Homebrew Formula Update**
+#### **Step 5: Homebrew Formula Update**
 
 ```bash
 # Update Homebrew Formula for new version
 sed -i 's/version ".*"/version "0.0.48"/' homebrew/Formula/terminal-jarvis.rb
 ```
 
-#### **Step 5: Validation**
+#### **Step 6: Validation**
 
 ```bash
 ./scripts/local-ci.sh  # MUST pass all tests
 ```
 
-#### **Step 6: Deployment**
+#### **Step 7: Deployment**
 
 ```bash
 ./scripts/local-cd.sh  # Creates archives, commits, tags, pushes
 ```
 
-#### **Step 7: GitHub Release Creation - CRITICAL FOR HOMEBREW**
+#### **Step 8: GitHub Release Creation - CRITICAL FOR HOMEBREW**
 
 **🚨 MANDATORY**: Homebrew formulas require GitHub releases with attached archives. The deployment script only creates Git tags, not releases.
 
@@ -184,7 +204,7 @@ curl -I https://github.com/BA-CalderonMorales/terminal-jarvis/releases/download/
 
 **Both should return HTTP 302 (redirect) responses.**
 
-#### **Step 8: Homebrew Release Validation**
+#### **Step 9: Homebrew Release Validation**
 
 ```bash
 # After GitHub release is created

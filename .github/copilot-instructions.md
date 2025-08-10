@@ -61,7 +61,26 @@ The repository has two main parts:
   - **0.X.0 → 0.X+1.0**: Major new features, significant functionality additions
   - **X.0.0 → X+1.0.0**: Breaking changes, API changes
 
-#### **2. CHANGELOG.md Update - ABSOLUTE REQUIREMENT**
+#### **2. Pre-Commit Verification - CRITICAL**
+
+**🚨 BEFORE PROCEEDING**: Always check for uncommitted changes:
+
+```bash
+# Check for any uncommitted changes
+git status
+
+# If you see "Changes not staged for commit":
+# STOP! Commit and push those changes FIRST
+git add <files>
+git commit -m "descriptive message"
+git push origin develop
+
+# Only proceed when: "nothing to commit, working tree clean"
+```
+
+**CRITICAL**: Configuration changes, documentation updates, or Homebrew formula changes MUST be committed before deployment to ensure complete state is published to GitHub.
+
+#### **3. CHANGELOG.md Update - ABSOLUTE REQUIREMENT**
 
 **BEFORE running ANY deployment commands**, update CHANGELOG.md:
 
@@ -78,7 +97,7 @@ The repository has two main parts:
 - **User Experience**: Faster interactive mode startup with cached version data
 ```
 
-#### **3. Multi-Platform Version Synchronization**
+#### **4. Multi-Platform Version Synchronization**
 
 ```bash
 # Update all files to next version (e.g., 0.0.48)
@@ -88,7 +107,7 @@ The repository has two main parts:
 sed -i 's/version ".*"/version "0.0.48"/' homebrew/Formula/terminal-jarvis.rb
 ```
 
-#### **4. Complete Deployment Workflow**
+#### **5. Complete Deployment Workflow**
 
 ```bash
 # 1. Validate everything works
@@ -122,7 +141,7 @@ curl -I https://github.com/BA-CalderonMorales/terminal-jarvis/releases/download/
 - **Homebrew formulas expect release URLs**: Formula URLs point to `releases/download/vX.X.X/archive.tar.gz`
 - **Always verify release assets**: Use curl to test URLs before marking deployment complete
 
-#### **5. Documentation Update Pattern**
+#### **6. Documentation Update Pattern**
 
 **ALSO MANDATORY: Review and update docs/ directory** - Required whenever CHANGELOG.md is modified:
 
