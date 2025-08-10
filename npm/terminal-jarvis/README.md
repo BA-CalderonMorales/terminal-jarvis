@@ -1,12 +1,24 @@
 # Terminal Jarvis
 
-[![NPM Version](https://img.shields.io/npm/v/terminal-jarvis.svg)](https://www.npmjs.com/package/terminal-jarvis)
-[![NPM Downloads](https://img.shields.io/npm/dm/terminal-jarvis.svg)](https://www.npmjs.com/package/terminal-jarvis)
-[![Crates.io Version](https://img.shields.io/crates/v/terminal-jarvis.svg)](https://crates.io/crates/terminal-jarvis)
-[![Crates.io Downloads](https://img.shields.io/crates/d/terminal-jarvis.svg)](https://crates.io/crates/terminal-jarvis)
+<div align="center">
+
+<!-- NPM Package -->
+[![NPM Version](https://img.shields.io/npm/v/terminal-jarvis.svg?logo=npm&label=NPM%20Version)](https://www.npmjs.com/package/terminal-jarvis)
+[![NPM Downloads](https://img.shields.io/npm/dm/terminal-jarvis.svg?logo=npm&label=NPM%20Downloads)](https://www.npmjs.com/package/terminal-jarvis)
+[![NPM Stable](https://img.shields.io/npm/v/terminal-jarvis/stable.svg?label=NPM%20Stable&color=green&logo=npm)](https://www.npmjs.com/package/terminal-jarvis)
+[![NPM Beta](https://img.shields.io/npm/v/terminal-jarvis/beta.svg?label=NPM%20Beta&color=orange&logo=npm)](https://www.npmjs.com/package/terminal-jarvis)
+
+<!-- Rust Crate -->
+[![Crates.io Version](https://img.shields.io/crates/v/terminal-jarvis.svg?logo=rust&label=Crates.io%20Version)](https://crates.io/crates/terminal-jarvis)
+[![Crates.io Downloads](https://img.shields.io/crates/d/terminal-jarvis.svg?logo=rust&label=Crates.io%20Downloads)](https://crates.io/crates/terminal-jarvis)
+
+<!-- Homebrew -->
+[![Homebrew](https://img.shields.io/badge/Homebrew-Available-blue.svg?logo=homebrew)](https://github.com/BA-CalderonMorales/homebrew-terminal-jarvis)
+
+<!-- General -->
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![NPM Stable](https://img.shields.io/npm/v/terminal-jarvis/stable.svg?label=stable&color=green)](https://www.npmjs.com/package/terminal-jarvis)
-[![NPM Beta](https://img.shields.io/npm/v/terminal-jarvis/beta.svg?label=beta&color=orange)](https://www.npmjs.com/package/terminal-jarvis)
+
+</div>
 
 A unified command center for AI coding tools. Manage and run claude-code, gemini-cli, qwen-code, opencode, llxprt, and codex from one beautiful terminal interface.
 
@@ -32,6 +44,10 @@ npm install -g terminal-jarvis@stable
 
 # Install via Cargo (Rust users)
 cargo install terminal-jarvis
+
+# Install via Homebrew (macOS/Linux)
+brew tap ba-calderonmorales/terminal-jarvis
+brew install terminal-jarvis
 ```
 
 **📋 Prerequisites:**
