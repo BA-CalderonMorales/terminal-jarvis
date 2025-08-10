@@ -10,7 +10,7 @@ The project follows Orhun Parmaksız's approach for packaging Rust applications 
 
 ## Current Version & Key Features
 
-**Version**: 0.0.47
+**Version**: 0.0.48
 **Major Features**:
 
 - **Multi-Platform Distribution** (v0.0.46+) - NPM, Crates.io, and Homebrew publishing
@@ -46,6 +46,87 @@ The repository has two main parts:
 - `src/index.ts` - Simple TypeScript wrapper that calls the Rust binary
 - `package.json` - NPM package configuration
 - `biome.json` - Biome linting configuration (we use Biome, not ESLint)
+
+## 🚨 DEPLOYMENT COMMANDS TRIGGER - READ IMMEDIATELY
+
+**When users say "Let's run local-cd.sh" or mention deployment:**
+
+### **MANDATORY PRE-DEPLOYMENT CHECKLIST**
+
+#### **1. Version Bump Calculation**
+
+- **Current Live Version**: Check GitHub releases for latest published version
+- **Next Version**: Increment based on changes made in this session:
+  - **0.0.X → 0.0.X+1**: Bug fixes, small features, documentation, performance improvements
+  - **0.X.0 → 0.X+1.0**: Major new features, significant functionality additions
+  - **X.0.0 → X+1.0.0**: Breaking changes, API changes
+
+#### **2. CHANGELOG.md Update - ABSOLUTE REQUIREMENT**
+
+**BEFORE running ANY deployment commands**, update CHANGELOG.md:
+
+```bash
+# If current live is 0.0.47, add entry for 0.0.48:
+## [0.0.48] - 2025-08-10
+
+### Added
+- **Version Caching System**: Intelligent caching of NPM distribution tag information
+- **Cache Management CLI**: Commands for cache status, refresh, and clearing
+
+### Enhanced
+- **Performance**: Eliminated API call delays on Terminal Jarvis home page
+- **User Experience**: Faster interactive mode startup with cached version data
+```
+
+#### **3. Multi-Platform Version Synchronization**
+
+```bash
+# Update all files to next version (e.g., 0.0.48)
+./scripts/local-cd.sh --update-version 0.0.48
+
+# Update Homebrew Formula
+sed -i 's/version ".*"/version "0.0.48"/' homebrew/Formula/terminal-jarvis.rb
+```
+
+#### **4. Complete Deployment Workflow**
+
+```bash
+# 1. Validate everything works
+./scripts/local-ci.sh
+
+# 2. Deploy (commits, tags, pushes)
+./scripts/local-cd.sh
+
+# 3. Create Homebrew release archives (after GitHub release exists)
+./scripts/create-homebrew-release.sh
+
+# 4. Manual step: Upload terminal-jarvis-*.tar.gz files to GitHub release
+```
+
+#### **5. Documentation Update Pattern**
+
+**ALSO MANDATORY: Review and update docs/ directory** - Required whenever CHANGELOG.md is modified:
+
+- Check docs/ARCHITECTURE.md, docs/INSTALLATION.md, docs/TESTING.md
+- Update version references if version was bumped
+- Ensure new features are documented
+- **ALSO: Review and update README.md** - Required with CHANGELOG.md changes
+
+### **Quick Reference Commands**
+
+```bash
+# Check current version status
+./scripts/local-cd.sh --check-versions
+
+# Update to specific version
+./scripts/local-cd.sh --update-version X.X.X
+
+# Validate before deployment
+./scripts/local-ci.sh
+
+# Deploy everything
+./scripts/local-cd.sh
+```
 
 ## Version Numbers Are Important
 

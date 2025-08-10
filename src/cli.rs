@@ -51,6 +51,11 @@ pub enum Commands {
         #[command(subcommand)]
         action: ConfigCommands,
     },
+    /// Version cache management commands
+    Cache {
+        #[command(subcommand)]
+        action: CacheCommands,
+    },
 }
 
 #[derive(Subcommand)]
@@ -61,6 +66,20 @@ pub enum ConfigCommands {
     Show,
     /// Show configuration file path
     Path,
+}
+
+#[derive(Subcommand)]
+pub enum CacheCommands {
+    /// Clear the version cache
+    Clear,
+    /// Show cache status
+    Status,
+    /// Refresh cache with latest version
+    Refresh {
+        /// Cache TTL in seconds (default: 3600)
+        #[arg(long, default_value = "3600")]
+        ttl: u64,
+    },
 }
 
 #[derive(Subcommand)]
@@ -113,6 +132,11 @@ impl Cli {
                 ConfigCommands::Reset => cli_logic::handle_config_reset().await,
                 ConfigCommands::Show => cli_logic::handle_config_show().await,
                 ConfigCommands::Path => cli_logic::handle_config_path().await,
+            },
+            Some(Commands::Cache { action }) => match action {
+                CacheCommands::Clear => cli_logic::handle_cache_clear().await,
+                CacheCommands::Status => cli_logic::handle_cache_status().await,
+                CacheCommands::Refresh { ttl } => cli_logic::handle_cache_refresh(ttl).await,
             },
             None => cli_logic::handle_interactive_mode().await,
         }

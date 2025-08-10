@@ -4,7 +4,7 @@
 
 Terminal Jarvis is a Rust-based CLI wrapper that provides a unified interface for managing AI coding tools (claude-code, gemini-cli, qwen-code, opencode, llxprt). It's distributed through **three official channels**: NPM (Node.js ecosystem), Crates.io (Rust ecosystem), and Homebrew (macOS/Linux package manager).
 
-**Current Version**: 0.0.47  
+**Current Version**: 0.0.48  
 **License**: MIT  
 **Repository**: https://github.com/BA-CalderonMorales/terminal-jarvis
 
@@ -100,6 +100,71 @@ Terminal Jarvis is a Rust-based CLI wrapper that provides a unified interface fo
 - **Formatting**: `npm run format` before committing
 - **Build**: `npm run build` must succeed
 - **Sync**: Always run `npm run sync-readme` before NPM publishing
+
+### DEPLOYMENT WORKFLOW - READ THIS FIRST!
+
+**🚨 CRITICAL DEPLOYMENT CHECKLIST**
+
+When you see requests like "Let's now run local-cd.sh" or anything involving deployment, **ALWAYS** follow this checklist:
+
+#### **Step 1: Version Planning**
+
+**Current Live Version**: Check GitHub releases to see the latest published version  
+**Next Version**: Increment appropriately based on changes:
+
+- **Patch (X.X.Y)**: Bug fixes, small improvements, documentation
+- **Minor (X.Y.0)**: New features, no breaking changes
+- **Major (Y.0.0)**: Breaking changes
+
+#### **Step 2: CHANGELOG.md Update - MANDATORY FIRST STEP**
+
+```bash
+# Example: If live version is 0.0.47, next version should be 0.0.48
+## [0.0.48] - 2025-08-10
+
+### Added
+- **Version Caching System**: Intelligent caching of NPM distribution tag information
+- **Cache Management CLI**: Commands for cache status, refresh, and clearing
+- **Performance Optimization**: Faster startup times through cached version data
+
+### Enhanced
+- **User Experience**: Eliminated API call delays on Terminal Jarvis home page
+- **Network Efficiency**: Reduced NPM registry calls with 1-hour cache TTL
+```
+
+#### **Step 3: Version Synchronization**
+
+```bash
+# Update version across all files automatically
+./scripts/local-cd.sh --update-version 0.0.48
+```
+
+#### **Step 4: Homebrew Formula Update**
+
+```bash
+# Update Homebrew Formula for new version
+sed -i 's/version ".*"/version "0.0.48"/' homebrew/Formula/terminal-jarvis.rb
+```
+
+#### **Step 5: Validation**
+
+```bash
+./scripts/local-ci.sh  # MUST pass all tests
+```
+
+#### **Step 6: Deployment**
+
+```bash
+./scripts/local-cd.sh  # Creates archives, commits, tags, pushes
+```
+
+#### **Step 7: Homebrew Release**
+
+```bash
+# After GitHub release is created by local-cd.sh
+./scripts/create-homebrew-release.sh  # Creates platform-specific archives
+# Manually upload terminal-jarvis-macos.tar.gz and terminal-jarvis-linux.tar.gz to GitHub release
+```
 
 ### Version Management
 
