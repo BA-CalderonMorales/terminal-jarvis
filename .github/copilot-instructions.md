@@ -97,11 +97,30 @@ sed -i 's/version ".*"/version "0.0.48"/' homebrew/Formula/terminal-jarvis.rb
 # 2. Deploy (commits, tags, pushes)
 ./scripts/local-cd.sh
 
-# 3. Create Homebrew release archives (after GitHub release exists)
-./scripts/create-homebrew-release.sh
+# 3. 🚨 CRITICAL: Create GitHub Release for Homebrew
+# The deployment script only creates Git tags, NOT releases!
+# Homebrew formulas REQUIRE GitHub releases with attached archives
+gh release create v0.0.X \
+  homebrew/release/terminal-jarvis-mac.tar.gz \
+  homebrew/release/terminal-jarvis-linux.tar.gz \
+  --title "Release v0.0.X: [Brief Description]" \
+  --notes "Release notes content" \
+  --latest
 
-# 4. Manual step: Upload terminal-jarvis-*.tar.gz files to GitHub release
+# 4. Verify Homebrew archives are accessible
+curl -I https://github.com/BA-CalderonMorales/terminal-jarvis/releases/download/v0.0.X/terminal-jarvis-mac.tar.gz
+curl -I https://github.com/BA-CalderonMorales/terminal-jarvis/releases/download/v0.0.X/terminal-jarvis-linux.tar.gz
+# Both should return HTTP 302 (redirect) responses
+
+# 5. Optional: Create additional Homebrew release archives if needed
+./scripts/create-homebrew-release.sh
 ```
+
+**🚨 HOMEBREW DEPLOYMENT FOOTGUN PREVENTION**:
+
+- **Git tags ≠ GitHub releases**: Tags are just Git references, releases are GitHub UI/API entities with downloadable assets
+- **Homebrew formulas expect release URLs**: Formula URLs point to `releases/download/vX.X.X/archive.tar.gz`
+- **Always verify release assets**: Use curl to test URLs before marking deployment complete
 
 #### **5. Documentation Update Pattern**
 
@@ -126,6 +145,12 @@ sed -i 's/version ".*"/version "0.0.48"/' homebrew/Formula/terminal-jarvis.rb
 
 # Deploy everything
 ./scripts/local-cd.sh
+
+# 🚨 CRITICAL: Create GitHub release for Homebrew
+gh release create vX.X.X homebrew/release/terminal-jarvis-*.tar.gz --title "Release vX.X.X" --notes "..." --latest
+
+# Verify Homebrew assets are accessible
+curl -I https://github.com/BA-CalderonMorales/terminal-jarvis/releases/download/vX.X.X/terminal-jarvis-mac.tar.gz
 ```
 
 ## Version Numbers Are Important
