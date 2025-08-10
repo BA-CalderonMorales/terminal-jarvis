@@ -4,6 +4,47 @@ use anyhow::Result;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::path::PathBuf;
+use std::time::{Duration, SystemTime, UNIX_EPOCH};
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct VersionCache {
+    pub version_info: String,
+    pub cached_at: u64,   // Unix timestamp
+    pub ttl_seconds: u64, // Time to live in seconds
+}
+
+impl VersionCache {
+    pub fn new(version_info: String, ttl_seconds: u64) -> Self {
+        let cached_at = SystemTime::now()
+            .duration_since(UNIX_EPOCH)
+            .unwrap_or(Duration::from_secs(0))
+            .as_secs();
+
+        Self {
+            version_info,
+            cached_at,
+            ttl_seconds,
+        }
+    }
+
+    pub fn is_expired(&self) -> bool {
+        let now = SystemTime::now()
+            .duration_since(UNIX_EPOCH)
+            .unwrap_or(Duration::from_secs(0))
+            .as_secs();
+
+        now - self.cached_at > self.ttl_seconds
+    }
+
+    pub fn remaining_seconds(&self) -> u64 {
+        let now = SystemTime::now()
+            .duration_since(UNIX_EPOCH)
+            .unwrap_or(Duration::from_secs(0))
+            .as_secs();
+
+        (self.cached_at + self.ttl_seconds).saturating_sub(now)
+    }
+}
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Config {
@@ -204,5 +245,143 @@ impl Config {
         for (tool_name, tool_config) in default_config.tools {
             self.tools.entry(tool_name).or_insert(tool_config);
         }
+    }
+}
+
+/// Configuration manager for handling config files and caching
+pub struct ConfigManager {
+    config_dir: PathBuf,
+}
+
+impl ConfigManager {
+    pub fn new() -> Result<Self> {
+        let config_dir = dirs::config_dir()
+            .ok_or_else(|| anyhow::anyhow!("Could not determine config directory"))?
+            .join("terminal-jarvis");
+
+        // Create config directory if it doesn't exist
+        std::fs::create_dir_all(&config_dir)?;
+
+        Ok(Self { config_dir })
+    }
+
+    /// Get the path to the version cache file
+    pub fn get_version_cache_path(&self) -> PathBuf {
+        self.config_dir.join("version_cache.toml")
+    }
+
+    /// Load version cache from disk
+    pub fn load_version_cache(&self) -> Result<Option<VersionCache>> {
+        let cache_path = self.get_version_cache_path();
+
+        if !cache_path.exists() {
+            return Ok(None);
+        }
+
+        let content = std::fs::read_to_string(&cache_path)?;
+        let cache: VersionCache = toml::from_str(&content)?;
+
+        if cache.is_expired() {
+            // Clean up expired cache
+            let _ = std::fs::remove_file(&cache_path);
+            return Ok(None);
+        }
+
+        Ok(Some(cache))
+    }
+
+    /// Save version cache to disk
+    pub fn save_version_cache(&self, cache: &VersionCache) -> Result<()> {
+        let cache_path = self.get_version_cache_path();
+        let content = toml::to_string_pretty(cache)?;
+        std::fs::write(&cache_path, content)?;
+        Ok(())
+    }
+
+    /// Clear version cache
+    pub fn clear_version_cache(&self) -> Result<()> {
+        let cache_path = self.get_version_cache_path();
+        if cache_path.exists() {
+            std::fs::remove_file(&cache_path)?;
+        }
+        Ok(())
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use tempfile::TempDir;
+
+    #[test]
+    fn test_version_cache_creation() {
+        let cache = VersionCache::new("1.0.0 (@stable)".to_string(), 3600);
+        assert_eq!(cache.version_info, "1.0.0 (@stable)");
+        assert_eq!(cache.ttl_seconds, 3600);
+        assert!(!cache.is_expired()); // Should not be expired immediately
+    }
+
+    #[test]
+    fn test_version_cache_expiration() {
+        let mut cache = VersionCache::new("1.0.0".to_string(), 1);
+        cache.cached_at = 0; // Force expiration by setting very old timestamp
+        assert!(cache.is_expired());
+    }
+
+    #[test]
+    fn test_version_cache_remaining_seconds() {
+        let cache = VersionCache::new("1.0.0".to_string(), 3600);
+        let remaining = cache.remaining_seconds();
+        // Should be close to 3600, allowing for a few seconds of execution time
+        assert!(remaining > 3590 && remaining <= 3600);
+    }
+
+    #[test]
+    fn test_config_manager_version_cache_file_operations() -> Result<()> {
+        // Create a temporary directory for testing
+        let temp_dir = TempDir::new()?;
+        let config_manager = ConfigManager {
+            config_dir: temp_dir.path().to_path_buf(),
+        };
+
+        let cache = VersionCache::new("1.2.3 (@stable, beta)".to_string(), 3600);
+
+        // Test save
+        config_manager.save_version_cache(&cache)?;
+
+        // Test load
+        let loaded_cache = config_manager.load_version_cache()?.unwrap();
+        assert_eq!(loaded_cache.version_info, "1.2.3 (@stable, beta)");
+        assert_eq!(loaded_cache.ttl_seconds, 3600);
+
+        // Test clear
+        config_manager.clear_version_cache()?;
+        let after_clear = config_manager.load_version_cache()?;
+        assert!(after_clear.is_none());
+
+        Ok(())
+    }
+
+    #[test]
+    fn test_expired_cache_cleanup() -> Result<()> {
+        let temp_dir = TempDir::new()?;
+        let config_manager = ConfigManager {
+            config_dir: temp_dir.path().to_path_buf(),
+        };
+
+        // Create an expired cache
+        let mut expired_cache = VersionCache::new("1.0.0".to_string(), 1);
+        expired_cache.cached_at = 0; // Make it ancient
+
+        config_manager.save_version_cache(&expired_cache)?;
+
+        // When we try to load, it should return None and clean up the file
+        let loaded = config_manager.load_version_cache()?;
+        assert!(loaded.is_none());
+
+        // The cache file should no longer exist
+        assert!(!config_manager.get_version_cache_path().exists());
+
+        Ok(())
     }
 }

@@ -1,4 +1,4 @@
-use crate::config::Config;
+use crate::config::{Config, ConfigManager, VersionCache};
 use crate::progress_utils::ProgressUtils;
 use anyhow::{anyhow, Result};
 use std::collections::HashMap;
@@ -362,6 +362,63 @@ impl PackageService {
         }
 
         Ok(None)
+    }
+
+    /// Get NPM distribution tag information with caching
+    /// Cache TTL: 1 hour by default
+    pub async fn get_cached_npm_dist_tag_info(
+        config_manager: &ConfigManager,
+    ) -> Result<Option<String>> {
+        // Default cache TTL: 1 hour (3600 seconds)
+        const CACHE_TTL_SECONDS: u64 = 3600;
+
+        // Try to load from cache first
+        if let Ok(Some(cache)) = config_manager.load_version_cache() {
+            if !cache.is_expired() {
+                return Ok(Some(cache.version_info));
+            }
+        }
+
+        // Cache miss or expired - fetch fresh version info
+        let latest_version_info = Self::get_npm_dist_tag_info().await?;
+
+        // If we got version info, save to cache
+        if let Some(version_info) = &latest_version_info {
+            let cache = VersionCache::new(version_info.clone(), CACHE_TTL_SECONDS);
+            if let Err(e) = config_manager.save_version_cache(&cache) {
+                // Log warning but don't fail - caching is best effort
+                eprintln!("Warning: Failed to save version cache: {e}");
+            }
+        }
+
+        Ok(latest_version_info)
+    }
+
+    /// Get cached version info with custom TTL
+    pub async fn get_cached_npm_dist_tag_info_with_ttl(
+        config_manager: &ConfigManager,
+        ttl_seconds: u64,
+    ) -> Result<Option<String>> {
+        // Try to load from cache first
+        if let Ok(Some(cache)) = config_manager.load_version_cache() {
+            // Use cache if it's not expired and the TTL is at least what we want
+            if !cache.is_expired() && cache.ttl_seconds >= ttl_seconds {
+                return Ok(Some(cache.version_info));
+            }
+        }
+
+        // Cache miss, expired, or different TTL - fetch fresh version info
+        let latest_version_info = Self::get_npm_dist_tag_info().await?;
+
+        // If we got version info, save to cache with specified TTL
+        if let Some(version_info) = &latest_version_info {
+            let cache = VersionCache::new(version_info.clone(), ttl_seconds);
+            if let Err(e) = config_manager.save_version_cache(&cache) {
+                eprintln!("Warning: Failed to save version cache: {e}");
+            }
+        }
+
+        Ok(latest_version_info)
     }
 
     /// Execute a shell command

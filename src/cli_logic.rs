@@ -1,3 +1,4 @@
+use crate::config::ConfigManager;
 use crate::installation_arguments::InstallationManager;
 use crate::progress_utils::{ProgressContext, ProgressUtils};
 use crate::services::{GitHubService, PackageService};
@@ -409,9 +410,15 @@ pub async fn handle_interactive_mode() -> Result<()> {
         // Version and tagline in futuristic style - with NPM distribution tag if available
         let base_version = env!("CARGO_PKG_VERSION");
 
-        // Show progress for NPM tag detection
+        // Initialize config manager for caching
+        let config_manager = ConfigManager::new().unwrap_or_else(|_| {
+            // Fallback if config manager fails - continue without caching
+            ConfigManager::new().expect("Failed to create config manager")
+        });
+
+        // Show progress for NPM tag detection with caching
         let npm_progress = ProgressContext::new("🔍 Checking NPM distribution tags");
-        let npm_tag = PackageService::get_npm_dist_tag_info()
+        let npm_tag = PackageService::get_cached_npm_dist_tag_info(&config_manager)
             .await
             .unwrap_or(None);
         npm_progress.finish_success("NPM tag info loaded");
@@ -983,6 +990,63 @@ pub async fn handle_config_path() -> Result<()> {
         ProgressUtils::success_message("Configuration file exists");
     } else {
         ProgressUtils::info_message("Configuration file does not exist (using defaults)");
+    }
+
+    Ok(())
+}
+
+// Version cache management handlers
+
+pub async fn handle_cache_clear() -> Result<()> {
+    let config_manager = ConfigManager::new()?;
+
+    config_manager.clear_version_cache()?;
+    ProgressUtils::success_message("✅ Version cache cleared");
+
+    Ok(())
+}
+
+pub async fn handle_cache_status() -> Result<()> {
+    let config_manager = ConfigManager::new()?;
+
+    match config_manager.load_version_cache()? {
+        Some(cache) => {
+            println!("📄 Version Cache Status:");
+            println!("  Version Info: {}", cache.version_info);
+            println!("  Cached at: {} (Unix timestamp)", cache.cached_at);
+            println!("  TTL: {} seconds", cache.ttl_seconds);
+
+            if cache.is_expired() {
+                println!("  Status: ❌ Expired");
+            } else {
+                let remaining = cache.remaining_seconds();
+                println!("  Status: ✅ Valid ({remaining} seconds remaining)");
+            }
+        }
+        None => {
+            println!("📄 No version cache found");
+        }
+    }
+
+    Ok(())
+}
+
+pub async fn handle_cache_refresh(ttl: u64) -> Result<()> {
+    let config_manager = ConfigManager::new()?;
+
+    println!("🔄 Refreshing version cache...");
+    let latest_version_info =
+        PackageService::get_cached_npm_dist_tag_info_with_ttl(&config_manager, ttl).await?;
+
+    match latest_version_info {
+        Some(version_info) => {
+            ProgressUtils::success_message(&format!(
+                "✅ Cache refreshed with version info: {version_info} (TTL: {ttl}s)"
+            ));
+        }
+        None => {
+            ProgressUtils::warning_message("⚠️  No version information available to cache");
+        }
     }
 
     Ok(())

@@ -81,6 +81,45 @@ update_all_versions() {
     echo -e "${GREEN}✅ All version references updated to ${new_version}${RESET}"
 }
 
+# Function to suggest next version based on current version
+suggest_next_version() {
+    local current_version="$1"
+    IFS='.' read -ra VERSION_PARTS <<< "$current_version"
+    
+    local patch_version="${VERSION_PARTS[0]}.${VERSION_PARTS[1]}.$((VERSION_PARTS[2] + 1))"
+    local minor_version="${VERSION_PARTS[0]}.$((VERSION_PARTS[1] + 1)).0"
+    local major_version="$((VERSION_PARTS[0] + 1)).0.0"
+    
+    echo -e "${BLUE}💡 Suggested next versions based on ${current_version}:${RESET}"
+    echo -e "${BLUE}  • Patch (${patch_version}): Bug fixes, docs, small features${RESET}"
+    echo -e "${BLUE}  • Minor (${minor_version}): New features, no breaking changes${RESET}"
+    echo -e "${BLUE}  • Major (${major_version}): Breaking changes${RESET}"
+}
+
+# Function to check if CHANGELOG.md needs updating for next version
+check_changelog_readiness() {
+    local current_version="$1"
+    
+    echo -e "${BLUE}📋 CHANGELOG.md Status Check:${RESET}"
+    if grep -q "\[${current_version}\]" CHANGELOG.md; then
+        echo -e "${GREEN}✅ CHANGELOG.md has entry for version ${current_version}${RESET}"
+        return 0
+    else
+        echo -e "${YELLOW}⚠️  CHANGELOG.md missing entry for version ${current_version}${RESET}"
+        echo -e "${BLUE}   Add this entry to CHANGELOG.md:${RESET}"
+        echo ""
+        echo -e "${YELLOW}## [${current_version}] - $(date +%Y-%m-%d)${RESET}"
+        echo ""
+        echo -e "${YELLOW}### Added${RESET}"
+        echo -e "${YELLOW}- New feature descriptions${RESET}"
+        echo ""
+        echo -e "${YELLOW}### Enhanced${RESET}"
+        echo -e "${YELLOW}- Improvements and optimizations${RESET}"
+        echo ""
+        return 1
+    fi
+}
+
 # Handle standalone version check command
 if [ "$1" = "--check-versions" ] || [ "$1" = "-v" ]; then
     echo -e "${CYAN}🔍 Terminal Jarvis Version Status Check${RESET}"
@@ -128,9 +167,31 @@ echo -e "${BLUE}Current branch: ${CURRENT_BRANCH}${RESET}"
 echo -e "${YELLOW}This will commit, tag, push to GitHub, publish to crates.io, and prepare for NPM publishing${RESET}"
 echo ""
 
+echo -e "${CYAN}📚 Deployment Documentation:${RESET}"
+echo -e "${BLUE}• Full workflow guide: CLAUDE.md (search for 'DEPLOYMENT WORKFLOW')${RESET}"
+echo -e "${BLUE}• Copilot instructions: .github/copilot-instructions.md (search for 'DEPLOYMENT COMMANDS')${RESET}"
+echo -e "${BLUE}• Version caching feature: docs/VERSION_CACHING.md${RESET}"
+echo ""
+
+# Pre-flight checks
+echo -e "${CYAN}🔍 Pre-flight Deployment Readiness Check${RESET}"
+CANONICAL_VERSION=$(get_canonical_version)
+
+# Check if we need to suggest a version bump
+suggest_next_version "$CANONICAL_VERSION"
+echo ""
+
+# Check CHANGELOG.md readiness for next version
+IFS='.' read -ra VERSION_PARTS <<< "$CANONICAL_VERSION"
+SUGGESTED_PATCH="${VERSION_PARTS[0]}.${VERSION_PARTS[1]}.$((VERSION_PARTS[2] + 1))"
+
+if ! check_changelog_readiness "$SUGGESTED_PATCH"; then
+    echo -e "${YELLOW}💡 Consider updating CHANGELOG.md for version ${SUGGESTED_PATCH} before proceeding${RESET}"
+fi
+echo ""
+
 # Show current version status
 display_version_status
-CANONICAL_VERSION=$(get_canonical_version)
 echo ""
 
 # Prerequisite check
@@ -361,6 +422,21 @@ if [ "$NEW_VERSION" != "$CURRENT_VERSION" ] && [ "${MANUAL_VERSION_UPDATE:-false
     echo -e "${GREEN}✅ Version updated to ${NEW_VERSION} in all locations${RESET}"
 fi
 
+# Update Homebrew Formula
+echo -e "${BLUE}→ Updating Homebrew Formula...${RESET}"
+if [ -f "homebrew/Formula/terminal-jarvis.rb" ]; then
+    # Update version in Homebrew Formula
+    sed -i "s/version \".*\"/version \"${NEW_VERSION}\"/" homebrew/Formula/terminal-jarvis.rb
+    echo -e "${GREEN}✅ Homebrew Formula updated to version ${NEW_VERSION}${RESET}"
+    
+    # Show reminder about Homebrew archives
+    echo -e "${YELLOW}📋 REMINDER: After deployment completes, run:${RESET}"
+    echo -e "${YELLOW}    ./scripts/create-homebrew-release.sh${RESET}"
+    echo -e "${YELLOW}    Then upload the generated .tar.gz files to the GitHub release${RESET}"
+else
+    echo -e "${YELLOW}⚠️  Homebrew Formula not found at homebrew/Formula/terminal-jarvis.rb${RESET}"
+fi
+
 # Rebuild with new version
 echo -e "${BLUE}→ Rebuilding with new version...${RESET}"
 cargo build --release
@@ -480,9 +556,29 @@ echo -e "${BLUE}Version: ${NEW_VERSION}${RESET}"
 echo -e "${BLUE}Branch: ${CURRENT_BRANCH}${RESET}"
 echo -e "${BLUE}Git Operations: $([ "${SKIP_GIT_OPERATIONS:-false}" = "true" ] && echo "Skipped" || echo "Completed")${RESET}"
 echo -e "${BLUE}Crates.io Publishing: $([ "${SKIP_GIT_OPERATIONS:-false}" = "true" ] && echo "Skipped" || echo "Completed (check output above)")${RESET}"
-echo -e "${BLUE}Homebrew Archives: $([ "${SKIP_GIT_OPERATIONS:-false}" = "true" ] && echo "Skipped" || echo "Created (upload to GitHub release)")${RESET}"
-echo -e "${BLUE}NPM Publishing: Manual (see docs/MAINTAINERS.md)${RESET}"
+echo -e "${BLUE}Homebrew Formula: Updated to version ${NEW_VERSION}${RESET}"
+echo -e "${BLUE}NPM Publishing: Manual (see below)${RESET}"
 echo ""
+
+# Post-Deployment Action Items
+echo -e "${CYAN}📋 REQUIRED POST-DEPLOYMENT ACTIONS:${RESET}"
+echo ""
+echo -e "${YELLOW}1. 🍺 Complete Homebrew Integration:${RESET}"
+echo -e "${BLUE}   ./scripts/create-homebrew-release.sh${RESET}"
+echo -e "${BLUE}   → Then upload terminal-jarvis-macos.tar.gz and terminal-jarvis-linux.tar.gz${RESET}"
+echo -e "${BLUE}   → to the GitHub release at: https://github.com/BA-CalderonMorales/terminal-jarvis/releases/tag/v${NEW_VERSION}${RESET}"
+echo ""
+echo -e "${YELLOW}2. 📦 Manual NPM Publishing (due to 2FA):${RESET}"
+echo -e "${BLUE}   cd npm/terminal-jarvis${RESET}"
+echo -e "${BLUE}   npm publish --otp=<your-2fa-code>${RESET}"
+echo -e "${BLUE}   npm dist-tag add terminal-jarvis@${NEW_VERSION} stable${RESET}"
+echo ""
+echo -e "${YELLOW}3. 🔍 Verification Commands:${RESET}"
+echo -e "${BLUE}   npm view terminal-jarvis versions --json | tail -10${RESET}"
+echo -e "${BLUE}   npm dist-tag ls terminal-jarvis${RESET}"
+echo -e "${BLUE}   brew tap ba-calderonmorales/terminal-jarvis && brew install terminal-jarvis${RESET}"
+echo ""
+
 echo -e "${CYAN}📦 After completing all publishing steps, users can install with:${RESET}"
 echo -e "${YELLOW}  Cargo (Rust):    ${RESET}cargo install terminal-jarvis"
 echo -e "${YELLOW}  NPM Latest:      ${RESET}npm install -g terminal-jarvis@${NEW_VERSION}"

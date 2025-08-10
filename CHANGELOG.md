@@ -5,16 +5,56 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.0.48] - 2025-08-10
+
+### Added
+
+- **Version Caching System**: Intelligent caching of NPM distribution tag information to eliminate repeated API calls
+
+  - **Cache Storage**: Local TOML-based cache files with configurable TTL (default: 1 hour)
+  - **CLI Management**: `terminal-jarvis cache` commands for status, refresh, and clearing
+  - **Automatic Expiration**: Smart cleanup of expired cache entries
+  - **Graceful Fallback**: Falls back to direct API calls if caching fails
+
+- **Enhanced Deployment Workflow**: Improved local-cd.sh script with better integration reminders
+
+  - **Pre-flight Checks**: Automatic version suggestions and CHANGELOG.md readiness validation
+  - **Homebrew Integration**: Automatic Homebrew Formula updates during version bumps
+  - **Documentation Links**: Built-in references to CLAUDE.md and copilot-instructions.md
+  - **Post-deployment Actions**: Clear step-by-step instructions for completing Homebrew and NPM publishing
+
+- **Documentation Improvements**: Enhanced deployment guidance across multiple files
+  - **CLAUDE.md**: Added comprehensive deployment checklist with step-by-step workflow
+  - **copilot-instructions.md**: Enhanced with mandatory pre-deployment reminders and quick reference commands
+  - **VERSION_CACHING.md**: Complete documentation of the new caching system with examples and troubleshooting
+
+### Enhanced
+
+- **Performance**: Eliminated API call delays on Terminal Jarvis home page through intelligent caching
+- **User Experience**: Faster interactive mode startup with cached version data (loads instantly on subsequent runs)
+- **Network Efficiency**: Reduced NPM registry API calls from every startup to once per hour (configurable)
+- **Development Workflow**: More seamless deployment process with integrated reminders and automation
+- **Error Handling**: Comprehensive error handling for cache operations with non-fatal failures
+
+### Technical
+
+- **Cache Architecture**: TOML-based cache storage in standard config directory (`~/.config/terminal-jarvis/version_cache.toml`)
+- **Test Coverage**: Comprehensive unit tests for all caching functionality including expiration, file I/O, and error scenarios
+- **Clippy Compliance**: All code passes strict clippy linting with no warnings
+- **Backward Compatibility**: Zero breaking changes - all existing functionality preserved
+
 ## [0.0.47] - 2025-08-09
 
 ### Added
 
 - **Multi-Platform Distribution**: Complete distribution pipeline supporting NPM, Crates.io, and Homebrew
+
   - **Homebrew Integration**: Added comprehensive Homebrew Formula and release archive system based on Federico Terzi's approach
   - **Homebrew Testing**: Created local testing protocols using local taps and HTTP servers for end-to-end validation
   - **Distribution Channel Separation**: Clear installation paths for different user ecosystems (Node.js, Rust, macOS/Linux package managers)
 
 - **Enhanced Documentation**: Comprehensive documentation updates across multiple files
+
   - **Homebrew Integration Guide**: Added detailed Homebrew publishing workflow, Formula structure, and testing protocols
   - **Multi-Platform Installation**: Updated README.md with center-aligned badges for all distribution channels
   - **Common Pitfalls Documentation**: Added solutions for archive naming, SHA256 mismatches, binary permissions, and cross-platform issues
@@ -28,11 +68,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Enhanced
 
 - **Deployment Pipeline**: Enhanced local-cd.sh script with multi-platform publishing support
+
   - **Step 5: Homebrew Archive Creation**: Automated creation of platform-specific release archives
   - **Crates.io Integration**: Streamlined publishing to crates.io as Step 4 in deployment workflow
   - **Multi-Platform Summary**: Enhanced deployment summary showing status of all three distribution channels
 
 - **Pre-Commit Workflow**: Updated checklists to include Homebrew validation requirements
+
   - **Homebrew Formula Testing**: Added requirements for local Formula testing before deployment
   - **Version Synchronization**: Extended to include Homebrew Formula version consistency
   - **Archive Validation**: Added SHA256 checksum verification requirements
@@ -45,11 +87,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Technical
 
 - **Homebrew Formula**: Created multi-platform Formula with conditional URL/SHA256 handling
+
   - **Cross-Platform Support**: Separate configurations for macOS and Linux with proper `on_macos`/`on_linux` blocks
   - **GitHub Release Integration**: Formula URLs point to GitHub release assets for archive downloads
   - **Binary Installation**: Proper `bin.install` configuration with executable permissions preserved
 
 - **Build System**: Enhanced archive creation and validation
+
   - **Platform-Specific Archives**: Automated creation of `terminal-jarvis-{macos|linux}.tar.gz` with proper naming
   - **SHA256 Generation**: Automatic checksum calculation for Formula verification
   - **Binary Permissions**: Ensured executable permissions are preserved in release archives
