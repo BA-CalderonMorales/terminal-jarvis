@@ -111,6 +111,74 @@ Terminal Jarvis is a Rust-based CLI wrapper that provides a unified interface fo
 - `CHANGELOG.md` - must have entry for current version
 - `README.md` - version references in note sections
 
+### CHANGELOG.md Management (CRITICAL)
+
+**MANDATORY**: Update CHANGELOG.md BEFORE running any deployment scripts to prevent version confusion.
+
+#### Changelog Best Practices:
+
+1. **Feature-Based Versioning**: Each version should represent one cohesive feature set or development session
+2. **Timeline Accuracy**: Don't mix features from different development days/sessions into the same version
+3. **Update First**: Always add changelog entry BEFORE running `./scripts/local-cd.sh`
+4. **Clear Structure**: Use `### Added`, `### Enhanced`, `### Fixed`, `### Technical` sections consistently
+
+#### Version Increment Guidelines:
+
+- **Patch (0.0.X)**: Bug fixes, documentation updates, small improvements
+- **Minor (0.X.0)**: New features, major enhancements (like Homebrew integration)
+- **Major (X.0.0)**: Breaking changes that require user action
+
+#### Example Development Session:
+
+```bash
+# Day 1: Working on Homebrew integration
+# At END of session: Update CHANGELOG.md with v0.0.47 entry
+## [0.0.47] - 2025-08-09
+### Added
+- **Homebrew Integration**: Complete multi-platform distribution
+- **Testing Infrastructure**: Local validation protocols
+
+# Day 2: Deploy the completed feature
+./scripts/local-cd.sh  # Will see v0.0.47 entry and proceed
+```
+
+#### Common Mistakes to Avoid:
+
+- **Mixing Sessions**: Don't put Day 1 and Day 2 work in same changelog entry
+- **Post-Deployment Updates**: Don't update changelog after running deployment
+- **Vague Entries**: Be specific about what users gain from each change
+- **Version Confusion**: Each changelog entry should match exactly one deployment
+
+### README.md Maintenance (CRITICAL)
+
+**ESSENTIAL**: The README.md is the first impression for users and must be accurate and current.
+
+#### **README.md Accuracy Checklist**:
+
+- **Core Functionality**: Descriptions must match actual capabilities - no outdated or aspirational features
+- **Installation Instructions**: Must work correctly for all distribution channels (NPM, Crates.io, Homebrew)
+- **Version References**: All version numbers must be consistent throughout
+- **Working Examples**: Code examples and commands must work with current version
+- **Distribution Badges**: Badge organization must reflect current multi-platform distribution
+- **Package Information**: Size information and technical details must be current
+- **Feature Claims**: Only reference features that actually exist in the codebase
+
+#### **Common README.md Issues**:
+
+- **Outdated Feature Lists**: Mentioning features that were planned but not implemented
+- **Broken Installation Commands**: Commands that fail due to package name changes
+- **Version Inconsistencies**: Different version numbers in different sections
+- **Dead Links**: URLs that no longer work or point to incorrect resources
+- **Misleading Performance Claims**: Outdated information about package size or capabilities
+
+#### **README.md Update Triggers**:
+
+- **Every CHANGELOG.md update**: README must be reviewed for accuracy
+- **Version bumps**: All version references must be synchronized
+- **New features**: Feature descriptions must be added accurately
+- **Installation changes**: All distribution channel instructions must be verified
+- **Architecture changes**: Technical descriptions must reflect current implementation
+
 ### Commit Standards
 
 Use conventional commits with these types:
@@ -343,10 +411,12 @@ fn test_bug_opencode_input_focus_on_fresh_install() {
 
 **Version Consistency:**
 
+- [ ] **CHANGELOG.md updated FIRST** - CRITICAL: Must be done BEFORE running local-cd.sh
+- [ ] Changelog entry reflects actual work completed in current development session
+- [ ] Version number incremented appropriately (patch/minor/major)
 - [ ] Cargo.toml version updated
 - [ ] npm/terminal-jarvis/package.json version updated
 - [ ] npm/terminal-jarvis/src/index.ts version display updated
-- [ ] CHANGELOG.md has new version entry
 - [ ] README.md version references updated
 
 **MANDATORY Documentation Review:**
@@ -357,6 +427,15 @@ fn test_bug_opencode_input_focus_on_fresh_install() {
 - [ ] docs/TESTING.md updated if testing procedures changed
 - [ ] docs/LIMITATIONS.md updated if new limitations were introduced
 - [ ] Version references in docs/ files updated if version was bumped
+- [ ] **CRITICAL: README.md accuracy review** - Essential for user experience
+  - [ ] Core functionality descriptions are current and accurate
+  - [ ] No misleading information about features or capabilities
+  - [ ] Installation instructions reflect all distribution channels (NPM, Crates.io, Homebrew)
+  - [ ] Version references are consistent throughout
+  - [ ] Examples work with current version and feature set
+  - [ ] Package size information updated if binary changed
+  - [ ] Badge organization matches current distribution channels
+  - [ ] All referenced features actually exist in current codebase
 - [ ] **README.md reviewed and updated** - REQUIRED when CHANGELOG.md or docs/ are modified
 
 **Quality Checks:**

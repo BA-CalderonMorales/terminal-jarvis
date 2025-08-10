@@ -57,6 +57,45 @@ We use semantic versioning with **NO EMOJIS** and **NO DECORATIONS**. Just clean
 
 Always update BOTH `Cargo.toml` and `npm/terminal-jarvis/package.json` at the same time.
 
+## CHANGELOG.md Management (CRITICAL)
+
+**ALWAYS update CHANGELOG.md BEFORE running deployment scripts** - This prevents version confusion and ensures proper feature attribution.
+
+### Changelog Structure Rules:
+
+1. **One Release = One Complete Feature Set**: Each version should represent a cohesive set of features completed together
+2. **Update CHANGELOG.md FIRST**: Before running `local-cd.sh`, always add the changelog entry for the version you're about to release
+3. **Match Actual Work Timeline**: Don't mix features from different development sessions into the same version entry
+4. **Use Clear Section Headers**: `### Added`, `### Enhanced`, `### Fixed`, `### Technical`
+
+### Version Bumping Guidelines:
+
+- **Feature completion**: When a major feature (like Homebrew integration) is complete, increment version
+- **Bug fixes only**: Use patch version increments (0.0.X)
+- **New major features**: Use minor version increments (0.X.0) 
+- **Breaking changes**: Use major version increments (X.0.0)
+
+### Example Workflow:
+
+```bash
+# 1. FIRST: Update CHANGELOG.md with new version entry
+## [0.0.47] - 2025-08-09
+### Added
+- **Homebrew Integration**: Complete multi-platform distribution system
+- **Testing Infrastructure**: Comprehensive validation scripts
+
+# 2. THEN: Run deployment
+./scripts/local-cd.sh
+```
+
+### Common Pitfalls to Avoid:
+
+- **DON'T**: Put all work into one massive changelog entry
+- **DON'T**: Update changelog after running deployment (creates version confusion)
+- **DON'T**: Mix unrelated features from different development sessions
+- **DO**: Create changelog entries that reflect actual development timeline
+- **DO**: Keep changelog entries focused on user-visible improvements
+
 ## How To Write Commit Messages
 
 Keep them simple and clear:
@@ -566,21 +605,29 @@ npm dist-tag ls terminal-jarvis
 
 ### Version Consistency Check:
 
+- [ ] **CHANGELOG.md updated FIRST** - MANDATORY before running local-cd.sh
+- [ ] Changelog entry matches actual development session work
+- [ ] Version increment appropriate for changes made
 - [ ] `Cargo.toml` version updated
 - [ ] `npm/terminal-jarvis/package.json` version updated
 - [ ] `npm/terminal-jarvis/src/index.ts` version display updated
 - [ ] `npm/terminal-jarvis/package.json` postinstall script version updated
 - [ ] `src/cli_logic.rs` uses `env!("CARGO_PKG_VERSION")` (auto-updates)
-- [ ] `CHANGELOG.md` has new version entry with clear changes
 - [ ] `README.md` version references updated in note section
 - [ ] **Version synchronization verified**: `./scripts/local-cd.sh --check-versions` passes
 
 ### Documentation Updates:
 
-- [ ] README.md reflects current functionality and features
-- [ ] Package size information updated if binary changed
-- [ ] Installation instructions are accurate
-- [ ] Examples work with current version
+- [ ] **README.md Accuracy Review** - CRITICAL for user experience
+  - [ ] Core functionality descriptions are current and accurate
+  - [ ] No misleading information about features or capabilities
+  - [ ] Installation instructions reflect all distribution channels (NPM, Crates.io, Homebrew)
+  - [ ] Version references are consistent throughout
+  - [ ] Examples work with current version and feature set
+  - [ ] Package size information updated if binary changed
+  - [ ] Badge organization matches current distribution channels
+- [ ] Documentation files synchronized (npm/terminal-jarvis/README.md matches root)
+- [ ] All referenced features actually exist in current codebase
 
 ### Quality Checks:
 
