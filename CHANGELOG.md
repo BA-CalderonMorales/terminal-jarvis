@@ -5,14 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [0.0.46] - 2025-08-09
+## [0.0.47] - 2025-08-09
 
 ### Added
 
 - **Multi-Platform Distribution**: Complete distribution pipeline supporting NPM, Crates.io, and Homebrew
   - **Homebrew Integration**: Added comprehensive Homebrew Formula and release archive system based on Federico Terzi's approach
   - **Homebrew Testing**: Created local testing protocols using local taps and HTTP servers for end-to-end validation
-  - **Crates.io Publishing**: Terminal Jarvis now available via `cargo install terminal-jarvis`
   - **Distribution Channel Separation**: Clear installation paths for different user ecosystems (Node.js, Rust, macOS/Linux package managers)
 
 - **Enhanced Documentation**: Comprehensive documentation updates across multiple files
@@ -59,6 +58,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - **NPM Package README**: Automated syncing of README changes to NPM package
   - **Version References**: Consistent version information across all documentation
   - **Installation Instructions**: Updated with all three distribution methods
+
+## [0.0.46] - 2025-08-09
+
+### Enhanced
+
+- **Crates.io Publishing**: Terminal Jarvis now available via `cargo install terminal-jarvis`
+  - Integrated crates.io publishing into deployment pipeline as Step 4
+  - Enhanced local-cd.sh script with automated Rust crate publishing
+  - Added comprehensive crates.io publishing documentation and workflows
+
+### Fixed
+
+- **Version Consistency**: Enhanced version synchronization across all project files
+  - Improved version validation and consistency checking in deployment scripts
+  - Better error handling for version mismatches during deployment
 
 ## [0.0.45] - 2025-08-08
 
