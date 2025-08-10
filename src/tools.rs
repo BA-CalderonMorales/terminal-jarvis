@@ -1,6 +1,6 @@
 use crate::auth_manager::AuthManager;
 use anyhow::Result;
-use std::collections::HashMap;
+use std::collections::{BTreeMap, HashMap};
 use std::io::Write;
 use std::process::Command;
 
@@ -72,20 +72,25 @@ impl ToolManager {
     }
 
     /// Get all available tools with their installation status
-    pub fn get_available_tools() -> HashMap<&'static str, ToolInfo> {
-        let mut tools = HashMap::new();
+    pub fn get_available_tools() -> BTreeMap<&'static str, ToolInfo> {
+        let mut tools = BTreeMap::new();
         let mapping = Self::get_command_mapping();
 
-        // Use display names (keys from mapping) for consistency with InstallationManager
-        for (display_name, cli_command) in mapping {
-            let is_installed = Self::check_tool_installed(cli_command);
-            tools.insert(
-                display_name,
-                ToolInfo {
-                    command: cli_command,
-                    is_installed,
-                },
-            );
+        // Define consistent order for tools display
+        let tool_order = ["claude", "gemini", "qwen", "opencode", "llxprt", "codex"];
+
+        // Insert tools in defined order for consistent display
+        for display_name in tool_order.iter() {
+            if let Some(cli_command) = mapping.get(display_name) {
+                let is_installed = Self::check_tool_installed(cli_command);
+                tools.insert(
+                    *display_name,
+                    ToolInfo {
+                        command: cli_command,
+                        is_installed,
+                    },
+                );
+            }
         }
 
         tools
