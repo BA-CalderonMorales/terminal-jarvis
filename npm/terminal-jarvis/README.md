@@ -3,19 +3,23 @@
 <div align="center">
 
 <!-- NPM Package -->
+
 [![NPM Version](https://img.shields.io/npm/v/terminal-jarvis.svg?logo=npm&label=NPM%20Version)](https://www.npmjs.com/package/terminal-jarvis)
 [![NPM Downloads](https://img.shields.io/npm/dm/terminal-jarvis.svg?logo=npm&label=NPM%20Downloads)](https://www.npmjs.com/package/terminal-jarvis)
 [![NPM Stable](https://img.shields.io/npm/v/terminal-jarvis/stable.svg?label=NPM%20Stable&color=green&logo=npm)](https://www.npmjs.com/package/terminal-jarvis)
 [![NPM Beta](https://img.shields.io/npm/v/terminal-jarvis/beta.svg?label=NPM%20Beta&color=orange&logo=npm)](https://www.npmjs.com/package/terminal-jarvis)
 
 <!-- Rust Crate -->
+
 [![Crates.io Version](https://img.shields.io/crates/v/terminal-jarvis.svg?logo=rust&label=Crates.io%20Version)](https://crates.io/crates/terminal-jarvis)
 [![Crates.io Downloads](https://img.shields.io/crates/d/terminal-jarvis.svg?logo=rust&label=Crates.io%20Downloads)](https://crates.io/crates/terminal-jarvis)
 
 <!-- Homebrew -->
+
 [![Homebrew](https://img.shields.io/badge/Homebrew-Available-blue.svg?logo=homebrew)](https://github.com/BA-CalderonMorales/homebrew-terminal-jarvis)
 
 <!-- General -->
+
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 </div>
@@ -121,14 +125,14 @@ terminal-jarvis templates apply my-template
 
 ## Supported AI Tools
 
-| Tool       | Description                            | Status     | Package                     |
-| ---------- | -------------------------------------- | ---------- | --------------------------- |
-| `claude`   | Anthropic's Claude for code assistance | ✅ Stable  | `@anthropic-ai/claude-code` |
-| `gemini`   | Google's Gemini CLI tool               | ✅ Stable  | `@google/gemini-cli`        |
-| `qwen`     | Qwen coding assistant                  | ✅ Stable  | `@qwen-code/qwen-code`      |
-| `opencode` | Terminal-based AI coding agent         | 🧪 Testing | Install script              |
-| `llxprt`   | Multi-provider AI coding assistant     | 🧪 Testing | NPM package                 |
-| `codex`    | OpenAI Codex CLI for local AI coding   | 🧪 Testing | NPM package                 |
+| Tool       | Description                            | Status     | Installation Command                         |
+| ---------- | -------------------------------------- | ---------- | -------------------------------------------- |
+| `claude`   | Anthropic's Claude for code assistance | ✅ Stable  | `npm install -g @anthropic-ai/claude-code`   |
+| `gemini`   | Google's Gemini CLI tool               | ✅ Stable  | `npm install -g @google/gemini-cli`          |
+| `qwen`     | Qwen coding assistant                  | ✅ Stable  | `npm install -g @qwen-code/qwen-code@latest` |
+| `opencode` | Terminal-based AI coding agent         | 🧪 Testing | `npm install -g opencode-ai@latest`          |
+| `llxprt`   | Multi-provider AI coding assistant     | 🧪 Testing | `npm install -g @vybestack/llxprt-code-core` |
+| `codex`    | OpenAI Codex CLI for local AI coding   | 🧪 Testing | `npm install -g @openai/codex`               |
 
 \*See [limitations](docs/LIMITATIONS.md) for known issues and workarounds
 
