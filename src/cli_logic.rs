@@ -549,157 +549,193 @@ pub async fn handle_interactive_mode() -> Result<()> {
 }
 
 async fn handle_ai_tools_menu() -> Result<()> {
-    // Futuristic colors consistent with main interface
-    let neon_cyan = "\x1b[96m";
-    let neon_blue = "\x1b[94m";
-    let neon_white = "\x1b[97m";
-    let reset = "\x1b[0m";
+    loop {
+        // Futuristic colors consistent with main interface
+        let neon_cyan = "\x1b[96m";
+        let neon_blue = "\x1b[94m";
+        let neon_white = "\x1b[97m";
+        let reset = "\x1b[0m";
 
-    print!("\x1b[2J\x1b[H"); // Clear screen
+        print!("\x1b[2J\x1b[H"); // Clear screen
 
-    println!("{neon_cyan}🤖 AI CLI Tools{reset}\n");
+        println!("{neon_cyan}🤖 AI CLI Tools{reset}\n");
 
-    // Show loading indicator
-    let loading_progress = ProgressContext::new("Loading AI tools status");
-    tokio::time::sleep(tokio::time::Duration::from_millis(300)).await;
+        // Show loading indicator
+        let loading_progress = ProgressContext::new("Loading AI tools status");
+        tokio::time::sleep(tokio::time::Duration::from_millis(300)).await;
 
-    let tools = ToolManager::get_available_tools();
-    let install_commands = InstallationManager::get_install_commands();
+        let tools = ToolManager::get_available_tools();
+        let install_commands = InstallationManager::get_install_commands();
 
-    loading_progress.finish_success("AI tools status loaded");
+        loading_progress.finish_success("AI tools status loaded");
 
-    // Build clean tool list with status indicators
-    let mut options = Vec::new();
-    let mut tool_mapping = Vec::new();
+        // Build clean tool list with status indicators
+        let mut options = Vec::new();
+        let mut tool_mapping = Vec::new();
 
-    for (tool_name, tool_info) in tools.iter() {
-        let install_info = install_commands.get(tool_name).unwrap();
-        let status_icon = if tool_info.is_installed {
-            "🚀"
-        } else {
-            "📦"
-        };
-        let display_text = format!(
-            "{} {} - {}",
-            status_icon, tool_name, install_info.description
-        );
-        options.push(display_text);
-        tool_mapping.push(Some(*tool_name));
-    }
-
-    // Add back option
-    options.push("🔙 Back to Main Menu".to_string());
-    tool_mapping.push(None);
-
-    let selection = match Select::new("Select an AI tool to launch:", options.clone())
-        .with_page_size(15)
-        .prompt()
-    {
-        Ok(selection) => selection,
-        Err(_) => {
-            // User interrupted (Ctrl+C) - return to main menu
-            return Ok(());
+        for (tool_name, tool_info) in tools.iter() {
+            let install_info = install_commands.get(tool_name).unwrap();
+            let status_icon = if tool_info.is_installed {
+                "🚀"
+            } else {
+                "📦"
+            };
+            let display_text = format!(
+                "{} {} - {}",
+                status_icon, tool_name, install_info.description
+            );
+            options.push(display_text);
+            tool_mapping.push(Some(*tool_name));
         }
-    };
 
-    // Handle selection
-    if selection.contains("🔙") {
-        return Ok(());
-    } else if let Some(index) = options.iter().position(|opt| opt == &selection) {
-        if let Some(Some(tool_name)) = tool_mapping.get(index) {
-            let tools = ToolManager::get_available_tools();
-            let tool_info = tools.get(tool_name).unwrap();
+        // Add back option
+        options.push("🔙 Back to Main Menu".to_string());
+        tool_mapping.push(None);
 
-            if !tool_info.is_installed {
-                let should_install = match Confirm::new(&format!(
-                    "{neon_blue}📦 '{tool_name}' is not installed. Install it now?{reset}"
-                ))
-                .with_default(true)
+        let selection = match Select::new("Select an AI tool to launch:", options.clone())
+            .with_page_size(15)
+            .prompt()
+        {
+            Ok(selection) => selection,
+            Err(_) => {
+                // User interrupted (Ctrl+C) - return to main menu
+                return Ok(());
+            }
+        };
+
+        // Handle selection
+        if selection.contains("🔙") {
+            return Ok(());
+        } else if let Some(index) = options.iter().position(|opt| opt == &selection) {
+            if let Some(Some(tool_name)) = tool_mapping.get(index) {
+                let tools = ToolManager::get_available_tools();
+                let tool_info = tools.get(tool_name).unwrap();
+
+                if !tool_info.is_installed {
+                    let should_install = match Confirm::new(&format!(
+                        "{neon_blue}📦 '{tool_name}' is not installed. Install it now?{reset}"
+                    ))
+                    .with_default(true)
+                    .prompt()
+                    {
+                        Ok(result) => result,
+                        Err(_) => {
+                            // User interrupted - go back to main menu
+                            println!("\n{neon_cyan}🔙 Installation cancelled{reset}");
+                            return Ok(());
+                        }
+                    };
+
+                    if should_install {
+                        println!("\n{neon_cyan}📦 Installing {tool_name}...{reset}");
+                        handle_install_tool(tool_name).await?;
+                        println!("{neon_cyan}✅ Installation complete!{reset}\n");
+                    } else {
+                        return Ok(());
+                    }
+                }
+
+                let args_input = match Text::new(&format!(
+                "{neon_white}Enter arguments for {tool_name} (or press Enter for default):{reset}"
+            ))
+                .with_default("")
                 .prompt()
                 {
-                    Ok(result) => result,
+                    Ok(input) => input,
                     Err(_) => {
                         // User interrupted - go back to main menu
-                        println!("\n{neon_cyan}🔙 Installation cancelled{reset}");
+                        println!("\n{neon_cyan}🔙 Operation cancelled{reset}");
                         return Ok(());
                     }
                 };
 
-                if should_install {
-                    println!("\n{neon_cyan}📦 Installing {tool_name}...{reset}");
-                    handle_install_tool(tool_name).await?;
-                    println!("{neon_cyan}✅ Installation complete!{reset}\n");
+                let args: Vec<String> = if args_input.trim().is_empty() {
+                    vec![]
                 } else {
-                    return Ok(());
+                    shell_words::split(&args_input).unwrap_or_else(|_| {
+                        args_input
+                            .split_whitespace()
+                            .map(|s| s.to_string())
+                            .collect()
+                    })
+                };
+
+                // Show loading indicator before launching tool
+                let launch_progress = ProgressContext::new(&format!("Launching {tool_name}"));
+
+                // Show more detailed progress steps
+                launch_progress.update_message(&format!("Preparing {tool_name} environment"));
+                tokio::time::sleep(tokio::time::Duration::from_millis(200)).await;
+
+                launch_progress.update_message(&format!("Initializing {tool_name}"));
+                tokio::time::sleep(tokio::time::Duration::from_millis(200)).await;
+
+                launch_progress
+                    .update_message(&format!("Starting {tool_name} with args: {args:?}"));
+                tokio::time::sleep(tokio::time::Duration::from_millis(150)).await;
+
+                // Finish progress right before starting the tool
+                launch_progress.finish_success(&format!("{tool_name} ready - starting now"));
+
+                // Special handling for opencode to ensure input focus works properly
+                if *tool_name == "opencode" {
+                    // For opencode, we need extra time and careful terminal state management
+                    // to prevent input focus issues on fresh installs
+                    tokio::time::sleep(tokio::time::Duration::from_millis(100)).await;
+                } else {
+                    // Clear any remaining progress indicators for other tools
+                    print!("\x1b[2K\r");
                 }
-            }
 
-            let args_input = match Text::new(&format!(
-                "{neon_white}Enter arguments for {tool_name} (or press Enter for default):{reset}"
-            ))
-            .with_default("")
-            .prompt()
-            {
-                Ok(input) => input,
-                Err(_) => {
-                    // User interrupted - go back to main menu
-                    println!("\n{neon_cyan}🔙 Operation cancelled{reset}");
-                    return Ok(());
+                match ToolManager::run_tool(tool_name, &args).await {
+                    Ok(_) => {
+                        println!("\n{neon_cyan}✅ {tool_name} completed successfully!{reset}");
+                    }
+                    Err(e) => {
+                        eprintln!("\n{neon_cyan}❌ Error running {tool_name}: {e}{reset}");
+                    }
                 }
-            };
 
-            let args: Vec<String> = if args_input.trim().is_empty() {
-                vec![]
-            } else {
-                shell_words::split(&args_input).unwrap_or_else(|_| {
-                    args_input
-                        .split_whitespace()
-                        .map(|s| s.to_string())
-                        .collect()
-                })
-            };
+                // Enhanced exit options for faster context switching
+                let exit_options = vec![
+                    "🏠 Back to Main Menu".to_string(),
+                    "🤖 Switch to Another AI Tool".to_string(),
+                    "🚪 Exit Terminal Jarvis".to_string(),
+                ];
 
-            // Show loading indicator before launching tool
-            let launch_progress = ProgressContext::new(&format!("Launching {tool_name}"));
+                let exit_choice = match Select::new("What would you like to do next?", exit_options)
+                    .with_page_size(5)
+                    .prompt()
+                {
+                    Ok(choice) => choice,
+                    Err(_) => {
+                        // User interrupted - return to main menu by default
+                        return Ok(());
+                    }
+                };
 
-            // Show more detailed progress steps
-            launch_progress.update_message(&format!("Preparing {tool_name} environment"));
-            tokio::time::sleep(tokio::time::Duration::from_millis(200)).await;
-
-            launch_progress.update_message(&format!("Initializing {tool_name}"));
-            tokio::time::sleep(tokio::time::Duration::from_millis(200)).await;
-
-            launch_progress.update_message(&format!("Starting {tool_name} with args: {args:?}"));
-            tokio::time::sleep(tokio::time::Duration::from_millis(150)).await;
-
-            // Finish progress right before starting the tool
-            launch_progress.finish_success(&format!("{tool_name} ready - starting now"));
-
-            // Special handling for opencode to ensure input focus works properly
-            if *tool_name == "opencode" {
-                // For opencode, we need extra time and careful terminal state management
-                // to prevent input focus issues on fresh installs
-                tokio::time::sleep(tokio::time::Duration::from_millis(100)).await;
-            } else {
-                // Clear any remaining progress indicators for other tools
-                print!("\x1b[2K\r");
-            }
-
-            match ToolManager::run_tool(tool_name, &args).await {
-                Ok(_) => {
-                    println!("\n{neon_cyan}✅ {tool_name} completed successfully!{reset}");
+                match exit_choice.as_str() {
+                    s if s.contains("🏠") => {
+                        // Return to main menu - break out of AI tools submenu
+                        return Ok(());
+                    }
+                    s if s.contains("🤖") => {
+                        // Stay in AI tools menu for context switching - continue the loop
+                        continue;
+                    }
+                    s if s.contains("🚪") => {
+                        // Exit completely - break out of everything
+                        println!("{neon_blue}👋 Goodbye!{reset}");
+                        std::process::exit(0);
+                    }
+                    _ => {
+                        // Default to returning to main menu
+                        return Ok(());
+                    }
                 }
-                Err(e) => {
-                    eprintln!("\n{neon_cyan}❌ Error running {tool_name}: {e}{reset}");
-                }
-            }
-
-            println!("\n{neon_blue}Press Enter to continue...{reset}");
-            let _ = std::io::stdin().read_line(&mut String::new());
-        }
-    }
-
-    Ok(())
+            } // Close the inner if let Some(Some(tool_name)) block
+        } // Close the else if let Some(index) block
+    } // End of loop
 }
 
 async fn handle_important_links() -> Result<()> {

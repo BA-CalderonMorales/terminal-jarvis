@@ -14,7 +14,7 @@ class TerminalJarvis < Formula
     sha256 "1b2409976f98ae2758eeca67faa1c374894beb8f809e2e417c641bc522dc7d40"
   end
   
-  version "0.0.48"
+  version "0.0.49"
 
   def install
     bin.install "terminal-jarvis"
