@@ -5,6 +5,61 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.0.46] - 2025-08-09
+
+### Added
+
+- **Multi-Platform Distribution**: Complete distribution pipeline supporting NPM, Crates.io, and Homebrew
+  - **Homebrew Integration**: Added comprehensive Homebrew Formula and release archive system based on Federico Terzi's approach
+  - **Homebrew Testing**: Created local testing protocols using local taps and HTTP servers for end-to-end validation
+  - **Crates.io Publishing**: Terminal Jarvis now available via `cargo install terminal-jarvis`
+  - **Distribution Channel Separation**: Clear installation paths for different user ecosystems (Node.js, Rust, macOS/Linux package managers)
+
+- **Enhanced Documentation**: Comprehensive documentation updates across multiple files
+  - **Homebrew Integration Guide**: Added detailed Homebrew publishing workflow, Formula structure, and testing protocols
+  - **Multi-Platform Installation**: Updated README.md with center-aligned badges for all distribution channels
+  - **Common Pitfalls Documentation**: Added solutions for archive naming, SHA256 mismatches, binary permissions, and cross-platform issues
+  - **Development Guidelines**: Enhanced copilot-instructions.md and CLAUDE.md with Homebrew integration lessons learned
+
+- **Testing Infrastructure**: New testing tools and protocols
+  - **test-homebrew-formula.sh**: Comprehensive Homebrew Formula validation script
+  - **Local Testing Strategy**: Documentation for testing without requiring actual GitHub repositories
+  - **End-to-End Validation**: Proven workflow for complete Homebrew installation testing
+
+### Enhanced
+
+- **Deployment Pipeline**: Enhanced local-cd.sh script with multi-platform publishing support
+  - **Step 5: Homebrew Archive Creation**: Automated creation of platform-specific release archives
+  - **Crates.io Integration**: Streamlined publishing to crates.io as Step 4 in deployment workflow
+  - **Multi-Platform Summary**: Enhanced deployment summary showing status of all three distribution channels
+
+- **Pre-Commit Workflow**: Updated checklists to include Homebrew validation requirements
+  - **Homebrew Formula Testing**: Added requirements for local Formula testing before deployment
+  - **Version Synchronization**: Extended to include Homebrew Formula version consistency
+  - **Archive Validation**: Added SHA256 checksum verification requirements
+
+- **Visual Presentation**: Improved README.md badge organization
+  - **Center-Aligned Badges**: All distribution badges (NPM, Crates.io, Homebrew, License) now center-aligned
+  - **Grouped Organization**: Maintained clear grouping with HTML comments for different distribution channels
+  - **Professional Appearance**: Enhanced visual presentation of multi-platform distribution options
+
+### Technical
+
+- **Homebrew Formula**: Created multi-platform Formula with conditional URL/SHA256 handling
+  - **Cross-Platform Support**: Separate configurations for macOS and Linux with proper `on_macos`/`on_linux` blocks
+  - **GitHub Release Integration**: Formula URLs point to GitHub release assets for archive downloads
+  - **Binary Installation**: Proper `bin.install` configuration with executable permissions preserved
+
+- **Build System**: Enhanced archive creation and validation
+  - **Platform-Specific Archives**: Automated creation of `terminal-jarvis-{macos|linux}.tar.gz` with proper naming
+  - **SHA256 Generation**: Automatic checksum calculation for Formula verification
+  - **Binary Permissions**: Ensured executable permissions are preserved in release archives
+
+- **Documentation Synchronization**: Maintained consistency across all documentation files
+  - **NPM Package README**: Automated syncing of README changes to NPM package
+  - **Version References**: Consistent version information across all documentation
+  - **Installation Instructions**: Updated with all three distribution methods
+
 ## [0.0.45] - 2025-08-08
 
 ### Fixed
