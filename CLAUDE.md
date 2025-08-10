@@ -2,11 +2,18 @@
 
 ## Project Overview
 
-Terminal Jarvis is a Rust-based CLI wrapper that provides a unified interface for managing AI coding tools (claude-code, gemini-cli, qwen-code, opencode, llxprt). It's packaged via NPM for easy distribution while maintaining the performance of a native Rust binary.
+Terminal Jarvis is a Rust-based CLI wrapper that provides a unified interface for managing AI coding tools (claude-code, gemini-cli, qwen-code, opencode, llxprt). It's distributed through **three official channels**: NPM (Node.js ecosystem), Crates.io (Rust ecosystem), and Homebrew (macOS/Linux package manager).
 
-**Current Version**: 0.0.45  
+**Current Version**: 0.0.46  
 **License**: MIT  
 **Repository**: https://github.com/BA-CalderonMorales/terminal-jarvis
+
+### Multi-Platform Distribution
+
+**Distribution Channels**:
+1. **NPM**: `npm install -g terminal-jarvis` (Node.js ecosystem)
+2. **Crates.io**: `cargo install terminal-jarvis` (Rust developers)  
+3. **Homebrew**: `brew tap ba-calderonmorales/terminal-jarvis && brew install terminal-jarvis` (macOS/Linux package managers)
 
 ## Key Features & Capabilities
 
@@ -141,6 +148,75 @@ cargo run -- list
 cargo run -- update --help
 
 # Run services tests to verify mappings
+cargo test --lib services
+```
+
+### Homebrew Integration (v0.0.46+)
+
+**Key Innovation**: Complete multi-platform distribution with Homebrew support based on Federico Terzi's approach.
+
+#### **Essential Scripts**:
+
+1. **`./scripts/create-homebrew-release.sh`** - Creates platform-specific archives and Formula template
+2. **`./scripts/test-homebrew-formula.sh`** - Comprehensive local Formula validation
+
+#### **Formula Structure** (`homebrew/Formula/terminal-jarvis.rb`):
+
+```ruby
+class TerminalJarvis < Formula
+  desc "A unified command center for AI coding tools"
+  homepage "https://github.com/BA-CalderonMorales/terminal-jarvis"
+  version "X.X.X"
+  license "MIT"
+
+  on_macos do
+    url "https://github.com/.../terminal-jarvis-macos.tar.gz"
+    sha256 "..."
+  end
+
+  on_linux do
+    url "https://github.com/.../terminal-jarvis-linux.tar.gz"  
+    sha256 "..."
+  end
+
+  def install
+    bin.install "terminal-jarvis"
+  end
+
+  test do
+    system "#{bin}/terminal-jarvis", "--version"
+  end
+end
+```
+
+#### **Local Testing Protocol** (MANDATORY before deployment):
+
+```bash
+# 1. Validate Formula syntax and structure
+./scripts/test-homebrew-formula.sh
+
+# 2. Create local tap for end-to-end testing
+mkdir -p /tmp/homebrew-test-tap/Formula
+cp homebrew/Formula/terminal-jarvis.rb /tmp/homebrew-test-tap/Formula/
+cd /tmp/homebrew-test-tap && git init && git add . && git commit -m "Test"
+
+# 3. Test complete installation workflow
+brew tap local/test /tmp/homebrew-test-tap
+brew install local/test/terminal-jarvis
+
+# 4. Verify functionality
+terminal-jarvis --version
+terminal-jarvis --help
+brew test local/test/terminal-jarvis
+```
+
+#### **Common Homebrew Pitfalls**:
+
+- **Archive Naming**: Must use consistent names: `terminal-jarvis-{macos|linux}.tar.gz`
+- **SHA256 Mismatch**: Always regenerate SHA256 after creating new archives  
+- **Binary Permissions**: Archives must preserve execute permissions
+- **Formula Syntax**: Ruby syntax errors prevent Formula loading
+- **Cross-Platform**: Use `on_macos` and `on_linux` blocks for platform-specific handling
 cargo test --lib services
 ```
 
@@ -298,6 +374,16 @@ fn test_bug_opencode_input_focus_on_fresh_install() {
 - [ ] Tool configuration added to `terminal-jarvis.toml.example`
 - [ ] Tests updated in `services.rs` for new tool mapping
 - [ ] Documentation updated (README.md, CLI descriptions)
+
+**Homebrew Integration (if updating version):**
+
+- [ ] `homebrew/Formula/terminal-jarvis.rb` version updated
+- [ ] GitHub release created with version tag
+- [ ] Homebrew archives uploaded: `terminal-jarvis-macos.tar.gz`, `terminal-jarvis-linux.tar.gz`
+- [ ] SHA256 checksums verified in Formula match actual archives
+- [ ] **Homebrew Formula tested locally**: `./scripts/test-homebrew-formula.sh` passes
+- [ ] Multi-platform support verified (macOS and Linux archives)
+- [ ] **End-to-end Homebrew testing completed** using local tap and test installation
 
 **NPM Package Testing:**
 

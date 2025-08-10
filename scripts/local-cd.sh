@@ -420,8 +420,44 @@ fi
 
 echo ""
 
+# Homebrew Archive Creation
+echo -e "${CYAN}📦 Step 5: Homebrew Archive Creation${RESET}"
+if [ "${SKIP_GIT_OPERATIONS:-false}" != "true" ]; then
+    echo -e "${BLUE}→ Creating Homebrew release archives...${RESET}"
+    echo ""
+    
+    if [ -f "./scripts/create-homebrew-release.sh" ]; then
+        echo -e "${YELLOW}📋 Generating Homebrew archives and Formula for v${NEW_VERSION}${RESET}"
+        
+        # Run homebrew release creation script
+        if ./scripts/create-homebrew-release.sh; then
+            echo -e "${GREEN}✅ Successfully created Homebrew archives${RESET}"
+            echo -e "${BLUE}📦 Archives created:${RESET}"
+            echo -e "${YELLOW}  • homebrew/release/terminal-jarvis-macos.tar.gz${RESET}"
+            echo -e "${YELLOW}  • homebrew/release/terminal-jarvis-linux.tar.gz${RESET}"
+            echo -e "${BLUE}📝 Formula updated: homebrew/Formula/terminal-jarvis.rb${RESET}"
+            echo ""
+            echo -e "${CYAN}📋 Next Steps for Homebrew Publishing:${RESET}"
+            echo -e "${YELLOW}  1. Upload archives to GitHub release v${NEW_VERSION}${RESET}"
+            echo -e "${YELLOW}  2. Create homebrew-terminal-jarvis GitHub repository${RESET}"
+            echo -e "${YELLOW}  3. Copy homebrew/Formula/terminal-jarvis.rb to new repo${RESET}"
+            echo -e "${YELLOW}  4. Users can then: brew tap ba-calderonmorales/terminal-jarvis && brew install terminal-jarvis${RESET}"
+        else
+            echo -e "${RED}❌ Failed to create Homebrew archives${RESET}"
+            echo -e "${YELLOW}⚠️  You can retry manually with: ./scripts/create-homebrew-release.sh${RESET}"
+        fi
+    else
+        echo -e "${YELLOW}⚠️  Homebrew release script not found at ./scripts/create-homebrew-release.sh${RESET}"
+        echo -e "${BLUE}💡 Skipping Homebrew archive creation${RESET}"
+    fi
+else
+    echo -e "${YELLOW}→ Skipping Homebrew archive creation (NPM-only publish)...${RESET}"
+fi
+
+echo ""
+
 # NPM Publishing
-echo -e "${CYAN}📦 Step 5: NPM Publishing${RESET}"
+echo -e "${CYAN}📦 Step 6: NPM Publishing${RESET}"
 echo -e "${BLUE}Git operations completed successfully!${RESET}"
 echo -e "${YELLOW}📋 Manual NPM Publishing Required${RESET}"
 echo ""
@@ -444,13 +480,15 @@ echo -e "${BLUE}Version: ${NEW_VERSION}${RESET}"
 echo -e "${BLUE}Branch: ${CURRENT_BRANCH}${RESET}"
 echo -e "${BLUE}Git Operations: $([ "${SKIP_GIT_OPERATIONS:-false}" = "true" ] && echo "Skipped" || echo "Completed")${RESET}"
 echo -e "${BLUE}Crates.io Publishing: $([ "${SKIP_GIT_OPERATIONS:-false}" = "true" ] && echo "Skipped" || echo "Completed (check output above)")${RESET}"
+echo -e "${BLUE}Homebrew Archives: $([ "${SKIP_GIT_OPERATIONS:-false}" = "true" ] && echo "Skipped" || echo "Created (upload to GitHub release)")${RESET}"
 echo -e "${BLUE}NPM Publishing: Manual (see docs/MAINTAINERS.md)${RESET}"
 echo ""
-echo -e "${CYAN}📦 After NPM Publishing, users can install with:${RESET}"
+echo -e "${CYAN}📦 After completing all publishing steps, users can install with:${RESET}"
 echo -e "${YELLOW}  Cargo (Rust):    ${RESET}cargo install terminal-jarvis"
 echo -e "${YELLOW}  NPM Latest:      ${RESET}npm install -g terminal-jarvis@${NEW_VERSION}"
 echo -e "${YELLOW}  NPM Beta:        ${RESET}npm install -g terminal-jarvis@beta"
 echo -e "${YELLOW}  Stable release:  ${RESET}npm install -g terminal-jarvis@stable"
+echo -e "${YELLOW}  Homebrew:        ${RESET}brew tap ba-calderonmorales/terminal-jarvis && brew install terminal-jarvis"
 
 echo ""
 echo -e "${CYAN}🏁 Local CD pipeline finished!${RESET}"

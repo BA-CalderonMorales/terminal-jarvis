@@ -10,13 +10,22 @@ The project follows Orhun Parmaksız's approach for packaging Rust applications 
 
 ## Current Version & Key Features
 
-**Version**: 0.0.45
+**Version**: 0.0.46
 **Major Features**:
 
+- **Multi-Platform Distribution** (v0.0.46+) - NPM, Crates.io, and Homebrew publishing
 - Session Continuation System (v0.0.44+) - Intelligent handling of authentication workflows
 - Enhanced Deployment Workflow (v0.0.45+) - Programmatic version management
 - 6 AI Tools Integration - claude, gemini, qwen, opencode, llxprt, codex
 - Infinite Loop Prevention (v0.0.45) - Smart detection of exit vs internal commands
+
+## Distribution Channels
+
+Terminal Jarvis is available through **three official distribution channels**:
+
+1. **NPM** (Node.js ecosystem): `npm install -g terminal-jarvis`
+2. **Crates.io** (Rust ecosystem): `cargo install terminal-jarvis`
+3. **Homebrew** (macOS/Linux package manager): `brew tap ba-calderonmorales/terminal-jarvis && brew install terminal-jarvis`
 
 ## How The Code Is Organized
 
@@ -228,6 +237,169 @@ mod tests {
 
 **ABSOLUTE RULE**: No bugfix commits without accompanying failing test. This is enforced during code review.
 
+## Homebrew Integration & Multi-Platform Distribution (v0.0.46+)
+
+**Key Innovation**: Complete multi-platform distribution pipeline supporting NPM, Crates.io, and Homebrew.
+
+### Homebrew Publishing Workflow
+
+**Based on Federico Terzi's approach**: https://federicoterzi.com/blog/how-to-publish-your-rust-project-on-homebrew/
+
+#### 1. **Release Archive Creation**
+
+```bash
+# Create platform-specific archives for Homebrew
+./scripts/create-homebrew-release.sh
+```
+
+This script:
+- Builds release binaries for macOS and Linux
+- Creates .tar.gz archives with proper naming (`terminal-jarvis-{platform}.tar.gz`)
+- Calculates SHA256 checksums for Formula verification
+- Generates Formula template with multi-platform support
+
+#### 2. **Formula Structure** (`homebrew/Formula/terminal-jarvis.rb`)
+
+```ruby
+class TerminalJarvis < Formula
+  desc "A unified command center for AI coding tools"
+  homepage "https://github.com/BA-CalderonMorales/terminal-jarvis"
+  version "X.X.X"
+  license "MIT"
+
+  on_macos do
+    url "https://github.com/.../terminal-jarvis-macos.tar.gz"
+    sha256 "..."
+  end
+
+  on_linux do
+    url "https://github.com/.../terminal-jarvis-linux.tar.gz"  
+    sha256 "..."
+  end
+
+  def install
+    bin.install "terminal-jarvis"
+  end
+
+  test do
+    system "#{bin}/terminal-jarvis", "--version"
+  end
+end
+```
+
+#### 3. **End-to-End Testing Protocol**
+
+**CRITICAL**: Always test Homebrew integration locally before deployment:
+
+```bash
+# 1. Test Formula validation
+./scripts/test-homebrew-formula.sh
+
+# 2. Create local tap for testing
+mkdir -p /tmp/homebrew-test-tap/Formula
+cp homebrew/Formula/terminal-jarvis.rb /tmp/homebrew-test-tap/Formula/
+cd /tmp/homebrew-test-tap && git init && git add . && git commit -m "Test"
+
+# 3. Add tap and test installation
+brew tap-new local/test && cp Formula/* $(brew --repository)/Library/Taps/local/homebrew-test/Formula/
+brew install local/test/terminal-jarvis
+
+# 4. Verify functionality
+terminal-jarvis --version
+terminal-jarvis --help
+brew test local/test/terminal-jarvis
+```
+
+#### 4. **GitHub Release Integration**
+
+Archives must be uploaded to GitHub releases:
+- `terminal-jarvis-macos.tar.gz` 
+- `terminal-jarvis-linux.tar.gz`
+
+Formula URLs point to these release assets.
+
+### Multi-Platform Distribution Best Practices
+
+#### **Distribution Channel Separation**
+
+1. **NPM Users** - JavaScript/Node.js ecosystem
+2. **Crates.io Users** - Rust developers who prefer `cargo install`  
+3. **Homebrew Users** - macOS/Linux users preferring system package managers
+
+#### **README Badge Organization**
+
+Group badges by distribution channel for clarity:
+```markdown
+<!-- NPM Distribution -->
+[![npm version](badge-url)](link) [![npm downloads](badge-url)](link)
+
+<!-- Crates.io Distribution -->  
+[![Crates.io](badge-url)](link) [![Crates.io downloads](badge-url)](link)
+
+<!-- GitHub Stats -->
+[![GitHub release](badge-url)](link) [![GitHub stars](badge-url)](link)
+```
+
+#### **Version Synchronization Requirements**
+
+ALL distribution channels must maintain version synchronization:
+- `Cargo.toml` - Core Rust package version
+- `npm/terminal-jarvis/package.json` - NPM package version
+- `homebrew/Formula/terminal-jarvis.rb` - Homebrew Formula version
+- GitHub release tags - Must match exactly
+
+### Common Homebrew Integration Pitfalls
+
+#### **Archive Naming Issues**
+- **Problem**: Inconsistent archive naming breaks Formula URLs
+- **Solution**: Use standardized names: `terminal-jarvis-{macos|linux}.tar.gz`
+
+#### **SHA256 Mismatch** 
+- **Problem**: Formula SHA256 doesn't match actual archive checksum
+- **Solution**: Always regenerate SHA256 after creating new archives
+
+#### **Formula Syntax Errors**
+- **Problem**: Ruby syntax errors prevent Formula loading
+- **Solution**: Use `./scripts/test-homebrew-formula.sh` for validation
+
+#### **Binary Permissions**
+- **Problem**: Extracted binary lacks execute permissions
+- **Solution**: Archives must preserve file permissions (`tar -czf` with proper flags)
+
+#### **Cross-Platform Issues**
+- **Problem**: Formula doesn't handle macOS vs Linux differences
+- **Solution**: Use `on_macos` and `on_linux` blocks for platform-specific handling
+
+### Homebrew Testing Without GitHub Repository
+
+**Local Testing Strategy** (when GitHub repo doesn't exist yet):
+
+1. **Create Local Tap Structure**:
+   ```bash
+   mkdir -p /tmp/homebrew-test-tap/Formula
+   cp homebrew/Formula/terminal-jarvis.rb /tmp/homebrew-test-tap/Formula/
+   cd /tmp/homebrew-test-tap && git init && git add . && git commit -m "Test"
+   ```
+
+2. **Serve Archives Locally**:
+   ```bash
+   cd homebrew/release && python3 -m http.server 8000
+   ```
+
+3. **Modify Formula for Testing**:
+   ```ruby
+   # Replace GitHub URLs with localhost for testing
+   url "http://localhost:8000/terminal-jarvis-linux.tar.gz"
+   ```
+
+4. **Install and Test**:
+   ```bash
+   brew tap local/test /tmp/homebrew-test-tap
+   brew install local/test/terminal-jarvis
+   ```
+
+This approach validates the complete installation workflow without requiring actual GitHub repository creation.
+
 ## Session Continuation System (v0.0.44+)
 
 **Key Innovation**: Prevents users from being kicked out of AI tools during authentication workflows.
@@ -302,6 +474,10 @@ We use a controlled deployment approach with programmatic version management:
 # Deploy changes (commit/tag/push)
 ./scripts/local-cd.sh
 
+# Homebrew archives and Formula preparation
+./scripts/create-homebrew-release.sh
+# Upload archives to GitHub releases manually
+
 # Manual NPM publishing (due to 2FA)
 cd npm/terminal-jarvis && npm publish
 npm dist-tag add terminal-jarvis@X.X.X stable  # optional
@@ -312,6 +488,7 @@ npm dist-tag add terminal-jarvis@X.X.X stable  # optional
 - **Controlled workflow**: Separate validation from deployment
 - **Programmatic version management**: No manual file editing
 - **Version synchronization**: Automated consistency across all files
+- **Multi-platform support**: Includes Homebrew archive creation
 - **Flexibility**: Choose between programmatic and one-shot approaches
 
 ## How To Release
@@ -421,6 +598,15 @@ npm dist-tag ls terminal-jarvis
 - [ ] Tests updated in `services.rs` for new tool mapping
 - [ ] Documentation updated (README.md, CLI descriptions)
 - [ ] Verification commands run successfully (`cargo run -- list`, `cargo test --lib services`)
+
+### Homebrew Integration (if updating version):
+
+- [ ] `homebrew/Formula/terminal-jarvis.rb` version updated
+- [ ] GitHub release created with version tag
+- [ ] Homebrew archives uploaded: `terminal-jarvis-macos.tar.gz`, `terminal-jarvis-linux.tar.gz`
+- [ ] SHA256 checksums verified in Formula match actual archives
+- [ ] **Homebrew Formula tested locally**: `./scripts/test-homebrew-formula.sh` passes
+- [ ] Multi-platform support verified (macOS and Linux archives)
 
 ### Testing (Critical):
 

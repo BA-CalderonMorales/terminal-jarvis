@@ -3,6 +3,8 @@
 
 # Homebrew release artifacts (keep Formula directory structure)
 /homebrew/release/
+# Release archives that might end up in root
+*.tar.gz
 
 # NPM and Node.js
 # Logs
