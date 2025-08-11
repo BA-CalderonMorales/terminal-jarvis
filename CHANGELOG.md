@@ -5,6 +5,23 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.0.53] - 2025-08-11
+
+### Enhanced
+
+- **Documentation Consistency**: Updated all documentation files to reflect current v0.0.53 status
+  - Consolidated SUPPORTED_TOOLS.md content into comprehensive SOURCES.md
+  - Updated tool counts from 6 to 7 tools across all testing documentation
+  - Synchronized version references across installation guides
+  - Improved README.md structure with centralized tool documentation reference
+
+### Fixed
+
+- **Documentation Accuracy**: Corrected outdated version references and tool counts
+  - Fixed TESTING.md references from 5/6 tools to 7 tools
+  - Updated INSTALLATION.md current version from v0.0.43 to v0.0.53
+  - Ensured all NPM package descriptions include Crush in tool listings
+
 ## [0.0.52] - 2025-08-10
 
 ### Added

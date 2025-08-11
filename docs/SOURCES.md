@@ -1,6 +1,76 @@
-# AI CLI Tools NPM Installation Guide
+# Supported AI Coding Tools - Installation & Sources Guide
 
-All six AI CLI tools are available via NPM. Here's the comprehensive installation guide with exact NPM commands, package details, and official sources.
+Terminal Jarvis supports **7 AI coding tools** with seamless installation, updates, and execution. This comprehensive guide provides official sources, exact NPM installation commands, and detailed tool information.
+
+## 🤖 Complete Tool Overview
+
+### Stable Tools (Production Ready)
+
+| Tool       | Provider  | Description                                          | Installation                                 | Key Features                                                               |
+| ---------- | --------- | ---------------------------------------------------- | -------------------------------------------- | -------------------------------------------------------------------------- |
+| **claude** | Anthropic | Claude AI for advanced code assistance and reasoning | `npm install -g @anthropic-ai/claude-code`   | • Advanced reasoning<br>• Code analysis<br>• Refactoring suggestions       |
+| **gemini** | Google    | Google's powerful Gemini CLI tool                    | `npm install -g @google/gemini-cli`          | • Multi-modal AI<br>• Code generation<br>• Natural language processing     |
+| **qwen**   | Alibaba   | Qwen coding assistant with strong language model     | `npm install -g @qwen-code/qwen-code@latest` | • Code completion<br>• Multi-language support<br>• Intelligent suggestions |
+
+### Testing Tools (Community Feedback Welcome)
+
+| Tool         | Provider    | Description                          | Installation                                 | Key Features                                                                    |
+| ------------ | ----------- | ------------------------------------ | -------------------------------------------- | ------------------------------------------------------------------------------- |
+| **opencode** | OpenCode AI | Terminal-based AI coding agent       | `npm install -g opencode-ai@latest`          | • Terminal-native interface<br>• Code generation<br>• Interactive workflows     |
+| **llxprt**   | VybeStack   | Multi-provider AI coding assistant   | `npm install -g @vybestack/llxprt-code-core` | • Multi-provider support<br>• Flexible AI backends<br>• Extensible architecture |
+| **codex**    | OpenAI      | OpenAI Codex CLI for local AI coding | `npm install -g @openai/codex`               | • Local AI processing<br>• Code completion<br>• OpenAI integration              |
+
+### New Tools (Latest Additions)
+
+| Tool         | Provider | Description                               | Installation                      | Key Features                                                                                 |
+| ------------ | -------- | ----------------------------------------- | --------------------------------- | -------------------------------------------------------------------------------------------- |
+| **crush** ✨ | Charm    | Multi-model AI assistant with LSP support | `npm install -g @charmland/crush` | • LSP protocol support<br>• Multi-model AI<br>• MCP integration<br>• Beautiful TUI interface |
+
+## 🚀 Quick Usage with Terminal Jarvis
+
+### Interactive Mode (Recommended)
+
+```bash
+terminal-jarvis
+```
+
+### Direct Tool Execution
+
+```bash
+# Run any supported tool directly
+terminal-jarvis run claude --prompt "Explain this code"
+terminal-jarvis run gemini --file src/main.rs
+terminal-jarvis run qwen --analyze
+terminal-jarvis run opencode --generate
+terminal-jarvis run llxprt --help
+terminal-jarvis run codex --complete
+terminal-jarvis run crush --lsp
+```
+
+### Tool Management
+
+```bash
+# Install specific tools
+terminal-jarvis install claude
+terminal-jarvis install crush
+
+# Update all installed tools
+terminal-jarvis update
+
+# Check tool status
+terminal-jarvis list
+terminal-jarvis info claude
+```
+
+## 🔧 Tool Status Indicators
+
+- ✅ **Stable** - Production-ready, thoroughly tested
+- 🧪 **Testing** - Feature-complete, seeking community feedback
+- ✨ **New** - Recently added, actively being integrated
+
+---
+
+# Detailed Installation Guide & Official Sources
 
 ## 1. claude-code - Anthropic's Claude Coding Assistant CLI Tool
 
@@ -163,6 +233,35 @@ npm install -g opencode-ai
 - API key from any supported provider (75+ LLM providers via Models.dev)
 - Provider agnostic architecture
 
+## 7. crush - Charm's Multi-Model AI Assistant
+
+**Exact NPM Install Command:**
+
+```bash
+npm install -g @charmland/crush
+```
+
+**Package Details:**
+
+- **NPM Package Name:** `@charmland/crush`
+- **Status:** New addition to Terminal Jarvis ecosystem
+- **Release Strategy:** Actively maintained by Charm
+- **Special Features:** LSP support, MCP integration, beautiful TUI
+
+**Official Sources:**
+
+- **GitHub Repository:** https://github.com/charmbracelet/crush
+- **NPM Registry:** https://www.npmjs.com/package/@charmland/crush
+- **Charm Website:** https://charm.sh/
+- **Documentation:** https://github.com/charmbracelet/crush#readme
+
+**Requirements:**
+
+- Node.js 16+
+- Compatible with multiple AI providers
+- LSP protocol support for enhanced IDE integration
+- MCP (Model Context Protocol) support
+
 ## Summary Table
 
 | Tool        | NPM Package Name              | NPM Install Command                          | Release Strategy              |
@@ -173,12 +272,14 @@ npm install -g opencode-ai
 | codex       | `@openai/codex`               | `npm install -g @openai/codex`               | Stable with experimental flag |
 | gemini      | `@google/gemini-cli`          | `npm install -g @google/gemini-cli`          | Stable releases               |
 | opencode    | `opencode-ai`                 | `npm install -g opencode-ai`                 | Daily updates                 |
+| crush       | `@charmland/crush`            | `npm install -g @charmland/crush`            | Active maintenance            |
 
-**Note:** Three tools use different package names than their common names:
+**Note:** Four tools use different package names than their common names:
 
 - llxprt → `@vybestack/llxprt-code-core`
 - gemini → `@google/gemini-cli`
 - opencode → `opencode-ai`
+- crush → `@charmland/crush`
 
 ## Terminal Jarvis Configuration Consistency
 
@@ -194,6 +295,7 @@ qwen-code = { enabled = true, auto_update = true, install_command = "npm install
 opencode = { enabled = true, auto_update = true, install_command = "npm install -g opencode-ai@latest", update_command = "npm update -g opencode-ai" }
 llxprt-code = { enabled = true, auto_update = true, install_command = "npm install -g @vybestack/llxprt-code-core", update_command = "npm update -g @vybestack/llxprt-code-core" }
 codex = { enabled = true, auto_update = true, install_command = "npm install -g @openai/codex", update_command = "npm update -g @openai/codex" }
+crush = { enabled = true, auto_update = true, install_command = "npm install -g @charmland/crush", update_command = "npm update -g @charmland/crush" }
 ```
 
 ### Display Name to CLI Command Mappings (`src/tools.rs`):
@@ -204,6 +306,7 @@ codex = { enabled = true, auto_update = true, install_command = "npm install -g 
 - opencode → opencode
 - llxprt → llxprt
 - codex → codex
+- crush → crush
 
 ### Display Name to Configuration Key Mappings (`src/services.rs`):
 
@@ -213,6 +316,7 @@ codex = { enabled = true, auto_update = true, install_command = "npm install -g 
 - opencode → opencode
 - llxprt → llxprt-code
 - codex → codex
+- crush → crush
 
 ## Common Installation Issues
 
@@ -275,6 +379,7 @@ qwen --version
 opencode --version
 llxprt --version
 codex --version
+crush --version
 
 # Test help commands
 claude --help
@@ -283,6 +388,7 @@ qwen --help
 opencode --help
 llxprt --help
 codex --help
+crush --help
 ```
 
 ## Security Considerations
@@ -303,6 +409,7 @@ codex --help
 | codex       | ✅ Maintained by OpenAI             | Weekly       | Low        |
 | gemini      | ✅ Maintained by Google             | Weekly       | Low        |
 | opencode    | ✅ Very active development          | Daily        | Medium     |
+| crush       | ✅ Actively maintained by Charm     | Weekly       | Low        |
 
 **Risk Levels:**
 
