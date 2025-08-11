@@ -130,6 +130,26 @@ impl Default for Config {
             },
         );
 
+        tools.insert(
+            "codex".to_string(),
+            ToolConfig {
+                enabled: true,
+                auto_update: true,
+                install_command: Some("npm install -g @openai/codex".to_string()),
+                update_command: Some("npm update -g @openai/codex".to_string()),
+            },
+        );
+
+        tools.insert(
+            "crush".to_string(),
+            ToolConfig {
+                enabled: true,
+                auto_update: true,
+                install_command: Some("npm install -g @charmland/crush".to_string()),
+                update_command: Some("npm update -g @charmland/crush".to_string()),
+            },
+        );
+
         Self {
             tools,
             templates: TemplateConfig {
