@@ -26,11 +26,17 @@
 
 </div>
 
-A unified command center for AI coding tools. Manage and run claude-code, gemini-cli, qwen-code, opencode, llxprt, and codex from one beautiful terminal interface.
+<hr>
+
+A unified command center for AI coding tools. Manage and run claude-code, gemini-cli, qwen-code, opencode, llxprt, codex, and crush from one beautiful terminal interface.
+
+<hr>
 
 <img src="screenshots/promo_image_for_readme.png" alt="Terminal Jarvis Interface" width="100%">
 
----
+<hr>
+
+📋 **[View all 7 supported AI tools →](docs/SOURCES.md)**
 
 🎉 **Try it instantly:** `npx terminal-jarvis`
 
@@ -127,14 +133,15 @@ terminal-jarvis templates apply my-template
 
 ## Supported AI Tools
 
-| Tool       | Description                            | Status     | Installation Command                         |
-| ---------- | -------------------------------------- | ---------- | -------------------------------------------- |
-| `claude`   | Anthropic's Claude for code assistance | ✅ Stable  | `npm install -g @anthropic-ai/claude-code`   |
-| `gemini`   | Google's Gemini CLI tool               | ✅ Stable  | `npm install -g @google/gemini-cli`          |
-| `qwen`     | Qwen coding assistant                  | ✅ Stable  | `npm install -g @qwen-code/qwen-code@latest` |
-| `opencode` | Terminal-based AI coding agent         | 🧪 Testing | `npm install -g opencode-ai@latest`          |
-| `llxprt`   | Multi-provider AI coding assistant     | 🧪 Testing | `npm install -g @vybestack/llxprt-code-core` |
-| `codex`    | OpenAI Codex CLI for local AI coding   | 🧪 Testing | `npm install -g @openai/codex`               |
+| Tool       | Description                               | Status     | Installation Command                         |
+| ---------- | ----------------------------------------- | ---------- | -------------------------------------------- |
+| `claude`   | Anthropic's Claude for code assistance    | ✅ Stable  | `npm install -g @anthropic-ai/claude-code`   |
+| `gemini`   | Google's Gemini CLI tool                  | ✅ Stable  | `npm install -g @google/gemini-cli`          |
+| `qwen`     | Qwen coding assistant                     | ✅ Stable  | `npm install -g @qwen-code/qwen-code@latest` |
+| `opencode` | Terminal-based AI coding agent            | 🧪 Testing | `npm install -g opencode-ai@latest`          |
+| `llxprt`   | Multi-provider AI coding assistant        | 🧪 Testing | `npm install -g @vybestack/llxprt-code-core` |
+| `codex`    | OpenAI Codex CLI for local AI coding      | 🧪 Testing | `npm install -g @openai/codex`               |
+| `crush`    | Charm's multi-model AI assistant with LSP | ✨ New     | `npm install -g @charmland/crush`            |
 
 \*See [limitations](docs/LIMITATIONS.md) for known issues and workarounds
 
@@ -157,6 +164,7 @@ qwen = { enabled = true, auto_update = true }
 opencode = { enabled = false, auto_update = false }
 llxprt = { enabled = true, auto_update = true }
 codex = { enabled = true, auto_update = true }
+crush = { enabled = true, auto_update = true }
 
 [templates]
 repository = "your-username/jarvis-templates"

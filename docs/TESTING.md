@@ -10,7 +10,7 @@ This document outlines our comprehensive testing approach to ensure core functio
 
 - Basic CLI functionality
 - Tool listing
-- Configuration loading (5 tools present)
+- Configuration loading (7 tools present)
 - NPM package consistency
 
 ```bash
@@ -102,7 +102,7 @@ Our test suite validates these essential behaviors:
 
 ### 1. **Tool Management**
 
-- ✅ All 6 AI tools are available: claude, gemini, qwen, opencode, llxprt, codex
+- ✅ All 7 AI tools are available: claude, gemini, qwen, opencode, llxprt, codex, crush
 - ✅ All tools use consistent NPM package installation
 - ✅ Tool listing shows proper status and requirements
 - ✅ Install/update commands work for each tool

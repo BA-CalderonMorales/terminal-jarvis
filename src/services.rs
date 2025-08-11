@@ -29,6 +29,7 @@ impl PackageService {
         mapping.insert("opencode", "opencode");
         mapping.insert("llxprt", "llxprt-code");
         mapping.insert("codex", "codex");
+        mapping.insert("crush", "crush");
         mapping
     }
 
@@ -656,6 +657,7 @@ mod tests {
         assert_eq!(mapping.get("opencode"), Some(&"opencode"));
         assert_eq!(mapping.get("llxprt"), Some(&"llxprt-code"));
         assert_eq!(mapping.get("codex"), Some(&"codex"));
+        assert_eq!(mapping.get("crush"), Some(&"crush"));
     }
 
     #[tokio::test]
@@ -669,6 +671,7 @@ mod tests {
         assert_eq!(service.get_config_key_for_tool("opencode"), "opencode");
         assert_eq!(service.get_config_key_for_tool("llxprt"), "llxprt-code");
         assert_eq!(service.get_config_key_for_tool("codex"), "codex");
+        assert_eq!(service.get_config_key_for_tool("crush"), "crush");
 
         // Test that unknown tools return themselves
         assert_eq!(
