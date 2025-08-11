@@ -218,10 +218,13 @@ curl -I https://github.com/BA-CalderonMorales/terminal-jarvis/releases/download/
 
 - `Cargo.toml` - version field
 - `npm/terminal-jarvis/package.json` - version field
+- **`homebrew/Formula/terminal-jarvis.rb` - version field** ⚠️ **COMMONLY FORGOTTEN!**
 - `npm/terminal-jarvis/src/index.ts` - console.log version display
 - `src/cli_logic.rs` - uses `env!("CARGO_PKG_VERSION")` (auto-updates)
 - `CHANGELOG.md` - must have entry for current version
 - `README.md` - version references in note sections
+
+🚨 **HOMEBREW FORMULA VERSION MUST MATCH EXACTLY** - This is frequently overlooked and causes deployment failures.
 
 ### CHANGELOG.md Management (CRITICAL)
 
@@ -569,7 +572,7 @@ fn test_bug_opencode_input_focus_on_fresh_install() {
 
 **Homebrew Integration (if updating version):**
 
-- [ ] `homebrew/Formula/terminal-jarvis.rb` version updated
+- [ ] **🚨 CRITICAL: `homebrew/Formula/terminal-jarvis.rb` version updated** - COMMONLY FORGOTTEN!
 - [ ] GitHub release created with version tag
 - [ ] Homebrew archives uploaded: `terminal-jarvis-macos.tar.gz`, `terminal-jarvis-linux.tar.gz`
 - [ ] SHA256 checksums verified in Formula match actual archives

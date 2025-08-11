@@ -1,6 +1,6 @@
-# Terminal Jarvis
-
 <div align="center">
+
+# Terminal Jarvis
 
 <!-- NPM Package -->
 
