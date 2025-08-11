@@ -5,6 +5,22 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.0.51] - 2025-08-11
+
+### Fixed
+
+- **README.md Title Alignment**: Fixed NPM package README.md to have centered title alignment
+  - Root README.md already had proper `<div align="center">` wrapper
+  - NPM package README.md was missing title inside the alignment block
+  - Ensures consistent branding across all distribution channels
+
+### Enhanced
+
+- **Documentation Quality**: Updated copilot-instructions.md and CLAUDE.md to emphasize Homebrew Formula version synchronization
+  - Added explicit warnings about commonly forgotten `homebrew/Formula/terminal-jarvis.rb` version updates
+  - Enhanced local-cd.sh script to detect and warn about Homebrew Formula version mismatches
+  - Prevents deployment failures due to version inconsistencies
+
 ## [0.0.50] - 2025-08-10
 
 ### Added
