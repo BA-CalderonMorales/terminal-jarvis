@@ -5,6 +5,44 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.0.52] - 2025-08-10
+
+### Added
+
+- **Crush Integration**: Added support for Charm's Crush AI coding assistant
+  - Multi-model support with OpenAI, Anthropic, Google, Groq, and more
+  - LSP-enhanced context for improved code understanding
+  - Session-based workflows with context preservation
+  - MCP (Model Context Protocol) support for extensibility
+  - Flexible configuration with local model support (Ollama, LM Studio)
+  - Installation via NPM: `npm install -g @charmland/crush`
+
+### Fixed
+
+- **llxprt Package Configuration**: Fixed inconsistent package name in terminal-jarvis.toml.example
+  - Changed from incorrect `@vybestack/llxprt-code-core` to correct `@vybestack/llxprt-code`
+  - Resolves concurrent update failures and directory conflicts
+  - Ensures proper tool updates without interfering with other packages
+
+### Enhanced
+
+- **Testing Infrastructure**: Updated CI/testing scripts to validate all 7 AI tools
+  - Comprehensive test coverage for Crush integration (6 new tests)
+  - NPM package validation for all tools including Crush
+  - Updated tool count validation from 6 to 7 tools across all test suites
+
+## [Unreleased]
+
+### Added
+
+- **Crush Integration**: Added support for Charm's Crush AI coding assistant
+  - Multi-model support with OpenAI, Anthropic, Google, Groq, and more
+  - LSP-enhanced context for improved code understanding
+  - Session-based workflows with context preservation
+  - MCP (Model Context Protocol) support for extensibility
+  - Flexible configuration with local model support (Ollama, LM Studio)
+  - Installation via NPM: `npm install -g @charmland/crush`
+
 ## [0.0.51] - 2025-08-11
 
 ### Fixed

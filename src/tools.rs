@@ -30,6 +30,7 @@ impl ToolManager {
         mapping.insert("opencode", "opencode"); // OpenCode installs as 'opencode'
         mapping.insert("llxprt", "llxprt"); // LLxprt Code installs as 'llxprt'
         mapping.insert("codex", "codex"); // OpenAI Codex CLI installs as 'codex'
+        mapping.insert("crush", "crush"); // Crush installs as 'crush'
         mapping
     }
 
@@ -68,6 +69,10 @@ impl ToolManager {
                 command: "codex",
                 description: "OpenAI Codex CLI - AI coding agent that runs locally",
             },
+            ToolCommand {
+                command: "crush",
+                description: "Charm's Crush - Multi-model AI coding assistant with LSP support",
+            },
         ]
     }
 
@@ -77,7 +82,9 @@ impl ToolManager {
         let mapping = Self::get_command_mapping();
 
         // Define consistent order for tools display
-        let tool_order = ["claude", "gemini", "qwen", "opencode", "llxprt", "codex"];
+        let tool_order = [
+            "claude", "gemini", "qwen", "opencode", "llxprt", "codex", "crush",
+        ];
 
         // Insert tools in defined order for consistent display
         for display_name in tool_order.iter() {

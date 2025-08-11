@@ -1,7 +1,7 @@
 #!/bin/bash
 
-# Terminal Jarvis Comprehensive Test Suite
-# Validates core functionality and NPM package integrity to prevent regressions
+# Terminal Jarvis Comprehensive Test Suiterun_test "List shows all expected tools (7 total)" 
+    'TOOL_COUNT=$('$BINARY' list 2>/dev/null | grep -E "^  (claude|gemini|qwen|opencode|llxprt|codex|crush)" | wc -l); [ "$TOOL_COUNT" -eq 7 ]' Validates core functionality and NPM package integrity to prevent regressions
 
 # Colors for output
 CYAN='\033[0;96m'
@@ -53,11 +53,11 @@ run_test "CLI help command works" \
 run_test "Tool listing functionality" \
     "$BINARY list > /dev/null 2>&1"
 
-run_test "All 6 tools loaded from configuration" \
-    'TOOL_COUNT=$('$BINARY' list 2>/dev/null | grep -E "^  (claude|gemini|qwen|opencode|llxprt|codex)" | wc -l); [ "$TOOL_COUNT" -eq 6 ]'
+run_test "All 7 tools loaded from configuration" \
+    'TOOL_COUNT=$('$BINARY' list 2>/dev/null | grep -E "^  (claude|gemini|qwen|opencode|llxprt|codex|crush)" | wc -l); [ "$TOOL_COUNT" -eq 7 ]'
 
 run_test "All tools use NPM packages consistently" \
-    'NPM_TOOLS=$('$BINARY' list 2>/dev/null | grep -c "Requires: NPM"); [ "$NPM_TOOLS" -eq 6 ]'
+    'NPM_TOOLS=$('$BINARY' list 2>/dev/null | grep -c "Requires: NPM"); [ "$NPM_TOOLS" -eq 7 ]'
 
 run_test "Update command help" \
     "$BINARY update --help > /dev/null 2>&1"
@@ -74,11 +74,11 @@ run_test "Error handling for nonexistent tool" \
 run_test "Version consistency (Cargo.toml vs NPM package.json)" \
     'CARGO_VERSION=$(grep "^version = " Cargo.toml | sed "s/version = \"\(.*\)\"/\1/"); NPM_VERSION=$(grep "\"version\":" npm/terminal-jarvis/package.json | sed "s/.*\"version\": \"\(.*\)\".*/\1/"); [ "$CARGO_VERSION" = "$NPM_VERSION" ]'
 
-run_test "Example configuration file has all 6 tools" \
-    'CONFIG_TOOLS=$(grep -E "(claude-code|gemini-cli|qwen-code|opencode|llxprt-code|codex)" terminal-jarvis.toml.example | wc -l); [ "$CONFIG_TOOLS" -eq 6 ]'
+run_test "Example configuration file has all 7 tools" \
+    'CONFIG_TOOLS=$(grep -E "(claude-code|gemini-cli|qwen-code|opencode|llxprt-code|codex|crush)" terminal-jarvis.toml.example | wc -l); [ "$CONFIG_TOOLS" -eq 7 ]'
 
 run_test "Example config uses NPM for all installs" \
-    'NPM_INSTALL_COMMANDS=$(grep -c "npm install" terminal-jarvis.toml.example); [ "$NPM_INSTALL_COMMANDS" -eq 6 ]'
+    'NPM_INSTALL_COMMANDS=$(grep -c "npm install" terminal-jarvis.toml.example); [ "$NPM_INSTALL_COMMANDS" -eq 7 ]'
 
 # Test the opencode input focus fix specifically
 run_test "OpenCode input focus tests pass" \
@@ -112,6 +112,25 @@ run_test "Codex tool description is informative" \
 run_test "Codex functionality tests pass" \
     "cargo test codex_functionality >/dev/null 2>&1"
 
+# Test crush functionality specifically
+run_test "Crush tool is properly configured" \
+    '$BINARY list | grep -q "crush.*multi-model AI coding assistant"'
+
+run_test "Crush binary mapping is correct" \
+    'grep -q "crush.*crush" src/tools.rs'
+
+run_test "Crush tool description is informative" \
+    'grep -A2 "command: \"crush\"" src/tools.rs | grep -q "description.*Multi-model AI coding assistant"'
+
+run_test "Crush installation command is correct" \
+    'grep -A5 "crush\"," src/installation_arguments.rs | grep -q "@charmland/crush"'
+
+run_test "Crush config mapping exists" \
+    'grep -q "crush.*crush" src/services.rs'
+
+run_test "Crush default config exists" \
+    'grep -A5 "crush" src/config.rs | grep -q "charmland/crush"'
+
 echo ""
 
 # ===== NPM PACKAGE VALIDATION TESTS =====
@@ -132,8 +151,9 @@ else
     OPENCODE_PACKAGE=$(grep -A5 'opencode",' src/installation_arguments.rs | grep 'args: vec!' | sed 's/.*"\([^"]*\)".*/\1/' | tail -1)
     LLXPRT_PACKAGE=$(grep -A5 'llxprt",' src/installation_arguments.rs | grep 'args: vec!' | sed 's/.*"\([^"]*\)".*/\1/' | tail -1)
     CODEX_PACKAGE=$(grep -A5 'codex",' src/installation_arguments.rs | grep 'args: vec!' | sed 's/.*"\([^"]*\)".*/\1/' | tail -1)
+    CRUSH_PACKAGE=$(grep -A5 'crush",' src/installation_arguments.rs | grep 'args: vec!' | sed 's/.*"\([^"]*\)".*/\1/' | tail -1)
     
-    echo -e "${BLUE}Validating packages: $CLAUDE_PACKAGE, $GEMINI_PACKAGE, $QWEN_PACKAGE, $OPENCODE_PACKAGE, $LLXPRT_PACKAGE, $CODEX_PACKAGE${RESET}"
+    echo -e "${BLUE}Validating packages: $CLAUDE_PACKAGE, $GEMINI_PACKAGE, $QWEN_PACKAGE, $OPENCODE_PACKAGE, $LLXPRT_PACKAGE, $CODEX_PACKAGE, $CRUSH_PACKAGE${RESET}"
     echo ""
     
     run_test "Claude package exists in NPM registry" \
@@ -154,6 +174,9 @@ else
     run_test "Codex package exists in NPM registry" \
         "npm view $CODEX_PACKAGE version > /dev/null 2>&1"
     
+    run_test "Crush package exists in NPM registry" \
+        "npm view $CRUSH_PACKAGE version > /dev/null 2>&1"
+    
     run_test "Claude package provides 'claude' binary" \
         "npm view $CLAUDE_PACKAGE bin | grep -q 'claude'"
     
@@ -166,10 +189,14 @@ else
     run_test "Codex package provides 'codex' binary" \
         "npm view $CODEX_PACKAGE bin | grep -q 'codex'"
     
+    run_test "Crush package provides 'crush' binary" \
+        "npm view $CRUSH_PACKAGE bin | grep -q 'crush'"
+    
     # Validate configuration consistency across files
     CONFIG_CLAUDE=$(grep -A2 'claude-code' src/config.rs | grep 'install_command' | sed 's/.*npm install -g \([^ "]*\).*/\1/')
     CONFIG_GEMINI=$(grep -A2 'gemini-cli' src/config.rs | grep 'install_command' | sed 's/.*npm install -g \([^ "]*\).*/\1/')
     CONFIG_LLXPRT=$(grep -A2 'llxprt-code' src/config.rs | grep 'install_command' | sed 's/.*npm install -g \([^ "]*\).*/\1/')
+    CONFIG_CRUSH=$(grep -A2 'crush' src/config.rs | grep 'install_command' | sed 's/.*npm install -g \([^ "]*\).*/\1/')
     
     run_test "Claude package consistent between installation_arguments.rs and config.rs" \
         "[ '$CLAUDE_PACKAGE' = '$CONFIG_CLAUDE' ]"
@@ -179,6 +206,9 @@ else
     
     run_test "LLxprt package consistent between installation_arguments.rs and config.rs" \
         "[ '$LLXPRT_PACKAGE' = '$CONFIG_LLXPRT' ]"
+    
+    run_test "Crush package consistent between installation_arguments.rs and config.rs" \
+        "[ '$CRUSH_PACKAGE' = '$CONFIG_CRUSH' ]"
     
     # Validate package installation compatibility (dry run)
     run_test "Claude package can be installed (dry run)" \
@@ -198,6 +228,9 @@ else
     
     run_test "Codex package can be installed (dry run)" \
         "npm install -g $CODEX_PACKAGE --dry-run > /dev/null 2>&1"
+    
+    run_test "Crush package can be installed (dry run)" \
+        "npm install -g $CRUSH_PACKAGE --dry-run > /dev/null 2>&1"
     
     # Validate services.rs update logic has correct package names
     SERVICES_CLAUDE_PRIMARY=$(grep -A10 'claude-code.*=>' src/services.rs | grep 'update_npm_package' | head -1 | sed 's/.*update_npm_package("\([^"]*\)").*/\1/')
