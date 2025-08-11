@@ -219,7 +219,7 @@ cargo uninstall terminal-jarvis
 - **Dependencies**: Zero runtime dependencies
 - **Platforms**: Cross-platform support (Windows, macOS, Linux)
 - **Testing**: All tools undergo comprehensive integration testing, but real-world usage patterns help identify edge cases
-- **Current Version**: v0.0.43 with enhanced CI/CD pipeline and comprehensive codex validation
+- **Current Version**: v0.0.53 with Crush AI integration and 7 supported tools
 - **Known Issues**: See [LIMITATIONS.md](LIMITATIONS.md) for detailed information on resolved and current limitations
 
 > **Note**: The current NPM version includes full binary functionality with the complete T.JARVIS interface. No additional installation required!

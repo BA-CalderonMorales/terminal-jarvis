@@ -4,18 +4,10 @@
 
 <!-- NPM Package -->
 
-[![NPM V- **🎛️ Supported Tools**:
-
-- `claude` - Anthropic's Claude for code assistance
-- `gemini` - Google's Gemini CLI tool
-- `qwen` - Qwen coding assistant
-- `opencode` - Terminal-based AI coding agent 🧪
-- `llxprt` - Multi-provider AI coding assistant 🧪
-- `codex` - OpenAI Codex CLI for local AI coding 🧪
-- `crush` - Charm's multi-model AI coding assistant with LSP support ✨(https://img.shields.io/npm/v/terminal-jarvis.svg?logo=npm&label=NPM%20Version)](https://www.npmjs.com/package/terminal-jarvis)
-  [![NPM Downloads](https://img.shields.io/npm/dm/terminal-jarvis.svg?logo=npm&label=NPM%20Downloads)](https://www.npmjs.com/package/terminal-jarvis)
-  [![NPM Stable](https://img.shields.io/npm/v/terminal-jarvis/stable.svg?label=NPM%20Stable&color=green&logo=npm)](https://www.npmjs.com/package/terminal-jarvis)
-  [![NPM Beta](https://img.shields.io/npm/v/terminal-jarvis/beta.svg?label=NPM%20Beta&color=orange&logo=npm)](https://www.npmjs.com/package/terminal-jarvis)
+[![NPM Version](https://img.shields.io/npm/v/terminal-jarvis.svg?logo=npm&label=NPM%20Version)](https://www.npmjs.com/package/terminal-jarvis)
+[![NPM Downloads](https://img.shields.io/npm/dm/terminal-jarvis.svg?logo=npm&label=NPM%20Downloads)](https://www.npmjs.com/package/terminal-jarvis)
+[![NPM Stable](https://img.shields.io/npm/v/terminal-jarvis/stable.svg?label=NPM%20Stable&color=green&logo=npm)](https://www.npmjs.com/package/terminal-jarvis)
+[![NPM Beta](https://img.shields.io/npm/v/terminal-jarvis/beta.svg?label=NPM%20Beta&color=orange&logo=npm)](https://www.npmjs.com/package/terminal-jarvis)
 
 <!-- Rust Crate -->
 
@@ -34,11 +26,17 @@
 
 </div>
 
+<hr>
+
 A unified command center for AI coding tools. Manage and run claude-code, gemini-cli, qwen-code, opencode, llxprt, codex, and crush from one beautiful terminal interface.
+
+<hr>
 
 <img src="screenshots/promo_image_for_readme.png" alt="Terminal Jarvis Interface" width="100%">
 
----
+<hr>
+
+📋 **[View all 7 supported AI tools →](docs/SOURCES.md)**
 
 🎉 **Try it instantly:** `npx terminal-jarvis`
 
