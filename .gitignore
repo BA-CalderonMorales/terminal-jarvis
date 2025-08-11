@@ -1,8 +1,12 @@
 # Rust
 /target/
 
-# Homebrew release artifacts (keep Formula directory structure)
-/homebrew/release/
+# Homebrew - DEPRECATED: Use homebrew-terminal-jarvis repository instead
+/homebrew/
+
+# Homebrew tap repository is embedded but kept separate
+homebrew-terminal-jarvis/
+
 # Release archives that might end up in root
 *.tar.gz
 
@@ -165,3 +169,6 @@ Thumbs.db
 crush.db
 
 terminal-jarvis-agents/
+
+# Homebrew Tap Repository (managed separately)
+homebrew-terminal-jarvis/
