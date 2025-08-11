@@ -1,5 +1,28 @@
 # CLAUDE.md - Terminal Jarvis AI Assistant Guide
 
+## 🚨 CRITICAL DEPLOYMENT WARNING 🚨
+
+**THE #1 DEPLOYMENT FAILURE**: Homebrew Formula changes committed AFTER GitHub release creation.
+
+**THIS CAUSES BROKEN HOMEBREW INSTALLATIONS** - Formula URLs don't match release assets.
+
+**NEVER DO THIS SEQUENCE**:
+
+1. ❌ Run local-cd.sh (creates Git tag)
+2. ❌ Create GitHub release
+3. ❌ Discover Homebrew Formula needs updates
+4. ❌ Commit Formula changes as a "fix"
+
+**ALWAYS DO THIS SEQUENCE**:
+
+1. ✅ Update ALL files (including Homebrew Formula)
+2. ✅ Commit and push ALL changes to GitHub
+3. ✅ Verify: `git status` shows "nothing to commit, working tree clean"
+4. ✅ THEN run local-cd.sh
+5. ✅ THEN create GitHub release
+
+**VERIFICATION COMMAND**: `git log -1 --name-only` MUST include `homebrew/Formula/terminal-jarvis.rb`
+
 ## Project Overview
 
 Terminal Jarvis is a Rust-based CLI wrapper that provides a unified interface for managing AI coding tools (claude-code, gemini-cli, qwen-code, opencode, llxprt). It's distributed through **three official channels**: NPM (Node.js ecosystem), Crates.io (Rust ecosystem), and Homebrew (macOS/Linux package manager).
@@ -136,6 +159,23 @@ git push origin develop
 
 **Why This Matters**: The deployment process expects a clean working directory. Uncommitted changes, especially to documentation files (CLAUDE.md, copilot-instructions.md) or configuration files (homebrew/Formula/terminal-jarvis.rb), must be committed and pushed BEFORE deployment to ensure the complete state is published to GitHub.
 
+**🚨 HOMEBREW FORMULA CRITICAL DEPLOYMENT ORDER**
+
+**THE #1 DEPLOYMENT FAILURE**: Homebrew Formula changes committed AFTER GitHub release creation.
+
+**MANDATORY SEQUENCE** (NEVER deviate from this order):
+
+1. **FIRST**: Update and commit ALL changes (including Homebrew Formula)
+2. **SECOND**: Push changes to GitHub
+3. **THIRD**: Create GitHub release with archives
+4. **NEVER**: Create release first, then commit Formula changes
+
+**This prevents the common failure pattern where:**
+
+- GitHub release is created with v0.0.X URLs
+- Homebrew Formula still references the old URLs
+- Users get broken installations because Formula URLs don't match releases
+
 #### **Step 3: CHANGELOG.md Update - MANDATORY FIRST STEP**
 
 ```bash
@@ -159,11 +199,17 @@ git push origin develop
 ./scripts/local-cd.sh --update-version 0.0.48
 ```
 
-#### **Step 5: Homebrew Formula Update**
+#### **Step 5: Homebrew Formula Update & Verification**
 
 ```bash
-# Update Homebrew Formula for new version
+# Update Homebrew Formula for new version (if not done by local-cd.sh automatically)
 sed -i 's/version ".*"/version "0.0.48"/' homebrew/Formula/terminal-jarvis.rb
+
+# 🚨 CRITICAL: Verify all versions are synchronized
+./scripts/local-cd.sh --check-versions  # MUST show "All versions are synchronized"
+
+# 🚨 CRITICAL: Ensure working tree is clean BEFORE deployment
+git status  # MUST show "nothing to commit, working tree clean"
 ```
 
 #### **Step 6: Validation**
@@ -172,13 +218,21 @@ sed -i 's/version ".*"/version "0.0.48"/' homebrew/Formula/terminal-jarvis.rb
 ./scripts/local-ci.sh  # MUST pass all tests
 ```
 
-#### **Step 7: Deployment**
+#### **Step 7: Deployment - COMMITS AND PUSHES ALL CHANGES**
 
 ```bash
-./scripts/local-cd.sh  # Creates archives, commits, tags, pushes
+./scripts/local-cd.sh  # Creates archives, commits ALL changes (including Formula), tags, pushes to GitHub
 ```
 
-#### **Step 8: GitHub Release Creation - CRITICAL FOR HOMEBREW**
+#### **Step 8: Verification - HOMEBREW FORMULA MUST BE COMMITTED**
+
+**🚨 CRITICAL**: Verify Homebrew Formula was committed and pushed:
+
+```bash
+git log -1 --name-only  # MUST include homebrew/Formula/terminal-jarvis.rb
+```
+
+#### **Step 9: GitHub Release Creation - ONLY AFTER FORMULA IS COMMITTED**
 
 **🚨 MANDATORY**: Homebrew formulas require GitHub releases with attached archives. The deployment script only creates Git tags, not releases.
 
@@ -218,10 +272,13 @@ curl -I https://github.com/BA-CalderonMorales/terminal-jarvis/releases/download/
 
 - `Cargo.toml` - version field
 - `npm/terminal-jarvis/package.json` - version field
+- **`homebrew/Formula/terminal-jarvis.rb` - version field** ⚠️ **COMMONLY FORGOTTEN!**
 - `npm/terminal-jarvis/src/index.ts` - console.log version display
 - `src/cli_logic.rs` - uses `env!("CARGO_PKG_VERSION")` (auto-updates)
 - `CHANGELOG.md` - must have entry for current version
 - `README.md` - version references in note sections
+
+🚨 **HOMEBREW FORMULA VERSION MUST MATCH EXACTLY** - This is frequently overlooked and causes deployment failures.
 
 ### CHANGELOG.md Management (CRITICAL)
 
@@ -569,7 +626,7 @@ fn test_bug_opencode_input_focus_on_fresh_install() {
 
 **Homebrew Integration (if updating version):**
 
-- [ ] `homebrew/Formula/terminal-jarvis.rb` version updated
+- [ ] **🚨 CRITICAL: `homebrew/Formula/terminal-jarvis.rb` version updated** - COMMONLY FORGOTTEN!
 - [ ] GitHub release created with version tag
 - [ ] Homebrew archives uploaded: `terminal-jarvis-macos.tar.gz`, `terminal-jarvis-linux.tar.gz`
 - [ ] SHA256 checksums verified in Formula match actual archives
