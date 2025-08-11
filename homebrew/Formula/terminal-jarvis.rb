@@ -8,10 +8,10 @@ class TerminalJarvis < Formula
   
   if OS.mac?
     url "https://github.com/BA-CalderonMorales/terminal-jarvis/releases/download/v0.0.53/terminal-jarvis-mac.tar.gz"
-    sha256 "e5d0f1153d127083ea26e75d5b3776de26351efa17f48bf24717c22ae17825a2"
+    sha256 "2357ffa2bf837eb97b8183daeabc3ac2d0420f8f5eaaa32fa200511b6fc8f7c7"
   elsif OS.linux?
     url "https://github.com/BA-CalderonMorales/terminal-jarvis/releases/download/v0.0.53/terminal-jarvis-linux.tar.gz" 
-    sha256 "e5d0f1153d127083ea26e75d5b3776de26351efa17f48bf24717c22ae17825a2"
+    sha256 "2357ffa2bf837eb97b8183daeabc3ac2d0420f8f5eaaa32fa200511b6fc8f7c7"
   end
   
   version "0.0.53"
