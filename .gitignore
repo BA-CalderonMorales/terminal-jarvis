@@ -158,4 +158,10 @@ vite.config.ts.timestamp-*
 .DS_Store
 Thumbs.db
 
+# AI Tools Data/Config
+# Crush AI assistant data
+.crush/
+*.db
+crush.db
+
 terminal-jarvis-agents/

@@ -75,6 +75,16 @@ impl InstallationManager {
             },
         );
 
+        commands.insert(
+            "crush",
+            InstallCommand {
+                command: "npm",
+                args: vec!["install", "-g", "@charmland/crush"],
+                description: "Charm's multi-model AI coding assistant with LSP support",
+                requires_npm: true,
+            },
+        );
+
         commands
     }
 
