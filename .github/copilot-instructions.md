@@ -17,6 +17,49 @@
 
 **This prevents broken Homebrew installations where Formula URLs don't match release assets.**
 
+## Communication & Reference Guidelines
+
+### Reference Clarity Requirements (CRITICAL)
+
+**When providing numbered lists, steps, or procedures**:
+
+- ALWAYS use descriptive section headers: "## Deployment Steps" not just "Steps:"
+- Include context in references: "In the deployment workflow above, step 4 refers to..."
+- NEVER leave numbered references ambiguous
+
+**When user asks for clarification about numbered items**:
+
+- Quote the specific text being referenced
+- Provide full context of which section/workflow the number belongs to
+- Explain where that reference appeared in the conversation
+
+**ANTI-PATTERN to avoid**:
+
+```
+❌ Steps:
+1. Do this
+2. Do that
+3. Another thing
+4. Final step ← User asks "what's step 4?" - ambiguous!
+```
+
+**CORRECT PATTERN**:
+
+```
+✅ ## Homebrew Release Workflow
+1. Update Formula version
+2. Commit all changes
+3. Create GitHub release
+4. Verify archive accessibility ← Clear context when referenced
+```
+
+**Response Requirements when user asks "what do you mean by step X"**:
+
+1. Acknowledge the ambiguity apologetically
+2. Quote the specific numbered list being referenced
+3. Explain which procedure/workflow it belongs to
+4. Provide the clear answer to their question
+
 ## What This Project Does
 
 Terminal Jarvis is a thin Rust wrapper that provides a unified interface for managing and running AI coding tools like claude-code, gemini-cli, qwen-code, opencode, llxprt, and codex. Think of it as a package manager and runner for AI coding assistants.

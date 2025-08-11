@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Terminal Jarvis Local CD (Continuous Deployment) Script
-# Handles deployment: committing, tagging, pushing to GitHub, publishing to crates.io, and publishing to NPM
+# Handles deployment: committing, tagging, pushing to GitHub, publishing to crates.io, syncing homebrew tap, and preparing for NPM publishing
 # Run local-ci.sh first to validate before using this script
 
 set -e  # Exit on any error
@@ -25,8 +25,8 @@ display_version_status() {
     local ts_version=$(grep "console.log.*Terminal Jarvis v" npm/terminal-jarvis/src/index.ts | sed 's/.*Terminal Jarvis v\([0-9.]*\).*/\1/')
     local homebrew_version=""
     
-    if [ -f "homebrew/Formula/terminal-jarvis.rb" ]; then
-        homebrew_version=$(grep 'version "' homebrew/Formula/terminal-jarvis.rb | sed 's/.*version "\(.*\)".*/\1/')
+    if [ -f "homebrew-terminal-jarvis/Formula/terminal-jarvis.rb" ]; then
+        homebrew_version=$(grep 'version "' homebrew-terminal-jarvis/Formula/terminal-jarvis.rb | sed 's/.*version "\(.*\)".*/\1/')
     fi
     
     echo -e "${BLUE}📍 Current Version Status:${RESET}"
@@ -34,9 +34,9 @@ display_version_status() {
     echo -e "${BLUE}  • npm/terminal-jarvis/package.json: ${npm_version}${RESET}"
     echo -e "${BLUE}  • npm/terminal-jarvis/src/index.ts: ${ts_version}${RESET}"
     if [ -n "$homebrew_version" ]; then
-        echo -e "${BLUE}  • homebrew/Formula/terminal-jarvis.rb: ${homebrew_version}${RESET}"
+        echo -e "${BLUE}  • homebrew-terminal-jarvis/Formula/terminal-jarvis.rb: ${homebrew_version}${RESET}"
     else
-        echo -e "${YELLOW}  • homebrew/Formula/terminal-jarvis.rb: NOT FOUND${RESET}"
+        echo -e "${YELLOW}  • homebrew-terminal-jarvis/Formula/terminal-jarvis.rb: NOT FOUND${RESET}"
     fi
     echo -e "${BLUE}  • src/cli_logic.rs: Auto-synced from Cargo.toml${RESET}"
     
@@ -90,16 +90,6 @@ update_all_versions() {
     echo -e "${BLUE}  • Updating npm/terminal-jarvis/src/index.ts${RESET}"
     sed -i "s/console.log(\"🤖 Terminal Jarvis v[0-9.]*\")/console.log(\"🤖 Terminal Jarvis v$new_version\")/g" npm/terminal-jarvis/src/index.ts
     
-    # Update Homebrew Formula
-    echo -e "${BLUE}  • Updating homebrew/Formula/terminal-jarvis.rb${RESET}"
-    if [ -f "homebrew/Formula/terminal-jarvis.rb" ]; then
-        # Update the version line but preserve URLs (they'll be updated during deployment)
-        sed -i "s/download\/v[0-9]\+\.[0-9]\+\.[0-9]\+\//download\/v$new_version\//" homebrew/Formula/terminal-jarvis.rb
-        echo -e "${GREEN}    ✅ Homebrew Formula updated to version ${new_version}${RESET}"
-    else
-        echo -e "${YELLOW}    ⚠️  Homebrew Formula not found${RESET}"
-    fi
-    
     # Update version references in README files (if any exist)
     echo -e "${BLUE}  • Updating version references in documentation${RESET}"
     sed -i "s/terminal-jarvis@[0-9]\+\.[0-9]\+\.[0-9]\+/terminal-jarvis@$new_version/g" README.md 2>/dev/null || echo -e "${BLUE}    (No version references found in README.md)${RESET}"
@@ -107,6 +97,18 @@ update_all_versions() {
     
     # Note: src/cli_logic.rs uses env!("CARGO_PKG_VERSION") so it auto-updates from Cargo.toml
     echo -e "${BLUE}  • src/cli_logic.rs: Auto-syncs from Cargo.toml via env!(\"CARGO_PKG_VERSION\")${RESET}"
+    
+    # Sync homebrew-terminal-jarvis if it exists (but don't fail if it doesn't)
+    echo -e "${BLUE}  • Checking homebrew-terminal-jarvis sync...${RESET}"
+    if [ -d "homebrew-terminal-jarvis" ]; then
+        if sync_homebrew_tap "$new_version"; then
+            echo -e "${GREEN}    ✅ Homebrew tap synchronized${RESET}"
+        else
+            echo -e "${YELLOW}    ⚠️  Homebrew tap sync failed (continuing anyway)${RESET}"
+        fi
+    else
+        echo -e "${BLUE}    (homebrew-terminal-jarvis directory not found - skipping)${RESET}"
+    fi
     
     echo -e "${GREEN}✅ All version references updated to ${new_version}${RESET}"
 }
@@ -148,6 +150,146 @@ check_changelog_readiness() {
         echo ""
         return 1
     fi
+}
+
+# Function to sync homebrew-terminal-jarvis repository
+sync_homebrew_tap() {
+    local new_version="$1"
+    
+    echo -e "${BLUE}🍺 Syncing Homebrew Tap Repository...${RESET}"
+    
+    # Check if homebrew-terminal-jarvis directory exists
+    if [ ! -d "homebrew-terminal-jarvis" ]; then
+        echo -e "${YELLOW}⚠️  homebrew-terminal-jarvis directory not found${RESET}"
+        echo -e "${BLUE}💡 Run: git clone https://github.com/BA-CalderonMorales/homebrew-terminal-jarvis.git${RESET}"
+        return 1
+    fi
+    
+    # Ensure Formula directory exists
+    if [ ! -d "homebrew-terminal-jarvis/Formula" ]; then
+        echo -e "${BLUE}  • Creating Formula directory${RESET}"
+        mkdir -p homebrew-terminal-jarvis/Formula
+    fi
+    
+    # Generate updated Formula directly in the tap repository
+    echo -e "${BLUE}  • Generating updated Formula for version ${new_version}${RESET}"
+    cat > homebrew-terminal-jarvis/Formula/terminal-jarvis.rb << EOL
+# Documentation: https://docs.brew.sh/Formula-Cookbook
+#                https://rubydoc.brew.sh/Formula
+# Based on Federico Terzi's approach: https://federicoterzi.com/blog/how-to-publish-your-rust-project-on-homebrew/
+
+class TerminalJarvis < Formula
+  desc "A unified command center for AI coding tools"
+  homepage "https://github.com/BA-CalderonMorales/terminal-jarvis"
+  
+  if OS.mac?
+    url "https://github.com/BA-CalderonMorales/terminal-jarvis/releases/download/v${new_version}/terminal-jarvis-mac.tar.gz"
+    sha256 "2357ffa2bf837eb97b8183daeabc3ac2d0420f8f5eaaa32fa200511b6fc8f7c7"
+  elsif OS.linux?
+    url "https://github.com/BA-CalderonMorales/terminal-jarvis/releases/download/v${new_version}/terminal-jarvis-linux.tar.gz" 
+    sha256 "2357ffa2bf837eb97b8183daeabc3ac2d0420f8f5eaaa32fa200511b6fc8f7c7"
+  end
+  
+  version "${new_version}"
+
+  def install
+    bin.install "terminal-jarvis"
+  end
+
+  test do
+    system "#{bin}/terminal-jarvis", "--version"
+  end
+end
+EOL
+    
+    # Create/update README.md for the tap
+    echo -e "${BLUE}  • Updating Homebrew tap README.md${RESET}"
+    cat > homebrew-terminal-jarvis/README.md << 'EOL'
+# Homebrew Tap for Terminal Jarvis
+
+🍺 Official Homebrew tap for [Terminal Jarvis](https://github.com/BA-CalderonMorales/terminal-jarvis) - A unified command center for AI coding tools.
+
+## Installation
+
+```bash
+# Add the tap
+brew tap ba-calderonmorales/terminal-jarvis
+
+# Install Terminal Jarvis
+brew install terminal-jarvis
+
+# Verify installation
+terminal-jarvis --version
+```
+
+## What is Terminal Jarvis?
+
+Terminal Jarvis is a unified command center for AI coding tools. It provides seamless management and execution of:
+
+- **claude** - Anthropic's Claude for code assistance
+- **gemini** - Google's Gemini CLI tool  
+- **qwen** - Qwen coding assistant
+- **opencode** - Terminal-based AI coding agent
+- **llxprt** - Multi-provider AI coding assistant
+- **codex** - OpenAI Codex CLI for local AI coding
+- **crush** - Charm's multi-model AI assistant with LSP support
+
+## Features
+
+- 🤖 Interactive T.JARVIS Interface with ASCII art
+- ⚡ One-click tool installation and updates
+- 📊 Real-time tool status dashboard
+- 🔧 Built-in management options
+- 💡 Smart guidance and workflows
+
+## Alternative Installation Methods
+
+- **NPM**: `npm install -g terminal-jarvis`
+- **Cargo**: `cargo install terminal-jarvis`
+- **NPX**: `npx terminal-jarvis` (try instantly)
+
+## Support
+
+- **GitHub**: [terminal-jarvis](https://github.com/BA-CalderonMorales/terminal-jarvis)
+- **Issues**: [Report bugs](https://github.com/BA-CalderonMorales/terminal-jarvis/issues)
+- **Discord**: [Join community](https://discord.gg/zNuyC5uG)
+
+## License
+
+MIT License - see the [LICENSE](LICENSE) file for details.
+EOL
+    
+    # Navigate to homebrew-terminal-jarvis and commit changes
+    cd homebrew-terminal-jarvis
+    
+    # Check if there are changes to commit
+    if git diff --quiet && git diff --cached --quiet; then
+        echo -e "${BLUE}  • No changes to commit in homebrew-terminal-jarvis${RESET}"
+        cd ..
+        return 0
+    fi
+    
+    echo -e "${BLUE}  • Committing changes to homebrew-terminal-jarvis${RESET}"
+    git add Formula/terminal-jarvis.rb README.md
+    git commit -m "feat: update Terminal Jarvis to v${new_version}
+
+- Updated Formula to version ${new_version}
+- Updated download URLs to point to v${new_version} release
+- Refreshed README.md with current feature set"
+    
+    # Push changes
+    echo -e "${BLUE}  • Pushing changes to GitHub${RESET}"
+    if git push origin develop; then
+        echo -e "${GREEN}✅ Successfully synced homebrew-terminal-jarvis repository${RESET}"
+    else
+        echo -e "${RED}❌ Failed to push homebrew-terminal-jarvis changes${RESET}"
+        echo -e "${BLUE}💡 You may need to push manually or check GitHub token permissions${RESET}"
+        cd ..
+        return 1
+    fi
+    
+    cd ..
+    return 0
 }
 
 # Handle standalone version check command
@@ -194,7 +336,7 @@ fi
 
 echo -e "${CYAN}🚀 Terminal Jarvis Local CD (Deployment) Pipeline${RESET}"
 echo -e "${BLUE}Current branch: ${CURRENT_BRANCH}${RESET}"
-echo -e "${YELLOW}This will commit, tag, push to GitHub, publish to crates.io, and prepare for NPM publishing${RESET}"
+echo -e "${YELLOW}This will commit, tag, push to GitHub, publish to crates.io, sync homebrew tap, and prepare for NPM publishing${RESET}"
 echo ""
 
 echo -e "${CYAN}📚 Deployment Documentation:${RESET}"
@@ -452,21 +594,6 @@ if [ "$NEW_VERSION" != "$CURRENT_VERSION" ] && [ "${MANUAL_VERSION_UPDATE:-false
     echo -e "${GREEN}✅ Version updated to ${NEW_VERSION} in all locations${RESET}"
 fi
 
-# Update Homebrew Formula
-echo -e "${BLUE}→ Updating Homebrew Formula...${RESET}"
-if [ -f "homebrew/Formula/terminal-jarvis.rb" ]; then
-    # Update version in Homebrew Formula
-    sed -i "s/version \".*\"/version \"${NEW_VERSION}\"/" homebrew/Formula/terminal-jarvis.rb
-    echo -e "${GREEN}✅ Homebrew Formula updated to version ${NEW_VERSION}${RESET}"
-    
-    # Show reminder about Homebrew archives
-    echo -e "${YELLOW}📋 REMINDER: After deployment completes, run:${RESET}"
-    echo -e "${YELLOW}    ./scripts/create-homebrew-release.sh${RESET}"
-    echo -e "${YELLOW}    Then upload the generated .tar.gz files to the GitHub release${RESET}"
-else
-    echo -e "${YELLOW}⚠️  Homebrew Formula not found at homebrew/Formula/terminal-jarvis.rb${RESET}"
-fi
-
 # Rebuild with new version
 echo -e "${BLUE}→ Rebuilding with new version...${RESET}"
 cargo build --release
@@ -526,38 +653,18 @@ fi
 
 echo ""
 
-# Homebrew Archive Creation
-echo -e "${CYAN}📦 Step 5: Homebrew Archive Creation${RESET}"
+# Homebrew Tap Sync
+echo -e "${CYAN}🍺 Step 5: Homebrew Tap Sync${RESET}"
 if [ "${SKIP_GIT_OPERATIONS:-false}" != "true" ]; then
-    echo -e "${BLUE}→ Creating Homebrew release archives...${RESET}"
-    echo ""
-    
-    if [ -f "./scripts/create-homebrew-release.sh" ]; then
-        echo -e "${YELLOW}📋 Generating Homebrew archives and Formula for v${NEW_VERSION}${RESET}"
-        
-        # Run homebrew release creation script
-        if ./scripts/create-homebrew-release.sh; then
-            echo -e "${GREEN}✅ Successfully created Homebrew archives${RESET}"
-            echo -e "${BLUE}📦 Archives created:${RESET}"
-            echo -e "${YELLOW}  • homebrew/release/terminal-jarvis-macos.tar.gz${RESET}"
-            echo -e "${YELLOW}  • homebrew/release/terminal-jarvis-linux.tar.gz${RESET}"
-            echo -e "${BLUE}📝 Formula updated: homebrew/Formula/terminal-jarvis.rb${RESET}"
-            echo ""
-            echo -e "${CYAN}📋 Next Steps for Homebrew Publishing:${RESET}"
-            echo -e "${YELLOW}  1. Upload archives to GitHub release v${NEW_VERSION}${RESET}"
-            echo -e "${YELLOW}  2. Create homebrew-terminal-jarvis GitHub repository${RESET}"
-            echo -e "${YELLOW}  3. Copy homebrew/Formula/terminal-jarvis.rb to new repo${RESET}"
-            echo -e "${YELLOW}  4. Users can then: brew tap ba-calderonmorales/terminal-jarvis && brew install terminal-jarvis${RESET}"
-        else
-            echo -e "${RED}❌ Failed to create Homebrew archives${RESET}"
-            echo -e "${YELLOW}⚠️  You can retry manually with: ./scripts/create-homebrew-release.sh${RESET}"
-        fi
+    if sync_homebrew_tap "$NEW_VERSION"; then
+        echo -e "${GREEN}✅ Successfully synced homebrew-terminal-jarvis repository${RESET}"
+        echo -e "${BLUE}🍺 Users can now install with: brew tap ba-calderonmorales/terminal-jarvis && brew install terminal-jarvis${RESET}"
     else
-        echo -e "${YELLOW}⚠️  Homebrew release script not found at ./scripts/create-homebrew-release.sh${RESET}"
-        echo -e "${BLUE}💡 Skipping Homebrew archive creation${RESET}"
+        echo -e "${YELLOW}⚠️  Homebrew tap sync failed or skipped${RESET}"
+        echo -e "${BLUE}💡 You may need to manually update the homebrew-terminal-jarvis repository${RESET}"
     fi
 else
-    echo -e "${YELLOW}→ Skipping Homebrew archive creation (NPM-only publish)...${RESET}"
+    echo -e "${YELLOW}→ Skipping Homebrew tap sync (NPM-only publish)...${RESET}"
 fi
 
 echo ""
@@ -586,24 +693,19 @@ echo -e "${BLUE}Version: ${NEW_VERSION}${RESET}"
 echo -e "${BLUE}Branch: ${CURRENT_BRANCH}${RESET}"
 echo -e "${BLUE}Git Operations: $([ "${SKIP_GIT_OPERATIONS:-false}" = "true" ] && echo "Skipped" || echo "Completed")${RESET}"
 echo -e "${BLUE}Crates.io Publishing: $([ "${SKIP_GIT_OPERATIONS:-false}" = "true" ] && echo "Skipped" || echo "Completed (check output above)")${RESET}"
-echo -e "${BLUE}Homebrew Formula: Updated to version ${NEW_VERSION}${RESET}"
+echo -e "${BLUE}Homebrew Tap Sync: $([ "${SKIP_GIT_OPERATIONS:-false}" = "true" ] && echo "Skipped" || echo "Attempted (check output above)")${RESET}"
 echo -e "${BLUE}NPM Publishing: Manual (see below)${RESET}"
 echo ""
 
 # Post-Deployment Action Items
 echo -e "${CYAN}📋 REQUIRED POST-DEPLOYMENT ACTIONS:${RESET}"
 echo ""
-echo -e "${YELLOW}1. 🍺 Complete Homebrew Integration:${RESET}"
-echo -e "${BLUE}   ./scripts/create-homebrew-release.sh${RESET}"
-echo -e "${BLUE}   → Then upload terminal-jarvis-macos.tar.gz and terminal-jarvis-linux.tar.gz${RESET}"
-echo -e "${BLUE}   → to the GitHub release at: https://github.com/BA-CalderonMorales/terminal-jarvis/releases/tag/v${NEW_VERSION}${RESET}"
-echo ""
-echo -e "${YELLOW}2. 📦 Manual NPM Publishing (due to 2FA):${RESET}"
+echo -e "${YELLOW}1. 📦 Manual NPM Publishing (due to 2FA):${RESET}"
 echo -e "${BLUE}   cd npm/terminal-jarvis${RESET}"
 echo -e "${BLUE}   npm publish --otp=<your-2fa-code>${RESET}"
 echo -e "${BLUE}   npm dist-tag add terminal-jarvis@${NEW_VERSION} stable${RESET}"
 echo ""
-echo -e "${YELLOW}3. 🔍 Verification Commands:${RESET}"
+echo -e "${YELLOW}2. 🔍 Verification Commands:${RESET}"
 echo -e "${BLUE}   npm view terminal-jarvis versions --json | tail -10${RESET}"
 echo -e "${BLUE}   npm dist-tag ls terminal-jarvis${RESET}"
 echo -e "${BLUE}   brew tap ba-calderonmorales/terminal-jarvis && brew install terminal-jarvis${RESET}"

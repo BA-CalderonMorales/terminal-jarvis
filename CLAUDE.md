@@ -23,6 +23,47 @@
 
 **VERIFICATION COMMAND**: `git log -1 --name-only` MUST include `homebrew/Formula/terminal-jarvis.rb`
 
+## Communication Guidelines
+
+### Reference Clarity Requirements
+
+**CRITICAL**: Always provide specific context when referring to numbered items, steps, or sections.
+
+**NEVER say**: "what do you mean by step 4" without clarifying which step 4
+**ALWAYS say**: "what do you mean by step 4 in the deployment workflow" or "step 4 from the previous instructions"
+
+**When providing numbered lists or procedures**:
+
+- Use descriptive headers: "## Deployment Steps" not just "Steps:"
+- Reference context explicitly: "In the above deployment workflow, step 4 means..."
+- Avoid ambiguous references like "the previous step" or "step X" without context
+
+**When user asks for clarification**:
+
+- Always quote the specific text being referenced
+- Provide the full context of where that reference appeared
+- Explain which section/workflow/process the numbered item belongs to
+
+**Example of good practice**:
+
+```
+## Homebrew Deployment Steps
+1. Update Formula version
+2. Commit changes
+3. Create GitHub release
+4. Verify archives are accessible ← When user asks about "step 4", this context is clear
+```
+
+**Example of bad practice**:
+
+```
+Steps:
+1. Do this
+2. Do that
+3. Another thing
+4. Final step ← Ambiguous when referenced later
+```
+
 ## Project Overview
 
 Terminal Jarvis is a Rust-based CLI wrapper that provides a unified interface for managing AI coding tools (claude-code, gemini-cli, qwen-code, opencode, llxprt). It's distributed through **three official channels**: NPM (Node.js ecosystem), Crates.io (Rust ecosystem), and Homebrew (macOS/Linux package manager).

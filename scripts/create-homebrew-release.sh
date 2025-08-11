@@ -1,14 +1,28 @@
 #!/bin/bash
 
-# Terminal Jarvis # Create macOS archive
-echo -e "${YELLOW}→ Creating macOS archive...${RESET}"
-cd target/release
-tar -czf "../../${RELEASE_DIR}/terminal-jarvis-mac.tar.gz" terminal-jarvis
-cd ../..
+# Terminal Jarvis #!/bin/bash
 
-# Calculate SHA256 for macOS
-MAC_SHA256=$(shasum -a 256 "${RELEASE_DIR}/terminal-jarvis-mac.tar.gz" | cut -d' ' -f1)
-echo -e "${GREEN}✅ macOS archive created: ${MAC_SHA256}${RESET}"elease Creation Script
+# DEPRECATED: create-homebrew-release.sh
+# This script is no longer needed with the new homebrew-terminal-jarvis embedded repository approach.
+
+echo "🚨 SCRIPT DEPRECATED"
+echo ""
+echo "The create-homebrew-release.sh script is no longer needed."
+echo ""
+echo "✅ NEW APPROACH: Homebrew Formula is automatically generated and synced during deployment."
+echo ""
+echo "🔄 Use these commands instead:"
+echo "   ./scripts/local-cd.sh --update-version X.X.X  # Updates version and syncs homebrew tap"
+echo "   ./scripts/local-cd.sh                        # Full deployment with homebrew sync"
+echo ""
+echo "📍 The Homebrew Formula is now maintained in:"
+echo "   homebrew-terminal-jarvis/Formula/terminal-jarvis.rb"
+echo ""
+echo "🍺 Users install with:"
+echo "   brew tap ba-calderonmorales/terminal-jarvis && brew install terminal-jarvis"
+echo ""
+
+exit 1elease Creation Script
 # Based on Federico Terzi's approach: https://federicoterzi.com/blog/how-to-publish-your-rust-project-on-homebrew/
 # 
 # This script creates release archives for Homebrew installation
