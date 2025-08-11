@@ -1,5 +1,22 @@
 # Terminal Jarvis - AI Coding Tools Wrapper
 
+## 🚨 CRITICAL DEPLOYMENT WARNING 🚨
+
+**THE #1 DEPLOYMENT FAILURE**: Homebrew Formula changes committed AFTER GitHub release creation.
+
+**NEVER DO THIS**:
+
+1. ❌ Create GitHub release first
+2. ❌ Then commit Homebrew Formula changes later
+
+**ALWAYS DO THIS**:
+
+1. ✅ Update and commit ALL changes (including Homebrew Formula)
+2. ✅ Push changes to GitHub
+3. ✅ THEN create GitHub release
+
+**This prevents broken Homebrew installations where Formula URLs don't match release assets.**
+
 ## What This Project Does
 
 Terminal Jarvis is a thin Rust wrapper that provides a unified interface for managing and running AI coding tools like claude-code, gemini-cli, qwen-code, opencode, llxprt, and codex. Think of it as a package manager and runner for AI coding assistants.
@@ -80,6 +97,15 @@ git push origin develop
 
 **CRITICAL**: Configuration changes, documentation updates, or Homebrew formula changes MUST be committed before deployment to ensure complete state is published to GitHub.
 
+**🚨 HOMEBREW FORMULA FOOTGUN PREVENTION**:
+The most common deployment failure is forgetting to commit Homebrew Formula changes before creating GitHub releases. This causes broken Homebrew installations because the Formula references release URLs that don't exist yet.
+
+**MANDATORY PRE-DEPLOYMENT CHECKLIST**:
+
+- [ ] **ALL changes committed and pushed to GitHub** - No "Changes not staged for commit"
+- [ ] **Homebrew Formula version matches other files** - Run `./scripts/local-cd.sh --check-versions`
+- [ ] **Working tree clean** - `git status` shows "nothing to commit"
+
 #### **3. CHANGELOG.md Update - ABSOLUTE REQUIREMENT**
 
 **BEFORE running ANY deployment commands**, update CHANGELOG.md:
@@ -103,21 +129,32 @@ git push origin develop
 # Update all files to next version (e.g., 0.0.48)
 ./scripts/local-cd.sh --update-version 0.0.48
 
-# Update Homebrew Formula
-sed -i 's/version ".*"/version "0.0.48"/' homebrew/Formula/terminal-jarvis.rb
+# VERIFY Homebrew Formula is updated (local-cd.sh should handle this automatically)
+./scripts/local-cd.sh --check-versions  # Must show "All versions are synchronized"
+
+# 🚨 CRITICAL: If Formula version is wrong, STOP and fix it manually:
+# sed -i 's/version ".*"/version "0.0.48"/' homebrew/Formula/terminal-jarvis.rb
 ```
 
-#### **5. Complete Deployment Workflow**
+#### **5. Complete Deployment Workflow - REVISED ORDER**
 
 ```bash
 # 1. Validate everything works
 ./scripts/local-ci.sh
 
-# 2. Deploy (commits, tags, pushes)
+# 2. 🚨 CRITICAL: Verify ALL changes are committed BEFORE deployment
+git status  # Must show "nothing to commit, working tree clean"
+
+# 3. Deploy (commits, tags, pushes) - This includes Homebrew Formula
 ./scripts/local-cd.sh
 
-# 3. 🚨 CRITICAL: Create GitHub Release for Homebrew
+# 4. 🚨 CRITICAL: Verify Homebrew Formula is committed and pushed
+# The GitHub release MUST point to committed Formula, not local changes
+git log -1 --name-only  # Should include homebrew/Formula/terminal-jarvis.rb
+
+# 5. Create GitHub Release for Homebrew (ONLY after Formula is pushed)
 # The deployment script only creates Git tags, NOT releases!
+# Homebrew formulas REQUIRE GitHub releases with attached archives
 # Homebrew formulas REQUIRE GitHub releases with attached archives
 gh release create v0.0.X \
   homebrew/release/terminal-jarvis-mac.tar.gz \
@@ -750,6 +787,25 @@ npm dist-tag ls terminal-jarvis
 
 **ALWAYS** verify these items before making any commit:
 
+### 🚨 **CRITICAL: Homebrew Formula Deployment Order**
+
+**THE #1 DEPLOYMENT FAILURE**: Homebrew Formula changes not committed before GitHub release creation.
+
+**MANDATORY SEQUENCE** (NEVER deviate from this order):
+
+1. **FIRST**: Update and commit ALL changes (including Homebrew Formula)
+2. **SECOND**: Push changes to GitHub
+3. **THIRD**: Create GitHub release with archives
+4. **NEVER**: Create release first, then try to fix Formula later
+
+**VERIFICATION COMMANDS** (run BEFORE creating any GitHub release):
+
+```bash
+git status                          # MUST show "nothing to commit, working tree clean"
+git log -1 --name-only             # MUST include homebrew/Formula/terminal-jarvis.rb
+./scripts/local-cd.sh --check-versions  # MUST show "All versions are synchronized"
+```
+
 ### Version Consistency Check:
 
 - [ ] **CHANGELOG.md updated FIRST** - MANDATORY before running local-cd.sh
@@ -763,6 +819,7 @@ npm dist-tag ls terminal-jarvis
 - [ ] `src/cli_logic.rs` uses `env!("CARGO_PKG_VERSION")` (auto-updates)
 - [ ] `README.md` version references updated in note section
 - [ ] **Version synchronization verified**: `./scripts/local-cd.sh --check-versions` passes
+- [ ] **🚨 CRITICAL: Working tree clean BEFORE release**: `git status` shows "nothing to commit"
 
 ### Documentation Updates:
 
