@@ -5,16 +5,16 @@
 class TerminalJarvis < Formula
   desc "A unified command center for AI coding tools"
   homepage "https://github.com/BA-CalderonMorales/terminal-jarvis"
-  version "0.0.51"
-  license "MIT"
   
   if OS.mac?
     url "https://github.com/BA-CalderonMorales/terminal-jarvis/releases/download/v0.0.51/terminal-jarvis-mac.tar.gz"
-    sha256 "31bc99f98819dc091bd699baa37fb2e269f8e9de40324e1d22d8cfd0f77603b9"
+    sha256 "e5d0f1153d127083ea26e75d5b3776de26351efa17f48bf24717c22ae17825a2"
   elsif OS.linux?
     url "https://github.com/BA-CalderonMorales/terminal-jarvis/releases/download/v0.0.51/terminal-jarvis-linux.tar.gz" 
-    sha256 "31bc99f98819dc091bd699baa37fb2e269f8e9de40324e1d22d8cfd0f77603b9"
+    sha256 "e5d0f1153d127083ea26e75d5b3776de26351efa17f48bf24717c22ae17825a2"
   end
+  
+  version "0.0.51"
 
   def install
     bin.install "terminal-jarvis"
