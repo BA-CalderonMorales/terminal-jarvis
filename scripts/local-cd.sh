@@ -23,18 +23,38 @@ display_version_status() {
     local cargo_version=$(grep '^version = ' Cargo.toml | sed 's/version = "\(.*\)"/\1/')
     local npm_version=$(grep '"version":' npm/terminal-jarvis/package.json | sed 's/.*"version": "\(.*\)".*/\1/')
     local ts_version=$(grep "console.log.*Terminal Jarvis v" npm/terminal-jarvis/src/index.ts | sed 's/.*Terminal Jarvis v\([0-9.]*\).*/\1/')
+    local homebrew_version=""
+    
+    if [ -f "homebrew/Formula/terminal-jarvis.rb" ]; then
+        homebrew_version=$(grep 'version "' homebrew/Formula/terminal-jarvis.rb | sed 's/.*version "\(.*\)".*/\1/')
+    fi
     
     echo -e "${BLUE}📍 Current Version Status:${RESET}"
     echo -e "${BLUE}  • Cargo.toml: ${cargo_version}${RESET}"
     echo -e "${BLUE}  • npm/terminal-jarvis/package.json: ${npm_version}${RESET}"
     echo -e "${BLUE}  • npm/terminal-jarvis/src/index.ts: ${ts_version}${RESET}"
+    if [ -n "$homebrew_version" ]; then
+        echo -e "${BLUE}  • homebrew/Formula/terminal-jarvis.rb: ${homebrew_version}${RESET}"
+    else
+        echo -e "${YELLOW}  • homebrew/Formula/terminal-jarvis.rb: NOT FOUND${RESET}"
+    fi
     echo -e "${BLUE}  • src/cli_logic.rs: Auto-synced from Cargo.toml${RESET}"
     
     local readme_versions=$(grep -o 'terminal-jarvis@[0-9.]*' README.md 2>/dev/null || echo "none")
     echo -e "${BLUE}  • README.md version refs: ${readme_versions}${RESET}"
     
-    # Check if all versions match
-    if [ "$cargo_version" = "$npm_version" ] && [ "$cargo_version" = "$ts_version" ]; then
+    # Check if all versions match (including Homebrew)
+    local all_match=true
+    if [ "$cargo_version" != "$npm_version" ] || [ "$cargo_version" != "$ts_version" ]; then
+        all_match=false
+    fi
+    
+    if [ -n "$homebrew_version" ] && [ "$cargo_version" != "$homebrew_version" ]; then
+        all_match=false
+        echo -e "${RED}🚨 CRITICAL: Homebrew Formula version mismatch!${RESET}"
+    fi
+    
+    if [ "$all_match" = true ]; then
         echo -e "${GREEN}✅ All versions are synchronized${RESET}"
     else
         echo -e "${YELLOW}⚠️  Version mismatch detected${RESET}"
@@ -69,6 +89,16 @@ update_all_versions() {
     # Update version display in TypeScript
     echo -e "${BLUE}  • Updating npm/terminal-jarvis/src/index.ts${RESET}"
     sed -i "s/console.log(\"🤖 Terminal Jarvis v[0-9.]*\")/console.log(\"🤖 Terminal Jarvis v$new_version\")/g" npm/terminal-jarvis/src/index.ts
+    
+    # Update Homebrew Formula
+    echo -e "${BLUE}  • Updating homebrew/Formula/terminal-jarvis.rb${RESET}"
+    if [ -f "homebrew/Formula/terminal-jarvis.rb" ]; then
+        # Update the version line but preserve URLs (they'll be updated during deployment)
+        sed -i "s/download\/v[0-9]\+\.[0-9]\+\.[0-9]\+\//download\/v$new_version\//" homebrew/Formula/terminal-jarvis.rb
+        echo -e "${GREEN}    ✅ Homebrew Formula updated to version ${new_version}${RESET}"
+    else
+        echo -e "${YELLOW}    ⚠️  Homebrew Formula not found${RESET}"
+    fi
     
     # Update version references in README files (if any exist)
     echo -e "${BLUE}  • Updating version references in documentation${RESET}"

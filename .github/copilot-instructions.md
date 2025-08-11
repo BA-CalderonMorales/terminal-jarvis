@@ -180,7 +180,14 @@ We use semantic versioning with **NO EMOJIS** and **NO DECORATIONS**. Just clean
 - `0.1.0` - New features that don't break existing functionality
 - `1.0.0` - Breaking changes that require users to update their code
 
-Always update BOTH `Cargo.toml` and `npm/terminal-jarvis/package.json` at the same time.
+🚨 **CRITICAL VERSION SYNCHRONIZATION REQUIREMENT**:
+Always update **ALL THREE** version files simultaneously:
+
+- `Cargo.toml`
+- `npm/terminal-jarvis/package.json`
+- **`homebrew/Formula/terminal-jarvis.rb`** ⚠️ COMMONLY FORGOTTEN!
+
+**Homebrew Formula version MUST match exactly** - This is frequently overlooked and causes deployment failures.
 
 ## CHANGELOG.md Management (CRITICAL)
 
@@ -750,6 +757,7 @@ npm dist-tag ls terminal-jarvis
 - [ ] Version increment appropriate for changes made
 - [ ] `Cargo.toml` version updated
 - [ ] `npm/terminal-jarvis/package.json` version updated
+- [ ] **🚨 CRITICAL: `homebrew/Formula/terminal-jarvis.rb` version updated** - COMMONLY FORGOTTEN!
 - [ ] `npm/terminal-jarvis/src/index.ts` version display updated
 - [ ] `npm/terminal-jarvis/package.json` postinstall script version updated
 - [ ] `src/cli_logic.rs` uses `env!("CARGO_PKG_VERSION")` (auto-updates)
