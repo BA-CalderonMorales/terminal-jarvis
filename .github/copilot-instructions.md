@@ -146,7 +146,7 @@ The most common deployment failure is forgetting to commit Homebrew Formula chan
 **MANDATORY PRE-DEPLOYMENT CHECKLIST**:
 
 - [ ] **ALL changes committed and pushed to GitHub** - No "Changes not staged for commit"
-- [ ] **Homebrew Formula version matches other files** - Run `./scripts/local-cd.sh --check-versions`
+- [ ] **Homebrew Formula version matches other files** - Run `./scripts/cicd/local-cd.sh --check-versions`
 - [ ] **Working tree clean** - `git status` shows "nothing to commit"
 
 #### **3. CHANGELOG.md Update - ABSOLUTE REQUIREMENT**
@@ -170,10 +170,10 @@ The most common deployment failure is forgetting to commit Homebrew Formula chan
 
 ```bash
 # Update all files to next version (e.g., 0.0.48)
-./scripts/local-cd.sh --update-version 0.0.48
+./scripts/cicd/local-cd.sh --update-version 0.0.48
 
 # VERIFY Homebrew Formula is updated (local-cd.sh should handle this automatically)
-./scripts/local-cd.sh --check-versions  # Must show "All versions are synchronized"
+./scripts/cicd/local-cd.sh --check-versions  # Must show "All versions are synchronized"
 
 # 🚨 CRITICAL: If Formula version is wrong, STOP and fix it manually:
 # sed -i 's/version ".*"/version "0.0.48"/' homebrew/Formula/terminal-jarvis.rb
@@ -183,13 +183,13 @@ The most common deployment failure is forgetting to commit Homebrew Formula chan
 
 ```bash
 # 1. Validate everything works
-./scripts/local-ci.sh
+./scripts/cicd/local-ci.sh
 
 # 2. 🚨 CRITICAL: Verify ALL changes are committed BEFORE deployment
 git status  # Must show "nothing to commit, working tree clean"
 
 # 3. Deploy (commits, tags, pushes) - This includes Homebrew Formula
-./scripts/local-cd.sh
+./scripts/cicd/local-cd.sh
 
 # 4. 🚨 CRITICAL: Verify Homebrew Formula is committed and pushed
 # The GitHub release MUST point to committed Formula, not local changes
@@ -212,7 +212,7 @@ curl -I https://github.com/BA-CalderonMorales/terminal-jarvis/releases/download/
 # Both should return HTTP 302 (redirect) responses
 
 # 5. Optional: Create additional Homebrew release archives if needed
-./scripts/create-homebrew-release.sh
+# Homebrew release creation integrated into CI/CD pipeline
 ```
 
 **🚨 HOMEBREW DEPLOYMENT FOOTGUN PREVENTION**:
@@ -234,16 +234,16 @@ curl -I https://github.com/BA-CalderonMorales/terminal-jarvis/releases/download/
 
 ```bash
 # Check current version status
-./scripts/local-cd.sh --check-versions
+./scripts/cicd/local-cd.sh --check-versions
 
 # Update to specific version
-./scripts/local-cd.sh --update-version X.X.X
+./scripts/cicd/local-cd.sh --update-version X.X.X
 
 # Validate before deployment
-./scripts/local-ci.sh
+./scripts/cicd/local-ci.sh
 
 # Deploy everything
-./scripts/local-cd.sh
+./scripts/cicd/local-cd.sh
 
 # 🚨 CRITICAL: Create GitHub release for Homebrew
 gh release create vX.X.X homebrew/release/terminal-jarvis-*.tar.gz --title "Release vX.X.X" --notes "..." --latest
@@ -297,7 +297,7 @@ Always update **ALL THREE** version files simultaneously:
 - **Testing Infrastructure**: Comprehensive validation scripts
 
 # 2. THEN: Run deployment
-./scripts/local-cd.sh
+./scripts/cicd/local-cd.sh
 ```
 
 ### Common Pitfalls to Avoid:
@@ -353,7 +353,10 @@ npm run sync-readme
 - No `.unwrap()` without good error handling
 - No magic numbers - use named constants
 - **No shell scripts (.sh files) in tests/ directory** - Only Rust test files (.rs) belong in tests/
-- **All shell scripts must go in scripts/ directory** - This keeps testing and scripting concerns separate
+- **All shell scripts organized in scripts/ directory structure**:
+  - `scripts/cicd/` - CI/CD automation (local-cd.sh, local-ci.sh)
+  - `scripts/tests/` - Testing and validation scripts  
+  - `scripts/utils/` - Utility scripts (generate-readme-tools.sh, etc.)
 - **No multi-line bash commands in terminal suggestions** - Always use single-line commands
 - **NO BUGFIXES WITHOUT FAILING TESTS** - Every bug must have a failing test written first
 
@@ -500,7 +503,7 @@ mod tests {
 
 ```bash
 # Create platform-specific archives for Homebrew
-./scripts/create-homebrew-release.sh
+# Homebrew release creation integrated into CI/CD pipeline
 ```
 
 This script:
@@ -545,7 +548,7 @@ end
 
 ```bash
 # 1. Test Formula validation
-./scripts/test-homebrew-formula.sh
+# Homebrew formula testing integrated into CI/CD pipeline
 
 # 2. Create local tap for testing
 mkdir -p /tmp/homebrew-test-tap/Formula
@@ -621,7 +624,7 @@ ALL distribution channels must maintain version synchronization:
 #### **Formula Syntax Errors**
 
 - **Problem**: Ruby syntax errors prevent Formula loading
-- **Solution**: Use `./scripts/test-homebrew-formula.sh` for validation
+- **Solution**: Use `# Homebrew formula testing integrated into CI/CD pipeline` for validation
 
 #### **Binary Permissions**
 
@@ -719,13 +722,13 @@ We use a controlled deployment approach with programmatic version management:
 
 ```bash
 # Check version synchronization
-./scripts/local-cd.sh --check-versions
+./scripts/cicd/local-cd.sh --check-versions
 
 # Update version programmatically (if needed)
-./scripts/local-cd.sh --update-version X.X.X
+./scripts/cicd/local-cd.sh --update-version X.X.X
 
 # Validate with CI (no commits/pushes)
-./scripts/local-ci.sh
+./scripts/cicd/local-ci.sh
 ```
 
 **Phase 2: Documentation (MANDATORY)**
@@ -738,10 +741,10 @@ We use a controlled deployment approach with programmatic version management:
 
 ```bash
 # Deploy changes (commit/tag/push)
-./scripts/local-cd.sh
+./scripts/cicd/local-cd.sh
 
 # Homebrew archives and Formula preparation
-./scripts/create-homebrew-release.sh
+# Homebrew release creation integrated into CI/CD pipeline
 # Upload archives to GitHub releases manually
 
 # Manual NPM publishing (due to 2FA)
@@ -768,7 +771,7 @@ npm dist-tag add terminal-jarvis@X.X.X stable  # optional
    - Verify new features/fixes are properly documented
    - This is **NON-NEGOTIABLE** - no CHANGELOG.md updates without docs/ review
    - **ALSO MANDATORY: Review and update README.md** - Required when CHANGELOG.md or docs/ are modified
-3. **THEN: Use Enhanced Workflow** - `./scripts/local-cd.sh --check-versions`, validation with `./scripts/local-ci.sh`, then deployment with `./scripts/local-cd.sh`
+3. **THEN: Use Enhanced Workflow** - `./scripts/cicd/local-cd.sh --check-versions`, validation with `./scripts/cicd/local-ci.sh`, then deployment with `./scripts/cicd/local-cd.sh`
 
 **Legacy One-Shot: Use Local CI/CD Script**
 
@@ -846,7 +849,7 @@ npm dist-tag ls terminal-jarvis
 ```bash
 git status                          # MUST show "nothing to commit, working tree clean"
 git log -1 --name-only             # MUST include homebrew/Formula/terminal-jarvis.rb
-./scripts/local-cd.sh --check-versions  # MUST show "All versions are synchronized"
+./scripts/cicd/local-cd.sh --check-versions  # MUST show "All versions are synchronized"
 ```
 
 ### Version Consistency Check:
@@ -861,7 +864,7 @@ git log -1 --name-only             # MUST include homebrew/Formula/terminal-jarv
 - [ ] `npm/terminal-jarvis/package.json` postinstall script version updated
 - [ ] `src/cli_logic.rs` uses `env!("CARGO_PKG_VERSION")` (auto-updates)
 - [ ] `README.md` version references updated in note section
-- [ ] **Version synchronization verified**: `./scripts/local-cd.sh --check-versions` passes
+- [ ] **Version synchronization verified**: `./scripts/cicd/local-cd.sh --check-versions` passes
 - [ ] **🚨 CRITICAL: Working tree clean BEFORE release**: `git status` shows "nothing to commit"
 
 ### Documentation Updates:
@@ -900,7 +903,7 @@ git log -1 --name-only             # MUST include homebrew/Formula/terminal-jarv
 - [ ] GitHub release created with version tag
 - [ ] Homebrew archives uploaded: `terminal-jarvis-macos.tar.gz`, `terminal-jarvis-linux.tar.gz`
 - [ ] SHA256 checksums verified in Formula match actual archives
-- [ ] **Homebrew Formula tested locally**: `./scripts/test-homebrew-formula.sh` passes
+- [ ] **Homebrew Formula tested locally**: `# Homebrew formula testing integrated into CI/CD pipeline` passes
 - [ ] Multi-platform support verified (macOS and Linux archives)
 
 ### Testing (Critical):
@@ -909,7 +912,7 @@ git log -1 --name-only             # MUST include homebrew/Formula/terminal-jarv
 - [ ] NPX functionality verified (`npx terminal-jarvis` works)
 - [ ] Binary permissions and execution tested
 - [ ] Postinstall scripts validated
-- [ ] **Enhanced workflow tested**: `./scripts/local-ci.sh` passes validation
+- [ ] **Enhanced workflow tested**: `./scripts/cicd/local-ci.sh` passes validation
 
 **Never commit without completing the full checklist!**
 
@@ -921,10 +924,10 @@ This workspace is designed for optimal AI-assisted development with the followin
 
 **Use the enhanced workflow instead of one-shot deployments:**
 
-1. **Version Management**: `./scripts/local-cd.sh --check-versions` and `--update-version`
-2. **Validation**: `./scripts/local-ci.sh` for safe testing without commits
+1. **Version Management**: `./scripts/cicd/local-cd.sh --check-versions` and `--update-version`
+2. **Validation**: `./scripts/cicd/local-ci.sh` for safe testing without commits
 3. **Documentation**: Manual CHANGELOG.md and docs/ updates with quality review
-4. **Deployment**: `./scripts/local-cd.sh` for controlled Git operations
+4. **Deployment**: `./scripts/cicd/local-cd.sh` for controlled Git operations
 5. **Publishing**: Manual NPM publishing with proper 2FA handling
 
 **Benefits:**
@@ -956,7 +959,7 @@ When conducting local continuous deployment with agents, **ALWAYS** follow this 
 
 1. **Update CHANGELOG.md FIRST** - Add entry for current version with clear change descriptions
 2. **Enhanced workflow checks for this** - Scripts will validate CHANGELOG.md is updated
-3. **Controlled approach preferred** - Use `./scripts/local-cd.sh --check-versions` then `./scripts/local-ci.sh` then `./scripts/local-cd.sh`
+3. **Controlled approach preferred** - Use `./scripts/cicd/local-cd.sh --check-versions` then `./scripts/cicd/local-ci.sh` then `./scripts/cicd/local-cd.sh`
 
 **CHANGELOG.md Entry Format:**
 
@@ -982,17 +985,17 @@ When conducting local continuous deployment with agents, **ALWAYS** follow this 
 
 ```bash
 # Check current version synchronization
-./scripts/local-cd.sh --check-versions
+./scripts/cicd/local-cd.sh --check-versions
 
 # Update version programmatically if needed
-./scripts/local-cd.sh --update-version 0.0.X
+./scripts/cicd/local-cd.sh --update-version 0.0.X
 ```
 
 **Phase 2: Validation**
 
 ```bash
 # Validate all changes without deployment
-./scripts/local-ci.sh
+./scripts/cicd/local-ci.sh
 ```
 
 **Phase 3: Documentation (MANDATORY)**
@@ -1005,7 +1008,7 @@ When conducting local continuous deployment with agents, **ALWAYS** follow this 
 
 ```bash
 # Deploy with controlled workflow
-./scripts/local-cd.sh
+./scripts/cicd/local-cd.sh
 ```
 
 **Why Enhanced Workflow Matters:**
@@ -1021,7 +1024,7 @@ When conducting local continuous deployment with agents, **ALWAYS** follow this 
 - **ALWAYS use enhanced workflow** - Prefer controlled approach over one-shot deployments
 - **NEVER skip CHANGELOG.md update** - Required before any deployment
 - **USE programmatic version management** - `--update-version` instead of manual editing
-- **VALIDATE before deployment** - Always run `./scripts/local-ci.sh` first
+- **VALIDATE before deployment** - Always run `./scripts/cicd/local-ci.sh` first
 
 ## Testing NPM Package Before Publishing
 

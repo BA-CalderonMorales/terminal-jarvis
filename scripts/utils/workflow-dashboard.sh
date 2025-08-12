@@ -40,13 +40,13 @@ echo ""
 if [ "$CURRENT_BRANCH" != "$DEFAULT_BRANCH" ]; then
     echo -e "${BLUE}1. 🧪 Local CI (Validation)${RESET}"
     echo -e "   └─ Run quality checks, tests, builds (no commits/pushes)"
-    echo -e "   └─ Command: ${YELLOW}./scripts/local-ci.sh${RESET}"
+    echo -e "   └─ Command: ${YELLOW}./scripts/cicd/local-ci.sh${RESET}"
     echo ""
     
     echo -e "${BLUE}2. 🚀 Local CD (Deployment)${RESET}"
     echo -e "   └─ Commit, tag, push, publish (run local-ci.sh first)"
     echo -e "   └─ Will ask: merge to ${DEFAULT_BRANCH} or deploy from branch"
-    echo -e "   └─ Command: ${YELLOW}./scripts/local-cd.sh${RESET}"
+    echo -e "   └─ Command: ${YELLOW}./scripts/cicd/local-cd.sh${RESET}"
     echo ""
     
     echo -e "${BLUE}3. 🔀 Manual Git Workflow${RESET}"
@@ -59,12 +59,12 @@ else
     echo ""
     echo -e "${BLUE}1. 🧪 Local CI (Validation)${RESET}"
     echo -e "   └─ Run quality checks, tests, builds (no commits/pushes)"
-    echo -e "   └─ Command: ${YELLOW}./scripts/local-ci.sh${RESET}"
+    echo -e "   └─ Command: ${YELLOW}./scripts/cicd/local-ci.sh${RESET}"
     echo ""
     
     echo -e "${BLUE}2. 🚀 Local CD (Deployment)${RESET}"
     echo -e "   └─ Version bump + commit + tag + push + publish"
-    echo -e "   └─ Command: ${YELLOW}./scripts/local-cd.sh${RESET}"
+    echo -e "   └─ Command: ${YELLOW}./scripts/cicd/local-cd.sh${RESET}"
     echo ""
 fi
 
@@ -77,14 +77,14 @@ echo -e "${CYAN}💡 Recommended Next Steps:${RESET}"
 if [ "$CURRENT_BRANCH" != "$DEFAULT_BRANCH" ]; then
     if [ $HAS_CHANGES -eq 0 ]; then
         echo -e "   ${GREEN}→ Your feature branch looks clean!${RESET}"
-        echo -e "   ${BLUE}→ Run: ${YELLOW}./scripts/local-ci.sh${RESET} ${BLUE}then ${YELLOW}./scripts/local-cd.sh${RESET}"
+        echo -e "   ${BLUE}→ Run: ${YELLOW}./scripts/cicd/local-ci.sh${RESET} ${BLUE}then ${YELLOW}./scripts/cicd/local-cd.sh${RESET}"
     else
         echo -e "   ${YELLOW}→ You have uncommitted changes${RESET}"
         echo -e "   ${BLUE}→ Commit changes first, then run CI/CD pipeline${RESET}"
     fi
 else
     echo -e "   ${GREEN}→ Ready for immediate publish from ${DEFAULT_BRANCH}${RESET}"
-    echo -e "   ${BLUE}→ Run: ${YELLOW}./scripts/local-ci.sh${RESET} ${BLUE}then ${YELLOW}./scripts/local-cd.sh${RESET}"
+    echo -e "   ${BLUE}→ Run: ${YELLOW}./scripts/cicd/local-ci.sh${RESET} ${BLUE}then ${YELLOW}./scripts/cicd/local-cd.sh${RESET}"
 fi
 
 echo ""

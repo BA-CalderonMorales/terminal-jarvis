@@ -65,7 +65,7 @@ echo -e "${BLUE}  • Binary name mappings are correct${RESET}"
 echo ""
 
 # Run our comprehensive smoke test which includes NPM package validation
-if ! ./scripts/smoke-test.sh; then
+if ! ./scripts/tests/smoke-test.sh; then
     echo -e "${RED}❌ Comprehensive tests failed!${RESET}"
     echo -e "${BLUE}This includes core functionality and NPM package validation.${RESET}"
     echo -e "${YELLOW}Please fix the issues before deploying.${RESET}"
@@ -128,4 +128,4 @@ echo -e "${YELLOW}  ✓ Release binary building${RESET}"
 echo -e "${YELLOW}  ✓ NPM package building${RESET}"
 echo -e "${YELLOW}  ✓ Version consistency${RESET}"
 echo ""
-echo -e "${BLUE}💡 Next step: Run ./scripts/local-cd.sh to deploy${RESET}"
+echo -e "${BLUE}💡 Next step: Run ./scripts/cicd/local-cd.sh to deploy${RESET}"

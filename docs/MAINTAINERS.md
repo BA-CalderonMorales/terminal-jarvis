@@ -12,7 +12,7 @@ Terminal Jarvis uses a **hybrid CI/CD approach** with automated Git operations a
 
 ```bash
 # Run validation without deployment
-./scripts/local-ci.sh
+./scripts/cicd/local-ci.sh
 ```
 
 **What local-ci.sh does:**
@@ -28,8 +28,8 @@ Terminal Jarvis uses a **hybrid CI/CD approach** with automated Git operations a
 ### 2. Git Deployment & Crates.io Publishing
 
 ```bash
-# Deploy to Git and crates.io with version management
-./scripts/local-cd.sh
+# Deploy with full automation
+./scripts/cicd/local-cd.sh
 ```
 
 **What local-cd.sh does:**
@@ -133,15 +133,75 @@ For precise control, manually update all version files first, then use **option 
 
 2. **Deploy with validation:**
    ```bash
-   ./scripts/local-cd.sh
+   ./scripts/cicd/local-cd.sh
    # Choose option 6: "Deploy current version (manually updated)"
    ```
 
 The script will validate all versions match before proceeding.
 
+## Tools Manifest System
+
+Terminal Jarvis uses a **single source of truth** approach for managing tool information to prevent drift between the README bullets and tools table.
+
+### Manifest File: `tools-manifest.toml`
+
+The root-level `tools-manifest.toml` file contains all tool definitions:
+
+```toml
+[[tools]]
+name = "claude"
+description = "Anthropic's Claude for code assistance"
+status = "stable"
+install_command = "npm install -g @anthropic-ai/claude-code"
+
+[[tools]]
+name = "opencode"
+description = "Terminal-based AI coding agent"
+status = "testing"
+install_command = "npm install -g opencode-ai@latest"
+```
+
+### Generation Script
+
+Use `scripts/utils/generate-readme-tools.sh` to generate README sections from the manifest:
+
+```bash
+# Generate both bullet list and tools table
+./scripts/utils/generate-readme-tools.sh
+```
+
+**What it generates:**
+
+- **Supported Tools bullets** - Automatically includes "(Testing)" for testing tools
+- **Tools table** - Status column, installation commands, descriptions
+- **Testing phase note** - Links testing tools to the Testing Guide
+- **Sync to NPM package** - Updates both README files automatically
+
+### Adding New Tools
+
+1. **Add to manifest**: Update `tools-manifest.toml` with new tool entry
+2. **Update code mappings**: Add tool to `src/tools.rs` and `src/services.rs`
+3. **Regenerate README**: Run `./scripts/utils/generate-readme-tools.sh`
+4. **Test locally**: Verify tool works with `terminal-jarvis list`
+
+### Status Types
+
+- **`stable`** - Production-ready, fully tested
+- **`testing`** - Looking for testers, may have issues
+- **`new`** - Recently added, stable but newer
+
+**Benefits:**
+
+- ✅ No drift between bullets and table
+- ✅ Consistent formatting across sections
+- ✅ Automatic testing phase documentation
+- ✅ Single place to update tool information
+
 ## Distribution Tags Strategy
 
 ### Tag Types
+
+```
 
 - **`latest`**: Automatically assigned when publishing (default install)
 - **`beta`**: Preview releases with newest features
