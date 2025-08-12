@@ -26,21 +26,9 @@
 
 </div>
 
-<hr>
-
 A unified command center for AI coding tools. Manage and run claude-code, gemini-cli, qwen-code, opencode, llxprt, codex, and crush from one beautiful terminal interface.
 
-<hr>
-
 <img src="screenshots/promo_image_for_readme.png" alt="Terminal Jarvis Interface" width="100%">
-
-<hr>
-
-📋 **[View all 7 supported AI tools →](docs/SOURCES.md)**
-
-🎉 **Try it instantly:** `npx terminal-jarvis`
-
-⚠️ **Known Issues**: [View current limitations and workarounds](docs/LIMITATIONS.md)
 
 ## Quick Start
 
@@ -62,30 +50,40 @@ brew tap ba-calderonmorales/terminal-jarvis
 brew install terminal-jarvis
 ```
 
-**📋 Prerequisites:**
+**Prerequisites:**
 
 - Node.js and NPM
 - **macOS users**: [Rust toolchain required](docs/INSTALLATION.md#macos-prerequisites)
 
-**📖 Full installation guide:** [docs/INSTALLATION.md](docs/INSTALLATION.md)
+**Full installation guide:** [docs/INSTALLATION.md](docs/INSTALLATION.md)
+
+## Insights
+
+**[View all 7 supported AI tools →](docs/SOURCES.md)**
+
+**Try it instantly:** `npx terminal-jarvis`
+
+**Known Issues**: [View current limitations and workarounds](docs/LIMITATIONS.md)
 
 ## What Terminal Jarvis Does
 
 Terminal Jarvis is your AI coding assistant command center:
 
-- **🤖 Interactive T.JARVIS Interface**: Beautiful ASCII art terminal UI with responsive design
-- **⚡ One-Click Tool Management**: Install, update, and run AI coding tools seamlessly
-- **� Supported Tools**:
+- **Interactive T.JARVIS Interface**: Beautiful ASCII art terminal UI with responsive design
+- **One-Click Tool Management**: Install, update, and run AI coding tools seamlessly
+- **Supported Tools**:
   - `claude` - Anthropic's Claude for code assistance
   - `gemini` - Google's Gemini CLI tool
   - `qwen` - Qwen coding assistant
-  - `opencode` - Terminal-based AI coding agent 🧪
-  - `llxprt` - Multi-provider AI coding assistant 🧪
-  - `codex` - OpenAI Codex CLI for local AI coding 🧪
-- **📊 Smart Status Detection**: See which tools are installed and ready to use
-- **� Interactive Workflows**: Guided prompts for running tools with the right arguments
+  - `opencode` - Terminal-based AI coding agent (Testing)
+  - `llxprt` - Multi-provider AI coding assistant (Testing)
+  - `codex` - OpenAI Codex CLI for local AI coding (Testing)
+  - `crush` - Charm's multi-model AI assistant with LSP (New)
+- **Smart Status Detection**: See which tools are installed and ready to use
+- **Smart Status Detection**: See which tools are installed and ready to use
+- **Interactive Workflows**: Guided prompts for running tools with the right arguments
 
-🧪 = _Looking for testers! These tools are new additions._
+BETA = _Looking for testers! These tools are new additions._
 
 ## How to Use Terminal Jarvis
 
@@ -98,11 +96,11 @@ terminal-jarvis
 
 Get the complete interface with:
 
-- 🎨 Beautiful ASCII art welcome screen
-- 📊 Real-time tool status dashboard
-- ⚡ Quick tool selection and launching
-- 🔧 Built-in management options
-- 💡 Smart guidance and tips
+- Beautiful ASCII art welcome screen
+- Real-time tool status dashboard
+- Quick tool selection and launching
+- Built-in management options
+- Smart guidance and tips
 
 ### Direct Commands
 
@@ -147,6 +145,7 @@ terminal-jarvis templates apply my-template
 
 
 
+
 \*See [limitations](docs/LIMITATIONS.md) for known issues and workarounds
 
 ## Configuration (Optional)
@@ -177,10 +176,10 @@ auto_sync = true
 
 ## Documentation
 
-- **📋 [Installation Guide](docs/INSTALLATION.md)** - Platform-specific setup instructions
-- **⚠️ [Known Limitations](docs/LIMITATIONS.md)** - Current issues and workarounds
-- **🏗️ [Architecture Guide](docs/ARCHITECTURE.md)** - Technical details and development info
-- **🧪 [Testing Guide](docs/TESTING.md)** - How to test and contribute
+- **[Installation Guide](docs/INSTALLATION.md)** - Platform-specific setup instructions
+- **[Known Limitations](docs/LIMITATIONS.md)** - Current issues and workarounds
+- **[Architecture Guide](docs/ARCHITECTURE.md)** - Technical details and development info
+- **[Testing Guide](docs/TESTING.md)** - How to test and contribute
 
 ## Contributing
 
@@ -188,17 +187,17 @@ We welcome contributions! Please join our [Discord community](https://discord.gg
 
 **Quick Start:**
 
-1. 💬 Join the [Terminal Jarvis Discord](https://discord.gg/zNuyC5uG)
-2. 🗣️ Discuss your contribution in `#features` or `#bugfix` channels
-3. 🍴 Fork the repository
-4. 🔧 Create a feature branch (`git checkout -b feature/amazing-feature`)
-5. ✅ Follow our [contribution guidelines](docs/CONTRIBUTIONS.md)
-6. 🧪 Ensure tests pass (`cargo test`)
-7. 📝 Use our PR template for submitting changes
+1. Join the [Terminal Jarvis Discord](https://discord.gg/zNuyC5uG)
+2. Discuss your contribution in `#features` or `#bugfix` channels
+3. Fork the repository
+4. Create a feature branch (`git checkout -b feature/amazing-feature`)
+5. Follow our [contribution guidelines](docs/CONTRIBUTIONS.md)
+6. Ensure tests pass (`cargo test`)
+7. Use our PR template for submitting changes
 
-**📖 Full Guide:** [docs/CONTRIBUTIONS.md](docs/CONTRIBUTIONS.md) - Complete contributor guide with coding standards, testing requirements, and development workflow.
+**Full Guide:** [docs/CONTRIBUTIONS.md](docs/CONTRIBUTIONS.md) - Complete contributor guide with coding standards, testing requirements, and development workflow.
 
-**🏗️ Technical Details:** [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) - Architecture overview and development setup.
+**Technical Details:** [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) - Architecture overview and development setup.
 
 ## Support the Project
 

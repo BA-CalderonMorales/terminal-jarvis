@@ -1,12 +1,6 @@
 # Rust
 /target/
 
-# Homebrew - DEPRECATED: Use homebrew-terminal-jarvis repository instead
-/homebrew/
-
-# Homebrew tap repository is embedded but kept separate
-homebrew-terminal-jarvis/
-
 # Release archives that might end up in root
 *.tar.gz
 

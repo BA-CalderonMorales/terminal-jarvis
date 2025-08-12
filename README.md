@@ -75,9 +75,11 @@ Terminal Jarvis is your AI coding assistant command center:
   - `claude` - Anthropic's Claude for code assistance
   - `gemini` - Google's Gemini CLI tool
   - `qwen` - Qwen coding assistant
-  - `opencode` - Terminal-based AI coding agent (BETA)
-  - `llxprt` - Multi-provider AI coding assistant (BETA)
-  - `codex` - OpenAI Codex CLI for local AI coding (BETA)
+  - `opencode` - Terminal-based AI coding agent (Testing)
+  - `llxprt` - Multi-provider AI coding assistant (Testing)
+  - `codex` - OpenAI Codex CLI for local AI coding (Testing)
+  - `crush` - Charm's multi-model AI assistant with LSP (New)
+- **Smart Status Detection**: See which tools are installed and ready to use
 - **Smart Status Detection**: See which tools are installed and ready to use
 - **Interactive Workflows**: Guided prompts for running tools with the right arguments
 
@@ -138,6 +140,7 @@ terminal-jarvis templates apply my-template
 | `llxprt`   | Multi-provider AI coding assistant        | Testing    | `npm install -g @vybestack/llxprt-code-core` |
 | `codex`    | OpenAI Codex CLI for local AI coding      | Testing    | `npm install -g @openai/codex`               |
 | `crush`    | Charm's multi-model AI assistant with LSP | New        | `npm install -g @charmland/crush`            |
+
 
 
 
