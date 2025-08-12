@@ -1,19 +1,35 @@
 # Terminal Jarvis - AI Coding Tools Wrapper
 
-## 🚨 CRITICAL DEPLOYMENT WARNING 🚨
+## CRITICAL NO-EMOJIS RULE
+
+**ABSOLUTE REQUIREMENT**: NO EMOJIS anywhere in the codebase, commits, documentation, or any output.
+
+**FORBIDDEN**: Any use of emojis in:
+- Commit messages
+- Code comments
+- Documentation files 
+- README content
+- GitHub releases
+- Terminal output
+- Log messages
+- Error messages
+
+**REASON**: Professional appearance and accessibility. Emojis create visual clutter and accessibility issues.
+
+## CRITICAL DEPLOYMENT WARNING
 
 **THE #1 DEPLOYMENT FAILURE**: Homebrew Formula changes committed AFTER GitHub release creation.
 
 **NEVER DO THIS**:
 
-1. ❌ Create GitHub release first
-2. ❌ Then commit Homebrew Formula changes later
+1. Create GitHub release first
+2. Then commit Homebrew Formula changes later
 
 **ALWAYS DO THIS**:
 
-1. ✅ Update and commit ALL changes (including Homebrew Formula)
-2. ✅ Push changes to GitHub
-3. ✅ THEN create GitHub release
+1. Update and commit ALL changes (including Homebrew Formula)
+2. Push changes to GitHub
+3. THEN create GitHub release
 
 **This prevents broken Homebrew installations where Formula URLs don't match release assets.**
 
@@ -36,21 +52,21 @@
 **ANTI-PATTERN to avoid**:
 
 ```
-❌ Steps:
+Steps:
 1. Do this
 2. Do that
 3. Another thing
-4. Final step ← User asks "what's step 4?" - ambiguous!
+4. Final step <- User asks "what's step 4?" - ambiguous!
 ```
 
 **CORRECT PATTERN**:
 
 ```
-✅ ## Homebrew Release Workflow
+## Homebrew Release Workflow
 1. Update Formula version
 2. Commit all changes
 3. Create GitHub release
-4. Verify archive accessibility ← Clear context when referenced
+4. Verify archive accessibility <- Clear context when referenced
 ```
 
 **Response Requirements when user asks "what do you mean by step X"**:
