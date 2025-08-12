@@ -288,7 +288,26 @@ git status  # MUST show "nothing to commit, working tree clean"
 ./scripts/cicd/local-cd.sh  # Creates archives, commits ALL changes (including Formula), tags, pushes to GitHub
 ```
 
-#### **Step 8: Verification - HOMEBREW FORMULA MUST BE COMMITTED**
+#### **Step 8: Generate Homebrew Release Archives**
+
+**NEW AUTOMATED APPROACH**: Use the programmatic script to create platform-specific archives:
+
+```bash
+# Generate Homebrew release archives automatically
+./scripts/utils/generate-homebrew-release.sh --stage
+git commit -m "feat: add Homebrew release archives for v0.0.48"
+git push origin develop
+```
+
+**What this script does**:
+- Builds release binary
+- Creates platform-specific archives (terminal-jarvis-mac.tar.gz, terminal-jarvis-linux.tar.gz)
+- Calculates SHA256 checksums for Formula verification
+- Automatically stages files for commit (with --stage flag)
+- Removes temporary binary to avoid repository bloat
+- Provides next steps for GitHub release creation
+
+#### **Step 9: Verification - HOMEBREW FORMULA MUST BE COMMITTED**
 
 **CRITICAL**: Verify Homebrew Formula was committed and pushed:
 
@@ -296,7 +315,7 @@ git status  # MUST show "nothing to commit, working tree clean"
 git log -1 --name-only  # MUST include homebrew/Formula/terminal-jarvis.rb
 ```
 
-#### **Step 9: GitHub Release Creation - ONLY AFTER FORMULA IS COMMITTED**
+#### **Step 10: GitHub Release Creation - ONLY AFTER ARCHIVES ARE COMMITTED**
 
 **MANDATORY**: Homebrew formulas require GitHub releases with attached archives. The deployment script only creates Git tags, not releases.
 
