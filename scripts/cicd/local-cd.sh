@@ -299,8 +299,8 @@ if [ "$1" = "--check-versions" ] || [ "$1" = "-v" ]; then
     display_version_status
     echo ""
     echo -e "${BLUE}💡 To update all versions programmatically:${RESET}"
-    echo -e "${BLUE}   ./scripts/local-cd.sh --update-version <new_version>${RESET}"
-    echo -e "${BLUE}   Example: ./scripts/local-cd.sh --update-version 0.0.46${RESET}"
+    echo -e "${BLUE}   ./scripts/cicd/local-cd.sh --update-version <new_version>${RESET}"
+    echo -e "${BLUE}   Example: ./scripts/cicd/local-cd.sh --update-version 0.0.46${RESET}"
     exit 0
 fi
 
@@ -329,8 +329,8 @@ if [ "$1" = "--update-version" ] && [ -n "$2" ]; then
     echo -e "${GREEN}✅ Version update completed!${RESET}"
     echo -e "${BLUE}💡 Next steps:${RESET}"
     echo -e "${BLUE}   1. Update CHANGELOG.md with changes for v${NEW_VERSION}${RESET}"
-    echo -e "${BLUE}   2. Run ./scripts/local-ci.sh to validate${RESET}"
-    echo -e "${BLUE}   3. Run ./scripts/local-cd.sh to deploy${RESET}"
+    echo -e "${BLUE}   2. Run ./scripts/cicd/local-ci.sh to validate${RESET}"
+    echo -e "${BLUE}   3. Run ./scripts/cicd/local-cd.sh to deploy${RESET}"
     exit 0
 fi
 
@@ -368,12 +368,12 @@ echo ""
 
 # Prerequisite check
 echo -e "${CYAN}📋 Step 0: Prerequisite Verification${RESET}"
-echo -e "${YELLOW}⚠️  Have you run ./scripts/local-ci.sh successfully?${RESET}"
+echo -e "${YELLOW}⚠️  Have you run ./scripts/cicd/local-ci.sh successfully?${RESET}"
 echo ""
 read -p "Continue with deployment? (y/N): " continue_deploy
 
 if [[ ! $continue_deploy =~ ^[Yy]$ ]]; then
-    echo -e "${YELLOW}👋 Deployment cancelled. Run ./scripts/local-ci.sh first${RESET}"
+    echo -e "${YELLOW}👋 Deployment cancelled. Run ./scripts/cicd/local-ci.sh first${RESET}"
     exit 0
 fi
 
@@ -437,7 +437,7 @@ if ! grep -q "\[${CURRENT_VERSION}\]" CHANGELOG.md; then
         2)
             echo -e "${BLUE}📝 Please update CHANGELOG.md with changes for version ${CURRENT_VERSION}${RESET}"
             echo -e "${YELLOW}Add an entry at the top following the existing format.${RESET}"
-            echo -e "${YELLOW}Then re-run this script: ./scripts/local-cd.sh${RESET}"
+            echo -e "${YELLOW}Then re-run this script: ./scripts/cicd/local-cd.sh${RESET}"
             exit 0
             ;;
         3)

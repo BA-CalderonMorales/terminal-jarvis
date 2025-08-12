@@ -9,19 +9,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- **Comprehensive Security Audit Report**: Complete security review covering all 40+ files across 6 major directories
+- **Security Audit Report**: Code and documentation review across the codebase (scope, tools, and limitations documented). If citing "40+ files across 6 directories," ensure the exact scope is stated in and linked from the report.
   - Public security audit notice for v0.0.54 release transparency
   - Systematic directory-by-directory security analysis methodology
-  - Zero exploitable vulnerabilities identified with high confidence (8.5/10)
-  - Industry-standard vulnerability assessment with OWASP Top 10 compliance
-  - Community vulnerability reporting process and ongoing security commitment
-  - Production-ready security certification for enterprise environments
+  - No critical or high-severity issues were identified during the review; see the Security Audit Report for findings, scope, limitations, and residual risk
+  - Assessment aligned to OWASP Top 10 categories; coverage and mapping documented in the report
+  - Coordinated vulnerability disclosure process and ongoing security commitment (see SECURITY.md)
+  - Enterprise readiness review completed; this is not a formal certification. See the report for scope and non-claims
 
 ### Enhanced
 
 - **Security Documentation**: Prominent maintainer recommendations for production users
   - Moved security recommendations to top of report for better visibility  
   - Clear methodology documentation showing AI-assisted comprehensive review process
+  - Explicit scope and limitations of the AI-assisted analysis, including out-of-scope areas and potential false-negative risk
   - Ongoing vulnerability management and community contribution guidelines
 
 ## [0.0.53] - 2025-08-11

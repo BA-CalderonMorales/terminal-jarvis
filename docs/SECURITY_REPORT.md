@@ -29,15 +29,14 @@ The maintainers performed a comprehensive, directory-by-directory security analy
    "/security-review the entire set of [directory] directory, every file within that directory."
    ```
 
-2. **AI-Assisted Analysis**: Claude AI was used to conduct thorough security reviews of each directory, examining:
+2. **AI-Assisted Analysis**: AI-assisted security tooling (e.g., static analyzers and LLM-based code reviewers) was used to review each directory, examining:
    - Code patterns and potential vulnerabilities
    - Dependency security and supply chain risks  
    - Input validation and injection attack vectors
    - Authentication and authorization mechanisms
    - File handling and path traversal risks
 
-3. **Executive Summary Generation**: After completing all directory reviews, Claude helped draft this executive summary to consolidate findings and provide actionable recommendations.
-
+3. **Executive Summary Generation**: After completing all directory reviews, AI tooling assisted in drafting this executive summary to consolidate findings and provide actionable recommendations.
 **Ongoing Vulnerability Management:**
 - We actively monitor for security vulnerabilities across all dependencies
 - If you identify a package that needs updating, please reach out - maintainers will prioritize security updates
