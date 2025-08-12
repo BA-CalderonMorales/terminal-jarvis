@@ -211,9 +211,14 @@ git status  # Must show "nothing to commit, working tree clean"
 # The GitHub release MUST point to committed Formula, not local changes
 git log -1 --name-only  # Should include homebrew/Formula/terminal-jarvis.rb
 
-# 5. Create GitHub Release for Homebrew (ONLY after Formula is pushed)
+# 5. Generate Homebrew Release Archives (NEW AUTOMATED APPROACH)
+# Use the programmatic script to create platform-specific archives
+./scripts/utils/generate-homebrew-release.sh --stage
+git commit -m "feat: add Homebrew release archives for v0.0.X"
+git push origin develop
+
+# 6. Create GitHub Release for Homebrew (ONLY after archives are committed)
 # The deployment script only creates Git tags, NOT releases!
-# Homebrew formulas REQUIRE GitHub releases with attached archives
 # Homebrew formulas REQUIRE GitHub releases with attached archives
 gh release create v0.0.X \
   homebrew/release/terminal-jarvis-mac.tar.gz \
@@ -222,7 +227,7 @@ gh release create v0.0.X \
   --notes "Release notes content" \
   --latest
 
-# 4. Verify Homebrew archives are accessible
+# 7. Verify Homebrew archives are accessible
 curl -I https://github.com/BA-CalderonMorales/terminal-jarvis/releases/download/v0.0.X/terminal-jarvis-mac.tar.gz
 curl -I https://github.com/BA-CalderonMorales/terminal-jarvis/releases/download/v0.0.X/terminal-jarvis-linux.tar.gz
 # Both should return HTTP 302 (redirect) responses
@@ -260,6 +265,11 @@ curl -I https://github.com/BA-CalderonMorales/terminal-jarvis/releases/download/
 
 # Deploy everything
 ./scripts/cicd/local-cd.sh
+
+# Generate Homebrew release archives
+./scripts/utils/generate-homebrew-release.sh --stage
+git commit -m "feat: add Homebrew release archives for vX.X.X"
+git push origin develop
 
 # 🚨 CRITICAL: Create GitHub release for Homebrew
 gh release create vX.X.X homebrew/release/terminal-jarvis-*.tar.gz --title "Release vX.X.X" --notes "..." --latest
