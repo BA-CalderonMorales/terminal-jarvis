@@ -5,12 +5,9 @@
 
 set -e  # Exit on any error
 
-# Colors for output
-CYAN='\033[0;96m'
-BLUE='\033[0;94m'
-GREEN='\033[0;92m'
-YELLOW='\033[0;93m'
-RESET='\033[0m'
+# Source logger
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source "$SCRIPT_DIR/../logger/logger.sh"
 
 # Get git info
 CURRENT_BRANCH=$(git branch --show-current)
@@ -19,23 +16,20 @@ HAS_CHANGES=$(git status --porcelain | wc -l)
 CURRENT_VERSION=$(grep '^version = ' Cargo.toml | sed 's/version = "\(.*\)"/\1/')
 
 clear
-echo -e "${CYAN}╔══════════════════════════════════════════════════════════════╗${RESET}"
-echo -e "${CYAN}║               🚀 Terminal Jarvis CI/CD Status                ║${RESET}"
-echo -e "${CYAN}╚══════════════════════════════════════════════════════════════╝${RESET}"
-echo ""
-echo -e "${BLUE}📍 Current Status:${RESET}"
-echo -e "   Branch: ${YELLOW}${CURRENT_BRANCH}${RESET}"
-echo -e "   Version: ${GREEN}v${CURRENT_VERSION}${RESET}"
-echo -e "   Uncommitted changes: $([ $HAS_CHANGES -eq 0 ] && echo -e "${GREEN}None${RESET}" || echo -e "${YELLOW}${HAS_CHANGES} files${RESET}")"
-echo ""
+log_header "Terminal Jarvis CI/CD Status"
+
+log_info_if_enabled "Current Status:"
+log_info_if_enabled "   Branch: ${CURRENT_BRANCH}"
+log_info_if_enabled "   Version: v${CURRENT_VERSION}"
+log_info_if_enabled "   Uncommitted changes: $([ $HAS_CHANGES -eq 0 ] && echo "None" || echo "${HAS_CHANGES} files")"
 
 # Show last commit
 LAST_COMMIT=$(git log -1 --pretty=format:"%h - %s (%cr)" 2>/dev/null || echo "No commits")
-echo -e "${BLUE}📝 Last commit:${RESET} ${LAST_COMMIT}"
-echo ""
+log_info_if_enabled "Last commit: ${LAST_COMMIT}"
 
-echo -e "${CYAN}🛠️  Available Actions:${RESET}"
-echo ""
+log_separator
+
+log_info_if_enabled "Available Actions:"
 
 if [ "$CURRENT_BRANCH" != "$DEFAULT_BRANCH" ]; then
     echo -e "${BLUE}1. 🧪 Local CI (Validation)${RESET}"
@@ -43,7 +37,7 @@ if [ "$CURRENT_BRANCH" != "$DEFAULT_BRANCH" ]; then
     echo -e "   └─ Command: ${YELLOW}./scripts/cicd/local-ci.sh${RESET}"
     echo ""
     
-    echo -e "${BLUE}2. 🚀 Local CD (Deployment)${RESET}"
+    echo -e "${BLUE}2. Local CD (Deployment)${RESET}"
     echo -e "   └─ Commit, tag, push, publish (run local-ci.sh first)"
     echo -e "   └─ Will ask: merge to ${DEFAULT_BRANCH} or deploy from branch"
     echo -e "   └─ Command: ${YELLOW}./scripts/cicd/local-cd.sh${RESET}"
@@ -55,25 +49,62 @@ if [ "$CURRENT_BRANCH" != "$DEFAULT_BRANCH" ]; then
     echo ""
     
 else
-    echo -e "${GREEN}✅ You're on the ${DEFAULT_BRANCH} branch${RESET}"
+    log_success "You're on the ${DEFAULT_BRANCH} branch"
     echo ""
-    echo -e "${BLUE}1. 🧪 Local CI (Validation)${RESET}"
-    echo -e "   └─ Run quality checks, tests, builds (no commits/pushes)"
-    echo -e "   └─ Command: ${YELLOW}./scripts/cicd/local-ci.sh${RESET}"
-    echo ""
+    log_info_if_enabled "1. Branch-specific CI (Validation)"
+    log_info_if_enabled "   └─ Run quality checks, tests, builds (no commits/pushes)"
+    log_info_if_enabled "   └─ Command: ./scripts/cicd/local-ci.sh"
     
-    echo -e "${BLUE}2. 🚀 Local CD (Deployment)${RESET}"
-    echo -e "   └─ Version bump + commit + tag + push + publish"
-    echo -e "   └─ Command: ${YELLOW}./scripts/cicd/local-cd.sh${RESET}"
-    echo ""
+    log_info_if_enabled "2. Local CD (Deployment)"
+    log_info_if_enabled "   └─ Commit, tag, push, publish (run local-ci.sh first)"
+    log_info_if_enabled "   └─ Will ask: merge to ${DEFAULT_BRANCH} or deploy from branch"
+    log_info_if_enabled "   └─ Command: ./scripts/cicd/local-cd.sh"
+    
+    log_info_if_enabled "3. Manual Git Workflow"
+    log_info_if_enabled "   └─ Switch to ${DEFAULT_BRANCH}: git checkout ${DEFAULT_BRANCH}"
+    log_info_if_enabled "   └─ Merge feature: git merge ${CURRENT_BRANCH} --no-ff"
+    
+else
+    log_success_if_enabled "You're on the ${DEFAULT_BRANCH} branch"
+    
+    log_info_if_enabled "1. Local CI (Validation)"
+    log_info_if_enabled "   └─ Run quality checks, tests, builds (no commits/pushes)"
+    log_info_if_enabled "   └─ Command: ./scripts/cicd/local-ci.sh"
+    
+    log_info_if_enabled "2. Local CD (Deployment)"
+    log_info_if_enabled "   └─ Version bump + commit + tag + push + publish"
+    log_info_if_enabled "   └─ Command: ./scripts/cicd/local-cd.sh"
 fi
 
-echo -e "${BLUE}4. 🎯 Test Interactive Mode${RESET}"
+log_info_if_enabled "4. Test Interactive Mode"
+log_info_if_enabled "   └─ See the new futuristic UI in action"
+log_info_if_enabled "   └─ Command: ./target/release/terminal-jarvis"
+
+log_separator
+
+log_info_if_enabled "Recommended Next Steps:"
+if [ "$CURRENT_BRANCH" != "$DEFAULT_BRANCH" ]; then
+    if [ $HAS_CHANGES -eq 0 ]; then
+        log_success_if_enabled "   → Your feature branch looks clean!"
+        log_info_if_enabled "   → Run: ./scripts/cicd/local-ci.sh then ./scripts/cicd/local-cd.sh"
+    else
+        log_warn_if_enabled "   → You have uncommitted changes"
+        log_info_if_enabled "   → Commit changes first, then run CI/CD pipeline"
+    fi
+else
+    log_success_if_enabled "   → Ready for immediate publish from ${DEFAULT_BRANCH}"
+    log_info_if_enabled "   → Run: ./scripts/cicd/local-ci.sh then ./scripts/cicd/local-cd.sh"
+fi
+
+log_success_if_enabled "Ready to deploy Terminal Jarvis with futuristic UX!"
+fi
+
+echo -e "${BLUE}4. Test Interactive Mode${RESET}"
 echo -e "   └─ See the new futuristic UI in action"
 echo -e "   └─ Command: ${YELLOW}./target/release/terminal-jarvis${RESET}"
 echo ""
 
-echo -e "${CYAN}💡 Recommended Next Steps:${RESET}"
+log_info_if_enabled "Recommended Next Steps:"
 if [ "$CURRENT_BRANCH" != "$DEFAULT_BRANCH" ]; then
     if [ $HAS_CHANGES -eq 0 ]; then
         echo -e "   ${GREEN}→ Your feature branch looks clean!${RESET}"

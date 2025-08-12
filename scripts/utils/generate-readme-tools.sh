@@ -5,16 +5,19 @@
 
 set -e
 
+# Source logger
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source "$SCRIPT_DIR/../logger/logger.sh"
+
 REPO_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
 MANIFEST_FILE="$REPO_ROOT/tools-manifest.toml"
 
 if [ ! -f "$MANIFEST_FILE" ]; then
-    echo "❌ Error: tools-manifest.toml not found in repo root"
+    log_error_if_enabled "Error: tools-manifest.toml not found in repo root"
     exit 1
 fi
 
-echo "🔧 Generating README tools sections from manifest..."
+log_info_if_enabled "Generating README tools sections from manifest..."
 
 # Parse TOML and generate bullet list
 generate_bullet_list() {
@@ -192,11 +195,11 @@ README_FILE="$REPO_ROOT/README.md"
 TEMP_FILE="$REPO_ROOT/README.md.tmp"
 
 if [ ! -f "$README_FILE" ]; then
-    echo "❌ Error: README.md not found"
+    log_error_if_enabled "Error: README.md not found"
     exit 1
 fi
 
-echo "🔄 Updating README.md..."
+log_info_if_enabled "Updating README.md..."
 
 # Create a backup
 cp "$README_FILE" "$TEMP_FILE"
@@ -268,7 +271,7 @@ table_replaced && !in_table {
 # Clean up
 rm "$TEMP_FILE"
 
-echo "✅ README.md updated successfully!"
+log_success_if_enabled "README.md updated successfully!"
 echo "   • Updated supported tools bullet list"
 echo "   • Updated tools table" 
 echo "   • Updated testing phase note"

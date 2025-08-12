@@ -1,15 +1,11 @@
 #!/bin/bash
 
-# Terminal Jarvis Comprehensive Test Suiterun_test "List shows all expected tools (7 total)" 
-    'TOOL_COUNT=$('$BINARY' list 2>/dev/null | grep -E "^  (claude|gemini|qwen|opencode|llxprt|codex|crush)" | wc -l); [ "$TOOL_COUNT" -eq 7 ]' Validates core functionality and NPM package integrity to prevent regressions
+# Terminal Jarvis Comprehensive Test Suite
+# Validates core functionality and NPM package integrity to prevent regressions
 
-# Colors for output
-CYAN='\033[0;96m'
-BLUE='\033[0;94m'
-GREEN='\033[0;92m'
-YELLOW='\033[0;93m'
-RED='\033[0;91m'
-RESET='\033[0m'
+# Source logger
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source "$SCRIPT_DIR/../logger/logger.sh"
 
 BINARY="./target/release/terminal-jarvis"
 TESTS_PASSED=0
@@ -20,32 +16,31 @@ run_test() {
     local test_name="$1"
     local test_command="$2"
     
-    echo -e "${BLUE}→ $test_name${RESET}"
+    log_info_if_enabled "→ $test_name"
     
     # Execute test command and capture result without exiting on failure
     if eval "$test_command" >/dev/null 2>&1; then
-        echo -e "${GREEN}  ✅ PASSED${RESET}"
+        log_success_if_enabled "  PASSED"
         ((TESTS_PASSED++))
         return 0
     else
-        echo -e "${RED}  ❌ FAILED${RESET}"
+        log_error_if_enabled "  FAILED"
         ((TESTS_FAILED++))
         return 1
     fi
 }
 
-echo -e "${CYAN}🧪 Terminal Jarvis Comprehensive Test Suite${RESET}"
-echo -e "${BLUE}Running core functionality and NPM package validation...${RESET}"
-echo ""
+log_header "Terminal Jarvis Comprehensive Test Suite"
+log_info_if_enabled "Running core functionality and NPM package validation..."
 
 # Build if needed
 if [ ! -f "$BINARY" ]; then
-    echo -e "${BLUE}Building release binary...${RESET}"
+    log_info_if_enabled "Building release binary..."
     cargo build --release
 fi
 
 # ===== CORE FUNCTIONALITY TESTS =====
-echo -e "${CYAN}� Core Functionality Tests${RESET}"
+log_info_if_enabled "Core Functionality Tests"
 
 run_test "CLI help command works" \
     "$BINARY --help > /dev/null 2>&1"
@@ -131,18 +126,17 @@ run_test "Crush config mapping exists" \
 run_test "Crush default config exists" \
     'grep -A5 "crush" src/config.rs | grep -q "charmland/crush"'
 
-echo ""
+log_separator
 
 # ===== NPM PACKAGE VALIDATION TESTS =====
-echo -e "${CYAN}📦 NPM Package Validation Tests${RESET}"
+log_info_if_enabled "NPM Package Validation Tests"
 
 # Check if NPM is available
 if ! command -v npm &> /dev/null; then
-    echo -e "${YELLOW}⚠️  NPM not available - skipping NPM package validation${RESET}"
-    echo -e "${BLUE}Install Node.js and NPM to run complete validation${RESET}"
+    log_warn_if_enabled "NPM not available - skipping NPM package validation"
+    log_info_if_enabled "Install Node.js and NPM to run complete validation"
 else
-    echo -e "${BLUE}NPM version: $(npm --version)${RESET}"
-    echo ""
+    log_info_if_enabled "NPM version: $(npm --version)"
     
     # Extract NPM package names from installation configuration
     CLAUDE_PACKAGE=$(grep -A5 'claude",' src/installation_arguments.rs | grep 'args: vec!' | sed 's/.*"\([^"]*\)".*/\1/' | tail -1)
@@ -153,8 +147,7 @@ else
     CODEX_PACKAGE=$(grep -A5 'codex",' src/installation_arguments.rs | grep 'args: vec!' | sed 's/.*"\([^"]*\)".*/\1/' | tail -1)
     CRUSH_PACKAGE=$(grep -A5 'crush",' src/installation_arguments.rs | grep 'args: vec!' | sed 's/.*"\([^"]*\)".*/\1/' | tail -1)
     
-    echo -e "${BLUE}Validating packages: $CLAUDE_PACKAGE, $GEMINI_PACKAGE, $QWEN_PACKAGE, $OPENCODE_PACKAGE, $LLXPRT_PACKAGE, $CODEX_PACKAGE, $CRUSH_PACKAGE${RESET}"
-    echo ""
+    log_info_if_enabled "Validating packages: $CLAUDE_PACKAGE, $GEMINI_PACKAGE, $QWEN_PACKAGE, $OPENCODE_PACKAGE, $LLXPRT_PACKAGE, $CODEX_PACKAGE, $CRUSH_PACKAGE"
     
     run_test "Claude package exists in NPM registry" \
         "npm view $CLAUDE_PACKAGE version > /dev/null 2>&1"
@@ -258,26 +251,26 @@ else
         "grep -q '$LLXPRT_PACKAGE' docs/TESTING.md"
 fi
 
-echo ""
-echo -e "${CYAN}📊 Test Results Summary${RESET}"
-echo -e "${GREEN}✅ Tests Passed: $TESTS_PASSED${RESET}"
-echo -e "${RED}❌ Tests Failed: $TESTS_FAILED${RESET}"
+log_separator
+log_info_if_enabled "Test Results Summary"
+log_success_if_enabled "Tests Passed: $TESTS_PASSED"
+log_error_if_enabled "Tests Failed: $TESTS_FAILED"
 
 if [ $TESTS_FAILED -eq 0 ]; then
-    echo ""
-    echo -e "${GREEN}🎉 All tests passed!${RESET}"
-    echo -e "${BLUE}Core functionality works and NPM packages are valid.${RESET}"
-    echo -e "${BLUE}The application is ready for release.${RESET}"
+    log_separator
+    log_success_if_enabled "All tests passed!"
+    log_info_if_enabled "Core functionality works and NPM packages are valid."
+    log_info_if_enabled "The application is ready for release."
     exit 0
 else
-    echo ""
-    echo -e "${RED}💥 Some tests failed!${RESET}"
-    echo -e "${YELLOW}Please fix the failing functionality before proceeding with release.${RESET}"
-    echo ""
-    echo -e "${CYAN}💡 Common fixes for NPM package issues:${RESET}"
-    echo -e "${BLUE}• Verify package names exist in NPM registry${RESET}"
-    echo -e "${BLUE}• Update installation_arguments.rs with correct package names${RESET}"
-    echo -e "${BLUE}• Ensure config.rs, terminal-jarvis.toml.example, and services.rs use same packages${RESET}"
-    echo -e "${BLUE}• Update documentation with correct package references${RESET}"
+    log_separator
+    log_error_if_enabled "Some tests failed!"
+    log_warn_if_enabled "Please fix the failing functionality before proceeding with release."
+    
+    log_info_if_enabled "Common fixes for NPM package issues:"
+    log_info_if_enabled "• Verify package names exist in NPM registry"
+    log_info_if_enabled "• Update installation_arguments.rs with correct package names"
+    log_info_if_enabled "• Ensure config.rs, terminal-jarvis.toml.example, and services.rs use same packages"
+    log_info_if_enabled "• Update documentation with correct package references"
     exit 1
 fi

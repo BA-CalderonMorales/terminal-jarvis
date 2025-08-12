@@ -2,6 +2,10 @@
 
 # Terminal Jarvis
 
+<img src="screenshots/promo_image_for_readme.png" alt="Terminal Jarvis Interface" width="100%">
+
+A unified command center for AI coding tools. Manage and run claude-code, gemini-cli, qwen-code, opencode, llxprt, codex, and crush from one beautiful terminal interface.
+
 <!-- NPM Package -->
 
 [![NPM Version](https://img.shields.io/npm/v/terminal-jarvis.svg?logo=npm&label=NPM%20Version)](https://www.npmjs.com/package/terminal-jarvis)
@@ -25,10 +29,6 @@
 [![Buy Me a Coffee](https://img.shields.io/badge/☕-Buy%20Me%20a%20Coffee-orange.svg)](https://www.buymeacoffee.com/brandoncalderonmorales)
 
 </div>
-
-A unified command center for AI coding tools. Manage and run claude-code, gemini-cli, qwen-code, opencode, llxprt, codex, and crush from one beautiful terminal interface.
-
-<img src="screenshots/promo_image_for_readme.png" alt="Terminal Jarvis Interface" width="100%">
 
 ## Quick Start
 
@@ -79,6 +79,9 @@ Terminal Jarvis is your AI coding assistant command center:
   - `llxprt` - Multi-provider AI coding assistant (Testing)
   - `codex` - OpenAI Codex CLI for local AI coding (Testing)
   - `crush` - Charm's multi-model AI assistant with LSP (New)
+- **Smart Status Detection**: See which tools are installed and ready to use
+- **Smart Status Detection**: See which tools are installed and ready to use
+- **Smart Status Detection**: See which tools are installed and ready to use
 - **Smart Status Detection**: See which tools are installed and ready to use
 - **Smart Status Detection**: See which tools are installed and ready to use
 - **Interactive Workflows**: Guided prompts for running tools with the right arguments
@@ -140,6 +143,9 @@ terminal-jarvis templates apply my-template
 | `llxprt`   | Multi-provider AI coding assistant        | Testing    | `npm install -g @vybestack/llxprt-code-core` |
 | `codex`    | OpenAI Codex CLI for local AI coding      | Testing    | `npm install -g @openai/codex`               |
 | `crush`    | Charm's multi-model AI assistant with LSP | New        | `npm install -g @charmland/crush`            |
+
+
+
 
 
 
