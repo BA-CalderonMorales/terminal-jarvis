@@ -6,13 +6,9 @@
 
 set -e  # Exit on any error
 
-# Colors for output
-CYAN='\033[0;96m'
-BLUE='\033[0;94m'
-GREEN='\033[0;92m'
-YELLOW='\033[0;93m'
-RED='\033[0;91m'
-RESET='\033[0m'
+# Source logger
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source "$SCRIPT_DIR/../logger/logger.sh"
 
 # Get current branch
 CURRENT_BRANCH=$(git branch --show-current)
@@ -29,19 +25,19 @@ display_version_status() {
         homebrew_version=$(grep 'version "' homebrew-terminal-jarvis/Formula/terminal-jarvis.rb | sed 's/.*version "\(.*\)".*/\1/')
     fi
     
-    echo -e "${BLUE}📍 Current Version Status:${RESET}"
+    log_info_if_enabled "Current Version Status:"
     echo -e "${BLUE}  • Cargo.toml: ${cargo_version}${RESET}"
-    echo -e "${BLUE}  • npm/terminal-jarvis/package.json: ${npm_version}${RESET}"
-    echo -e "${BLUE}  • npm/terminal-jarvis/src/index.ts: ${ts_version}${RESET}"
+    log_info_if_enabled "  • npm/terminal-jarvis/package.json: ${npm_version}"
+    log_info_if_enabled "  • npm/terminal-jarvis/src/index.ts: ${ts_version}"
     if [ -n "$homebrew_version" ]; then
-        echo -e "${BLUE}  • homebrew-terminal-jarvis/Formula/terminal-jarvis.rb: ${homebrew_version}${RESET}"
+        log_info_if_enabled "  • homebrew-terminal-jarvis/Formula/terminal-jarvis.rb: ${homebrew_version}"
     else
-        echo -e "${YELLOW}  • homebrew-terminal-jarvis/Formula/terminal-jarvis.rb: NOT FOUND${RESET}"
+        log_warn_if_enabled "  • homebrew-terminal-jarvis/Formula/terminal-jarvis.rb: NOT FOUND"
     fi
-    echo -e "${BLUE}  • src/cli_logic.rs: Auto-synced from Cargo.toml${RESET}"
+    log_info_if_enabled "  • src/cli_logic.rs: Auto-synced from Cargo.toml"
     
     local readme_versions=$(grep -o 'terminal-jarvis@[0-9.]*' README.md 2>/dev/null || echo "none")
-    echo -e "${BLUE}  • README.md version refs: ${readme_versions}${RESET}"
+    log_info_if_enabled "  • README.md version refs: ${readme_versions}"
     
     # Check if all versions match (including Homebrew)
     local all_match=true
@@ -51,13 +47,13 @@ display_version_status() {
     
     if [ -n "$homebrew_version" ] && [ "$cargo_version" != "$homebrew_version" ]; then
         all_match=false
-        echo -e "${RED}🚨 CRITICAL: Homebrew Formula version mismatch!${RESET}"
+        log_error_if_enabled "CRITICAL: Homebrew Formula version mismatch!"
     fi
     
     if [ "$all_match" = true ]; then
-        echo -e "${GREEN}✅ All versions are synchronized${RESET}"
+        log_success_if_enabled "All versions are synchronized"
     else
-        echo -e "${YELLOW}⚠️  Version mismatch detected${RESET}"
+        log_warn_if_enabled "Version mismatch detected"
     fi
 }
 
@@ -72,45 +68,45 @@ update_all_versions() {
     local current_version="$2"
     
     if [ -z "$new_version" ] || [ -z "$current_version" ]; then
-        echo -e "${RED}❌ Error: update_all_versions requires new_version and current_version parameters${RESET}"
+        log_error_if_enabled "Error: update_all_versions requires new_version and current_version parameters"
         return 1
     fi
     
-    echo -e "${BLUE}🔄 Updating all version references from ${current_version} to ${new_version}...${RESET}"
+    log_info_if_enabled "Updating all version references from ${current_version} to ${new_version}..."
     
     # Update Cargo.toml
-    echo -e "${BLUE}  • Updating Cargo.toml${RESET}"
+    log_info_if_enabled "  • Updating Cargo.toml"
     sed -i "s/^version = \".*\"/version = \"$new_version\"/" Cargo.toml
     
     # Update NPM package.json
-    echo -e "${BLUE}  • Updating npm/terminal-jarvis/package.json${RESET}"
+    log_info_if_enabled "  • Updating npm/terminal-jarvis/package.json"
     sed -i "s/\"version\": \".*\"/\"version\": \"$new_version\"/" npm/terminal-jarvis/package.json
     
-    # Update version display in TypeScript
-    echo -e "${BLUE}  • Updating npm/terminal-jarvis/src/index.ts${RESET}"
-    sed -i "s/console.log(\"🤖 Terminal Jarvis v[0-9.]*\")/console.log(\"🤖 Terminal Jarvis v$new_version\")/g" npm/terminal-jarvis/src/index.ts
+    # Update version display in TypeScript (removing emoji)
+    log_info_if_enabled "  • Updating npm/terminal-jarvis/src/index.ts"
+    sed -i "s/console.log(\"🤖 Terminal Jarvis v[0-9.]*\")/console.log(\"Terminal Jarvis v$new_version\")/g" npm/terminal-jarvis/src/index.ts
     
     # Update version references in README files (if any exist)
-    echo -e "${BLUE}  • Updating version references in documentation${RESET}"
-    sed -i "s/terminal-jarvis@[0-9]\+\.[0-9]\+\.[0-9]\+/terminal-jarvis@$new_version/g" README.md 2>/dev/null || echo -e "${BLUE}    (No version references found in README.md)${RESET}"
-    sed -i "s/terminal-jarvis@[0-9]\+\.[0-9]\+\.[0-9]\+/terminal-jarvis@$new_version/g" npm/terminal-jarvis/README.md 2>/dev/null || echo -e "${BLUE}    (No version references found in npm README.md)${RESET}"
+    log_info_if_enabled "  • Updating version references in documentation"
+    sed -i "s/terminal-jarvis@[0-9]\+\.[0-9]\+\.[0-9]\+/terminal-jarvis@$new_version/g" README.md 2>/dev/null || log_info_if_enabled "    (No version references found in README.md)"
+    sed -i "s/terminal-jarvis@[0-9]\+\.[0-9]\+\.[0-9]\+/terminal-jarvis@$new_version/g" npm/terminal-jarvis/README.md 2>/dev/null || log_info_if_enabled "    (No version references found in npm README.md)"
     
     # Note: src/cli_logic.rs uses env!("CARGO_PKG_VERSION") so it auto-updates from Cargo.toml
-    echo -e "${BLUE}  • src/cli_logic.rs: Auto-syncs from Cargo.toml via env!(\"CARGO_PKG_VERSION\")${RESET}"
+    log_info_if_enabled "  • src/cli_logic.rs: Auto-syncs from Cargo.toml via env!(\"CARGO_PKG_VERSION\")"
     
     # Sync homebrew-terminal-jarvis if it exists (but don't fail if it doesn't)
-    echo -e "${BLUE}  • Checking homebrew-terminal-jarvis sync...${RESET}"
+    log_info_if_enabled "  • Checking homebrew-terminal-jarvis sync..."
     if [ -d "homebrew-terminal-jarvis" ]; then
         if sync_homebrew_tap "$new_version"; then
-            echo -e "${GREEN}    ✅ Homebrew tap synchronized${RESET}"
+            log_success_if_enabled "    Homebrew tap synchronized"
         else
-            echo -e "${YELLOW}    ⚠️  Homebrew tap sync failed (continuing anyway)${RESET}"
+            log_warn_if_enabled "    Homebrew tap sync failed (continuing anyway)"
         fi
     else
-        echo -e "${BLUE}    (homebrew-terminal-jarvis directory not found - skipping)${RESET}"
+        log_info_if_enabled "    (homebrew-terminal-jarvis directory not found - skipping)"
     fi
     
-    echo -e "${GREEN}✅ All version references updated to ${new_version}${RESET}"
+    log_success_if_enabled "All version references updated to ${new_version}"
 }
 
 # Function to suggest next version based on current version
@@ -122,31 +118,31 @@ suggest_next_version() {
     local minor_version="${VERSION_PARTS[0]}.$((VERSION_PARTS[1] + 1)).0"
     local major_version="$((VERSION_PARTS[0] + 1)).0.0"
     
-    echo -e "${BLUE}💡 Suggested next versions based on ${current_version}:${RESET}"
-    echo -e "${BLUE}  • Patch (${patch_version}): Bug fixes, docs, small features${RESET}"
-    echo -e "${BLUE}  • Minor (${minor_version}): New features, no breaking changes${RESET}"
-    echo -e "${BLUE}  • Major (${major_version}): Breaking changes${RESET}"
+    log_info_if_enabled "Suggested next versions based on ${current_version}:"
+    log_info_if_enabled "  • Patch (${patch_version}): Bug fixes, docs, small features"
+    log_info_if_enabled "  • Minor (${minor_version}): New features, no breaking changes"
+    log_info_if_enabled "  • Major (${major_version}): Breaking changes"
 }
 
 # Function to check if CHANGELOG.md needs updating for next version
 check_changelog_readiness() {
     local current_version="$1"
     
-    echo -e "${BLUE}📋 CHANGELOG.md Status Check:${RESET}"
+    log_info_if_enabled "CHANGELOG.md Status Check:"
     if grep -q "\[${current_version}\]" CHANGELOG.md; then
-        echo -e "${GREEN}✅ CHANGELOG.md has entry for version ${current_version}${RESET}"
+        log_success_if_enabled "CHANGELOG.md has entry for version ${current_version}"
         return 0
     else
-        echo -e "${YELLOW}⚠️  CHANGELOG.md missing entry for version ${current_version}${RESET}"
-        echo -e "${BLUE}   Add this entry to CHANGELOG.md:${RESET}"
+        log_warn_if_enabled "CHANGELOG.md missing entry for version ${current_version}"
+        log_info_if_enabled "   Add this entry to CHANGELOG.md:"
         echo ""
-        echo -e "${YELLOW}## [${current_version}] - $(date +%Y-%m-%d)${RESET}"
+        log_warn_if_enabled "## [${current_version}] - $(date +%Y-%m-%d)"
         echo ""
-        echo -e "${YELLOW}### Added${RESET}"
-        echo -e "${YELLOW}- New feature descriptions${RESET}"
+        log_warn_if_enabled "### Added"
+        log_warn_if_enabled "- New feature descriptions"
         echo ""
-        echo -e "${YELLOW}### Enhanced${RESET}"
-        echo -e "${YELLOW}- Improvements and optimizations${RESET}"
+        log_warn_if_enabled "### Enhanced"
+        log_warn_if_enabled "- Improvements and optimizations"
         echo ""
         return 1
     fi
@@ -156,12 +152,12 @@ check_changelog_readiness() {
 sync_homebrew_tap() {
     local new_version="$1"
     
-    echo -e "${BLUE}🍺 Syncing Homebrew Tap Repository...${RESET}"
+    log_info_if_enabled "Syncing Homebrew Tap Repository..."
     
     # Check if homebrew-terminal-jarvis directory exists
     if [ ! -d "homebrew-terminal-jarvis" ]; then
-        echo -e "${YELLOW}⚠️  homebrew-terminal-jarvis directory not found${RESET}"
-        echo -e "${BLUE}💡 Run: git clone https://github.com/BA-CalderonMorales/homebrew-terminal-jarvis.git${RESET}"
+        log_warn_if_enabled "homebrew-terminal-jarvis directory not found"
+        log_info_if_enabled "Run: git clone https://github.com/BA-CalderonMorales/homebrew-terminal-jarvis.git"
         return 1
     fi
     
@@ -236,11 +232,11 @@ Terminal Jarvis is a unified command center for AI coding tools. It provides sea
 
 ## Features
 
-- 🤖 Interactive T.JARVIS Interface with ASCII art
-- ⚡ One-click tool installation and updates
-- 📊 Real-time tool status dashboard
-- 🔧 Built-in management options
-- 💡 Smart guidance and workflows
+- Interactive T.JARVIS Interface with ASCII art
+- One-click tool installation and updates
+- Real-time tool status dashboard
+- Built-in management options
+- Smart guidance and workflows
 
 ## Alternative Installation Methods
 
@@ -280,10 +276,10 @@ EOL
     # Push changes
     echo -e "${BLUE}  • Pushing changes to GitHub${RESET}"
     if git push origin develop; then
-        echo -e "${GREEN}✅ Successfully synced homebrew-terminal-jarvis repository${RESET}"
+        log_success "Successfully synced homebrew-terminal-jarvis repository"
     else
-        echo -e "${RED}❌ Failed to push homebrew-terminal-jarvis changes${RESET}"
-        echo -e "${BLUE}💡 You may need to push manually or check GitHub token permissions${RESET}"
+        log_error "Failed to push homebrew-terminal-jarvis changes"
+        log_info_if_enabled "You may need to push manually or check GitHub token permissions"
         cd ..
         return 1
     fi
@@ -294,11 +290,11 @@ EOL
 
 # Handle standalone version check command
 if [ "$1" = "--check-versions" ] || [ "$1" = "-v" ]; then
-    echo -e "${CYAN}🔍 Terminal Jarvis Version Status Check${RESET}"
+    log_header "Terminal Jarvis Version Status Check"
     echo ""
     display_version_status
     echo ""
-    echo -e "${BLUE}💡 To update all versions programmatically:${RESET}"
+    log_info_if_enabled "To update all versions programmatically:"
     echo -e "${BLUE}   ./scripts/cicd/local-cd.sh --update-version <new_version>${RESET}"
     echo -e "${BLUE}   Example: ./scripts/cicd/local-cd.sh --update-version 0.0.46${RESET}"
     exit 0
@@ -306,7 +302,7 @@ fi
 
 # Handle standalone version update command
 if [ "$1" = "--update-version" ] && [ -n "$2" ]; then
-    echo -e "${CYAN}🔄 Terminal Jarvis Programmatic Version Update${RESET}"
+    log_header "Terminal Jarvis Programmatic Version Update"
     echo ""
     
     # Get current version
@@ -318,7 +314,7 @@ if [ "$1" = "--update-version" ] && [ -n "$2" ]; then
     
     # Validate version format
     if [[ ! "$NEW_VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
-        echo -e "${RED}❌ Invalid version format. Use semantic versioning (e.g., 0.0.46)${RESET}"
+        log_error "Invalid version format. Use semantic versioning (e.g., 0.0.46)"
         exit 1
     fi
     
@@ -326,15 +322,15 @@ if [ "$1" = "--update-version" ] && [ -n "$2" ]; then
     update_all_versions "$NEW_VERSION" "$CURRENT_VERSION"
     
     echo ""
-    echo -e "${GREEN}✅ Version update completed!${RESET}"
-    echo -e "${BLUE}💡 Next steps:${RESET}"
+    log_success "Version update completed!"
+    log_info_if_enabled "Next steps:"
     echo -e "${BLUE}   1. Update CHANGELOG.md with changes for v${NEW_VERSION}${RESET}"
     echo -e "${BLUE}   2. Run ./scripts/cicd/local-ci.sh to validate${RESET}"
     echo -e "${BLUE}   3. Run ./scripts/cicd/local-cd.sh to deploy${RESET}"
     exit 0
 fi
 
-echo -e "${CYAN}🚀 Terminal Jarvis Local CD (Deployment) Pipeline${RESET}"
+log_header "Terminal Jarvis Local CD (Deployment) Pipeline"
 echo -e "${BLUE}Current branch: ${CURRENT_BRANCH}${RESET}"
 echo -e "${YELLOW}This will commit, tag, push to GitHub, publish to crates.io, sync homebrew tap, and prepare for NPM publishing${RESET}"
 echo ""
@@ -346,7 +342,7 @@ echo -e "${BLUE}• Version caching feature: docs/VERSION_CACHING.md${RESET}"
 echo ""
 
 # Pre-flight checks
-echo -e "${CYAN}🔍 Pre-flight Deployment Readiness Check${RESET}"
+log_header "Pre-flight Deployment Readiness Check"
 CANONICAL_VERSION=$(get_canonical_version)
 
 # Check if we need to suggest a version bump
@@ -358,7 +354,7 @@ IFS='.' read -ra VERSION_PARTS <<< "$CANONICAL_VERSION"
 SUGGESTED_PATCH="${VERSION_PARTS[0]}.${VERSION_PARTS[1]}.$((VERSION_PARTS[2] + 1))"
 
 if ! check_changelog_readiness "$SUGGESTED_PATCH"; then
-    echo -e "${YELLOW}💡 Consider updating CHANGELOG.md for version ${SUGGESTED_PATCH} before proceeding${RESET}"
+    log_info_if_enabled "Consider updating CHANGELOG.md for version ${SUGGESTED_PATCH} before proceeding"
 fi
 echo ""
 
@@ -368,7 +364,7 @@ echo ""
 
 # Prerequisite check
 echo -e "${CYAN}📋 Step 0: Prerequisite Verification${RESET}"
-echo -e "${YELLOW}⚠️  Have you run ./scripts/cicd/local-ci.sh successfully?${RESET}"
+log_warn "Have you run ./scripts/cicd/local-ci.sh successfully?"
 echo ""
 read -p "Continue with deployment? (y/N): " continue_deploy
 
@@ -380,7 +376,7 @@ fi
 echo ""
 
 # CHANGELOG.md Check
-echo -e "${CYAN}📝 Step 1: CHANGELOG.md Verification${RESET}"
+log_section "Step 1: CHANGELOG.md Verification"
 
 # Get current version from Cargo.toml
 CURRENT_VERSION=$(grep '^version = ' Cargo.toml | sed 's/version = "\(.*\)"/\1/')
@@ -388,7 +384,7 @@ echo -e "${BLUE}Current version in Cargo.toml: ${CURRENT_VERSION}${RESET}"
 
 # Check if CHANGELOG.md has entry for current version
 if ! grep -q "\[${CURRENT_VERSION}\]" CHANGELOG.md; then
-    echo -e "${YELLOW}⚠️  CHANGELOG.md does not contain an entry for version ${CURRENT_VERSION}${RESET}"
+    log_warn "CHANGELOG.md does not contain an entry for version ${CURRENT_VERSION}"
     echo ""
     echo -e "${BLUE}The CHANGELOG.md should be updated BEFORE deployment.${RESET}"
     echo -e "${BLUE}This ensures proper documentation of changes for the release.${RESET}"
@@ -427,9 +423,9 @@ if ! grep -q "\[${CURRENT_VERSION}\]" CHANGELOG.md; then
             
             # Check again if the entry was added
             if grep -q "\[${CURRENT_VERSION}\]" CHANGELOG.md; then
-                echo -e "${GREEN}✅ CHANGELOG.md updated successfully!${RESET}"
+                log_success "CHANGELOG.md updated successfully!"
             else
-                echo -e "${RED}❌ No entry for version ${CURRENT_VERSION} found in CHANGELOG.md${RESET}"
+                log_error "No entry for version ${CURRENT_VERSION} found in CHANGELOG.md"
                 echo -e "${YELLOW}Please add the entry and re-run this script.${RESET}"
                 exit 1
             fi
@@ -441,7 +437,7 @@ if ! grep -q "\[${CURRENT_VERSION}\]" CHANGELOG.md; then
             exit 0
             ;;
         3)
-            echo -e "${YELLOW}⚠️  Continuing without CHANGELOG.md update${RESET}"
+            log_warn "Continuing without CHANGELOG.md update"
             echo -e "${RED}This is not recommended for proper release documentation.${RESET}"
             ;;
         4)
@@ -449,12 +445,12 @@ if ! grep -q "\[${CURRENT_VERSION}\]" CHANGELOG.md; then
             exit 0
             ;;
         *)
-            echo -e "${RED}❌ Invalid choice. Exiting.${RESET}"
+            log_error "Invalid choice. Exiting."
             exit 1
             ;;
     esac
 else
-    echo -e "${GREEN}✅ CHANGELOG.md contains entry for version ${CURRENT_VERSION}${RESET}"
+    log_success "CHANGELOG.md contains entry for version ${CURRENT_VERSION}"
 fi
 
 echo ""
@@ -484,28 +480,28 @@ if [ "$CURRENT_BRANCH" != "$DEFAULT_BRANCH" ]; then
             git pull origin $DEFAULT_BRANCH
             git merge $CURRENT_BRANCH --no-ff -m "feat: merge ${CURRENT_BRANCH} - futuristic UX improvements"
             
-            echo -e "${GREEN}✅ Successfully merged into ${DEFAULT_BRANCH}!${RESET}"
+            log_success "Successfully merged into ${DEFAULT_BRANCH}!"
             ;;
         2)
             echo -e "${BLUE}📌 Deploying from feature branch: ${CURRENT_BRANCH}${RESET}"
             ;;
         3)
-            echo -e "${YELLOW}❌ Cancelled by user${RESET}"
+            log_warn "Cancelled by user"
             exit 0
             ;;
         *)
-            echo -e "${RED}❌ Invalid choice. Exiting.${RESET}"
+            log_error "Invalid choice. Exiting."
             exit 1
             ;;
     esac
 else
-    echo -e "${GREEN}✅ Already on ${DEFAULT_BRANCH} branch${RESET}"
+    log_success "Already on ${DEFAULT_BRANCH} branch"
 fi
 
 echo ""
 
 # Version Management
-echo -e "${CYAN}🚀 Step 2: Version Management${RESET}"
+log_section "Step 2: Version Management"
 
 # Get current version
 CURRENT_VERSION=$(grep '^version = ' Cargo.toml | sed 's/version = "\(.*\)"/\1/')
@@ -556,7 +552,7 @@ case $version_choice in
         MANUAL_VERSION_UPDATE=true
         
         # Verify version consistency before proceeding
-        echo -e "${YELLOW}🔍 Verifying version consistency across files...${RESET}"
+        log_warn "Verifying version consistency across files..."
         
         NPM_VERSION=$(grep '"version":' npm/terminal-jarvis/package.json | sed 's/.*"version": "\(.*\)".*/\1/')
         TS_VERSION=$(grep "console.log.*Terminal Jarvis v" npm/terminal-jarvis/src/index.ts | sed 's/.*Terminal Jarvis v\([0-9.]*\).*/\1/')
@@ -567,10 +563,10 @@ case $version_choice in
         echo -e "${BLUE}  cli_logic.rs: Uses env!(\"CARGO_PKG_VERSION\") - auto-synced${RESET}"
         
         if [ "$CURRENT_VERSION" = "$NPM_VERSION" ] && [ "$CURRENT_VERSION" = "$TS_VERSION" ]; then
-            echo -e "${GREEN}✅ All versions are synchronized${RESET}"
+            log_success "All versions are synchronized"
             echo -e "${BLUE}→ Will proceed with commit, tag v${CURRENT_VERSION}, and deployment${RESET}"
         else
-            echo -e "${RED}❌ Version mismatch detected!${RESET}"
+            log_error "Version mismatch detected!"
             echo -e "${YELLOW}Expected all files to have version: ${CURRENT_VERSION}${RESET}"
             echo -e "${YELLOW}Please update all version references manually before using this option.${RESET}"
             echo ""
@@ -583,7 +579,7 @@ case $version_choice in
         fi
         ;;
     *)
-        echo -e "${RED}❌ Invalid choice. Using current version.${RESET}"
+        log_error "Invalid choice. Using current version."
         NEW_VERSION=$CURRENT_VERSION
         ;;
 esac
@@ -591,7 +587,7 @@ esac
 if [ "$NEW_VERSION" != "$CURRENT_VERSION" ] && [ "${MANUAL_VERSION_UPDATE:-false}" != "true" ]; then
     echo -e "${BLUE}→ Updating version to ${NEW_VERSION}...${RESET}"
     update_all_versions "$NEW_VERSION" "$CURRENT_VERSION"
-    echo -e "${GREEN}✅ Version updated to ${NEW_VERSION} in all locations${RESET}"
+    log_success "Version updated to ${NEW_VERSION} in all locations"
 fi
 
 # Rebuild with new version
@@ -602,7 +598,7 @@ cd npm/terminal-jarvis && npm run build && cd ../..
 echo ""
 
 # Git Operations
-echo -e "${CYAN}📦 Step 3: Git Operations${RESET}"
+log_section "Step 3: Git Operations"
 
 if [ "${SKIP_GIT_OPERATIONS:-false}" != "true" ]; then
     echo -e "${BLUE}→ Committing changes...${RESET}"
@@ -616,7 +612,7 @@ if [ "${SKIP_GIT_OPERATIONS:-false}" != "true" ]; then
     git push origin $CURRENT_BRANCH
     git push origin "v${NEW_VERSION}"
     
-    echo -e "${GREEN}✅ Pushed to GitHub with tag v${NEW_VERSION}${RESET}"
+    log_success "Pushed to GitHub with tag v${NEW_VERSION}"
 else
     echo -e "${YELLOW}→ Skipping git operations (NPM-only publish)...${RESET}"
 fi
@@ -624,7 +620,7 @@ fi
 echo ""
 
 # Crates.io Publishing
-echo -e "${CYAN}📦 Step 4: Crates.io Publishing${RESET}"
+log_section "Step 4: Crates.io Publishing"
 if [ "${SKIP_GIT_OPERATIONS:-false}" != "true" ]; then
     echo -e "${BLUE}→ Publishing to crates.io...${RESET}"
     echo ""
@@ -632,20 +628,20 @@ if [ "${SKIP_GIT_OPERATIONS:-false}" != "true" ]; then
     
     # Check if logged in to crates.io
     if ! cargo login --registry crates-io --help >/dev/null 2>&1; then
-        echo -e "${RED}❌ Error: cargo login not available. Please ensure Rust/Cargo is installed.${RESET}"
+        log_error "Error: cargo login not available. Please ensure Rust/Cargo is installed."
         exit 1
     fi
     
     # Publish to crates.io
     if cargo publish; then
-        echo -e "${GREEN}✅ Successfully published to crates.io${RESET}"
-        echo -e "${BLUE}📦 Crate available at: https://crates.io/crates/terminal-jarvis${RESET}"
+        log_success "Successfully published to crates.io"
+        echo -e "${BLUE}Crate available at: https://crates.io/crates/terminal-jarvis${RESET}"
         echo -e "${YELLOW}Users can now install with: cargo install terminal-jarvis${RESET}"
     else
-        echo -e "${RED}❌ Failed to publish to crates.io${RESET}"
-        echo -e "${YELLOW}⚠️  You may need to login first: cargo login${RESET}"
-        echo -e "${YELLOW}⚠️  Or check for version conflicts or other publishing issues${RESET}"
-        echo -e "${BLUE}💡 You can retry manually with: cargo publish${RESET}"
+        log_error "Failed to publish to crates.io"
+        log_warn "You may need to login first: cargo login"
+        log_warn "Or check for version conflicts or other publishing issues"
+        log_info_if_enabled "You can retry manually with: cargo publish"
     fi
 else
     echo -e "${YELLOW}→ Skipping crates.io publishing (NPM-only publish)...${RESET}"
@@ -656,12 +652,25 @@ echo ""
 # Homebrew Tap Sync
 echo -e "${CYAN}🍺 Step 5: Homebrew Tap Sync${RESET}"
 if [ "${SKIP_GIT_OPERATIONS:-false}" != "true" ]; then
+    # Generate Homebrew release archives first
+    echo -e "${BLUE}→ Generating Homebrew release archives...${RESET}"
+    if ./scripts/utils/generate-homebrew-release.sh --stage; then
+        echo -e "${BLUE}→ Committing Homebrew release archives...${RESET}"
+        git add homebrew/release/terminal-jarvis-*.tar.gz
+        git commit -m "feat: add Homebrew release archives for v${NEW_VERSION}" || echo "No new archives to commit"
+        git push origin $(git branch --show-current)
+    else
+        log_warn "Homebrew release archive generation failed"
+        log_info_if_enabled "Archives may need to be created manually for Homebrew formula"
+    fi
+    
+    # Now sync the homebrew tap
     if sync_homebrew_tap "$NEW_VERSION"; then
-        echo -e "${GREEN}✅ Successfully synced homebrew-terminal-jarvis repository${RESET}"
+        log_success "Successfully synced homebrew-terminal-jarvis repository"
         echo -e "${BLUE}🍺 Users can now install with: brew tap ba-calderonmorales/terminal-jarvis && brew install terminal-jarvis${RESET}"
     else
-        echo -e "${YELLOW}⚠️  Homebrew tap sync failed or skipped${RESET}"
-        echo -e "${BLUE}💡 You may need to manually update the homebrew-terminal-jarvis repository${RESET}"
+        log_warn "Homebrew tap sync failed or skipped"
+        log_info_if_enabled "You may need to manually update the homebrew-terminal-jarvis repository"
     fi
 else
     echo -e "${YELLOW}→ Skipping Homebrew tap sync (NPM-only publish)...${RESET}"
@@ -670,7 +679,7 @@ fi
 echo ""
 
 # NPM Publishing
-echo -e "${CYAN}📦 Step 6: NPM Publishing${RESET}"
+log_section "Step 6: NPM Publishing"
 echo -e "${BLUE}Git operations completed successfully!${RESET}"
 echo -e "${YELLOW}📋 Manual NPM Publishing Required${RESET}"
 echo ""
@@ -687,7 +696,7 @@ echo ""
 echo ""
 
 # Deployment Summary
-echo -e "${GREEN}🎉 Git deployment completed successfully!${RESET}"
+log_success "Git deployment completed successfully!"
 CURRENT_BRANCH=$(git branch --show-current)  # Refresh current branch
 echo -e "${BLUE}Version: ${NEW_VERSION}${RESET}"
 echo -e "${BLUE}Branch: ${CURRENT_BRANCH}${RESET}"
@@ -700,18 +709,27 @@ echo ""
 # Post-Deployment Action Items
 echo -e "${CYAN}📋 REQUIRED POST-DEPLOYMENT ACTIONS:${RESET}"
 echo ""
-echo -e "${YELLOW}1. 📦 Manual NPM Publishing (due to 2FA):${RESET}"
+echo -e "${YELLOW}1. Manual NPM Publishing (due to 2FA):${RESET}"
 echo -e "${BLUE}   cd npm/terminal-jarvis${RESET}"
 echo -e "${BLUE}   npm publish --otp=<your-2fa-code>${RESET}"
 echo -e "${BLUE}   npm dist-tag add terminal-jarvis@${NEW_VERSION} stable${RESET}"
 echo ""
-echo -e "${YELLOW}2. 🔍 Verification Commands:${RESET}"
+echo -e "${YELLOW}2. Create GitHub Release for Homebrew (CRITICAL):${RESET}"
+echo -e "${BLUE}   gh release create v${NEW_VERSION} \\${RESET}"
+echo -e "${BLUE}     homebrew/release/terminal-jarvis-mac.tar.gz \\${RESET}"
+echo -e "${BLUE}     homebrew/release/terminal-jarvis-linux.tar.gz \\${RESET}"
+echo -e "${BLUE}     --title \"Release v${NEW_VERSION}: Professional Logging System\" \\${RESET}"
+echo -e "${BLUE}     --notes \"See CHANGELOG.md for detailed changes\" \\${RESET}"
+echo -e "${BLUE}     --latest${RESET}"
+echo ""
+echo -e "${YELLOW}3. Verification Commands:${RESET}"
 echo -e "${BLUE}   npm view terminal-jarvis versions --json | tail -10${RESET}"
 echo -e "${BLUE}   npm dist-tag ls terminal-jarvis${RESET}"
+echo -e "${BLUE}   curl -I https://github.com/BA-CalderonMorales/terminal-jarvis/releases/download/v${NEW_VERSION}/terminal-jarvis-mac.tar.gz${RESET}"
 echo -e "${BLUE}   brew tap ba-calderonmorales/terminal-jarvis && brew install terminal-jarvis${RESET}"
 echo ""
 
-echo -e "${CYAN}📦 After completing all publishing steps, users can install with:${RESET}"
+log_info_if_enabled "After completing all publishing steps, users can install with:"
 echo -e "${YELLOW}  Cargo (Rust):    ${RESET}cargo install terminal-jarvis"
 echo -e "${YELLOW}  NPM Latest:      ${RESET}npm install -g terminal-jarvis@${NEW_VERSION}"
 echo -e "${YELLOW}  NPM Beta:        ${RESET}npm install -g terminal-jarvis@beta"

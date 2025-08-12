@@ -6,41 +6,36 @@
 
 set -e  # Exit on any error
 
-# Colors for output
-CYAN='\033[0;96m'
-BLUE='\033[0;94m'
-GREEN='\033[0;92m'
-YELLOW='\033[0;93m'
-RED='\033[0;91m'
-RESET='\033[0m'
+# Source logger
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source "$SCRIPT_DIR/../logger/logger.sh"
 
 # Get current branch
 CURRENT_BRANCH=$(git branch --show-current)
 
-echo -e "${CYAN}🔍 Terminal Jarvis Local CI Pipeline${RESET}"
-echo -e "${BLUE}Current branch: ${CURRENT_BRANCH}${RESET}"
-echo -e "${YELLOW}Running validation and testing WITHOUT deployment${RESET}"
-echo ""
+log_header "Terminal Jarvis Local CI Pipeline"
+log_info_if_enabled "Current branch: ${CURRENT_BRANCH}"
+log_warn_if_enabled "Running validation and testing WITHOUT deployment"
 
 # Step 0: CHANGELOG.md Check
-echo -e "${CYAN}📝 Step 0: CHANGELOG.md Verification${RESET}"
+log_info_if_enabled "Step 0: CHANGELOG.md Verification"
 
 # Get current version from Cargo.toml
 CURRENT_VERSION=$(grep '^version = ' Cargo.toml | sed 's/version = "\(.*\)"/\1/')
-echo -e "${BLUE}Current version in Cargo.toml: ${CURRENT_VERSION}${RESET}"
+log_info_if_enabled "Current version in Cargo.toml: ${CURRENT_VERSION}"
 
-# Check if CHANGELOG.md has entry for current version
-if ! grep -q "\[${CURRENT_VERSION}\]" CHANGELOG.md; then
-    echo -e "${YELLOW}⚠️  CHANGELOG.md does not contain an entry for version ${CURRENT_VERSION}${RESET}"
-    echo -e "${BLUE}Consider updating CHANGELOG.md before deployment${RESET}"
+# Check if CHANGELOG.md has been updated for current version
+if ! grep -q "## \[${CURRENT_VERSION}\]" CHANGELOG.md 2>/dev/null; then
+    log_warn_if_enabled "CHANGELOG.md does not contain an entry for version ${CURRENT_VERSION}"
+    log_warn_if_enabled "Please update CHANGELOG.md before deployment"
 else
-    echo -e "${GREEN}✅ CHANGELOG.md contains entry for version ${CURRENT_VERSION}${RESET}"
+    log_success_if_enabled "CHANGELOG.md contains entry for version ${CURRENT_VERSION}"
 fi
 
-echo ""
+log_separator
 
-# Step 1: Run Quality Checks
-echo -e "${CYAN}📋 Step 1: Running Quality Checks${RESET}"
+# Step 1: Quality Checks
+log_info_if_enabled "Step 1: Running Quality Checks"
 echo -e "${BLUE}→ Running cargo fmt...${RESET}"
 cargo fmt --all
 
@@ -50,82 +45,106 @@ cargo clippy --all-targets --all-features -- -D warnings
 echo -e "${BLUE}→ Running tests...${RESET}"
 cargo test
 
-echo -e "${GREEN}✅ All quality checks passed!${RESET}"
-echo ""
-
-# Step 2: Comprehensive Test Suite (Core Functionality + NPM Package Validation)
-echo -e "${CYAN}🧪 Step 2: Comprehensive Test Suite${RESET}"
-echo -e "${BLUE}Running core functionality and NPM package validation...${RESET}"
-echo -e "${BLUE}This validates:${RESET}"
-echo -e "${BLUE}  • Core CLI functionality and commands${RESET}"
-echo -e "${BLUE}  • All 7 AI tools are properly configured${RESET}"
-echo -e "${BLUE}  • NPM packages exist and are installable${RESET}"
-echo -e "${BLUE}  • Configuration consistency across all files${RESET}"
-echo -e "${BLUE}  • Binary name mappings are correct${RESET}"
-echo ""
-
-# Run our comprehensive smoke test which includes NPM package validation
-if ! ./scripts/tests/smoke-test.sh; then
-    echo -e "${RED}❌ Comprehensive tests failed!${RESET}"
-    echo -e "${BLUE}This includes core functionality and NPM package validation.${RESET}"
-    echo -e "${YELLOW}Please fix the issues before deploying.${RESET}"
+# Run Clippy (strict mode - warnings as errors)
+log_progress "Running Clippy checks"
+if cargo clippy --all-targets --all-features -- -D warnings; then
+    log_progress_done
+else
+    log_progress_failed
     exit 1
 fi
 
-echo -e "${GREEN}🎉 All comprehensive tests passed!${RESET}"
-echo -e "${BLUE}Core functionality works and all NPM packages are valid and installable.${RESET}"
-echo ""
+# Format check
+log_progress "Checking code formatting"
+cargo fmt --all --check
+log_progress_done
+
+log_success_if_enabled "All quality checks passed!"
+
+log_separator
+
+# Step 2: Comprehensive Test Suite (Core Functionality + NPM Package Validation)
+log_info_if_enabled "Step 2: Comprehensive Test Suite"
+log_info_if_enabled "Running core functionality and NPM package validation..."
+log_info_if_enabled "This validates:"
+log_info_if_enabled "  • Core CLI functionality and commands"
+log_info_if_enabled "  • All 7 AI tools are properly configured"
+log_info_if_enabled "  • NPM packages exist and are installable"
+log_info_if_enabled "  • Configuration consistency across all files"
+log_info_if_enabled "  • Binary name mappings are correct"
+
+# Run our comprehensive smoke test which includes NPM package validation
+log_progress "Running comprehensive smoke tests"
+if ./scripts/tests/smoke-test.sh; then
+    log_progress_done
+    log_success_if_enabled "All comprehensive tests passed!"
+    log_info_if_enabled "Core functionality works and all NPM packages are valid and installable."
+else
+    log_progress_failed
+    log_error_if_enabled "Comprehensive tests failed!"
+    log_info_if_enabled "This includes core functionality and NPM package validation."
+    log_warn_if_enabled "Please fix the issues before deploying."
+    exit 1
+fi
+
+log_separator
 
 # Step 3: Build Release Binary
-echo -e "${CYAN}📦 Step 3: Building Release Binary${RESET}"
+log_info_if_enabled "Step 3: Building Release Binary"
+log_progress "Building release binary"
 cargo build --release
-echo -e "${GREEN}✅ Release binary built successfully!${RESET}"
-echo ""
+log_progress_done
+log_success_if_enabled "Release binary built successfully!"
+
+log_separator
 
 # Step 4: Build NPM Package
-echo -e "${CYAN}📦 Step 4: Building NPM Package${RESET}"
-cd npm/terminal-jarvis
-npm run build
-cd ../..
-echo -e "${GREEN}✅ NPM package built successfully!${RESET}"
-echo ""
+log_info_if_enabled "Step 4: Building NPM Package"
+log_progress "Building NPM package"
+cd npm/terminal-jarvis && npm run build && cd ../..
+log_progress_done
+log_success_if_enabled "NPM package built successfully!"
+
+log_separator
 
 # Step 5: Validation Summary
-echo -e "${CYAN}📊 Step 5: Validation Summary${RESET}"
+log_info_if_enabled "Step 5: Validation Summary"
 
 # Check version consistency across files
-echo -e "${BLUE}→ Checking version consistency...${RESET}"
+log_progress "Checking version consistency"
 
 NPM_VERSION=$(grep '"version":' npm/terminal-jarvis/package.json | sed 's/.*"version": "\(.*\)".*/\1/')
 TS_VERSION=$(grep "console.log.*Terminal Jarvis v" npm/terminal-jarvis/src/index.ts | sed 's/.*Terminal Jarvis v\([0-9.]*\).*/\1/')
 
-echo -e "${BLUE}  Cargo.toml: ${CURRENT_VERSION}${RESET}"
-echo -e "${BLUE}  package.json: ${NPM_VERSION}${RESET}"
-echo -e "${BLUE}  index.ts: ${TS_VERSION}${RESET}"
+log_info_if_enabled "  Cargo.toml: ${CURRENT_VERSION}"
+log_info_if_enabled "  package.json: ${NPM_VERSION}"
+log_info_if_enabled "  index.ts: ${TS_VERSION}"
 
 if [ "$CURRENT_VERSION" = "$NPM_VERSION" ] && [ "$CURRENT_VERSION" = "$TS_VERSION" ]; then
-    echo -e "${GREEN}✅ All versions are synchronized${RESET}"
+    log_progress_done
+    log_success_if_enabled "All versions are synchronized"
 else
-    echo -e "${RED}❌ Version mismatch detected!${RESET}"
-    echo -e "${YELLOW}All versions must be synchronized before deployment${RESET}"
+    log_progress_failed
+    log_error_if_enabled "Version mismatch detected!"
+    log_warn_if_enabled "All versions must be synchronized before deployment"
     exit 1
 fi
 
-echo ""
+log_separator
 
 # Summary
-echo -e "${GREEN}🎉 Local CI validation completed successfully!${RESET}"
-echo -e "${BLUE}All checks passed for branch: ${CURRENT_BRANCH}${RESET}"
-echo -e "${BLUE}Version: ${CURRENT_VERSION}${RESET}"
-echo -e "${BLUE}Ready for deployment with local-cd.sh${RESET}"
-echo ""
-echo -e "${CYAN}📋 What was validated:${RESET}"
-echo -e "${YELLOW}  ✓ Code formatting and linting${RESET}"
-echo -e "${YELLOW}  ✓ All tests passing (including crush functionality)${RESET}"
-echo -e "${YELLOW}  ✓ Core functionality working${RESET}"
-echo -e "${YELLOW}  ✓ NPM package validation (all 7 tools)${RESET}"
-echo -e "${YELLOW}  ✓ Release binary building${RESET}"
-echo -e "${YELLOW}  ✓ NPM package building${RESET}"
-echo -e "${YELLOW}  ✓ Version consistency${RESET}"
-echo ""
-echo -e "${BLUE}💡 Next step: Run ./scripts/cicd/local-cd.sh to deploy${RESET}"
+log_success_if_enabled "Local CI validation completed successfully!"
+log_info_if_enabled "All checks passed for branch: ${CURRENT_BRANCH}"
+log_info_if_enabled "Version: ${CURRENT_VERSION}"
+log_info_if_enabled "Ready for deployment with local-cd.sh"
+
+log_info_if_enabled "What was validated:"
+log_info_if_enabled "  ✓ Code formatting and linting"
+log_info_if_enabled "  ✓ All tests passing (including core functionality)"
+log_info_if_enabled "  ✓ Core functionality working"
+log_info_if_enabled "  ✓ NPM package validation (all 7 tools)"
+log_info_if_enabled "  ✓ Release binary building"
+log_info_if_enabled "  ✓ NPM package building"
+log_info_if_enabled "  ✓ Version consistency"
+
+log_info_if_enabled "Next step: Run ./scripts/cicd/local-cd.sh to deploy"
