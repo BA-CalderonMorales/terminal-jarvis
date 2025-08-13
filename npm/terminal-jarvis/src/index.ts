@@ -136,7 +136,7 @@ async function main() {
 }
 
 function showFallbackMessage() {
-    console.log("🤖 Terminal Jarvis v0.0.53");
+    console.log("Terminal Jarvis v0.0.55");
     console.log("");
     console.log("❌ Error: Could not find or execute the T.JARVIS binary.");
     console.log("");
