@@ -1,0 +1,59 @@
+# Terminal Jarvis Supported Tools Manifest
+# This file serves as the single source of truth for all supported tools
+# Both the README bullets and tools table are generated from this manifest
+
+[[tools]]
+id = "claude"
+name = "claude"
+display_name = "Claude"
+description = "Anthropic's Claude for code assistance"
+status = "stable"
+installation_command = "npm install -g @anthropic-ai/claude-code"
+
+[[tools]]
+id = "gemini"
+name = "gemini"
+display_name = "Gemini"
+description = "Google's Gemini CLI tool"
+status = "stable"
+installation_command = "npm install -g @google/gemini-cli"
+
+[[tools]]
+id = "qwen"
+name = "qwen"
+display_name = "Qwen"
+description = "Qwen coding assistant"
+status = "stable"
+installation_command = "npm install -g @qwen-code/qwen-code@latest"
+
+[[tools]]
+id = "opencode"
+name = "opencode"
+display_name = "OpenCode"
+description = "Terminal-based AI coding agent"
+status = "testing"
+installation_command = "npm install -g opencode-ai@latest"
+
+[[tools]]
+id = "llxprt"
+name = "llxprt"
+display_name = "LLXPRT"
+description = "Multi-provider AI coding assistant"
+status = "testing"
+installation_command = "npm install -g @vybestack/llxprt-code-core"
+
+[[tools]]
+id = "codex"
+name = "codex"
+display_name = "Codex"
+description = "OpenAI Codex CLI for local AI coding"
+status = "testing"
+installation_command = "npm install -g @openai/codex"
+
+[[tools]]
+id = "crush"
+name = "crush"
+display_name = "Crush"
+description = "Charm's multi-model AI assistant with LSP"
+status = "new"
+installation_command = "npm install -g @charmland/crush"

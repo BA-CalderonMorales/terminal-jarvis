@@ -1,6 +1,22 @@
 # CLAUDE.md - Terminal Jarvis AI Assistant Guide
 
-## 🚨 CRITICAL DEPLOYMENT WARNING 🚨
+## CRITICAL NO-EMOJIS RULE
+
+**ABSOLUTE REQUIREMENT**: NO EMOJIS anywhere in the codebase, commits, documentation, or any output.
+
+**FORBIDDEN**: Any use of emojis in:
+- Commit messages  
+- Code comments
+- Documentation files
+- README content
+- GitHub releases
+- Terminal output
+- Log messages
+- Error messages
+
+**REASON**: Professional appearance and accessibility. Emojis create visual clutter and accessibility issues.
+
+## CRITICAL DEPLOYMENT WARNING
 
 **THE #1 DEPLOYMENT FAILURE**: Homebrew Formula changes committed AFTER GitHub release creation.
 
@@ -8,20 +24,61 @@
 
 **NEVER DO THIS SEQUENCE**:
 
-1. ❌ Run local-cd.sh (creates Git tag)
-2. ❌ Create GitHub release
-3. ❌ Discover Homebrew Formula needs updates
-4. ❌ Commit Formula changes as a "fix"
+1. Run local-cd.sh (creates Git tag)
+2. Create GitHub release
+3. Discover Homebrew Formula needs updates
+4. Commit Formula changes as a "fix"
 
 **ALWAYS DO THIS SEQUENCE**:
 
-1. ✅ Update ALL files (including Homebrew Formula)
-2. ✅ Commit and push ALL changes to GitHub
-3. ✅ Verify: `git status` shows "nothing to commit, working tree clean"
-4. ✅ THEN run local-cd.sh
-5. ✅ THEN create GitHub release
+1. Update ALL files (including Homebrew Formula)
+2. Commit and push ALL changes to GitHub
+3. Verify: `git status` shows "nothing to commit, working tree clean"
+4. THEN run local-cd.sh
+5. THEN create GitHub release
 
 **VERIFICATION COMMAND**: `git log -1 --name-only` MUST include `homebrew/Formula/terminal-jarvis.rb`
+
+## Communication Guidelines
+
+### Reference Clarity Requirements
+
+**CRITICAL**: Always provide specific context when referring to numbered items, steps, or sections.
+
+**NEVER say**: "what do you mean by step 4" without clarifying which step 4
+**ALWAYS say**: "what do you mean by step 4 in the deployment workflow" or "step 4 from the previous instructions"
+
+**When providing numbered lists or procedures**:
+
+- Use descriptive headers: "## Deployment Steps" not just "Steps:"
+- Reference context explicitly: "In the above deployment workflow, step 4 means..."
+- Avoid ambiguous references like "the previous step" or "step X" without context
+
+**When user asks for clarification**:
+
+- Always quote the specific text being referenced
+- Provide the full context of where that reference appeared
+- Explain which section/workflow/process the numbered item belongs to
+
+**Example of good practice**:
+
+```
+## Homebrew Deployment Steps
+1. Update Formula version
+2. Commit changes
+3. Create GitHub release
+4. Verify archives are accessible ← When user asks about "step 4", this context is clear
+```
+
+**Example of bad practice**:
+
+```
+Steps:
+1. Do this
+2. Do that
+3. Another thing
+4. Final step ← Ambiguous when referenced later
+```
 
 ## Project Overview
 
@@ -86,15 +143,22 @@ Terminal Jarvis is a Rust-based CLI wrapper that provides a unified interface fo
 
 ### Scripts (`/scripts/`)
 
-- `local-ci.sh` - Continuous Integration (validation only, no commits/pushes)
-- `local-cd.sh` - Continuous Deployment (commit/tag/push/publish) with enhanced version management
-  - `--check-versions` - Verify version synchronization across all files
-  - `--update-version X.X.X` - Programmatically update all version references
-- `local-cicd.sh` - Combined CI/CD script (legacy, prefer separated scripts)
-- `workflow-dashboard.sh` - Development workflow status and recommendations
-- `smoke-test.sh` - Basic functionality tests
-- `manual_auth_test.sh` - Manual authentication behavior testing
-- `interactive_auth_test.sh` - Interactive authentication testing scenarios
+**Organized Structure:**
+- `scripts/cicd/` - CI/CD automation scripts
+  - `local-ci.sh` - Continuous Integration (validation only, no commits/pushes)
+  - `local-cd.sh` - Continuous Deployment (commit/tag/push/publish) with enhanced version management
+    - `--check-versions` - Verify version synchronization across all files
+    - `--update-version X.X.X` - Programmatically update all version references
+- `scripts/tests/` - Testing and validation scripts
+  - `smoke-test.sh` - Basic functionality tests
+  - `manual_auth_test.sh` - Manual authentication behavior testing
+  - `interactive_auth_test.sh` - Interactive authentication testing scenarios
+  - `auth-test.sh` - Authentication testing
+  - `test-opencode-fix.sh` - OpenCode integration testing
+- `scripts/utils/` - Utility scripts
+  - `workflow-dashboard.sh` - Development workflow status and recommendations
+  - `generate-readme-tools.sh` - Generates README sections from tools manifest
+  - `demo-auth-fix.sh` - Authentication demonstration utilities
 
 ### Tests (`/tests/`)
 
@@ -126,7 +190,7 @@ Terminal Jarvis is a Rust-based CLI wrapper that provides a unified interface fo
 
 ### DEPLOYMENT WORKFLOW - READ THIS FIRST!
 
-**🚨 CRITICAL DEPLOYMENT CHECKLIST**
+**CRITICAL DEPLOYMENT CHECKLIST**
 
 When you see requests like "Let's now run local-cd.sh" or anything involving deployment, **ALWAYS** follow this checklist:
 
@@ -141,7 +205,7 @@ When you see requests like "Let's now run local-cd.sh" or anything involving dep
 
 #### **Step 2: Pre-Commit Verification - MANDATORY**
 
-**🚨 CRITICAL**: Always check for uncommitted changes BEFORE proceeding with deployment:
+**CRITICAL**: Always check for uncommitted changes BEFORE proceeding with deployment:
 
 ```bash
 # Check for any uncommitted changes
@@ -159,7 +223,7 @@ git push origin develop
 
 **Why This Matters**: The deployment process expects a clean working directory. Uncommitted changes, especially to documentation files (CLAUDE.md, copilot-instructions.md) or configuration files (homebrew/Formula/terminal-jarvis.rb), must be committed and pushed BEFORE deployment to ensure the complete state is published to GitHub.
 
-**🚨 HOMEBREW FORMULA CRITICAL DEPLOYMENT ORDER**
+**HOMEBREW FORMULA CRITICAL DEPLOYMENT ORDER**
 
 **THE #1 DEPLOYMENT FAILURE**: Homebrew Formula changes committed AFTER GitHub release creation.
 
@@ -196,7 +260,7 @@ git push origin develop
 
 ```bash
 # Update version across all files automatically
-./scripts/local-cd.sh --update-version 0.0.48
+./scripts/cicd/local-cd.sh --update-version 0.0.48
 ```
 
 #### **Step 5: Homebrew Formula Update & Verification**
@@ -205,36 +269,55 @@ git push origin develop
 # Update Homebrew Formula for new version (if not done by local-cd.sh automatically)
 sed -i 's/version ".*"/version "0.0.48"/' homebrew/Formula/terminal-jarvis.rb
 
-# 🚨 CRITICAL: Verify all versions are synchronized
-./scripts/local-cd.sh --check-versions  # MUST show "All versions are synchronized"
+# CRITICAL: Verify all versions are synchronized
+./scripts/cicd/local-cd.sh --check-versions  # MUST show "All versions are synchronized"
 
-# 🚨 CRITICAL: Ensure working tree is clean BEFORE deployment
+# CRITICAL: Ensure working tree is clean BEFORE deployment
 git status  # MUST show "nothing to commit, working tree clean"
 ```
 
 #### **Step 6: Validation**
 
 ```bash
-./scripts/local-ci.sh  # MUST pass all tests
+./scripts/cicd/local-ci.sh  # MUST pass all tests
 ```
 
 #### **Step 7: Deployment - COMMITS AND PUSHES ALL CHANGES**
 
 ```bash
-./scripts/local-cd.sh  # Creates archives, commits ALL changes (including Formula), tags, pushes to GitHub
+./scripts/cicd/local-cd.sh  # Creates archives, commits ALL changes (including Formula), tags, pushes to GitHub
 ```
 
-#### **Step 8: Verification - HOMEBREW FORMULA MUST BE COMMITTED**
+#### **Step 8: Generate Homebrew Release Archives**
 
-**🚨 CRITICAL**: Verify Homebrew Formula was committed and pushed:
+**NEW AUTOMATED APPROACH**: Use the programmatic script to create platform-specific archives:
+
+```bash
+# Generate Homebrew release archives automatically
+./scripts/utils/generate-homebrew-release.sh --stage
+git commit -m "feat: add Homebrew release archives for v0.0.48"
+git push origin develop
+```
+
+**What this script does**:
+- Builds release binary
+- Creates platform-specific archives (terminal-jarvis-mac.tar.gz, terminal-jarvis-linux.tar.gz)
+- Calculates SHA256 checksums for Formula verification
+- Automatically stages files for commit (with --stage flag)
+- Removes temporary binary to avoid repository bloat
+- Provides next steps for GitHub release creation
+
+#### **Step 9: Verification - HOMEBREW FORMULA MUST BE COMMITTED**
+
+**CRITICAL**: Verify Homebrew Formula was committed and pushed:
 
 ```bash
 git log -1 --name-only  # MUST include homebrew/Formula/terminal-jarvis.rb
 ```
 
-#### **Step 9: GitHub Release Creation - ONLY AFTER FORMULA IS COMMITTED**
+#### **Step 10: GitHub Release Creation - ONLY AFTER ARCHIVES ARE COMMITTED**
 
-**🚨 MANDATORY**: Homebrew formulas require GitHub releases with attached archives. The deployment script only creates Git tags, not releases.
+**MANDATORY**: Homebrew formulas require GitHub releases with attached archives. The deployment script only creates Git tags, not releases.
 
 ```bash
 # Verify the tag was created
@@ -260,11 +343,8 @@ curl -I https://github.com/BA-CalderonMorales/terminal-jarvis/releases/download/
 
 #### **Step 9: Homebrew Release Validation**
 
-```bash
-# After GitHub release is created
-./scripts/create-homebrew-release.sh  # Creates platform-specific archives if needed
-# Archives should already exist from local-cd.sh, this is just verification
-```
+**Note**: Homebrew release creation is now handled automatically by the CI/CD pipeline.
+Archives are created during the deployment process in `local-cd.sh`.
 
 ### Version Management
 
@@ -272,13 +352,13 @@ curl -I https://github.com/BA-CalderonMorales/terminal-jarvis/releases/download/
 
 - `Cargo.toml` - version field
 - `npm/terminal-jarvis/package.json` - version field
-- **`homebrew/Formula/terminal-jarvis.rb` - version field** ⚠️ **COMMONLY FORGOTTEN!**
+- **`homebrew/Formula/terminal-jarvis.rb` - version field** **COMMONLY FORGOTTEN!**
 - `npm/terminal-jarvis/src/index.ts` - console.log version display
 - `src/cli_logic.rs` - uses `env!("CARGO_PKG_VERSION")` (auto-updates)
 - `CHANGELOG.md` - must have entry for current version
 - `README.md` - version references in note sections
 
-🚨 **HOMEBREW FORMULA VERSION MUST MATCH EXACTLY** - This is frequently overlooked and causes deployment failures.
+**HOMEBREW FORMULA VERSION MUST MATCH EXACTLY** - This is frequently overlooked and causes deployment failures.
 
 ### CHANGELOG.md Management (CRITICAL)
 
@@ -288,7 +368,7 @@ curl -I https://github.com/BA-CalderonMorales/terminal-jarvis/releases/download/
 
 1. **Feature-Based Versioning**: Each version should represent one cohesive feature set or development session
 2. **Timeline Accuracy**: Don't mix features from different development days/sessions into the same version
-3. **Update First**: Always add changelog entry BEFORE running `./scripts/local-cd.sh`
+3. **Update First**: Always add changelog entry BEFORE running `./scripts/cicd/local-cd.sh`
 4. **Clear Structure**: Use `### Added`, `### Enhanced`, `### Fixed`, `### Technical` sections consistently
 
 #### Version Increment Guidelines:
@@ -308,7 +388,7 @@ curl -I https://github.com/BA-CalderonMorales/terminal-jarvis/releases/download/
 - **Testing Infrastructure**: Local validation protocols
 
 # Day 2: Deploy the completed feature
-./scripts/local-cd.sh  # Will see v0.0.47 entry and proceed
+./scripts/cicd/local-cd.sh  # Will see v0.0.47 entry and proceed
 ```
 
 #### Common Mistakes to Avoid:
@@ -392,10 +472,8 @@ cargo test --lib services
 
 **Key Innovation**: Complete multi-platform distribution with Homebrew support based on Federico Terzi's approach.
 
-#### **Essential Scripts**:
-
-1. **`./scripts/create-homebrew-release.sh`** - Creates platform-specific archives and Formula template
-2. **`./scripts/test-homebrew-formula.sh`** - Comprehensive local Formula validation
+**Note**: Homebrew release creation is now integrated into the main CI/CD pipeline.
+Platform-specific archives and formula updates are handled automatically during deployment.
 
 #### **Formula Structure** (`homebrew/Formula/terminal-jarvis.rb`):
 
@@ -429,10 +507,7 @@ end
 #### **Local Testing Protocol** (MANDATORY before deployment):
 
 ```bash
-# 1. Validate Formula syntax and structure
-./scripts/test-homebrew-formula.sh
-
-# 2. Create local tap for end-to-end testing
+# Local tap testing (manual validation)
 mkdir -p /tmp/homebrew-test-tap/Formula
 cp homebrew/Formula/terminal-jarvis.rb /tmp/homebrew-test-tap/Formula/
 cd /tmp/homebrew-test-tap && git init && git add . && git commit -m "Test"
@@ -493,13 +568,13 @@ We've developed an optimal workflow that balances automation with control:
 
 ```bash
 # Check current version synchronization
-./scripts/local-cd.sh --check-versions
+./scripts/cicd/local-cd.sh --check-versions
 
 # Update version programmatically (if needed)
-./scripts/local-cd.sh --update-version 0.0.X
+./scripts/cicd/local-cd.sh --update-version 0.0.X
 
 # Validate changes with CI
-./scripts/local-ci.sh
+./scripts/cicd/local-ci.sh
 ```
 
 **Phase 2: Documentation Updates (MANDATORY)**
@@ -512,7 +587,7 @@ We've developed an optimal workflow that balances automation with control:
 
 ```bash
 # Deploy with controlled workflow
-./scripts/local-cd.sh
+./scripts/cicd/local-cd.sh
 
 # Manual NPM publishing (due to 2FA requirements)
 cd npm/terminal-jarvis && npm publish
@@ -522,7 +597,8 @@ npm dist-tag add terminal-jarvis@X.X.X stable  # optional
 ### Legacy Automated (One-Shot)
 
 1. **Update CHANGELOG.md first** - Add entry for current version
-2. **Run**: `./scripts/local-cicd.sh` - Handles everything automatically
+2. **Run CI validation**: `./scripts/cicd/local-ci.sh` - Validates without deployment
+3. **Run deployment**: `./scripts/cicd/local-cd.sh` - Handles everything automatically
 
 ### Manual Process
 
@@ -626,13 +702,12 @@ fn test_bug_opencode_input_focus_on_fresh_install() {
 
 **Homebrew Integration (if updating version):**
 
-- [ ] **🚨 CRITICAL: `homebrew/Formula/terminal-jarvis.rb` version updated** - COMMONLY FORGOTTEN!
+- [ ] **CRITICAL: `homebrew/Formula/terminal-jarvis.rb` version updated** - COMMONLY FORGOTTEN!
 - [ ] GitHub release created with version tag
 - [ ] Homebrew archives uploaded: `terminal-jarvis-macos.tar.gz`, `terminal-jarvis-linux.tar.gz`
 - [ ] SHA256 checksums verified in Formula match actual archives
-- [ ] **Homebrew Formula tested locally**: `./scripts/test-homebrew-formula.sh` passes
 - [ ] Multi-platform support verified (macOS and Linux archives)
-- [ ] **End-to-end Homebrew testing completed** using local tap and test installation
+- [ ] **End-to-end Homebrew testing completed** using local tap (see Local Testing Protocol above)
 
 **NPM Package Testing:**
 
@@ -704,10 +779,10 @@ center_output = true
 ### Debugging CI/CD Issues
 
 - Check CHANGELOG.md is updated before running deployment scripts
-- Verify all version numbers are synchronized with `./scripts/local-cd.sh --check-versions`
+- Verify all version numbers are synchronized with `./scripts/cicd/local-cd.sh --check-versions`
 - Test NPM package locally in `/tmp` environment
 - Ensure binary has correct permissions
-- Use `./scripts/local-ci.sh` for validation without deployment
+- Use `./scripts/cicd/local-ci.sh` for validation without deployment
 
 ### Debugging Session Continuation Issues
 
