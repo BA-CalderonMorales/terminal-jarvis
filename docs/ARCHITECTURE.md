@@ -16,6 +16,9 @@ src/
 ├── installation_arguments.rs # Installation commands and NPM validation
 ├── services.rs           # Service layer for external tools (gh CLI, etc.)
 ├── config.rs             # TOML configuration management
+├── theme.rs              # Professional theme definitions and ANSI color management
+├── theme_config.rs       # Global theme state management and configuration
+├── progress_utils.rs     # Theme-integrated messaging and progress indicators
 ├── api.rs                # Modular API endpoint definitions (future use)
 ├── api_base.rs           # Base API route configurations (future use)
 └── api_client.rs         # HTTP client abstraction layer (future use)
@@ -31,6 +34,10 @@ src/
 - **`installation_arguments.rs`**: Centralized installation commands with NPM dependency validation
 - **`services.rs`**: Service layer for external integrations (GitHub CLI, package managers)
 - **`config.rs`**: TOML configuration file management
+- **Theme System**: Professional theming architecture with global consistency
+  - **`theme.rs`**: Three professionally designed themes (T.JARVIS, Classic, Matrix) with complete ANSI color definitions
+  - **`theme_config.rs`**: Global theme state management and runtime theme switching
+  - **`progress_utils.rs`**: Theme-integrated messaging system for consistent visual experience
 - **API modules**: Framework code for future web integrations (currently unused)
 
 The interactive mode provides a complete T.JARVIS experience with real-time tool status, installation management, and a beautiful terminal interface.
@@ -51,6 +58,46 @@ For optimal tool integration, Terminal Jarvis implements careful terminal state 
 - **Minimal Interference**: Uses minimal terminal clearing sequences to avoid conflicts with tool initialization
 - **State Preparation**: Prepares terminal state for tools that require specific input focus (like OpenCode)
 - **Race Condition Prevention**: Includes initialization delays to prevent conflicts between Terminal Jarvis and launched tools
+
+## Theme System Architecture (v0.0.56+)
+
+Terminal Jarvis implements a comprehensive theming system for professional, consistent visual experience:
+
+### Core Theme Components
+
+- **`theme.rs`**: Theme definitions with complete ANSI color palettes
+  - **T.JARVIS Theme**: Professional blue-based corporate theme with cyan accents
+  - **Classic Theme**: Traditional grayscale terminal aesthetic 
+  - **Matrix Theme**: Green-on-black retro computing style
+  - **Color Management**: Comprehensive ANSI escape code handling for backgrounds, borders, and text
+
+- **`theme_config.rs`**: Global theme state and configuration management
+  - **Runtime Theme Switching**: Dynamic theme changes without restart
+  - **Theme Persistence**: User theme preferences maintained across sessions
+  - **Global State**: Centralized theme state accessible throughout application
+
+- **`progress_utils.rs`**: Theme-integrated messaging system
+  - **Consistent Colors**: All messages use current theme's color palette
+  - **Professional Presentation**: Success, warning, and error messages with themed colors
+  - **T.JARVIS Branding**: Integrated T.JARVIS advisory system for tool guidance
+
+### Visual Design Features
+
+- **Perfect Box Borders**: Unicode box-drawing characters (╔══╗║║╚══╝) with precise alignment
+- **Background Fills**: Complete background color coverage for professional appearance
+- **Menu Integration**: inquire library integration with custom RenderConfig for themed menus
+- **ASCII Art Integration**: T.JARVIS ASCII art with theme-appropriate coloring
+- **Advisory Boxes**: Professional tool startup guidance with perfect 62-character alignment
+
+### Theme Integration Points
+
+- **Interactive Interface**: Main CLI interface uses current theme consistently
+- **Tool Execution**: Pre-launch advisory messages themed appropriately
+- **Error Handling**: Theme-aware error and warning message presentation
+- **Menu Systems**: All interactive menus respect current theme selection
+- **Progress Indicators**: Loading and status messages integrate with theme colors
+
+This architecture ensures visual consistency throughout the entire Terminal Jarvis experience while maintaining professional appearance standards.
 
 ## Adding New Tools
 
@@ -141,6 +188,12 @@ auto_sync = true
 [ui]
 show_ascii_art = true
 center_output = true
+theme = "T.JARVIS"  # Options: "T.JARVIS", "Classic", "Matrix"
+
+[theme]
+# Theme-specific customizations (future use)
+custom_colors = false
+border_style = "rounded"  # Options: "rounded", "sharp", "minimal"
 ```
 
 ## Future Architecture Plans
@@ -150,3 +203,6 @@ center_output = true
 - **Enhanced API**: REST API for integration with other tools
 - **Docker Support**: Containerized deployment options
 - **Shell Integration**: Native shell completion and integration
+- **Theme Customization**: User-defined custom themes and color schemes
+- **Dynamic Theming**: Context-aware themes based on tool or environment
+- **Accessibility Themes**: High-contrast and colorblind-friendly theme variants

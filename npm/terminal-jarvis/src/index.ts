@@ -111,21 +111,21 @@ async function main() {
         
         child.on('error', (err) => {
             clearTimeout(timeout);
-            console.error('\n❌ Error running terminal-jarvis binary:');
+            console.error('\n⚠ T.JARVIS SYSTEM: Binary execution failed');
             console.error('   ' + err.message);
             console.error('');
             
             // Provide specific error context
             if (err.message.includes('ENOENT')) {
-                console.error('🔍 Binary not found or not executable.');
-                console.error('   This usually means the binary is missing or has wrong permissions.');
+                console.error('🔍 DIAGNOSIS: Binary not found or not executable');
+                console.error('   The T.JARVIS binary appears to be missing or has incorrect permissions.');
             } else if (err.message.includes('EACCES')) {
-                console.error('🔒 Permission denied.');
+                console.error('🔒 DIAGNOSIS: Permission denied');
                 console.error('   The binary exists but cannot be executed.');
-                console.error('   💡 Try: chmod +x ' + rustBinary);
+                console.error('   💡 SOLUTION: chmod +x ' + rustBinary);
             } else if (err.message.includes('spawn')) {
-                console.error('🚫 Failed to spawn process.');
-                console.error('   This might be a system-level issue.');
+                console.error('🚫 DIAGNOSIS: Process spawn failure');
+                console.error('   This indicates a system-level execution issue.');
             }
             console.error('');
             showFallbackMessage();
@@ -136,9 +136,9 @@ async function main() {
 }
 
 function showFallbackMessage() {
-    console.log("Terminal Jarvis v0.0.55");
+    console.log("Terminal Jarvis v0.0.56");
     console.log("");
-    console.log("❌ Error: Could not find or execute the T.JARVIS binary.");
+    console.log("❌ T.JARVIS SYSTEM: Could not locate or execute the core binary.");
     console.log("");
     console.log("🔍 Debug: Searched for binary in:");
     console.log("  • Bundled binary (bin/terminal-jarvis)");

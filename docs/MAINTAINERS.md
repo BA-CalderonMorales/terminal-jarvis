@@ -17,13 +17,13 @@ Terminal Jarvis uses a **hybrid CI/CD approach** with automated Git operations a
 
 **What local-ci.sh does:**
 
-- ✅ Code formatting (`cargo fmt`)
-- ✅ Linting (`cargo clippy`)
-- ✅ Test suite (33 comprehensive tests)
-- ✅ Version consistency validation
-- ✅ Release binary build
-- ✅ NPM package build
-- **❌ No commits, tags, or pushes**
+- Code formatting (`cargo fmt`)
+- Linting (`cargo clippy`)
+- Test suite (33 comprehensive tests)
+- Version consistency validation
+- Release binary build
+- NPM package build
+- **No commits, tags, or pushes**
 
 ### 2. Git Deployment & Crates.io Publishing
 
@@ -34,13 +34,13 @@ Terminal Jarvis uses a **hybrid CI/CD approach** with automated Git operations a
 
 **What local-cd.sh does:**
 
-- ✅ CHANGELOG.md verification
-- ✅ Version management (bump or manual)
-- ✅ Git commit with standardized message
-- ✅ Git tag creation (`v0.0.X`)
-- ✅ Push to GitHub with tags
-- ✅ Publish to crates.io automatically
-- **❌ No NPM publishing (manual only)**
+- CHANGELOG.md verification
+- Version management (bump or manual)
+- Git commit with standardized message
+- Git tag creation (`v0.0.X`)
+- Push to GitHub with tags
+- Publish to crates.io automatically
+- **No NPM publishing (manual only)**
 
 ### 3. Manual NPM Publishing
 
@@ -192,10 +192,10 @@ Use `scripts/utils/generate-readme-tools.sh` to generate README sections from th
 
 **Benefits:**
 
-- ✅ No drift between bullets and table
-- ✅ Consistent formatting across sections
-- ✅ Automatic testing phase documentation
-- ✅ Single place to update tool information
+- No drift between bullets and table
+- Consistent formatting across sections
+- Automatic testing phase documentation
+- Single place to update tool information
 
 ## Distribution Tags Strategy
 

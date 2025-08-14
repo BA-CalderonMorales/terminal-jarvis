@@ -102,52 +102,52 @@ Our test suite validates these essential behaviors:
 
 ### 1. **Tool Management**
 
-- ✅ All 7 AI tools are available: claude, gemini, qwen, opencode, llxprt, codex, crush
-- ✅ All tools use consistent NPM package installation
-- ✅ Tool listing shows proper status and requirements
-- ✅ Install/update commands work for each tool
+- All 7 AI tools are available: claude, gemini, qwen, opencode, llxprt, codex, crush
+- All tools use consistent NPM package installation
+- Tool listing shows proper status and requirements
+- Install/update commands work for each tool
 
 ### 2. **Configuration System**
 
-- ✅ Default configuration loads properly
-- ✅ All tools have NPM install/update commands
-- ✅ Example configuration file is maintained
-- ✅ Version consistency across Cargo.toml and package.json
+- Default configuration loads properly
+- All tools have NPM install/update commands
+- Example configuration file is maintained
+- Version consistency across Cargo.toml and package.json
 
 ### 3. **CLI Interface**
 
-- ✅ Help commands work for all subcommands
-- ✅ Error handling for invalid inputs
-- ✅ Command structure remains stable
+- Help commands work for all subcommands
+- Error handling for invalid inputs
+- Command structure remains stable
 
 ### 4. **Package Management**
 
-- ✅ NPM packages: `@anthropic-ai/claude-code`, `@google/gemini-cli`, `@qwen-code/qwen-code@latest`, `opencode-ai@latest`, `@vybestack/llxprt-code`
-- ✅ Concurrent updates work properly
-- ✅ Individual tool updates function correctly
+- NPM packages: `@anthropic-ai/claude-code`, `@google/gemini-cli`, `@qwen-code/qwen-code@latest`, `opencode-ai@latest`, `@vybestack/llxprt-code`
+- Concurrent updates work properly
+- Individual tool updates function correctly
 
 ### 5. **Authentication & Environment Management**
 
-- ✅ Browser opening prevention in headless/CI environments
-- ✅ Environment detection (CI, Codespaces, SSH, containers)
-- ✅ API key validation and guidance for Gemini CLI and Qwen Code
-- ✅ Authentication behavior integration testing with real tool scenarios
-- ✅ Regression tests to prevent browser opening in terminal environments
+- Browser opening prevention in headless/CI environments
+- Environment detection (CI, Codespaces, SSH, containers)
+- API key validation and guidance for Gemini CLI and Qwen Code
+- Authentication behavior integration testing with real tool scenarios
+- Regression tests to prevent browser opening in terminal environments
 
 ### 6. **Terminal State & Tool Integration**
 
-- ✅ OpenCode input focus works immediately on fresh installs
-- ✅ Terminal state preparation doesn't interfere with tool initialization
-- ✅ Minimal terminal clearing sequences prevent race conditions
-- ✅ Tool-specific launch optimizations (initialization delays, state management)
+- OpenCode input focus works immediately on fresh installs
+- Terminal state preparation doesn't interfere with tool initialization
+- Minimal terminal clearing sequences prevent race conditions
+- Tool-specific launch optimizations (initialization delays, state management)
 
 ### 5. **Multi-Platform Distribution** (v0.0.47+)
 
-- ✅ Homebrew Formula syntax validation
-- ✅ Cross-platform archive creation (macOS/Linux)
-- ✅ SHA256 checksum verification
-- ✅ Binary permissions preservation in archives
-- ✅ Local tap testing workflow validation
+- Homebrew Formula syntax validation
+- Cross-platform archive creation (macOS/Linux)
+- SHA256 checksum verification
+- Binary permissions preservation in archives
+- Local tap testing workflow validation
 
 ## Homebrew Testing Infrastructure
 
