@@ -16,6 +16,6 @@ use cli::Cli;
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
-  let cli = Cli::new();
-  cli.run().await
+    let cli = Cli::new();
+    cli.run().await
 }
