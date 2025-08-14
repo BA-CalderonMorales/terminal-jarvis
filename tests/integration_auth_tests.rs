@@ -66,10 +66,12 @@ mod integration_tests {
         let auth_vars = [
             "GOOGLE_API_KEY",
             "GEMINI_API_KEY",
+            "GOOGLE_APPLICATION_CREDENTIALS",
             "QWEN_CODE_API_KEY",
             "DASHSCOPE_API_KEY",
             "ANTHROPIC_API_KEY",
             "CLAUDE_API_KEY",
+            "OPENAI_API_KEY",
         ];
 
         for var in &auth_vars {
