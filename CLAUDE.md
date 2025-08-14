@@ -13,8 +13,18 @@
 - Terminal output
 - Log messages
 - Error messages
+- CLI interface elements
+- Menu options
+- Status indicators
+- ANY user-facing text
 
 **REASON**: Professional appearance and accessibility. Emojis create visual clutter and accessibility issues.
+
+**CLAUDE REMINDER**: When improving CLI design, use professional text-based indicators like:
+- "[INSTALLED]" / "[AVAILABLE]" instead of checkmarks
+- "►" / "◄" / "•" for navigation instead of fancy symbols
+- Simple ASCII art and borders
+- Text-based status indicators
 
 ## CRITICAL DEPLOYMENT WARNING
 

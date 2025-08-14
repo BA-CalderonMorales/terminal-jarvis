@@ -1,14 +1,14 @@
 # Contributing to Terminal Jarvis
 
-🎉 **Thank you for your interest in contributing to Terminal Jarvis!**
+**Thank you for your interest in contributing to Terminal Jarvis!**
 
 This project is a unified command center for AI coding tools, and we welcome contributions that help improve the experience for developers working with AI assistants.
 
-## 🚨 **FIRST STEP: Join Our Discord**
+## **FIRST STEP: Join Our Discord**
 
 **BEFORE opening any Pull Request**, please join our community Discord:
 
-👉 **[Join Terminal Jarvis Discord](https://discord.gg/zNuyC5uG)** 👈
+**[Join Terminal Jarvis Discord](https://discord.gg/zNuyC5uG)**
 
 ### Why Discord First?
 
@@ -25,11 +25,11 @@ This project is a unified command center for AI coding tools, and we welcome con
 - `#development` - Technical discussions, architecture questions, and code reviews
 - `#general` - Community chat and project updates
 
-## 📋 Contribution Types
+## Contribution Types
 
 We welcome various types of contributions:
 
-### 🔧 **Code Contributions**
+### **Code Contributions**
 
 - New AI tool integrations
 - Bug fixes and stability improvements
@@ -37,28 +37,28 @@ We welcome various types of contributions:
 - Session continuation improvements
 - Authentication workflow fixes
 
-### 📚 **Documentation**
+### **Documentation**
 
 - README improvements
 - API documentation
 - Installation guides
 - Usage examples and tutorials
 
-### 🧪 **Testing**
+### **Testing**
 
 - Unit and integration tests
 - Bug reproduction test cases
 - CI/CD improvements
 - Cross-platform testing
 
-### 🎨 **User Experience**
+### **User Experience**
 
 - Interactive interface improvements
 - ASCII art and visual enhancements
 - Error message clarity
 - Command-line ergonomics
 
-## 🚦 **Contribution Process**
+## **Contribution Process**
 
 ### 1. **Discord Discussion** (MANDATORY)
 
@@ -107,7 +107,7 @@ cd npm/terminal-jarvis && npm run build
 - Link Discord discussion
 - Include comprehensive testing information
 
-## 🎯 **Code Quality Standards**
+## **Code Quality Standards**
 
 ### **Rust Code Requirements**
 
@@ -158,14 +158,14 @@ git commit -m "test: add integration tests for tool detection"
 
 ### **What NOT to Do**
 
-- ❌ No emojis in commit messages or code
-- ❌ No vague commits like "fix stuff" or "update things"
-- ❌ No combining unrelated changes in one commit
-- ❌ No force pushing to main or develop branches
-- ❌ No shell scripts in `tests/` directory (use `scripts/` instead)
-- ❌ No multi-line bash commands in suggestions
+- No emojis in commit messages or code
+- No vague commits like "fix stuff" or "update things"
+- No combining unrelated changes in one commit
+- No force pushing to main or develop branches
+- No shell scripts in `tests/` directory (use `scripts/` instead)
+- No multi-line bash commands in suggestions
 
-## 🔧 **New AI Tool Integration**
+## **New AI Tool Integration**
 
 Adding a new AI coding tool requires updating multiple files for consistency:
 
@@ -201,7 +201,7 @@ cargo test --lib services           # Test mappings work
 cargo run -- update --help          # Test end-to-end flow
 ```
 
-## 📚 **Project Structure Understanding**
+## **Project Structure Understanding**
 
 Terminal Jarvis has a specific architecture:
 
@@ -230,7 +230,7 @@ Terminal Jarvis distributes via **three channels**:
 
 **Note**: Contributors cannot publish to these registries - maintainers handle distribution.
 
-## 🚨 **Important Limitations for Contributors**
+## **Important Limitations for Contributors**
 
 ### **Distribution Access**
 
@@ -255,7 +255,7 @@ Contributors do NOT have access to:
 - Cannot test published package distribution
 - Focus on unit/integration tests for your changes
 
-## 🎯 **Effective Contribution Tips**
+## **Effective Contribution Tips**
 
 ### **Start Small**
 
@@ -278,7 +278,7 @@ Contributors do NOT have access to:
 - **Architecture Guide**: Read [ARCHITECTURE.md](ARCHITECTURE.md) for technical deep dive
 - **Testing Guide**: See [TESTING.md](TESTING.md) for testing approaches
 
-## 📈 **Recognition**
+## **Recognition**
 
 Contributors are recognized in:
 
@@ -287,14 +287,14 @@ Contributors are recognized in:
 - Discord contributor role
 - README acknowledgments (for major contributions)
 
-## 🔗 **Useful Links**
+## **Useful Links**
 
-- 🗨️ **[Discord Community](https://discord.gg/zNuyC5uG)** - Primary communication channel
-- 📖 **[Architecture Guide](ARCHITECTURE.md)** - Technical deep dive
-- 🧪 **[Testing Guide](TESTING.md)** - Testing strategies and frameworks
-- 📦 **[Installation Guide](INSTALLATION.md)** - Platform-specific setup
-- ⚠️ **[Known Limitations](LIMITATIONS.md)** - Current issues and workarounds
+- **[Discord Community](https://discord.gg/zNuyC5uG)** - Primary communication channel
+- **[Architecture Guide](ARCHITECTURE.md)** - Technical deep dive
+- **[Testing Guide](TESTING.md)** - Testing strategies and frameworks
+- **[Installation Guide](INSTALLATION.md)** - Platform-specific setup
+- **[Known Limitations](LIMITATIONS.md)** - Current issues and workarounds
 
 ---
 
-**Ready to contribute? Join our Discord community and let's build something amazing together!** 🚀
+**Ready to contribute? Join our Discord community and let's build something amazing together!**

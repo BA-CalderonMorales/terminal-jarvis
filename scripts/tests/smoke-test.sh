@@ -49,7 +49,7 @@ run_test "Tool listing functionality" \
     "$BINARY list > /dev/null 2>&1"
 
 run_test "All 7 tools loaded from configuration" \
-    'TOOL_COUNT=$('$BINARY' list 2>/dev/null | grep -E "^  (claude|gemini|qwen|opencode|llxprt|codex|crush)" | wc -l); [ "$TOOL_COUNT" -eq 7 ]'
+    'TOOL_COUNT=$('$BINARY' list 2>/dev/null | grep -E "^ (claude|gemini|qwen|opencode|llxprt|codex|crush)" | wc -l); [ "$TOOL_COUNT" -eq 7 ]'
 
 run_test "All tools use NPM packages consistently" \
     'NPM_TOOLS=$('$BINARY' list 2>/dev/null | grep -c "Requires: NPM"); [ "$NPM_TOOLS" -eq 7 ]'
