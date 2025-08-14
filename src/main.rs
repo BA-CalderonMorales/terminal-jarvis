@@ -8,6 +8,8 @@ mod config;
 mod installation_arguments;
 mod progress_utils;
 mod services;
+mod theme;
+mod theme_config;
 mod tools;
 
 use cli::Cli;

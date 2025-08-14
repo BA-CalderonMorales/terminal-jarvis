@@ -119,15 +119,15 @@ impl PackageService {
         let config_key = self.get_config_key_for_tool(tool);
 
         let tool_config = self
-            .config
-            .get_tool_config(config_key)
-            .ok_or_else(|| {
-                // Provide helpful error message
-                anyhow!(
-                    "Tool '{}' not found in configuration. This might be due to an outdated config file. Try deleting ~/.config/terminal-jarvis/config.toml to reset to defaults.",
-                    tool
-                )
-            })?;
+      .config
+      .get_tool_config(config_key)
+      .ok_or_else(|| {
+        // Provide helpful error message
+        anyhow!(
+          "Tool '{}' not found in configuration. This might be due to an outdated config file. Try deleting ~/.config/terminal-jarvis/config.toml to reset to defaults.",
+          tool
+        )
+      })?;
 
         if !tool_config.enabled {
             return Err(anyhow!("Tool '{}' is disabled in configuration", tool));

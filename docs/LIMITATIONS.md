@@ -9,7 +9,7 @@ This document outlines current limitations, known issues, and workarounds for Te
 - **Previous Issue**: Login would fail on first attempt due to browser opening in headless environments
 - **Resolution**: Added comprehensive environment detection system that prevents unwanted browser opening
 - **Current Behavior**: Tools now properly prompt for API keys instead of opening browsers in terminal environments
-- **Status**: ✅ **FIXED** - Browser authentication issues resolved with robust environment detection
+- **Status**: **FIXED** - Browser authentication issues resolved with robust environment detection
 
 ## Tool-Specific Issues
 
@@ -19,7 +19,7 @@ This document outlines current limitations, known issues, and workarounds for Te
 - **Root Cause**: Terminal Jarvis progress indicators and clearing sequences interfered with opencode's terminal initialization
 - **Resolution**: Implemented careful terminal state preparation with minimal escape sequences and 75ms initialization delay
 - **Current Behavior**: Input box is automatically focused and ready for immediate typing on startup
-- **Status**: ✅ **FIXED** - Input focus works immediately with comprehensive test coverage
+- **Status**: **FIXED** - Input focus works immediately with comprehensive test coverage
 
 ### New Tool Testing
 

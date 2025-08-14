@@ -5,6 +5,39 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.0.56] - 2025-08-14
+
+### Added
+
+- **Professional T.JARVIS Advisory System**: Complete tool warning message overhaul
+  - Custom T.JARVIS-themed startup guidance for all 7 AI coding tools (claude, gemini, qwen, opencode, llxprt, codex, crush)
+  - Professional Unicode box-drawing advisories with perfect 62-character alignment
+  - Tool-specific guidance: Authentication advisories for API key tools, startup advisories for TUI tools, setup advisories for configuration tools
+  - Eliminated all raw technical warnings (e.g., "WARNING: claude may attempt to open a browser")
+  - Theme-integrated message styling using current T.JARVIS theme colors
+
+### Enhanced
+
+- **CLI Warning Messages**: Complete user-friendliness overhaul throughout the application
+  - Updated NPM/Node.js warnings: "Node.js runtime environment not detected" instead of "NPM is not installed or not in PATH"
+  - OpenCode shell guidance: "OpenCode requires shell environment refresh to update PATH" with quick fix instructions
+  - Professional error message styling: "⚠ ADVISORY:", "✗ SYSTEM:", "✓ COMPLETE:" prefixes with theme integration
+  - Consistent messaging across all CLI operations and error handling
+
+- **Professional Documentation System**: Complete documentation overhaul for enterprise standards
+  - Removed all emojis from docs/ directory following strict NO EMOJIS policy
+  - Enhanced ARCHITECTURE.md with comprehensive theme system documentation
+  - Unified SOURCES.md table format with GitHub repository links for all 7 tools
+  - Streamlined all documentation for professional appearance and accessibility
+  - Added theme system architecture details including theme.rs and theme_config.rs modules
+
+### Fixed
+
+- **Perfect Box Alignment**: Corrected all advisory box border misalignments
+  - Fixed content lines exceeding 62-character width causing right border displacement
+  - Standardized all box components (headers, content, borders) to exact 62-character alignment
+  - Eliminated broken bottom-right corners in Unicode box-drawing characters
+
 ## [0.0.55] - 2025-08-12
 
 ### Added

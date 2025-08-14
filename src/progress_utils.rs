@@ -1,3 +1,4 @@
+use crate::theme_config;
 use indicatif::{MultiProgress, ProgressBar, ProgressStyle};
 use std::time::Duration;
 use tokio::time::sleep;
@@ -42,14 +43,14 @@ impl ProgressUtils {
 
     /// Finish progress with success message
     pub fn finish_with_success(pb: &ProgressBar, message: &str) {
-        pb.finish_with_message(format!("✅ {message}"));
+        pb.finish_with_message(format!("SUCCESS: {message}"));
         // Brief pause to let user see the success message before clearing
         std::thread::sleep(std::time::Duration::from_millis(300));
     }
 
     /// Finish progress with error message
     pub fn finish_with_error(pb: &ProgressBar, message: &str) {
-        pb.finish_with_message(format!("❌ {message}"));
+        pb.finish_with_message(format!("ERROR: {message}"));
         // Brief pause to let user see the error message before clearing
         std::thread::sleep(std::time::Duration::from_millis(500));
     }
@@ -67,7 +68,7 @@ impl ProgressUtils {
         ];
 
         for (step, duration) in steps {
-            pb.set_message(format!("📦 Installing {tool_name}: {step}"));
+            pb.set_message(format!("Installing {tool_name}: {step}"));
             sleep(Duration::from_millis(duration)).await;
         }
     }
@@ -82,7 +83,7 @@ impl ProgressUtils {
         ];
 
         for (step, duration) in steps {
-            pb.set_message(format!("🔍 Verifying {tool_name}: {step}"));
+            pb.set_message(format!("Verifying {tool_name}: {step}"));
             sleep(Duration::from_millis(duration)).await;
         }
     }
@@ -97,22 +98,30 @@ impl ProgressUtils {
 
     /// Create a styled info message
     pub fn info_message(message: &str) {
-        println!("ℹ️  {message}");
+        let theme = theme_config::current_theme();
+        println!("{} {}", theme.accent("T.JARVIS:"), theme.primary(message));
     }
 
     /// Create a styled warning message
     pub fn warning_message(message: &str) {
-        println!("⚠️  {message}");
+        let theme = theme_config::current_theme();
+        println!(
+            "{} {}",
+            theme.secondary("⚠ ADVISORY:"),
+            theme.primary(message)
+        );
     }
 
     /// Create a styled error message
     pub fn error_message(message: &str) {
-        println!("❌ {message}");
+        let theme = theme_config::current_theme();
+        println!("{} {}", theme.accent("✗ SYSTEM:"), theme.primary(message));
     }
 
     /// Create a styled success message
     pub fn success_message(message: &str) {
-        println!("✅ {message}");
+        let theme = theme_config::current_theme();
+        println!("{} {}", theme.accent("✓ COMPLETE:"), theme.primary(message));
     }
 }
 
@@ -125,7 +134,7 @@ pub struct ProgressContext {
 
 impl ProgressContext {
     pub fn new(operation: &str) -> Self {
-        let spinner = ProgressUtils::spinner(&format!("⚡ {operation}"));
+        let spinner = ProgressUtils::spinner(operation);
         Self {
             spinner,
             operation: operation.to_string(),
@@ -133,7 +142,7 @@ impl ProgressContext {
     }
 
     pub fn update_message(&self, message: &str) {
-        self.spinner.set_message(format!("⚡ {message}"));
+        self.spinner.set_message(message.to_string());
     }
 
     pub fn finish_success(&self, message: &str) {

@@ -2,18 +2,54 @@ use crate::config::ConfigManager;
 use crate::installation_arguments::InstallationManager;
 use crate::progress_utils::{ProgressContext, ProgressUtils};
 use crate::services::{GitHubService, PackageService};
+use crate::theme_config;
 use crate::tools::ToolManager;
 use anyhow::{anyhow, Result};
+use inquire::ui::{Color, RenderConfig, StyleSheet, Styled};
 use inquire::{Confirm, MultiSelect, Select, Text};
 use tokio::process::Command as AsyncCommand;
+
+/// Create inquire RenderConfig based on current theme
+fn get_themed_render_config() -> RenderConfig<'static> {
+    let theme = theme_config::current_theme();
+
+    // Map our theme to inquire colors based on theme name
+    let (primary_color, accent_color, secondary_color) = match theme.name {
+        "T.JARVIS" => (Color::DarkCyan, Color::LightCyan, Color::DarkBlue),
+        "Classic" => (Color::White, Color::DarkCyan, Color::DarkGrey),
+        "Matrix" => (Color::DarkGreen, Color::LightGreen, Color::Black),
+        _ => (Color::DarkCyan, Color::LightCyan, Color::DarkGrey),
+    };
+
+    RenderConfig::default()
+        .with_prompt_prefix(Styled::new("?").with_fg(accent_color))
+        .with_answered_prompt_prefix(Styled::new("✓").with_fg(accent_color))
+        .with_default_value(StyleSheet::new().with_fg(secondary_color))
+        .with_help_message(StyleSheet::new().with_fg(secondary_color))
+        .with_text_input(StyleSheet::new().with_fg(primary_color))
+        .with_highlighted_option_prefix(Styled::new(">").with_fg(accent_color))
+        .with_option(StyleSheet::new().with_fg(primary_color))
+        .with_selected_option(Some(
+            StyleSheet::new()
+                .with_fg(accent_color)
+                .with_attr(inquire::ui::Attributes::BOLD),
+        ))
+        .with_scroll_up_prefix(Styled::new("↑").with_fg(accent_color))
+        .with_scroll_down_prefix(Styled::new("↓").with_fg(accent_color))
+}
+
+/// Apply themed render config to MultiSelect as well
+fn apply_theme_to_multiselect<T: std::fmt::Display>(multiselect: MultiSelect<T>) -> MultiSelect<T> {
+    multiselect.with_render_config(get_themed_render_config())
+}
 
 pub async fn handle_run_tool(tool: &str, args: &[String]) -> Result<()> {
     // Check if NPM is available first
     if !InstallationManager::check_npm_available() {
-        ProgressUtils::warning_message("NPM is not installed or not in PATH.");
-        println!("   Most AI coding tools require NPM for installation.");
-        println!("   Please install Node.js and NPM first: https://nodejs.org/");
-        return Err(anyhow!("NPM is required but not available"));
+        ProgressUtils::warning_message("Node.js runtime environment not detected");
+        println!("  Most AI coding tools are distributed via the NPM ecosystem.");
+        println!("  Please install Node.js to continue: https://nodejs.org/");
+        return Err(anyhow!("Node.js runtime required"));
     }
 
     // Check if tool is installed with progress
@@ -26,7 +62,8 @@ pub async fn handle_run_tool(tool: &str, args: &[String]) -> Result<()> {
     if !ToolManager::check_tool_installed(cli_command) {
         check_progress.finish_error(&format!("Tool '{tool}' is not installed"));
 
-        let should_install = match Confirm::new(&format!("📦 Install '{tool}' now?"))
+        let should_install = match Confirm::new(&format!("Install '{tool}' now?"))
+            .with_render_config(get_themed_render_config())
             .with_default(true)
             .prompt()
         {
@@ -82,8 +119,8 @@ pub async fn handle_install_tool(tool: &str) -> Result<()> {
         let npm_check = ProgressContext::new("Checking NPM availability");
 
         if !InstallationManager::check_npm_available() {
-            npm_check.finish_error("NPM is not installed or not in PATH");
-            println!("   Please install Node.js and NPM first: https://nodejs.org/");
+            npm_check.finish_error("Node.js ecosystem not detected");
+            println!("  Please install Node.js and NPM first: https://nodejs.org/");
             return Err(anyhow!(
                 "NPM is required to install {} but is not available",
                 tool
@@ -134,10 +171,10 @@ pub async fn handle_install_tool(tool: &str) -> Result<()> {
             // For opencode, provide additional guidance
             if tool == "opencode" {
                 ProgressUtils::warning_message(
-                    "OpenCode may require a shell restart to be available in PATH.",
+                    "OpenCode requires shell environment refresh to update PATH",
                 );
                 ProgressUtils::info_message(
-                    "Try running: source ~/.bashrc or restart your terminal.",
+                    "Quick fix: Run 'source ~/.bashrc' or restart your terminal",
                 );
             }
         }
@@ -154,34 +191,34 @@ pub async fn handle_update_packages(package: Option<&str>) -> Result<()> {
 
     match package {
         Some(pkg) => {
-            let update_progress = ProgressContext::new(&format!("⚡ Updating {pkg}"));
+            let update_progress = ProgressContext::new(&format!("Updating {pkg}"));
 
             // Add a small delay to show the progress indicator
             tokio::time::sleep(tokio::time::Duration::from_millis(200)).await;
-            update_progress.update_message(&format!("📦 Downloading latest version of {pkg}..."));
+            update_progress.update_message(&format!("Downloading latest version of {pkg}..."));
 
             let result = package_service.update_tool(pkg).await;
 
             match result {
                 Ok(_) => {
-                    update_progress.finish_success(&format!("✅ {pkg} updated successfully"));
+                    update_progress.finish_success(&format!("{pkg} updated successfully"));
                     Ok(())
                 }
                 Err(e) => {
-                    update_progress.finish_error(&format!("❌ Failed to update {pkg}"));
+                    update_progress.finish_error(&format!("Failed to update {pkg}"));
                     Err(e)
                 }
             }
         }
         None => {
             // This should not be called anymore from the updated menu, but keeping for compatibility
-            let overall_progress = ProgressContext::new("⚡ Updating all packages");
+            let overall_progress = ProgressContext::new("Updating all packages");
             let tools = InstallationManager::get_tool_names();
             let mut had_errors = false;
 
             for (index, tool) in tools.iter().enumerate() {
                 overall_progress.update_message(&format!(
-                    "⚡ Updating {tool} ({}/{})...",
+                    "Updating {tool} ({}/{})...",
                     index + 1,
                     tools.len()
                 ));
@@ -189,17 +226,17 @@ pub async fn handle_update_packages(package: Option<&str>) -> Result<()> {
                 tokio::time::sleep(tokio::time::Duration::from_millis(100)).await;
 
                 if let Err(e) = package_service.update_tool(tool).await {
-                    ProgressUtils::error_message(&format!("❌ Failed to update {tool}: {e}"));
+                    ProgressUtils::error_message(&format!("Failed to update {tool}: {e}"));
                     had_errors = true;
                 } else {
-                    ProgressUtils::success_message(&format!("✅ {tool} updated successfully"));
+                    ProgressUtils::success_message(&format!("{tool} updated successfully"));
                 }
             }
 
             if had_errors {
-                overall_progress.finish_error("⚠️  Some packages failed to update");
+                overall_progress.finish_error("Some packages failed to update");
             } else {
-                overall_progress.finish_success("🎉 All packages updated successfully");
+                overall_progress.finish_success("All packages updated successfully");
             }
 
             Ok(())
@@ -208,7 +245,7 @@ pub async fn handle_update_packages(package: Option<&str>) -> Result<()> {
 }
 
 pub async fn handle_list_tools() -> Result<()> {
-    println!("🤖 Available AI Coding Tools:\n");
+    println!("Available AI Coding Tools:\n");
 
     let tools = ToolManager::get_available_tools();
     let install_commands = InstallationManager::get_install_commands();
@@ -216,23 +253,28 @@ pub async fn handle_list_tools() -> Result<()> {
     for (tool_name, tool_info) in tools.iter() {
         let install_info = install_commands.get(tool_name).unwrap();
         let status = if tool_info.is_installed {
-            "✅ Installed"
+            "Installed"
         } else {
-            "📦 Not installed"
+            "Not installed"
         };
 
-        println!("  {} - {}", tool_name, install_info.description);
-        println!("    Status: {status}");
-        println!("    Command: {}", tool_info.command);
+        println!(" {} - {}", tool_name, install_info.description);
+        println!("  Status: {status}");
+        println!("  Command: {}", tool_info.command);
         if install_info.requires_npm {
-            println!("    Requires: NPM");
+            println!("  Requires: NPM");
         }
         println!();
     }
 
     if !InstallationManager::check_npm_available() {
-        println!("⚠️  Warning: NPM is not available. Most tools require NPM for installation.");
-        println!("   Install Node.js and NPM from: https://nodejs.org/");
+        let theme = theme_config::current_theme();
+        println!(
+            "{} {}",
+            theme.secondary("⚠ ADVISORY:"),
+            theme.primary("Node.js ecosystem not detected")
+        );
+        println!("  Most AI tools are distributed via NPM. Install from: https://nodejs.org/");
     }
 
     Ok(())
@@ -249,15 +291,15 @@ pub async fn handle_tool_info(tool: &str) -> Result<()> {
         .get(tool)
         .ok_or_else(|| anyhow!("Installation info for '{}' not found", tool))?;
 
-    println!("🔍 Tool Information: {tool}\n");
+    println!("Tool Information: {tool}\n");
     println!("Description: {}", install_info.description);
     println!("Command: {}", tool_info.command);
     println!(
         "Status: {}",
         if tool_info.is_installed {
-            "✅ Installed"
+            "Installed"
         } else {
-            "📦 Not installed"
+            "Not installed"
         }
     );
     println!(
@@ -268,9 +310,9 @@ pub async fn handle_tool_info(tool: &str) -> Result<()> {
 
     if install_info.requires_npm {
         let npm_status = if InstallationManager::check_npm_available() {
-            "✅ Available"
+            "Available"
         } else {
-            "❌ Not available"
+            "Not available"
         };
         println!("NPM Required: Yes ({npm_status})");
     }
@@ -301,10 +343,10 @@ pub async fn handle_templates_list() -> Result<()> {
     let templates = github_service.list_templates().await?;
 
     if templates.is_empty() {
-        println!("  No templates found. Use 'terminal-jarvis templates create <name>' to create a template.");
+        println!(" No templates found. Use 'terminal-jarvis templates create <name>' to create a template.");
     } else {
         for template in templates {
-            println!("  - {template}");
+            println!(" - {template}");
         }
     }
 
@@ -319,11 +361,16 @@ pub async fn handle_templates_apply(name: &str) -> Result<()> {
 }
 
 pub async fn handle_interactive_mode() -> Result<()> {
+    // Initialize theme configuration
+    let _ = theme_config::initialize_theme_config();
+
     // Check NPM availability upfront
     let npm_available = InstallationManager::check_npm_available();
 
     loop {
-        // Clear screen and display stunning T.JARVIS interface
+        // Get fresh theme on each iteration to support theme switching
+        let theme = theme_config::current_theme();
+        // Clear screen first
         print!("\x1b[2J\x1b[H"); // Clear screen
 
         // Get terminal width for responsive design
@@ -333,79 +380,80 @@ pub async fn handle_interactive_mode() -> Result<()> {
             80 // fallback width
         };
 
-        // Futuristic minimal design
-        println!();
-        let border_width = std::cmp::min(70, term_width.saturating_sub(4));
-        let border_padding = if term_width > border_width {
-            " ".repeat((term_width - border_width) / 2)
+        // Professional design with blue background in content areas - no initial line break
+        // Use most of the terminal width for a more immersive experience
+        let border_width = if term_width > 20 {
+            term_width.saturating_sub(4) // Leave 2 chars padding on each side
         } else {
-            String::new()
+            term_width.saturating_sub(2) // Minimum border for very narrow terminals
         };
+        let border_padding = format!("{}  {}", "\x1b[0m", "\x1b[0m"); // Explicit reset for padding spaces
 
-        // Futuristic neon colors - Electric cyan and bright white
-        let neon_cyan = "\x1b[96m"; // Bright cyan
-        let neon_white = "\x1b[97m"; // Bright white
-        let neon_blue = "\x1b[94m"; // Bright blue
-        let dim_cyan = "\x1b[36m"; // Regular cyan for borders
-        let reset = "\x1b[0m";
-
+        // Professional color scheme using T.JARVIS theme
         let top_border = format!(
             "{}╔{}╗{}",
-            dim_cyan,
+            theme.colors.border,
             "═".repeat(border_width.saturating_sub(2)),
-            reset
-        );
-        let empty_border = format!(
-            "{}║{}║{}",
-            dim_cyan,
-            " ".repeat(border_width.saturating_sub(2)),
-            reset
+            theme.reset()
         );
         let bottom_border = format!(
             "{}╚{}╝{}",
-            dim_cyan,
+            theme.colors.border,
             "═".repeat(border_width.saturating_sub(2)),
-            reset
+            theme.reset()
         );
 
         println!("{border_padding}{top_border}");
-        println!("{border_padding}{empty_border}");
 
-        // Futuristic T.JARVIS ASCII art
+        // T.JARVIS ASCII art - professional and clean
         let logo_lines = vec![
-            "████████╗       ██╗ █████╗ ██████╗ ██╗   ██╗██╗███████╗",
-            "╚══██╔══╝       ██║██╔══██╗██╔══██╗██║   ██║██║██╔════╝",
-            "   ██║          ██║███████║██████╔╝██║   ██║██║███████╗",
-            "   ██║     ██   ██║██╔══██║██╔══██╗╚██╗ ██╔╝██║╚════██║",
-            "   ██║  ██╗╚█████╔╝██║  ██║██║  ██║ ╚████╔╝ ██║███████║",
-            "   ╚═╝  ╚═╝ ╚════╝ ╚═╝  ╚═╝╚═╝  ╚═╝  ╚═══╝  ╚═╝╚══════╝",
-        ];
+      "$$$$$$$$\\           $$$$$\\  $$$$$$\\  $$$$$$$\\  $$\\    $$\\ $$$$$$\\  $$$$$$\\  ",
+      "\\__$$  __|          \\__$$ |$$  __$$\\ $$  __$$\\ $$ |   $$ |\\_$$  _|$$  __$$\\ ",
+      "   $$ |                $$ |$$ /  $$ |$$ |  $$ |$$ |   $$ |  $$ |  $$ /  \\__|",
+      "   $$ |                $$ |$$$$$$$$ |$$$$$$$  |\\$$\\  $$  /  $$ |  \\$$$$$$\\  ",
+      "   $$ |          $$\\   $$ |$$  __$$ |$$  __$$<  \\$$\\$$  /   $$ |   \\____$$\\ ",
+      "   $$ |          $$ |  $$ |$$ |  $$ |$$ |  $$ |  \\$$$  /    $$ |  $$\\   $$ |",
+      "   $$ |$$\\       \\$$$$$$  |$$ |  $$ |$$ |  $$ |   \\$  /   $$$$$$\\ \\$$$$$$  |",
+      "   \\__|\\__|       \\______/ \\__|  \\__|\\__|  \\__|    \\_/    \\______| \\______/ ",
+    ];
 
-        let inner_width = border_width.saturating_sub(4);
+        let inner_width = border_width.saturating_sub(2); // Account for left and right border chars only
+
+        // Helper function to print a line with proper border and background
+        let print_border_line = |content: &str| {
+            let full_line = theme.background_line_with_content(content, inner_width);
+            println!(
+                "{}{}║{}║{}",
+                border_padding, theme.colors.border, full_line, theme.colors.border,
+            );
+        };
+
+        // Add empty line before logo
+        print_border_line("");
 
         for line in logo_lines {
             let line_chars: Vec<char> = line.chars().collect();
             let line_char_len = line_chars.len();
 
             if line_char_len <= inner_width {
-                let content_padding = (inner_width - line_char_len) / 2;
-                let left_padding = " ".repeat(content_padding);
-                let right_padding = " ".repeat(inner_width - content_padding - line_char_len);
-                println!(
-                    "{border_padding}{dim_cyan}║ {left_padding}{neon_cyan}{line}{right_padding} ║{reset}"
-                );
+                // Create content with logo color formatting
+                let content = format!("{}{}", theme.logo_no_reset(""), line);
+                print_border_line(&content);
             } else {
                 let simple_line = "T.JARVIS";
-                let content_padding = (inner_width - simple_line.len()) / 2;
-                let left_padding = " ".repeat(content_padding);
-                let right_padding = " ".repeat(inner_width - content_padding - simple_line.len());
-                println!(
-                    "{border_padding}{dim_cyan}║ {left_padding}{neon_cyan}{simple_line}{right_padding} ║{reset}"
-                );
+                // Create content with logo color formatting
+                let content = format!("{}{}", theme.logo_no_reset(""), simple_line);
+                print_border_line(&content);
             }
         }
 
-        println!("{border_padding}{empty_border}");
+        // Add empty line after logo
+        print_border_line("");
+
+        // Add elegant separator line with theme colors
+        let separator_content =
+            theme.background_line_with_content(&"─".repeat(inner_width), inner_width);
+        print_border_line(&separator_content);
 
         // Version and tagline in futuristic style - with NPM distribution tag if available
         let base_version = env!("CARGO_PKG_VERSION");
@@ -417,7 +465,7 @@ pub async fn handle_interactive_mode() -> Result<()> {
         });
 
         // Show progress for NPM tag detection with caching
-        let npm_progress = ProgressContext::new("🔍 Checking NPM distribution tags");
+        let npm_progress = ProgressContext::new("Checking NPM distribution tags");
         let npm_tag = PackageService::get_cached_npm_dist_tag_info(&config_manager)
             .await
             .unwrap_or(None);
@@ -430,16 +478,12 @@ pub async fn handle_interactive_mode() -> Result<()> {
         };
 
         if version_text.len() <= inner_width {
-            let version_content_padding = (inner_width - version_text.len()) / 2;
-            let version_left_padding = " ".repeat(version_content_padding);
-            let version_right_padding =
-                " ".repeat(inner_width - version_content_padding - version_text.len());
-            println!(
-                "{border_padding}{dim_cyan}║ {version_left_padding}{neon_blue}{version_text}{version_right_padding} ║{reset}"
-            );
+            // Use background_line_with_content for proper background fill
+            let content = format!("{}{}", theme.secondary_no_reset(""), version_text);
+            print_border_line(&content);
         }
 
-        let tagline = "🤖 AI Coding Assistant Command Center";
+        let tagline = "AI Coding Assistant Command Center";
         // Calculate visual width accounting for emoji (which takes 2 columns)
         let tagline_visual_width = tagline
             .chars()
@@ -453,19 +497,18 @@ pub async fn handle_interactive_mode() -> Result<()> {
             .sum::<usize>();
 
         if tagline_visual_width <= inner_width {
-            let tagline_content_padding = (inner_width - tagline_visual_width) / 2;
-            let tagline_left_padding = " ".repeat(tagline_content_padding);
-            let tagline_right_padding =
-                " ".repeat(inner_width - tagline_content_padding - tagline_visual_width);
-            println!(
-                "{border_padding}{dim_cyan}║ {tagline_left_padding}{neon_white}{tagline}{tagline_right_padding} ║{reset}"
-            );
+            // Use background_line_with_content for proper background fill
+            let content = format!("{}{}", theme.secondary_no_reset(""), tagline);
+            print_border_line(&content);
         }
 
-        println!("{border_padding}{empty_border}");
+        // Add another elegant separator
+        let separator_content2 =
+            theme.background_line_with_content(&"─".repeat(inner_width), inner_width);
+        print_border_line(&separator_content2);
 
         // Short hint about Important Links - shortened to fit border
-        let links_hint = "📚 See 'Important Links' menu";
+        let links_hint = "See 'Important Links' menu";
         // Calculate visual width accounting for emoji (which takes 2 columns)
         let links_visual_width = links_hint
             .chars()
@@ -479,42 +522,33 @@ pub async fn handle_interactive_mode() -> Result<()> {
             .sum::<usize>();
 
         if links_visual_width <= inner_width {
-            let links_content_padding = (inner_width - links_visual_width) / 2;
-            let links_left_padding = " ".repeat(links_content_padding);
-            let links_right_padding =
-                " ".repeat(inner_width - links_content_padding - links_visual_width);
-            println!(
-                "{border_padding}{dim_cyan}║ {links_left_padding}{dim_cyan}{links_hint}{links_right_padding} ║{reset}"
-            );
+            // Use background_line_with_content for proper background fill
+            let content = format!("{}{}", theme.secondary_no_reset(""), links_hint);
+            print_border_line(&content);
         }
 
-        println!("{border_padding}{empty_border}");
+        // Add empty line after links hint to match top padding
+        print_border_line("");
+
         println!("{border_padding}{bottom_border}");
         println!();
 
         // Minimal setup warning
         if !npm_available {
-            println!("{neon_blue}⚠️  Node.js required → https://nodejs.org/{reset}");
+            println!("Node.js required → https://nodejs.org/");
             println!();
         }
 
-        // Show progress while loading tool status
-        let loading_progress = ProgressContext::new("Loading AI tools status");
-
-        // Add a small delay to show the progress
-        tokio::time::sleep(tokio::time::Duration::from_millis(500)).await;
-
-        loading_progress.finish_success("Interface initialized");
-
-        // Main menu options - clean and organized
+        // Main menu options - clean styling without redundant indicators
         let options = vec![
-            "🤖 AI CLI Tools".to_string(),
-            "📚 Important Links".to_string(),
-            "⚙️  Settings".to_string(),
-            "🚪 Exit".to_string(),
+            "AI CLI Tools".to_string(),
+            "Important Links".to_string(),
+            "Settings".to_string(),
+            "Exit".to_string(),
         ];
 
         let selection = match Select::new("Choose an option:", options.clone())
+            .with_render_config(get_themed_render_config())
             .with_page_size(10)
             .prompt()
         {
@@ -522,77 +556,69 @@ pub async fn handle_interactive_mode() -> Result<()> {
             Err(_) => {
                 // User interrupted (Ctrl+C) - show clean exit message
                 println!();
-                println!("👋 Goodbye!");
+                println!("Goodbye!");
                 return Ok(());
             }
         };
 
         // Handle selection
         match selection.as_str() {
-            s if s.starts_with("🤖") => {
+            s if s.contains("AI CLI Tools") => {
                 handle_ai_tools_menu().await?;
             }
-            s if s.starts_with("📚") => {
+            s if s.contains("Important Links") => {
                 handle_important_links().await?;
             }
-            s if s.starts_with("⚙️") => {
+            s if s.contains("Settings") => {
                 handle_manage_tools_menu().await?;
             }
-            s if s.starts_with("🚪") => {
-                println!("{neon_blue}👋 Goodbye!{reset}");
+            s if s.contains("Exit") => {
+                print!("{}", theme.reset()); // Reset all formatting
+                print!("\x1b[2J\x1b[H"); // Clear screen
+                println!("Goodbye!");
                 break;
             }
             _ => continue,
         }
     }
+    // Ensure terminal is reset when function exits
+    print!("\x1b[0m"); // Reset all formatting
+    print!("\x1b[2J\x1b[H"); // Clear screen
     Ok(())
 }
 
 async fn handle_ai_tools_menu() -> Result<()> {
     loop {
-        // Futuristic colors consistent with main interface
-        let neon_cyan = "\x1b[96m";
-        let neon_blue = "\x1b[94m";
-        let neon_white = "\x1b[97m";
-        let reset = "\x1b[0m";
+        // Get fresh theme on each iteration to support theme switching
+        let theme = theme_config::current_theme();
 
         print!("\x1b[2J\x1b[H"); // Clear screen
 
-        println!("{neon_cyan}🤖 AI CLI Tools{reset}\n");
+        println!("{}\n", theme.primary("AI CLI Tools"));
 
         // Show loading indicator
         let loading_progress = ProgressContext::new("Loading AI tools status");
         tokio::time::sleep(tokio::time::Duration::from_millis(300)).await;
 
         let tools = ToolManager::get_available_tools();
-        let install_commands = InstallationManager::get_install_commands();
 
         loading_progress.finish_success("AI tools status loaded");
 
-        // Build clean tool list with status indicators
+        // Build clean tool list
         let mut options = Vec::new();
         let mut tool_mapping = Vec::new();
 
-        for (tool_name, tool_info) in tools.iter() {
-            let install_info = install_commands.get(tool_name).unwrap();
-            let status_icon = if tool_info.is_installed {
-                "🚀"
-            } else {
-                "📦"
-            };
-            let display_text = format!(
-                "{} {} - {}",
-                status_icon, tool_name, install_info.description
-            );
-            options.push(display_text);
+        for (tool_name, _tool_info) in tools.iter() {
+            options.push(tool_name.to_string());
             tool_mapping.push(Some(*tool_name));
         }
 
         // Add back option
-        options.push("🔙 Back to Main Menu".to_string());
+        options.push("Back to Main Menu".to_string());
         tool_mapping.push(None);
 
         let selection = match Select::new("Select an AI tool to launch:", options.clone())
+            .with_render_config(get_themed_render_config())
             .with_page_size(15)
             .prompt()
         {
@@ -604,7 +630,7 @@ async fn handle_ai_tools_menu() -> Result<()> {
         };
 
         // Handle selection
-        if selection.contains("🔙") {
+        if selection.contains("Back to Main Menu") {
             return Ok(());
         } else if let Some(index) = options.iter().position(|opt| opt == &selection) {
             if let Some(Some(tool_name)) = tool_mapping.get(index) {
@@ -613,38 +639,45 @@ async fn handle_ai_tools_menu() -> Result<()> {
 
                 if !tool_info.is_installed {
                     let should_install = match Confirm::new(&format!(
-                        "{neon_blue}📦 '{tool_name}' is not installed. Install it now?{reset}"
+                        "{} '{}' is not installed. Install it now?",
+                        theme.accent("Tool"),
+                        tool_name
                     ))
+                    .with_render_config(get_themed_render_config())
                     .with_default(true)
                     .prompt()
                     {
                         Ok(result) => result,
                         Err(_) => {
                             // User interrupted - go back to main menu
-                            println!("\n{neon_cyan}🔙 Installation cancelled{reset}");
+                            println!("\n{}", theme.accent("Installation cancelled"));
                             return Ok(());
                         }
                     };
 
                     if should_install {
-                        println!("\n{neon_cyan}📦 Installing {tool_name}...{reset}");
+                        println!(
+                            "\n{}",
+                            theme.accent(&format!("Installing {}...", tool_name))
+                        );
                         handle_install_tool(tool_name).await?;
-                        println!("{neon_cyan}✅ Installation complete!{reset}\n");
+                        println!("{}", theme.accent("Installation complete!\n"));
                     } else {
                         return Ok(());
                     }
                 }
 
                 let args_input = match Text::new(&format!(
-                "{neon_white}Enter arguments for {tool_name} (or press Enter for default):{reset}"
-            ))
+                    "{}Enter arguments for {tool_name} (or press Enter for default):",
+                    theme.primary("")
+                ))
                 .with_default("")
                 .prompt()
                 {
                     Ok(input) => input,
                     Err(_) => {
                         // User interrupted - go back to main menu
-                        println!("\n{neon_cyan}🔙 Operation cancelled{reset}");
+                        println!("\n{}", theme.accent("Operation cancelled"));
                         return Ok(());
                     }
                 };
@@ -689,21 +722,28 @@ async fn handle_ai_tools_menu() -> Result<()> {
 
                 match ToolManager::run_tool(tool_name, &args).await {
                     Ok(_) => {
-                        println!("\n{neon_cyan}✅ {tool_name} completed successfully!{reset}");
+                        println!(
+                            "\n{}",
+                            theme.accent(&format!("{} completed successfully!", tool_name))
+                        );
                     }
                     Err(e) => {
-                        eprintln!("\n{neon_cyan}❌ Error running {tool_name}: {e}{reset}");
+                        eprintln!(
+                            "\n{}",
+                            theme.accent(&format!("Error running {}: {}", tool_name, e))
+                        );
                     }
                 }
 
                 // Enhanced exit options for faster context switching
                 let exit_options = vec![
-                    "🏠 Back to Main Menu".to_string(),
-                    "🤖 Switch to Another AI Tool".to_string(),
-                    "🚪 Exit Terminal Jarvis".to_string(),
+                    "Back to Main Menu".to_string(),
+                    "Switch to Another AI Tool".to_string(),
+                    "Exit Terminal Jarvis".to_string(),
                 ];
 
                 let exit_choice = match Select::new("What would you like to do next?", exit_options)
+                    .with_render_config(get_themed_render_config())
                     .with_page_size(5)
                     .prompt()
                 {
@@ -715,17 +755,17 @@ async fn handle_ai_tools_menu() -> Result<()> {
                 };
 
                 match exit_choice.as_str() {
-                    s if s.contains("🏠") => {
+                    s if s.contains("Back to Main Menu") => {
                         // Return to main menu - break out of AI tools submenu
                         return Ok(());
                     }
-                    s if s.contains("🤖") => {
+                    s if s.contains("Switch to Another AI Tool") => {
                         // Stay in AI tools menu for context switching - continue the loop
                         continue;
                     }
-                    s if s.contains("🚪") => {
+                    s if s.contains("Exit Terminal Jarvis") => {
                         // Exit completely - break out of everything
-                        println!("{neon_blue}👋 Goodbye!{reset}");
+                        println!("{}", theme.accent("Goodbye!"));
                         std::process::exit(0);
                     }
                     _ => {
@@ -739,136 +779,152 @@ async fn handle_ai_tools_menu() -> Result<()> {
 }
 
 async fn handle_important_links() -> Result<()> {
-    // Futuristic colors consistent with main interface
-    let neon_cyan = "\x1b[96m";
-    let neon_blue = "\x1b[94m";
-    let neon_green = "\x1b[92m";
-    let neon_magenta = "\x1b[95m";
-    let neon_yellow = "\x1b[93m";
-    let reset = "\x1b[0m";
+    loop {
+        let theme = theme_config::current_theme();
 
-    print!("\x1b[2J\x1b[H"); // Clear screen
+        print!("\x1b[2J\x1b[H"); // Clear screen
 
-    println!("{neon_cyan}📚 Important Links & Resources{reset}\n");
+        println!("{}\n", theme.accent("Important Links & Resources"));
 
-    let options = vec![
-        format!("{neon_blue}🐙 GitHub Repository{reset}"),
-        format!("{neon_green}📦 NPM Package{reset}"),
-        format!("{neon_magenta}📝 CHANGELOG.md{reset}"),
-        format!("{neon_yellow}🔧 Cargo Package{reset}"),
-        format!("{neon_cyan}📖 Documentation{reset}"),
-        format!("{neon_blue}🚀 Homebrew Formula{reset}"),
-        "🔙 Back to Main Menu".to_string(),
-    ];
+        let options = vec![
+            "GitHub Repository".to_string(),
+            "NPM Package".to_string(),
+            "CHANGELOG.md".to_string(),
+            "Cargo Package".to_string(),
+            "Documentation".to_string(),
+            "Homebrew Formula".to_string(),
+            "Back to Main Menu".to_string(),
+        ];
 
-    let selection = match Select::new("Choose a resource to view:", options)
-        .with_page_size(10)
-        .prompt()
-    {
-        Ok(selection) => selection,
-        Err(_) => {
-            // User interrupted - return to main menu
-            return Ok(());
-        }
-    };
+        let selection = match Select::new("Choose a resource to view:", options)
+            .with_render_config(get_themed_render_config())
+            .with_page_size(10)
+            .prompt()
+        {
+            Ok(selection) => selection,
+            Err(_) => {
+                // User interrupted - return to main menu
+                return Ok(());
+            }
+        };
 
-    match selection.as_str() {
-        s if s.contains("GitHub") => {
-            println!("\n{neon_blue}🐙 Opening GitHub Repository...{reset}");
-            println!("   📍 https://github.com/BA-CalderonMorales/terminal-jarvis");
-            println!("   - View source code and contribute");
-            println!("   - Report issues and feature requests");
-            println!("   - Check latest releases and changelogs");
+        match selection.as_str() {
+            s if s.contains("GitHub") => {
+                println!("\n{}", theme.accent("Opening GitHub Repository..."));
+                println!("    https://github.com/BA-CalderonMorales/terminal-jarvis");
+                println!("  - View source code and contribute");
+                println!("  - Report issues and feature requests");
+                println!("  - Check latest releases and changelogs");
+            }
+            s if s.contains("NPM") => {
+                println!("\n{}", theme.accent("NPM Package Information..."));
+                println!("    https://www.npmjs.com/package/terminal-jarvis");
+                println!("  - Install: npm install -g terminal-jarvis");
+                println!("  - Run: npx terminal-jarvis");
+                println!("  - Version history and statistics");
+            }
+            s if s.contains("CHANGELOG") => {
+                println!("\n{}", theme.secondary("CHANGELOG.md - Version History"));
+                println!("    https://github.com/BA-CalderonMorales/terminal-jarvis/blob/main/CHANGELOG.md");
+                println!("  - Detailed release notes for each version");
+                println!("  - Feature additions and bug fixes");
+                println!("  - Breaking changes and migration guides");
+            }
+            s if s.contains("Cargo") => {
+                println!("\n{}", theme.accent("Cargo Package Information"));
+                println!("    https://crates.io/crates/terminal-jarvis");
+                println!("  - Install: cargo install terminal-jarvis");
+                println!("  - Rust ecosystem integration");
+                println!("  - Development dependencies and features");
+            }
+            s if s.contains("Documentation") => {
+                println!("\n{}", theme.accent("Documentation Hub"));
+                println!(
+                    "    https://github.com/BA-CalderonMorales/terminal-jarvis/tree/main/docs"
+                );
+                println!("  - Architecture overview and design decisions");
+                println!("  - Installation guides for all platforms");
+                println!("  - Testing procedures and contribution guidelines");
+                println!("  - Limitations and troubleshooting");
+            }
+            s if s.contains("Homebrew") => {
+                println!("\n{}", theme.accent("Homebrew Formula"));
+                println!(
+                    "    https://github.com/BA-CalderonMorales/terminal-jarvis/tree/main/homebrew"
+                );
+                println!("  - macOS/Linux package management");
+                println!("  - Install: brew tap ba-calderonmorales/terminal-jarvis && brew install terminal-jarvis");
+                println!("  - System integration and automatic updates");
+            }
+            s if s.contains("Back to Main Menu") => {
+                // Exit loop and return to main menu
+                return Ok(());
+            }
+            _ => {
+                // Unknown option - continue loop
+                continue;
+            }
         }
-        s if s.contains("NPM") => {
-            println!("\n{neon_green}📦 NPM Package Information...{reset}");
-            println!("   📍 https://www.npmjs.com/package/terminal-jarvis");
-            println!("   - Install: npm install -g terminal-jarvis");
-            println!("   - Run: npx terminal-jarvis");
-            println!("   - Version history and statistics");
-        }
-        s if s.contains("CHANGELOG") => {
-            println!("\n{neon_magenta}📝 CHANGELOG.md - Version History{reset}");
-            println!("   📍 https://github.com/BA-CalderonMorales/terminal-jarvis/blob/main/CHANGELOG.md");
-            println!("   - Detailed release notes for each version");
-            println!("   - Feature additions and bug fixes");
-            println!("   - Breaking changes and migration guides");
-        }
-        s if s.contains("Cargo") => {
-            println!("\n{neon_yellow}🔧 Cargo Package Information{reset}");
-            println!("   📍 https://crates.io/crates/terminal-jarvis");
-            println!("   - Install: cargo install terminal-jarvis");
-            println!("   - Rust ecosystem integration");
-            println!("   - Development dependencies and features");
-        }
-        s if s.contains("Documentation") => {
-            println!("\n{neon_cyan}📖 Documentation Hub{reset}");
-            println!("   📍 https://github.com/BA-CalderonMorales/terminal-jarvis/tree/main/docs");
-            println!("   - Architecture overview and design decisions");
-            println!("   - Installation guides for all platforms");
-            println!("   - Testing procedures and contribution guidelines");
-            println!("   - Limitations and troubleshooting");
-        }
-        s if s.contains("Homebrew") => {
-            println!("\n{neon_blue}🚀 Homebrew Formula{reset}");
-            println!(
-                "   📍 https://github.com/BA-CalderonMorales/terminal-jarvis/tree/main/homebrew"
-            );
-            println!("   - macOS/Linux package management");
-            println!("   - Install: brew tap ba-calderonmorales/terminal-jarvis && brew install terminal-jarvis");
-            println!("   - System integration and automatic updates");
-        }
-        _ => {
-            // Back to main menu
-            return Ok(());
-        }
+
+        println!("\n{}", theme.accent("Press Enter to continue..."));
+        let _ = std::io::stdin().read_line(&mut String::new());
+
+        // Continue loop to return to Important Links menu
     }
-
-    println!("\n{neon_cyan}Press Enter to continue...{reset}");
-    let _ = std::io::stdin().read_line(&mut String::new());
-
-    Ok(())
 }
 
 async fn handle_manage_tools_menu() -> Result<()> {
-    // Futuristic colors consistent with main interface
-    let neon_cyan = "\x1b[96m";
-    let reset = "\x1b[0m";
+    loop {
+        let theme = theme_config::current_theme();
 
-    print!("\x1b[2J\x1b[H"); // Clear screen
+        print!("\x1b[2J\x1b[H"); // Clear screen
 
-    println!("{neon_cyan}⚙️  Settings & Tools{reset}\n");
+        println!("{}\n", theme.accent("Settings & Tools"));
 
-    let options = vec![
-        "📦 Install Tools".to_string(),
-        "🔄 Update Tools".to_string(),
-        "📋 List All Tools".to_string(),
-        "ℹ️  Tool Information".to_string(),
-        "🔙 Back to Main Menu".to_string(),
-    ];
+        let options = vec![
+            "Install Tools".to_string(),
+            "Update Tools".to_string(),
+            "List All Tools".to_string(),
+            "Tool Information".to_string(),
+            "Switch Theme".to_string(),
+            "Back to Main Menu".to_string(),
+        ];
 
-    let selection = match Select::new("Choose an option:", options)
-        .with_page_size(10)
-        .prompt()
-    {
-        Ok(selection) => selection,
-        Err(_) => {
-            // User interrupted - return to main menu
-            return Ok(());
+        let selection = match Select::new("Choose an option:", options)
+            .with_render_config(get_themed_render_config())
+            .with_page_size(10)
+            .prompt()
+        {
+            Ok(selection) => selection,
+            Err(_) => {
+                // User interrupted - return to main menu
+                return Ok(());
+            }
+        };
+
+        match selection.as_str() {
+            s if s.contains("Install Tools") => {
+                handle_install_tools_menu().await?;
+            }
+            s if s.contains("Update Tools") => {
+                handle_update_tools_menu().await?;
+            }
+            s if s.contains("List All Tools") => {
+                handle_list_tools().await?;
+                println!("\n{}", theme.accent("Press Enter to continue..."));
+                let _ = std::io::stdin().read_line(&mut String::new());
+            }
+            s if s.contains("Tool Information") => {
+                handle_tool_info_menu().await?;
+            }
+            s if s.contains("Switch Theme") => {
+                handle_theme_switch_menu().await?;
+            }
+            _ => {
+                // Back to main menu
+                return Ok(());
+            }
         }
-    };
-
-    match selection.as_str() {
-        s if s.starts_with("📦") => handle_install_tools_menu().await,
-        s if s.starts_with("🔄") => handle_update_tools_menu().await,
-        s if s.starts_with("📋") => {
-            handle_list_tools().await?;
-            println!("\n{neon_cyan}Press Enter to continue...{reset}");
-            let _ = std::io::stdin().read_line(&mut String::new());
-            Ok(())
-        }
-        s if s.starts_with("ℹ️") => handle_tool_info_menu().await,
-        _ => Ok(()), // Back to main menu
     }
 }
 
@@ -878,9 +934,9 @@ async fn handle_install_tools_menu() -> Result<()> {
     tokio::time::sleep(tokio::time::Duration::from_millis(200)).await;
 
     if !InstallationManager::check_npm_available() {
-        npm_check.finish_error("NPM is not available");
-        ProgressUtils::error_message("NPM is not available. Please install Node.js first.");
-        println!("   Download from: https://nodejs.org/");
+        npm_check.finish_error("Node.js ecosystem unavailable");
+        ProgressUtils::error_message("Node.js runtime required. Install from: https://nodejs.org/");
+        println!("  Download from: https://nodejs.org/");
         println!("Press Enter to continue...");
         std::io::stdin().read_line(&mut String::new())?;
         return Ok(());
@@ -907,14 +963,18 @@ async fn handle_install_tools_menu() -> Result<()> {
         uninstalled_tools.len()
     ));
 
-    let tools_to_install =
-        match MultiSelect::new("Select tools to install:", uninstalled_tools).prompt() {
-            Ok(tools) => tools,
-            Err(_) => {
-                // User interrupted - return to previous menu
-                return Ok(());
-            }
-        };
+    let tools_to_install = match apply_theme_to_multiselect(MultiSelect::new(
+        "Select tools to install:",
+        uninstalled_tools,
+    ))
+    .prompt()
+    {
+        Ok(tools) => tools,
+        Err(_) => {
+            // User interrupted - return to previous menu
+            return Ok(());
+        }
+    };
 
     println!();
     for tool in tools_to_install {
@@ -930,7 +990,7 @@ async fn handle_install_tools_menu() -> Result<()> {
 
 async fn handle_update_tools_menu() -> Result<()> {
     // Check for installed tools with progress
-    let scan_progress = ProgressContext::new("🔍 Scanning for installed tools");
+    let scan_progress = ProgressContext::new("Scanning for installed tools");
     tokio::time::sleep(tokio::time::Duration::from_millis(500)).await;
 
     let installed_tools: Vec<String> = ToolManager::get_installed_tools()
@@ -939,23 +999,23 @@ async fn handle_update_tools_menu() -> Result<()> {
         .collect();
 
     if installed_tools.is_empty() {
-        scan_progress.finish_error("❌ No tools are installed yet");
+        scan_progress.finish_error("No tools are installed yet");
         ProgressUtils::info_message("No tools are installed yet!");
-        println!("   Install tools first using the main menu.");
+        println!("  Install tools first using the main menu.");
         println!("Press Enter to continue...");
         std::io::stdin().read_line(&mut String::new())?;
         return Ok(());
     }
 
-    scan_progress.finish_success(&format!(
-        "✅ Found {} installed tools",
-        installed_tools.len()
-    ));
+    scan_progress.finish_success(&format!("Found {} installed tools", installed_tools.len()));
 
     let mut options = installed_tools.clone();
     options.push("All Tools".to_string());
 
-    let selection = match Select::new("Select tools to update:", options).prompt() {
+    let selection = match Select::new("Select tools to update:", options)
+        .with_render_config(get_themed_render_config())
+        .prompt()
+    {
         Ok(selection) => selection,
         Err(_) => {
             // User interrupted - return to previous menu
@@ -965,7 +1025,7 @@ async fn handle_update_tools_menu() -> Result<()> {
 
     println!();
     if selection == "All Tools" {
-        let update_progress = ProgressContext::new("⚡ Updating all installed tools concurrently");
+        let update_progress = ProgressContext::new("Updating all installed tools concurrently");
 
         // Use concurrent updates for better performance
         let mut update_futures = Vec::new();
@@ -977,21 +1037,20 @@ async fn handle_update_tools_menu() -> Result<()> {
 
             let future = async move {
                 let individual_progress = ProgressContext::new(&format!(
-                    "⚡ Updating {tool_name} ({current_index}/{total_tools})"
+                    "Updating {tool_name} ({current_index}/{total_tools})"
                 ));
                 tokio::time::sleep(tokio::time::Duration::from_millis(300)).await;
                 individual_progress
-                    .update_message(&format!("📦 Downloading latest version of {tool_name}..."));
+                    .update_message(&format!("Downloading latest version of {tool_name}..."));
 
                 match handle_update_packages(Some(&tool_name)).await {
                     Ok(_) => {
                         individual_progress
-                            .finish_success(&format!("✅ {tool_name} updated successfully"));
+                            .finish_success(&format!("{tool_name} updated successfully"));
                         Ok(tool_name)
                     }
                     Err(e) => {
-                        individual_progress
-                            .finish_error(&format!("❌ Failed to update {tool_name}"));
+                        individual_progress.finish_error(&format!("Failed to update {tool_name}"));
                         Err((tool_name, e))
                     }
                 }
@@ -1001,7 +1060,7 @@ async fn handle_update_tools_menu() -> Result<()> {
 
         // Wait for all updates to complete
         let results = futures::future::join_all(update_futures).await;
-        update_progress.finish_success("🎯 Concurrent updates completed");
+        update_progress.finish_success("Concurrent updates completed");
 
         // Analyze results and show detailed summary
         let mut successful_tools = Vec::new();
@@ -1015,58 +1074,58 @@ async fn handle_update_tools_menu() -> Result<()> {
         }
 
         // Display comprehensive results
-        println!("\n🎯 Update Results Summary:");
+        println!("\nUpdate Results Summary:");
 
         if !successful_tools.is_empty() {
-            println!("✅ Successfully updated {} tools:", successful_tools.len());
+            println!("Successfully updated {} tools:", successful_tools.len());
             for tool in &successful_tools {
-                println!("   ✓ {tool}");
+                println!("  • {tool}");
             }
         }
 
         if !failed_tools.is_empty() {
-            println!("\n❌ Failed to update {} tools:", failed_tools.len());
+            println!("\nFailed to update {} tools:", failed_tools.len());
             for (tool, error) in &failed_tools {
-                println!("   ✗ {tool}: {error}");
+                println!("  • {tool}: {error}");
             }
 
-            println!("\n💡 Troubleshooting tips:");
-            println!("   • Check your internet connection");
+            println!("\nTroubleshooting tips:");
+            println!("  • Check your internet connection");
             println!(
-                "   • Ensure you have the required package managers installed (npm, cargo, pip)"
+                "  • Ensure you have the required package managers installed (npm, cargo, pip)"
             );
-            println!("   • Some tools might need to be manually updated");
-            println!("   • Try updating individual tools to see specific error messages");
+            println!("  • Some tools might need to be manually updated");
+            println!("  • Try updating individual tools to see specific error messages");
         }
 
         if successful_tools.is_empty() && !failed_tools.is_empty() {
-            println!("\n⚠️  All updates failed. Please check your environment setup.");
+            println!("\nAll updates failed. Please check your environment setup.");
         } else if !successful_tools.is_empty() && !failed_tools.is_empty() {
             println!(
-                "\n🎯 Partial success: {}/{} tools updated successfully",
+                "\nPartial success: {}/{} tools updated successfully",
                 successful_tools.len(),
                 installed_tools.len()
             );
         } else {
-            println!("\n🎉 All tools updated successfully!");
+            println!("\n All tools updated successfully!");
         }
     } else {
-        let update_progress = ProgressContext::new(&format!("⚡ Updating {selection}"));
+        let update_progress = ProgressContext::new(&format!(" Updating {selection}"));
         match handle_update_packages(Some(&selection)).await {
             Ok(_) => {
-                update_progress.finish_success(&format!("✅ {selection} updated successfully"));
-                println!("\n🎉 Update completed successfully!");
-                println!("✅ {selection} is now up to date!");
+                update_progress.finish_success(&format!("{selection} updated successfully"));
+                println!("\n Update completed successfully!");
+                println!(" {selection} is now up to date!");
             }
             Err(e) => {
-                update_progress.finish_error(&format!("❌ Failed to update {selection}"));
-                println!("\n⚠️  Update failed!");
-                println!("❌ Error: {e}");
-                println!("\n💡 Troubleshooting tips:");
-                println!("   • Check your internet connection");
-                println!("   • Ensure the required package manager is installed");
-                println!("   • Try running the update command manually");
-                println!("   • Some tools may require manual updates");
+                update_progress.finish_error(&format!("Failed to update {selection}"));
+                println!("\n Update failed!");
+                println!(" Error: {e}");
+                println!("\nTroubleshooting tips:");
+                println!("  • Check your internet connection");
+                println!("  • Ensure the required package manager is installed");
+                println!("  • Try running the update command manually");
+                println!("  • Some tools may require manual updates");
             }
         }
     }
@@ -1081,7 +1140,10 @@ async fn handle_tool_info_menu() -> Result<()> {
         .into_iter()
         .map(String::from)
         .collect();
-    let tool = match Select::new("Select a tool for information:", tool_names).prompt() {
+    let tool = match Select::new("Select a tool for information:", tool_names)
+        .with_render_config(get_themed_render_config())
+        .prompt()
+    {
         Ok(selection) => selection,
         Err(_) => {
             // User interrupted - return to previous menu
@@ -1124,15 +1186,16 @@ pub async fn handle_config_reset() -> Result<()> {
 
     if config_path.exists() {
         let confirm = match Confirm::new("Are you sure you want to reset configuration to defaults? This will delete your current config file.")
-            .with_default(false)
-            .prompt() {
-                Ok(result) => result,
-                Err(_) => {
-                    // User interrupted - cancel the operation
-                    ProgressUtils::info_message("Configuration reset cancelled");
-                    return Ok(());
-                }
-            };
+      .with_render_config(get_themed_render_config())
+      .with_default(false)
+      .prompt() {
+        Ok(result) => result,
+        Err(_) => {
+          // User interrupted - cancel the operation
+          ProgressUtils::info_message("Configuration reset cancelled");
+          return Ok(());
+        }
+      };
 
         if confirm {
             std::fs::remove_file(&config_path)?;
@@ -1188,7 +1251,7 @@ pub async fn handle_cache_clear() -> Result<()> {
     let config_manager = ConfigManager::new()?;
 
     config_manager.clear_version_cache()?;
-    ProgressUtils::success_message("✅ Version cache cleared");
+    ProgressUtils::success_message(" Version cache cleared");
 
     Ok(())
 }
@@ -1198,20 +1261,20 @@ pub async fn handle_cache_status() -> Result<()> {
 
     match config_manager.load_version_cache()? {
         Some(cache) => {
-            println!("📄 Version Cache Status:");
-            println!("  Version Info: {}", cache.version_info);
-            println!("  Cached at: {} (Unix timestamp)", cache.cached_at);
-            println!("  TTL: {} seconds", cache.ttl_seconds);
+            println!(" Version Cache Status:");
+            println!(" Version Info: {}", cache.version_info);
+            println!(" Cached at: {} (Unix timestamp)", cache.cached_at);
+            println!(" TTL: {} seconds", cache.ttl_seconds);
 
             if cache.is_expired() {
-                println!("  Status: ❌ Expired");
+                println!(" Status: Expired");
             } else {
                 let remaining = cache.remaining_seconds();
-                println!("  Status: ✅ Valid ({remaining} seconds remaining)");
+                println!(" Status: Valid ({remaining} seconds remaining)");
             }
         }
         None => {
-            println!("📄 No version cache found");
+            println!(" No version cache found");
         }
     }
 
@@ -1221,20 +1284,75 @@ pub async fn handle_cache_status() -> Result<()> {
 pub async fn handle_cache_refresh(ttl: u64) -> Result<()> {
     let config_manager = ConfigManager::new()?;
 
-    println!("🔄 Refreshing version cache...");
+    println!(" Refreshing version cache...");
     let latest_version_info =
         PackageService::get_cached_npm_dist_tag_info_with_ttl(&config_manager, ttl).await?;
 
     match latest_version_info {
         Some(version_info) => {
             ProgressUtils::success_message(&format!(
-                "✅ Cache refreshed with version info: {version_info} (TTL: {ttl}s)"
+                " Cache refreshed with version info: {version_info} (TTL: {ttl}s)"
             ));
         }
         None => {
-            ProgressUtils::warning_message("⚠️  No version information available to cache");
+            ProgressUtils::warning_message(
+                "Version caching unavailable - registry data incomplete",
+            );
         }
     }
+
+    Ok(())
+}
+
+async fn handle_theme_switch_menu() -> Result<()> {
+    let current_theme = theme_config::current_theme();
+
+    print!("\x1b[2J\x1b[H"); // Clear screen
+
+    println!("{}\n", current_theme.accent("Theme Selection"));
+    println!(
+        "Current theme: {}\n",
+        current_theme.primary(current_theme.name)
+    );
+
+    let theme_options = vec![
+        "T.JARVIS (Professional Blue)".to_string(),
+        "Classic (Terminal Default)".to_string(),
+        "Matrix (Green on Black)".to_string(),
+        "Back to Settings".to_string(),
+    ];
+
+    let selection = match Select::new("Choose a theme:", theme_options)
+        .with_render_config(get_themed_render_config())
+        .with_page_size(10)
+        .prompt()
+    {
+        Ok(selection) => selection,
+        Err(_) => return Ok(()),
+    };
+
+    match selection.as_str() {
+        s if s.contains("T.JARVIS") => {
+            theme_config::set_theme(crate::theme::ThemeType::TJarvis);
+            println!("\n{}", current_theme.accent("Switched to T.JARVIS theme"));
+        }
+        s if s.contains("Classic") => {
+            theme_config::set_theme(crate::theme::ThemeType::Classic);
+            println!("\n{}", current_theme.accent("Switched to Classic theme"));
+        }
+        s if s.contains("Matrix") => {
+            theme_config::set_theme(crate::theme::ThemeType::Matrix);
+            println!("\n{}", current_theme.accent("Switched to Matrix theme"));
+        }
+        _ => return Ok(()),
+    }
+
+    println!(
+        "{}",
+        current_theme.secondary("Theme will take effect on next screen refresh.")
+    );
+    println!("\n{}", current_theme.accent("Press Enter to continue..."));
+    let _ = std::io::stdin().read_line(&mut String::new());
 
     Ok(())
 }
