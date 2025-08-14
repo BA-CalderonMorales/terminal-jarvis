@@ -99,6 +99,7 @@ impl AuthManager {
     }
 
     /// Check if required API keys are set for a tool
+    #[allow(dead_code)]
     pub fn check_api_keys_for_tool(tool: &str) -> bool {
         match tool {
             "gemini" => {
@@ -116,41 +117,40 @@ impl AuthManager {
     }
 
     /// Provide helpful error messages for missing API keys
+    #[allow(dead_code)]
     pub fn get_api_key_help_message(tool: &str) -> String {
         match tool {
             "gemini" => {
                 "Gemini CLI requires authentication. Set one of these environment variables:\n\
-                 export GOOGLE_API_KEY=\"your-api-key\"\n\
-                 export GEMINI_API_KEY=\"your-api-key\"\n\
-                 \n\
-                 Get your API key from: https://makersuite.google.com/app/apikey"
+         export GOOGLE_API_KEY=\"your-api-key\"\n\
+         export GEMINI_API_KEY=\"your-api-key\"\n\
+         \n\
+         Get your API key from: https://makersuite.google.com/app/apikey"
                     .to_string()
             }
             "qwen" => {
                 "Qwen Code requires authentication. Set one of these environment variables:\n\
-                 export QWEN_CODE_API_KEY=\"your-api-key\"\n\
-                 export DASHSCOPE_API_KEY=\"your-api-key\"\n\
-                 \n\
-                 Get your API key from: https://dashscope.console.aliyun.com/"
+         export QWEN_CODE_API_KEY=\"your-api-key\"\n\
+         export DASHSCOPE_API_KEY=\"your-api-key\"\n\
+         \n\
+         Get your API key from: https://dashscope.console.aliyun.com/"
                     .to_string()
             }
             "claude" => {
                 "Claude CLI requires authentication. Set one of these environment variables:\n\
-                 export ANTHROPIC_API_KEY=\"your-api-key\"\n\
-                 export CLAUDE_API_KEY=\"your-api-key\"\n\
-                 \n\
-                 Get your API key from: https://console.anthropic.com/"
+         export ANTHROPIC_API_KEY=\"your-api-key\"\n\
+         export CLAUDE_API_KEY=\"your-api-key\"\n\
+         \n\
+         Get your API key from: https://console.anthropic.com/"
                     .to_string()
             }
-            "codex" => {
-                "OpenAI Codex CLI supports two authentication methods:\n\
-                 1. ChatGPT account (Plus/Pro/Team): Run 'codex' and select 'Sign in with ChatGPT'\n\
-                 2. OpenAI API key (usage-based billing):\n\
-                    export OPENAI_API_KEY=\"your-api-key\"\n\
-                 \n\
-                 Get your API key from: https://platform.openai.com/api-keys"
-                    .to_string()
-            }
+            "codex" => "OpenAI Codex CLI supports two authentication methods:\n\
+         1. ChatGPT account (Plus/Pro/Team): Run 'codex' and select 'Sign in with ChatGPT'\n\
+         2. OpenAI API key (usage-based billing):\n\
+          export OPENAI_API_KEY=\"your-api-key\"\n\
+         \n\
+         Get your API key from: https://platform.openai.com/api-keys"
+                .to_string(),
             _ => {
                 format!("Tool '{tool}' may require authentication. Please check its documentation.")
             }
@@ -184,16 +184,9 @@ impl AuthManager {
     }
 
     /// Check if a tool is likely to open a browser and warn user
-    pub fn warn_if_browser_likely(tool: &str) -> Result<()> {
-        if Self::should_prevent_browser_opening() && !Self::check_api_keys_for_tool(tool) {
-            eprintln!("⚠️  WARNING: {tool} may attempt to open a browser for authentication.");
-            eprintln!("   This can cause issues in terminal/cloud environments.");
-            eprintln!("   Consider setting API keys to avoid browser authentication:");
-            eprintln!();
-            eprintln!("{}", Self::get_api_key_help_message(tool));
-            eprintln!();
-        }
-
+    pub fn warn_if_browser_likely(_tool: &str) -> Result<()> {
+        // T.JARVIS startup guidance in tools.rs now handles all authentication messaging
+        // This keeps our interface clean and professional
         Ok(())
     }
 }
