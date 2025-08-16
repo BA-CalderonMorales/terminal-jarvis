@@ -5,6 +5,33 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.0.57] - 2025-08-16
+
+### Enhanced
+
+- **Security Policy**: Updated response timelines to reflect realistic hobby project maintainer availability
+  - Changed critical vulnerability response from "Immediate (24 hours)" to "Best effort within 1-2 weeks"
+  - Adjusted high severity response from "48 hours" to "2-3 weeks"
+  - Extended medium severity response to "Within 1 month"
+  - Added "maintainer availability" context throughout severity levels
+
+### Technical
+
+- **Major Code Architecture Refactoring**: Complete modularization of large source files
+  - Refactored `src/tools/` module from single large file to focused domain modules
+  - Refactored `src/services/` module following same modular pattern
+  - Refactored `src/config/` module into focused configuration management modules
+  - Refactored `src/auth_manager/` module for better separation of concerns
+  - Refactored `src/theme/` module to match established patterns
+  - Refactored `src/api/` layer to align with domain-based module structure
+  - Applied consistent naming convention: `{module}_domain_operations.rs`
+  - Eliminated dead code warnings by removing 260+ lines of unused functions
+  - Improved code maintainability and developer experience
+  - All modules now follow established `mod.rs` re-export pattern
+
+- **Documentation Cleanup**: Removed REFACTOR.md after completing comprehensive refactoring initiative
+- **Code Quality**: Applied clippy and formatting improvements across all refactored modules
+
 ## [0.0.56] - 2025-08-14
 
 ### Added
