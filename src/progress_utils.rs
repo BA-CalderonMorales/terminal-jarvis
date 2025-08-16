@@ -10,14 +10,18 @@ impl ProgressUtils {
     /// Create a spinner for indeterminate progress
     pub fn spinner(message: &str) -> ProgressBar {
         let pb = ProgressBar::new_spinner();
+
         pb.set_style(
             ProgressStyle::default_spinner()
                 .tick_strings(&["⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧", "⠇", "⠏"])
                 .template("{spinner:.cyan} {msg}")
                 .unwrap(),
         );
+
         pb.set_message(message.to_string());
+
         pb.enable_steady_tick(Duration::from_millis(100));
+
         pb
     }
 
@@ -25,13 +29,16 @@ impl ProgressUtils {
     #[allow(dead_code)]
     pub fn progress_bar(total: u64, message: &str) -> ProgressBar {
         let pb = ProgressBar::new(total);
+
         pb.set_style(
             ProgressStyle::default_bar()
                 .template("{msg} [{elapsed_precise}] {bar:40.cyan/blue} {pos:>7}/{len:7} {eta}")
                 .unwrap()
                 .progress_chars("██░"),
         );
+
         pb.set_message(message.to_string());
+
         pb
     }
 
@@ -44,6 +51,7 @@ impl ProgressUtils {
     /// Finish progress with success message
     pub fn finish_with_success(pb: &ProgressBar, message: &str) {
         pb.finish_with_message(format!("SUCCESS: {message}"));
+
         // Brief pause to let user see the success message before clearing
         std::thread::sleep(std::time::Duration::from_millis(300));
     }
@@ -51,6 +59,7 @@ impl ProgressUtils {
     /// Finish progress with error message
     pub fn finish_with_error(pb: &ProgressBar, message: &str) {
         pb.finish_with_message(format!("ERROR: {message}"));
+
         // Brief pause to let user see the error message before clearing
         std::thread::sleep(std::time::Duration::from_millis(500));
     }
@@ -69,6 +78,7 @@ impl ProgressUtils {
 
         for (step, duration) in steps {
             pb.set_message(format!("Installing {tool_name}: {step}"));
+
             sleep(Duration::from_millis(duration)).await;
         }
     }
@@ -84,6 +94,7 @@ impl ProgressUtils {
 
         for (step, duration) in steps {
             pb.set_message(format!("Verifying {tool_name}: {step}"));
+
             sleep(Duration::from_millis(duration)).await;
         }
     }
@@ -92,19 +103,23 @@ impl ProgressUtils {
     #[allow(dead_code)]
     pub async fn quick_load(message: &str, duration_ms: u64) -> ProgressBar {
         let pb = Self::spinner(message);
+
         sleep(Duration::from_millis(duration_ms)).await;
+
         pb
     }
 
     /// Create a styled info message
     pub fn info_message(message: &str) {
         let theme = theme_global_config::current_theme();
+
         println!("{} {}", theme.accent("T.JARVIS:"), theme.primary(message));
     }
 
     /// Create a styled warning message
     pub fn warning_message(message: &str) {
         let theme = theme_global_config::current_theme();
+
         println!(
             "{} {}",
             theme.secondary("⚠ ADVISORY:"),
@@ -115,12 +130,14 @@ impl ProgressUtils {
     /// Create a styled error message
     pub fn error_message(message: &str) {
         let theme = theme_global_config::current_theme();
+
         println!("{} {}", theme.accent("✗ SYSTEM:"), theme.primary(message));
     }
 
     /// Create a styled success message
     pub fn success_message(message: &str) {
         let theme = theme_global_config::current_theme();
+
         println!("{} {}", theme.accent("✓ COMPLETE:"), theme.primary(message));
     }
 }
@@ -128,6 +145,7 @@ impl ProgressUtils {
 /// Progress context for long-running operations
 pub struct ProgressContext {
     pub spinner: ProgressBar,
+
     #[allow(dead_code)]
     pub operation: String,
 }
@@ -135,6 +153,7 @@ pub struct ProgressContext {
 impl ProgressContext {
     pub fn new(operation: &str) -> Self {
         let spinner = ProgressUtils::spinner(operation);
+
         Self {
             spinner,
             operation: operation.to_string(),
@@ -147,6 +166,7 @@ impl ProgressContext {
 
     pub fn finish_success(&self, message: &str) {
         ProgressUtils::finish_with_success(&self.spinner, message);
+
         // Clear the line after showing success message
         print!("\x1b[2K\r");
     }
@@ -162,8 +182,10 @@ impl Drop for ProgressContext {
         if !self.spinner.is_finished() {
             self.spinner.finish_and_clear();
         }
+
         // Ensure cursor is visible and terminal is clean
         print!("\x1b[?25h"); // Show cursor
+
         print!("\x1b[2K\r"); // Clear current line
     }
 }
