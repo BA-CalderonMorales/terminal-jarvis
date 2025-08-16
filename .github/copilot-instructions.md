@@ -361,6 +361,61 @@ Types to use: `fix`, `feat`, `break`, `docs`, `style`, `refactor`, `test`, `chor
 - Use Biome for linting and formatting, NOT ESLint
 - Run `npm run lint` and `npm run format` before committing
 
+## Refactoring Best Practices (CRITICAL)
+
+**OBJECTIVE**: Break large files (>200 lines) into focused domain modules while maintaining functionality.
+
+### **Proven Architecture Pattern**
+
+Based on successful cli_logic.rs refactoring (1,358 lines → 10 focused modules):
+
+**Domain-Based Folder Structure**:
+```
+src/
+  large_module.rs (684 lines) →
+  large_module/
+    mod.rs                    # Re-exports + minimal coordination
+    large_module_domain1.rs   # Focused functionality
+    large_module_domain2.rs   # Focused functionality
+    large_module_domain3.rs   # Focused functionality
+```
+
+**Naming Convention**: `{module}_domain_operations.rs` (e.g., `cli_logic_tool_execution.rs`)
+
+### **Dead Code Elimination Protocol**
+
+**ABSOLUTE REQUIREMENT**: Zero tolerance for dead code warnings.
+
+**Process**:
+1. **Identify**: Run `cargo check` to find unused function warnings
+2. **Verify**: Search codebase for actual usage with `grep -r "function_name("`
+3. **Remove**: Delete completely unused functions (prefer deletion over `#[allow(dead_code)]`)
+4. **Clean imports**: Remove unused `use` statements
+5. **Validate**: `cargo check` must show zero warnings
+
+**Recent Success**: Eliminated 14 dead code warnings by removing 260+ lines of unused functions.
+
+### **Refactoring Workflow**
+
+**MANDATORY STEPS**:
+1. **Before**: `cargo check` - baseline compilation
+2. **Plan**: Domain separation strategy
+3. **Implement**: Extract related functions into focused modules
+4. **Clean**: Remove dead code aggressively
+5. **Validate**: `cargo check` + `cargo clippy` + `cargo fmt` must all pass
+6. **Document**: Update REFACTOR.md with metrics
+
+**Critical**: Never proceed to next refactoring until current one compiles cleanly.
+
+### **Quality Gates**
+
+**Post-refactoring requirements**:
+- [ ] `cargo check` - zero warnings
+- [ ] `cargo clippy --all-targets --all-features -- -D warnings` - passes
+- [ ] `cargo fmt --all` - applied
+- [ ] REFACTOR.md updated with results
+- [ ] Total line reduction calculated and documented
+
 ## File Sync Requirements
 
 The README.md needs to be the same in both the root directory and `npm/terminal-jarvis/`. Before publishing to NPM, always run:
