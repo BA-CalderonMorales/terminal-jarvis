@@ -198,6 +198,94 @@ Terminal Jarvis is a Rust-based CLI wrapper that provides a unified interface fo
 - **Build**: `npm run build` must succeed
 - **Sync**: Always run `npm run sync-readme` before NPM publishing
 
+### Refactoring Best Practices (CRITICAL)
+
+**OBJECTIVE**: Break large files (>200 lines) into focused domain modules while maintaining functionality.
+
+#### **Proven Refactoring Architecture Pattern**
+
+Based on successful cli_logic.rs refactoring (1,358 lines → 10 focused modules):
+
+**Domain-Based Folder Structure**:
+```
+src/
+  large_module.rs (684 lines) →
+  large_module/
+    mod.rs                    (re-exports + minimal coordination)
+    large_module_domain1.rs   (focused functionality)
+    large_module_domain2.rs   (focused functionality)
+    large_module_domain3.rs   (focused functionality)
+```
+
+**Naming Convention**: `{module}_domain_operations.rs` (e.g., `cli_logic_tool_execution.rs`)
+
+#### **Dead Code Elimination Protocol**
+
+**ABSOLUTE REQUIREMENT**: Zero tolerance for dead code warnings.
+
+**Process**:
+1. **Identify**: Run `cargo check` to find unused function warnings
+2. **Verify**: Search codebase for actual usage with `grep -r "function_name("`
+3. **Remove**: Delete completely unused functions (prefer deletion over `#[allow(dead_code)]`)
+4. **Clean imports**: Remove unused `use` statements
+5. **Validate**: `cargo check` must show zero warnings
+
+**Recent Success**: Eliminated 14 dead code warnings by removing 260+ lines of unused functions across 6 files.
+
+#### **Compilation-Driven Refactoring**
+
+**MANDATORY WORKFLOW**:
+1. **Before refactoring**: `cargo check` - baseline compilation
+2. **During refactoring**: Fix one compilation error at a time
+3. **After refactoring**: `cargo check` + `cargo clippy` + `cargo fmt` must all pass
+4. **Verification**: Run specific tests if available
+
+**Critical**: Never proceed with next refactoring until current one compiles cleanly.
+
+#### **Module Coordination Pattern**
+
+**mod.rs responsibilities**:
+- Re-export public functions: `pub use module_domain::*;`
+- Minimal coordination logic (usually <50 lines)
+- Clear documentation of module purpose
+
+**Domain module responsibilities**:
+- Single focused area (tool execution, update operations, etc.)
+- Self-contained functionality
+- Clear function naming
+- Average 150-200 lines per domain module
+
+#### **Refactoring Order Priority**
+
+**Next targets** (by line count):
+1. `services.rs` (684 lines) - Package/GitHub service management
+2. `tools.rs` (624 lines) - Tool detection and execution  
+3. `config.rs` (407 lines) - Configuration and caching
+4. `auth_manager.rs` (317 lines) - Authentication management
+5. `theme.rs` (235 lines) - UI theming system
+
+**Files under 200 lines**: No action required (optimal size).
+
+#### **Quality Verification Checklist**
+
+**Pre-refactoring**:
+- [ ] `cargo check` shows baseline warnings count
+- [ ] Identify target file and line count
+- [ ] Plan domain separation strategy
+
+**During refactoring**:
+- [ ] Create domain modules with clear responsibilities
+- [ ] Move related functions together
+- [ ] Update imports systematically
+- [ ] Fix compilation errors incrementally
+
+**Post-refactoring**:
+- [ ] `cargo check` - zero warnings
+- [ ] `cargo clippy --all-targets --all-features -- -D warnings` - passes
+- [ ] `cargo fmt --all` - applied
+- [ ] Total line reduction calculated and documented
+- [ ] REFACTOR.md updated with results
+
 ### DEPLOYMENT WORKFLOW - READ THIS FIRST!
 
 **CRITICAL DEPLOYMENT CHECKLIST**
