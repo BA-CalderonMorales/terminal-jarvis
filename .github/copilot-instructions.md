@@ -127,155 +127,118 @@ The repository has two main parts:
 
 **When users say "Let's run local-cd.sh" or mention deployment:**
 
-### **MANDATORY PRE-DEPLOYMENT CHECKLIST**
+## GitHub Copilot Deployment Guide
 
-#### **1. Version Bump Calculation**
-
-- **Current Live Version**: Check GitHub releases for latest published version
-- **Next Version**: Increment based on changes made in this session:
-  - **0.0.X → 0.0.X+1**: Bug fixes, small features, documentation, performance improvements
-  - **0.X.0 → 0.X+1.0**: Major new features, significant functionality additions
-  - **X.0.0 → X+1.0.0**: Breaking changes, API changes
-
-#### **2. Pre-Commit Verification - CRITICAL**
-
-**🚨 BEFORE PROCEEDING**: Always check for uncommitted changes:
+### Standard Release Workflow
 
 ```bash
-# Check for any uncommitted changes
-git status
+# 1. Pre-flight checks (MANDATORY)
+git status                                    # Must show "working tree clean" 
+./scripts/cicd/local-cd.sh --check-versions  # Must show "All versions synchronized"
 
-# If you see "Changes not staged for commit":
-# STOP! Commit and push those changes FIRST
-git add <files>
-git commit -m "descriptive message"
-git push origin develop
+# 2. Update CHANGELOG.md with new version entry (REQUIRED FIRST)
+# Format: ## [X.X.X] - YYYY-MM-DD
 
-# Only proceed when: "nothing to commit, working tree clean"
+# 3. Execute deployment pipeline
+./scripts/cicd/local-ci.sh      # Validate (no commits)
+./scripts/cicd/local-cd.sh      # Deploy (commits, tags, pushes)
 ```
 
-**CRITICAL**: Configuration changes, documentation updates, or Homebrew formula changes MUST be committed before deployment to ensure complete state is published to GitHub.
-
-**🚨 HOMEBREW FORMULA FOOTGUN PREVENTION**:
-The most common deployment failure is forgetting to commit Homebrew Formula changes before creating GitHub releases. This causes broken Homebrew installations because the Formula references release URLs that don't exist yet.
-
-**MANDATORY PRE-DEPLOYMENT CHECKLIST**:
-
-- [ ] **ALL changes committed and pushed to GitHub** - No "Changes not staged for commit"
-- [ ] **Homebrew Formula version matches other files** - Run `./scripts/cicd/local-cd.sh --check-versions`
-- [ ] **Working tree clean** - `git status` shows "nothing to commit"
-
-#### **3. CHANGELOG.md Update - ABSOLUTE REQUIREMENT**
-
-**BEFORE running ANY deployment commands**, update CHANGELOG.md:
+### Version Management Workflow
 
 ```bash
-# If current live is 0.0.47, add entry for 0.0.48:
-## [0.0.48] - 2025-08-10
+# 1. Determine version increment
+# Bug fixes/docs: 0.0.X+1 | New features: 0.X+1.0 | Breaking: X+1.0.0
 
-### Added
-- **Version Caching System**: Intelligent caching of NPM distribution tag information
-- **Cache Management CLI**: Commands for cache status, refresh, and clearing
+# 2. Update CHANGELOG.md entry for target version
 
-### Enhanced
-- **Performance**: Eliminated API call delays on Terminal Jarvis home page
-- **User Experience**: Faster interactive mode startup with cached version data
-```
-
-#### **4. Multi-Platform Version Synchronization**
-
-```bash
-# Update all files to next version (e.g., 0.0.48)
+# 3. Synchronize all version files
 ./scripts/cicd/local-cd.sh --update-version 0.0.48
 
-# VERIFY Homebrew Formula is updated (local-cd.sh should handle this automatically)
-./scripts/cicd/local-cd.sh --check-versions  # Must show "All versions are synchronized"
-
-# 🚨 CRITICAL: If Formula version is wrong, STOP and fix it manually:
-# sed -i 's/version ".*"/version "0.0.48"/' homebrew/Formula/terminal-jarvis.rb
+# 4. Verify synchronization and deploy
+./scripts/cicd/local-cd.sh --check-versions
+./scripts/cicd/local-ci.sh && ./scripts/cicd/local-cd.sh
 ```
 
-#### **5. Complete Deployment Workflow - REVISED ORDER**
+### Multi-Platform Distribution
 
 ```bash
-# 1. Validate everything works
-./scripts/cicd/local-ci.sh
+# 1. Complete standard deployment first
 
-# 2. 🚨 CRITICAL: Verify ALL changes are committed BEFORE deployment
-git status  # Must show "nothing to commit, working tree clean"
-
-# 3. Deploy (commits, tags, pushes) - This includes Homebrew Formula
-./scripts/cicd/local-cd.sh
-
-# 4. 🚨 CRITICAL: Verify Homebrew Formula is committed and pushed
-# The GitHub release MUST point to committed Formula, not local changes
-git log -1 --name-only  # Should include homebrew/Formula/terminal-jarvis.rb
-
-# 5. Generate Homebrew Release Archives (NEW AUTOMATED APPROACH)
-# Use the programmatic script to create platform-specific archives
+# 2. Generate Homebrew release archives
 ./scripts/utils/generate-homebrew-release.sh --stage
-git commit -m "feat: add Homebrew release archives for v0.0.X"
-git push origin develop
+git add homebrew/release/ && git commit -m "feat: Homebrew archives v0.0.48" && git push
 
-# 6. Create GitHub Release for Homebrew (ONLY after archives are committed)
-# The deployment script only creates Git tags, NOT releases!
-# Homebrew formulas REQUIRE GitHub releases with attached archives
-gh release create v0.0.X \
+# 3. Create GitHub release with assets
+gh release create v0.0.48 \
   homebrew/release/terminal-jarvis-mac.tar.gz \
   homebrew/release/terminal-jarvis-linux.tar.gz \
-  --title "Release v0.0.X: [Brief Description]" \
-  --notes "Release notes content" \
-  --latest
+  --title "Release v0.0.48" --notes "Release notes" --latest
 
-# 7. Verify Homebrew archives are accessible
-curl -I https://github.com/BA-CalderonMorales/terminal-jarvis/releases/download/v0.0.X/terminal-jarvis-mac.tar.gz
-curl -I https://github.com/BA-CalderonMorales/terminal-jarvis/releases/download/v0.0.X/terminal-jarvis-linux.tar.gz
-# Both should return HTTP 302 (redirect) responses
-
-# 5. Optional: Create additional Homebrew release archives if needed
-# Homebrew release creation integrated into CI/CD pipeline
+# 4. Verify Homebrew installation works
+curl -I https://github.com/BA-CalderonMorales/terminal-jarvis/releases/download/v0.0.48/terminal-jarvis-mac.tar.gz
 ```
 
-**🚨 HOMEBREW DEPLOYMENT FOOTGUN PREVENTION**:
+## Critical Deployment Requirements
 
-- **Git tags ≠ GitHub releases**: Tags are just Git references, releases are GitHub UI/API entities with downloadable assets
-- **Homebrew formulas expect release URLs**: Formula URLs point to `releases/download/vX.X.X/archive.tar.gz`
-- **Always verify release assets**: Use curl to test URLs before marking deployment complete
+### Pre-Deployment Validation (NON-NEGOTIABLE)
 
-#### **6. Documentation Update Pattern**
+- [ ] **Working Tree Clean**: `git status` shows no uncommitted changes
+- [ ] **Version Sync**: `./scripts/cicd/local-cd.sh --check-versions` passes
+- [ ] **CHANGELOG.md Updated**: New version entry added BEFORE running scripts
+- [ ] **Homebrew Formula**: Version matches if manually edited
 
-**ALSO MANDATORY: Review and update docs/ directory** - Required whenever CHANGELOG.md is modified:
+### Deployment Failure Prevention
 
-- Check docs/ARCHITECTURE.md, docs/INSTALLATION.md, docs/TESTING.md
-- Update version references if version was bumped
-- Ensure new features are documented
-- **ALSO: Review and update README.md** - Required with CHANGELOG.md changes
+**Most Common Failures**:
+1. **Uncommitted changes** → Always check `git status` first
+2. **Version mismatches** → Always run `--check-versions` first
+3. **Missing changelog** → Always update CHANGELOG.md before scripts
+4. **Formula after release** → Always commit Formula before GitHub release
 
-### **Quick Reference Commands**
+### Quick Recovery Commands
 
 ```bash
-# Check current version status
-./scripts/cicd/local-cd.sh --check-versions
-
-# Update to specific version
+# Fix version synchronization
 ./scripts/cicd/local-cd.sh --update-version X.X.X
 
-# Validate before deployment
-./scripts/cicd/local-ci.sh
+# Fix Homebrew Formula manually
+sed -i 's/version ".*"/version "X.X.X"/' homebrew/Formula/terminal-jarvis.rb
 
-# Deploy everything
-./scripts/cicd/local-cd.sh
+# Verify all changes committed
+git status && git log -1 --name-only
+```
 
-# Generate Homebrew release archives
-./scripts/utils/generate-homebrew-release.sh --stage
-git commit -m "feat: add Homebrew release archives for vX.X.X"
-git push origin develop
+## GitHub Copilot Development Guidelines
 
-# 🚨 CRITICAL: Create GitHub release for Homebrew
-gh release create vX.X.X homebrew/release/terminal-jarvis-*.tar.gz --title "Release vX.X.X" --notes "..." --latest
+### Working with GitHub Copilot
 
-# Verify Homebrew assets are accessible
-curl -I https://github.com/BA-CalderonMorales/terminal-jarvis/releases/download/vX.X.X/terminal-jarvis-mac.tar.gz
+**GitHub Copilot excels at**:
+- **Code generation**: Creating boilerplate and implementing well-defined patterns
+- **Test creation**: Writing comprehensive test suites with good coverage
+- **Documentation consistency**: Ensuring technical docs match implementation
+- **Incremental development**: Building features step-by-step with validation
+
+**Optimal Copilot workflow**:
+1. **Clear specifications**: Provide detailed requirements for what you want to build
+2. **Pattern following**: Leverage existing project patterns for consistency
+3. **Test-driven development**: Write tests first, then implement features
+4. **Continuous validation**: Verify each step compiles and passes tests
+
+**Copilot's code generation strength**: Use Copilot for implementing well-defined features, creating test suites, and generating documentation that matches actual code behavior.
+
+### Copilot-Optimized Quality Checks
+
+```bash
+# Copilot-assisted development verification
+cargo check                          # Verify code compiles
+cargo test                          # Run full test suite
+cargo clippy --all-targets --all-features -- -D warnings  # Code quality
+cargo fmt --all                     # Code formatting
+
+# Integration testing
+cargo run -- list                   # Verify CLI works
+cargo run -- --help                 # Verify help text
 ```
 
 ## Version Numbers Are Important
@@ -298,6 +261,40 @@ Always update **ALL THREE** version files simultaneously:
 ## CHANGELOG.md Management (CRITICAL)
 
 **ALWAYS update CHANGELOG.md BEFORE running deployment scripts** - This prevents version confusion and ensures proper feature attribution.
+
+### Changelog Structure Rules:
+
+```bash
+## [X.X.X] - YYYY-MM-DD
+### Added
+- New features that users can see
+### Enhanced
+- Improvements to existing features  
+### Fixed
+- Bug fixes and corrections
+### Technical
+- Internal changes (refactoring, tests)
+```
+
+**Rules**:
+1. **One Release = One Complete Feature Set**: Each version should represent a cohesive set of features completed together
+2. **Update CHANGELOG.md FIRST**: Before running `local-cd.sh`, always add the changelog entry for the version you're about to release
+3. **Match Actual Work Timeline**: Don't mix features from different development sessions into the same version entry
+
+## Quick Command Reference
+
+```bash
+# Version management
+./scripts/cicd/local-cd.sh --check-versions
+./scripts/cicd/local-cd.sh --update-version X.X.X
+
+# Deployment pipeline  
+./scripts/cicd/local-ci.sh && ./scripts/cicd/local-cd.sh
+
+# Homebrew release
+./scripts/utils/generate-homebrew-release.sh --stage
+gh release create vX.X.X homebrew/release/*.tar.gz --title "vX.X.X" --notes "..." --latest
+```
 
 ### Changelog Structure Rules:
 
