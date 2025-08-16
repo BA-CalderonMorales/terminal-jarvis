@@ -1,10 +1,10 @@
-use crate::theme_config;
+use crate::theme::theme_global_config;
 use inquire::ui::{Color, RenderConfig, StyleSheet, Styled};
 use inquire::MultiSelect;
 
 /// Create inquire RenderConfig based on current theme
 pub fn get_themed_render_config() -> RenderConfig<'static> {
-    let theme = theme_config::current_theme();
+    let theme = theme_global_config::current_theme();
 
     // Map our theme to inquire colors based on theme name
     let (primary_color, accent_color, secondary_color) = match theme.name {
