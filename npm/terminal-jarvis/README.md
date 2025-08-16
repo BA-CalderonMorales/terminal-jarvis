@@ -85,6 +85,8 @@ Terminal Jarvis is your AI coding assistant command center:
 
 
 
+
+
 BETA = _Looking for testers! These tools are new additions._
 
 ## How to Use Terminal Jarvis
@@ -142,6 +144,8 @@ terminal-jarvis templates apply my-template
 | `llxprt`   | Multi-provider AI coding assistant        | Testing    | `npm install -g @vybestack/llxprt-code-core` |
 | `codex`    | OpenAI Codex CLI for local AI coding      | Testing    | `npm install -g @openai/codex`               |
 | `crush`    | Charm's multi-model AI assistant with LSP | New        | `npm install -g @charmland/crush`            |
+
+
 
 
 
