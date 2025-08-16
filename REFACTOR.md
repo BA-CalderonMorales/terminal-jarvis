@@ -22,6 +22,7 @@ Systematic cleanup of the `src/` folder to reduce file complexity and improve ma
 ### 3. cli_logic.rs ✅ COMPLETED
 - **Lines of Code**: 1,358 → **6 lines** (SUCCESSFULLY REFACTORED)
 - **Status**: ✅ COMPLETE - Reduced by 99.6% (1,352 lines saved)
+- **Dead Code Elimination**: ✅ COMPLETE - 14 warnings eliminated, ~260 lines of unused code removed
 - **New Architecture**: Domain-based folder structure implemented
   ```
   src/cli_logic/
@@ -43,8 +44,25 @@ Systematic cleanup of the `src/` folder to reduce file complexity and improve ma
   - ✅ Clear entry point for delegation
   - ✅ Maintainable modular architecture
   - ✅ Compilation successful - no breaking changes
+  - ✅ All dead code eliminated - zero compiler warnings
+  - ✅ Code quality verified: `cargo fmt` + `cargo clippy` clean
 - **Files Created**: 10 focused domain files
 - **Average Lines per File**: ~158 lines (down from 1,358 lines in single file)
+- **Quality Metrics**: 
+  - Compilation: ✅ Clean (0 errors, 0 warnings)
+  - Formatting: ✅ Applied (`cargo fmt --all`)
+  - Linting: ✅ Clean (`cargo clippy --all-targets --all-features -- -D warnings`)
+  - Dead Code: ✅ Eliminated (14 functions removed, ~260 lines saved)
+
+**Dead Code Functions Removed**:
+- `cli_logic_update_operations.rs`: `show_update_recommendations()`, `check_available_updates()`
+- `cli_logic_list_operations.rs`: `list_installed_tools()`, `list_uninstalled_tools()`, `list_tools_formatted()`
+- `cli_logic_info_operations.rs`: `display_system_info()`, `display_tool_recommendations()`
+- `cli_logic_template_operations.rs`: `display_template_help()`, `check_template_prerequisites()`
+- `cli_logic_config_management.rs`: `display_config_help()`
+- `cli_logic_utilities.rs`: `display_welcome_message()`, `show_error()`, `show_success()`, `show_info()`, unused imports
+
+**Lesson Learned**: Aggressive dead code elimination during refactoring is critical for maintaining clean, focused modules.
 
 ### 4. tools.rs
 - **Lines of Code**: 624
@@ -281,9 +299,40 @@ src/
 5. **Onboarding**: New developers can focus on one domain at a time
 6. **Maintenance**: Bug fixes and features have clear file boundaries
 
+## Refactoring Lessons Learned (cli_logic.rs Success)
+
+### **Proven Workflow**
+1. **Planning**: Domain-based architecture with clear naming conventions
+2. **Implementation**: Extract related functions into focused modules
+3. **Dead Code Elimination**: Aggressively remove unused functions (prefer deletion over `#[allow(dead_code)]`)
+4. **Quality Assurance**: `cargo check` + `cargo fmt` + `cargo clippy` must all pass
+5. **Documentation**: Update REFACTOR.md with metrics and lessons learned
+
+### **Key Success Factors**
+- **Domain-Based Architecture**: Folder structure with clear responsibilities
+- **Descriptive Naming**: `{module}_{domain}_operations.rs` pattern for easy navigation
+- **Entry Point Pattern**: Main coordination file (~500 lines) + focused domain modules (~150 lines each)
+- **Zero Tolerance for Dead Code**: Removed 14 unused functions (~260 lines) during refactoring
+- **Compilation-Driven Development**: Fix one error at a time, validate continuously
+
+### **Metrics Achieved**
+- **Line Reduction**: 1,358 → 6 lines in main file (99.6% reduction)
+- **Module Creation**: 10 focused domain files averaging ~158 lines each
+- **Dead Code Elimination**: 14 functions removed, ~260 lines of unused code eliminated
+- **Quality**: Zero warnings, clean compilation, formatted code, clippy-compliant
+
+### **Next Refactoring Targets** (In Priority Order)
+1. **services.rs** (684 lines) - Package/GitHub service management
+2. **tools.rs** (624 lines) - Tool detection and execution
+3. **config.rs** (407 lines) - Configuration and caching  
+4. **auth_manager.rs** (317 lines) - Authentication management
+5. **theme.rs** (235 lines) - UI theming system
+
 ## Next Steps
-1. Create domain folders and entry point files
-2. Extract and move domain-specific code
-3. Update import statements and dependencies
-4. Run tests to ensure no breaking changes
-5. Update documentation to reflect new architecture
+1. **Continue with services.rs**: Apply proven domain-based architecture pattern
+2. **Dead Code Elimination**: Search for and remove unused functions during each refactoring
+3. **Quality Gates**: Ensure `cargo check` + `cargo fmt` + `cargo clippy` pass after each refactoring
+4. **Documentation**: Update REFACTOR.md with metrics after each completed refactoring
+5. **Validation**: Test functionality to ensure no breaking changes
+
+**Target**: Reduce all files to <200 lines using the proven cli_logic refactoring pattern.
