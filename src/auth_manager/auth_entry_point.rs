@@ -1,0 +1,60 @@
+// Authentication Manager Entry Point - Main AuthManager coordination
+//
+// This module provides the main AuthManager interface that coordinates
+// between different authentication domains for a unified API.
+
+use anyhow::Result;
+
+/// Main authentication manager that coordinates all authentication functionality
+pub struct AuthManager;
+
+impl AuthManager {
+    /// Check if we're running in an environment where browser opening should be prevented
+    #[allow(dead_code)]
+    pub fn should_prevent_browser_opening() -> bool {
+        use crate::auth_manager::auth_environment_detection::EnvironmentDetector;
+        EnvironmentDetector::should_prevent_browser_opening()
+    }
+
+    /// Set environment variables to prevent browser opening for tools that support it
+    #[allow(dead_code)]
+    pub fn set_no_browser_env_vars() -> Result<()> {
+        use crate::auth_manager::auth_environment_setup::EnvironmentSetup;
+        EnvironmentSetup::set_no_browser_env_vars()
+    }
+
+    /// Restore original environment after tool execution
+    #[allow(dead_code)]
+    pub fn restore_environment() -> Result<()> {
+        use crate::auth_manager::auth_environment_setup::EnvironmentSetup;
+        EnvironmentSetup::restore_environment()
+    }
+
+    /// Check if required API keys are set for a tool
+    #[allow(dead_code)]
+    pub fn check_api_keys_for_tool(tool: &str) -> bool {
+        use crate::auth_manager::auth_api_key_management::ApiKeyManager;
+        ApiKeyManager::check_api_keys_for_tool(tool)
+    }
+
+    /// Provide helpful error messages for missing API keys
+    #[allow(dead_code)]
+    pub fn get_api_key_help_message(tool: &str) -> String {
+        use crate::auth_manager::auth_api_key_management::ApiKeyManager;
+        ApiKeyManager::get_api_key_help_message(tool)
+    }
+
+    /// Setup authentication prevention wrapper for running tools
+    #[allow(dead_code)]
+    pub fn prepare_auth_safe_environment() -> Result<()> {
+        use crate::auth_manager::auth_environment_setup::EnvironmentSetup;
+        EnvironmentSetup::prepare_auth_safe_environment()
+    }
+
+    /// Check if a tool is likely to open a browser and warn user
+    #[allow(dead_code)]
+    pub fn warn_if_browser_likely(tool: &str) -> Result<()> {
+        use crate::auth_manager::auth_warning_system::WarningSystem;
+        WarningSystem::warn_if_browser_likely(tool)
+    }
+}
