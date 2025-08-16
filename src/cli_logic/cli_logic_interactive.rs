@@ -3,21 +3,21 @@ use crate::config::ConfigManager;
 use crate::installation_arguments::InstallationManager;
 use crate::progress_utils::ProgressContext;
 use crate::services::PackageService;
-use crate::theme_config;
+use crate::theme::theme_global_config;
 use anyhow::Result;
 use inquire::Select;
 
 /// Handle the main interactive mode interface
 pub async fn handle_interactive_mode() -> Result<()> {
     // Initialize theme configuration
-    let _ = theme_config::initialize_theme_config();
+    let _ = theme_global_config::initialize_theme_config();
 
     // Check NPM availability upfront
     let npm_available = InstallationManager::check_npm_available();
 
     loop {
         // Get fresh theme on each iteration to support theme switching
-        let theme = theme_config::current_theme();
+        let theme = theme_global_config::current_theme();
         // Clear screen first
         print!("\x1b[2J\x1b[H"); // Clear screen
 
