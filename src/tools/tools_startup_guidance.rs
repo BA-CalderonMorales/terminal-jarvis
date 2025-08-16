@@ -5,9 +5,9 @@ use anyhow::Result;
 
 /// Show T.JARVIS-themed startup guidance for tools
 pub fn show_tool_startup_guidance(display_name: &str) -> Result<()> {
-    use crate::theme_config;
+    use crate::theme::theme_global_config;
 
-    let theme = theme_config::current_theme();
+    let theme = theme_global_config::current_theme();
 
     match display_name {
         "claude" => {

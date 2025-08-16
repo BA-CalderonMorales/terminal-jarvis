@@ -4,7 +4,7 @@
 use crate::cli_logic::cli_logic_utilities::{apply_theme_to_multiselect, get_themed_render_config};
 use crate::installation_arguments::InstallationManager;
 use crate::progress_utils::ProgressContext;
-use crate::theme_config;
+use crate::theme::theme_global_config;
 use crate::tools::ToolManager;
 use anyhow::Result;
 use inquire::{Confirm, MultiSelect, Select, Text};
@@ -22,7 +22,7 @@ pub use crate::cli_logic::cli_logic_update_operations::*;
 pub async fn handle_ai_tools_menu() -> Result<()> {
     loop {
         // Get fresh theme on each iteration to support theme switching
-        let theme = theme_config::current_theme();
+        let theme = theme_global_config::current_theme();
 
         print!("\x1b[2J\x1b[H"); // Clear screen
 
@@ -74,7 +74,7 @@ pub async fn handle_ai_tools_menu() -> Result<()> {
 
 /// Handle launching a specific tool with argument input
 async fn handle_tool_launch(tool_name: &str) -> Result<()> {
-    let theme = theme_config::current_theme();
+    let theme = theme_global_config::current_theme();
     let tools = ToolManager::get_available_tools();
     let tool_info = tools.get(tool_name).unwrap();
 
@@ -140,7 +140,7 @@ async fn handle_tool_launch(tool_name: &str) -> Result<()> {
 
 /// Launch a tool with detailed progress tracking
 async fn launch_tool_with_progress(tool_name: &str, args: &[String]) -> Result<()> {
-    let theme = theme_config::current_theme();
+    let theme = theme_global_config::current_theme();
 
     // Show loading indicator before launching tool
     let launch_progress = ProgressContext::new(&format!("Launching {tool_name}"));
@@ -188,7 +188,7 @@ async fn launch_tool_with_progress(tool_name: &str, args: &[String]) -> Result<(
 
 /// Handle user choice after tool exit
 async fn handle_post_tool_exit() -> Result<()> {
-    let theme = theme_config::current_theme();
+    let theme = theme_global_config::current_theme();
 
     // Enhanced exit options for faster context switching
     let exit_options = vec![
@@ -233,7 +233,7 @@ async fn handle_post_tool_exit() -> Result<()> {
 /// Handle the important links menu
 pub async fn handle_important_links() -> Result<()> {
     loop {
-        let theme = theme_config::current_theme();
+        let theme = theme_global_config::current_theme();
 
         print!("\x1b[2J\x1b[H"); // Clear screen
 
@@ -329,7 +329,7 @@ fn display_link_information(selection: &str, theme: &crate::theme::Theme) {
 /// Handle the settings and tools management menu
 pub async fn handle_manage_tools_menu() -> Result<()> {
     loop {
-        let theme = theme_config::current_theme();
+        let theme = theme_global_config::current_theme();
 
         print!("\x1b[2J\x1b[H"); // Clear screen
 
@@ -384,7 +384,7 @@ pub async fn handle_manage_tools_menu() -> Result<()> {
 
 /// Handle the theme switching interface
 async fn handle_theme_switch_menu() -> Result<()> {
-    let current_theme = theme_config::current_theme();
+    let current_theme = theme_global_config::current_theme();
 
     print!("\x1b[2J\x1b[H"); // Clear screen
 
@@ -420,8 +420,8 @@ async fn handle_theme_switch_menu() -> Result<()> {
         _ => crate::theme::ThemeType::TJarvis,
     };
 
-    theme_config::set_theme(theme_type);
-    let new_theme = theme_config::current_theme();
+    theme_global_config::set_theme(theme_type);
+    let new_theme = theme_global_config::current_theme();
     println!(
         "\n{}",
         new_theme.primary(&format!("Theme changed to: {}", selected_theme))
