@@ -97,7 +97,10 @@ async fn handle_tool_launch(tool_name: &str) -> Result<()> {
         };
 
         if should_install {
-            println!("\n{}", theme.accent(&format!("Installing {}...", tool_name)));
+            println!(
+                "\n{}",
+                theme.accent(&format!("Installing {}...", tool_name))
+            );
             handle_install_tool(tool_name).await?;
             println!("{}", theme.accent("Installation complete!\n"));
         } else {
@@ -138,7 +141,7 @@ async fn handle_tool_launch(tool_name: &str) -> Result<()> {
 /// Launch a tool with detailed progress tracking
 async fn launch_tool_with_progress(tool_name: &str, args: &[String]) -> Result<()> {
     let theme = theme_config::current_theme();
-    
+
     // Show loading indicator before launching tool
     let launch_progress = ProgressContext::new(&format!("Launching {tool_name}"));
 
@@ -167,10 +170,16 @@ async fn launch_tool_with_progress(tool_name: &str, args: &[String]) -> Result<(
 
     match ToolManager::run_tool(tool_name, args).await {
         Ok(_) => {
-            println!("\n{}", theme.accent(&format!("{} completed successfully!", tool_name)));
+            println!(
+                "\n{}",
+                theme.accent(&format!("{} completed successfully!", tool_name))
+            );
         }
         Err(e) => {
-            eprintln!("\n{}", theme.accent(&format!("Error running {}: {}", tool_name, e)));
+            eprintln!(
+                "\n{}",
+                theme.accent(&format!("Error running {}: {}", tool_name, e))
+            );
         }
     }
 
@@ -180,7 +189,7 @@ async fn launch_tool_with_progress(tool_name: &str, args: &[String]) -> Result<(
 /// Handle user choice after tool exit
 async fn handle_post_tool_exit() -> Result<()> {
     let theme = theme_config::current_theme();
-    
+
     // Enhanced exit options for faster context switching
     let exit_options = vec![
         "Back to Main Menu".to_string(),
@@ -282,7 +291,9 @@ fn display_link_information(selection: &str, theme: &crate::theme::Theme) {
         }
         s if s.contains("CHANGELOG") => {
             println!("\n{}", theme.secondary("CHANGELOG.md - Version History"));
-            println!("    https://github.com/BA-CalderonMorales/terminal-jarvis/blob/main/CHANGELOG.md");
+            println!(
+                "    https://github.com/BA-CalderonMorales/terminal-jarvis/blob/main/CHANGELOG.md"
+            );
             println!("  - Detailed release notes for each version");
             println!("  - Feature additions and bug fixes");
             println!("  - Breaking changes and migration guides");
@@ -304,7 +315,9 @@ fn display_link_information(selection: &str, theme: &crate::theme::Theme) {
         }
         s if s.contains("Homebrew") => {
             println!("\n{}", theme.accent("Homebrew Formula"));
-            println!("    https://github.com/BA-CalderonMorales/terminal-jarvis/tree/main/homebrew");
+            println!(
+                "    https://github.com/BA-CalderonMorales/terminal-jarvis/tree/main/homebrew"
+            );
             println!("  - macOS/Linux package management");
             println!("  - Install: brew tap ba-calderonmorales/terminal-jarvis && brew install terminal-jarvis");
             println!("  - System integration and automatic updates");
@@ -376,10 +389,17 @@ async fn handle_theme_switch_menu() -> Result<()> {
     print!("\x1b[2J\x1b[H"); // Clear screen
 
     println!("{}", current_theme.primary("Theme Selection"));
-    println!("{}", current_theme.secondary(&format!("Current theme: {}", current_theme.name)));
+    println!(
+        "{}",
+        current_theme.secondary(&format!("Current theme: {}", current_theme.name))
+    );
     println!();
 
-    let theme_options = vec!["T.JARVIS".to_string(), "Classic".to_string(), "Matrix".to_string()];
+    let theme_options = vec![
+        "T.JARVIS".to_string(),
+        "Classic".to_string(),
+        "Matrix".to_string(),
+    ];
 
     let selected_theme = match Select::new("Choose a theme:", theme_options)
         .with_render_config(get_themed_render_config())
@@ -399,10 +419,13 @@ async fn handle_theme_switch_menu() -> Result<()> {
         "Matrix" => crate::theme::ThemeType::Matrix,
         _ => crate::theme::ThemeType::TJarvis,
     };
-    
+
     theme_config::set_theme(theme_type);
     let new_theme = theme_config::current_theme();
-    println!("\n{}", new_theme.primary(&format!("Theme changed to: {}", selected_theme)));
+    println!(
+        "\n{}",
+        new_theme.primary(&format!("Theme changed to: {}", selected_theme))
+    );
     println!("The new theme will be applied immediately.");
 
     println!("\n{}", current_theme.accent("Press Enter to continue..."));
@@ -415,7 +438,7 @@ async fn handle_theme_switch_menu() -> Result<()> {
 async fn handle_install_tools_menu() -> Result<()> {
     // Implementation moved to a focused module - placeholder for now
     use crate::progress_utils::ProgressUtils;
-    
+
     // Check NPM availability with progress
     let npm_check = ProgressContext::new("Checking NPM availability");
     tokio::time::sleep(tokio::time::Duration::from_millis(200)).await;
@@ -478,7 +501,7 @@ async fn handle_install_tools_menu() -> Result<()> {
 async fn handle_update_tools_menu() -> Result<()> {
     // Implementation will be moved to update operations module - simplified for now
     use crate::progress_utils::ProgressUtils;
-    
+
     let installed_tools: Vec<String> = ToolManager::get_installed_tools()
         .into_iter()
         .map(String::from)

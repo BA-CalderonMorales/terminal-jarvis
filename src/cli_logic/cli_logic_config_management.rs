@@ -140,24 +140,3 @@ fn display_cache_info(cache: &crate::config::VersionCache) {
         println!(" Status: Valid ({remaining} seconds remaining)");
     }
 }
-
-/// Display configuration management help
-pub async fn display_config_help() -> Result<()> {
-    let theme = crate::theme_config::current_theme();
-
-    println!("{}", theme.primary("┌─ Configuration Management ─────────────────────────────────┐"));
-    println!("{}", theme.primary("│                                                             │"));
-    println!("│ {:<59} │", theme.accent("Config Commands:"));
-    println!("│   {:<57} │", theme.secondary("show   - Display current configuration"));
-    println!("│   {:<57} │", theme.secondary("path   - Show config file location"));
-    println!("│   {:<57} │", theme.secondary("reset  - Reset to default configuration"));
-    println!("{}", theme.primary("│                                                             │"));
-    println!("│ {:<59} │", theme.accent("Cache Commands:"));
-    println!("│   {:<57} │", theme.secondary("status  - Show version cache status"));
-    println!("│   {:<57} │", theme.secondary("clear   - Clear version cache"));
-    println!("│   {:<57} │", theme.secondary("refresh - Refresh cache with new TTL"));
-    println!("{}", theme.primary("│                                                             │"));
-    println!("{}", theme.primary("└─────────────────────────────────────────────────────────────┘"));
-
-    Ok(())
-}

@@ -171,13 +171,17 @@ where
     print_border_line("");
 
     // Add elegant separator line with theme colors
-    let separator_content = theme.background_line_with_content(&"─".repeat(inner_width), inner_width);
+    let separator_content =
+        theme.background_line_with_content(&"─".repeat(inner_width), inner_width);
     print_border_line(&separator_content);
 }
 
 /// Display version and tagline information
-async fn display_version_info<F>(print_border_line: &F, theme: &crate::theme::Theme, inner_width: usize)
-where
+async fn display_version_info<F>(
+    print_border_line: &F,
+    theme: &crate::theme::Theme,
+    inner_width: usize,
+) where
     F: Fn(&str),
 {
     // Version and tagline in futuristic style - with NPM distribution tag if available
@@ -228,7 +232,8 @@ where
     }
 
     // Add another elegant separator
-    let separator_content2 = theme.background_line_with_content(&"─".repeat(inner_width), inner_width);
+    let separator_content2 =
+        theme.background_line_with_content(&"─".repeat(inner_width), inner_width);
     print_border_line(&separator_content2);
 
     // Short hint about Important Links - shortened to fit border
@@ -257,7 +262,7 @@ where
 
 // Forward declarations for menu functions that will be in other modules
 async fn handle_ai_tools_menu() -> Result<()> {
-    // This will be implemented in a separate function  
+    // This will be implemented in a separate function
     crate::cli_logic::handle_ai_tools_menu().await
 }
 
