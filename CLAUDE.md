@@ -292,112 +292,77 @@ src/
 
 When you see requests like "Let's now run local-cd.sh" or anything involving deployment, **ALWAYS** follow this checklist:
 
-#### **Step 1: Version Planning**
+## Claude-Optimized Command Workflow
 
-**Current Live Version**: Check GitHub releases to see the latest published version  
-**Next Version**: Increment appropriately based on changes:
-
-- **Patch (X.X.Y)**: Bug fixes, small improvements, documentation
-- **Minor (X.Y.0)**: New features, no breaking changes
-- **Major (Y.0.0)**: Breaking changes
-
-#### **Step 2: Pre-Commit Verification - MANDATORY**
-
-**CRITICAL**: Always check for uncommitted changes BEFORE proceeding with deployment:
+### Quick Deployment (Most Common)
 
 ```bash
-# Check for any uncommitted changes
-git status
+# 1. Check current status
+git status                           # MUST be clean
+./scripts/cicd/local-cd.sh --check-versions  # MUST be synchronized
 
-# If you see "Changes not staged for commit" or "Changes to be committed":
-# STOP and commit those changes FIRST before proceeding with deployment
-git add <files>
-git commit -m "descriptive commit message"
-git push origin develop
+# 2. Update CHANGELOG.md first (MANDATORY)
+# Add version entry: ## [X.X.X] - YYYY-MM-DD
 
-# Only proceed with deployment when git status shows:
-# "nothing to commit, working tree clean"
+# 3. Deploy everything at once
+./scripts/cicd/local-ci.sh && ./scripts/cicd/local-cd.sh
 ```
 
-**Why This Matters**: The deployment process expects a clean working directory. Uncommitted changes, especially to documentation files (CLAUDE.md, copilot-instructions.md) or configuration files (homebrew/Formula/terminal-jarvis.rb), must be committed and pushed BEFORE deployment to ensure the complete state is published to GitHub.
-
-**HOMEBREW FORMULA CRITICAL DEPLOYMENT ORDER**
-
-**THE #1 DEPLOYMENT FAILURE**: Homebrew Formula changes committed AFTER GitHub release creation.
-
-**MANDATORY SEQUENCE** (NEVER deviate from this order):
-
-1. **FIRST**: Update and commit ALL changes (including Homebrew Formula)
-2. **SECOND**: Push changes to GitHub
-3. **THIRD**: Create GitHub release with archives
-4. **NEVER**: Create release first, then commit Formula changes
-
-**This prevents the common failure pattern where:**
-
-- GitHub release is created with v0.0.X URLs
-- Homebrew Formula still references the old URLs
-- Users get broken installations because Formula URLs don't match releases
-
-#### **Step 3: CHANGELOG.md Update - MANDATORY FIRST STEP**
+### Version Bump Deployment
 
 ```bash
-# Example: If live version is 0.0.47, next version should be 0.0.48
-## [0.0.48] - 2025-08-10
+# 1. Plan version increment
+# Current: 0.0.47 → Next: 0.0.48 (patch), 0.1.0 (minor), 1.0.0 (major)
 
-### Added
-- **Version Caching System**: Intelligent caching of NPM distribution tag information
-- **Cache Management CLI**: Commands for cache status, refresh, and clearing
-- **Performance Optimization**: Faster startup times through cached version data
+# 2. Update CHANGELOG.md with new version entry
 
-### Enhanced
-- **User Experience**: Eliminated API call delays on Terminal Jarvis home page
-- **Network Efficiency**: Reduced NPM registry calls with 1-hour cache TTL
-```
-
-#### **Step 4: Version Synchronization**
-
-```bash
-# Update version across all files automatically
+# 3. Update version everywhere
 ./scripts/cicd/local-cd.sh --update-version 0.0.48
+
+# 4. Verify and deploy
+./scripts/cicd/local-cd.sh --check-versions && ./scripts/cicd/local-ci.sh && ./scripts/cicd/local-cd.sh
 ```
 
-#### **Step 5: Homebrew Formula Update & Verification**
+### Homebrew Release
 
 ```bash
-# Update Homebrew Formula for new version (if not done by local-cd.sh automatically)
-sed -i 's/version ".*"/version "0.0.48"/' homebrew/Formula/terminal-jarvis.rb
-
-# CRITICAL: Verify all versions are synchronized
-./scripts/cicd/local-cd.sh --check-versions  # MUST show "All versions are synchronized"
-
-# CRITICAL: Ensure working tree is clean BEFORE deployment
-git status  # MUST show "nothing to commit, working tree clean"
-```
-
-#### **Step 6: Validation**
-
-```bash
-./scripts/cicd/local-ci.sh  # MUST pass all tests
-```
-
-#### **Step 7: Deployment - COMMITS AND PUSHES ALL CHANGES**
-
-```bash
-./scripts/cicd/local-cd.sh  # Creates archives, commits ALL changes (including Formula), tags, pushes to GitHub
-```
-
-#### **Step 8: Generate Homebrew Release Archives**
-
-**NEW AUTOMATED APPROACH**: Use the programmatic script to create platform-specific archives:
-
-```bash
-# Generate Homebrew release archives automatically
+# 1. After deployment, create Homebrew archives
 ./scripts/utils/generate-homebrew-release.sh --stage
-git commit -m "feat: add Homebrew release archives for v0.0.48"
-git push origin develop
+git add homebrew/release/ && git commit -m "feat: add Homebrew archives v0.0.48" && git push
+
+# 2. Create GitHub release
+gh release create v0.0.48 homebrew/release/*.tar.gz --title "v0.0.48" --notes "Release notes" --latest
+
+# 3. Verify archives work
+curl -I https://github.com/BA-CalderonMorales/terminal-jarvis/releases/download/v0.0.48/terminal-jarvis-mac.tar.gz
 ```
 
-**What this script does**:
+## Critical Safety Rules
+
+### Pre-Deployment Verification
+
+```bash
+# These MUST all pass before deployment:
+git status                                    # "nothing to commit, working tree clean"
+./scripts/cicd/local-cd.sh --check-versions  # "All versions are synchronized"
+```
+
+### Common Failures to Avoid
+
+1. **Uncommitted Changes**: Always `git status` first
+2. **Version Mismatch**: Always `--check-versions` first  
+3. **Missing CHANGELOG.md**: Always update changelog before scripts
+4. **Homebrew Formula**: Always commit Formula changes before GitHub release
+
+### Emergency Fixes
+
+```bash
+# If versions are out of sync:
+./scripts/cicd/local-cd.sh --update-version X.X.X
+
+# If Homebrew Formula is wrong:
+sed -i 's/version ".*"/version "X.X.X"/' homebrew/Formula/terminal-jarvis.rb
+```
 - Builds release binary
 - Creates platform-specific archives (terminal-jarvis-mac.tar.gz, terminal-jarvis-linux.tar.gz)
 - Calculates SHA256 checksums for Formula verification
@@ -444,94 +409,84 @@ curl -I https://github.com/BA-CalderonMorales/terminal-jarvis/releases/download/
 **Note**: Homebrew release creation is now handled automatically by the CI/CD pipeline.
 Archives are created during the deployment process in `local-cd.sh`.
 
-### Version Management
+## Claude-Specific Development Tips
 
-**CRITICAL**: All version numbers must stay synchronized:
+### Working with Claude
 
-- `Cargo.toml` - version field
-- `npm/terminal-jarvis/package.json` - version field
-- **`homebrew/Formula/terminal-jarvis.rb` - version field** **COMMONLY FORGOTTEN!**
-- `npm/terminal-jarvis/src/index.ts` - console.log version display
-- `src/cli_logic.rs` - uses `env!("CARGO_PKG_VERSION")` (auto-updates)
-- `CHANGELOG.md` - must have entry for current version
-- `README.md` - version references in note sections
+**Claude excels at**:
+- **Systematic refactoring**: Breaking large files into focused domain modules
+- **Quality assurance**: Ensuring code passes `cargo clippy`, `cargo fmt`, and tests
+- **Documentation accuracy**: Keeping README.md and docs/ synchronized with actual features
+- **Error debugging**: Methodically fixing compilation errors one at a time
 
-**HOMEBREW FORMULA VERSION MUST MATCH EXACTLY** - This is frequently overlooked and causes deployment failures.
+**Optimal Claude workflow**:
+1. **Plan before implementing**: Describe the architecture changes you want to make
+2. **Incremental validation**: Run `cargo check` after each major change
+3. **Quality gates**: Always verify `cargo clippy` and `cargo fmt` pass
+4. **Documentation sync**: Update docs when adding or changing features
 
-### CHANGELOG.md Management (CRITICAL)
+**Claude's refactoring strength**: Use Claude for domain-based module extraction, where large files (>200 lines) are broken into focused modules with clear responsibilities.
 
-**MANDATORY**: Update CHANGELOG.md BEFORE running any deployment scripts to prevent version confusion.
+## Deployment Verification Checklist
 
-#### Changelog Best Practices:
-
-1. **Feature-Based Versioning**: Each version should represent one cohesive feature set or development session
-2. **Timeline Accuracy**: Don't mix features from different development days/sessions into the same version
-3. **Update First**: Always add changelog entry BEFORE running `./scripts/cicd/local-cd.sh`
-4. **Clear Structure**: Use `### Added`, `### Enhanced`, `### Fixed`, `### Technical` sections consistently
-
-#### Version Increment Guidelines:
-
-- **Patch (0.0.X)**: Bug fixes, documentation updates, small improvements
-- **Minor (0.X.0)**: New features, major enhancements (like Homebrew integration)
-- **Major (X.0.0)**: Breaking changes that require user action
-
-#### Example Development Session:
+When deploying with Claude assistance:
 
 ```bash
-# Day 1: Working on Homebrew integration
-# At END of session: Update CHANGELOG.md with v0.0.47 entry
-## [0.0.47] - 2025-08-09
-### Added
-- **Homebrew Integration**: Complete multi-platform distribution
-- **Testing Infrastructure**: Local validation protocols
+# 1. Pre-deployment verification
+git status                           # Must be clean
+./scripts/cicd/local-cd.sh --check-versions  # Must be synchronized
 
-# Day 2: Deploy the completed feature
-./scripts/cicd/local-cd.sh  # Will see v0.0.47 entry and proceed
+# 2. Quality verification  
+cargo check                          # Must compile cleanly
+cargo clippy --all-targets --all-features -- -D warnings  # Must pass
+cargo test                          # Must pass all tests
+
+# 3. Documentation verification
+# Check that CHANGELOG.md has entry for current version
+# Verify README.md accuracy against actual features
 ```
 
-#### Common Mistakes to Avoid:
+## Version & Release Management
 
-- **Mixing Sessions**: Don't put Day 1 and Day 2 work in same changelog entry
-- **Post-Deployment Updates**: Don't update changelog after running deployment
-- **Vague Entries**: Be specific about what users gain from each change
-- **Version Confusion**: Each changelog entry should match exactly one deployment
+### Version Synchronization
 
-### README.md Maintenance (CRITICAL)
+**CRITICAL FILES** (must always match):
+- `Cargo.toml`
+- `npm/terminal-jarvis/package.json` 
+- `homebrew/Formula/terminal-jarvis.rb` ⚠️ COMMONLY FORGOTTEN!
 
-**ESSENTIAL**: The README.md is the first impression for users and must be accurate and current.
+**Auto-Update Files** (managed by CLI):
+- `src/cli_logic.rs` - uses `env!("CARGO_PKG_VERSION")`
+- `npm/terminal-jarvis/src/index.ts` - version display
 
-#### **README.md Accuracy Checklist**:
+### CHANGELOG.md Best Practices
 
-- **Core Functionality**: Descriptions must match actual capabilities - no outdated or aspirational features
-- **Installation Instructions**: Must work correctly for all distribution channels (NPM, Crates.io, Homebrew)
-- **Version References**: All version numbers must be consistent throughout
-- **Working Examples**: Code examples and commands must work with current version
-- **Distribution Badges**: Badge organization must reflect current multi-platform distribution
-- **Package Information**: Size information and technical details must be current
-- **Feature Claims**: Only reference features that actually exist in the codebase
+```bash
+# ALWAYS update CHANGELOG.md BEFORE deployment scripts
+## [X.X.X] - YYYY-MM-DD
 
-#### **Common README.md Issues**:
+### Added
+- New features that users can see
 
-- **Outdated Feature Lists**: Mentioning features that were planned but not implemented
-- **Broken Installation Commands**: Commands that fail due to package name changes
-- **Version Inconsistencies**: Different version numbers in different sections
-- **Dead Links**: URLs that no longer work or point to incorrect resources
-- **Misleading Performance Claims**: Outdated information about package size or capabilities
+### Enhanced  
+- Improvements to existing features
 
-#### **README.md Update Triggers**:
+### Fixed
+- Bug fixes and corrections
 
-- **Every CHANGELOG.md update**: README must be reviewed for accuracy
-- **Version bumps**: All version references must be synchronized
-- **New features**: Feature descriptions must be added accurately
-- **Installation changes**: All distribution channel instructions must be verified
-- **Architecture changes**: Technical descriptions must reflect current implementation
+### Technical
+- Internal changes (refactoring, tests)
+```
+
+**Rules**:
+- One version = One development session
+- Update BEFORE running `local-cd.sh`
+- Be specific about user-visible changes
 
 ### Commit Standards
 
-Use conventional commits with these types:
-
 - `fix:` - Bug fixes, docs, small improvements
-- `feat:` - New features that don't break existing functionality
+- `feat:` - New features, no breaking changes  
 - `break:` - Breaking changes requiring user updates
 - `docs:` - Documentation updates
 - `style:` - Code style/formatting
