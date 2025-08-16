@@ -8,12 +8,8 @@ pub async fn handle_update_packages(package: Option<&str>) -> Result<()> {
     let package_service = PackageService::new()?;
 
     match package {
-        Some(pkg) => {
-            update_single_package(&package_service, pkg).await
-        }
-        None => {
-            update_all_packages(&package_service).await
-        }
+        Some(pkg) => update_single_package(&package_service, pkg).await,
+        None => update_all_packages(&package_service).await,
     }
 }
 
@@ -69,36 +65,4 @@ async fn update_all_packages(package_service: &PackageService) -> Result<()> {
     }
 
     Ok(())
-}
-
-/// Display update status and recommendations  
-pub fn show_update_recommendations() {
-    let theme = crate::theme_config::current_theme();
-    
-    println!("{}", theme.secondary("Update Recommendations:"));
-    println!("  • Run updates regularly to get the latest features and bug fixes");
-    println!("  • Individual tool updates are faster than bulk updates");
-    println!("  • Check tool documentation for breaking changes between versions");
-    println!();
-}
-
-/// Check if updates are available for installed tools
-pub async fn check_available_updates() -> Result<Vec<String>> {
-    let package_service = PackageService::new()?;
-    let tools = InstallationManager::get_tool_names();
-    let tools_with_updates = Vec::new();
-    
-    for tool in tools {
-        // This is a placeholder - in a real implementation, you'd check
-        // the current version vs latest available version
-        if let Ok(_) = package_service.is_tool_installed(tool).await {
-            // For now, assume updates might be available
-            // In practice, you'd call something like:
-            // let current_version = package_service.get_tool_version(tool).await?;
-            // let latest_version = package_service.get_latest_version(tool).await?;
-            // if current_version != latest_version { ... }
-        }
-    }
-    
-    Ok(tools_with_updates)
 }
