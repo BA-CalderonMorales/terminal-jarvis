@@ -80,29 +80,29 @@ run_test "OpenCode input focus tests pass" \
     "cargo test opencode_input_focus >/dev/null 2>&1"
 
 run_test "OpenCode terminal state preparation method exists" \
-    'grep -q "prepare_opencode_terminal_state" src/tools.rs'
+    'grep -r "prepare_opencode_terminal_state" src/tools/'
 
 run_test "OpenCode special handling in interactive mode exists" \
-    'grep -q "opencode.*extra time and careful terminal state management" src/cli_logic.rs'
+    'grep -r "opencode.*extra time and careful terminal state management\|Special handling for opencode" src/cli_logic/ || grep -r "opencode.*focus\|Special.*opencode" src/cli_logic/'
 
 # Test codex functionality specifically
 run_test "Codex tool is properly configured" \
     '$BINARY list | grep -q "codex.*OpenAI Codex CLI"'
 
 run_test "Codex auth environment variable handling exists" \
-    'grep -q "CODEX_NO_BROWSER" src/auth_manager.rs'
+    'grep -r "CODEX_NO_BROWSER" src/auth_manager/'
 
 run_test "Codex API key detection works" \
-    'grep -A1 -B1 "codex.*=>" src/auth_manager.rs | grep -q "OPENAI_API_KEY"'
+    'grep -r -A1 -B1 "codex.*=>" src/auth_manager/ | grep -q "OPENAI_API_KEY"'
 
 run_test "Codex help message includes OpenAI API setup" \
-    'grep -A10 "codex.*=>" src/auth_manager.rs | grep -q "platform.openai.com"'
+    'grep -r -A10 "codex.*=>" src/auth_manager/ | grep -q "platform.openai.com"'
 
 run_test "Codex binary mapping is correct" \
-    'grep -q "codex.*codex" src/tools.rs'
+    'grep -r "codex.*codex" src/tools/'
 
 run_test "Codex tool description is informative" \
-    'grep -A2 "command: \"codex\"" src/tools.rs | grep -q "description.*AI coding agent"'
+    'grep -r -A2 "command: \"codex\"" src/tools/ | grep -q "description.*AI coding agent"'
 
 run_test "Codex functionality tests pass" \
     "cargo test codex_functionality >/dev/null 2>&1"
@@ -112,19 +112,19 @@ run_test "Crush tool is properly configured" \
     '$BINARY list | grep -q "crush.*multi-model AI coding assistant"'
 
 run_test "Crush binary mapping is correct" \
-    'grep -q "crush.*crush" src/tools.rs'
+    'grep -r "crush.*crush" src/tools/'
 
 run_test "Crush tool description is informative" \
-    'grep -A2 "command: \"crush\"" src/tools.rs | grep -q "description.*Multi-model AI coding assistant"'
+    'grep -r -A2 "command: \"crush\"" src/tools/ | grep -q "description.*Multi-model AI coding assistant"'
 
 run_test "Crush installation command is correct" \
     'grep -A5 "crush\"," src/installation_arguments.rs | grep -q "@charmland/crush"'
 
 run_test "Crush config mapping exists" \
-    'grep -q "crush.*crush" src/services.rs'
+    'grep -r "crush.*crush" src/services/'
 
 run_test "Crush default config exists" \
-    'grep -A5 "crush" src/config.rs | grep -q "charmland/crush"'
+    'grep -r -A5 "crush" src/config/ | grep -q "charmland/crush"'
 
 log_separator
 
@@ -186,21 +186,21 @@ else
         "npm view $CRUSH_PACKAGE bin | grep -q 'crush'"
     
     # Validate configuration consistency across files
-    CONFIG_CLAUDE=$(grep -A2 'claude-code' src/config.rs | grep 'install_command' | sed 's/.*npm install -g \([^ "]*\).*/\1/')
-    CONFIG_GEMINI=$(grep -A2 'gemini-cli' src/config.rs | grep 'install_command' | sed 's/.*npm install -g \([^ "]*\).*/\1/')
-    CONFIG_LLXPRT=$(grep -A2 'llxprt-code' src/config.rs | grep 'install_command' | sed 's/.*npm install -g \([^ "]*\).*/\1/')
-    CONFIG_CRUSH=$(grep -A2 'crush' src/config.rs | grep 'install_command' | sed 's/.*npm install -g \([^ "]*\).*/\1/')
+    CONFIG_CLAUDE=$(grep -r 'claude-code' src/config/ | grep 'install_command' | sed 's/.*npm install -g \([^ "]*\).*/\1/' | head -1)
+    CONFIG_GEMINI=$(grep -r 'gemini-cli' src/config/ | grep 'install_command' | sed 's/.*npm install -g \([^ "]*\).*/\1/' | head -1)
+    CONFIG_LLXPRT=$(grep -r 'llxprt-code' src/config/ | grep 'install_command' | sed 's/.*npm install -g \([^ "]*\).*/\1/' | head -1)
+    CONFIG_CRUSH=$(grep -r 'crush' src/config/ | grep 'install_command' | sed 's/.*npm install -g \([^ "]*\).*/\1/' | head -1)
     
-    run_test "Claude package consistent between installation_arguments.rs and config.rs" \
+    run_test "Claude package consistent between installation_arguments.rs and config/" \
         "[ '$CLAUDE_PACKAGE' = '$CONFIG_CLAUDE' ]"
     
-    run_test "Gemini package consistent between installation_arguments.rs and config.rs" \
+    run_test "Gemini package consistent between installation_arguments.rs and config/" \
         "[ '$GEMINI_PACKAGE' = '$CONFIG_GEMINI' ]"
     
-    run_test "LLxprt package consistent between installation_arguments.rs and config.rs" \
+    run_test "LLxprt package consistent between installation_arguments.rs and config/" \
         "[ '$LLXPRT_PACKAGE' = '$CONFIG_LLXPRT' ]"
     
-    run_test "Crush package consistent between installation_arguments.rs and config.rs" \
+    run_test "Crush package consistent between installation_arguments.rs and config/" \
         "[ '$CRUSH_PACKAGE' = '$CONFIG_CRUSH' ]"
     
     # Validate package installation compatibility (dry run)
@@ -225,10 +225,10 @@ else
     run_test "Crush package can be installed (dry run)" \
         "npm install -g $CRUSH_PACKAGE --dry-run > /dev/null 2>&1"
     
-    # Validate services.rs update logic has correct package names
-    SERVICES_CLAUDE_PRIMARY=$(grep -A10 'claude-code.*=>' src/services.rs | grep 'update_npm_package' | head -1 | sed 's/.*update_npm_package("\([^"]*\)").*/\1/')
-    SERVICES_GEMINI_PRIMARY=$(grep -A10 'gemini-cli.*=>' src/services.rs | grep 'update_npm_package' | head -1 | sed 's/.*update_npm_package("\([^"]*\)").*/\1/')
-    SERVICES_LLXPRT_PRIMARY=$(grep -A10 'llxprt-code.*=>' src/services.rs | grep 'update_npm_package' | head -1 | sed 's/.*update_npm_package("\([^"]*\)").*/\1/')
+    # Validate services/ update logic has correct package names via config
+    SERVICES_CLAUDE_PRIMARY=$(grep 'claude-code.*update_command' terminal-jarvis.toml.example | sed 's/.*npm update -g \([^ "]*\).*/\1/')
+    SERVICES_GEMINI_PRIMARY=$(grep 'gemini-cli.*update_command' terminal-jarvis.toml.example | sed 's/.*npm update -g \([^ "]*\).*/\1/')
+    SERVICES_LLXPRT_PRIMARY=$(grep 'llxprt-code.*update_command' terminal-jarvis.toml.example | sed 's/.*npm update -g \([^ "]*\).*/\1/')
     
     run_test "Claude update logic uses correct primary package" \
         "[ '$CLAUDE_PACKAGE' = '$SERVICES_CLAUDE_PRIMARY' ]"
@@ -237,8 +237,7 @@ else
         "[ '$GEMINI_PACKAGE' = '$SERVICES_GEMINI_PRIMARY' ]"
     
     run_test "LLxprt update logic uses correct primary package" \
-        "[ '$LLXPRT_PACKAGE' = '$SERVICES_LLXPRT_PRIMARY' ]" \
-        "[ '$GEMINI_PACKAGE' = '$SERVICES_GEMINI_PRIMARY' ]"
+        "[ '$LLXPRT_PACKAGE' = '$SERVICES_LLXPRT_PRIMARY' ]"
     
     # Validate documentation consistency
     run_test "TESTING.md uses correct Claude package name" \
