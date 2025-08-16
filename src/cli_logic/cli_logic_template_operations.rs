@@ -56,52 +56,9 @@ fn display_templates_list(templates: &[String]) {
             println!(" {} {}", theme.accent("•"), template);
         }
         println!();
-        println!("{}", theme.secondary(&format!("Found {} template(s)", templates.len())));
-    }
-}
-
-/// Display template management help and guidance
-pub async fn display_template_help() -> Result<()> {
-    let theme = theme_config::current_theme();
-
-    println!("{}", theme.primary("┌─ Template Management ──────────────────────────────────────┐"));
-    println!("{}", theme.primary("│                                                             │"));
-    println!("│ {:<59} │", theme.secondary("Templates help you quickly set up new projects with"));
-    println!("│ {:<59} │", theme.secondary("predefined configurations and boilerplate code."));
-    println!("{}", theme.primary("│                                                             │"));
-    println!("│ {:<59} │", theme.accent("Available Commands:"));
-    println!("│   {:<57} │", theme.secondary("init    - Initialize template repository"));
-    println!("│   {:<57} │", theme.secondary("create  - Create a new template"));
-    println!("│   {:<57} │", theme.secondary("list    - List available templates"));
-    println!("│   {:<57} │", theme.secondary("apply   - Apply a template to current directory"));
-    println!("{}", theme.primary("│                                                             │"));
-    println!("│ {:<59} │", theme.accent("Requirements:"));
-    println!("│   {:<57} │", theme.secondary("• GitHub CLI (gh) must be installed"));
-    println!("│   {:<57} │", theme.secondary("• GitHub account with repository access"));
-    println!("{}", theme.primary("│                                                             │"));
-    println!("{}", theme.primary("└─────────────────────────────────────────────────────────────┘"));
-
-    Ok(())
-}
-
-/// Check template system prerequisites
-pub async fn check_template_prerequisites() -> Result<bool> {
-    use tokio::process::Command;
-
-    // Check if GitHub CLI is installed
-    let gh_check = Command::new("gh").arg("--version").output().await;
-
-    match gh_check {
-        Ok(output) if output.status.success() => {
-            let theme = theme_config::current_theme();
-            println!("{}", theme.primary("✓ GitHub CLI is available"));
-            Ok(true)
-        }
-        _ => {
-            let theme = theme_config::current_theme();
-            println!("{}", theme.accent("✗ GitHub CLI (gh) is required but not installed"));
-            println!("  Install from: https://cli.github.com/");
-            Ok(false)
-        }
+        println!(
+            "{}",
+            theme.secondary(&format!("Found {} template(s)", templates.len()))
+        );
     }
 }
