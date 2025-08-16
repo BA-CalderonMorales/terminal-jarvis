@@ -11,6 +11,22 @@ pub struct InstallCommand {
 pub struct InstallationManager;
 
 impl InstallationManager {
+    pub fn check_npm_available() -> bool {
+        std::process::Command::new("npm")
+            .arg("--version")
+            .output()
+            .map(|output| output.status.success())
+            .unwrap_or(false)
+    }
+
+    pub fn get_tool_names() -> Vec<&'static str> {
+        Self::get_install_commands().keys().copied().collect()
+    }
+
+    pub fn get_install_command(tool: &str) -> Option<InstallCommand> {
+        Self::get_install_commands().get(tool).cloned()
+    }
+
     pub fn get_install_commands() -> HashMap<&'static str, InstallCommand> {
         let mut commands = HashMap::new();
 
@@ -86,21 +102,5 @@ impl InstallationManager {
         );
 
         commands
-    }
-
-    pub fn check_npm_available() -> bool {
-        std::process::Command::new("npm")
-            .arg("--version")
-            .output()
-            .map(|output| output.status.success())
-            .unwrap_or(false)
-    }
-
-    pub fn get_tool_names() -> Vec<&'static str> {
-        Self::get_install_commands().keys().copied().collect()
-    }
-
-    pub fn get_install_command(tool: &str) -> Option<InstallCommand> {
-        Self::get_install_commands().get(tool).cloned()
     }
 }
