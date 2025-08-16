@@ -9,5 +9,4 @@ pub mod installation_arguments;
 pub mod progress_utils;
 pub mod services;
 pub mod theme;
-pub mod theme_config;
 pub mod tools;

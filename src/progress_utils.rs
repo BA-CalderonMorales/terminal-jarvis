@@ -1,4 +1,4 @@
-use crate::theme_config;
+use crate::theme::theme_global_config;
 use indicatif::{MultiProgress, ProgressBar, ProgressStyle};
 use std::time::Duration;
 use tokio::time::sleep;
@@ -98,13 +98,13 @@ impl ProgressUtils {
 
     /// Create a styled info message
     pub fn info_message(message: &str) {
-        let theme = theme_config::current_theme();
+        let theme = theme_global_config::current_theme();
         println!("{} {}", theme.accent("T.JARVIS:"), theme.primary(message));
     }
 
     /// Create a styled warning message
     pub fn warning_message(message: &str) {
-        let theme = theme_config::current_theme();
+        let theme = theme_global_config::current_theme();
         println!(
             "{} {}",
             theme.secondary("⚠ ADVISORY:"),
@@ -114,13 +114,13 @@ impl ProgressUtils {
 
     /// Create a styled error message
     pub fn error_message(message: &str) {
-        let theme = theme_config::current_theme();
+        let theme = theme_global_config::current_theme();
         println!("{} {}", theme.accent("✗ SYSTEM:"), theme.primary(message));
     }
 
     /// Create a styled success message
     pub fn success_message(message: &str) {
-        let theme = theme_config::current_theme();
+        let theme = theme_global_config::current_theme();
         println!("{} {}", theme.accent("✓ COMPLETE:"), theme.primary(message));
     }
 }

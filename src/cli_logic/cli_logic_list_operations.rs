@@ -1,5 +1,5 @@
 use crate::installation_arguments::InstallationManager;
-use crate::theme_config;
+use crate::theme::theme_global_config;
 use crate::tools::ToolManager;
 use anyhow::Result;
 
@@ -35,7 +35,7 @@ pub async fn handle_list_tools() -> Result<()> {
 /// Display system requirements and installation advisory
 fn show_system_requirements_advisory() {
     if !InstallationManager::check_npm_available() {
-        let theme = theme_config::current_theme();
+        let theme = theme_global_config::current_theme();
         println!(
             "{} {}",
             theme.secondary("⚠ ADVISORY:"),

@@ -1,5 +1,5 @@
 use crate::installation_arguments::InstallationManager;
-use crate::theme_config;
+use crate::theme::theme_global_config;
 use crate::tools::ToolManager;
 use anyhow::{anyhow, Result};
 
@@ -26,7 +26,7 @@ fn display_tool_info_formatted(
     tool_info: &crate::tools::ToolInfo,
     install_info: &crate::installation_arguments::InstallCommand,
 ) {
-    let theme = theme_config::current_theme();
+    let theme = theme_global_config::current_theme();
 
     println!(
         "{}",
