@@ -150,11 +150,11 @@ pub async fn handle_install_tool(tool: &str) -> Result<()> {
 /// Prepare terminal state specifically for opencode to ensure proper input focus
 async fn prepare_opencode_terminal_state() -> Result<()> {
     use std::io::Write;
-    
+
     // Force flush any remaining output and reset terminal
     print!("\x1b[2J\x1b[H\x1b[?25h"); // Clear screen, home cursor, show cursor
     std::io::stdout().flush().unwrap_or_default();
     tokio::time::sleep(tokio::time::Duration::from_millis(300)).await;
-    
+
     Ok(())
 }
