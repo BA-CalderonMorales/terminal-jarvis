@@ -4,43 +4,110 @@ This document provides technical information about Terminal Jarvis's architectur
 
 ## Project Structure
 
-The project follows a modular architecture designed for maintainability and extensibility:
+The project follows a domain-based modular architecture designed for maintainability, extensibility, and clear separation of concerns:
 
 ```
 src/
-├── main.rs               # Entry point - minimal code, delegates to CLI
-├── cli.rs                # Clean, expressive CLI interface definitions
-├── cli_logic.rs          # Business logic with interactive T.JARVIS interface
-├── tools.rs              # Tool management and detection logic
-├── auth_manager.rs       # Authentication management and browser prevention
+├── main.rs                    # Entry point - minimal code, delegates to CLI
+├── lib.rs                     # Library entry point for module organization
+├── cli.rs                     # Clean, expressive CLI interface definitions
 ├── installation_arguments.rs # Installation commands and NPM validation
-├── services.rs           # Service layer for external tools (gh CLI, etc.)
-├── config.rs             # TOML configuration management
-├── theme.rs              # Professional theme definitions and ANSI color management
-├── theme_config.rs       # Global theme state management and configuration
-├── progress_utils.rs     # Theme-integrated messaging and progress indicators
-├── api.rs                # Modular API endpoint definitions (future use)
-├── api_base.rs           # Base API route configurations (future use)
-└── api_client.rs         # HTTP client abstraction layer (future use)
+├── progress_utils.rs          # Theme-integrated messaging and progress indicators
+│
+├── cli_logic/                 # Business logic domain (9 focused modules)
+│   ├── mod.rs                 # Module coordination and re-exports
+│   ├── cli_logic_entry_point.rs        # Main CLI logic entry point
+│   ├── cli_logic_interactive.rs        # Interactive T.JARVIS interface
+│   ├── cli_logic_tool_execution.rs     # Tool execution workflows
+│   ├── cli_logic_update_operations.rs  # Tool update management
+│   ├── cli_logic_list_operations.rs    # Tool listing operations
+│   ├── cli_logic_info_operations.rs    # Tool information display
+│   ├── cli_logic_config_management.rs  # Configuration management
+│   ├── cli_logic_template_operations.rs # Template system operations
+│   └── cli_logic_utilities.rs          # Shared utility functions
+│
+├── auth_manager/              # Authentication domain (5 focused modules)
+│   ├── mod.rs                 # Module coordination and re-exports
+│   ├── auth_entry_point.rs            # Authentication system entry point
+│   ├── auth_environment_detection.rs  # Environment detection logic
+│   ├── auth_environment_setup.rs      # Environment configuration
+│   ├── auth_api_key_management.rs     # API key handling
+│   └── auth_warning_system.rs         # Browser prevention warnings
+│
+├── config/                    # Configuration domain (5 focused modules)
+│   ├── mod.rs                 # Module coordination and re-exports
+│   ├── config_entry_point.rs          # Configuration system entry point
+│   ├── config_structures.rs           # TOML configuration structures
+│   ├── config_file_operations.rs      # File I/O operations
+│   ├── config_manager.rs              # Configuration management logic
+│   └── config_version_cache.rs        # Version caching system
+│
+├── services/                  # External integrations domain (5 focused modules)
+│   ├── mod.rs                 # Module coordination and re-exports
+│   ├── services_entry_point.rs        # Service layer entry point
+│   ├── services_package_operations.rs # Package management operations
+│   ├── services_npm_operations.rs     # NPM-specific operations
+│   ├── services_github_integration.rs # GitHub CLI integration
+│   └── services_tool_configuration.rs # Tool configuration mapping
+│
+├── theme/                     # UI theming domain (7 focused modules)
+│   ├── mod.rs                 # Module coordination and re-exports
+│   ├── theme_entry_point.rs           # Theme system entry point
+│   ├── theme_definitions.rs           # Theme color definitions
+│   ├── theme_config.rs                # Theme configuration management
+│   ├── theme_global_config.rs         # Global theme state
+│   ├── theme_background_layout.rs     # Background and layout styling
+│   ├── theme_text_formatting.rs       # Text formatting utilities
+│   └── theme_utilities.rs             # Theme utility functions
+│
+├── tools/                     # Tool management domain (6 focused modules)
+│   ├── mod.rs                 # Module coordination and re-exports
+│   ├── tools_entry_point.rs           # Tool system entry point
+│   ├── tools_detection.rs             # Tool detection and verification
+│   ├── tools_command_mapping.rs       # Command-to-tool mapping
+│   ├── tools_execution_engine.rs      # Tool execution engine
+│   ├── tools_process_management.rs    # Process lifecycle management
+│   └── tools_startup_guidance.rs      # Tool startup guidance system
+│
+└── api/                       # API framework domain (4 focused modules)
+    ├── mod.rs                 # Module coordination and re-exports
+    ├── api_base.rs            # Base API route configurations
+    ├── api_client.rs          # HTTP client abstraction layer
+    └── api_tool_operations.rs # API tool operation endpoints
 ```
 
 ## Architecture Philosophy
 
-- **`main.rs`**: Entry point with minimal code - simply bootstraps the CLI
-- **`cli.rs`**: Expressive command definitions with optional subcommands (defaults to interactive mode)
-- **`cli_logic.rs`**: Complete business logic including the interactive T.JARVIS interface with ASCII art
-- **`tools.rs`**: Comprehensive tool detection using multiple verification methods (`which`, `--version`, `--help`)
-- **Authentication & Browser Prevention**: Built-in system for detecting headless/CI environments and preventing unwanted browser authentication flows
-- **`installation_arguments.rs`**: Centralized installation commands with NPM dependency validation
-- **`services.rs`**: Service layer for external integrations (GitHub CLI, package managers)
-- **`config.rs`**: TOML configuration file management
-- **Theme System**: Professional theming architecture with global consistency
-  - **`theme.rs`**: Three professionally designed themes (T.JARVIS, Classic, Matrix) with complete ANSI color definitions
-  - **`theme_config.rs`**: Global theme state management and runtime theme switching
-  - **`progress_utils.rs`**: Theme-integrated messaging system for consistent visual experience
-- **API modules**: Framework code for future web integrations (currently unused)
+Terminal Jarvis follows a **domain-based modular architecture** where large functional areas are broken into focused modules within dedicated folders. This approach provides:
 
-The interactive mode provides a complete T.JARVIS experience with real-time tool status, installation management, and a beautiful terminal interface.
+### Core Design Principles
+
+- **Domain Separation**: Each major functional area (CLI logic, authentication, configuration, etc.) is organized into its own folder with focused modules
+- **Module Coordination**: Each domain folder contains a `mod.rs` file that handles re-exports and minimal coordination logic
+- **Focused Modules**: Individual modules average 150-200 lines, handling single responsibilities within their domain
+- **Clear Entry Points**: Each domain has a dedicated entry point module for external interaction
+
+### Domain Architecture
+
+- **`main.rs` & `lib.rs`**: Minimal entry points that delegate to domain modules
+- **`cli.rs`**: Expressive command definitions with optional subcommands (defaults to interactive mode)
+- **`cli_logic/`**: Complete business logic domain including the interactive T.JARVIS interface, tool execution workflows, and operation management
+- **`auth_manager/`**: Authentication domain with environment detection, browser prevention, and API key management
+- **`config/`**: Configuration domain handling TOML file operations, structure management, and version caching
+- **`services/`**: External integrations domain for package management, NPM operations, and GitHub CLI integration
+- **`theme/`**: UI theming domain with color definitions, global state management, and formatting utilities
+- **`tools/`**: Tool management domain covering detection, command mapping, execution, and process lifecycle
+- **`api/`**: API framework domain for future web integrations (currently unused)
+
+### Modular Benefits
+
+- **Maintainability**: Clear separation of concerns makes code easier to understand and modify
+- **Testability**: Focused modules can be tested independently with clear interfaces
+- **Extensibility**: New functionality can be added within appropriate domains without affecting other areas
+- **Refactoring Safety**: Compilation-driven refactoring ensures changes don't break existing functionality
+- **Code Quality**: Smaller modules reduce complexity and eliminate dead code more effectively
+
+The interactive mode provides a complete T.JARVIS experience with real-time tool status, installation management, and a beautiful terminal interface, all coordinated through this modular architecture.
 
 ## Authentication & Environment Management
 
@@ -101,27 +168,46 @@ This architecture ensures visual consistency throughout the entire Terminal Jarv
 
 ## Adding New Tools
 
-Terminal Jarvis is designed to make adding new CLI tools straightforward:
+Terminal Jarvis is designed to make adding new CLI tools straightforward using the modular architecture:
 
-1. Define the tool configuration in `cli_logic.rs`
-2. Add the command interface in `cli.rs`
-3. Implement any required services in `services.rs`
-4. Update the tool registry
+1. **Define CLI interface** in `cli.rs` with new command structure
+2. **Add tool configuration** in `services/services_tool_configuration.rs` for display name mapping
+3. **Update tool detection** in `tools/tools_detection.rs` and `tools/tools_command_mapping.rs`
+4. **Implement tool execution** in `cli_logic/cli_logic_tool_execution.rs`
+5. **Add service operations** in appropriate `services/` modules if external integrations are needed
 
 Example structure for adding a new tool:
 
 ```rust
-// In cli_logic.rs
-pub fn handle_new_tool(args: &NewToolArgs) -> Result<()> {
-    // Tool-specific logic here
-}
-
 // In cli.rs
 #[derive(Parser)]
 pub struct NewToolArgs {
-    // Tool arguments
+    // Tool-specific command arguments
+}
+
+// In tools/tools_command_mapping.rs
+pub fn get_command_mapping() -> HashMap<&'static str, &'static str> {
+    let mut commands = HashMap::new();
+    // Add new tool mapping
+    commands.insert("newtool", "new-tool-cli");
+    commands
+}
+
+// In services/services_tool_configuration.rs
+pub fn get_display_name_to_config_mapping() -> HashMap<String, String> {
+    let mut mapping = HashMap::new();
+    // Add new tool configuration mapping
+    mapping.insert("New Tool".to_string(), "newtool".to_string());
+    mapping
+}
+
+// In cli_logic/cli_logic_tool_execution.rs
+pub fn handle_new_tool_execution(args: &NewToolArgs) -> Result<()> {
+    // Tool-specific execution logic here
 }
 ```
+
+This modular approach ensures that new tools integrate cleanly with all existing systems (detection, execution, configuration, and service management) while maintaining the separation of concerns.
 
 ## NPM Distribution Technical Details
 

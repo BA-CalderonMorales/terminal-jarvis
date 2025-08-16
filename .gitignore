@@ -156,6 +156,8 @@ vite.config.ts.timestamp-*
 .DS_Store
 Thumbs.db
 
+.claude
+
 # AI Tools Data/Config
 # Crush AI assistant data
 .crush/
