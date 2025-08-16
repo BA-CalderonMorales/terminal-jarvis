@@ -1,6 +1,6 @@
 #![allow(dead_code)]
 
-use crate::api_client::ApiClient;
+use crate::api::api_client::ApiClient;
 use anyhow::Result;
 use std::collections::HashMap;
 
