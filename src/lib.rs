@@ -1,6 +1,4 @@
 pub mod api;
-pub mod api_base;
-pub mod api_client;
 pub mod auth_manager;
 pub mod cli;
 pub mod cli_logic;
