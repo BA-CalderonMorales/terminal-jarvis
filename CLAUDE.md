@@ -106,6 +106,23 @@ Terminal Jarvis is a Rust-based CLI wrapper that provides a unified interface fo
 2. **Crates.io**: `cargo install terminal-jarvis` (Rust developers)
 3. **Homebrew**: `brew tap ba-calderonmorales/terminal-jarvis && brew install terminal-jarvis` (macOS/Linux package managers)
 
+**Cross-Platform Build System** (v0.0.58+):
+
+Terminal Jarvis now includes comprehensive multi-platform build support:
+
+- **Native macOS binaries**: Universal binaries supporting both Intel and ARM64
+- **Linux cross-compilation**: True Linux binaries for proper compatibility
+- **Automated build system**: `scripts/utils/build-multiplatform.sh` and enhanced Homebrew release generation
+- **CI/CD integration**: Seamless integration with existing deployment pipeline
+- **Fallback handling**: Graceful degradation when cross-compilation tools unavailable
+
+**Build Scripts**:
+- `./scripts/utils/build-multiplatform.sh` - Multi-platform build system
+- `./scripts/utils/generate-homebrew-release.sh` - Enhanced with true cross-platform archives
+- `MULTIPLATFORM_BUILD=true ./scripts/cicd/local-ci.sh` - CI testing with cross-compilation
+
+See `docs/MULTIPLATFORM_BUILD.md` for detailed technical documentation.
+
 ## Key Features & Capabilities
 
 ### Session Continuation System (v0.0.44+)

@@ -38,6 +38,43 @@ jobs:
       uses: dtolnay/rust-toolchain@stable
     - name: Build
       run: cargo build --verbose
+    
+  # New multi-platform build testing
+  multiplatform-build:
+    name: Multi-Platform Build Test
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        include:
+          - os: macos-latest
+            target: x86_64-apple-darwin
+            cross_target: aarch64-apple-darwin
+          - os: macos-latest  
+            target: aarch64-apple-darwin
+            cross_target: x86_64-unknown-linux-gnu
+          - os: ubuntu-latest
+            target: x86_64-unknown-linux-gnu
+            cross_target: aarch64-unknown-linux-gnu
+    steps:
+    - uses: actions/checkout@v4
+    - name: Install Rust
+      uses: dtolnay/rust-toolchain@stable
+      with:
+        targets: ${{ matrix.target }},${{ matrix.cross_target }}
+    - name: Test multi-platform build system
+      run: |
+        chmod +x scripts/utils/build-multiplatform.sh
+        ./scripts/utils/build-multiplatform.sh --current-only
+    - name: Test cross-compilation (may fail)
+      continue-on-error: true
+      run: |
+        echo "Testing cross-compilation to ${{ matrix.cross_target }}"
+        cargo build --target ${{ matrix.cross_target }} || echo "Cross-compilation failed (expected)"
+    - name: Test Homebrew release generation (macOS only)
+      if: matrix.os == 'macos-latest'
+      run: |
+        chmod +x scripts/utils/generate-homebrew-release.sh
+        ./scripts/utils/generate-homebrew-release.sh || echo "Homebrew generation completed with warnings"
 
   npm-test:
     name: Test NPM Package

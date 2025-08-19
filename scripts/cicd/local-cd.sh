@@ -592,7 +592,15 @@ fi
 
 # Rebuild with new version
 echo -e "${BLUE}→ Rebuilding with new version...${RESET}"
-cargo build --release
+
+# Use multi-platform build for better binary compatibility
+if ./scripts/utils/build-multiplatform.sh --current-only; then
+    log_info_if_enabled "Multi-platform build system used for rebuild"
+else
+    log_warn_if_enabled "Multi-platform build failed, using standard build"
+    cargo build --release
+fi
+
 cd npm/terminal-jarvis && npm run build && cd ../..
 
 echo ""
