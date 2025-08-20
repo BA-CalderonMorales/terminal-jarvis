@@ -117,10 +117,32 @@ jobs:
         run: |
           mkdir -p release-assets
           
-          # Copy Homebrew archives
+          # Copy existing Homebrew archives (generated during build)
           find artifacts -name "*.tar.gz" -exec cp {} release-assets/ \;
           
-          # Create additional platform-specific archives
+          # Create Homebrew-compatible simplified archives
+          # These are needed for both automated CD and manual update-formula.sh
+          
+          # Create macOS universal archive (compatible with Homebrew Formula)
+          if [ -d "artifacts/binaries-macos" ]; then
+            mkdir -p /tmp/macos-binary
+            # Use the first available macOS binary (universal binary approach)
+            find artifacts/binaries-macos -name "terminal-jarvis" -type f | head -1 | xargs cp -t /tmp/macos-binary/
+            tar -czf "release-assets/terminal-jarvis-mac.tar.gz" -C /tmp/macos-binary terminal-jarvis
+            echo "Created Homebrew-compatible macOS archive: terminal-jarvis-mac.tar.gz"
+          fi
+          
+          # Create Linux universal archive (compatible with Homebrew Formula)
+          if [ -d "artifacts/binaries-linux" ]; then
+            mkdir -p /tmp/linux-binary
+            # Use the first available Linux binary (universal binary approach)
+            find artifacts/binaries-linux -name "terminal-jarvis" -type f | head -1 | xargs cp -t /tmp/linux-binary/
+            tar -czf "release-assets/terminal-jarvis-linux.tar.gz" -C /tmp/linux-binary terminal-jarvis
+            echo "Created Homebrew-compatible Linux archive: terminal-jarvis-linux.tar.gz"
+          fi
+          
+          # Create detailed platform-specific archives (Aviv Laufer's contribution)
+          # These provide granular architecture-specific downloads for advanced users
           for platform_dir in artifacts/binaries-*; do
             platform=$(basename "$platform_dir" | sed 's/binaries-//')
             
@@ -132,8 +154,13 @@ jobs:
               # Create platform-specific archive
               archive_name="terminal-jarvis-${platform}-${arch}.tar.gz"
               tar -czf "release-assets/$archive_name" -C "$(dirname "$binary")" "$(basename "$binary")"
+              echo "Created detailed archive: $archive_name"
             done
           done
+          
+          # List all created archives for verification
+          echo "All release assets created:"
+          ls -la release-assets/
 
       - name: Create Release
         uses: softprops/action-gh-release@v1

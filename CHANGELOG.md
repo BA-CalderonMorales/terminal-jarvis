@@ -5,6 +5,23 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.0.59] - 2025-08-19
+
+### Fixed
+
+- **Multi-Platform CD Pipeline**: Resolved GitHub release creation permissions and archive naming compatibility
+  - Added required permissions (contents: write, packages: write, id-token: write) to fix 403 Forbidden errors
+  - Enhanced release asset preparation to create both simplified Homebrew-compatible archives and detailed platform-specific archives
+  - Preserved Aviv Laufer's detailed platform-specific archive logic while adding universal mac/linux archives
+  - Ensured compatibility between automated CD workflow and manual update-formula.sh script
+
+### Technical
+
+- **Archive Strategy**: Dual archive approach for maximum compatibility
+  - Simplified archives: terminal-jarvis-mac.tar.gz, terminal-jarvis-linux.tar.gz (for Homebrew)
+  - Detailed archives: terminal-jarvis-{platform}-{arch}.tar.gz (for advanced users)
+- **Workflow Permissions**: Added comprehensive GitHub Actions permissions for release automation
+
 ## [0.0.58] - 2025-08-19
 
 ### Enhanced

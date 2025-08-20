@@ -4,6 +4,10 @@
 # Release archives that might end up in root
 *.tar.gz
 
+binaries-*
+release-assets
+
+
 # NPM and Node.js
 # Logs
 logs
