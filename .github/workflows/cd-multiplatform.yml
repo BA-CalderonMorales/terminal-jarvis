@@ -249,24 +249,44 @@ jobs:
           # Download release assets to get checksums
           gh release download "$VERSION" --pattern "*.tar.gz" --dir /tmp/
           
-          MAC_SHA256=$(sha256sum /tmp/terminal-jarvis-mac.tar.gz | cut -d' ' -f1)
-          LINUX_SHA256=$(sha256sum /tmp/terminal-jarvis-linux.tar.gz | cut -d' ' -f1)
+          # Calculate checksums for all architecture-specific archives
+          MAC_X64_SHA256=$(sha256sum /tmp/terminal-jarvis-macos-x86_64.tar.gz | cut -d' ' -f1)
+          MAC_ARM64_SHA256=$(sha256sum /tmp/terminal-jarvis-macos-aarch64.tar.gz | cut -d' ' -f1)
+          LINUX_X64_SHA256=$(sha256sum /tmp/terminal-jarvis-linux-x86_64.tar.gz | cut -d' ' -f1)
+          LINUX_FALLBACK_SHA256=$(sha256sum /tmp/terminal-jarvis-linux.tar.gz | cut -d' ' -f1)
           
-          # Update Formula
+          # Generate robust multi-architecture Formula
           cat > ../tap/Formula/terminal-jarvis.rb << EOL
+          # Documentation: https://docs.brew.sh/Formula-Cookbook
+          #                https://rubydoc.brew.sh/Formula
+          # Based on Federico Terzi's approach: https://federicoterzi.com/blog/how-to-publish-your-rust-project-on-homebrew/
+          
           class TerminalJarvis < Formula
             desc "A unified command center for AI coding tools"
             homepage "https://github.com/BA-CalderonMorales/terminal-jarvis"
-            
-            if OS.mac?
-              url "https://github.com/BA-CalderonMorales/terminal-jarvis/releases/download/${VERSION}/terminal-jarvis-mac.tar.gz"
-              sha256 "${MAC_SHA256}"
-            elsif OS.linux?
-              url "https://github.com/BA-CalderonMorales/terminal-jarvis/releases/download/${VERSION}/terminal-jarvis-linux.tar.gz" 
-              sha256 "${LINUX_SHA256}"
-            end
-            
             version "${VERSION_NUM}"
+            license "MIT"
+          
+            on_macos do
+              if Hardware::CPU.intel?
+                url "https://github.com/BA-CalderonMorales/terminal-jarvis/releases/download/${VERSION}/terminal-jarvis-macos-x86_64.tar.gz"
+                sha256 "${MAC_X64_SHA256}"
+              elsif Hardware::CPU.arm?
+                url "https://github.com/BA-CalderonMorales/terminal-jarvis/releases/download/${VERSION}/terminal-jarvis-macos-aarch64.tar.gz"
+                sha256 "${MAC_ARM64_SHA256}"
+              end
+            end
+          
+            on_linux do
+              if Hardware::CPU.intel?
+                url "https://github.com/BA-CalderonMorales/terminal-jarvis/releases/download/${VERSION}/terminal-jarvis-linux-x86_64.tar.gz"
+                sha256 "${LINUX_X64_SHA256}"
+              else
+                # Fallback for other Linux architectures
+                url "https://github.com/BA-CalderonMorales/terminal-jarvis/releases/download/${VERSION}/terminal-jarvis-linux.tar.gz"
+                sha256 "${LINUX_FALLBACK_SHA256}"
+              end
+            end
           
             def install
               bin.install "terminal-jarvis"

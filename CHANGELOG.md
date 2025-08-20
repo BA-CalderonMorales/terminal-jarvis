@@ -5,6 +5,23 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.0.60] - 2025-08-19
+
+### Enhanced
+
+- **Homebrew Formula Robustness**: Implemented architecture-specific binary selection for improved multi-platform support
+  - Enhanced Formula generation to use modern `on_macos` and `on_linux` blocks with Hardware::CPU detection
+  - Added Intel vs ARM architecture-specific archive selection for both macOS and Linux
+  - Implemented robust fallback mechanisms for unsupported architectures
+  - Preserved simplified archives while adding detailed architecture-specific support
+  - Addresses multi-architecture scenarios for optimal binary compatibility across different hardware
+
+### Technical
+
+- **Multi-Architecture Support**: Enhanced CD workflow to generate comprehensive Formula with per-architecture checksums
+- **Homebrew Best Practices**: Updated Formula structure to follow modern Homebrew conventions
+- **Fallback Strategy**: Robust error handling for edge cases and unsupported platforms
+
 ## [0.0.59] - 2025-08-19
 
 ### Fixed
