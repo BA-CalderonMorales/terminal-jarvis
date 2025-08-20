@@ -5,6 +5,35 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.0.58] - 2025-08-19
+
+### Enhanced
+
+- **CI/CD Pipeline**: Resolved test race conditions and optimized GitHub Actions workflows
+  - Fixed parallel test execution conflicts with ENV_TEST_MUTEX in auth_behavior_tests.rs and integration_auth_tests.rs
+  - Corrected README formatting issues in generate-readme-tools.sh AWK logic
+  - Streamlined CI workflow by removing redundant build job while maintaining multiplatform-build and npm-test coverage
+  - Prepared multi-platform CD workflow for comprehensive deployment testing
+
+### Technical
+
+- **Test Infrastructure**: Implemented mutex-based synchronization for integration tests
+- **Documentation Pipeline**: Fixed AWK script logic to prevent double blank lines in generated README sections
+- **Workflow Optimization**: Reduced CI resource usage while maintaining comprehensive quality checks
+
+### Contributors
+
+- **Aviv Laufer (@avivl)**: Multi-platform build system enhancements via [PR #5](https://github.com/BA-CalderonMorales/terminal-jarvis/pull/5)
+  - Comprehensive multi-platform build infrastructure with GitHub Actions workflows
+  - Created advanced build scripts supporting macOS universal binaries and Linux targets
+  - Established CD pipeline foundations with build-multiplatform.sh and enhanced Homebrew release generation
+  - Added detailed documentation in docs/MULTIPLATFORM_BUILD.md
+  - Resolved Windows support complexities by strategically removing Windows targets while maintaining comprehensive cross-platform coverage
+
+### Acknowledgments
+
+- **Claude AI (@anthropic-ai/claude-code)**: Collaborative development partner in multi-platform build system design and implementation
+
 ## [0.0.57] - 2025-08-16
 
 ### Enhanced
