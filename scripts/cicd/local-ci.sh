@@ -92,7 +92,20 @@ log_separator
 # Step 3: Build Release Binary
 log_info_if_enabled "Step 3: Building Release Binary"
 log_progress "Building release binary"
-cargo build --release
+
+# Check if multi-platform build should be tested
+if [ "${MULTIPLATFORM_BUILD:-false}" = "true" ]; then
+    log_info_if_enabled "Testing multi-platform build capabilities..."
+    if ./scripts/utils/build-multiplatform.sh --current-only; then
+        log_success_if_enabled "Multi-platform build system working"
+    else
+        log_warn_if_enabled "Multi-platform build failed, falling back to standard build"
+        cargo build --release
+    fi
+else
+    cargo build --release
+fi
+
 log_progress_done
 log_success_if_enabled "Release binary built successfully!"
 
