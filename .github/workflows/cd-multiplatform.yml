@@ -1,12 +1,19 @@
 name: Multi-Platform Continuous Deployment
 
 on:
+
   push:
+
     tags:
+
       - 'v*'
+
   workflow_dispatch:
+
     inputs:
+
       version:
+
         description: 'Version to deploy (e.g., v0.0.58)'
         required: true
         type: string
@@ -15,6 +22,7 @@ env:
   CARGO_TERM_COLOR: always
 
 jobs:
+
   # Build for all platforms using our new multi-platform build system
   build-multiplatform:
     name: Build Multi-Platform Binaries
@@ -26,11 +34,14 @@ jobs:
           - os: macos-latest
             platform: macos
             targets: "x86_64-apple-darwin,aarch64-apple-darwin"
+
           - os: ubuntu-latest
             platform: linux
             targets: "x86_64-unknown-linux-gnu,aarch64-unknown-linux-gnu"
+
     outputs:
       version: ${{ steps.version.outputs.version }}
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4

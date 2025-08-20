@@ -1,8 +1,10 @@
 name: Continuous Integration
 
 on:
+
   push:
     branches: [ "main", "develop" ]
+
   pull_request:
     branches: [ "main", "develop" ]
 
@@ -10,37 +12,31 @@ env:
   CARGO_TERM_COLOR: always
 
 jobs:
+
   test:
+
     name: Test
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4
+
     - name: Install Rust
       uses: dtolnay/rust-toolchain@stable
       with:
         components: rustfmt, clippy
+
     - name: Check formatting
       run: cargo fmt --all -- --check
+
     - name: Check clippy
       run: cargo clippy --all-targets --all-features -- -D warnings
+
     - name: Run tests
       run: cargo test --verbose
 
-  build:
-    name: Build
-    runs-on: ${{ matrix.os }}
-    strategy:
-      matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]
-    steps:
-    - uses: actions/checkout@v4
-    - name: Install Rust
-      uses: dtolnay/rust-toolchain@stable
-    - name: Build
-      run: cargo build --verbose
-    
-  # New multi-platform build testing
+  # Multi-platform build testing
   multiplatform-build:
+
     name: Multi-Platform Build Test
     runs-on: ${{ matrix.os }}
     strategy:
@@ -49,27 +45,34 @@ jobs:
           - os: macos-latest
             target: x86_64-apple-darwin
             cross_target: aarch64-apple-darwin
+
           - os: macos-latest  
             target: aarch64-apple-darwin
             cross_target: x86_64-unknown-linux-gnu
+
           - os: ubuntu-latest
             target: x86_64-unknown-linux-gnu
             cross_target: aarch64-unknown-linux-gnu
+ 
     steps:
     - uses: actions/checkout@v4
+ 
     - name: Install Rust
       uses: dtolnay/rust-toolchain@stable
       with:
         targets: ${{ matrix.target }},${{ matrix.cross_target }}
+ 
     - name: Test multi-platform build system
       run: |
         chmod +x scripts/utils/build-multiplatform.sh
         ./scripts/utils/build-multiplatform.sh --current-only
+ 
     - name: Test cross-compilation (may fail)
       continue-on-error: true
       run: |
         echo "Testing cross-compilation to ${{ matrix.cross_target }}"
         cargo build --target ${{ matrix.cross_target }} || echo "Cross-compilation failed (expected)"
+ 
     - name: Test Homebrew release generation (macOS only)
       if: matrix.os == 'macos-latest'
       run: |
@@ -81,22 +84,28 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4
+ 
     - name: Install Rust
       uses: dtolnay/rust-toolchain@stable
+ 
     - name: Build release binary
       run: cargo build --release
+ 
     - name: Setup Node.js
       uses: actions/setup-node@v4
       with:
         node-version: '18'
+ 
     - name: Install dependencies
       run: |
         cd npm/terminal-jarvis
         npm install
+ 
     - name: Build TypeScript
       run: |
         cd npm/terminal-jarvis
         npm run build
+ 
     - name: Lint NPM Package
       run: |
         cd npm/terminal-jarvis
