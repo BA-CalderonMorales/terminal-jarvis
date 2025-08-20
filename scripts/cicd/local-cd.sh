@@ -82,9 +82,9 @@ update_all_versions() {
     log_info_if_enabled "  • Updating npm/terminal-jarvis/package.json"
     sed -i "s/\"version\": \".*\"/\"version\": \"$new_version\"/" npm/terminal-jarvis/package.json
     
-    # Update version display in TypeScript (removing emoji)
+    # Update version display in TypeScript in showFallbackMessage function
     log_info_if_enabled "  • Updating npm/terminal-jarvis/src/index.ts"
-    sed -i "s/console.log(\"🤖 Terminal Jarvis v[0-9.]*\")/console.log(\"Terminal Jarvis v$new_version\")/g" npm/terminal-jarvis/src/index.ts
+    sed -i "s/console.log(\"Terminal Jarvis v[0-9]\+\.[0-9]\+\.[0-9]\+\");/console.log(\"Terminal Jarvis v$new_version\");/g" npm/terminal-jarvis/src/index.ts
     
     # Update version references in README files (if any exist)
     log_info_if_enabled "  • Updating version references in documentation"
@@ -592,7 +592,15 @@ fi
 
 # Rebuild with new version
 echo -e "${BLUE}→ Rebuilding with new version...${RESET}"
-cargo build --release
+
+# Use multi-platform build for better binary compatibility
+if ./scripts/utils/build-multiplatform.sh --current-only; then
+    log_info_if_enabled "Multi-platform build system used for rebuild"
+else
+    log_warn_if_enabled "Multi-platform build failed, using standard build"
+    cargo build --release
+fi
+
 cd npm/terminal-jarvis && npm run build && cd ../..
 
 echo ""

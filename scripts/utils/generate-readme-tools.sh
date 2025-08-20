@@ -217,7 +217,10 @@ skip_bullets && /^  - `[a-z]+` -/ {
 }
 skip_bullets && !/^  - `[a-z]+` -/ {
     skip_bullets = 0
-    print $0
+    # Skip empty lines immediately after tools list to prevent double blank lines
+    if ($0 != "") {
+        print $0
+    }
 }
 !skip_bullets {
     print $0
@@ -258,7 +261,10 @@ in_table && /^\| `[a-z]+` / {
 }
 in_table && !/^\| `[a-z]+` / && !/^\| [-\| ]+\|$/ {
     in_table = 0
-    print $0
+    # Skip empty lines immediately after table to prevent double blank lines
+    if ($0 != "") {
+        print $0
+    }
 }
 !in_table && !table_replaced {
     print $0
