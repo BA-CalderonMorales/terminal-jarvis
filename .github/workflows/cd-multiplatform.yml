@@ -1,0 +1,310 @@
+name: Multi-Platform Continuous Deployment
+
+on:
+
+  push:
+
+    tags:
+
+      - 'v*'
+
+  workflow_dispatch:
+
+    inputs:
+
+      version:
+
+        description: 'Version to deploy (e.g., v0.0.58)'
+        required: true
+        type: string
+
+permissions:
+  contents: write
+  packages: write
+  id-token: write
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+
+  # Build for all platforms using our new multi-platform build system
+  build-multiplatform:
+    name: Build Multi-Platform Binaries
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: macos-latest
+            platform: macos
+            targets: "x86_64-apple-darwin,aarch64-apple-darwin"
+
+          - os: ubuntu-latest
+            platform: linux
+            targets: "x86_64-unknown-linux-gnu,aarch64-unknown-linux-gnu"
+
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set version
+        id: version
+        shell: bash
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "version=${{ github.event.inputs.version }}" >> $GITHUB_OUTPUT
+          else
+            echo "version=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.targets }}
+
+      - name: Install cross-compilation tools (Linux)
+        if: matrix.platform == 'linux'
+        run: |
+          cargo install cross --git https://github.com/cross-rs/cross
+
+      - name: Make scripts executable
+        shell: bash
+        run: |
+          chmod +x scripts/utils/build-multiplatform.sh
+          chmod +x scripts/utils/generate-homebrew-release.sh
+
+      - name: Build using multi-platform build system
+        shell: bash
+        run: |
+          if [ "${{ matrix.platform }}" = "linux" ]; then
+            # Use cross-compilation for Linux builds
+            export USE_CROSS=true
+          fi
+          ./scripts/utils/build-multiplatform.sh
+
+      - name: Generate Homebrew archives (macOS only)
+        if: matrix.platform == 'macos'
+        run: ./scripts/utils/generate-homebrew-release.sh --stage
+
+      - name: Upload platform binaries
+        uses: actions/upload-artifact@v4
+        with:
+          name: binaries-${{ matrix.platform }}
+          path: |
+            target/*/release/terminal-jarvis*
+            homebrew/release/*.tar.gz
+          retention-days: 1
+
+  # Create GitHub release with all platform binaries
+  create-release:
+    name: Create GitHub Release
+    needs: build-multiplatform
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+
+      - name: Prepare release assets
+        run: |
+          mkdir -p release-assets
+          
+          # Copy existing Homebrew archives (generated during build)
+          find artifacts -name "*.tar.gz" -exec cp {} release-assets/ \;
+          
+          # Create Homebrew-compatible simplified archives
+          # These are needed for both automated CD and manual update-formula.sh
+          
+          # Create macOS universal archive (compatible with Homebrew Formula)
+          if [ -d "artifacts/binaries-macos" ]; then
+            mkdir -p /tmp/macos-binary
+            # Use the first available macOS binary (universal binary approach)
+            find artifacts/binaries-macos -name "terminal-jarvis" -type f | head -1 | xargs cp -t /tmp/macos-binary/
+            tar -czf "release-assets/terminal-jarvis-mac.tar.gz" -C /tmp/macos-binary terminal-jarvis
+            echo "Created Homebrew-compatible macOS archive: terminal-jarvis-mac.tar.gz"
+          fi
+          
+          # Create Linux universal archive (compatible with Homebrew Formula)
+          if [ -d "artifacts/binaries-linux" ]; then
+            mkdir -p /tmp/linux-binary
+            # Use the first available Linux binary (universal binary approach)
+            find artifacts/binaries-linux -name "terminal-jarvis" -type f | head -1 | xargs cp -t /tmp/linux-binary/
+            tar -czf "release-assets/terminal-jarvis-linux.tar.gz" -C /tmp/linux-binary terminal-jarvis
+            echo "Created Homebrew-compatible Linux archive: terminal-jarvis-linux.tar.gz"
+          fi
+          
+          # Create detailed platform-specific archives (Aviv Laufer's contribution)
+          # These provide granular architecture-specific downloads for advanced users
+          for platform_dir in artifacts/binaries-*; do
+            platform=$(basename "$platform_dir" | sed 's/binaries-//')
+            
+            # Find all binaries for this platform
+            find "$platform_dir" -name "terminal-jarvis*" -type f | while read binary; do
+              # Determine architecture from path
+              arch=$(echo "$binary" | grep -o '[^/]*-[^/]*-[^/]*' | head -1 | cut -d'-' -f1)
+              
+              # Create platform-specific archive
+              archive_name="terminal-jarvis-${platform}-${arch}.tar.gz"
+              tar -czf "release-assets/$archive_name" -C "$(dirname "$binary")" "$(basename "$binary")"
+              echo "Created detailed archive: $archive_name"
+            done
+          done
+          
+          # List all created archives for verification
+          echo "All release assets created:"
+          ls -la release-assets/
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: ${{ needs.build-multiplatform.outputs.version }}
+          name: Release ${{ needs.build-multiplatform.outputs.version }}
+          files: release-assets/*
+          draft: false
+          prerelease: false
+          generate_release_notes: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  # Publish to Crates.io
+  publish-crates:
+    name: Publish to Crates.io
+    needs: build-multiplatform
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Publish to Crates.io
+        run: cargo publish
+        env:
+          CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN }}
+
+  # Publish NPM package (single platform for now)
+  publish-npm:
+    name: Publish NPM Package
+    needs: build-multiplatform
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Build release binary
+        run: cargo build --release
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Build and publish NPM package
+        run: |
+          cd npm/terminal-jarvis
+          npm install
+          npm run build
+          npm publish
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+  # Update Homebrew tap
+  update-homebrew-tap:
+    name: Update Homebrew Tap
+    needs: [build-multiplatform, create-release]
+    runs-on: ubuntu-latest
+    if: success()
+    steps:
+      - name: Checkout main repository
+        uses: actions/checkout@v4
+        with:
+          path: main
+
+      - name: Checkout Homebrew tap
+        uses: actions/checkout@v4
+        with:
+          repository: BA-CalderonMorales/homebrew-terminal-jarvis
+          path: tap
+          token: ${{ secrets.HOMEBREW_TAP_TOKEN }}
+
+      - name: Update Formula
+        run: |
+          cd main
+          VERSION="${{ needs.build-multiplatform.outputs.version }}"
+          VERSION_NUM=${VERSION#v}
+          
+          # Download release assets to get checksums
+          gh release download "$VERSION" --pattern "*.tar.gz" --dir /tmp/
+          
+          # Calculate checksums for all architecture-specific archives
+          MAC_X64_SHA256=$(sha256sum /tmp/terminal-jarvis-macos-x86_64.tar.gz | cut -d' ' -f1)
+          MAC_ARM64_SHA256=$(sha256sum /tmp/terminal-jarvis-macos-aarch64.tar.gz | cut -d' ' -f1)
+          LINUX_X64_SHA256=$(sha256sum /tmp/terminal-jarvis-linux-x86_64.tar.gz | cut -d' ' -f1)
+          LINUX_FALLBACK_SHA256=$(sha256sum /tmp/terminal-jarvis-linux.tar.gz | cut -d' ' -f1)
+          
+          # Generate robust multi-architecture Formula
+          cat > ../tap/Formula/terminal-jarvis.rb << EOL
+          # Documentation: https://docs.brew.sh/Formula-Cookbook
+          #                https://rubydoc.brew.sh/Formula
+          # Based on Federico Terzi's approach: https://federicoterzi.com/blog/how-to-publish-your-rust-project-on-homebrew/
+          
+          class TerminalJarvis < Formula
+            desc "A unified command center for AI coding tools"
+            homepage "https://github.com/BA-CalderonMorales/terminal-jarvis"
+            version "${VERSION_NUM}"
+            license "MIT"
+          
+            on_macos do
+              if Hardware::CPU.intel?
+                url "https://github.com/BA-CalderonMorales/terminal-jarvis/releases/download/${VERSION}/terminal-jarvis-macos-x86_64.tar.gz"
+                sha256 "${MAC_X64_SHA256}"
+              elsif Hardware::CPU.arm?
+                url "https://github.com/BA-CalderonMorales/terminal-jarvis/releases/download/${VERSION}/terminal-jarvis-macos-aarch64.tar.gz"
+                sha256 "${MAC_ARM64_SHA256}"
+              end
+            end
+          
+            on_linux do
+              if Hardware::CPU.intel?
+                url "https://github.com/BA-CalderonMorales/terminal-jarvis/releases/download/${VERSION}/terminal-jarvis-linux-x86_64.tar.gz"
+                sha256 "${LINUX_X64_SHA256}"
+              else
+                # Fallback for other Linux architectures
+                url "https://github.com/BA-CalderonMorales/terminal-jarvis/releases/download/${VERSION}/terminal-jarvis-linux.tar.gz"
+                sha256 "${LINUX_FALLBACK_SHA256}"
+              end
+            end
+          
+            def install
+              bin.install "terminal-jarvis"
+            end
+          
+            test do
+              system "#{bin}/terminal-jarvis", "--version"
+            end
+          end
+          EOL
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Commit and push Formula update
+        run: |
+          cd tap
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add Formula/terminal-jarvis.rb
+          git commit -m "feat: update Terminal Jarvis to ${{ needs.build-multiplatform.outputs.version }}"
+          git push

@@ -1,6 +1,10 @@
 use std::env;
 use std::process::Command;
+use std::sync::Mutex;
 use terminal_jarvis::auth_manager::AuthManager;
+
+// Mutex to ensure environment variable tests don't run in parallel
+static ENV_TEST_MUTEX: Mutex<()> = Mutex::new(());
 
 /// Integration test to reproduce actual browser-opening behavior
 /// This will install and test real NPM packages
@@ -10,6 +14,9 @@ mod integration_tests {
 
     #[test]
     fn test_install_and_run_tools_for_browser_behavior() {
+        // Acquire mutex to prevent parallel environment variable manipulation
+        let _guard = ENV_TEST_MUTEX.lock().unwrap();
+
         // Clear all API keys to force authentication
         clear_all_auth_env_vars();
 
@@ -24,6 +31,9 @@ mod integration_tests {
 
     #[test]
     fn test_auth_manager_integration() {
+        // Acquire mutex to prevent parallel environment variable manipulation
+        let _guard = ENV_TEST_MUTEX.lock().unwrap();
+
         // Test that our AuthManager correctly detects the environment
         println!("Testing AuthManager environment detection...");
 
@@ -48,6 +58,9 @@ mod integration_tests {
 
     #[test]
     fn test_no_browser_environment_setup() {
+        // Acquire mutex to prevent parallel environment variable manipulation
+        let _guard = ENV_TEST_MUTEX.lock().unwrap();
+
         // Test that we can set up a no-browser environment
         AuthManager::prepare_auth_safe_environment()
             .expect("Failed to prepare auth safe environment");
