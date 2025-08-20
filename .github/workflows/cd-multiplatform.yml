@@ -18,6 +18,11 @@ on:
         required: true
         type: string
 
+permissions:
+  contents: write
+  packages: write
+  id-token: write
+
 env:
   CARGO_TERM_COLOR: always
 
