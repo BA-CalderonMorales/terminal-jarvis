@@ -3,7 +3,11 @@ use std::env;
 use std::fs;
 use std::path::PathBuf;
 use std::process::Command;
+use std::sync::Mutex;
 use tempfile::TempDir;
+
+// Mutex to ensure environment variable tests don't run in parallel
+static ENV_TEST_MUTEX: Mutex<()> = Mutex::new(());
 
 /// Test struct for authentication behavior testing
 pub struct AuthTestEnvironment {
@@ -124,6 +128,7 @@ mod tests {
     /// Test that reproduces the browser-opening behavior
     #[test]
     fn test_reproduce_browser_opening_behavior() {
+        let _guard = ENV_TEST_MUTEX.lock().unwrap();
         let test_env = AuthTestEnvironment::new().expect("Failed to create test environment");
 
         // Setup first-run conditions
@@ -211,6 +216,7 @@ mod tests {
 
     #[test]
     fn test_headless_environment_no_browser() {
+        let _guard = ENV_TEST_MUTEX.lock().unwrap();
         let test_env = AuthTestEnvironment::new().expect("Failed to create test environment");
 
         // Setup headless conditions
@@ -250,6 +256,7 @@ mod tests {
     /// Test that we can detect when tools would open browsers
     #[test]
     fn test_browser_detection_mechanism() {
+        let _guard = ENV_TEST_MUTEX.lock().unwrap();
         // Test our ability to detect browser-opening scenarios
         assert!(should_prevent_browser_opening());
 
