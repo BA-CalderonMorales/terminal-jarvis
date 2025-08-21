@@ -5,6 +5,22 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.0.61] - 2025-08-21
+
+### Fixed
+
+- **Homebrew Binary Packaging**: Resolved critical issue where release archives contained debug directories instead of executable binaries
+  - Fixed GitHub Actions workflow to exclude debug directories from uploads (contribution by @aviv1)
+  - Improved archive creation logic to target executable binaries only with `-type f -executable` filter
+  - Changed artifact pattern from `terminal-jarvis*` to exact `terminal-jarvis` to prevent debug file inclusion
+  - Added local Homebrew Formula for testing and validation
+  - Verified fix prevents `terminal-jarvis.d` debug directories from being packaged instead of actual binaries
+
+### Technical
+
+- **Archive Creation Enhancement**: Enhanced multi-platform build system to ensure only executable binaries are packaged in release archives
+- **Contributor Recognition**: @aviv1's fix resolves deployment pipeline issue affecting Homebrew distribution
+
 ## [0.0.60] - 2025-08-19
 
 ### Enhanced
