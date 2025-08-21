@@ -95,7 +95,7 @@ jobs:
         with:
           name: binaries-${{ matrix.platform }}
           path: |
-            target/*/release/terminal-jarvis*
+            target/*/release/terminal-jarvis
             homebrew/release/*.tar.gz
           retention-days: 1
 
@@ -146,12 +146,12 @@ jobs:
           for platform_dir in artifacts/binaries-*; do
             platform=$(basename "$platform_dir" | sed 's/binaries-//')
             
-            # Find all binaries for this platform
-            find "$platform_dir" -name "terminal-jarvis*" -type f | while read binary; do
+            # Find all terminal-jarvis binaries (exclude debug directories and files)
+            find "$platform_dir" -name "terminal-jarvis" -type f -executable | while read binary; do
               # Determine architecture from path
               arch=$(echo "$binary" | grep -o '[^/]*-[^/]*-[^/]*' | head -1 | cut -d'-' -f1)
               
-              # Create platform-specific archive
+              # Create platform-specific archive with correct binary name
               archive_name="terminal-jarvis-${platform}-${arch}.tar.gz"
               tar -czf "release-assets/$archive_name" -C "$(dirname "$binary")" "$(basename "$binary")"
               echo "Created detailed archive: $archive_name"
