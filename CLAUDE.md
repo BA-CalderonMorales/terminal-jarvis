@@ -444,6 +444,65 @@ Archives are created during the deployment process in `local-cd.sh`.
 
 **Claude's refactoring strength**: Use Claude for domain-based module extraction, where large files (>200 lines) are broken into focused modules with clear responsibilities.
 
+## Methodical Deployment Validation Process
+
+### @aviv1 Fix Validation Workflow (v0.0.61)
+
+This process ensures we properly validate @aviv1's Homebrew binary packaging fix before deploying to production:
+
+#### **Phase 1: Version Bump and Local Validation**
+1. **Version Management**: Use `./scripts/cicd/local-cd.sh --update-version 0.0.61` for programmatic version updates
+2. **Local CI Validation**: Run `./scripts/cicd/local-ci.sh` to validate:
+   - All 56 tests pass (core functionality, NPM packages, tool configurations)
+   - Code quality checks (clippy, formatting) pass
+   - Release binary builds successfully (validates @aviv1's fix prevents debug directory inclusion)
+   - NPM package builds and validates correctly
+   - Version consistency across all files
+3. **CHANGELOG.md Documentation**: Update with proper attribution to @aviv1's contribution and detailed fix description
+
+#### **Phase 2: Controlled Remote CI Testing**
+4. **Commit and Push WITHOUT Tags**: 
+   - Commit all changes including version bump and CHANGELOG.md updates
+   - Push to GitHub develop branch WITHOUT creating version tags
+   - This allows GitHub Actions CI to validate the fix in the remote environment
+5. **GitHub Actions Validation**: Monitor remote CI to ensure:
+   - Multi-platform build system works correctly with @aviv1's fix
+   - Binary archives contain actual `terminal-jarvis` executable (not debug directories)
+   - Archive creation logic properly filters with `-type f -executable`
+   - All existing functionality remains intact across platforms
+
+#### **Phase 3: Production Deployment (Only if Remote CI Passes)**
+6. **Tag Creation and CD Trigger**: If GitHub Actions CI passes completely:
+   - Create version tag: `git tag v0.0.61`
+   - Push tags: `git push origin develop --tags`
+   - This triggers the full CD pipeline with GitHub release creation
+7. **Homebrew Distribution Validation**: Verify the fix works in production:
+   - GitHub release contains properly formatted archives
+   - Homebrew Formula points to correct release assets
+   - End-to-end installation testing via Homebrew
+
+#### **Phase 4: Rollback Strategy (If Remote CI Fails)**
+8. **Pipeline Debugging**: If GitHub Actions fails:
+   - Analyze specific failure points in the multi-platform build
+   - Fix the pipeline issues while preserving @aviv1's core fix
+   - Iterate on the build system without affecting the binary filtering logic
+   - Re-test locally and repeat Phase 2
+
+**Why This Approach Matters**:
+- **Validates @aviv1's fix** in actual GitHub Actions environment before production
+- **Prevents broken releases** by testing the complete pipeline without triggering CD
+- **Maintains rollback capability** if the pipeline has integration issues
+- **Ensures continuity** of the multi-platform distribution system
+- **Preserves contributor trust** by properly validating external contributions
+
+**Key Success Metrics**:
+- Remote CI passes completely with @aviv1's changes
+- Archive creation produces only executable binaries (no debug directories)
+- Existing functionality remains intact across all platforms
+- Homebrew installation workflow works end-to-end
+
+This methodical approach ensures we leverage our remote pipeline properly while validating critical fixes from contributors like @aviv1.
+
 ## Deployment Verification Checklist
 
 When deploying with Claude assistance:
