@@ -135,7 +135,7 @@ npm install -g [package-name]
 **CRITICAL:** Use `@vybestack/llxprt-code-core` for llxprt (not `@vybestack/llxprt-code` which installs Gemini CLI instead).
 
 ### Authentication/Configuration Issues
-Terminal Jarvis v0.0.44+ handles authentication gracefully. You'll see "✨ [tool] session ended" instead of error messages for normal authentication flows like `/auth` or `/config` commands.
+Terminal Jarvis v0.0.44+ handles authentication gracefully. You'll see "[INFO] [tool] session ended" instead of error messages for normal authentication flows like `/auth` or `/config` commands.
 
 ## Security & Maintenance
 
