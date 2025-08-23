@@ -266,7 +266,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - **Comprehensive Contribution System**: Complete contributor onboarding and governance framework
 
-  - **Discord-First Workflow**: Mandatory community discussion before PR submission via [Discord](https://discord.gg/zNuyC5uG)
+  - **Discord-First Workflow**: Mandatory community discussion before PR submission via [Discord](https://discord.gg/WteQm6MTZW)
   - **Advanced PR Template**: 8 PR types (docs, feature, bugfix, security, UI, logic, maintenance, testing)
   - **Complete CONTRIBUTIONS.md**: Full contributor guide with coding standards, testing requirements, and realistic expectations
   - **Quality Gate Enforcement**: TDD requirements, code formatting, and comprehensive testing protocols
