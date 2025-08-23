@@ -23,10 +23,10 @@ Terminal Jarvis supports multi-platform builds using Rust's cross-compilation ca
 
 | Platform | Target Triple | Status | Notes |
 |----------|---------------|--------|--------|
-| macOS Intel | `x86_64-apple-darwin` | ✅ | Native on Intel Macs, cross-compile on ARM Macs |
-| macOS ARM64 | `aarch64-apple-darwin` | ✅ | Native on ARM Macs, cross-compile on Intel Macs |
-| Linux x64 | `x86_64-unknown-linux-gnu` | ✅ | Cross-compile from macOS using `cross` tool |
-| Linux ARM64 | `aarch64-unknown-linux-gnu` | 🚧 | Requires additional toolchain setup |
+| macOS Intel | `x86_64-apple-darwin` | [SUPPORTED] | Native on Intel Macs, cross-compile on ARM Macs |
+| macOS ARM64 | `aarch64-apple-darwin` | [SUPPORTED] | Native on ARM Macs, cross-compile on Intel Macs |
+| Linux x64 | `x86_64-unknown-linux-gnu` | [SUPPORTED] | Cross-compile from macOS using `cross` tool |
+| Linux ARM64 | `aarch64-unknown-linux-gnu` | [LIMITED] | Requires additional toolchain setup |
 
 ## Usage
 
@@ -108,15 +108,15 @@ sudo apt install -y gcc-aarch64-linux-gnu
 
 | Host Platform | Target Platform | Status | Requirements |
 |---------------|----------------|--------|--------------|
-| macOS | macOS (other arch) | ✅ Native | Xcode CLI tools |
-| macOS | Linux | 🚧 Limited | `cross` tool (OpenSSL dependency issues) |
-| Linux | Linux (other arch) | ✅ Native | `gcc-*` packages |
-| Linux | macOS | 🚧 Complex | macOS SDK (legal issues) |
+| macOS | macOS (other arch) | [SUPPORTED] Native | Xcode CLI tools |
+| macOS | Linux | [LIMITED] Limited | `cross` tool (OpenSSL dependency issues) |
+| Linux | Linux (other arch) | [SUPPORTED] Native | `gcc-*` packages |
+| Linux | macOS | [LIMITED] Complex | macOS SDK (legal issues) |
 
 **Legend:**
-- ✅ **Native**: Supported with standard toolchain
-- ✅ **Cross**: Supported with additional tools  
-- 🚧 **Limited/Complex**: Possible but requires extensive setup
+- [SUPPORTED] **Native**: Supported with standard toolchain
+- [SUPPORTED] **Cross**: Supported with additional tools  
+- [LIMITED] **Limited/Complex**: Possible but requires extensive setup
 
 ### Platform-Specific Requirements
 
@@ -273,5 +273,5 @@ RUST_LOG=debug ./scripts/utils/build-multiplatform.sh
 
 For questions or issues with the multi-platform build system, see:
 - [GitHub Issues](https://github.com/BA-CalderonMorales/terminal-jarvis/issues)
-- [Build Troubleshooting](./TROUBLESHOOTING.md)
+- [Known Limitations](./LIMITATIONS.md)
 - [Architecture Documentation](./ARCHITECTURE.md)
