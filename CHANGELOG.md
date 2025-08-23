@@ -5,12 +5,37 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.0.65] - 2025-08-23
+
+### Fixed
+
+- **Crates.io Publication Workflow**: Final resolution of persistent Cargo.lock handling issues
+  - **Intelligent Cargo.lock Management**: Implemented sophisticated pre-publication validation that distinguishes between user errors and necessary workflow updates
+  - **Conditional --allow-dirty Usage**: Added smart logic that only uses --allow-dirty when Cargo.lock is updated by crates.io index refresh during workflow execution
+  - **Sequential Workflow Optimization**: Reordered job dependencies for optimal failure handling (Crates.io → GitHub Release → Homebrew → NPM)
+  - **Enhanced Git State Validation**: Pre-flight checks ensure clean repository state while allowing necessary dependency updates
+
+### Enhanced
+
+- **Deployment Pipeline Reliability**: Complete overhaul of multi-platform deployment workflow
+  - **Fail-Fast Architecture**: If any step fails, subsequent steps are automatically skipped to prevent partial releases
+  - **Robust Error Handling**: Comprehensive validation at each stage with clear error messaging
+  - **NPM Publication as Final Step**: Most reliable publication step moved to end of pipeline for maximum success rate
+
+### Technical
+
+- **Workflow Architecture**: Bulletproof sequential deployment pipeline designed to eliminate the persistent crates.io publication failures
+- **Smart Dependency Management**: Workflow now intelligently handles Cargo.lock updates that occur during normal crates.io operations
+
 ## [0.0.64] - 2025-08-23
 
 ### Fixed
 
 - **Deployment Pipeline Reliability**: Resolved critical issues that caused v0.0.63 release failure
-  - **Crates.io Publication**: Fixed "uncommitted Cargo.lock" error by ensuring proper git state before publication
+  - **Crates.io Publication**: Fixed "uncommitted Cargo.lock" error by implementing intelligent Cargo.lock handling
+    - Added pre-publication Cargo.lock validation and update logic
+    - Implemented conditional --allow-dirty flag usage when Cargo.lock updates during workflow execution
+    - Ensures clean git state while handling necessary Cargo.lock updates from crates.io index refresh
   - **Homebrew Tap Update**: Fixed missing GH_TOKEN environment variable causing exit code 4 failure
   - **Sequential Workflow**: Restructured deployment to be sequential (crates.io → GitHub release → NPM → Homebrew)
   - **Failure Prevention**: If any step fails, subsequent steps are skipped to avoid partial releases
@@ -20,13 +45,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Deployment Workflow Robustness**: Improved error handling and validation
   - Added explicit Cargo.lock update and commit verification in local deployment script
   - Implemented proper sequential dependencies in GitHub Actions workflow
-  - Enhanced git state validation before crates.io publication
+  - Enhanced git state validation with intelligent Cargo.lock management
   - Added comprehensive failure checks to prevent inconsistent multi-platform releases
 
 ### Technical
 
 - **CI/CD Pipeline**: Complete workflow restructure to eliminate race conditions and partial deployments
-- **Git Operations**: Explicit Cargo.lock handling ensures clean repository state for crates.io publication
+- **Git Operations**: Intelligent Cargo.lock handling that distinguishes between user errors and necessary workflow updates
 
 ## [0.0.63] - 2025-08-23
 

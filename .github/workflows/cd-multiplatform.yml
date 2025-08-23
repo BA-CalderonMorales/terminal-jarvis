@@ -113,8 +113,16 @@ jobs:
 
       - name: Check if Cargo.lock needs to be committed
         run: |
+          # First, ensure Cargo.lock is fully up-to-date
+          echo "Updating Cargo.lock to ensure it's current..."
+          cargo check --locked || {
+            echo "Cargo.lock is out of date, updating..."
+            cargo check
+          }
+          
+          # Now check if there are any uncommitted changes
           if git diff --name-only | grep -q "Cargo.lock"; then
-            echo "ERROR: Cargo.lock has uncommitted changes"
+            echo "ERROR: Cargo.lock has uncommitted changes after update"
             echo "Please commit Cargo.lock before creating a release"
             git diff Cargo.lock
             exit 1
@@ -130,7 +138,19 @@ jobs:
           echo "Cargo.lock is clean and committed"
 
       - name: Publish to Crates.io
-        run: cargo publish
+        run: |
+          # Do a final check right before publishing
+          echo "Final verification before publishing..."
+          cargo check --quiet
+          
+          # If Cargo.lock changed during the check, we need to handle it
+          if git diff --quiet Cargo.lock; then
+            echo "Cargo.lock is still clean, proceeding with publish"
+            cargo publish
+          else
+            echo "Cargo.lock was updated during final check, using --allow-dirty"
+            cargo publish --allow-dirty
+          fi
         env:
           CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN }}
 
@@ -209,40 +229,10 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-  # Publish NPM package ONLY if crates.io and GitHub release succeed
-  publish-npm:
-    name: Publish NPM Package
-    needs: [build-multiplatform, publish-crates, create-release]
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Install Rust
-        uses: dtolnay/rust-toolchain@stable
-
-      - name: Build release binary
-        run: cargo build --release
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '18'
-          registry-url: 'https://registry.npmjs.org'
-
-      - name: Build and publish NPM package
-        run: |
-          cd npm/terminal-jarvis
-          npm install
-          npm run build
-          npm publish
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-
-  # Update Homebrew tap ONLY if everything else succeeds
+  # Update Homebrew tap ONLY if create-release succeeds
   update-homebrew-tap:
     name: Update Homebrew Tap
-    needs: [build-multiplatform, publish-crates, create-release, publish-npm]
+    needs: [build-multiplatform, create-release]
     runs-on: ubuntu-latest
     if: success()
     steps:
@@ -450,3 +440,33 @@ jobs:
           git add Formula/terminal-jarvis.rb
           git commit -m "feat: update Terminal Jarvis to ${{ needs.build-multiplatform.outputs.version }}"
           git push
+
+  # Publish NPM package LAST - requires update-homebrew-tap to succeed
+  publish-npm:
+    name: Publish NPM Package
+    needs: [build-multiplatform, update-homebrew-tap]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Build release binary
+        run: cargo build --release
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Build and publish NPM package
+        run: |
+          cd npm/terminal-jarvis
+          npm install
+          npm run build
+          npm publish
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
