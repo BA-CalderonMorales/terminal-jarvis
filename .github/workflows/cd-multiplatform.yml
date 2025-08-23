@@ -99,10 +99,45 @@ jobs:
             homebrew/release/*.tar.gz
           retention-days: 1
 
-  # Create GitHub release with all platform binaries
+  # Publish to Crates.io FIRST - if this fails, we don't proceed with release
+  publish-crates:
+    name: Publish to Crates.io
+    needs: build-multiplatform
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Check if Cargo.lock needs to be committed
+        run: |
+          if git diff --name-only | grep -q "Cargo.lock"; then
+            echo "ERROR: Cargo.lock has uncommitted changes"
+            echo "Please commit Cargo.lock before creating a release"
+            git diff Cargo.lock
+            exit 1
+          fi
+          
+          if git diff --cached --name-only | grep -q "Cargo.lock"; then
+            echo "ERROR: Cargo.lock has staged but uncommitted changes"
+            echo "Please commit Cargo.lock before creating a release"
+            git diff --cached Cargo.lock
+            exit 1
+          fi
+          
+          echo "Cargo.lock is clean and committed"
+
+      - name: Publish to Crates.io
+        run: cargo publish
+        env:
+          CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN }}
+
+  # Create GitHub release ONLY if crates.io publication succeeds
   create-release:
     name: Create GitHub Release
-    needs: build-multiplatform
+    needs: [build-multiplatform, publish-crates]
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -174,27 +209,10 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-  # Publish to Crates.io
-  publish-crates:
-    name: Publish to Crates.io
-    needs: build-multiplatform
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Install Rust
-        uses: dtolnay/rust-toolchain@stable
-
-      - name: Publish to Crates.io
-        run: cargo publish
-        env:
-          CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN }}
-
-  # Publish NPM package (single platform for now)
+  # Publish NPM package ONLY if crates.io and GitHub release succeed
   publish-npm:
     name: Publish NPM Package
-    needs: build-multiplatform
+    needs: [build-multiplatform, publish-crates, create-release]
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -221,10 +239,10 @@ jobs:
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
-  # Update Homebrew tap
+  # Update Homebrew tap ONLY if everything else succeeds
   update-homebrew-tap:
     name: Update Homebrew Tap
-    needs: [build-multiplatform, create-release]
+    needs: [build-multiplatform, publish-crates, create-release, publish-npm]
     runs-on: ubuntu-latest
     if: success()
     steps:
@@ -354,6 +372,8 @@ jobs:
             end
           end
           EOL
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Update local Formula file
         run: |

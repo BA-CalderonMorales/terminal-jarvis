@@ -730,6 +730,11 @@ log_section "Step 3: Git Operations"
 
 if [ "${SKIP_GIT_OPERATIONS:-false}" != "true" ]; then
     echo -e "${BLUE}→ Committing changes...${RESET}"
+    
+    # Ensure Cargo.lock is updated and included
+    echo -e "${BLUE}  → Updating Cargo.lock...${RESET}"
+    cargo check --quiet 2>/dev/null || log_warn "Cargo check encountered issues (continuing)"
+    
     git add .
     git commit -m "version: bump to v${NEW_VERSION} with futuristic UX improvements"
     git tag "v${NEW_VERSION}"
