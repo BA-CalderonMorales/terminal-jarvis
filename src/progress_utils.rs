@@ -1,13 +1,47 @@
+// src/progress_utils.rs
+//
+// Progress indication utilities for Terminal Jarvis operations
+//
+// Provides spinner and progress bar utilities with theme integration
+// to enhance user experience during long-running operations.
+
 use crate::theme::theme_global_config;
 use indicatif::{MultiProgress, ProgressBar, ProgressStyle};
 use std::time::Duration;
 use tokio::time::sleep;
 
-/// Progress utilities for making cold starts more seamless
+/// Progress utilities for enhancing user experience during operations
+///
+/// Provides themed progress indicators, spinners, and progress bars that integrate
+/// with Terminal Jarvis's theming system. Designed to make cold starts and long-running
+/// operations feel more responsive and professional.
+///
+/// All progress indicators respect the user's theme configuration and provide
+/// consistent visual feedback across different Terminal Jarvis operations.
 pub struct ProgressUtils;
 
 impl ProgressUtils {
-    /// Create a spinner for indeterminate progress
+    /// Creates a themed spinner for indeterminate progress operations
+    ///
+    /// Displays an animated spinner with the specified message, using Terminal Jarvis
+    /// theme colors for consistency. Ideal for operations where progress cannot be
+    /// measured (e.g., network requests, tool initialization).
+    ///
+    /// # Arguments
+    ///
+    /// * `message` - The message to display alongside the spinner
+    ///
+    /// # Returns
+    ///
+    /// A configured ProgressBar in spinner mode
+    ///
+    /// # Example
+    ///
+    /// ```rust,ignore
+    /// let spinner = ProgressUtils::spinner("Initializing tool...");
+    /// // Perform long operation
+    /// spinner.finish_with_message("Tool ready!");
+    /// ```
     pub fn spinner(message: &str) -> ProgressBar {
         let pb = ProgressBar::new_spinner();
 
@@ -25,7 +59,31 @@ impl ProgressUtils {
         pb
     }
 
-    /// Create a progress bar for determinate progress
+    /// Creates a themed progress bar for determinate progress operations
+    ///
+    /// Displays a progress bar with percentage and ETA, using Terminal Jarvis
+    /// theme colors. Ideal for operations where total progress can be measured
+    /// (e.g., file downloads, batch processing).
+    ///
+    /// # Arguments
+    ///
+    /// * `total` - The total number of steps for the progress bar
+    /// * `message` - The message to display alongside the progress bar
+    ///
+    /// # Returns
+    ///
+    /// A configured ProgressBar with the specified total and message
+    ///
+    /// # Example
+    ///
+    /// ```rust,ignore
+    /// let pb = ProgressUtils::progress_bar(100, "Processing items...");
+    /// for i in 0..100 {
+    ///     pb.inc(1);
+    ///     // Perform work
+    /// }
+    /// pb.finish();
+    /// ```
     #[allow(dead_code)]
     pub fn progress_bar(total: u64, message: &str) -> ProgressBar {
         let pb = ProgressBar::new(total);
@@ -42,13 +100,46 @@ impl ProgressUtils {
         pb
     }
 
-    /// Create a multi-progress container for multiple concurrent operations
+    /// Creates a multi-progress manager for concurrent operations
+    ///
+    /// Enables multiple progress indicators to run simultaneously without
+    /// interfering with each other's display. Useful for batch operations
+    /// or parallel task execution.
+    ///
+    /// # Returns
+    ///
+    /// A MultiProgress instance for managing multiple progress indicators
+    ///
+    /// # Example
+    ///
+    /// ```rust,ignore
+    /// let multi = ProgressUtils::multi_progress();
+    /// let pb1 = multi.add(ProgressBar::new(100));
+    /// let pb2 = multi.add(ProgressBar::new(50));
+    /// // Run concurrent operations
+    /// ```
     #[allow(dead_code)]
     pub fn multi_progress() -> MultiProgress {
         MultiProgress::new()
     }
 
-    /// Finish progress with success message
+    /// Completes progress indicator with a success message
+    ///
+    /// Displays a success message and provides visual feedback that the operation
+    /// completed successfully. Includes a brief pause to ensure visibility.
+    ///
+    /// # Arguments
+    ///
+    /// * `pb` - The ProgressBar to complete
+    /// * `message` - Success message to display
+    ///
+    /// # Example
+    ///
+    /// ```rust,ignore
+    /// let spinner = ProgressUtils::spinner("Installing tool...");
+    /// // Perform installation
+    /// ProgressUtils::finish_with_success(&spinner, "Tool installed successfully!");
+    /// ```
     pub fn finish_with_success(pb: &ProgressBar, message: &str) {
         pb.finish_with_message(format!("SUCCESS: {message}"));
 
@@ -56,7 +147,25 @@ impl ProgressUtils {
         std::thread::sleep(std::time::Duration::from_millis(300));
     }
 
-    /// Finish progress with error message
+    /// Completes progress indicator with an error message
+    ///
+    /// Displays an error message and provides visual feedback that the operation
+    /// failed. Includes a brief pause to ensure visibility.
+    ///
+    /// # Arguments
+    ///
+    /// * `pb` - The ProgressBar to complete
+    /// * `message` - Error message to display
+    ///
+    /// # Example
+    ///
+    /// ```rust,ignore
+    /// let spinner = ProgressUtils::spinner("Connecting to service...");
+    /// // Attempt connection
+    /// if connection_failed {
+    ///     ProgressUtils::finish_with_error(&spinner, "Connection failed");
+    /// }
+    /// ```
     pub fn finish_with_error(pb: &ProgressBar, message: &str) {
         pb.finish_with_message(format!("ERROR: {message}"));
 
@@ -142,7 +251,13 @@ impl ProgressUtils {
     }
 }
 
-/// Progress context for long-running operations
+/// Progress context for coordinating long-running operations
+///
+/// Manages multiple related progress indicators and provides a unified interface
+/// for complex operations that involve multiple steps or parallel tasks.
+///
+/// Integrates with Terminal Jarvis theming and provides consistent progress
+/// reporting across different operation types.
 pub struct ProgressContext {
     pub spinner: ProgressBar,
 

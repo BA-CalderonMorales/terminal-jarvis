@@ -3,6 +3,11 @@
 // This module defines the main configuration structures used throughout
 // Terminal Jarvis, including tool configs, template configs, and API configs.
 
+/// Default base URL for Terminal Jarvis API services
+///
+/// Matches the constant used in api_base.rs to ensure consistency.
+const DEFAULT_API_BASE_URL: &str = "https://api.terminal-jarvis.dev";
+
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::path::PathBuf;
@@ -119,7 +124,7 @@ impl Default for Config {
                 local_path: None,
             },
             api: ApiConfig {
-                base_url: "https://api.terminal-jarvis.dev".to_string(),
+                base_url: DEFAULT_API_BASE_URL.to_string(),
                 timeout_seconds: 30,
                 max_retries: 3,
             },

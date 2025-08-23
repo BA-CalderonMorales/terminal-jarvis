@@ -10,6 +10,107 @@ set -e  # Exit on any error
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "$SCRIPT_DIR/../logger/logger.sh"
 
+# Color definitions for consistent theming
+BLUE='\033[0;34m'
+YELLOW='\033[1;33m'
+CYAN='\033[0;36m'
+GREEN='\033[0;32m'
+RED='\033[0;31m'
+RESET='\033[0m'
+
+# Help function
+show_help() {
+    log_header "Terminal Jarvis Local CI - Continuous Integration"
+    echo ""
+    
+    log_info_if_enabled "DESCRIPTION:"
+    echo -e "    ${BLUE}Continuous Integration script that validates changes WITHOUT deployment.${RESET}"
+    echo -e "    ${BLUE}Performs comprehensive validation including quality checks, tests, and builds.${RESET}"
+    echo ""
+    
+    log_info_if_enabled "USAGE:"
+    echo -e "    ${CYAN}./scripts/cicd/local-ci.sh [OPTIONS]${RESET}"
+    echo ""
+    
+    log_info_if_enabled "OPTIONS:"
+    echo -e "    ${YELLOW}--help, -h${RESET}        Show this help message and exit"
+    echo ""
+    
+    log_info_if_enabled "ENVIRONMENT VARIABLES:"
+    echo -e "    ${YELLOW}MULTIPLATFORM_BUILD${RESET}   Set to 'true' to test multi-platform build capabilities"
+    echo -e "                          ${BLUE}Example: MULTIPLATFORM_BUILD=true ./scripts/cicd/local-ci.sh${RESET}"
+    echo ""
+    
+    log_info_if_enabled "VALIDATION PHASES:"
+    echo -e "    ${CYAN}Phase 1: CHANGELOG.md Verification${RESET}"
+    echo -e "        • Checks if CHANGELOG.md has entry for current version"
+    echo -e "        • Warns if missing but continues validation"
+    echo ""
+    echo -e "    ${CYAN}Phase 2: Quality Checks${RESET}"
+    echo -e "        • Code formatting (cargo fmt)"
+    echo -e "        • Linting with strict mode (cargo clippy --all-targets --all-features -- -D warnings)"
+    echo -e "        • Format verification (cargo fmt --check)"
+    echo ""
+    echo -e "    ${CYAN}Phase 3: Comprehensive Test Suite${RESET}"
+    echo -e "        • Core Rust functionality tests (cargo test)"
+    echo -e "        • Smoke tests including NPM package validation"
+    echo -e "        • Validates all 7 AI tools are properly configured"
+    echo -e "        • Configuration consistency across all files"
+    echo ""
+    echo -e "    ${CYAN}Phase 4: Release Binary Build${RESET}"
+    echo -e "        • Standard build: cargo build --release"
+    echo -e "        • Multi-platform build (if MULTIPLATFORM_BUILD=true)"
+    echo -e "        • Binary compatibility validation"
+    echo ""
+    echo -e "    ${CYAN}Phase 5: NPM Package Build${RESET}"
+    echo -e "        • TypeScript compilation and package build"
+    echo -e "        • Version consistency verification"
+    echo -e "        • Final validation summary"
+    echo ""
+    
+    log_info_if_enabled "INTEGRATION WITH DEPLOYMENT:"
+    echo -e "    ${YELLOW}Recommended Workflow:${RESET}"
+    echo -e "        ${BLUE}1.${RESET} Run local-ci.sh to validate changes"
+    echo -e "        ${BLUE}2.${RESET} Fix any issues found during validation"
+    echo -e "        ${BLUE}3.${RESET} Run local-cd.sh for actual deployment"
+    echo ""
+    echo -e "    ${YELLOW}Quick Validation + Deployment:${RESET}"
+    echo -e "        ${CYAN}./scripts/cicd/local-ci.sh && ./scripts/cicd/local-cd.sh${RESET}"
+    echo ""
+    
+    log_info_if_enabled "SAFETY FEATURES:"
+    echo -e "        • ${GREEN}No commits, tags, or pushes performed${RESET}"
+    echo -e "        • ${GREEN}Safe to run multiple times${RESET}"
+    echo -e "        • ${GREEN}All validations must pass before deployment${RESET}"
+    echo -e "        • ${GREEN}Multi-platform build testing available${RESET}"
+    echo ""
+    
+    log_info_if_enabled "EXIT CODES:"
+    echo -e "        ${GREEN}0${RESET}    All validations passed successfully"
+    echo -e "        ${RED}1${RESET}    Validation failed (quality checks, tests, or builds)"
+    echo ""
+    
+    log_info_if_enabled "EXAMPLES:"
+    echo -e "    ${CYAN}# Basic validation${RESET}"
+    echo -e "    ./scripts/cicd/local-ci.sh"
+    echo ""
+    echo -e "    ${CYAN}# Validation with multi-platform build testing${RESET}"
+    echo -e "    MULTIPLATFORM_BUILD=true ./scripts/cicd/local-ci.sh"
+    echo ""
+    echo -e "    ${CYAN}# Validation followed by deployment${RESET}"
+    echo -e "    ./scripts/cicd/local-ci.sh && ./scripts/cicd/local-cd.sh"
+    echo ""
+    
+    log_info_if_enabled "For deployment workflow, see: ./scripts/cicd/local-cd.sh --help"
+    echo ""
+}
+
+# Handle --help flag
+if [ "$1" = "--help" ] || [ "$1" = "-h" ]; then
+    show_help
+    exit 0
+fi
+
 # Get current branch
 CURRENT_BRANCH=$(git branch --show-current)
 
