@@ -5,8 +5,8 @@
 *.tar.gz
 
 binaries-*
-release-assets
-
+release-assets/
+artifacts/
 
 # NPM and Node.js
 # Logs

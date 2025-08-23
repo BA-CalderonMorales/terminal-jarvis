@@ -10,6 +10,126 @@ set -e  # Exit on any error
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "$SCRIPT_DIR/../logger/logger.sh"
 
+# Color definitions for consistent theming
+BLUE='\033[0;34m'
+YELLOW='\033[1;33m'
+CYAN='\033[0;36m'
+GREEN='\033[0;32m'
+RED='\033[0;31m'
+RESET='\033[0m'
+
+# Help function
+show_help() {
+    log_header "Terminal Jarvis Local CD - Continuous Deployment"
+    echo ""
+    
+    log_info_if_enabled "DESCRIPTION:"
+    echo -e "    ${BLUE}Continuous Deployment script that handles production operations including${RESET}"
+    echo -e "    ${BLUE}version management, Git operations, and multi-platform publishing.${RESET}"
+    echo ""
+    echo -e "    ${RED}WARNING: This script performs production operations that affect:${RESET}"
+    echo -e "    ${RED}• Git repository (commits, tags, pushes)${RESET}"
+    echo -e "    ${RED}• Crates.io publishing${RESET}"
+    echo -e "    ${RED}• Homebrew tap synchronization${RESET}"
+    echo ""
+    
+    log_info_if_enabled "USAGE:"
+    echo -e "    ${CYAN}./scripts/cicd/local-cd.sh [OPTIONS]${RESET}"
+    echo -e "    ${CYAN}./scripts/cicd/local-cd.sh --check-versions${RESET}"
+    echo -e "    ${CYAN}./scripts/cicd/local-cd.sh --update-version <VERSION>${RESET}"
+    echo ""
+    
+    log_info_if_enabled "OPTIONS:"
+    echo -e "    ${YELLOW}--help, -h${RESET}              Show this help message and exit"
+    echo -e "    ${YELLOW}--check-versions, -v${RESET}    Check version consistency across all files"
+    echo -e "    ${YELLOW}--update-version X.X.X${RESET}  Update all version references programmatically"
+    echo ""
+    
+    log_info_if_enabled "DEPLOYMENT PHASES:"
+    echo -e "    ${CYAN}Phase 1: CHANGELOG.md Verification${RESET}"
+    echo -e "        • Ensures CHANGELOG.md has entry for current version"
+    echo -e "        • Interactive editor option if entry missing"
+    echo -e "        • Validates proper release documentation"
+    echo ""
+    echo -e "    ${CYAN}Phase 2: Version Management and Consistency${RESET}"
+    echo -e "        • Version bump options: patch, minor, major"
+    echo -e "        • Cross-file synchronization (Cargo.toml, package.json, etc.)"
+    echo -e "        • Homebrew Formula version updates"
+    echo -e "        • Multi-platform binary rebuilds"
+    echo ""
+    echo -e "    ${CYAN}Phase 3: Git Operations${RESET}"
+    echo -e "        • Commits all changes with structured message"
+    echo -e "        • Creates semantic version tags (v0.0.X format)"
+    echo -e "        • Pushes to GitHub with tags"
+    echo ""
+    echo -e "    ${CYAN}Phase 4: Crates.io Publishing${RESET}"
+    echo -e "        • Publishes Rust crate to crates.io registry"
+    echo -e "        • Validates cargo login status"
+    echo -e "        • Provides installation instructions"
+    echo ""
+    echo -e "    ${CYAN}Phase 5: Homebrew Tap Synchronization${RESET}"
+    echo -e "        • Generates platform-specific archives (mac, linux)"
+    echo -e "        • Updates homebrew-terminal-jarvis repository"
+    echo -e "        • Synchronizes Formula with new version"
+    echo ""
+    echo -e "    ${CYAN}Phase 6: NPM Publishing Coordination${RESET}"
+    echo -e "        • Prepares NPM package for manual publishing"
+    echo -e "        • Provides 2FA-compatible publishing commands"
+    echo -e "        • Coordinates distribution tag management"
+    echo ""
+    
+    log_info_if_enabled "VERSION MANAGEMENT EXAMPLES:"
+    echo -e "    ${CYAN}# Check version consistency${RESET}"
+    echo -e "    ./scripts/cicd/local-cd.sh --check-versions"
+    echo ""
+    echo -e "    ${CYAN}# Update to specific version${RESET}"
+    echo -e "    ./scripts/cicd/local-cd.sh --update-version 0.0.50"
+    echo ""
+    echo -e "    ${CYAN}# Full deployment workflow${RESET}"
+    echo -e "    ./scripts/cicd/local-ci.sh && ./scripts/cicd/local-cd.sh"
+    echo ""
+    
+    log_info_if_enabled "SAFETY REQUIREMENTS:"
+    echo -e "        ${RED}CRITICAL:${RESET} Run ${CYAN}./scripts/cicd/local-ci.sh${RESET} first for validation"
+    echo -e "        ${RED}CRITICAL:${RESET} Ensure ${CYAN}git status${RESET} shows clean working tree"
+    echo -e "        ${RED}CRITICAL:${RESET} Update CHANGELOG.md before deployment"
+    echo -e "        ${RED}CRITICAL:${RESET} Verify version synchronization first"
+    echo ""
+    
+    log_info_if_enabled "MULTI-PLATFORM DISTRIBUTION:"
+    echo -e "        • ${GREEN}Cargo (Rust ecosystem):${RESET} cargo install terminal-jarvis"
+    echo -e "        • ${GREEN}NPM (Node.js ecosystem):${RESET} npm install -g terminal-jarvis"
+    echo -e "        • ${GREEN}Homebrew (macOS/Linux):${RESET} brew tap ba-calderonmorales/terminal-jarvis && brew install terminal-jarvis"
+    echo ""
+    
+    log_info_if_enabled "DEPLOYMENT MODES:"
+    echo -e "    ${YELLOW}1. Full Deployment${RESET}       Complete workflow with version bump"
+    echo -e "    ${YELLOW}2. Current Version Deploy${RESET} Deploy existing version without bump"
+    echo -e "    ${YELLOW}3. NPM-Only Publishing${RESET}    Skip Git operations, publish to NPM only"
+    echo -e "    ${YELLOW}4. Version Update Only${RESET}    Update versions without deployment"
+    echo ""
+    
+    log_info_if_enabled "POST-DEPLOYMENT ACTIONS:"
+    echo -e "        • ${YELLOW}Manual NPM publishing${RESET} (due to 2FA requirements)"
+    echo -e "        • ${YELLOW}GitHub release creation${RESET} (for Homebrew compatibility)"
+    echo -e "        • ${YELLOW}Distribution verification${RESET} (test all installation methods)"
+    echo ""
+    
+    log_info_if_enabled "EXIT CODES:"
+    echo -e "        ${GREEN}0${RESET}    Deployment completed successfully"
+    echo -e "        ${RED}1${RESET}    Deployment failed or validation error"
+    echo ""
+    
+    log_info_if_enabled "For validation workflow, see: ./scripts/cicd/local-ci.sh --help"
+    echo ""
+}
+
+# Handle --help flag before other processing
+if [ "$1" = "--help" ] || [ "$1" = "-h" ]; then
+    show_help
+    exit 0
+fi
+
 # Get current branch
 CURRENT_BRANCH=$(git branch --show-current)
 DEFAULT_BRANCH="develop"
@@ -248,7 +368,7 @@ Terminal Jarvis is a unified command center for AI coding tools. It provides sea
 
 - **GitHub**: [terminal-jarvis](https://github.com/BA-CalderonMorales/terminal-jarvis)
 - **Issues**: [Report bugs](https://github.com/BA-CalderonMorales/terminal-jarvis/issues)
-- **Discord**: [Join community](https://discord.gg/zNuyC5uG)
+- **Discord**: [Join community](https://discord.gg/WteQm6MTZW)
 
 ## License
 

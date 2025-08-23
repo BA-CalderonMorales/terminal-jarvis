@@ -6,29 +6,30 @@ labels: ""
 assignees: ""
 ---
 
-## 📋 Pull Request Checklist
+## Pull Request Checklist
 
 **BEFORE submitting this PR, please ensure:**
 
-- [ ] I have joined the [Terminal Jarvis Discord](https://discord.gg/zNuyC5uG) and discussed this contribution
+- [ ] I have joined the [Terminal Jarvis Discord](https://discord.gg/WteQm6MTZW) and discussed this contribution
 - [ ] I have read and understand the [CONTRIBUTIONS.md](docs/CONTRIBUTIONS.md) guidelines
 - [ ] All tests pass locally (`cargo test`)
 - [ ] Code follows project formatting standards (`cargo fmt --all` and `cargo clippy`)
+- [ ] **NO EMOJIS** used anywhere in commits, code, or documentation (per AGENTS.md guidelines)
 
-## 🏷️ PR Type
+## PR Type
 
 **Select the PRIMARY type of this PR:**
 
-- [ ] **📚 Documentation** - README, docs/, comments, or other documentation changes
-- [ ] **✨ Feature** - New functionality or tool integration
-- [ ] **🐛 Bugfix** - Fixes a specific bug or issue
-- [ ] **🔒 Security** - Addresses security vulnerabilities or improves security
-- [ ] **💄 UI/UX** - Changes to interactive interface, ASCII art, or user experience
-- [ ] **⚡ Logic** - Core business logic, algorithms, or architectural changes
-- [ ] **🔧 Maintenance** - Dependency updates, refactoring, or code cleanup
-- [ ] **🧪 Testing** - Test additions, improvements, or testing infrastructure
+- [ ] **Documentation** - README, docs/, comments, or other documentation changes
+- [ ] **Feature** - New functionality or tool integration
+- [ ] **Bugfix** - Fixes a specific bug or issue
+- [ ] **Security** - Addresses security vulnerabilities or improves security
+- [ ] **UI/UX** - Changes to interactive interface, ASCII art, or user experience
+- [ ] **Logic** - Core business logic, algorithms, or architectural changes
+- [ ] **Maintenance** - Dependency updates, refactoring, or code cleanup
+- [ ] **Testing** - Test additions, improvements, or testing infrastructure
 
-## 📖 Description
+## Description
 
 **What does this PR do?**
 
@@ -38,7 +39,7 @@ assignees: ""
 
 <!-- Explain the motivation or problem this PR solves -->
 
-## 🔍 Changes Made
+## Changes Made
 
 **Files Modified:**
 
@@ -52,7 +53,7 @@ assignees: ""
 
 <!-- Highlight important technical decisions or approaches -->
 
-## 🧪 Testing Strategy
+## Testing Strategy
 
 **For Bugfixes (MANDATORY):**
 
@@ -73,7 +74,7 @@ assignees: ""
 - [ ] Examples tested and working
 - [ ] Formatting and style consistent
 
-## 📊 Tool Configuration Updates
+## Tool Configuration Updates
 
 **If adding new AI tools (check all that apply):**
 
@@ -83,16 +84,16 @@ assignees: ""
 - [ ] Updated tests in `src/services.rs`
 - [ ] Updated README.md and documentation
 
-## 🚨 Breaking Changes
+## Breaking Changes
 
 - [ ] **No breaking changes**
-- [ ] **Contains breaking changes** - ⚠️ **Requires version bump to X.0.0**
+- [ ] **Contains breaking changes** - WARNING: Requires version bump to X.0.0
 
 **If breaking changes, describe:**
 
 <!-- What will break and how users should migrate -->
 
-## 💭 Additional Context
+## Additional Context
 
 **Related Issues:**
 
@@ -108,7 +109,7 @@ assignees: ""
 
 ---
 
-## 🤝 For Maintainers Only
+## For Maintainers Only
 
 **Post-Merge Tasks:**
 
