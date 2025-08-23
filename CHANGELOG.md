@@ -5,6 +5,29 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.0.64] - 2025-08-23
+
+### Fixed
+
+- **Deployment Pipeline Reliability**: Resolved critical issues that caused v0.0.63 release failure
+  - **Crates.io Publication**: Fixed "uncommitted Cargo.lock" error by ensuring proper git state before publication
+  - **Homebrew Tap Update**: Fixed missing GH_TOKEN environment variable causing exit code 4 failure
+  - **Sequential Workflow**: Restructured deployment to be sequential (crates.io → GitHub release → NPM → Homebrew)
+  - **Failure Prevention**: If any step fails, subsequent steps are skipped to avoid partial releases
+
+### Enhanced
+
+- **Deployment Workflow Robustness**: Improved error handling and validation
+  - Added explicit Cargo.lock update and commit verification in local deployment script
+  - Implemented proper sequential dependencies in GitHub Actions workflow
+  - Enhanced git state validation before crates.io publication
+  - Added comprehensive failure checks to prevent inconsistent multi-platform releases
+
+### Technical
+
+- **CI/CD Pipeline**: Complete workflow restructure to eliminate race conditions and partial deployments
+- **Git Operations**: Explicit Cargo.lock handling ensures clean repository state for crates.io publication
+
 ## [0.0.63] - 2025-08-23
 
 ### Fixed
