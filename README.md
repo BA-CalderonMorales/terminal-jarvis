@@ -73,7 +73,8 @@ Terminal Jarvis is your AI coding assistant command center:
   - `codex` - OpenAI Codex CLI for local AI coding (Testing)
   - `crush` - Charm's multi-model AI assistant with LSP (New)
 
-BETA = _Looking for testers! These tools are new additions._
+> [!NOTE]
+> BETA = _Looking for testers! These tools are new additions._
 
 ## How to Use Terminal Jarvis
 
@@ -168,9 +169,11 @@ auto_sync = true
 
 ## Additional Insights
 
-**[View all 7 supported AI tools →](docs/SOURCES.md)**
-**Try it instantly:** `npx terminal-jarvis`
-**Known Issues**: [View current limitations and workarounds](docs/LIMITATIONS.md)
+- **[View all 7 supported AI tools →](docs/SOURCES.md)**
+- **Try it instantly:** `npx terminal-jarvis`
+
+> [!CAUTION]
+> **Known Issues**: [View current limitations and workarounds](docs/LIMITATIONS.md)
 
 ## Contributing
 
@@ -190,14 +193,6 @@ We welcome contributions! Please join our [Discord community](https://discord.gg
 
 **Technical Details:** [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) - Architecture overview and development setup.
 
-## Support the Project
-
-If Terminal Jarvis has been helpful for your AI coding workflow, consider supporting development:
-
-[![Buy Me a Coffee](https://img.shields.io/badge/☕-Buy%20Me%20a%20Coffee-orange.svg?style=for-the-badge)](https://www.buymeacoffee.com/brandoncalderonmorales)
-
-Your support helps maintain and improve Terminal Jarvis for the entire community! 🙏
-
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
@@ -213,3 +208,11 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - [ ] Plugin system for custom tools
 - [ ] Shell completion scripts
 - [ ] Web dashboard for tool management
+
+## Support the Project
+
+If Terminal Jarvis has been helpful for your AI coding workflow or you just thought the project is worth the maintainers going down this rabbit hole, consider supporting development:
+
+[![Buy Me a Coffee](https://img.shields.io/badge/☕-Buy%20Me%20a%20Coffee-orange.svg?style=for-the-badge)](https://www.buymeacoffee.com/brandoncalderonmorales)
+
+Your support helps maintain and improve Terminal Jarvis for the entire community! 🙏
