@@ -198,6 +198,10 @@ update_all_versions() {
     log_info_if_enabled "  • Updating Cargo.toml"
     sed -i "s/^version = \".*\"/version = \"$new_version\"/" Cargo.toml
     
+    # Update Cargo.lock to reflect the new version
+    log_info_if_enabled "  • Updating Cargo.lock"
+    cargo check --quiet 2>/dev/null || log_warn_if_enabled "    (Cargo check encountered issues - continuing)"
+    
     # Update NPM package.json
     log_info_if_enabled "  • Updating npm/terminal-jarvis/package.json"
     sed -i "s/\"version\": \".*\"/\"version\": \"$new_version\"/" npm/terminal-jarvis/package.json
