@@ -9,23 +9,29 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
-- **Crates.io Publication Workflow**: Final resolution of persistent Cargo.lock handling issues
-  - **Intelligent Cargo.lock Management**: Implemented sophisticated pre-publication validation that distinguishes between user errors and necessary workflow updates
-  - **Conditional --allow-dirty Usage**: Added smart logic that only uses --allow-dirty when Cargo.lock is updated by crates.io index refresh during workflow execution
-  - **Sequential Workflow Optimization**: Reordered job dependencies for optimal failure handling (Crates.io → GitHub Release → Homebrew → NPM)
-  - **Enhanced Git State Validation**: Pre-flight checks ensure clean repository state while allowing necessary dependency updates
+- **CRITICAL: Deployment Script Bug**: Resolved major flaw in version management workflow
+  - **Root Cause**: `local-cd.sh --update-version` was updating `Cargo.toml` but NOT updating `Cargo.lock`
+  - **Impact**: Caused persistent workflow failures as `Cargo.lock` contained outdated version numbers
+  - **Resolution**: Added `cargo check` to `update_all_versions` function to synchronize `Cargo.lock` with `Cargo.toml` changes
+  - **Prevention**: Future version bumps will automatically maintain `Cargo.lock` synchronization
+
+- **Crates.io Publication Workflow**: Enhanced Cargo.lock handling for deployment pipeline
+  - **Intelligent Validation**: Pre-publication checks now distinguish between user errors and necessary workflow updates
+  - **Conditional --allow-dirty Usage**: Smart logic that only uses --allow-dirty when `Cargo.lock` is updated by crates.io index refresh
+  - **Clean State Enforcement**: Ensures repository state is clean while allowing necessary dependency updates during workflow execution
 
 ### Enhanced
 
-- **Deployment Pipeline Reliability**: Complete overhaul of multi-platform deployment workflow
-  - **Fail-Fast Architecture**: If any step fails, subsequent steps are automatically skipped to prevent partial releases
-  - **Robust Error Handling**: Comprehensive validation at each stage with clear error messaging
-  - **NPM Publication as Final Step**: Most reliable publication step moved to end of pipeline for maximum success rate
+- **Deployment Pipeline Reliability**: Complete overhaul with lessons learned from debugging session
+  - **Sequential Workflow Optimization**: Reordered job dependencies (Crates.io → GitHub Release → Homebrew → NPM)
+  - **Fail-Fast Architecture**: If any step fails, subsequent steps are skipped to prevent partial releases
+  - **Version Consistency**: Local deployment script now maintains proper synchronization between all version files
 
 ### Technical
 
-- **Workflow Architecture**: Bulletproof sequential deployment pipeline designed to eliminate the persistent crates.io publication failures
-- **Smart Dependency Management**: Workflow now intelligently handles Cargo.lock updates that occur during normal crates.io operations
+- **Version Management**: Fixed fundamental flaw where `--update-version` created inconsistent state between `Cargo.toml` and `Cargo.lock`
+- **Workflow Debugging**: Extensive troubleshooting session revealed and resolved deployment pipeline issues that had been causing persistent failures
+- **Quality Assurance**: Enhanced pre-flight validation prevents version mismatches from reaching CI/CD pipeline
 
 ## [0.0.64] - 2025-08-23
 
