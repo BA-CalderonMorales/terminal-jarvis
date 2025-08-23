@@ -5,12 +5,126 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.0.67] - 2025-08-23
+
+### Fixed
+- **Workflow Optimization**: Removed unnecessary local Homebrew Formula handling
+- **Deployment Reliability**: Eliminated detached HEAD errors from Formula commit attempts
+- **Clean Architecture**: Deleted local `homebrew/Formula/` directory - using separate tap repository instead
+
+### Technical
+- Removed "Update local Formula file" and "Commit local Formula update" workflow steps
+- Simplified Homebrew deployment to only update actual tap repository
+- Fixed workflow failures caused by attempting to commit non-existent local Formula
+
+## [0.0.66] - 2025-08-23
+
+### Technical
+- **Remote Pipeline Testing**: Deploy with all v0.0.65 fixes to validate GitHub Actions workflow
+- **Deployment Verification**: Testing sequential workflow, intelligent Cargo.lock handling, and GH_TOKEN fixes
+- **Quality Assurance**: Validating that critical local-cd.sh bug fix resolves crates.io publication issues
+
+## [0.0.65] - 2025-08-23
+
+### Fixed
+
+- **CRITICAL: Deployment Script Bug**: Resolved major flaw in version management workflow
+  - **Root Cause**: `local-cd.sh --update-version` was updating `Cargo.toml` but NOT updating `Cargo.lock`
+  - **Impact**: Caused persistent workflow failures as `Cargo.lock` contained outdated version numbers
+  - **Resolution**: Added `cargo check` to `update_all_versions` function to synchronize `Cargo.lock` with `Cargo.toml` changes
+  - **Prevention**: Future version bumps will automatically maintain `Cargo.lock` synchronization
+
+- **Crates.io Publication Workflow**: Enhanced Cargo.lock handling for deployment pipeline
+  - **Intelligent Validation**: Pre-publication checks now distinguish between user errors and necessary workflow updates
+  - **Conditional --allow-dirty Usage**: Smart logic that only uses --allow-dirty when `Cargo.lock` is updated by crates.io index refresh
+  - **Clean State Enforcement**: Ensures repository state is clean while allowing necessary dependency updates during workflow execution
+
+### Enhanced
+
+- **Deployment Pipeline Reliability**: Complete overhaul with lessons learned from debugging session
+  - **Sequential Workflow Optimization**: Reordered job dependencies (Crates.io → GitHub Release → Homebrew → NPM)
+  - **Fail-Fast Architecture**: If any step fails, subsequent steps are skipped to prevent partial releases
+  - **Version Consistency**: Local deployment script now maintains proper synchronization between all version files
+
+### Technical
+
+- **Version Management**: Fixed fundamental flaw where `--update-version` created inconsistent state between `Cargo.toml` and `Cargo.lock`
+- **Workflow Debugging**: Extensive troubleshooting session revealed and resolved deployment pipeline issues that had been causing persistent failures
+- **Quality Assurance**: Enhanced pre-flight validation prevents version mismatches from reaching CI/CD pipeline
+
+## [0.0.64] - 2025-08-23
+
+### Fixed
+
+- **Deployment Pipeline Reliability**: Resolved critical issues that caused v0.0.63 release failure
+  - **Crates.io Publication**: Fixed "uncommitted Cargo.lock" error by implementing intelligent Cargo.lock handling
+    - Added pre-publication Cargo.lock validation and update logic
+    - Implemented conditional --allow-dirty flag usage when Cargo.lock updates during workflow execution
+    - Ensures clean git state while handling necessary Cargo.lock updates from crates.io index refresh
+  - **Homebrew Tap Update**: Fixed missing GH_TOKEN environment variable causing exit code 4 failure
+  - **Sequential Workflow**: Restructured deployment to be sequential (crates.io → GitHub release → NPM → Homebrew)
+  - **Failure Prevention**: If any step fails, subsequent steps are skipped to avoid partial releases
+
+### Enhanced
+
+- **Deployment Workflow Robustness**: Improved error handling and validation
+  - Added explicit Cargo.lock update and commit verification in local deployment script
+  - Implemented proper sequential dependencies in GitHub Actions workflow
+  - Enhanced git state validation with intelligent Cargo.lock management
+  - Added comprehensive failure checks to prevent inconsistent multi-platform releases
+
+### Technical
+
+- **CI/CD Pipeline**: Complete workflow restructure to eliminate race conditions and partial deployments
+- **Git Operations**: Intelligent Cargo.lock handling that distinguishes between user errors and necessary workflow updates
+
+## [0.0.63] - 2025-08-23
+
+### Fixed
+
+- **CD Pipeline Optimization**: Improved Homebrew Formula synchronization in deployment pipeline
+  - Enhanced version management and deployment workflow reliability
+  - Better handling of multi-platform distribution requirements
+
+### Enhanced
+
+- **Release Process**: Added automated release process documentation to deployment pipeline
+  - Improved deployment script comments for better maintainability
+  - Enhanced Homebrew Formula with automated release process documentation
+
+## [0.0.62] - 2025-08-23
+
+### Fixed
+
+- **Clippy Compliance**: Resolved clippy errors in test files preventing CI/CD pipeline execution
+  - Fixed `items-after-test-module` error in `tests/codex_functionality_tests.rs` by moving non-test functions before test module
+  - Fixed `items-after-test-module` error in `tests/auth_behavior_tests.rs` by moving non-test functions before test module
+  - Removed empty line after doc comment to satisfy `empty-line-after-doc-comments` rule
+  - All test files now comply with Rust code organization best practices
+
+### Enhanced
+
+- **Documentation Consolidation**: Completed unification of AI assistant guidelines
+  - Created comprehensive `AGENTS.md` as single source of truth for all AI coding assistants
+  - Streamlined `CLAUDE.md` and `.github/copilot-instructions.md` to reference unified guidelines
+  - Eliminated redundant documentation while maintaining consistency across AI assistant workflows
+
+- **Community Links**: Updated Discord server invitation links
+  - Changed from expired `discord.gg/zNuyC5uG` to active `discord.gg/WteQm6MTZW`
+  - Updated links across 6 files: PR template, README files, CI/CD scripts, CHANGELOG, and documentation
+
+### Technical
+
+- **Code Quality**: All clippy warnings resolved with strict `-D warnings` compliance
+- **Test Organization**: Proper Rust file structure ensures reliable compilation and testing
+- **CI/CD Pipeline**: Full pipeline now executes successfully with zero warnings
+
 ## [0.0.61] - 2025-08-21
 
 ### Fixed
 
 - **Homebrew Binary Packaging**: Resolved critical issue where release archives contained debug directories instead of executable binaries
-  - Fixed GitHub Actions workflow to exclude debug directories from uploads (contribution by @aviv1)
+  - Fixed GitHub Actions workflow to exclude debug directories from uploads (contribution by @avivl)
   - Improved archive creation logic to target executable binaries only with `-type f -executable` filter
   - Changed artifact pattern from `terminal-jarvis*` to exact `terminal-jarvis` to prevent debug file inclusion
   - Added local Homebrew Formula for testing and validation
@@ -19,7 +133,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Technical
 
 - **Archive Creation Enhancement**: Enhanced multi-platform build system to ensure only executable binaries are packaged in release archives
-- **Contributor Recognition**: @aviv1's fix resolves deployment pipeline issue affecting Homebrew distribution
+- **Contributor Recognition**: @avivl's fix resolves deployment pipeline issue affecting Homebrew distribution
 
 ## [0.0.60] - 2025-08-19
 
@@ -266,7 +380,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - **Comprehensive Contribution System**: Complete contributor onboarding and governance framework
 
-  - **Discord-First Workflow**: Mandatory community discussion before PR submission via [Discord](https://discord.gg/zNuyC5uG)
+  - **Discord-First Workflow**: Mandatory community discussion before PR submission via [Discord](https://discord.gg/WteQm6MTZW)
   - **Advanced PR Template**: 8 PR types (docs, feature, bugfix, security, UI, logic, maintenance, testing)
   - **Complete CONTRIBUTIONS.md**: Full contributor guide with coding standards, testing requirements, and realistic expectations
   - **Quality Gate Enforcement**: TDD requirements, code formatting, and comprehensive testing protocols

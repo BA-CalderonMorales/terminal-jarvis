@@ -32,32 +32,17 @@ This document outlines current limitations, known issues, and workarounds for Te
 ### macOS Prerequisites
 
 - **Requirement**: Rust toolchain must be installed before using Terminal Jarvis
-- **Installation**:
-
-  ```bash
-  # Install Rust via rustup
-  curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
-  source ~/.cargo/env
-
-  # Then install Terminal Jarvis
-  npm install -g terminal-jarvis
-  ```
-
+- **Details**: See [INSTALLATION.md](INSTALLATION.md#macos-prerequisites) for complete setup instructions
 - **Why**: Some tools require compilation or Rust-specific dependencies on macOS
 
-### General Prerequisites
-
-- **Node.js and NPM**: Required for most AI coding tools
-- **Internet Connection**: Required for tool installation and updates
-- **Terminal Support**: Best experience with modern terminal emulators that support Unicode and colors
+> **Note**: For complete installation instructions and prerequisites, see [INSTALLATION.md](INSTALLATION.md)
 
 ## Performance Considerations
 
 ### Package Size
 
 - Current NPM package is ~1.2MB compressed / ~2.9MB unpacked
-- Includes pre-compiled binaries for immediate functionality
-- Future optimizations planned for platform-specific packages
+- See [INSTALLATION.md](INSTALLATION.md#package-information) for detailed package information and distribution channels
 
 ### Tool Detection
 
