@@ -5,6 +5,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.0.67] - 2025-08-23
+
+### Fixed
+- **Workflow Optimization**: Removed unnecessary local Homebrew Formula handling
+- **Deployment Reliability**: Eliminated detached HEAD errors from Formula commit attempts
+- **Clean Architecture**: Deleted local `homebrew/Formula/` directory - using separate tap repository instead
+
+### Technical
+- Removed "Update local Formula file" and "Commit local Formula update" workflow steps
+- Simplified Homebrew deployment to only update actual tap repository
+- Fixed workflow failures caused by attempting to commit non-existent local Formula
+
 ## [0.0.66] - 2025-08-23
 
 ### Technical
