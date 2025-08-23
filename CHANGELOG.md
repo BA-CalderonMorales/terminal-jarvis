@@ -5,6 +5,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.0.63] - 2025-08-23
+
+### Fixed
+
+- **CD Pipeline Optimization**: Improved Homebrew Formula synchronization in deployment pipeline
+  - Enhanced version management and deployment workflow reliability
+  - Better handling of multi-platform distribution requirements
+
+### Enhanced
+
+- **Release Process**: Added automated release process documentation to deployment pipeline
+  - Improved deployment script comments for better maintainability
+  - Enhanced Homebrew Formula with automated release process documentation
+
 ## [0.0.62] - 2025-08-23
 
 ### Fixed
