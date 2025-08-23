@@ -175,11 +175,11 @@ auto_sync = true
 
 ## Contributing
 
-We welcome contributions! Please join our [Discord community](https://discord.gg/zNuyC5uG) first to discuss your ideas.
+We welcome contributions! Please join our [Discord community](https://discord.gg/WteQm6MTZW) first to discuss your ideas.
 
 **Quick Start:**
 
-1. Join the [Terminal Jarvis Discord](https://discord.gg/zNuyC5uG)
+1. Join the [Terminal Jarvis Discord](https://discord.gg/WteQm6MTZW)
 2. Discuss your contribution in `#features` or `#bugfix` channels
 3. Fork the repository
 4. Create a feature branch (`git checkout -b feature/amazing-feature`)

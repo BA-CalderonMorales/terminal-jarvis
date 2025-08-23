@@ -30,6 +30,14 @@ A unified command center for AI coding tools. Manage and run claude-code, gemini
 
 </div>
 
+## Prerequisites
+
+- Node.js and NPM
+- **macOS users**: [Rust toolchain required](docs/INSTALLATION.md#macos-prerequisites)
+
+> [!IMPORTANT]
+> **Full installation guide:** [docs/INSTALLATION.md](docs/INSTALLATION.md)
+
 ## Quick Start
 
 ```bash
@@ -49,21 +57,6 @@ cargo install terminal-jarvis
 brew tap ba-calderonmorales/terminal-jarvis
 brew install terminal-jarvis
 ```
-
-**Prerequisites:**
-
-- Node.js and NPM
-- **macOS users**: [Rust toolchain required](docs/INSTALLATION.md#macos-prerequisites)
-
-**Full installation guide:** [docs/INSTALLATION.md](docs/INSTALLATION.md)
-
-## Insights
-
-**[View all 7 supported AI tools →](docs/SOURCES.md)**
-
-**Try it instantly:** `npx terminal-jarvis`
-
-**Known Issues**: [View current limitations and workarounds](docs/LIMITATIONS.md)
 
 ## What Terminal Jarvis Does
 
@@ -173,13 +166,19 @@ auto_sync = true
 - **[Architecture Guide](docs/ARCHITECTURE.md)** - Technical details and development info
 - **[Testing Guide](docs/TESTING.md)** - How to test and contribute
 
+## Additional Insights
+
+**[View all 7 supported AI tools →](docs/SOURCES.md)**
+**Try it instantly:** `npx terminal-jarvis`
+**Known Issues**: [View current limitations and workarounds](docs/LIMITATIONS.md)
+
 ## Contributing
 
-We welcome contributions! Please join our [Discord community](https://discord.gg/zNuyC5uG) first to discuss your ideas.
+We welcome contributions! Please join our [Discord community](https://discord.gg/WteQm6MTZW) first to discuss your ideas.
 
 **Quick Start:**
 
-1. Join the [Terminal Jarvis Discord](https://discord.gg/zNuyC5uG)
+1. Join the [Terminal Jarvis Discord](https://discord.gg/WteQm6MTZW)
 2. Discuss your contribution in `#features` or `#bugfix` channels
 3. Fork the repository
 4. Create a feature branch (`git checkout -b feature/amazing-feature`)

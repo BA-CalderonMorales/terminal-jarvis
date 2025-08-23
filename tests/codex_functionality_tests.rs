@@ -223,3 +223,87 @@ mod codex_functionality_tests {
         binary_provided: bool,
     }
 }
+
+fn print_help() {
+    println!("Codex Functionality Tests - Terminal Jarvis Test Suite");
+    println!("====================================================");
+    println!();
+    println!("This test suite provides comprehensive functionality testing for the Codex");
+    println!("tool integration within Terminal Jarvis, focusing on command execution,");
+    println!("configuration management, and tool lifecycle operations.");
+    println!();
+    println!("USAGE:");
+    println!("  cargo test --test codex_functionality_tests              Run all codex tests");
+    println!("  cargo test --test codex_functionality_tests [TESTNAME]   Run specific test");
+    println!("  cargo test --test codex_functionality_tests -- --help    Show this help");
+    println!();
+    println!("TEST CATEGORIES:");
+    println!("  Tool Detection Tests:");
+    println!("    - test_codex_tool_detection              Tests codex tool discovery");
+    println!("    - test_codex_command_availability        Tests codex command availability");
+    println!("    - test_codex_binary_detection            Tests codex binary detection");
+    println!();
+    println!("  Configuration Tests:");
+    println!("    - test_codex_config_loading              Tests codex configuration loading");
+    println!("    - test_codex_config_validation           Tests codex configuration validation");
+    println!("    - test_codex_env_variable_handling       Tests environment variable processing");
+    println!();
+    println!("  Installation Tests:");
+    println!("    - test_codex_installation_detection      Tests installation status detection");
+    println!("    - test_codex_update_mechanism            Tests codex update mechanisms");
+    println!("    - test_codex_package_management          Tests package management operations");
+    println!();
+    println!("  Execution Tests:");
+    println!("    - test_codex_command_execution           Tests codex command execution");
+    println!("    - test_codex_error_handling              Tests codex error handling");
+    println!("    - test_codex_output_processing           Tests output processing");
+    println!();
+    println!("ENVIRONMENT VARIABLES:");
+    println!("  TEST_MODE=true                          Enable test mode for safer testing");
+    println!("  CODEX_API_KEY                           Codex API key for authentication");
+    println!("  SKIP_INSTALLATION_TESTS=true            Skip actual installation tests");
+    println!("  MOCK_CODEX_RESPONSES=true               Use mock responses for testing");
+    println!();
+    println!("EXAMPLES:");
+    println!("  # Run all codex functionality tests");
+    println!("  cargo test --test codex_functionality_tests");
+    println!();
+    println!("  # Run specific tool detection test");
+    println!("  cargo test --test codex_functionality_tests test_codex_tool_detection");
+    println!();
+    println!("  # Run tests with verbose output and test mode");
+    println!("  TEST_MODE=true cargo test --test codex_functionality_tests -- --nocapture");
+    println!();
+    println!("  # Run configuration tests only");
+    println!("  cargo test --test codex_functionality_tests test_codex_config");
+    println!();
+    println!("TECHNICAL DETAILS:");
+    println!("  - Tests codex tool discovery and command mapping");
+    println!("  - Validates codex configuration loading and validation");
+    println!("  - Ensures proper codex installation detection mechanisms");
+    println!("  - Tests codex command execution and error handling");
+    println!("  - Provides comprehensive coverage of codex tool lifecycle");
+    println!("  - Includes package management and update mechanism testing");
+    println!("  - Uses mock responses and test mode for safe testing");
+    println!();
+    println!("TOOL INFORMATION:");
+    println!("  - Codex is an AI coding assistant tool");
+    println!("  - Provides code completion and generation capabilities");
+    println!("  - Integrates with OpenAI's Codex model");
+    println!("  - Requires API key authentication");
+    println!("  - Supports multiple programming languages");
+    println!();
+    println!("For more information, see docs/TESTING.md and docs/ARCHITECTURE.md");
+}
+
+fn main() {
+    let args: Vec<String> = std::env::args().collect();
+    
+    if args.len() > 1 && (args[1] == "--help" || args[1] == "-h") {
+        print_help();
+        return;
+    }
+    
+    println!("Codex Functionality Tests - Use --help for detailed information");
+    println!("Run with: cargo test --test codex_functionality_tests");
+}

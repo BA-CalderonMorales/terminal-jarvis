@@ -1,5 +1,11 @@
 #![allow(dead_code)]
 
+//! Tool-specific API operations and metadata management
+//!
+//! **STATUS: FUTURE FEATURE** - Reserved for enhanced tool management
+//! This module will provide API-driven tool discovery, version checking, and
+//! metadata fetching from remote services, replacing static tool definitions.
+
 use crate::api::api_client::ApiClient;
 use anyhow::Result;
 use std::collections::HashMap;
