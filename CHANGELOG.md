@@ -5,12 +5,39 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.0.62] - 2025-08-23
+
+### Fixed
+
+- **Clippy Compliance**: Resolved clippy errors in test files preventing CI/CD pipeline execution
+  - Fixed `items-after-test-module` error in `tests/codex_functionality_tests.rs` by moving non-test functions before test module
+  - Fixed `items-after-test-module` error in `tests/auth_behavior_tests.rs` by moving non-test functions before test module
+  - Removed empty line after doc comment to satisfy `empty-line-after-doc-comments` rule
+  - All test files now comply with Rust code organization best practices
+
+### Enhanced
+
+- **Documentation Consolidation**: Completed unification of AI assistant guidelines
+  - Created comprehensive `AGENTS.md` as single source of truth for all AI coding assistants
+  - Streamlined `CLAUDE.md` and `.github/copilot-instructions.md` to reference unified guidelines
+  - Eliminated redundant documentation while maintaining consistency across AI assistant workflows
+
+- **Community Links**: Updated Discord server invitation links
+  - Changed from expired `discord.gg/zNuyC5uG` to active `discord.gg/WteQm6MTZW`
+  - Updated links across 6 files: PR template, README files, CI/CD scripts, CHANGELOG, and documentation
+
+### Technical
+
+- **Code Quality**: All clippy warnings resolved with strict `-D warnings` compliance
+- **Test Organization**: Proper Rust file structure ensures reliable compilation and testing
+- **CI/CD Pipeline**: Full pipeline now executes successfully with zero warnings
+
 ## [0.0.61] - 2025-08-21
 
 ### Fixed
 
 - **Homebrew Binary Packaging**: Resolved critical issue where release archives contained debug directories instead of executable binaries
-  - Fixed GitHub Actions workflow to exclude debug directories from uploads (contribution by @aviv1)
+  - Fixed GitHub Actions workflow to exclude debug directories from uploads (contribution by @avivl)
   - Improved archive creation logic to target executable binaries only with `-type f -executable` filter
   - Changed artifact pattern from `terminal-jarvis*` to exact `terminal-jarvis` to prevent debug file inclusion
   - Added local Homebrew Formula for testing and validation
@@ -19,7 +46,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Technical
 
 - **Archive Creation Enhancement**: Enhanced multi-platform build system to ensure only executable binaries are packaged in release archives
-- **Contributor Recognition**: @aviv1's fix resolves deployment pipeline issue affecting Homebrew distribution
+- **Contributor Recognition**: @avivl's fix resolves deployment pipeline issue affecting Homebrew distribution
 
 ## [0.0.60] - 2025-08-19
 
@@ -266,7 +293,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - **Comprehensive Contribution System**: Complete contributor onboarding and governance framework
 
-  - **Discord-First Workflow**: Mandatory community discussion before PR submission via [Discord](https://discord.gg/zNuyC5uG)
+  - **Discord-First Workflow**: Mandatory community discussion before PR submission via [Discord](https://discord.gg/WteQm6MTZW)
   - **Advanced PR Template**: 8 PR types (docs, feature, bugfix, security, UI, logic, maintenance, testing)
   - **Complete CONTRIBUTIONS.md**: Full contributor guide with coding standards, testing requirements, and realistic expectations
   - **Quality Gate Enforcement**: TDD requirements, code formatting, and comprehensive testing protocols

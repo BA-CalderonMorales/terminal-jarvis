@@ -8,7 +8,7 @@ This project is a unified command center for AI coding tools, and we welcome con
 
 **BEFORE opening any Pull Request**, please join our community Discord:
 
-**[Join Terminal Jarvis Discord](https://discord.gg/zNuyC5uG)**
+**[Join Terminal Jarvis Discord](https://discord.gg/WteQm6MTZW)**
 
 ### Why Discord First?
 
@@ -289,7 +289,7 @@ Contributors are recognized in:
 
 ## **Useful Links**
 
-- **[Discord Community](https://discord.gg/zNuyC5uG)** - Primary communication channel
+- **[Discord Community](https://discord.gg/WteQm6MTZW)** - Primary communication channel
 - **[Architecture Guide](ARCHITECTURE.md)** - Technical deep dive
 - **[Testing Guide](TESTING.md)** - Testing strategies and frameworks
 - **[Installation Guide](INSTALLATION.md)** - Platform-specific setup

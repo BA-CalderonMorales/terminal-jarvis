@@ -1,5 +1,11 @@
 #![allow(dead_code)]
 
+//! HTTP client implementation with retry logic and error handling
+//!
+//! **STATUS: FUTURE FEATURE** - Reserved for remote service communication
+//! This module provides a robust HTTP client that will be used for communicating
+//! with remote Terminal Jarvis services for tool updates, metadata, and discovery.
+
 use crate::api::api_base::ApiBase;
 use anyhow::{anyhow, Result};
 use reqwest::{Client, ClientBuilder, Response};
