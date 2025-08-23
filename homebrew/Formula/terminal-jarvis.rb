@@ -1,6 +1,16 @@
 # Documentation: https://docs.brew.sh/Formula-Cookbook
 #                https://rubydoc.brew.sh/Formula
 # Based on Federico Terzi's approach: https://federicoterzi.com/blog/how-to-publish-your-rust-project-on-homebrew/
+#
+# AUTOMATED RELEASE PROCESS:
+# This file is automatically updated by the CD pipeline when you push a tag:
+# 1. Push a git tag: git tag v0.0.X && git push origin v0.0.X
+# 2. GitHub Actions (cd-multiplatform.yml) triggers on tag push
+# 3. Pipeline builds binaries, creates GitHub release with assets
+# 4. update-homebrew-tap job automatically updates BA-CalderonMorales/homebrew-terminal-jarvis
+# 5. Real Formula gets updated with correct version, URLs, and SHA256 checksums
+#
+# This local file is just a staging template - the live Formula is in the homebrew-terminal-jarvis repo
 
 class TerminalJarvis < Formula
   desc "A unified command center for AI coding tools"
