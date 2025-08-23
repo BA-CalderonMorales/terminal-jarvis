@@ -249,11 +249,58 @@ jobs:
           # Download release assets to get checksums
           gh release download "$VERSION" --pattern "*.tar.gz" --dir /tmp/
           
-          # Calculate checksums for all architecture-specific archives
-          MAC_X64_SHA256=$(sha256sum /tmp/terminal-jarvis-macos-x86_64.tar.gz | cut -d' ' -f1)
-          MAC_ARM64_SHA256=$(sha256sum /tmp/terminal-jarvis-macos-aarch64.tar.gz | cut -d' ' -f1)
-          LINUX_X64_SHA256=$(sha256sum /tmp/terminal-jarvis-linux-x86_64.tar.gz | cut -d' ' -f1)
+          # List downloaded files for debugging
+          echo "Downloaded files:"
+          ls -la /tmp/*.tar.gz
+          
+          # Calculate checksums for available archives
+          # Try architecture-specific files first, fall back to universal files
+          if [ -f "/tmp/terminal-jarvis-macos-x86_64.tar.gz" ]; then
+            MAC_X64_SHA256=$(sha256sum /tmp/terminal-jarvis-macos-x86_64.tar.gz | cut -d' ' -f1)
+          else
+            # Fall back to universal mac archive
+            MAC_X64_SHA256=$(sha256sum /tmp/terminal-jarvis-mac.tar.gz | cut -d' ' -f1)
+          fi
+          
+          if [ -f "/tmp/terminal-jarvis-macos-aarch64.tar.gz" ]; then
+            MAC_ARM64_SHA256=$(sha256sum /tmp/terminal-jarvis-macos-aarch64.tar.gz | cut -d' ' -f1)
+          else
+            # Fall back to universal mac archive
+            MAC_ARM64_SHA256=$(sha256sum /tmp/terminal-jarvis-mac.tar.gz | cut -d' ' -f1)
+          fi
+          
+          if [ -f "/tmp/terminal-jarvis-linux-x86_64.tar.gz" ]; then
+            LINUX_X64_SHA256=$(sha256sum /tmp/terminal-jarvis-linux-x86_64.tar.gz | cut -d' ' -f1)
+          else
+            # Fall back to universal linux archive
+            LINUX_X64_SHA256=$(sha256sum /tmp/terminal-jarvis-linux.tar.gz | cut -d' ' -f1)
+          fi
+          
           LINUX_FALLBACK_SHA256=$(sha256sum /tmp/terminal-jarvis-linux.tar.gz | cut -d' ' -f1)
+          
+          # Determine which archive URLs to use based on what's available
+          if [ -f "/tmp/terminal-jarvis-macos-x86_64.tar.gz" ]; then
+            MAC_X64_URL="https://github.com/BA-CalderonMorales/terminal-jarvis/releases/download/${VERSION}/terminal-jarvis-macos-x86_64.tar.gz"
+          else
+            MAC_X64_URL="https://github.com/BA-CalderonMorales/terminal-jarvis/releases/download/${VERSION}/terminal-jarvis-mac.tar.gz"
+          fi
+          
+          if [ -f "/tmp/terminal-jarvis-macos-aarch64.tar.gz" ]; then
+            MAC_ARM64_URL="https://github.com/BA-CalderonMorales/terminal-jarvis/releases/download/${VERSION}/terminal-jarvis-macos-aarch64.tar.gz"
+          else
+            MAC_ARM64_URL="https://github.com/BA-CalderonMorales/terminal-jarvis/releases/download/${VERSION}/terminal-jarvis-mac.tar.gz"
+          fi
+          
+          if [ -f "/tmp/terminal-jarvis-linux-x86_64.tar.gz" ]; then
+            LINUX_X64_URL="https://github.com/BA-CalderonMorales/terminal-jarvis/releases/download/${VERSION}/terminal-jarvis-linux-x86_64.tar.gz"
+          else
+            LINUX_X64_URL="https://github.com/BA-CalderonMorales/terminal-jarvis/releases/download/${VERSION}/terminal-jarvis-linux.tar.gz"
+          fi
+          
+          echo "Archive URLs:"
+          echo "MAC_X64_URL: $MAC_X64_URL"
+          echo "MAC_ARM64_URL: $MAC_ARM64_URL" 
+          echo "LINUX_X64_URL: $LINUX_X64_URL"
           
           # Generate robust multi-architecture Formula
           cat > ../tap/Formula/terminal-jarvis.rb << EOL
@@ -279,17 +326,17 @@ jobs:
           
             on_macos do
               if Hardware::CPU.intel?
-                url "https://github.com/BA-CalderonMorales/terminal-jarvis/releases/download/${VERSION}/terminal-jarvis-macos-x86_64.tar.gz"
+                url "${MAC_X64_URL}"
                 sha256 "${MAC_X64_SHA256}"
               elsif Hardware::CPU.arm?
-                url "https://github.com/BA-CalderonMorales/terminal-jarvis/releases/download/${VERSION}/terminal-jarvis-macos-aarch64.tar.gz"
+                url "${MAC_ARM64_URL}"
                 sha256 "${MAC_ARM64_SHA256}"
               end
             end
           
             on_linux do
               if Hardware::CPU.intel?
-                url "https://github.com/BA-CalderonMorales/terminal-jarvis/releases/download/${VERSION}/terminal-jarvis-linux-x86_64.tar.gz"
+                url "${LINUX_X64_URL}"
                 sha256 "${LINUX_X64_SHA256}"
               else
                 # Fallback for other Linux architectures
@@ -307,6 +354,71 @@ jobs:
             end
           end
           EOL
+
+      - name: Update local Formula file
+        run: |
+          cd main
+          VERSION="${{ needs.build-multiplatform.outputs.version }}"
+          VERSION_NUM=${VERSION#v}
+          
+          # Copy the same Formula to local repository for synchronization
+          # Use simplified URLs for local Formula (compatibility with existing archives)
+          MAC_SHA256=$(sha256sum /tmp/terminal-jarvis-mac.tar.gz | cut -d' ' -f1)
+          LINUX_SHA256=$(sha256sum /tmp/terminal-jarvis-linux.tar.gz | cut -d' ' -f1)
+          
+          cat > homebrew/Formula/terminal-jarvis.rb << EOL
+          # Documentation: https://docs.brew.sh/Formula-Cookbook
+          #                https://rubydoc.brew.sh/Formula
+          # Based on Federico Terzi's approach: https://federicoterzi.com/blog/how-to-publish-your-rust-project-on-homebrew/
+          #
+          # AUTOMATED RELEASE PROCESS:
+          # This file is automatically updated by the CD pipeline when you push a tag:
+          # 1. Push a git tag: git tag v0.0.X && git push origin v0.0.X
+          # 2. GitHub Actions (cd-multiplatform.yml) triggers on tag push
+          # 3. Pipeline builds binaries, creates GitHub release with assets
+          # 4. update-homebrew-tap job automatically updates BA-CalderonMorales/homebrew-terminal-jarvis
+          # 5. Real Formula gets updated with correct version, URLs, and SHA256 checksums
+          #
+          # This local file is just a staging template - the live Formula is in the homebrew-terminal-jarvis repo
+          
+          class TerminalJarvis < Formula
+            desc "A unified command center for AI coding tools"
+            homepage "https://github.com/BA-CalderonMorales/terminal-jarvis"
+            version "${VERSION_NUM}"
+            license "MIT"
+          
+            on_macos do
+              url "https://github.com/BA-CalderonMorales/terminal-jarvis/releases/download/${VERSION}/terminal-jarvis-mac.tar.gz"
+              sha256 "${MAC_SHA256}"
+            end
+          
+            on_linux do
+              url "https://github.com/BA-CalderonMorales/terminal-jarvis/releases/download/${VERSION}/terminal-jarvis-linux.tar.gz"
+              sha256 "${LINUX_SHA256}"
+            end
+          
+            def install
+              bin.install "terminal-jarvis"
+            end
+          
+            test do
+              system "#{bin}/terminal-jarvis", "--version"
+            end
+          end
+          EOL
+
+      - name: Commit local Formula update
+        run: |
+          cd main
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add homebrew/Formula/terminal-jarvis.rb
+          if git diff --staged --quiet; then
+            echo "No changes to local Formula"
+          else
+            git commit -m "feat: update local Homebrew Formula to ${{ needs.build-multiplatform.outputs.version }}"
+            git push
+          fi
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
