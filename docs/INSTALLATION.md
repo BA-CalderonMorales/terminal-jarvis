@@ -63,10 +63,11 @@ terminal-jarvis --version
 
 ### macOS Prerequisites
 
-**Important**: macOS users must install Rust before using Terminal Jarvis.
+**Note**: The NPM package includes a precompiled macOS binary.
+Install Rust only if you plan to build from source or use the Cargo/Homebrew workflows.
 
 ```bash
-# 1. Install Rust via rustup
+# 1. (Optional) Install Rust via rustup
 curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
 
 # 2. Reload your shell environment
