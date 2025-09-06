@@ -2,7 +2,7 @@
 
 # Terminal Jarvis
 
-<img src="screenshots/promo_image_for_readme.png" alt="Terminal Jarvis Interface" width="100%">
+<img src="screenshots_and_demo/promo_image_for_readme.png" alt="Terminal Jarvis Interface" width="100%">
 
 A unified command center for AI coding tools. Manage and run claude-code, gemini-cli, qwen-code, opencode, llxprt, codex, and crush from one beautiful terminal interface.
 
