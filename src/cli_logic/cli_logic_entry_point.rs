@@ -1,13 +1,14 @@
 // CLI Logic Entry Point
 // This module coordinates all CLI business logic operations
 
-use crate::cli_logic::cli_logic_utilities::{apply_theme_to_multiselect, get_themed_render_config};
+use crate::cli_logic::cli_logic_infinite_menu::infinite_hybrid_menu_select;
+use crate::cli_logic::cli_logic_utilities::apply_theme_to_multiselect;
 use crate::installation_arguments::InstallationManager;
 use crate::progress_utils::ProgressContext;
 use crate::theme::theme_global_config;
 use crate::tools::ToolManager;
 use anyhow::Result;
-use inquire::{Confirm, MultiSelect, Select, Text};
+use dialoguer::{Confirm, Input};
 
 // Re-export all the handler functions
 pub use crate::cli_logic::cli_logic_config_management::*;
@@ -23,7 +24,6 @@ pub async fn handle_ai_tools_menu() -> Result<()> {
     loop {
         // Get fresh theme on each iteration to support theme switching
         let theme = theme_global_config::current_theme();
-
         print!("\x1b[2J\x1b[H"); // Clear screen
 
         println!("{}\n", theme.primary("AI CLI Tools"));
@@ -33,40 +33,45 @@ pub async fn handle_ai_tools_menu() -> Result<()> {
         tokio::time::sleep(tokio::time::Duration::from_millis(300)).await;
 
         let tools = ToolManager::get_available_tools();
-
         loading_progress.finish_success("AI tools status loaded");
 
-        // Build clean tool list
-        let mut options = Vec::new();
-        let mut tool_mapping = Vec::new();
-
-        for (tool_name, _tool_info) in tools.iter() {
-            options.push(tool_name.to_string());
-            tool_mapping.push(Some(*tool_name));
-        }
+        // Create clean tool options with status indicators
+        let mut tool_options: Vec<String> = tools
+            .iter()
+            .map(|(name, info)| {
+                let status = if info.is_installed {
+                    "[INSTALLED]"
+                } else {
+                    "[AVAILABLE]"
+                };
+                format!("{} {}", name, status)
+            })
+            .collect();
 
         // Add back option
-        options.push("Back to Main Menu".to_string());
-        tool_mapping.push(None);
+        tool_options.push("Back to Main Menu".to_string());
 
-        let selection = match Select::new("Select an AI tool to launch:", options.clone())
-            .with_render_config(get_themed_render_config())
-            .with_page_size(15)
-            .prompt()
-        {
-            Ok(selection) => selection,
-            Err(_) => {
-                // User interrupted (Ctrl+C) - return to main menu
-                return Ok(());
+        // Use infinite hybrid menu for clean experience
+        match infinite_hybrid_menu_select("Select a tool:", tool_options).await {
+            Ok(selection) => {
+                if selection.contains("Back to Main Menu") {
+                    return Ok(());
+                } else {
+                    // Extract tool name from "tool_name [STATUS]" format
+                    let tool_name = if let Some(space_pos) = selection.find(' ') {
+                        &selection[..space_pos]
+                    } else {
+                        &selection
+                    };
+
+                    if tools.contains_key(tool_name) {
+                        handle_tool_launch(tool_name).await?;
+                    }
+                }
             }
-        };
-
-        // Handle selection
-        if selection.contains("Back to Main Menu") {
-            return Ok(());
-        } else if let Some(index) = options.iter().position(|opt| opt == &selection) {
-            if let Some(Some(tool_name)) = tool_mapping.get(index) {
-                handle_tool_launch(tool_name).await?;
+            Err(_) => {
+                // User interrupted - return to main menu
+                return Ok(());
             }
         }
     }
@@ -79,14 +84,14 @@ async fn handle_tool_launch(tool_name: &str) -> Result<()> {
     let tool_info = tools.get(tool_name).unwrap();
 
     if !tool_info.is_installed {
-        let should_install = match Confirm::new(&format!(
-            "{} '{}' is not installed. Install it now?",
-            theme.accent("Tool"),
-            tool_name
-        ))
-        .with_render_config(get_themed_render_config())
-        .with_default(true)
-        .prompt()
+        let should_install = match Confirm::new()
+            .with_prompt(&format!(
+                "{} '{}' is not installed. Install it now?",
+                theme.accent("Tool"),
+                tool_name
+            ))
+            .default(true)
+            .interact()
         {
             Ok(result) => result,
             Err(_) => {
@@ -108,12 +113,13 @@ async fn handle_tool_launch(tool_name: &str) -> Result<()> {
         }
     }
 
-    let args_input = match Text::new(&format!(
-        "{}Enter arguments for {tool_name} (or press Enter for default):",
-        theme.primary("")
-    ))
-    .with_default("")
-    .prompt()
+    let args_input = match Input::<String>::new()
+        .with_prompt(&format!(
+            "{}Enter arguments for {tool_name} (or press Enter for default):",
+            theme.primary("")
+        ))
+        .default("".to_string())
+        .interact()
     {
         Ok(input) => input,
         Err(_) => {
@@ -197,34 +203,31 @@ async fn handle_post_tool_exit() -> Result<()> {
         "Exit Terminal Jarvis".to_string(),
     ];
 
-    let exit_choice = match Select::new("What would you like to do next?", exit_options)
-        .with_render_config(get_themed_render_config())
-        .with_page_size(5)
-        .prompt()
+    match infinite_hybrid_menu_select("What would you like to do next?", exit_options.clone()).await
     {
-        Ok(choice) => choice,
+        Ok(selected_option) => {
+            match selected_option.as_str() {
+                s if s.contains("Back to Main Menu") => {
+                    // Return to main menu - break out of AI tools submenu
+                    Ok(())
+                }
+                s if s.contains("Switch to Another AI Tool") => {
+                    // Stay in AI tools menu for context switching - this will continue the loop in handle_ai_tools_menu
+                    Ok(())
+                }
+                s if s.contains("Exit Terminal Jarvis") => {
+                    // Exit completely - break out of everything
+                    println!("{}", theme.accent("Goodbye!"));
+                    std::process::exit(0);
+                }
+                _ => {
+                    // Default to returning to main menu
+                    Ok(())
+                }
+            }
+        }
         Err(_) => {
             // User interrupted - return to main menu by default
-            return Ok(());
-        }
-    };
-
-    match exit_choice.as_str() {
-        s if s.contains("Back to Main Menu") => {
-            // Return to main menu - break out of AI tools submenu
-            Ok(())
-        }
-        s if s.contains("Switch to Another AI Tool") => {
-            // Stay in AI tools menu for context switching - this will continue the loop in handle_ai_tools_menu
-            Ok(())
-        }
-        s if s.contains("Exit Terminal Jarvis") => {
-            // Exit completely - break out of everything
-            println!("{}", theme.accent("Goodbye!"));
-            std::process::exit(0);
-        }
-        _ => {
-            // Default to returning to main menu
             Ok(())
         }
     }
@@ -239,6 +242,18 @@ pub async fn handle_important_links() -> Result<()> {
 
         println!("{}\n", theme.accent("Important Links & Resources"));
 
+        println!(
+            "{}",
+            theme.secondary("Available resources (use arrow keys to navigate):")
+        );
+        println!("  GitHub Repository - Source code and contributions");
+        println!("  NPM Package - Node.js package installation");
+        println!("  CHANGELOG.md - Version history and release notes");
+        println!("  Cargo Package - Rust crate information");
+        println!("  Documentation - Architecture and usage guides");
+        println!("  Homebrew Formula - macOS/Linux package management");
+        println!();
+
         let options = vec![
             "GitHub Repository".to_string(),
             "NPM Package".to_string(),
@@ -249,26 +264,22 @@ pub async fn handle_important_links() -> Result<()> {
             "Back to Main Menu".to_string(),
         ];
 
-        let selection = match Select::new("Choose a resource to view:", options)
-            .with_render_config(get_themed_render_config())
-            .with_page_size(10)
-            .prompt()
-        {
-            Ok(selection) => selection,
+        match infinite_hybrid_menu_select("Choose a resource to view:", options.clone()).await {
+            Ok(selection) => {
+                display_link_information(&selection, &theme);
+
+                if selection.contains("Back to Main Menu") {
+                    return Ok(());
+                }
+
+                println!("\n{}", theme.accent("Press Enter to continue..."));
+                let _ = std::io::stdin().read_line(&mut String::new());
+            }
             Err(_) => {
                 // User interrupted - return to main menu
                 return Ok(());
             }
-        };
-
-        display_link_information(&selection, &theme);
-
-        if selection.contains("Back to Main Menu") {
-            return Ok(());
         }
-
-        println!("\n{}", theme.accent("Press Enter to continue..."));
-        let _ = std::io::stdin().read_line(&mut String::new());
     }
 }
 
@@ -330,7 +341,6 @@ fn display_link_information(selection: &str, theme: &crate::theme::Theme) {
 pub async fn handle_manage_tools_menu() -> Result<()> {
     loop {
         let theme = theme_global_config::current_theme();
-
         print!("\x1b[2J\x1b[H"); // Clear screen
 
         println!("{}\n", theme.accent("Settings & Tools"));
@@ -344,38 +354,34 @@ pub async fn handle_manage_tools_menu() -> Result<()> {
             "Back to Main Menu".to_string(),
         ];
 
-        let selection = match Select::new("Choose an option:", options)
-            .with_render_config(get_themed_render_config())
-            .with_page_size(10)
-            .prompt()
-        {
-            Ok(selection) => selection,
+        match infinite_hybrid_menu_select("Choose an option:", options).await {
+            Ok(selection) => {
+                match selection.as_str() {
+                    s if s.contains("Install Tools") => {
+                        handle_install_tools_menu().await?;
+                    }
+                    s if s.contains("Update Tools") => {
+                        handle_update_tools_menu().await?;
+                    }
+                    s if s.contains("List All Tools") => {
+                        handle_list_tools().await?;
+                        println!("\n{}", theme.accent("Press Enter to continue..."));
+                        let _ = std::io::stdin().read_line(&mut String::new());
+                    }
+                    s if s.contains("Tool Information") => {
+                        handle_tool_info_menu().await?;
+                    }
+                    s if s.contains("Switch Theme") => {
+                        handle_theme_switch_menu().await?;
+                    }
+                    _ => {
+                        // Back to main menu
+                        return Ok(());
+                    }
+                }
+            }
             Err(_) => {
                 // User interrupted - return to main menu
-                return Ok(());
-            }
-        };
-
-        match selection.as_str() {
-            s if s.contains("Install Tools") => {
-                handle_install_tools_menu().await?;
-            }
-            s if s.contains("Update Tools") => {
-                handle_update_tools_menu().await?;
-            }
-            s if s.contains("List All Tools") => {
-                handle_list_tools().await?;
-                println!("\n{}", theme.accent("Press Enter to continue..."));
-                let _ = std::io::stdin().read_line(&mut String::new());
-            }
-            s if s.contains("Tool Information") => {
-                handle_tool_info_menu().await?;
-            }
-            s if s.contains("Switch Theme") => {
-                handle_theme_switch_menu().await?;
-            }
-            _ => {
-                // Back to main menu
                 return Ok(());
             }
         }
@@ -388,7 +394,7 @@ async fn handle_theme_switch_menu() -> Result<()> {
 
     print!("\x1b[2J\x1b[H"); // Clear screen
 
-    println!("{}", current_theme.primary("Theme Selection"));
+    println!("{}", current_theme.accent("Theme Selection"));
     println!(
         "{}",
         current_theme.secondary(&format!("Current theme: {}", current_theme.name))
@@ -399,37 +405,44 @@ async fn handle_theme_switch_menu() -> Result<()> {
         "T.JARVIS".to_string(),
         "Classic".to_string(),
         "Matrix".to_string(),
+        "Back".to_string(),
     ];
 
-    let selected_theme = match Select::new("Choose a theme:", theme_options)
-        .with_render_config(get_themed_render_config())
-        .prompt()
-    {
-        Ok(theme) => theme,
+    match infinite_hybrid_menu_select("Choose a theme:", theme_options).await {
+        Ok(selected_theme) => {
+            if selected_theme.contains("Back") {
+                return Ok(());
+            }
+
+            // Apply the selected theme
+            let theme_type = match selected_theme.as_str() {
+                "T.JARVIS" => crate::theme::ThemeType::TJarvis,
+                "Classic" => crate::theme::ThemeType::Classic,
+                "Matrix" => crate::theme::ThemeType::Matrix,
+                _ => crate::theme::ThemeType::TJarvis,
+            };
+
+            theme_global_config::set_theme(theme_type);
+            let new_theme = theme_global_config::current_theme();
+            println!(
+                "
+{}",
+                new_theme.primary(&format!("Theme changed to: {}", selected_theme))
+            );
+            println!("The new theme will be applied immediately.");
+
+            println!(
+                "
+{}",
+                current_theme.accent("Press Enter to continue...")
+            );
+            let _ = std::io::stdin().read_line(&mut String::new());
+        }
         Err(_) => {
             // User interrupted - return to previous menu
             return Ok(());
         }
-    };
-
-    // Apply the selected theme
-    let theme_type = match selected_theme.as_str() {
-        "T.JARVIS" => crate::theme::ThemeType::TJarvis,
-        "Classic" => crate::theme::ThemeType::Classic,
-        "Matrix" => crate::theme::ThemeType::Matrix,
-        _ => crate::theme::ThemeType::TJarvis,
-    };
-
-    theme_global_config::set_theme(theme_type);
-    let new_theme = theme_global_config::current_theme();
-    println!(
-        "\n{}",
-        new_theme.primary(&format!("Theme changed to: {}", selected_theme))
-    );
-    println!("The new theme will be applied immediately.");
-
-    println!("\n{}", current_theme.accent("Press Enter to continue..."));
-    let _ = std::io::stdin().read_line(&mut String::new());
+    }
 
     Ok(())
 }
@@ -473,23 +486,22 @@ async fn handle_install_tools_menu() -> Result<()> {
         uninstalled_tools.len()
     ));
 
-    let tools_to_install = match apply_theme_to_multiselect(MultiSelect::new(
-        "Select tools to install:",
-        uninstalled_tools,
-    ))
-    .prompt()
-    {
-        Ok(tools) => tools,
-        Err(_) => {
-            // User interrupted - return to previous menu
-            return Ok(());
-        }
-    };
+    let tool_indices =
+        match apply_theme_to_multiselect("Select tools to install:", uninstalled_tools.clone())
+            .interact()
+        {
+            Ok(indices) => indices,
+            Err(_) => {
+                // User interrupted - return to previous menu
+                return Ok(());
+            }
+        };
 
     println!();
-    for tool in tools_to_install {
-        if let Err(e) = handle_install_tool(tool).await {
-            ProgressUtils::error_message(&format!("Failed to install {tool}: {e}"));
+    for &index in &tool_indices {
+        let tool_name = &uninstalled_tools[index];
+        if let Err(e) = handle_install_tool(tool_name).await {
+            ProgressUtils::error_message(&format!("Failed to install {tool_name}: {e}"));
         }
     }
 
@@ -501,6 +513,23 @@ async fn handle_install_tools_menu() -> Result<()> {
 async fn handle_update_tools_menu() -> Result<()> {
     // Implementation will be moved to update operations module - simplified for now
     use crate::progress_utils::ProgressUtils;
+
+    // Check NPM availability first
+    let npm_check = ProgressContext::new("Checking NPM availability");
+    tokio::time::sleep(tokio::time::Duration::from_millis(200)).await;
+
+    if !InstallationManager::check_npm_available() {
+        npm_check.finish_error("Node.js ecosystem unavailable");
+        ProgressUtils::error_message(
+            "Node.js runtime required for updates. Install from: https://nodejs.org/",
+        );
+        println!("  Download from: https://nodejs.org/");
+        println!("Press Enter to continue...");
+        std::io::stdin().read_line(&mut String::new())?;
+        return Ok(());
+    }
+
+    npm_check.finish_success("NPM is available");
 
     let installed_tools: Vec<String> = ToolManager::get_installed_tools()
         .into_iter()
@@ -518,49 +547,51 @@ async fn handle_update_tools_menu() -> Result<()> {
     let mut options = installed_tools.clone();
     options.push("All Tools".to_string());
 
-    let selection = match Select::new("Select tools to update:", options)
-        .with_render_config(get_themed_render_config())
-        .prompt()
-    {
-        Ok(selection) => selection,
+    match infinite_hybrid_menu_select("Select tools to update:", options.clone()).await {
+        Ok(selection) => {
+            println!();
+            if selection == "All Tools" {
+                handle_update_packages(None).await?;
+            } else {
+                handle_update_packages(Some(&selection)).await?;
+            }
+
+            println!("Press Enter to continue...");
+            std::io::stdin().read_line(&mut String::new())?;
+        }
         Err(_) => {
             // User interrupted - return to previous menu
             return Ok(());
         }
-    };
-
-    println!();
-    if selection == "All Tools" {
-        handle_update_packages(None).await?;
-    } else {
-        handle_update_packages(Some(&selection)).await?;
     }
-
-    println!("Press Enter to continue...");
-    std::io::stdin().read_line(&mut String::new())?;
     Ok(())
 }
 
 async fn handle_tool_info_menu() -> Result<()> {
-    let tool_names: Vec<String> = InstallationManager::get_tool_names()
+    let mut tool_names: Vec<String> = InstallationManager::get_tool_names()
         .into_iter()
         .map(String::from)
         .collect();
-    let tool = match Select::new("Select a tool for information:", tool_names)
-        .with_render_config(get_themed_render_config())
-        .prompt()
-    {
-        Ok(selection) => selection,
+
+    tool_names.push("Back".to_string());
+
+    match infinite_hybrid_menu_select("Select a tool for information:", tool_names).await {
+        Ok(tool) => {
+            if tool == "Back" {
+                return Ok(());
+            }
+
+            println!();
+            handle_tool_info(&tool).await?;
+
+            println!("\nPress Enter to continue...");
+            std::io::stdin().read_line(&mut String::new())?;
+        }
         Err(_) => {
             // User interrupted - return to previous menu
             return Ok(());
         }
-    };
+    }
 
-    println!();
-    handle_tool_info(&tool).await?;
-
-    println!("\nPress Enter to continue...");
-    std::io::stdin().read_line(&mut String::new())?;
     Ok(())
 }

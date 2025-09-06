@@ -163,10 +163,14 @@ Thumbs.db
 .claude
 
 # AI Tools Data/Config
-# Crush AI assistant data
 .crush/
 *.db
 crush.db
+.gemini/
+.junie/
+.kilocode/
+.qwen/
+.roo/
 
 terminal-jarvis-agents/
 

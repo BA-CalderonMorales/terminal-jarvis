@@ -31,9 +31,13 @@ impl PackageOperationsManager {
     /// Install a tool using the configuration from the config file
     #[allow(dead_code)]
     pub async fn install_tool(&self, config: &Config, tool_name: &str) -> Result<()> {
+        // Translate display name to config key
+        let mapping = crate::services::services_tool_configuration::ToolConfigurationManager::get_display_name_to_config_mapping();
+        let config_key = mapping.get(tool_name).unwrap_or(&tool_name);
+
         let tool_config = config
             .tools
-            .get(tool_name)
+            .get(*config_key)
             .ok_or_else(|| anyhow!("Tool '{}' not found in configuration", tool_name))?;
 
         if !tool_config.enabled {
@@ -70,9 +74,13 @@ impl PackageOperationsManager {
 
     /// Update a tool with fallback package name support
     pub async fn update_tool(&self, config: &Config, tool_name: &str) -> Result<()> {
+        // Translate display name to config key
+        let mapping = crate::services::services_tool_configuration::ToolConfigurationManager::get_display_name_to_config_mapping();
+        let config_key = mapping.get(tool_name).unwrap_or(&tool_name);
+
         let tool_config = config
             .tools
-            .get(tool_name)
+            .get(*config_key)
             .ok_or_else(|| anyhow!("Tool '{}' not found in configuration", tool_name))?;
 
         if !tool_config.enabled {
