@@ -1,4 +1,3 @@
-use crate::installation_arguments::InstallationManager;
 use crate::progress_utils::{ProgressContext, ProgressUtils};
 use crate::services::PackageService;
 use anyhow::Result;
@@ -38,7 +37,9 @@ async fn update_single_package(package_service: &PackageService, pkg: &str) -> R
 /// Update all packages with progress tracking and error handling
 async fn update_all_packages(package_service: &PackageService) -> Result<()> {
     let overall_progress = ProgressContext::new("Updating all packages");
-    let tools = InstallationManager::get_tool_names();
+
+    // Only update installed tools, not all available tools
+    let tools = crate::tools::ToolManager::get_installed_tools();
     let mut had_errors = false;
 
     for (index, tool) in tools.iter().enumerate() {

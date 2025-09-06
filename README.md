@@ -6,6 +6,15 @@
 
 A unified command center for AI coding tools. Manage and run claude-code, gemini-cli, qwen-code, opencode, llxprt, codex, and crush from one beautiful terminal interface.
 
+<div align="center">
+
+<video width="100%" controls>
+    <source src="screenshots_and_demo/Terminal Jarvis v0.0.67 Demo.mp4" type="video/mp4">
+    Your browser does not support the video tag. <a href="screenshots_and_demo/Terminal Jarvis v0.0.67 Demo.mp4">Download the demo video</a>
+</video>
+
+</div>
+
 <!-- NPM Package -->
 
 [![NPM Version](https://img.shields.io/npm/v/terminal-jarvis.svg?logo=npm&label=NPM%20Version)](https://www.npmjs.com/package/terminal-jarvis)
