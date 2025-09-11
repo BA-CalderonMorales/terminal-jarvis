@@ -2,16 +2,9 @@
 
 # Terminal Jarvis
 
-<img src="screenshots_and_demo/promo_image_for_readme.png" alt="Terminal Jarvis Interface" width="100%">
+<img src="screenshot_and_demo/promo_image_for_readme.png" alt="Terminal Jarvis Interface" width="100%">
 
 A unified command center for AI coding tools. Manage and run claude-code, gemini-cli, qwen-code, opencode, llxprt, codex, and crush from one beautiful terminal interface.
-
-<div align="center">
-
-<img src="screenshots_and_demo/Terminal Jarvis v0.0.67 Demo.gif" alt="Terminal Jarvis Demo" width="100%">
-
-
-</div>
 
 <!-- NPM Package -->
 
@@ -19,6 +12,8 @@ A unified command center for AI coding tools. Manage and run claude-code, gemini
 [![NPM Downloads](https://img.shields.io/npm/dm/terminal-jarvis.svg?logo=npm&label=NPM%20Downloads)](https://www.npmjs.com/package/terminal-jarvis)
 [![NPM Stable](https://img.shields.io/npm/v/terminal-jarvis/stable.svg?label=NPM%20Stable&color=green&logo=npm)](https://www.npmjs.com/package/terminal-jarvis)
 [![NPM Beta](https://img.shields.io/npm/v/terminal-jarvis/beta.svg?label=NPM%20Beta&color=orange&logo=npm)](https://www.npmjs.com/package/terminal-jarvis)
+
+
 
 <!-- Rust Crate -->
 
@@ -34,6 +29,8 @@ A unified command center for AI coding tools. Manage and run claude-code, gemini
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Mentioned in Awesome Gemini CLI](https://awesome.re/mentioned-badge.svg)](https://github.com/Piebald-AI/awesome-gemini-cli)
 [![Buy Me a Coffee](https://img.shields.io/badge/☕-Buy%20Me%20a%20Coffee-orange.svg)](https://www.buymeacoffee.com/brandoncalderonmorales)
+
+<img src="screenshot_and_demo/Terminal Jarvis v0.0.67 Demo.gif" alt="Terminal Jarvis Demo" width="85%" style="border-radius: 6px;">
 
 </div>
 
