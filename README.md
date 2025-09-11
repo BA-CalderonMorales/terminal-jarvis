@@ -8,10 +8,8 @@ A unified command center for AI coding tools. Manage and run claude-code, gemini
 
 <div align="center">
 
-<video width="100%" controls>
-    <source src="screenshots_and_demo/Terminal Jarvis v0.0.67 Demo.mp4" type="video/mp4">
-    Your browser does not support the video tag. <a href="screenshots_and_demo/Terminal Jarvis v0.0.67 Demo.mp4">Download the demo video</a>
-</video>
+<img src="screenshots_and_demo/Terminal Jarvis v0.0.67 Demo.gif" alt="Terminal Jarvis Demo" width="100%">
+
 
 </div>
 
