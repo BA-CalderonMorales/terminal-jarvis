@@ -1,8 +1,12 @@
 {
   "name": "Terminal Jarvis Development",
-  "image": "mcr.microsoft.com/devcontainers/rust:1-1-jammy",
+  "image": "mcr.microsoft.com/devcontainers/base:alpine-3.20",
   
   "features": {
+    "ghcr.io/devcontainers/features/rust:1": {
+      "version": "latest",
+      "profile": "default"
+    },
     "ghcr.io/devcontainers/features/node:1": {
       "version": "lts",
       "nodeGypDependencies": true
@@ -16,6 +20,14 @@
     "ghcr.io/devcontainers/features/docker-in-docker:2": {
       "version": "latest",
       "enableNonRootDocker": true
+    },
+    "ghcr.io/devcontainers/features/common-utils:2": {
+      "installZsh": true,
+      "installOhMyZsh": true,
+      "upgradePackages": true,
+      "username": "vscode",
+      "uid": "1000",
+      "gid": "1000"
     }
   },
 
@@ -51,21 +63,21 @@
   },
 
   "onCreateCommand": [
-    "bash",
+    "sh",
     "-c", 
-    "echo 'Adding Rust components...' && rustup component add clippy rustfmt rust-analyzer && echo 'Rust environment ready!'"
+    "echo 'Setting up Alpine development environment...' && apk add --no-cache build-base openssl-dev openssl-libs-static pkgconfig nodejs npm && echo 'Alpine development environment ready!'"
   ],
 
   "postCreateCommand": [
-    "bash", 
+    "sh", 
     "-c",
-    "echo 'Building project dependencies...' && cargo check && echo 'Installing NPM dependencies...' && cd npm/terminal-jarvis && npm install && echo 'Terminal Jarvis development environment ready! Try: cargo run -- --help'"
+    "echo 'Building project dependencies...' && source ~/.cargo/env && cargo check --all-targets && echo 'Installing NPM dependencies...' && cd npm/terminal-jarvis && npm install && cd ../.. && echo 'Verifying installation...' && rustc --version && cargo --version && node --version && npm --version && echo '\n🚀 Terminal Jarvis development environment ready!' && echo 'Quick commands:' && echo '  source ~/.cargo/env      # Load Rust environment' && echo '  cargo run -- --help     # Show Terminal Jarvis help' && echo '  cargo run -- list       # List available AI tools' && echo '  cargo test              # Run all tests'"
   ],
 
   "postStartCommand": [
-    "bash",
+    "sh",
     "-c",
-    "echo 'Welcome to Terminal Jarvis development!' && echo 'Quick start commands:' && echo '  cargo check - Check compilation' && echo '  cargo run -- list - List AI tools' && echo '  cargo test - Run tests' && echo '  ./scripts/cicd/local-ci.sh - Run CI checks'"
+    "echo 'source ~/.cargo/env' >> ~/.bashrc && echo 'Welcome to Terminal Jarvis development!' && echo 'Environment: Alpine Linux with Rust toolchain' && echo 'All dependencies installed and configured!' && echo '' && echo 'Quick start commands:' && echo '  cargo run -- --help     # Show Terminal Jarvis help' && echo '  cargo run -- list       # List AI tools' && echo '  cargo test              # Run tests' && echo '  ./scripts/cicd/local-ci.sh # Run CI checks' && echo '' && echo 'Rust environment is automatically loaded!'"
   ],
 
   "remoteUser": "vscode",
@@ -94,7 +106,12 @@
     "RUST_LOG": "debug",
     "CARGO_TERM_COLOR": "always",
     "CARGO_INCREMENTAL": "1",
-    "RUST_BACKTRACE": "1"
+    "RUST_BACKTRACE": "1",
+    "PATH": "/home/vscode/.cargo/bin:${PATH}",
+    "CARGO_HOME": "/home/vscode/.cargo",
+    "RUSTUP_HOME": "/home/vscode/.rustup",
+    "HOME": "/home/vscode",
+    "USER": "vscode"
   },
 
   "shutdownAction": "stopContainer",

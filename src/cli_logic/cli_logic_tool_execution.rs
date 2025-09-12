@@ -107,11 +107,34 @@ pub async fn handle_install_tool(tool: &str) -> Result<()> {
     let mut cmd = AsyncCommand::new(install_cmd.command);
     cmd.args(&install_cmd.args);
 
-    // Suppress output to avoid interfering with progress bar
-    cmd.stdout(std::process::Stdio::null());
-    cmd.stderr(std::process::Stdio::null());
+    // For NPM global installs, use sudo if available to handle permission issues
+    let status = if install_cmd.requires_npm && install_cmd.args.contains(&"-g") {
+        // Check if sudo is available
+        let sudo_available = std::process::Command::new("which")
+            .arg("sudo")
+            .output()
+            .map(|output| output.status.success())
+            .unwrap_or(false);
 
-    let status = cmd.status().await?;
+        if sudo_available {
+            let mut sudo_cmd = AsyncCommand::new("sudo");
+            sudo_cmd.arg(install_cmd.command);
+            sudo_cmd.args(&install_cmd.args);
+            sudo_cmd.stdout(std::process::Stdio::null());
+            sudo_cmd.stderr(std::process::Stdio::null());
+            sudo_cmd.status().await?
+        } else {
+            // Fallback to regular command if sudo isn't available
+            cmd.stdout(std::process::Stdio::null());
+            cmd.stderr(std::process::Stdio::null());
+            cmd.status().await?
+        }
+    } else {
+        // Non-global NPM installs or non-NPM commands
+        cmd.stdout(std::process::Stdio::null());
+        cmd.stderr(std::process::Stdio::null());
+        cmd.status().await?
+    };
 
     if status.success() {
         progress.finish_success(&format!("{tool} installed successfully!"));

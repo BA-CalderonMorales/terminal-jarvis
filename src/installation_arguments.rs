@@ -4,27 +4,12 @@
 //
 // This module provides a centralized system for managing installation commands
 // across all supported AI coding tools, with NPM availability validation.
+// 
+// Configuration is now loaded from ai-tools-registry.toml for better maintainability
+// and future database integration capabilities.
 
+use crate::ai_tools_registry::{AiToolsRegistryManager, InstallCommand};
 use std::collections::HashMap;
-
-/// Installation command metadata for AI coding tools
-///
-/// Contains all information needed to install a specific tool, including
-/// the command to run, arguments, user-facing description, and dependency requirements.
-///
-/// # Fields
-///
-/// * `command` - The primary command to execute (e.g., "npm", "cargo", "pip")
-/// * `args` - Command-line arguments as a vector
-/// * `description` - Human-readable description of the tool
-/// * `requires_npm` - Whether the installation requires NPM to be available
-#[derive(Debug, Clone)]
-pub struct InstallCommand {
-    pub command: &'static str,
-    pub args: Vec<&'static str>,
-    pub description: &'static str,
-    pub requires_npm: bool,
-}
 
 /// Manages installation commands and dependency validation for AI coding tools
 ///
@@ -33,8 +18,8 @@ pub struct InstallCommand {
 /// - Retrieving installation commands for specific tools
 /// - Validating installation prerequisites
 ///
-/// All installation commands are statically defined to ensure consistency
-/// and avoid runtime configuration errors.
+/// All installation commands are loaded from ai-tools-registry.toml to ensure consistency
+/// and enable easy maintenance without code changes.
 pub struct InstallationManager;
 
 impl InstallationManager {
@@ -82,8 +67,15 @@ impl InstallationManager {
     ///     println!("Supported tool: {}", tool);
     /// }
     /// ```
-    pub fn get_tool_names() -> Vec<&'static str> {
-        Self::get_install_commands().keys().copied().collect()
+    pub fn get_tool_names() -> Vec<String> {
+        match AiToolsRegistryManager::new() {
+            Ok(registry) => registry.get_tool_names(),
+            Err(_) => {
+                // Fallback to empty list if registry fails to load
+                eprintln!("Warning: Failed to load AI Tools Registry");
+                Vec::new()
+            }
+        }
     }
 
     /// Retrieves installation command for a specific tool
@@ -107,7 +99,43 @@ impl InstallationManager {
     /// }
     /// ```
     pub fn get_install_command(tool: &str) -> Option<InstallCommand> {
-        Self::get_install_commands().get(tool).cloned()
+        match AiToolsRegistryManager::new() {
+            Ok(registry) => registry.get_install_command(tool),
+            Err(_) => {
+                eprintln!("Warning: Failed to load AI Tools Registry");
+                None
+            }
+        }
+    }
+
+    /// Retrieves update command for a specific tool
+    ///
+    /// # Arguments
+    ///
+    /// * `tool` - The name of the tool (e.g., "claude", "gemini")
+    ///
+    /// # Returns
+    ///
+    /// * `Some(InstallCommand)` - Update command metadata if tool is supported
+    /// * `None` - If the tool name is not recognized
+    ///
+    /// # Example
+    ///
+    /// ```rust,ignore
+    /// if let Some(cmd) = InstallationManager::get_update_command("claude") {
+    ///     println!("Update command: {} {}", cmd.command, cmd.args.join(" "));
+    /// } else {
+    ///     println!("Tool not found");
+    /// }
+    /// ```
+    pub fn get_update_command(tool: &str) -> Option<InstallCommand> {
+        match AiToolsRegistryManager::new() {
+            Ok(registry) => registry.get_update_command(tool),
+            Err(_) => {
+                eprintln!("Warning: Failed to load AI Tools Registry");
+                None
+            }
+        }
     }
 
     /// Returns all available installation commands
@@ -121,82 +149,26 @@ impl InstallationManager {
     ///
     /// # Note
     ///
-    /// This method rebuilds the HashMap on each call. For single-tool lookups,
+    /// This method loads from the TOML registry on each call. For single-tool lookups,
     /// prefer [`get_install_command`](Self::get_install_command).
-    pub fn get_install_commands() -> HashMap<&'static str, InstallCommand> {
-        let mut commands = HashMap::new();
-
-        commands.insert(
-            "claude",
-            InstallCommand {
-                command: "npm",
-                args: vec!["install", "-g", "@anthropic-ai/claude-code"],
-                description: "Anthropic's Claude for code assistance",
-                requires_npm: true,
-            },
-        );
-
-        commands.insert(
-            "gemini",
-            InstallCommand {
-                command: "npm",
-                args: vec!["install", "-g", "@google/gemini-cli"],
-                description: "Google's Gemini CLI tool",
-                requires_npm: true,
-            },
-        );
-
-        commands.insert(
-            "qwen",
-            InstallCommand {
-                command: "npm",
-                args: vec!["install", "-g", "@qwen-code/qwen-code@latest"],
-                description: "Qwen coding assistant",
-                requires_npm: true,
-            },
-        );
-
-        commands.insert(
-            "opencode",
-            InstallCommand {
-                command: "npm",
-                args: vec!["install", "-g", "opencode-ai@latest"],
-                description: "OpenCode AI coding agent built for the terminal",
-                requires_npm: true,
-            },
-        );
-
-        commands.insert(
-            "llxprt",
-            InstallCommand {
-                command: "npm",
-                args: vec!["install", "-g", "@vybestack/llxprt-code"],
-                description:
-                    "LLxprt Code - Multi-provider AI coding assistant with enhanced features",
-                requires_npm: true,
-            },
-        );
-
-        commands.insert(
-            "codex",
-            InstallCommand {
-                command: "npm",
-                args: vec!["install", "-g", "@openai/codex"],
-                description: "OpenAI Codex CLI - AI coding agent that runs locally",
-                requires_npm: true,
-            },
-        );
-
-        commands.insert(
-            "crush",
-            InstallCommand {
-                command: "npm",
-                args: vec!["install", "-g", "@charmland/crush"],
-                description: "Charm's multi-model AI coding assistant with LSP support",
-                requires_npm: true,
-            },
-        );
-
-        commands
+    pub fn get_install_commands() -> HashMap<String, InstallCommand> {
+        match AiToolsRegistryManager::new() {
+            Ok(registry) => {
+                let tool_names = registry.get_tool_names();
+                let mut commands = HashMap::new();
+                
+                for tool in tool_names {
+                    if let Some(cmd) = registry.get_install_command(&tool) {
+                        commands.insert(tool, cmd);
+                    }
+                }
+                
+                commands
+            }
+            Err(_) => {
+                eprintln!("Warning: Failed to load AI Tools Registry");
+                HashMap::new()
+            }
+        }
     }
 }
