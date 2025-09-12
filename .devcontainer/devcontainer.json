@@ -65,7 +65,7 @@
   "onCreateCommand": [
     "sh",
     "-c", 
-    "echo 'Setting up Alpine development environment...' && apk add --no-cache build-base openssl-dev openssl-libs-static pkgconfig nodejs npm github-cli && echo 'Verifying GitHub CLI installation...' && gh --version && echo 'Alpine development environment ready!'"
+    "echo 'Setting up Alpine development environment...' && apk add --no-cache build-base openssl-dev openssl-libs-static pkgconfig nodejs npm github-cli git-lfs && echo 'Verifying installations...' && gh --version && git lfs version && echo 'Configuring Git LFS...' && git lfs install && echo 'Alpine development environment ready!'"
   ],
 
   "postCreateCommand": [
