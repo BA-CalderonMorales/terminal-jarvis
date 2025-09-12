@@ -62,10 +62,20 @@
     }
   },
 
+  "initializeCommand": [
+    "echo", "Preparing Terminal Jarvis development environment..."
+  ],
+
   "onCreateCommand": [
     "sh",
     "-c", 
     "echo 'Setting up Alpine development environment...' && sudo apk update && sudo apk add --no-cache build-base openssl-dev openssl-libs-static pkgconfig nodejs npm github-cli git-lfs && echo 'Fixing permissions for workspace...' && sudo chown -R vscode:vscode /workspaces/terminal-jarvis && sudo chmod -R 755 /workspaces/terminal-jarvis/scripts && sudo chmod +x /workspaces/terminal-jarvis/scripts/*/*.sh && echo 'Verifying installations...' && gh --version && git lfs version && echo 'Configuring Git LFS...' && git lfs install && echo 'Alpine development environment ready!'"
+  ],
+
+  "updateContentCommand": [
+    "sh",
+    "-c",
+    "echo 'Updating Terminal Jarvis environment...' && export HOME=/home/vscode && export CARGO_HOME=/home/vscode/.cargo && export RUSTUP_HOME=/home/vscode/.rustup && export PATH=\"/home/vscode/.cargo/bin:$PATH\" && echo 'Fixing permissions...' && sudo chown -R vscode:vscode /workspaces/terminal-jarvis 2>/dev/null || true && sudo chmod -R 755 /workspaces/terminal-jarvis/scripts 2>/dev/null || true && sudo chmod +x /workspaces/terminal-jarvis/scripts/*/*.sh 2>/dev/null || true && echo 'Environment updated successfully!'"
   ],
 
   "postCreateCommand": [
