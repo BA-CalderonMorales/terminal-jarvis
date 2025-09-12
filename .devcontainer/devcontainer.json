@@ -77,7 +77,7 @@
   "postStartCommand": [
     "sh",
     "-c",
-    "echo 'source ~/.cargo/env' >> ~/.bashrc && echo 'Welcome to Terminal Jarvis development!' && echo 'Environment: Alpine Linux with Rust toolchain' && echo 'All dependencies installed and configured!' && echo '' && echo 'Quick start commands:' && echo '  cargo run -- --help     # Show Terminal Jarvis help' && echo '  cargo run -- list       # List AI tools' && echo '  cargo test              # Run tests' && echo '  ./scripts/cicd/local-ci.sh # Run CI checks' && echo '' && echo 'Rust environment is automatically loaded!'"
+    "echo 'source ~/.cargo/env' >> ~/.bashrc && echo '# Terminal Jarvis Custom Prompt' >> ~/.bashrc && echo 'parse_git_branch() { git branch 2>/dev/null | sed -e \"/^[^*]/d\" -e \"s/* \\(.*\\)/\\1/\"; }' >> ~/.bashrc && echo 'export PS1=\"\\[\\033[1;36m\\]terminal-jarvis\\[\\033[0m\\]:\\[\\033[1;34m\\]\\w\\[\\033[0m\\] \\[\\033[1;32m\\](\\$(parse_git_branch))\\[\\033[0m\\] \\[\\033[1;35m\\]➤\\[\\033[0m\\] \"' >> ~/.bashrc && echo 'Welcome to Terminal Jarvis development!' && echo 'Environment: Alpine Linux with Rust toolchain' && echo 'All dependencies installed and configured!' && echo '' && echo 'Quick start commands:' && echo '  cargo run -- --help     # Show Terminal Jarvis help' && echo '  cargo run -- list       # List AI tools' && echo '  cargo test              # Run tests' && echo '  ./scripts/cicd/local-ci.sh # Run CI checks' && echo '' && echo 'Rust environment is automatically loaded!' && echo 'Custom colorful prompt configured!'"
   ],
 
   "remoteUser": "vscode",
