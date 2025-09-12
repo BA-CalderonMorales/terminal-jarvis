@@ -65,19 +65,19 @@
   "onCreateCommand": [
     "sh",
     "-c", 
-    "echo 'Setting up Alpine development environment...' && apk add --no-cache build-base openssl-dev openssl-libs-static pkgconfig nodejs npm github-cli git-lfs && echo 'Verifying installations...' && gh --version && git lfs version && echo 'Configuring Git LFS...' && git lfs install && echo 'Alpine development environment ready!'"
+    "echo 'Setting up Alpine development environment...' && sudo apk update && sudo apk add --no-cache build-base openssl-dev openssl-libs-static pkgconfig nodejs npm github-cli git-lfs && echo 'Fixing permissions for workspace...' && sudo chown -R vscode:vscode /workspaces/terminal-jarvis && sudo chmod -R 755 /workspaces/terminal-jarvis/scripts && sudo chmod +x /workspaces/terminal-jarvis/scripts/*/*.sh && echo 'Verifying installations...' && gh --version && git lfs version && echo 'Configuring Git LFS...' && git lfs install && echo 'Alpine development environment ready!'"
   ],
 
   "postCreateCommand": [
     "sh", 
     "-c",
-    "echo 'Building project dependencies...' && source ~/.cargo/env && cargo check --all-targets && echo 'Installing NPM dependencies...' && cd npm/terminal-jarvis && npm install && cd ../.. && echo 'Verifying installation...' && rustc --version && cargo --version && node --version && npm --version && echo '\n🚀 Terminal Jarvis development environment ready!' && echo 'Quick commands:' && echo '  source ~/.cargo/env      # Load Rust environment' && echo '  cargo run -- --help     # Show Terminal Jarvis help' && echo '  cargo run -- list       # List available AI tools' && echo '  cargo test              # Run all tests'"
+    "echo 'Building project dependencies...' && export HOME=/home/vscode && export CARGO_HOME=/home/vscode/.cargo && export RUSTUP_HOME=/home/vscode/.rustup && export PATH=\"/home/vscode/.cargo/bin:$PATH\" && source /home/vscode/.cargo/env && echo 'Rust environment loaded:' && rustc --version && cargo --version && echo 'Checking project structure...' && cargo check --all-targets 2>&1 | head -20 && echo 'Installing NPM dependencies...' && cd npm/terminal-jarvis && npm install && cd ../.. && echo 'Verifying installation...' && node --version && npm --version && echo '' && echo 'Terminal Jarvis development environment ready!' && echo 'Quick commands:' && echo '  source /home/vscode/.cargo/env  # Load Rust environment' && echo '  cargo run -- --help           # Show Terminal Jarvis help' && echo '  cargo run -- list             # List available AI tools' && echo '  cargo test                    # Run all tests'"
   ],
 
   "postStartCommand": [
     "sh",
     "-c",
-    "echo 'source ~/.cargo/env' >> ~/.bashrc && echo '# Terminal Jarvis Custom Prompt' >> ~/.bashrc && echo 'parse_git_branch() { git branch 2>/dev/null | sed -e \"/^[^*]/d\" -e \"s/* \\(.*\\)/\\1/\"; }' >> ~/.bashrc && echo 'export PS1=\"\\[\\033[1;36m\\]terminal-jarvis\\[\\033[0m\\]:\\[\\033[1;34m\\]\\w\\[\\033[0m\\] \\[\\033[1;32m\\](\\$(parse_git_branch))\\[\\033[0m\\] \\[\\033[1;35m\\]➤\\[\\033[0m\\] \"' >> ~/.bashrc && echo 'Welcome to Terminal Jarvis development!' && echo 'Environment: Alpine Linux with Rust toolchain' && echo 'All dependencies installed and configured!' && echo '' && echo 'Quick start commands:' && echo '  cargo run -- --help     # Show Terminal Jarvis help' && echo '  cargo run -- list       # List AI tools' && echo '  cargo test              # Run tests' && echo '  ./scripts/cicd/local-ci.sh # Run CI checks' && echo '' && echo 'Rust environment is automatically loaded!' && echo 'Custom colorful prompt configured!'"
+    "echo 'Setting up terminal environment...' && export HOME=/home/vscode && echo 'source /home/vscode/.cargo/env' >> /home/vscode/.bashrc && echo 'export HOME=/home/vscode' >> /home/vscode/.bashrc && echo 'export CARGO_HOME=/home/vscode/.cargo' >> /home/vscode/.bashrc && echo 'export RUSTUP_HOME=/home/vscode/.rustup' >> /home/vscode/.bashrc && echo '# Terminal Jarvis Custom Prompt' >> /home/vscode/.bashrc && echo 'parse_git_branch() { git branch 2>/dev/null | sed -e \"/^[^*]/d\" -e \"s/* \\(.*\\)/\\1/\"; }' >> /home/vscode/.bashrc && echo 'export PS1=\"\\[\\033[1;36m\\]terminal-jarvis\\[\\033[0m\\]:\\[\\033[1;34m\\]\\w\\[\\033[0m\\] \\[\\033[1;32m\\](\\$(parse_git_branch))\\[\\033[0m\\] \\[\\033[1;35m\\]➤\\[\\033[0m\\] \"' >> /home/vscode/.bashrc && echo 'Ensuring proper permissions...' && chmod -R 755 /workspaces/terminal-jarvis/scripts 2>/dev/null || true && chmod +x /workspaces/terminal-jarvis/scripts/*/*.sh 2>/dev/null || true && echo 'Welcome to Terminal Jarvis development!' && echo 'Environment: Alpine Linux with Rust toolchain' && echo 'All dependencies installed and configured!' && echo '' && echo 'Quick start commands:' && echo '  cargo run -- --help     # Show Terminal Jarvis help' && echo '  cargo run -- list       # List AI tools' && echo '  cargo test              # Run tests' && echo '  ./scripts/cicd/local-ci.sh # Run CI checks' && echo '' && echo 'Rust environment is automatically loaded!' && echo 'Custom colorful prompt configured!'"
   ],
 
   "remoteUser": "vscode",
@@ -107,14 +107,16 @@
     "CARGO_TERM_COLOR": "always",
     "CARGO_INCREMENTAL": "1",
     "RUST_BACKTRACE": "1",
-    "PATH": "/home/vscode/.cargo/bin:${PATH}",
-    "CARGO_HOME": "/home/vscode/.cargo",
     "RUSTUP_HOME": "/home/vscode/.rustup",
+    "CARGO_HOME": "/home/vscode/.cargo",
+    "PATH": "/home/vscode/.cargo/bin:${PATH}",
     "HOME": "/home/vscode",
-    "USER": "vscode"
+    "USER": "vscode",
+    "WORKSPACE_OWNER": "vscode"
   },
 
   "shutdownAction": "stopContainer",
   
   "waitFor": "postCreateCommand"
+
 }
