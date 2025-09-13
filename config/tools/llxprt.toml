@@ -1,0 +1,41 @@
+# =============================================================================
+# LLXPRT - Multi-provider AI coding assistant
+# =============================================================================
+# Single Responsibility: Manages LLXPRT tool configuration and settings
+
+[tool]
+display_name = "LLXPRT"
+config_key = "llxprt-code"
+description = "Multi-provider AI coding assistant"
+homepage = "https://llxprt.dev/"
+documentation = "https://docs.llxprt.dev/"
+cli_command = "llxprt"
+requires_npm = true
+requires_sudo = true
+status = "testing"
+
+[tool.install]
+command = "npm"
+args = ["install", "-g", "@vybestack/llxprt-code"]
+verify_command = "llxprt --version"
+post_install_message = "LLXPRT installed successfully! Set LLXPRT_API_KEY to get started."
+
+[tool.update]
+command = "npm"
+args = ["update", "-g", "@vybestack/llxprt-code"]
+verify_command = "llxprt --version"
+
+[tool.auth]
+env_vars = ["LLXPRT_API_KEY", "OPENAI_API_KEY"]
+setup_url = "https://platform.openai.com/api-keys"
+browser_auth = false
+auth_instructions = "Visit OpenAI Platform to generate your API key"
+
+[tool.features]
+supports_files = true
+supports_streaming = true
+supports_conversation = true
+max_context_tokens = 128000
+supported_languages = ["python", "javascript", "rust", "go", "java", "cpp", "typescript", "php", "ruby"]
+multi_provider = true
+experimental = true

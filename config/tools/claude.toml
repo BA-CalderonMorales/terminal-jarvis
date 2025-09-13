@@ -1,0 +1,40 @@
+# =============================================================================
+# CLAUDE - Anthropic's AI coding assistant
+# =============================================================================
+# Single Responsibility: Manages Claude tool configuration and settings
+# Open/Closed Principle: Self-contained tool definition, extensible without modification
+
+[tool]
+display_name = "Claude"
+config_key = "claude-code"
+description = "Anthropic's Claude for code assistance"
+homepage = "https://claude.ai/"
+documentation = "https://docs.anthropic.com/claude/docs/claude-code"
+cli_command = "claude"
+requires_npm = true
+requires_sudo = true
+status = "stable"
+
+[tool.install]
+command = "npm"
+args = ["install", "-g", "@anthropic-ai/claude-code"]
+verify_command = "claude --version"
+post_install_message = "Claude installed successfully! Set ANTHROPIC_API_KEY to get started."
+
+[tool.update]
+command = "npm"
+args = ["update", "-g", "@anthropic-ai/claude-code"]
+verify_command = "claude --version"
+
+[tool.auth]
+env_vars = ["ANTHROPIC_API_KEY", "CLAUDE_API_KEY"]
+setup_url = "https://console.anthropic.com/"
+browser_auth = true
+auth_instructions = "Visit console.anthropic.com to generate your API key"
+
+[tool.features]
+supports_files = true
+supports_streaming = true
+supports_conversation = true
+max_context_tokens = 200000
+supported_languages = ["python", "javascript", "rust", "go", "java", "cpp", "typescript"]
