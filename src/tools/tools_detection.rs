@@ -12,7 +12,7 @@ pub struct ToolInfo {
     pub is_installed: bool,
 }
 
-/// Get all available tools with their installation status and configuration
+/// Get all available tools with their installation status and command
 pub fn get_available_tools() -> BTreeMap<&'static str, ToolInfo> {
     let mut tools = BTreeMap::new();
     let mapping = get_command_mapping();
