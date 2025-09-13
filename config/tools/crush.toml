@@ -12,7 +12,7 @@ documentation = "https://github.com/charmbracelet/crush"
 cli_command = "crush"
 requires_npm = true
 requires_sudo = true
-status = "testing"
+status = "new"
 
 [tool.install]
 command = "npm"
