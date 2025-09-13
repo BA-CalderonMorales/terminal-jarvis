@@ -23,9 +23,9 @@ Terminal Jarvis supports multi-platform builds using Rust's cross-compilation ca
 
 | Platform | Target Triple | Status | Notes |
 |----------|---------------|--------|--------|
-| macOS Intel | `x86_64-apple-darwin` | ✅ | Native on Intel Macs, cross-compile on ARM Macs |
-| macOS ARM64 | `aarch64-apple-darwin` | ✅ | Native on ARM Macs, cross-compile on Intel Macs |
-| Linux x64 | `x86_64-unknown-linux-gnu` | ✅ | Cross-compile from macOS using `cross` tool |
+| macOS Intel | `x86_64-apple-darwin` | Yes | Native on Intel Macs, cross-compile on ARM Macs |
+| macOS ARM64 | `aarch64-apple-darwin` | Yes | Native on ARM Macs, cross-compile on Intel Macs |
+| Linux x64 | `x86_64-unknown-linux-gnu` | Yes | Cross-compile from macOS using `cross` tool |
 | Linux ARM64 | `aarch64-unknown-linux-gnu` | 🚧 | Requires additional toolchain setup |
 
 ## Usage
@@ -108,14 +108,14 @@ sudo apt install -y gcc-aarch64-linux-gnu
 
 | Host Platform | Target Platform | Status | Requirements |
 |---------------|----------------|--------|--------------|
-| macOS | macOS (other arch) | ✅ Native | Xcode CLI tools |
+| macOS | macOS (other arch) | Yes Native | Xcode CLI tools |
 | macOS | Linux | 🚧 Limited | `cross` tool (OpenSSL dependency issues) |
-| Linux | Linux (other arch) | ✅ Native | `gcc-*` packages |
+| Linux | Linux (other arch) | Yes Native | `gcc-*` packages |
 | Linux | macOS | 🚧 Complex | macOS SDK (legal issues) |
 
 **Legend:**
-- ✅ **Native**: Supported with standard toolchain
-- ✅ **Cross**: Supported with additional tools  
+- **Native**: Supported with standard toolchain
+- **Cross**: Supported with additional tools  
 - 🚧 **Limited/Complex**: Possible but requires extensive setup
 
 ### Platform-Specific Requirements

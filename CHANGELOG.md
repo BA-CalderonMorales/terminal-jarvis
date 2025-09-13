@@ -694,7 +694,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - **Real-time NPM Distribution Tag Detection**: Dynamic display of all applicable NPM distribution tags
   - Shows all matching tags (e.g., "v0.0.36 (@stable, beta, latest)") for complete transparency
-  - Smart progress indicators during NPM tag fetching with "🔍 Checking NPM distribution tags"
+  - Smart progress indicators during NPM tag fetching with "Checking NPM distribution tags"
   - Development builds show matching tags with "-dev" suffix to distinguish from published versions
 - **Enhanced Welcome Interface**: Integrated GitHub and NPM package links directly in T.JARVIS interface
   - Direct GitHub link: https://github.com/BA-CalderonMorales/terminal-jarvis

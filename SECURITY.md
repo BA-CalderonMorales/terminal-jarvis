@@ -11,7 +11,7 @@ Terminal Jarvis is a CLI tool that manages AI coding assistants. We take securit
 **RECOMMENDED SECURITY PRACTICES:**
 
 ### For All Users
-**⚠️ Use Remote Development Environments**
+**Use Remote Development Environments**
 
 We **strongly recommend** using Terminal Jarvis in isolated environments:
 
@@ -47,9 +47,9 @@ We provide security updates for the following versions:
 
 | Version | Supported          |
 | ------- | ------------------ |
-| 0.0.57  | ✅ Current stable   |
-| 0.0.55-0.0.56| ✅ Previous stable |
-| < 0.0.55| ❌ No longer supported |
+| 0.0.57  | Current stable   |
+| 0.0.55-0.0.56| Previous stable |
+| < 0.0.55| No longer supported |
 
 ## Reporting a Vulnerability
 

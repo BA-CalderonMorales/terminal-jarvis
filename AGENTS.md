@@ -119,17 +119,39 @@ Terminal Jarvis is available through **three official distribution channels**:
 
 ## How The Code Is Organized
 
-The repository has two main parts:
+The repository follows a domain-based modular architecture:
 
 **Rust Application** (`/src/`):
 
 - `main.rs` - Entry point that starts the CLI
 - `cli.rs` - Command definitions using clap (run, update, list, info, templates)
-- `cli_logic.rs` - The actual business logic for each command + session continuation system
-- `tools.rs` - Tool detection, command mapping + session continuation logic with intelligent restart
-- `services.rs` - PackageService and GitHubService for managing tools
-- `config.rs` - TOML configuration management
-- `api.rs`, `api_client.rs`, `api_base.rs` - Future API framework (currently unused)
+- `cli_logic/` - Modular business logic domain:
+  - `cli_logic_entry_point.rs` - Main coordination and menu systems
+  - `cli_logic_interactive.rs` - Interactive T.JARVIS interface
+  - `cli_logic_tool_execution.rs` - Tool launching and execution
+  - `cli_logic_update_operations.rs` - Tool update operations using InstallationManager
+  - `cli_logic_info_operations.rs` - Tool information display
+  - `cli_logic_list_operations.rs` - Tool listing operations
+- `tools/` - Tool management domain:
+  - `tools_config.rs` - Modular configuration loader from config/tools/
+  - `tools_detection.rs` - Tool installation detection
+  - `tools_display.rs` - Unified tool information display system
+  - `tools_command_mapping.rs` - Command and installation mapping
+  - `tools_execution_engine.rs` - Tool execution with session continuation
+- `config/` - Configuration management domain
+- `services/` - External service integrations (NPM, GitHub)
+- `installation_arguments.rs` - Tool installation command management
+- `api/` - Future API framework (currently unused)
+
+**Configuration System** (`/config/`):
+
+- `config.toml` - Global Terminal Jarvis settings
+- `tools/` - Modular tool configuration directory:
+  - `claude.toml` - Anthropic Claude configuration
+  - `gemini.toml` - Google Gemini configuration
+  - `qwen.toml` - Qwen coding assistant configuration
+  - `opencode.toml`, `llxprt.toml`, `codex.toml`, `crush.toml` - Additional tools
+  - Each tool config contains: installation commands, authentication, features
 
 **NPM Package** (`/npm/terminal-jarvis/`):
 
@@ -137,7 +159,7 @@ The repository has two main parts:
 - `package.json` - NPM package configuration
 - `biome.json` - Biome linting configuration (we use Biome, not ESLint)
 
-## 🚨 DEPLOYMENT COMMANDS TRIGGER - READ IMMEDIATELY
+## DEPLOYMENT COMMANDS TRIGGER - READ IMMEDIATELY
 
 **When users say "Let's run local-cd.sh" or mention deployment:**
 
@@ -268,12 +290,12 @@ We use semantic versioning with **NO EMOJIS** and **NO DECORATIONS**. Just clean
 - `0.1.0` - New features that don't break existing functionality
 - `1.0.0` - Breaking changes that require users to update their code
 
-🚨 **CRITICAL VERSION SYNCHRONIZATION REQUIREMENT**:
+**CRITICAL VERSION SYNCHRONIZATION REQUIREMENT**:
 Always update **ALL THREE** version files simultaneously:
 
 - `Cargo.toml`
 - `npm/terminal-jarvis/package.json`
-- **`homebrew/Formula/terminal-jarvis.rb`** ⚠️ COMMONLY FORGOTTEN!
+- **`homebrew/Formula/terminal-jarvis.rb`** COMMONLY FORGOTTEN!
 
 **Homebrew Formula version MUST match exactly** - This is frequently overlooked and causes deployment failures.
 
@@ -470,54 +492,74 @@ When suggesting terminal commands or using the `run_in_terminal` tool:
 
 ## Tool Configuration Consistency (CRITICAL FOR NEW FEATURES)
 
-**When adding new AI coding tools**, these files MUST be updated together to prevent "Tool not found in configuration" errors:
+**When adding new AI coding tools**, use the modular configuration system to prevent integration issues:
 
-### Required File Updates (ALL MANDATORY):
+### New Tool Addition Process (STREAMLINED):
 
-1. **`src/tools.rs`**:
+1. **Create Tool Configuration File**:
 
-   - Add tool to `get_command_mapping()` HashMap
-   - Add tool to `get_tool_commands()` Vec with proper description
+   - Create `config/tools/newtool.toml` with complete tool definition
+   - Follow existing tool config structure (see `config/tools/claude.toml` as reference)
+   - Include all required sections: `[tool]`, `[tool.install]`, `[tool.auth]`, `[tool.features]`
+
+2. **Update Command Mapping**:
+
+   - Add tool to `src/tools/tools_command_mapping.rs` in `get_command_mapping()` HashMap
    - Example: `mapping.insert("newtool", "newtool-cli");`
 
-2. **`src/services.rs`**:
+3. **No Legacy Config Updates Required**:
 
-   - Add display name mapping in `get_display_name_to_config_mapping()`
-   - Example: `mapping.insert("newtool", "newtool-cli");`
-   - **CRITICAL**: This mapping is what connects the CLI display name to the config file key
+   - The modular system automatically loads from `config/tools/` directory
+   - No need to update `terminal-jarvis.toml.example` or legacy config files
+   - InstallationManager automatically discovers new tool configurations
 
-3. **`terminal-jarvis.toml.example`**:
+4. **Test and Verify**:
 
-   - Add tool configuration with install/update commands
-   - Example: `newtool-cli = { enabled = true, auto_update = true, install_command = "npm install -g newtool-cli", update_command = "npm update -g newtool-cli" }`
+   - Test tool detection: `cargo run -- list`
+   - Test tool info display: `cargo run -- info newtool`
+   - Test installation: `cargo run -- install newtool`
+   - Verify configuration loading with unit tests
 
-4. **Test Updates**:
+### Tool Configuration File Structure:
 
-   - Update `test_display_name_to_config_mapping()` in `src/services.rs`
-   - Update `test_config_key_resolution()` in `src/services.rs`
-   - Add assertions for the new tool mapping
+```toml
+# config/tools/newtool.toml
+[tool]
+display_name = "New Tool"
+config_key = "newtool-cli"
+description = "Description of the new tool"
+cli_command = "newtool"
+requires_npm = true
+requires_sudo = true
+status = "stable"
 
-5. **Documentation**:
-   - Update README.md tool list and descriptions
-   - Update CLI help text and package descriptions
-   - Update any relevant docs/ files
+[tool.install]
+command = "npm"
+args = ["install", "-g", "newtool-package"]
+verify_command = "newtool --version"
+post_install_message = "Tool installed successfully!"
 
-### Common Failure Pattern:
+[tool.auth]
+env_vars = ["NEWTOOL_API_KEY"]
+setup_url = "https://tool-setup-url"
+browser_auth = false
+auth_instructions = "Visit setup URL to get API key"
 
-Adding a tool to `tools.rs` and config file but **forgetting the mapping in `services.rs`**. This causes the update system to fail with "Tool not found in configuration" because it can't translate the display name to the config key.
-
-### Verification Commands:
-
-```bash
-# Verify all tools are listed correctly
-cargo run -- list
-
-# Test services module mappings
-cargo test --lib services
-
-# Test end-to-end functionality
-cargo run -- update --help
+[tool.features]
+supports_files = true
+supports_streaming = true
+supports_conversation = true
+max_context_tokens = 32000
+supported_languages = ["python", "javascript", "rust"]
 ```
+
+### Key Benefits of New System:
+
+- **Automatic Discovery**: Tools are automatically detected from `config/tools/` directory
+- **No Manual Mapping**: InstallationManager handles configuration loading
+- **Unified Display**: ToolDisplayFormatter provides consistent tool information display
+- **Easy Maintenance**: Each tool has its own configuration file
+- **Future-Proof**: Ready for database integration and dynamic tool loading
 
 ### Why This Matters:
 
@@ -921,7 +963,7 @@ npm dist-tag ls terminal-jarvis
 
 **ALWAYS** verify these items before making any commit:
 
-### 🚨 **CRITICAL: Homebrew Formula Deployment Order**
+### **CRITICAL: Homebrew Formula Deployment Order**
 
 **THE #1 DEPLOYMENT FAILURE**: Homebrew Formula changes not committed before GitHub release creation.
 
@@ -947,13 +989,13 @@ git log -1 --name-only             # MUST include homebrew/Formula/terminal-jarv
 - [ ] Version increment appropriate for changes made
 - [ ] `Cargo.toml` version updated
 - [ ] `npm/terminal-jarvis/package.json` version updated
-- [ ] **🚨 CRITICAL: `homebrew/Formula/terminal-jarvis.rb` version updated** - COMMONLY FORGOTTEN!
+- [ ] **CRITICAL: `homebrew/Formula/terminal-jarvis.rb` version updated** - COMMONLY FORGOTTEN!
 - [ ] `npm/terminal-jarvis/src/index.ts` version display updated
 - [ ] `npm/terminal-jarvis/package.json` postinstall script version updated
 - [ ] `src/cli_logic.rs` uses `env!("CARGO_PKG_VERSION")` (auto-updates)
 - [ ] `README.md` version references updated in note section
 - [ ] **Version synchronization verified**: `./scripts/cicd/local-cd.sh --check-versions` passes
-- [ ] **🚨 CRITICAL: Working tree clean BEFORE release**: `git status` shows "nothing to commit"
+- [ ] **CRITICAL: Working tree clean BEFORE release**: `git status` shows "nothing to commit"
 
 ### Documentation Updates:
 
@@ -978,12 +1020,12 @@ git log -1 --name-only             # MUST include homebrew/Formula/terminal-jarv
 
 ### Tool Configuration Consistency (if adding new tools):
 
-- [ ] Tool added to `src/tools.rs` command mapping and tool commands
-- [ ] Tool added to `src/services.rs` display name mapping
-- [ ] Tool configuration added to `terminal-jarvis.toml.example`
-- [ ] Tests updated in `services.rs` for new tool mapping
-- [ ] Documentation updated (README.md, CLI descriptions)
-- [ ] Verification commands run successfully (`cargo run -- list`, `cargo test --lib services`)
+- [ ] Tool configuration file created in `config/tools/newtool.toml`
+- [ ] Tool added to `src/tools/tools_command_mapping.rs` command mapping
+- [ ] Tool information displays correctly via unified ToolDisplayFormatter
+- [ ] Tool can be installed via InstallationManager
+- [ ] Documentation updated (README.md, tool descriptions)
+- [ ] Verification commands run successfully (`cargo run -- list`, `cargo run -- info newtool`)
 
 ### Homebrew Integration (if updating version):
 
