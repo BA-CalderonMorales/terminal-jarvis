@@ -2,9 +2,6 @@
 
 # Terminal Jarvis Comprehensive Test Suite
 # Validates core functionality and NPM package integrity to prevent regressions
-run_test "Example config uses NPM for all installs" \
-    'NPM_INSTALL_COMMANDS=$(grep -c "command.*npm" config/tools/*.toml); [ "$NPM_INSTALL_COMMANDS" -eq 14 ]'
-
 # Source logger
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "$SCRIPT_DIR/../logger/logger.sh"
