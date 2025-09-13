@@ -4,6 +4,7 @@ FROM rust:1.87
 RUN apt-get update && apt-get install -y \
     curl \
     git \
+    git-lfs \
     build-essential \
     pkg-config \
     libssl-dev \

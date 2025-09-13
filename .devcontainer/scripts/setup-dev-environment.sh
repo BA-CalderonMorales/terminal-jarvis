@@ -17,6 +17,13 @@ echo "Node.js info:"
 node --version
 npm --version
 
+echo "Git LFS info:"
+git lfs version
+
+# Initialize git-lfs for the user (force update to handle existing hooks)
+echo "Initializing Git LFS..."
+git lfs update --force || echo "Git LFS initialization failed (non-blocking)"
+
 # Install Rust components if not already present
 echo "Installing additional Rust components..."
 rustup component add clippy rustfmt || echo "Clippy and rustfmt already installed"
