@@ -542,25 +542,43 @@ async fn handle_update_tools_menu() -> Result<()> {
 }
 
 async fn handle_tool_info_menu() -> Result<()> {
-    let tool_names: Vec<String> = InstallationManager::get_tool_names()
-        .into_iter()
-        .map(String::from)
-        .collect();
-    let tool = match Select::new("Select a tool for information:", tool_names)
-        .with_render_config(get_themed_render_config())
-        .prompt()
-    {
-        Ok(selection) => selection,
-        Err(_) => {
-            // User interrupted - return to previous menu
+    loop {
+        // Get fresh theme on each iteration
+        let theme = theme_global_config::current_theme();
+        
+        print!("\x1b[2J\x1b[H"); // Clear screen
+        println!("{}\n", theme.primary("Tool Information"));
+
+        let tool_names: Vec<String> = InstallationManager::get_tool_names()
+            .into_iter()
+            .map(String::from)
+            .collect();
+        
+        // Add back option to the tool list
+        let mut options = tool_names.clone();
+        options.push("Back to Settings Menu".to_string());
+        
+        let selection = match Select::new("Select a tool for information:", options)
+            .with_render_config(get_themed_render_config())
+            .prompt()
+        {
+            Ok(selection) => selection,
+            Err(_) => {
+                // User interrupted - return to previous menu
+                return Ok(());
+            }
+        };
+
+        // Handle selection
+        if selection.contains("Back to Settings Menu") {
             return Ok(());
+        } else {
+            println!();
+            handle_tool_info(&selection).await?;
+
+            println!("\n{}", theme.accent("Press Enter to continue..."));
+            std::io::stdin().read_line(&mut String::new())?;
+            // Loop continues, returning to Tool Information menu
         }
-    };
-
-    println!();
-    handle_tool_info(&tool).await?;
-
-    println!("\nPress Enter to continue...");
-    std::io::stdin().read_line(&mut String::new())?;
-    Ok(())
+    }
 }
