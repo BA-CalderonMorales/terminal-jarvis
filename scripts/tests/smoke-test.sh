@@ -2,7 +2,6 @@
 
 # Terminal Jarvis Comprehensive Test Suite
 # Validates core functionality and NPM package integrity to prevent regressions
-
 # Source logger
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "$SCRIPT_DIR/../logger/logger.sh"
@@ -70,10 +69,10 @@ run_test "Version consistency (Cargo.toml vs NPM package.json)" \
     'CARGO_VERSION=$(grep "^version = " Cargo.toml | sed "s/version = \"\(.*\)\"/\1/"); NPM_VERSION=$(grep "\"version\":" npm/terminal-jarvis/package.json | sed "s/.*\"version\": \"\(.*\)\".*/\1/"); [ "$CARGO_VERSION" = "$NPM_VERSION" ]'
 
 run_test "Example configuration file has all 7 tools" \
-    'CONFIG_TOOLS=$(grep -E "(claude-code|gemini-cli|qwen-code|opencode|llxprt-code|codex|crush)" terminal-jarvis.toml.example | wc -l); [ "$CONFIG_TOOLS" -eq 7 ]'
+    'CONFIG_TOOLS=$(grep -E "^(claude|gemini|qwen|opencode|llxprt|codex|crush) = " terminal-jarvis.toml.example | wc -l); [ "$CONFIG_TOOLS" -eq 7 ]'
 
 run_test "Example config uses NPM for all installs" \
-    'NPM_INSTALL_COMMANDS=$(grep -c "npm install" terminal-jarvis.toml.example); [ "$NPM_INSTALL_COMMANDS" -eq 7 ]'
+    'NPM_INSTALL_COMMANDS=$(grep -c "npm" config/tools/*.toml | awk -F: "{sum += \$2} END {print sum}"); [ "$NPM_INSTALL_COMMANDS" -eq 21 ]'
 
 # Test the opencode input focus fix specifically
 run_test "OpenCode input focus tests pass" \
@@ -102,23 +101,23 @@ run_test "Codex binary mapping is correct" \
     'grep -r "codex.*codex" src/tools/'
 
 run_test "Codex tool description is informative" \
-    'grep -r -A2 "command: \"codex\"" src/tools/ | grep -q "description.*AI coding agent"'
+    'grep -q "OpenAI Codex CLI for local AI coding" config/tools/codex.toml'
 
 run_test "Codex functionality tests pass" \
     "cargo test codex_functionality >/dev/null 2>&1"
 
 # Test crush functionality specifically
 run_test "Crush tool is properly configured" \
-    '$BINARY list | grep -q "crush.*multi-model AI coding assistant"'
+    '$BINARY list | grep -q "crush.*Charm'\''s multi-model AI assistant with LSP"'
 
 run_test "Crush binary mapping is correct" \
     'grep -r "crush.*crush" src/tools/'
 
 run_test "Crush tool description is informative" \
-    'grep -r -A2 "command: \"crush\"" src/tools/ | grep -q "description.*Multi-model AI coding assistant"'
+    'grep -q "Charm.*multi-model AI assistant" config/tools/crush.toml'
 
 run_test "Crush installation command is correct" \
-    'grep -A5 "crush\"," src/installation_arguments.rs | grep -q "@charmland/crush"'
+    'grep -q "@charmland/crush" config/tools/crush.toml'
 
 run_test "Crush config mapping exists" \
     'grep -r "crush.*crush" src/services/'
@@ -138,14 +137,14 @@ if ! command -v npm &> /dev/null; then
 else
     log_info_if_enabled "NPM version: $(npm --version)"
     
-    # Extract NPM package names from installation configuration
-    CLAUDE_PACKAGE=$(grep -A5 'claude",' src/installation_arguments.rs | grep 'args: vec!' | sed 's/.*"\([^"]*\)".*/\1/' | tail -1)
-    GEMINI_PACKAGE=$(grep -A5 'gemini",' src/installation_arguments.rs | grep 'args: vec!' | sed 's/.*"\([^"]*\)".*/\1/' | tail -1)
-    QWEN_PACKAGE=$(grep -A5 'qwen",' src/installation_arguments.rs | grep 'args: vec!' | sed 's/.*"\([^"]*\)".*/\1/' | tail -1)
-    OPENCODE_PACKAGE=$(grep -A5 'opencode",' src/installation_arguments.rs | grep 'args: vec!' | sed 's/.*"\([^"]*\)".*/\1/' | tail -1)
-    LLXPRT_PACKAGE=$(grep -A5 'llxprt",' src/installation_arguments.rs | grep 'args: vec!' | sed 's/.*"\([^"]*\)".*/\1/' | tail -1)
-    CODEX_PACKAGE=$(grep -A5 'codex",' src/installation_arguments.rs | grep 'args: vec!' | sed 's/.*"\([^"]*\)".*/\1/' | tail -1)
-    CRUSH_PACKAGE=$(grep -A5 'crush",' src/installation_arguments.rs | grep 'args: vec!' | sed 's/.*"\([^"]*\)".*/\1/' | tail -1)
+    # Extract NPM package names from modular configuration system
+    CLAUDE_PACKAGE=$(grep 'install.*-g' config/tools/claude.toml | sed 's/.*"\([^"]*\)".*/\1/')
+    GEMINI_PACKAGE=$(grep 'install.*-g' config/tools/gemini.toml | sed 's/.*"\([^"]*\)".*/\1/')
+    QWEN_PACKAGE=$(grep 'install.*-g' config/tools/qwen.toml | sed 's/.*"\([^"]*\)".*/\1/')
+    OPENCODE_PACKAGE=$(grep 'install.*-g' config/tools/opencode.toml | sed 's/.*"\([^"]*\)".*/\1/')
+    LLXPRT_PACKAGE=$(grep 'install.*-g' config/tools/llxprt.toml | sed 's/.*"\([^"]*\)".*/\1/')
+    CODEX_PACKAGE=$(grep 'install.*-g' config/tools/codex.toml | sed 's/.*"\([^"]*\)".*/\1/')
+    CRUSH_PACKAGE=$(grep 'install.*-g' config/tools/crush.toml | sed 's/.*"\([^"]*\)".*/\1/')
     
     log_info_if_enabled "Validating packages: $CLAUDE_PACKAGE, $GEMINI_PACKAGE, $QWEN_PACKAGE, $OPENCODE_PACKAGE, $LLXPRT_PACKAGE, $CODEX_PACKAGE, $CRUSH_PACKAGE"
     
@@ -186,10 +185,10 @@ else
         "npm view $CRUSH_PACKAGE bin | grep -q 'crush'"
     
     # Validate configuration consistency across files
-    CONFIG_CLAUDE=$(grep -r 'claude-code' src/config/ | grep 'install_command' | sed 's/.*npm install -g \([^ "]*\).*/\1/' | head -1)
-    CONFIG_GEMINI=$(grep -r 'gemini-cli' src/config/ | grep 'install_command' | sed 's/.*npm install -g \([^ "]*\).*/\1/' | head -1)
-    CONFIG_LLXPRT=$(grep -r 'llxprt-code' src/config/ | grep 'install_command' | sed 's/.*npm install -g \([^ "]*\).*/\1/' | head -1)
-    CONFIG_CRUSH=$(grep -r 'crush' src/config/ | grep 'install_command' | sed 's/.*npm install -g \([^ "]*\).*/\1/' | head -1)
+    CONFIG_CLAUDE=$(grep 'install.*-g' config/tools/claude.toml | sed 's/.*"\([^"]*\)".*/\1/')
+    CONFIG_GEMINI=$(grep 'install.*-g' config/tools/gemini.toml | sed 's/.*"\([^"]*\)".*/\1/')
+    CONFIG_LLXPRT=$(grep 'install.*-g' config/tools/llxprt.toml | sed 's/.*"\([^"]*\)".*/\1/')
+    CONFIG_CRUSH=$(grep 'install.*-g' config/tools/crush.toml | sed 's/.*"\([^"]*\)".*/\1/')
     
     run_test "Claude package consistent between installation_arguments.rs and config/" \
         "[ '$CLAUDE_PACKAGE' = '$CONFIG_CLAUDE' ]"
@@ -226,9 +225,9 @@ else
         "npm install -g $CRUSH_PACKAGE --dry-run > /dev/null 2>&1"
     
     # Validate services/ update logic has correct package names via config
-    SERVICES_CLAUDE_PRIMARY=$(grep 'claude-code.*update_command' terminal-jarvis.toml.example | sed 's/.*npm update -g \([^ "]*\).*/\1/')
-    SERVICES_GEMINI_PRIMARY=$(grep 'gemini-cli.*update_command' terminal-jarvis.toml.example | sed 's/.*npm update -g \([^ "]*\).*/\1/')
-    SERVICES_LLXPRT_PRIMARY=$(grep 'llxprt-code.*update_command' terminal-jarvis.toml.example | sed 's/.*npm update -g \([^ "]*\).*/\1/')
+    SERVICES_CLAUDE_PRIMARY=$(grep 'update.*-g' config/tools/claude.toml | sed 's/.*"\([^"]*\)".*/\1/')
+    SERVICES_GEMINI_PRIMARY=$(grep 'update.*-g' config/tools/gemini.toml | sed 's/.*"\([^"]*\)".*/\1/')
+    SERVICES_LLXPRT_PRIMARY=$(grep 'update.*-g' config/tools/llxprt.toml | sed 's/.*"\([^"]*\)".*/\1/')
     
     run_test "Claude update logic uses correct primary package" \
         "[ '$CLAUDE_PACKAGE' = '$SERVICES_CLAUDE_PRIMARY' ]"

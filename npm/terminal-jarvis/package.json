@@ -15,6 +15,7 @@
   "scripts": {
     "generate-tools": "../../scripts/utils/generate-readme-tools.sh",
     "sync-readme": "npm run generate-tools && cp ../../README.md .",
+    "sync-readme-npm": "npm run generate-tools && cp ../../README.md . && sed -i 's|screenshot_and_demo/|https://raw.githubusercontent.com/BA-CalderonMorales/terminal-jarvis/docs/screenshots_and_demos/screenshots_and_demo/|g' README.md",
     "build-rust": "cd ../.. && cargo build --release",
     "copy-binary": "mkdir -p bin && cp ../../target/release/terminal-jarvis bin/terminal-jarvis && chmod +x bin/terminal-jarvis",
     "typecheck": "tsc --noEmit",
@@ -24,10 +25,10 @@
     "format:fix": "biome format --write src/",
     "check": "biome check src/",
     "check:fix": "biome check --write src/",
-    "build": "npm run sync-readme && npm run copy-binary && npx tsc",
+    "build": "npm run copy-binary && npm run sync-readme-npm && npx tsc",
     "prepublishOnly": "npm run build",
     "dev": "npm run build && node lib/index.js",
-    "postinstall": "node -e \"console.log('\\n🤖 Terminal Jarvis v0.0.35 installed successfully!\\n\\n✅ Full T.JARVIS interface ready to use!\\n\\nRun: npx terminal-jarvis\\n')\""
+    "postinstall": "node -e \"console.log('\\n🤖 Terminal Jarvis v0.0.67 installed successfully!\\n\\n✅ Full T.JARVIS interface ready to use!\\n\\nRun: npx terminal-jarvis\\n')\""
   },
   "keywords": [
     "cli",

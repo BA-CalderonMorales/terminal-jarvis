@@ -1,17 +1,60 @@
-[tools]
-claude-code = { enabled = true, auto_update = true, install_command = "npm install -g @anthropic-ai/claude-code", update_command = "npm update -g @anthropic-ai/claude-code" }
-gemini-cli = { enabled = true, auto_update = false, install_command = "npm install -g @google/gemini-cli", update_command = "npm update -g @google/gemini-cli" }
-qwen-code = { enabled = true, auto_update = true, install_command = "npm install -g @qwen-code/qwen-code@latest", update_command = "npm update -g @qwen-code/qwen-code" }
-opencode = { enabled = true, auto_update = true, install_command = "npm install -g opencode-ai@latest", update_command = "npm update -g opencode-ai" }
-llxprt-code = { enabled = true, auto_update = true, install_command = "npm install -g @vybestack/llxprt-code", update_command = "npm update -g @vybestack/llxprt-code" }
-codex = { enabled = true, auto_update = true, install_command = "npm install -g @openai/codex", update_command = "npm update -g @openai/codex" }
-crush = { enabled = true, auto_update = true, install_command = "npm install -g @charmland/crush", update_command = "npm update -g @charmland/crush" }
+# =============================================================================
+# TERMINAL JARVIS USER CONFIGURATION EXAMPLE  
+# =============================================================================
+# Copy this file to `terminal-jarvis.toml` in your project directory or 
+# `~/.config/terminal-jarvis/config.toml` for user-wide settings
+#
+# This simple format automatically works with Terminal Jarvis's modular config system.
+# Only include sections you want to customize - defaults will be used for the rest.
 
+# =============================================================================
+# USER TOOL PREFERENCES - Control which tools are enabled and their behavior
+# =============================================================================
+[preferences.tools]
+# Enable/disable tools and control auto-updates
+claude = { enabled = true, auto_update = true }
+gemini = { enabled = true, auto_update = false }  # Disable auto-update for Gemini
+qwen = { enabled = true, auto_update = true }
+opencode = { enabled = true, auto_update = true }
+llxprt = { enabled = true, auto_update = true }
+codex = { enabled = true, auto_update = true }
+crush = { enabled = true, auto_update = true }
+
+# Optional: UI and update preferences
+[preferences.ui]
+theme = "t-jarvis"  # Options: t-jarvis, classic, matrix
+show_welcome_screen = true
+verbose_output = false
+
+[preferences.updates]
+check_for_updates = true
+auto_update_tools = false  # Global override for individual tool settings
+update_frequency = "weekly"  # Options: daily, weekly, monthly, never
+
+# =============================================================================
+# TEMPLATES CONFIGURATION - Optional template system setup
+# =============================================================================
 [templates]
 repository = "your-username/jarvis-templates"
 auto_sync = true
+sync_frequency = "daily"
 
+# =============================================================================  
+# API CONFIGURATION - Optional service endpoint customization
+# =============================================================================
 [api]
 base_url = "https://api.terminal-jarvis.dev"
 timeout_seconds = 30
 max_retries = 3
+
+# =============================================================================
+# ADVANCED: Custom tool configuration overrides (optional)
+# =============================================================================
+# You can override specific tool settings if needed:
+# [tools.claude.install]
+# command = "npm"
+# args = ["install", "-g", "@anthropic-ai/claude-code@specific-version"]
+
+# Note: Terminal Jarvis automatically discovers all supported tools from its
+# built-in registry. You don't need to define tools here unless you want to
+# override specific installation commands or add custom tools.

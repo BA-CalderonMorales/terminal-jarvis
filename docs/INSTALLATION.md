@@ -2,6 +2,31 @@
 
 This document provides comprehensive installation instructions for Terminal Jarvis across different platforms and use cases.
 
+## Recommended: Pre-configured Development Environment
+
+**For the best Terminal Jarvis experience, especially for development and testing AI tools:**
+
+### GitHub Codespaces (Cloud Development)
+```bash
+# Click "Code" → "Codespaces" → "Create codespace" on the repository
+# Or use the direct link: https://github.com/codespaces/new?template_repository=BA-CalderonMorales/terminal-jarvis
+```
+
+**Advantages:**
+- **Instant Setup**: Complete environment ready in 60 seconds
+- **Zero Dependencies**: No local software installation required
+- **Consistent Experience**: Same environment across all platforms
+- **Pre-configured Tools**: Rust 1.87, Node.js 20, GitHub CLI, AI tools ready
+- **Built-in Debugging**: Full debugging setup with LLDB and VS Code integration
+
+### VS Code Dev Containers (Local Docker)
+```bash
+# Prerequisites: Docker Desktop + VS Code + Remote-Containers extension
+# 1. Clone the repository
+# 2. Open in VS Code
+# 3. Click "Reopen in Container" when prompted
+```
+
 ## Quick Installation
 
 Terminal Jarvis is available through **three official distribution channels**:

@@ -1,0 +1,12 @@
+# =============================================================================
+# METADATA - Configuration file information
+# =============================================================================
+# Terminal Jarvis configuration metadata and versioning information
+# Single Responsibility: Manages configuration file versioning and metadata
+
+[metadata]
+version = "1.0.0"
+description = "Terminal Jarvis Complete Configuration"
+last_updated = "2025-09-13"
+config_format_version = "2.0.0"  # Modular config format version
+schema_description = "Modular TOML configuration following SOLID principles"

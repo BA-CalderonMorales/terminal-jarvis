@@ -22,6 +22,7 @@ pub struct PackageService {
 }
 
 impl PackageService {
+    #[allow(dead_code)] // Framework code for future use
     pub fn new() -> Result<Self> {
         let config = Config::load()?;
         Ok(Self {
@@ -58,6 +59,7 @@ impl PackageService {
             .await
     }
 
+    #[allow(dead_code)] // Framework code for future use
     pub async fn update_tool(&self, tool_name: &str) -> Result<()> {
         self.package_ops_manager
             .update_tool(&self.config, tool_name)

@@ -4,26 +4,23 @@
 //
 // This module provides a centralized system for managing installation commands
 // across all supported AI coding tools, with NPM availability validation.
+//
+// Configuration is now loaded from the modular config system for better maintainability
+// and future database integration capabilities.
 
+use crate::tools::tools_command_mapping::{get_install_command, get_update_command};
+use crate::tools::tools_config::get_tool_config_loader;
 use std::collections::HashMap;
 
-/// Installation command metadata for AI coding tools
-///
-/// Contains all information needed to install a specific tool, including
-/// the command to run, arguments, user-facing description, and dependency requirements.
-///
-/// # Fields
-///
-/// * `command` - The primary command to execute (e.g., "npm", "cargo", "pip")
-/// * `args` - Command-line arguments as a vector
-/// * `description` - Human-readable description of the tool
-/// * `requires_npm` - Whether the installation requires NPM to be available
+/// Installation command structure for compatibility with existing code
 #[derive(Debug, Clone)]
 pub struct InstallCommand {
-    pub command: &'static str,
-    pub args: Vec<&'static str>,
-    pub description: &'static str,
+    pub command: String,
+    pub args: Vec<String>,
+    pub description: String,
     pub requires_npm: bool,
+    #[allow(dead_code)] // Used for installation privilege management
+    pub requires_sudo: bool,
 }
 
 /// Manages installation commands and dependency validation for AI coding tools
@@ -33,8 +30,8 @@ pub struct InstallCommand {
 /// - Retrieving installation commands for specific tools
 /// - Validating installation prerequisites
 ///
-/// All installation commands are statically defined to ensure consistency
-/// and avoid runtime configuration errors.
+/// All installation commands are loaded from ai-tools-registry.toml to ensure consistency
+/// and enable easy maintenance without code changes.
 pub struct InstallationManager;
 
 impl InstallationManager {
@@ -82,8 +79,9 @@ impl InstallationManager {
     ///     println!("Supported tool: {}", tool);
     /// }
     /// ```
-    pub fn get_tool_names() -> Vec<&'static str> {
-        Self::get_install_commands().keys().copied().collect()
+    pub fn get_tool_names() -> Vec<String> {
+        let config_loader = get_tool_config_loader();
+        config_loader.get_tool_names()
     }
 
     /// Retrieves installation command for a specific tool
@@ -107,7 +105,44 @@ impl InstallationManager {
     /// }
     /// ```
     pub fn get_install_command(tool: &str) -> Option<InstallCommand> {
-        Self::get_install_commands().get(tool).cloned()
+        get_install_command(tool).map(|cmd| InstallCommand {
+            command: cmd.command,
+            args: cmd.args,
+            description: cmd.description,
+            requires_npm: cmd.requires_npm,
+            requires_sudo: cmd.requires_sudo,
+        })
+    }
+
+    /// Retrieves update command for a specific tool
+    ///
+    /// # Arguments
+    ///
+    /// * `tool` - The name of the tool (e.g., "claude", "gemini")
+    ///
+    /// # Returns
+    ///
+    /// * `Some(InstallCommand)` - Update command metadata if tool is supported
+    /// * `None` - If the tool name is not recognized
+    ///
+    /// # Example
+    ///
+    /// ```rust,ignore
+    /// if let Some(cmd) = InstallationManager::get_update_command("claude") {
+    ///     println!("Update command: {} {}", cmd.command, cmd.args.join(" "));
+    /// } else {
+    ///     println!("Tool not found");
+    /// }
+    /// ```
+    #[allow(dead_code)] // Used by update functionality
+    pub fn get_update_command(tool: &str) -> Option<InstallCommand> {
+        get_update_command(tool).map(|cmd| InstallCommand {
+            command: cmd.command,
+            args: cmd.args,
+            description: cmd.description,
+            requires_npm: cmd.requires_npm,
+            requires_sudo: cmd.requires_sudo,
+        })
     }
 
     /// Returns all available installation commands
@@ -121,81 +156,27 @@ impl InstallationManager {
     ///
     /// # Note
     ///
-    /// This method rebuilds the HashMap on each call. For single-tool lookups,
-    /// prefer [`get_install_command`](Self::get_install_command).
-    pub fn get_install_commands() -> HashMap<&'static str, InstallCommand> {
+    /// This method loads from the modular TOML configuration files in `config/tools/` on each call.
+    /// For single-tool lookups, prefer [`get_install_command`](Self::get_install_command).
+    pub fn get_install_commands() -> HashMap<String, InstallCommand> {
+        let config_loader = get_tool_config_loader();
+        let tool_names = config_loader.get_tool_names();
         let mut commands = HashMap::new();
 
-        commands.insert(
-            "claude",
-            InstallCommand {
-                command: "npm",
-                args: vec!["install", "-g", "@anthropic-ai/claude-code"],
-                description: "Anthropic's Claude for code assistance",
-                requires_npm: true,
-            },
-        );
-
-        commands.insert(
-            "gemini",
-            InstallCommand {
-                command: "npm",
-                args: vec!["install", "-g", "@google/gemini-cli"],
-                description: "Google's Gemini CLI tool",
-                requires_npm: true,
-            },
-        );
-
-        commands.insert(
-            "qwen",
-            InstallCommand {
-                command: "npm",
-                args: vec!["install", "-g", "@qwen-code/qwen-code@latest"],
-                description: "Qwen coding assistant",
-                requires_npm: true,
-            },
-        );
-
-        commands.insert(
-            "opencode",
-            InstallCommand {
-                command: "npm",
-                args: vec!["install", "-g", "opencode-ai@latest"],
-                description: "OpenCode AI coding agent built for the terminal",
-                requires_npm: true,
-            },
-        );
-
-        commands.insert(
-            "llxprt",
-            InstallCommand {
-                command: "npm",
-                args: vec!["install", "-g", "@vybestack/llxprt-code"],
-                description:
-                    "LLxprt Code - Multi-provider AI coding assistant with enhanced features",
-                requires_npm: true,
-            },
-        );
-
-        commands.insert(
-            "codex",
-            InstallCommand {
-                command: "npm",
-                args: vec!["install", "-g", "@openai/codex"],
-                description: "OpenAI Codex CLI - AI coding agent that runs locally",
-                requires_npm: true,
-            },
-        );
-
-        commands.insert(
-            "crush",
-            InstallCommand {
-                command: "npm",
-                args: vec!["install", "-g", "@charmland/crush"],
-                description: "Charm's multi-model AI coding assistant with LSP support",
-                requires_npm: true,
-            },
-        );
+        for tool in tool_names {
+            if let Some(cmd) = get_install_command(&tool) {
+                commands.insert(
+                    tool,
+                    InstallCommand {
+                        command: cmd.command,
+                        args: cmd.args,
+                        description: cmd.description,
+                        requires_npm: cmd.requires_npm,
+                        requires_sudo: cmd.requires_sudo,
+                    },
+                );
+            }
+        }
 
         commands
     }

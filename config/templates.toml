@@ -1,0 +1,25 @@
+# =============================================================================
+# TEMPLATES CONFIGURATION - Template repository and sync settings
+# =============================================================================
+# Single Responsibility: Manages template system configuration and repository settings
+# Interface Segregation: Separated from other configuration concerns
+
+[templates]
+repository = "your-username/jarvis-templates"
+auto_sync = true
+sync_frequency = "daily"  # Options: manual, daily, weekly, monthly
+branch = "main"
+local_cache_path = "~/.config/terminal-jarvis/templates"
+
+# Template creation settings
+[templates.creation]
+default_author = "Terminal Jarvis User"
+include_readme = true
+include_gitignore = true
+default_license = "MIT"
+
+# Template validation settings
+[templates.validation]
+require_manifest = true
+validate_structure = true
+allow_custom_hooks = false

@@ -1,0 +1,41 @@
+# =============================================================================
+# CODEX - OpenAI's AI coding assistant
+# =============================================================================
+# Single Responsibility: Manages Codex tool configuration and settings
+
+[tool]
+display_name = "Codex"
+config_key = "codex"
+description = "OpenAI Codex CLI for local AI coding"
+homepage = "https://openai.com/codex"
+documentation = "https://platform.openai.com/docs/guides/code"
+cli_command = "codex"
+requires_npm = true
+requires_sudo = true
+status = "testing"
+
+[tool.install]
+command = "npm"
+args = ["install", "-g", "@openai/codex"]
+verify_command = "codex --version"
+post_install_message = "Codex installed successfully! Set OPENAI_API_KEY to get started."
+
+[tool.update]
+command = "npm"
+args = ["update", "-g", "@openai/codex"]
+verify_command = "codex --version"
+
+[tool.auth]
+env_vars = ["OPENAI_API_KEY", "CODEX_API_KEY"]
+setup_url = "https://platform.openai.com/api-keys"
+browser_auth = false
+auth_instructions = "Visit OpenAI Platform to generate your API key"
+
+[tool.features]
+supports_files = true
+supports_streaming = false
+supports_conversation = false
+max_context_tokens = 8000
+supported_languages = ["python", "javascript", "rust", "go", "java", "cpp", "typescript", "php", "ruby", "swift"]
+experimental = true
+legacy_model = true
