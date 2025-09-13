@@ -104,11 +104,11 @@ pub async fn handle_install_tool(tool: &str) -> Result<()> {
         ProgressUtils::simulate_installation_progress(&progress.spinner, tool).await;
     }
 
-    let mut cmd = AsyncCommand::new(install_cmd.command);
+    let mut cmd = AsyncCommand::new(&install_cmd.command);
     cmd.args(&install_cmd.args);
 
     // For NPM global installs, use sudo if available to handle permission issues
-    let status = if install_cmd.requires_npm && install_cmd.args.contains(&"-g") {
+    let status = if install_cmd.requires_npm && install_cmd.args.contains(&"-g".to_string()) {
         // Check if sudo is available
         let sudo_available = std::process::Command::new("which")
             .arg("sudo")
@@ -118,7 +118,7 @@ pub async fn handle_install_tool(tool: &str) -> Result<()> {
 
         if sudo_available {
             let mut sudo_cmd = AsyncCommand::new("sudo");
-            sudo_cmd.arg(install_cmd.command);
+            sudo_cmd.arg(&install_cmd.command);
             sudo_cmd.args(&install_cmd.args);
             sudo_cmd.stdout(std::process::Stdio::null());
             sudo_cmd.stderr(std::process::Stdio::null());

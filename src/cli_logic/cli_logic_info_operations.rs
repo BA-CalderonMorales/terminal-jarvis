@@ -24,7 +24,7 @@ pub async fn handle_tool_info(tool: &str) -> Result<()> {
 fn display_tool_info_formatted(
     tool: &str,
     tool_info: &crate::tools::ToolInfo,
-    install_info: &crate::installation_arguments::InstallCommand,
+    install_info: &crate::ai_tools_registry::InstallCommand,
 ) {
     let theme = theme_global_config::current_theme();
 

@@ -12,7 +12,38 @@ use std::collections::HashMap;
 #[derive(Debug, Clone, Deserialize, Serialize)]
 pub struct AiToolsRegistry {
     pub metadata: RegistryMetadata,
+    pub preferences: Option<UserPreferences>,
+    pub templates: Option<TemplatesConfig>,
+    pub api: Option<ApiConfig>,
     pub tools: HashMap<String, ToolDefinition>,
+}
+
+/// User preferences for tool settings
+#[derive(Debug, Clone, Deserialize, Serialize)]
+pub struct UserPreferences {
+    pub tools: HashMap<String, ToolPreferences>,
+}
+
+/// Tool-specific user preferences
+#[derive(Debug, Clone, Deserialize, Serialize)]
+pub struct ToolPreferences {
+    pub enabled: bool,
+    pub auto_update: bool,
+}
+
+/// Templates configuration
+#[derive(Debug, Clone, Deserialize, Serialize)]
+pub struct TemplatesConfig {
+    pub repository: String,
+    pub auto_sync: bool,
+}
+
+/// API configuration
+#[derive(Debug, Clone, Deserialize, Serialize)]
+pub struct ApiConfig {
+    pub base_url: String,
+    pub timeout_seconds: u64,
+    pub max_retries: u32,
 }
 
 /// Registry metadata information
@@ -34,6 +65,7 @@ pub struct ToolDefinition {
     pub cli_command: String,
     pub requires_npm: bool,
     pub requires_sudo: bool,
+    pub status: String,
     pub install: CommandDefinition,
     pub update: CommandDefinition,
     pub auth: AuthDefinition,
@@ -72,7 +104,7 @@ pub struct AiToolsRegistryManager {
 impl AiToolsRegistryManager {
     /// Load the AI Tools Registry from the TOML file
     pub fn new() -> Result<Self> {
-        let registry_content = include_str!("../ai-tools-registry.toml");
+        let registry_content = include_str!("../config.toml");
         let registry: AiToolsRegistry = toml::from_str(registry_content)
             .map_err(|e| anyhow!("Failed to parse ai-tools-registry.toml: {}", e))?;
 

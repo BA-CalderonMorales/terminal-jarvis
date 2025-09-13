@@ -1,15 +1,41 @@
-# AI Tools Registry - Centralized configuration for all AI coding tools
-# This file serves as the single source of truth for AI tool metadata,
-# installation commands, and requirements.
+# Terminal Jarvis Configuration - Single Source of Truth
+# This file consolidates all tool definitions, user preferences, and application settings
+# Replaces ai-tools-registry.toml, terminal-jarvis.toml, and tools-manifest.toml
 
 [metadata]
 version = "1.0.0"
-description = "Terminal Jarvis AI Tools Registry"
-last_updated = "2025-09-12"
+description = "Terminal Jarvis Complete Configuration"
+last_updated = "2025-09-13"
+
+# User preferences and tool settings
+[preferences]
+# Tool-specific user preferences (enabled, auto_update, etc.)
+[preferences.tools]
+claude-code = { enabled = true, auto_update = true }
+gemini-cli = { enabled = true, auto_update = false }
+qwen-code = { enabled = true, auto_update = true }
+opencode = { enabled = true, auto_update = true }
+llxprt-code = { enabled = true, auto_update = true }
+codex = { enabled = true, auto_update = true }
+crush = { enabled = true, auto_update = true }
+
+# Templates configuration
+[templates]
+repository = "your-username/jarvis-templates"
+auto_sync = true
+
+# API configuration
+[api]
+base_url = "https://api.terminal-jarvis.dev"
+timeout_seconds = 30
+max_retries = 3
+
+# Tool definitions - Complete registry of all supported AI coding tools
+# Each tool includes metadata, installation, update, and authentication information
 
 # Claude - Anthropic's AI coding assistant
 [tools.claude]
-display_name = "claude"
+display_name = "Claude"
 config_key = "claude-code"
 description = "Anthropic's Claude for code assistance"
 homepage = "https://claude.ai/"
@@ -17,6 +43,7 @@ documentation = "https://docs.anthropic.com/claude/docs/claude-code"
 cli_command = "claude"
 requires_npm = true
 requires_sudo = true
+status = "stable"
 
 [tools.claude.install]
 command = "npm"
@@ -33,7 +60,7 @@ browser_auth = true
 
 # Gemini - Google's AI coding assistant
 [tools.gemini]
-display_name = "gemini"
+display_name = "Gemini"
 config_key = "gemini-cli"
 description = "Google's Gemini CLI tool"
 homepage = "https://ai.google.dev/"
@@ -41,6 +68,7 @@ documentation = "https://ai.google.dev/docs"
 cli_command = "gemini"
 requires_npm = true
 requires_sudo = true
+status = "stable"
 
 [tools.gemini.install]
 command = "npm"
@@ -57,7 +85,7 @@ browser_auth = true
 
 # Qwen - Alibaba's AI coding assistant
 [tools.qwen]
-display_name = "qwen"
+display_name = "Qwen"
 config_key = "qwen-code"
 description = "Qwen coding assistant"
 homepage = "https://qwenlm.github.io/"
@@ -65,6 +93,7 @@ documentation = "https://github.com/QwenLM/Qwen"
 cli_command = "qwen"
 requires_npm = true
 requires_sudo = true
+status = "stable"
 
 [tools.qwen.install]
 command = "npm"
@@ -81,14 +110,15 @@ browser_auth = false
 
 # OpenCode - Open source AI coding agent
 [tools.opencode]
-display_name = "opencode"
+display_name = "OpenCode"
 config_key = "opencode"
-description = "OpenCode AI coding agent built for the terminal"
+description = "Terminal-based AI coding agent"
 homepage = "https://opencode.ai/"
 documentation = "https://docs.opencode.ai/"
 cli_command = "opencode"
 requires_npm = true
 requires_sudo = true
+status = "testing"
 
 [tools.opencode.install]
 command = "npm"
@@ -105,14 +135,15 @@ browser_auth = false
 
 # LLxprt - Multi-provider AI coding assistant
 [tools.llxprt]
-display_name = "llxprt"
+display_name = "LLXPRT"
 config_key = "llxprt-code"
-description = "LLxprt Code - Multi-provider AI coding assistant with enhanced features"
+description = "Multi-provider AI coding assistant"
 homepage = "https://llxprt.dev/"
 documentation = "https://docs.llxprt.dev/"
 cli_command = "llxprt"
 requires_npm = true
 requires_sudo = true
+status = "testing"
 
 [tools.llxprt.install]
 command = "npm"
@@ -129,14 +160,15 @@ browser_auth = false
 
 # Codex - OpenAI's AI coding assistant
 [tools.codex]
-display_name = "codex"
+display_name = "Codex"
 config_key = "codex"
-description = "OpenAI Codex CLI - AI coding agent that runs locally"
+description = "OpenAI Codex CLI for local AI coding"
 homepage = "https://openai.com/codex"
 documentation = "https://platform.openai.com/docs/guides/code"
 cli_command = "codex"
 requires_npm = true
 requires_sudo = true
+status = "testing"
 
 [tools.codex.install]
 command = "npm"
@@ -153,14 +185,15 @@ browser_auth = false
 
 # Crush - Charm's multi-model AI coding assistant
 [tools.crush]
-display_name = "crush"
+display_name = "Crush"
 config_key = "crush"
-description = "Charm's multi-model AI coding assistant with LSP support"
+description = "Charm's multi-model AI assistant with LSP"
 homepage = "https://charm.sh/crush"
 documentation = "https://github.com/charmbracelet/crush"
 cli_command = "crush"
 requires_npm = true
 requires_sudo = true
+status = "new"
 
 [tools.crush.install]
 command = "npm"

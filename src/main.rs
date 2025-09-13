@@ -8,6 +8,7 @@ mod progress_utils;
 mod services;
 mod theme;
 mod tools;
+mod ai_tools_registry;
 
 use cli::Cli;
 

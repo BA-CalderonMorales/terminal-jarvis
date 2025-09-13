@@ -11,7 +11,7 @@ pub async fn handle_list_tools() -> Result<()> {
     let install_commands = InstallationManager::get_install_commands();
 
     for (tool_name, tool_info) in tools.iter() {
-        let install_info = install_commands.get(tool_name).unwrap();
+        let install_info = install_commands.get(*tool_name).unwrap();
         let status = if tool_info.is_installed {
             "Installed"
         } else {
