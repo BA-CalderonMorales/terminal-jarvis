@@ -61,28 +61,40 @@ impl ToolDisplayFormatter {
     /// Detailed format with separator lines (for `info` command)
     fn display_detailed(tool_name: &str, tool_info: &ToolInfo, install_info: &InstallCommand) {
         let theme = theme_global_config::current_theme();
-        
+
         println!();
-        println!("{}", theme.primary(&format!("=== Tool Information: {} ===", tool_name)));
+        println!(
+            "{}",
+            theme.primary(&format!("=== Tool Information: {} ===", tool_name))
+        );
         println!();
-        
-        println!("{}", theme.secondary(&format!("Description: {}", install_info.description)));
-        println!("{}", theme.secondary(&format!("Command: {}", tool_info.command)));
-        
+
+        println!(
+            "{}",
+            theme.secondary(&format!("Description: {}", install_info.description))
+        );
+        println!(
+            "{}",
+            theme.secondary(&format!("Command: {}", tool_info.command))
+        );
+
         let status_text = Self::format_installation_status(tool_info.is_installed);
         println!("Status: {}", status_text);
-        
-        println!("{}", theme.secondary(&format!(
-            "Installation: {} {}",
-            install_info.command,
-            install_info.args.join(" ")
-        )));
-        
+
+        println!(
+            "{}",
+            theme.secondary(&format!(
+                "Installation: {} {}",
+                install_info.command,
+                install_info.args.join(" ")
+            ))
+        );
+
         if install_info.requires_npm {
             let npm_status = Self::format_npm_status();
             println!("NPM Required: {}", npm_status);
         }
-        
+
         println!();
         println!("{}", theme.primary("==================================="));
         println!();
@@ -90,7 +102,11 @@ impl ToolDisplayFormatter {
 
     /// Compact format for list views
     fn display_compact(tool_name: &str, tool_info: &ToolInfo, install_info: &InstallCommand) {
-        let status_text = if tool_info.is_installed { "Installed" } else { "Not installed" };
+        let status_text = if tool_info.is_installed {
+            "Installed"
+        } else {
+            "Not installed"
+        };
 
         println!(" {} - {}", tool_name, install_info.description);
         println!("  Status: {}", status_text);

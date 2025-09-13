@@ -4,7 +4,7 @@
 //
 // This module provides a centralized system for managing installation commands
 // across all supported AI coding tools, with NPM availability validation.
-// 
+//
 // Configuration is now loaded from the modular config system for better maintainability
 // and future database integration capabilities.
 
@@ -19,7 +19,7 @@ pub struct InstallCommand {
     pub args: Vec<String>,
     pub description: String,
     pub requires_npm: bool,
-    #[allow(dead_code)]  // Used for installation privilege management
+    #[allow(dead_code)] // Used for installation privilege management
     pub requires_sudo: bool,
 }
 
@@ -134,7 +134,7 @@ impl InstallationManager {
     ///     println!("Tool not found");
     /// }
     /// ```
-    #[allow(dead_code)]  // Used by update functionality
+    #[allow(dead_code)] // Used by update functionality
     pub fn get_update_command(tool: &str) -> Option<InstallCommand> {
         get_update_command(tool).map(|cmd| InstallCommand {
             command: cmd.command,
@@ -162,19 +162,22 @@ impl InstallationManager {
         let config_loader = get_tool_config_loader();
         let tool_names = config_loader.get_tool_names();
         let mut commands = HashMap::new();
-        
+
         for tool in tool_names {
             if let Some(cmd) = get_install_command(&tool) {
-                commands.insert(tool, InstallCommand {
-                    command: cmd.command,
-                    args: cmd.args,
-                    description: cmd.description,
-                    requires_npm: cmd.requires_npm,
-                    requires_sudo: cmd.requires_sudo,
-                });
+                commands.insert(
+                    tool,
+                    InstallCommand {
+                        command: cmd.command,
+                        args: cmd.args,
+                        description: cmd.description,
+                        requires_npm: cmd.requires_npm,
+                        requires_sudo: cmd.requires_sudo,
+                    },
+                );
             }
         }
-        
+
         commands
     }
 }

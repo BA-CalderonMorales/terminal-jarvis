@@ -1,10 +1,10 @@
 //! Tool List Operations
-//! 
+//!
 //! Handles listing all available AI coding tools with their installation status.
 //! Uses the unified ToolDisplayFormatter for consistent formatting across all tools.
 
 use crate::installation_arguments::InstallationManager;
-use crate::tools::{ToolManager, tools_display::ToolDisplayFormatter};
+use crate::tools::{tools_display::ToolDisplayFormatter, ToolManager};
 use anyhow::Result;
 
 /// Handle listing all available AI coding tools with their status

@@ -545,19 +545,16 @@ async fn handle_tool_info_menu() -> Result<()> {
     loop {
         // Get fresh theme on each iteration
         let theme = theme_global_config::current_theme();
-        
+
         print!("\x1b[2J\x1b[H"); // Clear screen
         println!("{}\n", theme.primary("Tool Information"));
 
-        let tool_names: Vec<String> = InstallationManager::get_tool_names()
-            .into_iter()
-            .map(String::from)
-            .collect();
-        
+        let tool_names: Vec<String> = InstallationManager::get_tool_names().into_iter().collect();
+
         // Add back option to the tool list
         let mut options = tool_names.clone();
         options.push("Back to Settings Menu".to_string());
-        
+
         let selection = match Select::new("Select a tool for information:", options)
             .with_render_config(get_themed_render_config())
             .prompt()

@@ -13,6 +13,7 @@ use tokio::process::Command as AsyncCommand;
 pub struct PackageOperationsManager;
 
 impl PackageOperationsManager {
+    #[allow(dead_code)] // Framework code for future use
     pub fn new() -> Self {
         Self
     }
@@ -69,6 +70,7 @@ impl PackageOperationsManager {
     }
 
     /// Update a tool with fallback package name support
+    #[allow(dead_code)] // Framework code for future use
     pub async fn update_tool(&self, config: &Config, tool_name: &str) -> Result<()> {
         let tool_config = config
             .tools
@@ -117,6 +119,7 @@ impl PackageOperationsManager {
     ///
     /// If the primary package name fails, tries with fallback names
     /// commonly used for tools that have multiple package names.
+    #[allow(dead_code)] // Framework code for future use
     async fn execute_command_with_fallback(&self, command: &str, tool_name: &str) -> Result<()> {
         // Try the original command first
         if self.execute_command(command).await.is_ok() {
@@ -140,6 +143,7 @@ impl PackageOperationsManager {
     }
 
     /// Get fallback package names for tools that might have different package names
+    #[allow(dead_code)] // Framework code for future use
     fn get_fallback_package_names(&self, tool_name: &str) -> Vec<String> {
         let mut fallbacks = Vec::new();
 

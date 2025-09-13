@@ -5,7 +5,7 @@
 
 [tool]
 display_name = "Gemini"
-config_key = "gemini-cli"
+config_key = "gemini"
 description = "Google's Gemini CLI tool"
 homepage = "https://ai.google.dev/"
 documentation = "https://ai.google.dev/docs"
@@ -36,4 +36,13 @@ supports_files = true
 supports_streaming = true
 supports_conversation = true
 max_context_tokens = 128000
-supported_languages = ["python", "javascript", "rust", "go", "java", "cpp", "typescript", "kotlin"]
+supported_languages = [
+    "python",
+    "javascript",
+    "rust",
+    "go",
+    "java",
+    "cpp",
+    "typescript",
+    "kotlin",
+]

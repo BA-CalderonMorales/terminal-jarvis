@@ -26,7 +26,7 @@ pub fn get_available_tools() -> BTreeMap<&'static str, ToolInfo> {
     for display_name in tool_order.iter() {
         if let Some(cli_command) = mapping.get(display_name) {
             let is_installed = check_tool_installed(cli_command);
-            
+
             tools.insert(
                 *display_name,
                 ToolInfo {

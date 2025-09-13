@@ -61,7 +61,9 @@ pub struct ToolPreferences {
     pub auto_update: bool,
 }
 
-fn default_true() -> bool { true }
+fn default_true() -> bool {
+    true
+}
 
 /// Configuration loader for tools
 pub struct ToolConfigLoader {
@@ -69,6 +71,12 @@ pub struct ToolConfigLoader {
     tool_definitions: HashMap<String, ToolDefinition>,
     /// User preferences from terminal-jarvis.toml
     user_preferences: HashMap<String, ToolPreferences>,
+}
+
+impl Default for ToolConfigLoader {
+    fn default() -> Self {
+        Self::new()
+    }
 }
 
 impl ToolConfigLoader {
@@ -110,7 +118,8 @@ impl ToolConfigLoader {
                             if file_name.ends_with(".toml") {
                                 let tool_name = file_name.trim_end_matches(".toml");
                                 if let Ok(tool_config) = self.load_tool_config(&entry.path()) {
-                                    self.tool_definitions.insert(tool_name.to_string(), tool_config);
+                                    self.tool_definitions
+                                        .insert(tool_name.to_string(), tool_config);
                                 }
                             }
                         }
@@ -126,13 +135,13 @@ impl ToolConfigLoader {
     /// Load individual tool configuration from TOML file
     fn load_tool_config(&self, path: &PathBuf) -> Result<ToolDefinition> {
         let content = std::fs::read_to_string(path)?;
-        
+
         // Parse the tool TOML file
         #[derive(Deserialize)]
         struct ToolFile {
             tool: ToolDefinition,
         }
-        
+
         let tool_file: ToolFile = toml::from_str(&content)
             .map_err(|e| anyhow!("Failed to parse tool config {}: {}", path.display(), e))?;
 
@@ -175,7 +184,7 @@ impl ToolConfigLoader {
     }
 
     /// Check if tool is enabled by user preferences
-    #[allow(dead_code)]  // Used for configuration management
+    #[allow(dead_code)] // Used for configuration management
     pub fn is_tool_enabled(&self, tool_name: &str) -> bool {
         if let Some(tool_def) = self.tool_definitions.get(tool_name) {
             if let Some(prefs) = self.user_preferences.get(&tool_def.config_key) {
@@ -191,28 +200,28 @@ impl ToolConfigLoader {
     }
 
     /// Get update command for tool
-    #[allow(dead_code)]  // Used for update functionality
+    #[allow(dead_code)] // Used for update functionality
     pub fn get_update_command(&self, tool_name: &str) -> Option<&InstallCommand> {
         self.tool_definitions.get(tool_name).map(|t| &t.update)
     }
 
     /// Get authentication info for tool
-    #[allow(dead_code)]  // Used for auth management
+    #[allow(dead_code)] // Used for auth management
     pub fn get_auth_info(&self, tool_name: &str) -> Option<&AuthDefinition> {
         self.tool_definitions.get(tool_name).map(|t| &t.auth)
     }
 
     /// Get display name to config key mapping (for compatibility)
-    #[allow(dead_code)]  // Used for service mapping  
+    #[allow(dead_code)] // Used for service mapping
     pub fn get_display_name_to_config_mapping(&self) -> HashMap<String, String> {
         self.tool_definitions
-            .iter()
-            .map(|(_, tool_def)| (tool_def.display_name.clone(), tool_def.config_key.clone()))
+            .values()
+            .map(|tool_def| (tool_def.display_name.clone(), tool_def.config_key.clone()))
             .collect()
     }
 
     /// Check if tool requires sudo
-    #[allow(dead_code)]  // Used for installation privilege checking
+    #[allow(dead_code)] // Used for installation privilege checking
     pub fn requires_sudo(&self, tool_name: &str) -> bool {
         self.tool_definitions
             .get(tool_name)
@@ -221,7 +230,7 @@ impl ToolConfigLoader {
     }
 
     /// Get tools that require NPM
-    #[allow(dead_code)]  // Used for NPM dependency validation
+    #[allow(dead_code)] // Used for NPM dependency validation
     pub fn get_npm_tools(&self) -> Vec<String> {
         self.tool_definitions
             .iter()
@@ -247,7 +256,7 @@ static TOOL_CONFIG_LOADER: std::sync::OnceLock<ToolConfigLoader> = std::sync::On
 
 /// Get global tool config loader (singleton pattern)
 pub fn get_tool_config_loader() -> &'static ToolConfigLoader {
-    TOOL_CONFIG_LOADER.get_or_init(|| ToolConfigLoader::new())
+    TOOL_CONFIG_LOADER.get_or_init(ToolConfigLoader::new)
 }
 
 #[cfg(test)]

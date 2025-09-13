@@ -6,7 +6,7 @@
 
 [tool]
 display_name = "Claude"
-config_key = "claude-code"
+config_key = "claude"
 description = "Anthropic's Claude for code assistance"
 homepage = "https://claude.ai/"
 documentation = "https://docs.anthropic.com/claude/docs/claude-code"
@@ -37,4 +37,12 @@ supports_files = true
 supports_streaming = true
 supports_conversation = true
 max_context_tokens = 200000
-supported_languages = ["python", "javascript", "rust", "go", "java", "cpp", "typescript"]
+supported_languages = [
+    "python",
+    "javascript",
+    "rust",
+    "go",
+    "java",
+    "cpp",
+    "typescript",
+]

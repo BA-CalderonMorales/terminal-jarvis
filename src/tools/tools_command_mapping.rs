@@ -46,7 +46,7 @@ pub fn get_cli_command(display_name: &str) -> &str {
 /// Get installation command for a tool from configuration
 pub fn get_install_command(tool_name: &str) -> Option<InstallCommandInfo> {
     let config_loader = get_tool_config_loader();
-    
+
     if let Some(tool_def) = config_loader.get_tool_definition(tool_name) {
         if let Some(install_cmd) = config_loader.get_install_command(tool_name) {
             return Some(InstallCommandInfo {
@@ -58,15 +58,15 @@ pub fn get_install_command(tool_name: &str) -> Option<InstallCommandInfo> {
             });
         }
     }
-    
+
     None
 }
 
 /// Get update command for a tool from configuration
-#[allow(dead_code)]  // Used by future update functionality
+#[allow(dead_code)] // Used by future update functionality
 pub fn get_update_command(tool_name: &str) -> Option<InstallCommandInfo> {
     let config_loader = get_tool_config_loader();
-    
+
     if let Some(tool_def) = config_loader.get_tool_definition(tool_name) {
         if let Some(update_cmd) = config_loader.get_update_command(tool_name) {
             return Some(InstallCommandInfo {
@@ -78,33 +78,33 @@ pub fn get_update_command(tool_name: &str) -> Option<InstallCommandInfo> {
             });
         }
     }
-    
+
     None
 }
 
 /// Get authentication information for a tool
-#[allow(dead_code)]  // Used for auth management functionality  
+#[allow(dead_code)] // Used for auth management functionality
 pub fn get_auth_info(tool_name: &str) -> Option<&AuthDefinition> {
     let config_loader = get_tool_config_loader();
     config_loader.get_auth_info(tool_name)
 }
 
 /// Get display name to config key mapping for compatibility
-#[allow(dead_code)]  // Used by services for configuration mapping
+#[allow(dead_code)] // Used by services for configuration mapping
 pub fn get_display_name_to_config_mapping() -> HashMap<String, String> {
     let config_loader = get_tool_config_loader();
     config_loader.get_display_name_to_config_mapping()
 }
 
 /// Check if a tool requires sudo for installation
-#[allow(dead_code)]  // Used for installation privilege management
+#[allow(dead_code)] // Used for installation privilege management
 pub fn requires_sudo(tool_name: &str) -> bool {
     let config_loader = get_tool_config_loader();
     config_loader.requires_sudo(tool_name)
 }
 
 /// Get all tools that require NPM
-#[allow(dead_code)]  // Used for NPM dependency validation
+#[allow(dead_code)] // Used for NPM dependency validation
 pub fn get_npm_tools() -> Vec<String> {
     let config_loader = get_tool_config_loader();
     config_loader.get_npm_tools()
@@ -115,14 +115,16 @@ pub fn get_npm_tools() -> Vec<String> {
 pub fn get_all_tools() -> Vec<ToolCommand> {
     let config_loader = get_tool_config_loader();
     let tool_names = config_loader.get_tool_names();
-    
+
     tool_names
         .iter()
         .filter_map(|name| {
-            config_loader.get_tool_definition(name).map(|tool_def| ToolCommand {
-                command: &tool_def.cli_command,
-                description: &tool_def.description,
-            })
+            config_loader
+                .get_tool_definition(name)
+                .map(|tool_def| ToolCommand {
+                    command: &tool_def.cli_command,
+                    description: &tool_def.description,
+                })
         })
         .collect()
 }
@@ -131,8 +133,10 @@ pub fn get_all_tools() -> Vec<ToolCommand> {
 #[allow(dead_code)]
 pub fn get_tool_info(tool_name: &str) -> Option<ToolCommand> {
     let config_loader = get_tool_config_loader();
-    config_loader.get_tool_definition(tool_name).map(|tool_def| ToolCommand {
-        command: &tool_def.cli_command,
-        description: &tool_def.description,
-    })
+    config_loader
+        .get_tool_definition(tool_name)
+        .map(|tool_def| ToolCommand {
+            command: &tool_def.cli_command,
+            description: &tool_def.description,
+        })
 }

@@ -1,10 +1,13 @@
 //! Tool Information Operations
-//! 
+//!
 //! Handles displaying detailed information about specific AI coding tools.
 //! Uses the unified ToolDisplayFormatter for consistent formatting across all tools.
 
 use crate::installation_arguments::InstallationManager;
-use crate::tools::{ToolManager, tools_display::{ToolDisplayFormatter, ToolDisplayMode}};
+use crate::tools::{
+    tools_display::{ToolDisplayFormatter, ToolDisplayMode},
+    ToolManager,
+};
 use anyhow::{anyhow, Result};
 
 /// Handle displaying detailed information about a specific tool
@@ -19,7 +22,12 @@ pub async fn handle_tool_info(tool: &str) -> Result<()> {
         .get(tool)
         .ok_or_else(|| anyhow!("Installation info for '{}' not found", tool))?;
 
-    ToolDisplayFormatter::display_tool_info(tool, tool_info, install_info, ToolDisplayMode::Detailed);
+    ToolDisplayFormatter::display_tool_info(
+        tool,
+        tool_info,
+        install_info,
+        ToolDisplayMode::Detailed,
+    );
 
     Ok(())
 }
