@@ -4,14 +4,14 @@
 
 </div>
 
-<table>
+<table border="0">
 <tr>
 <td width="60%">
 
 <img src="screenshot_and_demo/promo_image_for_readme.png" alt="Terminal Jarvis Interface" width="100%">
 
 </td>
-<td width="40%" align="right">
+<td width="40%" align="center">
 
 <!-- NPM Package -->
 [![NPM Stable](https://img.shields.io/npm/v/terminal-jarvis/stable.svg?label=NPM%20Stable&color=green&logo=npm)](https://www.npmjs.com/package/terminal-jarvis)

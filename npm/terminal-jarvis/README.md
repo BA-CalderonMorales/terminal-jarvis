@@ -4,7 +4,7 @@
 
 </div>
 
-<table>
+<table border="0">
 <tr>
 <td width="60%">
 
