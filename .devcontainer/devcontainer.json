@@ -1,36 +1,42 @@
 {
   "name": "Terminal Jarvis Development",
-  "image": "mcr.microsoft.com/devcontainers/base:ubuntu-24.04",
-  
-  "features": {
-    "ghcr.io/devcontainers/features/rust:1": {
-      "version": "latest",
-      "profile": "default"
+  "build": {
+    "dockerfile": "./Dockerfile"
+  },
+  "remoteUser": "vscode",
+  "mounts": [
+    "source=/var/run/docker.sock,target=/var/run/docker.sock,type=bind"
+  ],
+  "forwardPorts": [
+    3000,
+    8000,
+    8080
+  ],
+  "portsAttributes": {
+    "3000": {
+      "label": "Development Server",
+      "onAutoForward": "silent"
     },
-    "ghcr.io/devcontainers/features/node:1": {
-      "version": "lts",
-      "nodeGypDependencies": true
+    "8000": {
+      "label": "Local File Server",
+      "onAutoForward": "silent"
     },
-    "ghcr.io/devcontainers/features/github-cli:1": {
-      "version": "latest"
-    },
-    "ghcr.io/devcontainers/features/git:1": {
-      "version": "latest"
-    },
-    "ghcr.io/devcontainers/features/docker-in-docker:2": {
-      "version": "latest",
-      "enableNonRootDocker": true
-    },
-    "ghcr.io/devcontainers/features/common-utils:2": {
-      "installZsh": true,
-      "installOhMyZsh": true,
-      "upgradePackages": true,
-      "username": "vscode",
-      "uid": "1000",
-      "gid": "1000"
+    "8080": {
+      "label": "Alternative Server",
+      "onAutoForward": "silent"
     }
   },
-
+  "containerEnv": {
+    "RUST_LOG": "debug",
+    "CARGO_TERM_COLOR": "always",
+    "CARGO_INCREMENTAL": "1",
+    "RUST_BACKTRACE": "1"
+  },
+  "updateContentCommand": "bash .devcontainer/scripts/setup-dev-environment.sh",
+  "postCreateCommand": [
+    "bash",
+    ".devcontainer/scripts/setup-dev-environment.sh"
+  ],
   "customizations": {
     "vscode": {
       "extensions": [
@@ -49,7 +55,11 @@
         "rust-analyzer.checkOnSave.command": "clippy",
         "rust-analyzer.checkOnSave.allTargets": true,
         "rust-analyzer.checkOnSave.allFeatures": true,
-        "rust-analyzer.checkOnSave.extraArgs": ["--", "-D", "warnings"],
+        "rust-analyzer.checkOnSave.extraArgs": [
+          "--",
+          "-D",
+          "warnings"
+        ],
         "files.watcherExclude": {
           "**/target/**": true
         },
@@ -61,72 +71,6 @@
       }
     }
   },
-
-  "initializeCommand": [
-    "echo", "Preparing Terminal Jarvis development environment for Ubuntu..."
-  ],
-
-  "onCreateCommand": [
-    "sh",
-    "-c", 
-    "echo 'Setting up Ubuntu development environment...' && sudo apt-get update && sudo apt-get install -y build-essential libssl-dev pkg-config nodejs npm gh git-lfs && echo 'Fixing permissions for workspace...' && sudo chown -R vscode:vscode /workspaces/terminal-jarvis && sudo chmod -R 755 /workspaces/terminal-jarvis/scripts && sudo chmod +x /workspaces/terminal-jarvis/scripts/*/*.sh && echo 'Verifying installations...' && gh --version && git lfs version && echo 'Configuring Git LFS...' && git lfs install && echo 'Ubuntu development environment ready!'"
-  ],
-
-  "updateContentCommand": [
-    "sh",
-    "-c",
-    "echo 'Updating Terminal Jarvis environment...' && export HOME=/home/vscode && export CARGO_HOME=/home/vscode/.cargo && export RUSTUP_HOME=/home/vscode/.rustup && export PATH=\"/home/vscode/.cargo/bin:$PATH\" && echo 'Fixing permissions...' && sudo chown -R vscode:vscode /workspaces/terminal-jarvis 2>/dev/null || true && sudo chmod -R 755 /workspaces/terminal-jarvis/scripts 2>/dev/null || true && sudo chmod +x /workspaces/terminal-jarvis/scripts/*/*.sh 2>/dev/null || true && echo 'Environment updated successfully!'"
-  ],
-
-  "postCreateCommand": [
-    "sh", 
-    "-c",
-    "echo 'Building project dependencies...' && export HOME=/home/vscode && export CARGO_HOME=/home/vscode/.cargo && export RUSTUP_HOME=/home/vscode/.rustup && export PATH=\"/home/vscode/.cargo/bin:$PATH\" && source /home/vscode/.cargo/env && echo 'Rust environment loaded:' && rustc --version && cargo --version && echo 'Checking project structure...' && cargo check --all-targets 2>&1 | head -20 && echo 'Installing NPM dependencies...' && cd npm/terminal-jarvis && npm install && cd ../.. && echo 'Verifying installation...' && node --version && npm --version && echo '' && echo 'Terminal Jarvis development environment ready!' && echo 'Quick commands:' && echo '  source /home/vscode/.cargo/env  # Load Rust environment' && echo '  cargo run -- --help           # Show Terminal Jarvis help' && echo '  cargo run -- list             # List available AI tools' && echo '  cargo test                    # Run all tests'"
-  ],
-
-  "postStartCommand": [
-    "sh",
-    "-c",
-    "echo 'Setting up terminal environment...' && export HOME=/home/vscode && echo 'source /home/vscode/.cargo/env' >> /home/vscode/.bashrc && echo 'export HOME=/home/vscode' >> /home/vscode/.bashrc && echo 'export CARGO_HOME=/home/vscode/.cargo' >> /home/vscode/.bashrc && echo 'export RUSTUP_HOME=/home/vscode/.rustup' >> /home/vscode/.bashrc && echo '# Terminal Jarvis Custom Prompt' >> /home/vscode/.bashrc && echo 'parse_git_branch() { git branch 2>/dev/null | sed -e \"/^[^*]/d\" -e \"s/* \\(.*\\)/\\1/\"; }' >> /home/vscode/.bashrc && echo 'export PS1=\"\\[\\033[1;36m\\]terminal-jarvis\\[\\033[0m\\]:\\[\\033[1;34m\\]\\w\\[\\033[0m\\] \\[\\033[1;32m\\](\\$(parse_git_branch))\\[\\033[0m\\] \\[\\033[1;35m\\]➤\\[\\033[0m\\] \"' >> /home/vscode/.bashrc && echo 'Ensuring proper permissions...' && chmod -R 755 /workspaces/terminal-jarvis/scripts 2>/dev/null || true && chmod +x /workspaces/terminal-jarvis/scripts/*/*.sh 2>/dev/null || true && echo 'Welcome to Terminal Jarvis development!' && echo 'Environment: Ubuntu Linux with Rust toolchain' && echo 'All dependencies installed and configured!' && echo '' && echo 'Quick start commands:' && echo '  cargo run -- --help     # Show Terminal Jarvis help' && echo '  cargo run -- list       # List AI tools' && echo '  cargo test              # Run tests' && echo '  ./scripts/cicd/local-ci.sh # Run CI checks' && echo '' && echo 'Rust environment is automatically loaded!' && echo 'Custom colorful prompt configured!'"
-  ],
-
-  "remoteUser": "vscode",
-  
-  "mounts": [
-    "source=/var/run/docker.sock,target=/var/run/docker.sock,type=bind"
-  ],
-
-  "forwardPorts": [3000, 8000, 8080],
-  "portsAttributes": {
-    "3000": {
-      "label": "Development Server",
-      "onAutoForward": "silent"
-    },
-    "8000": {
-      "label": "Local File Server",
-      "onAutoForward": "silent"
-    },
-    "8080": {
-      "label": "Alternative Server",
-      "onAutoForward": "silent"
-    }
-  },
-
-  "containerEnv": {
-    "RUST_LOG": "debug",
-    "CARGO_TERM_COLOR": "always",
-    "CARGO_INCREMENTAL": "1",
-    "RUST_BACKTRACE": "1",
-    "RUSTUP_HOME": "/home/vscode/.rustup",
-    "CARGO_HOME": "/home/vscode/.cargo",
-    "PATH": "/home/vscode/.cargo/bin:${PATH}",
-    "HOME": "/home/vscode",
-    "USER": "vscode",
-    "WORKSPACE_OWNER": "vscode"
-  },
-
   "shutdownAction": "stopContainer",
-  
   "waitFor": "postCreateCommand"
-
 }
