@@ -5,13 +5,16 @@
 </div>
 
 <table border="0" cellspacing="0" cellpadding="0" style="border: none; border-collapse: collapse;">
+
 <tr>
-<td width="60%" style="border: none; padding: 0;">
+
+<td width="75%" style="border: none; padding: 0;">
 
 <img src="screenshot_and_demo/promo_image_for_readme.png" alt="Terminal Jarvis Interface" width="100%">
 
 </td>
-<td width="40%" align="center" style="border: none; padding: 0;">
+
+<td align="right" width="25%" style="border: none; padding-left: 20px;">
 
 <!-- NPM Package -->
 [![NPM Stable](https://img.shields.io/npm/v/terminal-jarvis/stable.svg?label=NPM%20Stable&color=green&logo=npm)](https://www.npmjs.com/package/terminal-jarvis)
@@ -46,7 +49,7 @@ A unified command center for AI coding tools. Manage and run claude-code, gemini
 
 <div align="center">
 
-<img src="screenshot_and_demo/Terminal Jarvis v0.0.67 Demo.gif" alt="Terminal Jarvis Demo" width="85%" style="border-radius: 6px;">
+<img src="screenshot_and_demo/Terminal Jarvis v0.0.67 Demo.gif" alt="Terminal Jarvis Demo" width="100%" style="border-radius: 6px;">
 
 </div>
 
