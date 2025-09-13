@@ -60,9 +60,11 @@ The optimal way to use Terminal Jarvis is through a pre-configured remote develo
 - **[Use VS Code Dev Containers](https://code.visualstudio.com/docs/remote/containers)** - Local containerized environment
 
 **Why this approach is ideal:**
-- **Zero Setup Time**: Complete development environment ready in 60 seconds
+- **Zero Setup Time**: Complete development environment ready in ~60 seconds
 - **Consistent Environment**: Same setup across all contributors and platforms
-- **Pre-installed Tools**: Rust 1.87, Node.js 20, GitHub CLI, Git LFS, debugging tools
+- **Pre-installed Tools**: Rust 1.87, Node.js 20, GitHub CLI, Git LFS, LLDB debugger
+- **VS Code Extensions**: GitHub Copilot, Rust debugging, TOML support pre-configured
+- **Optimized Settings**: File watching excludes, format-on-save, search optimization
 - **AI-Assisted Development**: GitHub Copilot pre-configured
 - **All Dependencies Ready**: No manual installation of compilers or tools
 
@@ -115,9 +117,9 @@ Terminal Jarvis is your AI coding assistant command center:
 - **[Testing Guide](docs/TESTING.md)** - How to test and contribute
 - **[Contribution Guide](docs/CONTRIBUTIONS.md)** - Complete contributor guidelines
 - **[Roadmap](docs/ROADMAP.md)** - Future plans and development priorities
-- **[Supported AI Tools](docs/SOURCES.md)** - Complete overview of all 7 integrated AI coding tools
+- **[Supported AI Tools](docs/SOURCES.md)** - Complete overview of all integrated AI coding tools
 
-Terminal Jarvis supports 7 AI coding tools including Claude, Gemini, Qwen, and others in various stability stages. Each tool is carefully integrated with intelligent authentication flows and session management. For detailed tool information, capabilities, and current status, see our [comprehensive tool guide](docs/SOURCES.md).
+Terminal Jarvis provides a unified interface for multiple AI coding tools including Claude, Gemini, Qwen, and an expanding ecosystem of others. Each tool is carefully integrated with intelligent authentication flows and session management. For detailed tool information, capabilities, and current status, see our [comprehensive tool guide](docs/SOURCES.md).
 
 > [!CAUTION]
 > **Known Issues**: [View current limitations and workarounds](docs/LIMITATIONS.md)
