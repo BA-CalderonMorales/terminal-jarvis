@@ -82,10 +82,21 @@ async fn update_tool_using_install_manager(tool_name: &str) -> Result<()> {
     
     // Convert install command to update command
     let update_command = if install_info.command == "npm" && install_info.args.contains(&"install".to_string()) {
-        // Convert npm install to npm update
-        let mut update_args = install_info.args.clone();
-        if let Some(pos) = update_args.iter().position(|x| x == "install") {
-            update_args[pos] = "update".to_string();
+        // Convert npm install to npm update and remove version specifiers
+        let mut update_args = Vec::new();
+        for arg in &install_info.args {
+            if arg == "install" {
+                update_args.push("update".to_string());
+            } else if arg.contains("@latest") {
+                // Remove @latest from package names
+                // Examples: 
+                // @qwen-code/qwen-code@latest -> @qwen-code/qwen-code
+                // opencode-ai@latest -> opencode-ai
+                let package_name = arg.replace("@latest", "");
+                update_args.push(package_name);
+            } else {
+                update_args.push(arg.clone());
+            }
         }
         format!("{} {}", install_info.command, update_args.join(" "))
     } else {
