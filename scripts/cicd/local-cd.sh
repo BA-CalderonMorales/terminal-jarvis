@@ -139,6 +139,7 @@ display_version_status() {
     local cargo_version=$(grep '^version = ' Cargo.toml | sed 's/version = "\(.*\)"/\1/')
     local npm_version=$(grep '"version":' npm/terminal-jarvis/package.json | sed 's/.*"version": "\(.*\)".*/\1/')
     local ts_version=$(grep "console.log.*Terminal Jarvis v" npm/terminal-jarvis/src/index.ts | sed 's/.*Terminal Jarvis v\([0-9.]*\).*/\1/')
+    local postinstall_version=$(grep "Terminal Jarvis v" npm/terminal-jarvis/package.json | sed 's/.*Terminal Jarvis v\([0-9.]*\).*/\1/')
     local homebrew_version=""
     
     if [ -f "homebrew-terminal-jarvis/Formula/terminal-jarvis.rb" ]; then
@@ -149,6 +150,7 @@ display_version_status() {
     echo -e "${BLUE}  • Cargo.toml: ${cargo_version}${RESET}"
     log_info_if_enabled "  • npm/terminal-jarvis/package.json: ${npm_version}"
     log_info_if_enabled "  • npm/terminal-jarvis/src/index.ts: ${ts_version}"
+    log_info_if_enabled "  • npm/terminal-jarvis/package.json postinstall: ${postinstall_version}"
     if [ -n "$homebrew_version" ]; then
         log_info_if_enabled "  • homebrew-terminal-jarvis/Formula/terminal-jarvis.rb: ${homebrew_version}"
     else
@@ -159,9 +161,9 @@ display_version_status() {
     local readme_versions=$(grep -o 'terminal-jarvis@[0-9.]*' README.md 2>/dev/null || echo "none")
     log_info_if_enabled "  • README.md version refs: ${readme_versions}"
     
-    # Check if all versions match (including Homebrew)
+    # Check if all versions match (including Homebrew and postinstall)
     local all_match=true
-    if [ "$cargo_version" != "$npm_version" ] || [ "$cargo_version" != "$ts_version" ]; then
+    if [ "$cargo_version" != "$npm_version" ] || [ "$cargo_version" != "$ts_version" ] || [ "$cargo_version" != "$postinstall_version" ]; then
         all_match=false
     fi
     
@@ -209,6 +211,10 @@ update_all_versions() {
     # Update version display in TypeScript in showFallbackMessage function
     log_info_if_enabled "  • Updating npm/terminal-jarvis/src/index.ts"
     sed -i "s/console.log(\"Terminal Jarvis v[0-9]\+\.[0-9]\+\.[0-9]\+\");/console.log(\"Terminal Jarvis v$new_version\");/g" npm/terminal-jarvis/src/index.ts
+    
+    # Update postinstall script version
+    log_info_if_enabled "  • Updating npm/terminal-jarvis/package.json postinstall script"
+    sed -i "s/Terminal Jarvis v[0-9]\+\.[0-9]\+\.[0-9]\+/Terminal Jarvis v$new_version/g" npm/terminal-jarvis/package.json
     
     # Update version references in README files (if any exist)
     log_info_if_enabled "  • Updating version references in documentation"
