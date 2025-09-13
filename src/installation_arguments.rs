@@ -156,8 +156,8 @@ impl InstallationManager {
     ///
     /// # Note
     ///
-    /// This method loads from the TOML registry on each call. For single-tool lookups,
-    /// prefer [`get_install_command`](Self::get_install_command).
+    /// This method loads from the modular TOML configuration files in `config/tools/` on each call.
+    /// For single-tool lookups, prefer [`get_install_command`](Self::get_install_command).
     pub fn get_install_commands() -> HashMap<String, InstallCommand> {
         let config_loader = get_tool_config_loader();
         let tool_names = config_loader.get_tool_names();
