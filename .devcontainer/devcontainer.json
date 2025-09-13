@@ -40,26 +40,13 @@
   "customizations": {
     "vscode": {
       "extensions": [
-        "rust-lang.rust-analyzer",
         "vadimcn.vscode-lldb",
-        "serayuzgur.crates",
         "tamasfe.even-better-toml",
-        "biomejs.biome",
         "ms-vscode.vscode-typescript-next",
         "GitHub.copilot",
         "GitHub.copilot-chat"
       ],
       "settings": {
-        "rust-analyzer.cargo.loadOutDirsFromCheck": true,
-        "rust-analyzer.procMacro.enable": true,
-        "rust-analyzer.checkOnSave.command": "clippy",
-        "rust-analyzer.checkOnSave.allTargets": true,
-        "rust-analyzer.checkOnSave.allFeatures": true,
-        "rust-analyzer.checkOnSave.extraArgs": [
-          "--",
-          "-D",
-          "warnings"
-        ],
         "files.watcherExclude": {
           "**/target/**": true
         },

@@ -8,4 +8,3 @@ pub mod progress_utils;
 pub mod services;
 pub mod theme;
 pub mod tools;
-pub mod ai_tools_registry;

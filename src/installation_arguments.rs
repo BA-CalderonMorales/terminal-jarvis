@@ -5,11 +5,23 @@
 // This module provides a centralized system for managing installation commands
 // across all supported AI coding tools, with NPM availability validation.
 // 
-// Configuration is now loaded from ai-tools-registry.toml for better maintainability
+// Configuration is now loaded from the modular config system for better maintainability
 // and future database integration capabilities.
 
-use crate::ai_tools_registry::{AiToolsRegistryManager, InstallCommand};
+use crate::tools::tools_command_mapping::{get_install_command, get_update_command};
+use crate::tools::tools_config::get_tool_config_loader;
 use std::collections::HashMap;
+
+/// Installation command structure for compatibility with existing code
+#[derive(Debug, Clone)]
+pub struct InstallCommand {
+    pub command: String,
+    pub args: Vec<String>,
+    pub description: String,
+    pub requires_npm: bool,
+    #[allow(dead_code)]  // Used for installation privilege management
+    pub requires_sudo: bool,
+}
 
 /// Manages installation commands and dependency validation for AI coding tools
 ///
@@ -68,14 +80,8 @@ impl InstallationManager {
     /// }
     /// ```
     pub fn get_tool_names() -> Vec<String> {
-        match AiToolsRegistryManager::new() {
-            Ok(registry) => registry.get_tool_names(),
-            Err(_) => {
-                // Fallback to empty list if registry fails to load
-                eprintln!("Warning: Failed to load AI Tools Registry");
-                Vec::new()
-            }
-        }
+        let config_loader = get_tool_config_loader();
+        config_loader.get_tool_names()
     }
 
     /// Retrieves installation command for a specific tool
@@ -99,13 +105,13 @@ impl InstallationManager {
     /// }
     /// ```
     pub fn get_install_command(tool: &str) -> Option<InstallCommand> {
-        match AiToolsRegistryManager::new() {
-            Ok(registry) => registry.get_install_command(tool),
-            Err(_) => {
-                eprintln!("Warning: Failed to load AI Tools Registry");
-                None
-            }
-        }
+        get_install_command(tool).map(|cmd| InstallCommand {
+            command: cmd.command,
+            args: cmd.args,
+            description: cmd.description,
+            requires_npm: cmd.requires_npm,
+            requires_sudo: cmd.requires_sudo,
+        })
     }
 
     /// Retrieves update command for a specific tool
@@ -128,14 +134,15 @@ impl InstallationManager {
     ///     println!("Tool not found");
     /// }
     /// ```
+    #[allow(dead_code)]  // Used by update functionality
     pub fn get_update_command(tool: &str) -> Option<InstallCommand> {
-        match AiToolsRegistryManager::new() {
-            Ok(registry) => registry.get_update_command(tool),
-            Err(_) => {
-                eprintln!("Warning: Failed to load AI Tools Registry");
-                None
-            }
-        }
+        get_update_command(tool).map(|cmd| InstallCommand {
+            command: cmd.command,
+            args: cmd.args,
+            description: cmd.description,
+            requires_npm: cmd.requires_npm,
+            requires_sudo: cmd.requires_sudo,
+        })
     }
 
     /// Returns all available installation commands
@@ -152,23 +159,22 @@ impl InstallationManager {
     /// This method loads from the TOML registry on each call. For single-tool lookups,
     /// prefer [`get_install_command`](Self::get_install_command).
     pub fn get_install_commands() -> HashMap<String, InstallCommand> {
-        match AiToolsRegistryManager::new() {
-            Ok(registry) => {
-                let tool_names = registry.get_tool_names();
-                let mut commands = HashMap::new();
-                
-                for tool in tool_names {
-                    if let Some(cmd) = registry.get_install_command(&tool) {
-                        commands.insert(tool, cmd);
-                    }
-                }
-                
-                commands
-            }
-            Err(_) => {
-                eprintln!("Warning: Failed to load AI Tools Registry");
-                HashMap::new()
+        let config_loader = get_tool_config_loader();
+        let tool_names = config_loader.get_tool_names();
+        let mut commands = HashMap::new();
+        
+        for tool in tool_names {
+            if let Some(cmd) = get_install_command(&tool) {
+                commands.insert(tool, InstallCommand {
+                    command: cmd.command,
+                    args: cmd.args,
+                    description: cmd.description,
+                    requires_npm: cmd.requires_npm,
+                    requires_sudo: cmd.requires_sudo,
+                });
             }
         }
+        
+        commands
     }
 }
