@@ -134,7 +134,8 @@ async fn handle_tool_launch(tool_name: &str) -> Result<()> {
         })
     };
 
-    launch_tool_with_progress(tool_name, &args).await?;
+    // Always launch the tool and show post-tool menu regardless of success/failure
+    let _result = launch_tool_with_progress(tool_name, &args).await;
     handle_post_tool_exit().await
 }
 
@@ -176,10 +177,18 @@ async fn launch_tool_with_progress(tool_name: &str, args: &[String]) -> Result<(
             );
         }
         Err(e) => {
-            eprintln!(
-                "\n{}",
-                theme.accent(&format!("Error running {}: {}", tool_name, e))
-            );
+            // For aider specifically, be more graceful with error handling
+            if tool_name == "aider" {
+                println!(
+                    "\n{}",
+                    theme.accent("Aider session ended. Some compatibility issues may occur with uv-installed tools.")
+                );
+            } else {
+                eprintln!(
+                    "\n{}",
+                    theme.accent(&format!("Error running {}: {}", tool_name, e))
+                );
+            }
         }
     }
 

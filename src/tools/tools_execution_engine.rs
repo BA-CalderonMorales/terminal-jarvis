@@ -7,10 +7,11 @@ use std::process::Command;
 use super::tools_command_mapping::get_cli_command;
 use super::tools_detection::check_tool_installed;
 use super::tools_process_management::{
-    prepare_opencode_terminal_state, run_opencode_with_clean_exit,
+    prepare_opencode_terminal_state, run_opencode_with_clean_exit, run_tool_intercepting_sigint,
 };
 use super::tools_startup_guidance::show_tool_startup_guidance;
 use crate::auth_manager::AuthManager;
+use inquire::Text;
 
 /// Run a tool with arguments - automatically handles session continuation for internal commands
 pub async fn run_tool(display_name: &str, args: &[String]) -> Result<()> {
@@ -142,8 +143,52 @@ pub async fn run_tool_once(display_name: &str, args: &[String]) -> Result<()> {
             cmd.args(args);
         }
     } else if display_name == "aider" {
-        // For aider, pass arguments directly without modification
-        // Let aider handle its own terminal control and input modes
+        // Strategic aider handling - reduce terminal control and ensure Ctrl+C only stops child
+        cmd.env("PYTHONUNBUFFERED", "1");
+        cmd.env("AIDER_NO_BROWSER", "1"); // prevent auto opening browser; still prints URL
+        // Reduce fancy terminal features from prompt_toolkit ONLY in headless/Codespaces
+        let is_headless = std::env::var("DISPLAY").is_err() && std::env::var("WAYLAND_DISPLAY").is_err();
+        let is_codespaces = std::env::var("CODESPACES").map(|v| v == "true").unwrap_or(false)
+            || std::env::var("GITHUB_CODESPACES").is_ok()
+            || std::env::var("GITHUB_CODESPACES_PORT_FORWARDING_DOMAIN").is_ok();
+        let should_disable_fancy = is_headless || is_codespaces;
+        if should_disable_fancy && !args.iter().any(|arg| arg.contains("help") || arg.contains("version")) {
+            if !args.iter().any(|arg| arg.contains("no-pretty")) {
+                cmd.arg("--no-pretty");
+            }
+            if !args.iter().any(|arg| arg.contains("no-fancy-input")) {
+                cmd.arg("--no-fancy-input");
+            }
+            if !args.iter().any(|arg| arg.contains("no-multiline")) {
+                cmd.arg("--no-multiline");
+            }
+        }
+
+        // If running in Codespaces (or a cloud env) where OAuth callback won't work,
+        // and no API key is present, offer to set an API key for this session only.
+        let is_codespaces = is_codespaces;
+        let no_provider_keys = !std::env::var("OPENROUTER_API_KEY").is_ok()
+            && !std::env::var("OPENAI_API_KEY").is_ok()
+            && !std::env::var("ANTHROPIC_API_KEY").is_ok();
+
+        if is_codespaces && no_provider_keys {
+            println!(
+                "{}",
+                crate::theme::theme_global_config::current_theme()
+                    .accent("OpenRouter API keys: https://openrouter.ai/settings/keys")
+            );
+            // Lightweight inline prompt; user can press Enter to skip
+            if let Ok(input) = Text::new("Enter an API key for Aider (recommended: OPENROUTER_API_KEY). Leave blank to skip:")
+                .with_placeholder("skips if empty")
+                .prompt()
+            {
+                let trimmed = input.trim().to_string();
+                if !trimmed.is_empty() {
+                    // Prefer OpenRouter key when provided directly
+                    cmd.env("OPENROUTER_API_KEY", trimmed);
+                }
+            }
+        }
         cmd.args(args);
     } else if display_name == "llxprt" {
         // For llxprt, when no arguments are provided, it opens the interactive TUI
@@ -160,9 +205,12 @@ pub async fn run_tool_once(display_name: &str, args: &[String]) -> Result<()> {
         .stdout(std::process::Stdio::inherit())
         .stderr(std::process::Stdio::inherit());
 
-    // Special handling for opencode to prevent panic on exit
+    // Special handling for tools with known issues
     let status = if display_name == "opencode" {
         run_opencode_with_clean_exit(cmd)?
+    } else if display_name == "aider" {
+        // Run aider while intercepting Ctrl+C so only the child is terminated
+        run_tool_intercepting_sigint(cmd)?
     } else {
         // Use direct status() for tools to ensure proper signal handling
         // This allows Ctrl+C and other signals to work properly and exit gracefully
@@ -173,7 +221,21 @@ pub async fn run_tool_once(display_name: &str, args: &[String]) -> Result<()> {
     // Restore environment after tool execution
     AuthManager::restore_environment()?;
 
+    // Strategic exit code handling for tools with known issues
     if !status.success() {
+        if display_name == "aider" {
+            // For aider (especially uv-installed), treat any non-zero as graceful termination
+            let exit_code = status
+                .code()
+                .map(|c| c.to_string())
+                .unwrap_or_else(|| "signal".to_string());
+            println!(
+                "\nAider session ended (exit: {}). Returning to Terminal Jarvis...",
+                exit_code
+            );
+            return Ok(());
+        }
+
         return Err(anyhow::anyhow!(
             "Tool '{}' exited with error code: {:?}",
             display_name,

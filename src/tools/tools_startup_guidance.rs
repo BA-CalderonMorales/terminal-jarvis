@@ -8,6 +8,14 @@ pub fn show_tool_startup_guidance(display_name: &str) -> Result<()> {
     use crate::theme::theme_global_config;
 
     let theme = theme_global_config::current_theme();
+    // Basic environment detection to tailor guidance
+    let is_codespaces = std::env::var("CODESPACES").map(|v| v == "true").unwrap_or(false)
+        || std::env::var("GITHUB_CODESPACES").is_ok()
+        || std::env::var("GITHUB_CODESPACES_PORT_FORWARDING_DOMAIN").is_ok();
+    let is_devcontainer = std::path::Path::new("/.dockerenv").exists()
+        || std::env::var("DEVCONTAINER").is_ok()
+        || std::env::var("REMOTE_CONTAINERS").is_ok()
+        || std::env::var("VSCODE_IPC_HOOK_CLI").is_ok();
 
     match display_name {
         "claude" => {
@@ -189,6 +197,71 @@ pub fn show_tool_startup_guidance(display_name: &str) -> Result<()> {
                 theme.secondary("└────────────────────────────────────────────────────────────┘")
             );
             println!();
+
+            // Additional OAuth guidance for containerized environments
+            if is_codespaces {
+                // In Codespaces, localhost callbacks in the local browser cannot reach the remote container
+                println!(
+                    "{}",
+                    theme.secondary("┌─ T.JARVIS OAUTH LIMITATION (CODESPACES) ───────────────────┐")
+                );
+                println!(
+                    "{}",
+                    theme.primary("│ OAuth with localhost callback is not supported in Codespaces. │")
+                );
+                println!(
+                    "{}",
+                    theme.primary("│ Use API key authentication instead for OpenRouter/OpenAI/etc. │")
+                );
+                println!(
+                    "{}",
+                    theme.accent("│ • Example: export OPENROUTER_API_KEY=your_api_key           │")
+                );
+                println!(
+                    "{}",
+                    theme.accent("│ • Get an OpenRouter API key: https://openrouter.ai/settings/keys │")
+                );
+                println!(
+                    "{}",
+                    theme.accent("│ • Then run: aider --model openrouter/anthropic/claude-3.5   │")
+                );
+                println!(
+                    "{}",
+                    theme.accent("│   See: https://aider.chat/docs/troubleshooting/models-and-keys.html │")
+                );
+                println!(
+                    "{}",
+                    theme.secondary("└────────────────────────────────────────────────────────────┘")
+                );
+                println!();
+            } else if is_devcontainer {
+                // In local devcontainers, forwarding the callback port enables OAuth
+                println!(
+                    "{}",
+                    theme.secondary("┌─ T.JARVIS OAUTH TIP (DEV CONTAINER) ───────────────────────┐")
+                );
+                println!(
+                    "{}",
+                    theme.primary("│ Forward port 8484 to your host in the VS Code Ports panel. │")
+                );
+                println!(
+                    "{}",
+                    theme.primary("│ Then open the printed URL and complete the login.          │")
+                );
+                println!(
+                    "{}",
+                    theme.accent("│ • Port to forward: 8484 (HTTP)                              │")
+                );
+                println!(
+                    "{}",
+                    theme.accent("│ • If OAuth still fails, set an API key as a fallback.       │")
+                );
+                println!(
+                    "{}",
+                    theme.secondary("└────────────────────────────────────────────────────────────┘")
+                );
+                println!();
+            }
         }
         "amp" => {
             println!(
