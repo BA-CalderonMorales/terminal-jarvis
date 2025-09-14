@@ -10,6 +10,9 @@ RUN apt-get update && apt-get install -y \
     libssl-dev \
     nodejs \
     npm \
+    python3 \
+    python3-pip \
+    python3-venv \
     ca-certificates \
     sudo \
     && curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | dd of=/usr/share/keyrings/githubcli-archive-keyring.gpg \
@@ -26,5 +29,9 @@ RUN groupadd --gid 1000 vscode \
     && useradd --uid 1000 --gid vscode --shell /bin/bash --create-home vscode \
     && echo 'vscode ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers
 
-WORKDIR /workspaces/terminal-jarvis
+# Install uv for the vscode user
 USER vscode
+RUN curl -LsSf https://astral.sh/uv/install.sh | sh
+ENV PATH="/home/vscode/.cargo/bin:$PATH"
+
+WORKDIR /workspaces/terminal-jarvis

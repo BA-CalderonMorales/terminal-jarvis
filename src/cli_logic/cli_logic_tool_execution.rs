@@ -8,12 +8,30 @@ use tokio::process::Command as AsyncCommand;
 
 /// Handle running a specific AI coding tool with arguments
 pub async fn handle_run_tool(tool: &str, args: &[String]) -> Result<()> {
-    // Check if NPM is available first
-    if !InstallationManager::check_npm_available() {
+    // Get install command to check dependencies
+    let install_cmd = InstallationManager::get_install_command(tool)
+        .ok_or_else(|| anyhow!("Tool {} not found in configuration", tool))?;
+
+    // Check appropriate dependencies based on installation method
+    if install_cmd.requires_npm && !InstallationManager::check_npm_available() {
         ProgressUtils::warning_message("Node.js runtime environment not detected");
-        println!("  Most AI coding tools are distributed via the NPM ecosystem.");
+        println!("  Tool {} requires NPM but it's not available.", tool);
         println!("  Please install Node.js to continue: https://nodejs.org/");
         return Err(anyhow!("Node.js runtime required"));
+    }
+    
+    if install_cmd.command == "curl" && !InstallationManager::check_curl_available() {
+        ProgressUtils::warning_message("curl not found");
+        println!("  Tool {} requires curl but it's not available.", tool);
+        println!("  Please install curl to continue.");
+        return Err(anyhow!("curl required"));
+    }
+    
+    if install_cmd.command == "uv" && !InstallationManager::check_uv_available() {
+        ProgressUtils::warning_message("uv not found");
+        println!("  Tool {} requires uv but it's not available.", tool);
+        println!("  Please install uv from https://docs.astral.sh/uv/getting-started/installation/");
+        return Err(anyhow!("uv required"));
     }
 
     // Check if tool is installed with progress
@@ -75,7 +93,7 @@ pub async fn handle_install_tool(tool: &str) -> Result<()> {
     let install_cmd = InstallationManager::get_install_command(tool)
         .ok_or_else(|| anyhow!("Tool '{}' not found in installation registry", tool))?;
 
-    // Check NPM availability with progress
+    // Check dependencies based on installation method
     if install_cmd.requires_npm {
         let npm_check = ProgressContext::new("Checking NPM availability");
 
@@ -89,6 +107,36 @@ pub async fn handle_install_tool(tool: &str) -> Result<()> {
         }
 
         npm_check.finish_success("NPM is available");
+    }
+    
+    if install_cmd.command == "curl" {
+        let curl_check = ProgressContext::new("Checking curl availability");
+
+        if !InstallationManager::check_curl_available() {
+            curl_check.finish_error("curl not found");
+            println!("  Please install curl first (usually available by default on most systems)");
+            return Err(anyhow!(
+                "curl is required to install {} but is not available",
+                tool
+            ));
+        }
+
+        curl_check.finish_success("curl is available");
+    }
+    
+    if install_cmd.command == "uv" {
+        let uv_check = ProgressContext::new("Checking uv availability");
+
+        if !InstallationManager::check_uv_available() {
+            uv_check.finish_error("uv not found");
+            println!("  Please install uv first: https://docs.astral.sh/uv/getting-started/installation/");
+            return Err(anyhow!(
+                "uv is required to install {} but is not available",
+                tool
+            ));
+        }
+
+        uv_check.finish_success("uv is available");
     }
 
     // Create installation progress
@@ -107,9 +155,31 @@ pub async fn handle_install_tool(tool: &str) -> Result<()> {
     let mut cmd = AsyncCommand::new(&install_cmd.command);
     cmd.args(&install_cmd.args);
 
-    // For NPM global installs, use sudo if available to handle permission issues
-    let status = if install_cmd.requires_npm && install_cmd.args.contains(&"-g".to_string()) {
-        // Check if sudo is available
+    // Handle special installation types
+    let status = if let Some(pipe_to) = &install_cmd.pipe_to {
+        // Handle curl-based installations that pipe to bash (e.g., goose)
+        let curl_output = AsyncCommand::new(&install_cmd.command)
+            .args(&install_cmd.args)
+            .output()
+            .await?;
+
+        if !curl_output.status.success() {
+            return Err(anyhow::anyhow!("Failed to download installation script"));
+        }
+
+        let mut bash_cmd = AsyncCommand::new(pipe_to);
+        bash_cmd.stdin(std::process::Stdio::piped());
+        bash_cmd.stdout(std::process::Stdio::null());
+        bash_cmd.stderr(std::process::Stdio::null());
+
+        let mut child = bash_cmd.spawn()?;
+        if let Some(stdin) = child.stdin.as_mut() {
+            use tokio::io::AsyncWriteExt;
+            stdin.write_all(&curl_output.stdout).await?;
+        }
+        child.wait().await?
+    } else if install_cmd.requires_npm && install_cmd.args.contains(&"-g".to_string()) {
+        // For NPM global installs, use sudo if available to handle permission issues
         let sudo_available = std::process::Command::new("which")
             .arg("sudo")
             .output()
@@ -130,7 +200,7 @@ pub async fn handle_install_tool(tool: &str) -> Result<()> {
             cmd.status().await?
         }
     } else {
-        // Non-global NPM installs or non-NPM commands
+        // Regular command execution (npm, uv, cargo, etc.)
         cmd.stdout(std::process::Stdio::null());
         cmd.stderr(std::process::Stdio::null());
         cmd.status().await?

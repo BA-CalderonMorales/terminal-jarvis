@@ -4,20 +4,24 @@
 use anyhow::Result;
 use std::process::Command;
 
-/// Special process management for opencode to prevent "close of closed channel" panic
-/// This handles opencode's signal handling more carefully to avoid TUI cleanup race conditions
-pub fn run_opencode_with_clean_exit(mut cmd: Command) -> Result<std::process::ExitStatus> {
-    // For opencode, we need to be more careful about process management
-    // The panic happens when opencode's status component cleanup runs multiple times
-    // or when channels are closed by multiple goroutines simultaneously
+/// Run a tool process with proper signal isolation to prevent parent process termination
+/// This ensures that Ctrl+C and other signals sent to child processes don't terminate Terminal Jarvis
+pub fn run_tool_with_signal_isolation(mut cmd: Command) -> Result<std::process::ExitStatus> {
+    // Start the process as a separate process group to isolate signals
+    #[cfg(unix)]
+    {
+        use std::os::unix::process::CommandExt;
+        // Create new process group - this should prevent signal propagation to parent
+        cmd.process_group(0);
+    }
 
-    // Start the process but manage it more carefully
+    // Start the process
     let mut child = cmd
         .spawn()
-        .map_err(|e| anyhow::anyhow!("Failed to spawn opencode: {}", e))?;
+        .map_err(|e| anyhow::anyhow!("Failed to spawn process: {}", e))?;
 
-    // Set up signal handling to ensure clean shutdown
-    // This prevents the race condition that causes the channel panic
+    // Wait for the process to complete
+    // Even if the child receives SIGINT/SIGTERM, the parent (Terminal Jarvis) should continue
     let result = child.wait();
 
     match result {
@@ -25,9 +29,16 @@ pub fn run_opencode_with_clean_exit(mut cmd: Command) -> Result<std::process::Ex
         Err(e) => {
             // If wait fails, try to clean up gracefully
             let _ = child.kill(); // Best effort cleanup
-            Err(anyhow::anyhow!("Failed to wait for opencode: {}", e))
+            Err(anyhow::anyhow!("Failed to wait for child process: {}", e))
         }
     }
+}
+
+/// Special process management for opencode to prevent "close of closed channel" panic
+/// This handles opencode's signal handling more carefully to avoid TUI cleanup race conditions
+pub fn run_opencode_with_clean_exit(cmd: Command) -> Result<std::process::ExitStatus> {
+    // Use the same signal isolation approach for opencode
+    run_tool_with_signal_isolation(cmd)
 }
 
 /// Prepare terminal state specifically for opencode to ensure proper input focus

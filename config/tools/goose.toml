@@ -1,0 +1,54 @@
+# =============================================================================
+# GOOSE - Block's AI coding assistant
+# =============================================================================
+# Single Responsibility: Manages Goose tool configuration and settings
+# Open/Closed Principle: Self-contained tool definition, extensible without modification
+
+[tool]
+display_name = "Goose"
+config_key = "goose"
+description = "Block's AI-powered coding assistant with developer toolkit integration"
+homepage = "https://block.github.io/goose/"
+documentation = "https://block.github.io/goose/docs/"
+cli_command = "goose"
+requires_npm = false
+requires_sudo = false
+status = "stable"
+
+[tool.install]
+command = "curl"
+args = [
+    "-fsSL",
+    "https://github.com/block/goose/releases/download/stable/download_cli.sh",
+]
+pipe_to = "bash"
+verify_command = "goose --version"
+post_install_message = "Goose installed successfully! Run 'goose configure' to set up your AI provider."
+
+[tool.update]
+command = "goose"
+args = ["update"]
+verify_command = "goose --version"
+
+[tool.auth]
+env_vars = ["OPENAI_API_KEY", "ANTHROPIC_API_KEY", "GEMINI_API_KEY"]
+setup_url = "https://block.github.io/goose/docs/getting-started/providers"
+browser_auth = true
+auth_instructions = "Run 'goose configure' to set up your preferred AI provider (Tetrate, OpenRouter, or manual API key configuration)"
+
+[tool.features]
+supports_files = true
+supports_streaming = true
+supports_conversation = true
+max_context_tokens = 128000
+supported_languages = [
+    "python",
+    "javascript",
+    "rust",
+    "go",
+    "java",
+    "cpp",
+    "typescript",
+    "bash",
+    "shell",
+]

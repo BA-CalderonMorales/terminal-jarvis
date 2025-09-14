@@ -43,7 +43,7 @@
 
 <div align="center">
 
-A unified command center for AI coding tools. Manage and run claude-code, gemini-cli, qwen-code, opencode, llxprt, codex, and crush from one beautiful terminal interface.
+A unified command center for AI coding tools. Manage and run claude-code, gemini-cli, qwen-code, opencode, llxprt, codex, crush, goose, amp, and aider from one beautiful terminal interface.
 
 </div>
 

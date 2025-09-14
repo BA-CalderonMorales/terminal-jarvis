@@ -35,7 +35,10 @@ pub async fn run_tool(display_name: &str, args: &[String]) -> Result<()> {
                 Ok(())
             }
         }
-        Err(e) => Err(e),
+        Err(e) => {
+            // Just propagate errors normally - let Terminal Jarvis handle the post-tool flow
+            Err(e)
+        }
     }
 }
 
@@ -138,6 +141,10 @@ pub async fn run_tool_once(display_name: &str, args: &[String]) -> Result<()> {
             // Codex CLI handles various combinations of arguments and flags
             cmd.args(args);
         }
+    } else if display_name == "aider" {
+        // For aider, pass arguments directly without modification
+        // Let aider handle its own terminal control and input modes
+        cmd.args(args);
     } else if display_name == "llxprt" {
         // For llxprt, when no arguments are provided, it opens the interactive TUI
         // This is expected behavior and should work seamlessly
@@ -157,6 +164,8 @@ pub async fn run_tool_once(display_name: &str, args: &[String]) -> Result<()> {
     let status = if display_name == "opencode" {
         run_opencode_with_clean_exit(cmd)?
     } else {
+        // Use direct status() for tools to ensure proper signal handling
+        // This allows Ctrl+C and other signals to work properly and exit gracefully
         cmd.status()
             .map_err(|e| anyhow::anyhow!("Failed to execute {}: {}", cli_command, e))?
     };

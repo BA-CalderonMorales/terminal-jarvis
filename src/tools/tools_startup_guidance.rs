@@ -163,11 +163,84 @@ pub fn show_tool_startup_guidance(display_name: &str) -> Result<()> {
             );
             println!();
         }
-        _ => {
-            // For other tools, show generic guidance
+        "aider" => {
             println!(
                 "{}",
-                theme.secondary("┌─ T.JARVIS SYSTEM ──────────────────────────────────────────┐")
+                theme.secondary("┌─ T.JARVIS AUTHENTICATION ADVISORY ─────────────────────────┐")
+            );
+            println!(
+                "{}",
+                theme.primary("│ Aider may require API key setup for AI model access.       │")
+            );
+            println!(
+                "{}",
+                theme.primary("│ Follow the configuration prompts to get started.           │")
+            );
+            println!(
+                "{}",
+                theme.accent("│ • Supports OpenAI, Anthropic, OpenRouter, and more         │")
+            );
+            println!(
+                "{}",
+                theme.accent("│ • Documentation: https://aider.chat/docs/                  │")
+            );
+            println!(
+                "{}",
+                theme.secondary("└────────────────────────────────────────────────────────────┘")
+            );
+            println!();
+        }
+        "amp" => {
+            println!(
+                "{}",
+                theme.secondary("┌─ T.JARVIS STARTUP ADVISORY ────────────────────────────────┐")
+            );
+            println!(
+                "{}",
+                theme.primary("│ Amp is initializing the AI-powered development interface.  │")
+            );
+            println!(
+                "{}",
+                theme.primary("│ Advanced code assistance will be available momentarily.    │")
+            );
+            println!(
+                "{}",
+                theme.secondary("└────────────────────────────────────────────────────────────┘")
+            );
+            println!();
+        }
+        "goose" => {
+            println!(
+                "{}",
+                theme.secondary("┌─ T.JARVIS AUTHENTICATION ADVISORY ─────────────────────────┐")
+            );
+            println!(
+                "{}",
+                theme.primary("│ Goose may require API configuration for AI model access.   │")
+            );
+            println!(
+                "{}",
+                theme.primary("│ Follow any authentication prompts that appear.             │")
+            );
+            println!(
+                "{}",
+                theme.accent("│ • Supports multiple AI providers and models                │")
+            );
+            println!(
+                "{}",
+                theme.accent("│ • Documentation: https://github.com/square/goose           │")
+            );
+            println!(
+                "{}",
+                theme.secondary("└────────────────────────────────────────────────────────────┘")
+            );
+            println!();
+        }
+        _ => {
+            // For any future tools, show generic guidance
+            println!(
+                "{}",
+                theme.secondary("┌─ T.JARVIS STARTUP ADVISORY ────────────────────────────────┐")
             );
             println!(
                 "{}",
