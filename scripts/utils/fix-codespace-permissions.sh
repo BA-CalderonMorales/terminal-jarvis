@@ -39,6 +39,8 @@ if command -v cargo >/dev/null 2>&1; then
     echo "[OK] Rust found: $(rustc --version)"
 else
     echo "[ERROR] Rust not found. Sourcing environment..."
+    # shellcheck source=/home/vscode/.cargo/env
+    # shellcheck disable=SC1091
     source /home/vscode/.cargo/env
     if command -v cargo >/dev/null 2>&1; then
         echo "[OK] Cargo now available: $(cargo --version)"

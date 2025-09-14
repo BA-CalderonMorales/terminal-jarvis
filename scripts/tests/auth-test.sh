@@ -1,10 +1,13 @@
 #!/bin/bash
+# shellcheck disable=SC2317
 
 # Terminal Jarvis Authentication Behavior Test Script
 # Tests browser-opening prevention in various scenarios
 
 # Source logger
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# shellcheck source=../logger/logger.sh
+# shellcheck disable=SC1091
 source "$SCRIPT_DIR/../logger/logger.sh"
 
 BINARY="./target/release/terminal-jarvis"
@@ -104,8 +107,8 @@ test_interactive_mode() {
         fi
     else
         log_error_if_enabled "  Interactive mode failed"
-        log_warn_if_enabled "  Output:"
-        cat /tmp/interactive_output.log | sed 's/^/    /'
+    log_warn_if_enabled "  Output:"
+    sed 's/^/    /' /tmp/interactive_output.log
     fi
     
     return $exit_code
@@ -117,16 +120,16 @@ test_tool_with_auth_check() {
     log_info_if_enabled "Testing $tool with authentication checks..."
     
     # Try to run the tool with --help (should be safe)
-    timeout 10s $BINARY run $tool --help > /tmp/${tool}_output.log 2>&1
+    timeout 10s "$BINARY" run "$tool" --help > "/tmp/${tool}_output.log" 2>&1
     local exit_code=$?
     
     if [ $exit_code -eq 0 ]; then
         log_success_if_enabled "  $tool executed successfully"
         
         # Check for authentication warnings
-        if grep -q "WARNING.*may attempt to open a browser" /tmp/${tool}_output.log; then
+        if grep -q "WARNING.*may attempt to open a browser" "/tmp/${tool}_output.log"; then
             log_success_if_enabled "  Browser warning displayed for $tool"
-        elif grep -q "API_KEY\|environment variable" /tmp/${tool}_output.log; then
+        elif grep -q "API_KEY\|environment variable" "/tmp/${tool}_output.log"; then
             log_success_if_enabled "  API key guidance provided for $tool"
         fi
         
@@ -135,16 +138,16 @@ test_tool_with_auth_check() {
     else
         log_error_if_enabled "  $tool failed with exit code $exit_code"
         # Check if it's because the tool isn't installed
-        if grep -q "not installed" /tmp/${tool}_output.log; then
+        if grep -q "not installed" "/tmp/${tool}_output.log"; then
             log_info_if_enabled "  Tool is not installed - this is expected"
             return 0
         fi
     fi
     
     # Show relevant output
-    if grep -i "warning\|api\|auth\|browser\|login" /tmp/${tool}_output.log; then
+    if grep -i "warning\|api\|auth\|browser\|login" "/tmp/${tool}_output.log"; then
         log_info_if_enabled "  Authentication-related output:"
-        grep -i "warning\|api\|auth\|browser\|login" /tmp/${tool}_output.log | sed 's/^/    /'
+        grep -i "warning\|api\|auth\|browser\|login" "/tmp/${tool}_output.log" | sed 's/^/    /'
     fi
     
     return 0

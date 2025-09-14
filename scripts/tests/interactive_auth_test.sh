@@ -7,6 +7,8 @@ set -euo pipefail
 
 # Source logger
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# shellcheck source=../logger/logger.sh
+# shellcheck disable=SC1091
 source "$SCRIPT_DIR/../logger/logger.sh"
 
 log_header "Terminal Jarvis Interactive Authentication Test"
@@ -189,8 +191,9 @@ test_terminal_jarvis_wrapper() {
     
     if ! command -v terminal-jarvis >/dev/null 2>&1; then
         log_info_if_enabled "Building terminal-jarvis..."
-        cargo build --release
-        export PATH="$(pwd)/target/release:$PATH"
+    cargo build --release
+    BUILD_BIN_DIR="$(pwd)/target/release"
+    export PATH="$BUILD_BIN_DIR:$PATH"
     fi
     
     log_info_if_enabled "Testing terminal-jarvis run command with browser prevention..."

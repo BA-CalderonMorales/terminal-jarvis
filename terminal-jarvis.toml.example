@@ -9,9 +9,13 @@
 
 # =============================================================================
 # USER TOOL PREFERENCES - Control which tools are enabled and their behavior
+# Note: Tools in Terminal Jarvis may install via npm, uv, or curl depending on
+# the specific tool. No extra config is required—Jarvis detects what's needed.
 # =============================================================================
 [preferences.tools]
 # Enable/disable tools and control auto-updates
+aider = { enabled = true, auto_update = true }
+amp = { enabled = true, auto_update = true }
 claude = { enabled = true, auto_update = true }
 gemini = { enabled = true, auto_update = false }  # Disable auto-update for Gemini
 qwen = { enabled = true, auto_update = true }
@@ -19,6 +23,7 @@ opencode = { enabled = true, auto_update = true }
 llxprt = { enabled = true, auto_update = true }
 codex = { enabled = true, auto_update = true }
 crush = { enabled = true, auto_update = true }
+goose = { enabled = true, auto_update = true }
 
 # Optional: UI and update preferences
 [preferences.ui]
@@ -58,3 +63,8 @@ max_retries = 3
 # Note: Terminal Jarvis automatically discovers all supported tools from its
 # built-in registry. You don't need to define tools here unless you want to
 # override specific installation commands or add custom tools.
+#
+# Installer types used by built-in tools (for reference):
+# - npm: claude, gemini, qwen, opencode, llxprt, codex, crush, amp
+# - uv:  aider
+# - curl: goose

@@ -74,8 +74,10 @@ pub async fn handle_interactive_mode() -> Result<()> {
 /// Display the welcome interface with T.JARVIS branding
 async fn display_welcome_interface(theme: &crate::theme::Theme, npm_available: bool) -> Result<()> {
     // Get terminal width for responsive design
-    let term_width = if let Some((w, _)) = term_size::dimensions() {
-        w
+    let term_width = if let Some((terminal_size::Width(w), terminal_size::Height(_))) =
+        terminal_size::terminal_size()
+    {
+        w as usize
     } else {
         80 // fallback width
     };
