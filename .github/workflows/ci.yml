@@ -43,14 +43,74 @@ jobs:
     - name: Install Rust
       uses: dtolnay/rust-toolchain@stable
 
+    - name: Install dependencies for cargo-audit
+      run: sudo apt-get update && sudo apt-get install -y pkg-config libssl-dev
+
+    - name: Install cargo-audit
+      run: cargo install cargo-audit
+
     - name: Run cargo-audit
-      uses: RUSTSEC/cargo-audit-action@v1
+      run: cargo audit --deny warnings
+
+  secrets-scan:
+    name: Secrets Scan (gitleaks)
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
       with:
-        args: --deny warnings
+        fetch-depth: 0
+    - name: Run Gitleaks
+      uses: gitleaks/gitleaks-action@v2
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        args: --verbose --redact
+
+  cargo-deny:
+    name: Cargo Deny (advisories, bans, sources)
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - name: Install Rust
+      uses: dtolnay/rust-toolchain@stable
+    - name: Run cargo-deny checks
+      uses: EmbarkStudios/cargo-deny-action@v2
+      with:
+        command: check advisories bans sources
+
+  shellcheck:
+    name: Shell Script Lint (shellcheck)
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - name: Install ShellCheck
+      run: sudo apt-get update && sudo apt-get install -y shellcheck
+    - name: Run ShellCheck
+      run: |
+        set -e
+        if [ -d scripts ]; then
+          find scripts -type f -name "*.sh" -print0 | xargs -0 -r shellcheck -S style -x
+        fi
+
+  sbom-scan:
+    name: SBOM and Vulnerability Scan (Anchore)
+    needs: [test, security, secrets-scan, cargo-deny, shellcheck]
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - name: Scan workspace with Anchore
+      uses: anchore/scan-action@v4
+      with:
+        path: .
+        fail-build: true
+        severity-cutoff: high
 
   npm-test:
     name: NPM Package-Related Tests
-    needs: [test, security]
+    needs: [test, security, secrets-scan, cargo-deny, shellcheck, sbom-scan]
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4
@@ -94,10 +154,9 @@ jobs:
         echo "High: $HIGH, Critical: $CRIT"; \
         [ $((HIGH+CRIT)) -eq 0 ]
 
-  # Multi-platform build testing
+  # Multi-platform build testing - can run independently of other jobs
   multiplatform-build:
     name: Multi-Platform Build Test
-    needs: [test, security, npm-test]
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
@@ -138,56 +197,3 @@ jobs:
       run: |
         chmod +x scripts/utils/generate-homebrew-release.sh
         ./scripts/utils/generate-homebrew-release.sh || echo "Homebrew generation completed with warnings"
-
-  cargo-deny:
-    name: Cargo Deny (advisories, bans, sources)
-    needs: [test, security]
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v4
-    - name: Install Rust
-      uses: dtolnay/rust-toolchain@stable
-    - name: Run cargo-deny checks
-      uses: EmbarkStudios/cargo-deny-action@v2
-      with:
-        command: check advisories bans sources
-
-  shellcheck:
-    name: Shell Script Lint (shellcheck)
-    needs: test
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v4
-    - name: Run ShellCheck
-      uses: ludeeus/action-shellcheck@v2
-      with:
-        scandir: scripts
-
-  secrets-scan:
-    name: Secrets Scan (gitleaks)
-    needs: test
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v4
-      with:
-        fetch-depth: 0
-    - name: Run Gitleaks
-      uses: gitleaks/gitleaks-action@v2
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        args: --verbose --redact
-
-  sbom-scan:
-    name: SBOM and Vulnerability Scan (Anchore)
-    needs: [test, security, npm-test]
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v4
-    - name: Scan workspace with Anchore
-      uses: anchore/scan-action@v4
-      with:
-        path: .
-        fail-build: true
-        severity-cutoff: high
-
