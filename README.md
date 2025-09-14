@@ -47,7 +47,7 @@ A unified command center for AI coding tools. Manage and run claude-code, gemini
 
 </div>
 
-<div align="center">
+<div align="center" style="border-radius: 8px;">
 
 <img src="screenshot_and_demo/Terminal Jarvis v0.0.67 Demo.gif" alt="Terminal Jarvis Demo" width="100%" style="border-radius: 6px;">
 
