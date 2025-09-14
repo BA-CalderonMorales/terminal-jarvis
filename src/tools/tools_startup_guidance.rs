@@ -9,7 +9,9 @@ pub fn show_tool_startup_guidance(display_name: &str) -> Result<()> {
 
     let theme = theme_global_config::current_theme();
     // Basic environment detection to tailor guidance
-    let is_codespaces = std::env::var("CODESPACES").map(|v| v == "true").unwrap_or(false)
+    let is_codespaces = std::env::var("CODESPACES")
+        .map(|v| v == "true")
+        .unwrap_or(false)
         || std::env::var("GITHUB_CODESPACES").is_ok()
         || std::env::var("GITHUB_CODESPACES_PORT_FORWARDING_DOMAIN").is_ok();
     let is_devcontainer = std::path::Path::new("/.dockerenv").exists()
@@ -203,15 +205,21 @@ pub fn show_tool_startup_guidance(display_name: &str) -> Result<()> {
                 // In Codespaces, localhost callbacks in the local browser cannot reach the remote container
                 println!(
                     "{}",
-                    theme.secondary("┌─ T.JARVIS OAUTH LIMITATION (CODESPACES) ───────────────────┐")
+                    theme.secondary(
+                        "┌─ T.JARVIS OAUTH LIMITATION (CODESPACES) ───────────────────┐"
+                    )
                 );
                 println!(
                     "{}",
-                    theme.primary("│ OAuth with localhost callback is not supported in Codespaces. │")
+                    theme.primary(
+                        "│ OAuth with localhost callback is not supported in Codespaces. │"
+                    )
                 );
                 println!(
                     "{}",
-                    theme.primary("│ Use API key authentication instead for OpenRouter/OpenAI/etc. │")
+                    theme.primary(
+                        "│ Use API key authentication instead for OpenRouter/OpenAI/etc. │"
+                    )
                 );
                 println!(
                     "{}",
@@ -219,7 +227,9 @@ pub fn show_tool_startup_guidance(display_name: &str) -> Result<()> {
                 );
                 println!(
                     "{}",
-                    theme.accent("│ • Get an OpenRouter API key: https://openrouter.ai/settings/keys │")
+                    theme.accent(
+                        "│ • Get an OpenRouter API key: https://openrouter.ai/settings/keys │"
+                    )
                 );
                 println!(
                     "{}",
@@ -227,18 +237,24 @@ pub fn show_tool_startup_guidance(display_name: &str) -> Result<()> {
                 );
                 println!(
                     "{}",
-                    theme.accent("│   See: https://aider.chat/docs/troubleshooting/models-and-keys.html │")
+                    theme.accent(
+                        "│   See: https://aider.chat/docs/troubleshooting/models-and-keys.html │"
+                    )
                 );
                 println!(
                     "{}",
-                    theme.secondary("└────────────────────────────────────────────────────────────┘")
+                    theme.secondary(
+                        "└────────────────────────────────────────────────────────────┘"
+                    )
                 );
                 println!();
             } else if is_devcontainer {
                 // In local devcontainers, forwarding the callback port enables OAuth
                 println!(
                     "{}",
-                    theme.secondary("┌─ T.JARVIS OAUTH TIP (DEV CONTAINER) ───────────────────────┐")
+                    theme.secondary(
+                        "┌─ T.JARVIS OAUTH TIP (DEV CONTAINER) ───────────────────────┐"
+                    )
                 );
                 println!(
                     "{}",
@@ -258,7 +274,9 @@ pub fn show_tool_startup_guidance(display_name: &str) -> Result<()> {
                 );
                 println!(
                     "{}",
-                    theme.secondary("└────────────────────────────────────────────────────────────┘")
+                    theme.secondary(
+                        "└────────────────────────────────────────────────────────────┘"
+                    )
                 );
                 println!();
             }
@@ -313,13 +331,17 @@ pub fn show_tool_startup_guidance(display_name: &str) -> Result<()> {
             );
             println!();
             // Codespaces advisory similar to Aider, recommending API keys over OAuth/browser flows
-            let is_codespaces = std::env::var("CODESPACES").map(|v| v == "true").unwrap_or(false)
+            let is_codespaces = std::env::var("CODESPACES")
+                .map(|v| v == "true")
+                .unwrap_or(false)
                 || std::env::var("GITHUB_CODESPACES").is_ok()
                 || std::env::var("GITHUB_CODESPACES_PORT_FORWARDING_DOMAIN").is_ok();
             if is_codespaces {
                 println!(
                     "{}",
-                    theme.secondary("┌─ T.JARVIS OAUTH LIMITATION (CODESPACES) ───────────────────┐")
+                    theme.secondary(
+                        "┌─ T.JARVIS OAUTH LIMITATION (CODESPACES) ───────────────────┐"
+                    )
                 );
                 println!(
                     "{}",
@@ -327,7 +349,8 @@ pub fn show_tool_startup_guidance(display_name: &str) -> Result<()> {
                 );
                 println!(
                     "{}",
-                    theme.primary("│ Use direct API keys with 'goose configure' or env vars.     │")
+                    theme
+                        .primary("│ Use direct API keys with 'goose configure' or env vars.     │")
                 );
                 println!(
                     "{}",
@@ -339,7 +362,9 @@ pub fn show_tool_startup_guidance(display_name: &str) -> Result<()> {
                 );
                 println!(
                     "{}",
-                    theme.secondary("└────────────────────────────────────────────────────────────┘")
+                    theme.secondary(
+                        "└────────────────────────────────────────────────────────────┘"
+                    )
                 );
                 println!();
             }

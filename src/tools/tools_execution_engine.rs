@@ -146,13 +146,20 @@ pub async fn run_tool_once(display_name: &str, args: &[String]) -> Result<()> {
         // Strategic aider handling - reduce terminal control and ensure Ctrl+C only stops child
         cmd.env("PYTHONUNBUFFERED", "1");
         cmd.env("AIDER_NO_BROWSER", "1"); // prevent auto opening browser; still prints URL
-        // Reduce fancy terminal features from prompt_toolkit ONLY in headless/Codespaces
-        let is_headless = std::env::var("DISPLAY").is_err() && std::env::var("WAYLAND_DISPLAY").is_err();
-        let is_codespaces = std::env::var("CODESPACES").map(|v| v == "true").unwrap_or(false)
+                                          // Reduce fancy terminal features from prompt_toolkit ONLY in headless/Codespaces
+        let is_headless =
+            std::env::var("DISPLAY").is_err() && std::env::var("WAYLAND_DISPLAY").is_err();
+        let is_codespaces = std::env::var("CODESPACES")
+            .map(|v| v == "true")
+            .unwrap_or(false)
             || std::env::var("GITHUB_CODESPACES").is_ok()
             || std::env::var("GITHUB_CODESPACES_PORT_FORWARDING_DOMAIN").is_ok();
         let should_disable_fancy = is_headless || is_codespaces;
-        if should_disable_fancy && !args.iter().any(|arg| arg.contains("help") || arg.contains("version")) {
+        if should_disable_fancy
+            && !args
+                .iter()
+                .any(|arg| arg.contains("help") || arg.contains("version"))
+        {
             if !args.iter().any(|arg| arg.contains("no-pretty")) {
                 cmd.arg("--no-pretty");
             }
@@ -192,7 +199,9 @@ pub async fn run_tool_once(display_name: &str, args: &[String]) -> Result<()> {
     } else if display_name == "goose" {
         // Goose typically uses 'goose configure' for provider setup. In Codespaces, prefer API keys.
         // Keep interactive behavior; just pass args directly.
-        let is_codespaces = std::env::var("CODESPACES").map(|v| v == "true").unwrap_or(false)
+        let is_codespaces = std::env::var("CODESPACES")
+            .map(|v| v == "true")
+            .unwrap_or(false)
             || std::env::var("GITHUB_CODESPACES").is_ok()
             || std::env::var("GITHUB_CODESPACES_PORT_FORWARDING_DOMAIN").is_ok();
         let has_any_key = std::env::var("OPENAI_API_KEY").is_ok()
@@ -201,29 +210,50 @@ pub async fn run_tool_once(display_name: &str, args: &[String]) -> Result<()> {
         if is_codespaces && !has_any_key {
             println!(
                 "{}",
-                crate::theme::theme_global_config::current_theme()
-                    .accent("Tip: Set OPENAI_API_KEY, ANTHROPIC_API_KEY, or GEMINI_API_KEY for Goose.")
+                crate::theme::theme_global_config::current_theme().accent(
+                    "Tip: Set OPENAI_API_KEY, ANTHROPIC_API_KEY, or GEMINI_API_KEY for Goose."
+                )
             );
             // Inline prompt (optional): pick provider and capture key for this session
-            let providers = vec!["OpenAI", "Anthropic", "Gemini", "Skip"]; 
-            if let Ok(choice) = Select::new("Select a provider to set an API key (or Skip):", providers.clone()).prompt() {
+            let providers = vec!["OpenAI", "Anthropic", "Gemini", "Skip"];
+            if let Ok(choice) = Select::new(
+                "Select a provider to set an API key (or Skip):",
+                providers.clone(),
+            )
+            .prompt()
+            {
                 match choice {
                     "OpenAI" => {
-                        if let Ok(key) = Text::new("Enter OPENAI_API_KEY (leave blank to skip):").with_placeholder("skips if empty").prompt() {
+                        if let Ok(key) = Text::new("Enter OPENAI_API_KEY (leave blank to skip):")
+                            .with_placeholder("skips if empty")
+                            .prompt()
+                        {
                             let trimmed = key.trim();
-                            if !trimmed.is_empty() { cmd.env("OPENAI_API_KEY", trimmed); }
+                            if !trimmed.is_empty() {
+                                cmd.env("OPENAI_API_KEY", trimmed);
+                            }
                         }
                     }
                     "Anthropic" => {
-                        if let Ok(key) = Text::new("Enter ANTHROPIC_API_KEY (leave blank to skip):").with_placeholder("skips if empty").prompt() {
+                        if let Ok(key) = Text::new("Enter ANTHROPIC_API_KEY (leave blank to skip):")
+                            .with_placeholder("skips if empty")
+                            .prompt()
+                        {
                             let trimmed = key.trim();
-                            if !trimmed.is_empty() { cmd.env("ANTHROPIC_API_KEY", trimmed); }
+                            if !trimmed.is_empty() {
+                                cmd.env("ANTHROPIC_API_KEY", trimmed);
+                            }
                         }
                     }
                     "Gemini" => {
-                        if let Ok(key) = Text::new("Enter GEMINI_API_KEY (leave blank to skip):").with_placeholder("skips if empty").prompt() {
+                        if let Ok(key) = Text::new("Enter GEMINI_API_KEY (leave blank to skip):")
+                            .with_placeholder("skips if empty")
+                            .prompt()
+                        {
                             let trimmed = key.trim();
-                            if !trimmed.is_empty() { cmd.env("GEMINI_API_KEY", trimmed); }
+                            if !trimmed.is_empty() {
+                                cmd.env("GEMINI_API_KEY", trimmed);
+                            }
                         }
                     }
                     _ => {}
@@ -239,10 +269,13 @@ pub async fn run_tool_once(display_name: &str, args: &[String]) -> Result<()> {
         cmd.args(args);
     } else if display_name == "qwen" {
         // Reduce auth flicker for Qwen in headless/Codespaces by preferring API key path
-        let is_codespaces = std::env::var("CODESPACES").map(|v| v == "true").unwrap_or(false)
+        let is_codespaces = std::env::var("CODESPACES")
+            .map(|v| v == "true")
+            .unwrap_or(false)
             || std::env::var("GITHUB_CODESPACES").is_ok()
             || std::env::var("GITHUB_CODESPACES_PORT_FORWARDING_DOMAIN").is_ok();
-        let headless = std::env::var("DISPLAY").is_err() && std::env::var("WAYLAND_DISPLAY").is_err();
+        let headless =
+            std::env::var("DISPLAY").is_err() && std::env::var("WAYLAND_DISPLAY").is_err();
         let no_keys = std::env::var("OPENAI_API_KEY").is_err()
             && std::env::var("ANTHROPIC_API_KEY").is_err()
             && std::env::var("GEMINI_API_KEY").is_err();
@@ -317,9 +350,8 @@ pub async fn run_tool_once(display_name: &str, args: &[String]) -> Result<()> {
             if args.is_empty() {
                 println!(
                     "{}",
-                    crate::theme::theme_global_config::current_theme().primary(
-                        "Goose requires a provider. Launching 'goose configure'...\n",
-                    )
+                    crate::theme::theme_global_config::current_theme()
+                        .primary("Goose requires a provider. Launching 'goose configure'...\n",)
                 );
                 let mut configure_cmd = Command::new(cli_command);
                 configure_cmd

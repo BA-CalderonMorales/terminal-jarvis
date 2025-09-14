@@ -5,31 +5,41 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [0.0.68] - 2025-09-14
+## [Unreleased]
 
 ### Added
-- **🎉 MAJOR: Three New AI Coding Tools Support**
-  - **Goose** - Block's AI-powered coding assistant with developer toolkit integration
-  - **Amp** - Sourcegraph's AI-powered code assistant with advanced context awareness  
-  - **Aider** - AI pair programming assistant that edits code in your local git repository
+- Three new AI coding tools support
+  - Goose — Block's AI-powered coding assistant with developer toolkit integration
+  - Amp — Sourcegraph's AI-powered code assistant with advanced context awareness
+  - Aider — AI pair programming assistant that edits code in your local git repository
+
+### Fixed
+- OpenCode launch hang by avoiding detached process groups and running with SIGINT interception; prevents SIGTTIN input blocking and ensures clean exit handling
+- Qwen authentication flicker in headless/Codespaces by preferring API key prompt when a browser is not appropriate and keeping stdio/TTY stable
 
 ### Enhanced
-- **💪 Multi-Installation Method Support**
-  - **curl-based installations** - Support for `curl | bash` installation scripts (Goose)
-  - **uv-based installations** - Support for Python uv tool installations (Aider) 
-  - **npm installations** - Enhanced existing npm support (Amp)
-  - **Dependency validation** - Automatic checking for curl, uv, and npm availability
+- Multi-installation method support
+  - curl-based installations (Goose) using pipe-aware execution
+  - uv-based installations (Aider) for Python-based tooling
+  - npm installation improvements (Amp) and dependency validation for curl/uv/npm
+- Smoke test robustness: updated NPM consistency check to validate "Requires: NPM" within each tool's section, eliminating format sensitivity and flakiness
+- Updated tool detection: dynamic discovery of tools from `config/tools/` instead of hardcoded lists
 
-### Technical Improvements
-- **Extensible Configuration System** - Dynamic tool loading from `config/tools/` directory
-- **Enhanced Installation Engine** - Support for pipe operations and multiple installation backends
-- **Improved Error Handling** - Clear dependency requirement messages and installation guidance
-- **Updated Tool Detection** - Dynamic discovery of tools instead of hardcoded lists
+### Technical
+- Extensible configuration system with dynamic tool loading from `config/tools/`
+- Enhanced installation engine with support for pipe operations and multiple installation backends
+- Improved error handling with clear dependency requirement messages and installation guidance
+- Removed dead code in tools process management and cleaned up clippy warnings (simplified boolean checks, removed redundant bindings)
+- Standardized Node wrapper messages to plain text with bracketed tags to align with project logging style and no‑emoji policy
 
 ### Documentation
-- **Updated README.md** - Tool count increased from 7 to 10 AI coding tools
-- **Enhanced SOURCES.md** - Complete documentation for all installation methods
-- **Tool Configuration** - New TOML configurations for goose.toml, amp.toml, aider.toml
+- Updated README.md to reflect tool additions, supported tools table, and testing notes
+- Enhanced SOURCES.md documenting installation methods across tools
+- Added new TOML configurations for `goose.toml`, `amp.toml`, and `aider.toml`
+
+### Version Management
+- Synchronized versions to 0.0.68 across Cargo.toml, npm package.json, TypeScript wrapper, and postinstall message
+- Removed emojis from Node wrapper and postinstall messages to comply with the no‑emojis policy
 
 ## [0.0.67] - 2025-08-23
 

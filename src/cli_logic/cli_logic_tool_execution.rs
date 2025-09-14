@@ -19,18 +19,20 @@ pub async fn handle_run_tool(tool: &str, args: &[String]) -> Result<()> {
         println!("  Please install Node.js to continue: https://nodejs.org/");
         return Err(anyhow!("Node.js runtime required"));
     }
-    
+
     if install_cmd.command == "curl" && !InstallationManager::check_curl_available() {
         ProgressUtils::warning_message("curl not found");
         println!("  Tool {} requires curl but it's not available.", tool);
         println!("  Please install curl to continue.");
         return Err(anyhow!("curl required"));
     }
-    
+
     if install_cmd.command == "uv" && !InstallationManager::check_uv_available() {
         ProgressUtils::warning_message("uv not found");
         println!("  Tool {} requires uv but it's not available.", tool);
-        println!("  Please install uv from https://docs.astral.sh/uv/getting-started/installation/");
+        println!(
+            "  Please install uv from https://docs.astral.sh/uv/getting-started/installation/"
+        );
         return Err(anyhow!("uv required"));
     }
 
@@ -108,7 +110,7 @@ pub async fn handle_install_tool(tool: &str) -> Result<()> {
 
         npm_check.finish_success("NPM is available");
     }
-    
+
     if install_cmd.command == "curl" {
         let curl_check = ProgressContext::new("Checking curl availability");
 
@@ -123,7 +125,7 @@ pub async fn handle_install_tool(tool: &str) -> Result<()> {
 
         curl_check.finish_success("curl is available");
     }
-    
+
     if install_cmd.command == "uv" {
         let uv_check = ProgressContext::new("Checking uv availability");
 

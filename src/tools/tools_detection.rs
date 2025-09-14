@@ -31,7 +31,7 @@ pub fn get_available_tools() -> BTreeMap<&'static str, ToolInfo> {
             // For now, let's create a mapping that includes the new tools
             let static_name = match tool_name.as_str() {
                 "claude" => "claude",
-                "gemini" => "gemini", 
+                "gemini" => "gemini",
                 "qwen" => "qwen",
                 "opencode" => "opencode",
                 "llxprt" => "llxprt",
