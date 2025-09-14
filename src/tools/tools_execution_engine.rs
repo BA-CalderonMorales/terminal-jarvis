@@ -166,10 +166,9 @@ pub async fn run_tool_once(display_name: &str, args: &[String]) -> Result<()> {
 
         // If running in Codespaces (or a cloud env) where OAuth callback won't work,
         // and no API key is present, offer to set an API key for this session only.
-        let is_codespaces = is_codespaces;
-        let no_provider_keys = !std::env::var("OPENROUTER_API_KEY").is_ok()
-            && !std::env::var("OPENAI_API_KEY").is_ok()
-            && !std::env::var("ANTHROPIC_API_KEY").is_ok();
+        let no_provider_keys = std::env::var("OPENROUTER_API_KEY").is_err()
+            && std::env::var("OPENAI_API_KEY").is_err()
+            && std::env::var("ANTHROPIC_API_KEY").is_err();
 
         if is_codespaces && no_provider_keys {
             println!(
@@ -236,6 +235,33 @@ pub async fn run_tool_once(display_name: &str, args: &[String]) -> Result<()> {
                     "Match your model to the provider you configured (e.g., gemini-* => GEMINI_API_KEY, claude-* => ANTHROPIC_API_KEY, gpt-* => OPENAI_API_KEY).",
                 )
             );
+        }
+        cmd.args(args);
+    } else if display_name == "qwen" {
+        // Reduce auth flicker for Qwen in headless/Codespaces by preferring API key path
+        let is_codespaces = std::env::var("CODESPACES").map(|v| v == "true").unwrap_or(false)
+            || std::env::var("GITHUB_CODESPACES").is_ok()
+            || std::env::var("GITHUB_CODESPACES_PORT_FORWARDING_DOMAIN").is_ok();
+        let headless = std::env::var("DISPLAY").is_err() && std::env::var("WAYLAND_DISPLAY").is_err();
+        let no_keys = std::env::var("OPENAI_API_KEY").is_err()
+            && std::env::var("ANTHROPIC_API_KEY").is_err()
+            && std::env::var("GEMINI_API_KEY").is_err();
+
+        if (is_codespaces || headless) && no_keys {
+            println!(
+                "{}",
+                crate::theme::theme_global_config::current_theme()
+                    .accent("Qwen tip: Set OPENAI_API_KEY to avoid interactive auth flicker.")
+            );
+            if let Ok(input) = Text::new("Enter OPENAI_API_KEY for Qwen (leave blank to skip):")
+                .with_placeholder("skips if empty")
+                .prompt()
+            {
+                let trimmed = input.trim();
+                if !trimmed.is_empty() {
+                    cmd.env("OPENAI_API_KEY", trimmed);
+                }
+            }
         }
         cmd.args(args);
     } else if display_name == "llxprt" {
