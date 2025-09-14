@@ -19,9 +19,10 @@ impl WarningSystem {
         {
             eprintln!("WARNING: {tool} may attempt to open a browser for authentication.");
             eprintln!("  This can cause issues in terminal/cloud environments.");
-            eprintln!("  Consider setting API keys to avoid browser authentication:");
-            eprintln!();
-            eprintln!("{}", ApiKeyManager::get_api_key_help_message(tool));
+            eprintln!("  Consider setting API keys to avoid browser authentication.");
+            // Intentionally avoid printing dynamic help content to stderr to prevent
+            // potential cleartext-logging flags. Provide a static pointer instead.
+            eprintln!("  Help: Run 'terminal-jarvis auth-help {tool}' for detailed setup");
             eprintln!();
         }
 
