@@ -289,25 +289,60 @@ pub fn show_tool_startup_guidance(display_name: &str) -> Result<()> {
             );
             println!(
                 "{}",
-                theme.primary("│ Goose may require API configuration for AI model access.   │")
+                theme.primary("│ Goose may require provider/API key configuration.           │")
             );
             println!(
                 "{}",
-                theme.primary("│ Follow any authentication prompts that appear.             │")
+                theme.primary("│ Run 'goose configure' to select a provider and set keys.    │")
             );
             println!(
                 "{}",
-                theme.accent("│ • Supports multiple AI providers and models                │")
+                theme.accent("│ • Providers: OpenAI, Anthropic, Gemini (and more)          │")
             );
             println!(
                 "{}",
-                theme.accent("│ • Documentation: https://github.com/square/goose           │")
+                theme.accent("│ • Docs: https://block.github.io/goose/docs/                │")
+            );
+            println!(
+                "{}",
+                theme.accent("│ • Provider setup: https://block.github.io/goose/docs/getting-started/providers │")
             );
             println!(
                 "{}",
                 theme.secondary("└────────────────────────────────────────────────────────────┘")
             );
             println!();
+            // Codespaces advisory similar to Aider, recommending API keys over OAuth/browser flows
+            let is_codespaces = std::env::var("CODESPACES").map(|v| v == "true").unwrap_or(false)
+                || std::env::var("GITHUB_CODESPACES").is_ok()
+                || std::env::var("GITHUB_CODESPACES_PORT_FORWARDING_DOMAIN").is_ok();
+            if is_codespaces {
+                println!(
+                    "{}",
+                    theme.secondary("┌─ T.JARVIS OAUTH LIMITATION (CODESPACES) ───────────────────┐")
+                );
+                println!(
+                    "{}",
+                    theme.primary("│ Browser-based OAuth may not complete in Codespaces.        │")
+                );
+                println!(
+                    "{}",
+                    theme.primary("│ Use direct API keys with 'goose configure' or env vars.     │")
+                );
+                println!(
+                    "{}",
+                    theme.accent("│ • OPENAI_API_KEY, ANTHROPIC_API_KEY, GEMINI_API_KEY        │")
+                );
+                println!(
+                    "{}",
+                    theme.accent("│ • Provider setup: https://block.github.io/goose/docs/getting-started/providers │")
+                );
+                println!(
+                    "{}",
+                    theme.secondary("└────────────────────────────────────────────────────────────┘")
+                );
+                println!();
+            }
         }
         _ => {
             // For any future tools, show generic guidance
