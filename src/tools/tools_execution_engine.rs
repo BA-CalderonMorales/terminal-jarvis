@@ -11,7 +11,7 @@ use super::tools_process_management::{
 };
 use super::tools_startup_guidance::show_tool_startup_guidance;
 use crate::auth_manager::AuthManager;
-use inquire::Text;
+use inquire::{Select, Text};
 
 /// Run a tool with arguments - automatically handles session continuation for internal commands
 pub async fn run_tool(display_name: &str, args: &[String]) -> Result<()> {
@@ -190,6 +190,54 @@ pub async fn run_tool_once(display_name: &str, args: &[String]) -> Result<()> {
             }
         }
         cmd.args(args);
+    } else if display_name == "goose" {
+        // Goose typically uses 'goose configure' for provider setup. In Codespaces, prefer API keys.
+        // Keep interactive behavior; just pass args directly.
+        let is_codespaces = std::env::var("CODESPACES").map(|v| v == "true").unwrap_or(false)
+            || std::env::var("GITHUB_CODESPACES").is_ok()
+            || std::env::var("GITHUB_CODESPACES_PORT_FORWARDING_DOMAIN").is_ok();
+        let has_any_key = std::env::var("OPENAI_API_KEY").is_ok()
+            || std::env::var("ANTHROPIC_API_KEY").is_ok()
+            || std::env::var("GEMINI_API_KEY").is_ok();
+        if is_codespaces && !has_any_key {
+            println!(
+                "{}",
+                crate::theme::theme_global_config::current_theme()
+                    .accent("Tip: Set OPENAI_API_KEY, ANTHROPIC_API_KEY, or GEMINI_API_KEY for Goose.")
+            );
+            // Inline prompt (optional): pick provider and capture key for this session
+            let providers = vec!["OpenAI", "Anthropic", "Gemini", "Skip"]; 
+            if let Ok(choice) = Select::new("Select a provider to set an API key (or Skip):", providers.clone()).prompt() {
+                match choice {
+                    "OpenAI" => {
+                        if let Ok(key) = Text::new("Enter OPENAI_API_KEY (leave blank to skip):").with_placeholder("skips if empty").prompt() {
+                            let trimmed = key.trim();
+                            if !trimmed.is_empty() { cmd.env("OPENAI_API_KEY", trimmed); }
+                        }
+                    }
+                    "Anthropic" => {
+                        if let Ok(key) = Text::new("Enter ANTHROPIC_API_KEY (leave blank to skip):").with_placeholder("skips if empty").prompt() {
+                            let trimmed = key.trim();
+                            if !trimmed.is_empty() { cmd.env("ANTHROPIC_API_KEY", trimmed); }
+                        }
+                    }
+                    "Gemini" => {
+                        if let Ok(key) = Text::new("Enter GEMINI_API_KEY (leave blank to skip):").with_placeholder("skips if empty").prompt() {
+                            let trimmed = key.trim();
+                            if !trimmed.is_empty() { cmd.env("GEMINI_API_KEY", trimmed); }
+                        }
+                    }
+                    _ => {}
+                }
+            }
+            println!(
+                "{}",
+                crate::theme::theme_global_config::current_theme().secondary(
+                    "Match your model to the provider you configured (e.g., gemini-* => GEMINI_API_KEY, claude-* => ANTHROPIC_API_KEY, gpt-* => OPENAI_API_KEY).",
+                )
+            );
+        }
+        cmd.args(args);
     } else if display_name == "llxprt" {
         // For llxprt, when no arguments are provided, it opens the interactive TUI
         // This is expected behavior and should work seamlessly
@@ -210,6 +258,9 @@ pub async fn run_tool_once(display_name: &str, args: &[String]) -> Result<()> {
         run_opencode_with_clean_exit(cmd)?
     } else if display_name == "aider" {
         // Run aider while intercepting Ctrl+C so only the child is terminated
+        run_tool_intercepting_sigint(cmd)?
+    } else if display_name == "goose" {
+        // Ensure Ctrl+C during any provider config or prompts does not kill Terminal Jarvis
         run_tool_intercepting_sigint(cmd)?
     } else {
         // Use direct status() for tools to ensure proper signal handling
@@ -234,6 +285,28 @@ pub async fn run_tool_once(display_name: &str, args: &[String]) -> Result<()> {
                 exit_code
             );
             return Ok(());
+        } else if display_name == "goose" {
+            // If Goose fails with no args, it's commonly due to missing provider configuration.
+            // Proactively run `goose configure` to help the user set it up, then return to menu.
+            if args.is_empty() {
+                println!(
+                    "{}",
+                    crate::theme::theme_global_config::current_theme().primary(
+                        "Goose requires a provider. Launching 'goose configure'...\n",
+                    )
+                );
+                let mut configure_cmd = Command::new(cli_command);
+                configure_cmd
+                    .arg("configure")
+                    .stdin(std::process::Stdio::inherit())
+                    .stdout(std::process::Stdio::inherit())
+                    .stderr(std::process::Stdio::inherit());
+
+                // Reuse SIGINT-safe runner so Ctrl+C doesn't kill TJ
+                let _ = run_tool_intercepting_sigint(configure_cmd);
+                println!("Returning to Terminal Jarvis...");
+                return Ok(());
+            }
         }
 
         return Err(anyhow::anyhow!(
