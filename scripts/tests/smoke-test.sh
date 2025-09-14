@@ -1,4 +1,5 @@
 #!/bin/bash
+# shellcheck disable=SC2317
 
 # Terminal Jarvis Comprehensive Test Suite
 # Validates core functionality and NPM package integrity to prevent regressions
@@ -15,10 +16,12 @@ TESTS_FAILED=0
 : "${RUN_TEST_REDIRECT:=true}"
 
 # Helpers
+# shellcheck disable=SC2317
 strip_ansi() {
     # Remove ANSI escape sequences to make grep/awk stable regardless of TTY coloring
     sed -r $'s/\x1B\[[0-?]*[ -\/]*[@-~]//g'
 }
+# shellcheck disable=SC2317
 get_all_tools() {
     # Derive tool names from config/tools/*.toml filenames
     for f in config/tools/*.toml; do
@@ -36,9 +39,10 @@ verify_list_contains_all_tools() {
             missing=1
         fi
     done
-    return $missing
+    return "$missing"
 }
 
+# shellcheck disable=SC2317
 verify_example_has_all_tools() {
     local tool missing=0
     for tool in $(get_all_tools); do
@@ -47,9 +51,10 @@ verify_example_has_all_tools() {
             missing=1
         fi
     done
-    return $missing
+    return "$missing"
 }
 
+# shellcheck disable=SC2317
 verify_supported_installers() {
     local file cmd
     for file in config/tools/*.toml; do
@@ -63,8 +68,10 @@ verify_supported_installers() {
 }
 
 # Helper: verify list displays "Requires: NPM" for all tools marked requires_npm=true in configs
+## Helper invoked indirectly via run_test
+# shellcheck disable=SC2317
 verify_npm_flags() {
-    local out npm_tools tool
+    local out tool
     out="$($BINARY list 2>/dev/null | strip_ansi)" || return 1
     # Collect tool names with requires_npm=true from config
     # shellcheck disable=SC2013
