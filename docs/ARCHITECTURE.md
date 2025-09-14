@@ -138,6 +138,21 @@ Quality gates integration:
 - We treat cargo-deny as part of our pre-commit checks alongside `cargo fmt`, `cargo clippy --all-targets --all-features -- -D warnings`, and `cargo test`.
 - CI should run `cargo deny check` to prevent merging policy regressions.
 
+## SBOM Scanning and Vulnerability Gate
+
+We generate a Software Bill of Materials (SBOM) and scan it for known vulnerabilities using Anchore's scan action in CI. This provides a cross-ecosystem view that covers both Rust (Cargo) and Node (NPM) dependencies.
+
+CI policy (tuned to reduce noise):
+- Severity threshold: critical (we fail only on Critical vulnerabilities).
+- Fail behavior: Build fails on main when a Critical is found.
+- PR experience: The job is marked as allowed to continue on pull_request events so findings surface without blocking developer workflows.
+- Visibility: Results are uploaded as SARIF to GitHub Code Scanning for centralized visibility under the Security tab.
+
+Rationale:
+- Defense in depth across ecosystems (Rust + Node) with a single gate.
+- Reduced flakiness by gating only on Critical severity while still surfacing High issues in SARIF.
+- Non-blocking signal during PR iteration, with enforcement at merge time.
+
 ## Authentication & Environment Management
 
 Terminal Jarvis includes sophisticated authentication management to prevent browser opening in headless environments:
