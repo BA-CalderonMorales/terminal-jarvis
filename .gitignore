@@ -160,10 +160,11 @@ vite.config.ts.timestamp-*
 .DS_Store
 Thumbs.db
 
-.claude
 
 # AI Tools Data/Config
+.aider*
 .crush/
+.claude
 *.db
 crush.db
 .gemini/
