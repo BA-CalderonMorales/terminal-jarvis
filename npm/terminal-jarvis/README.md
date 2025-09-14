@@ -4,7 +4,7 @@
 
 </div>
 
-<table border="0" cellspacing="0" cellpadding="0" style="border: none; border-collapse: collapse;">
+<table style="border: 0px solid white; width:100%;">
 
 <tr>
 
