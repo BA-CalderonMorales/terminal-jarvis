@@ -1,0 +1,59 @@
+{
+  "name": "terminal-jarvis",
+  "version": "0.0.67",
+  "description": "AI Coding Tools Wrapper - Unified interface for claude-code, gemini-cli, qwen-code, opencode, llxprt, codex, and crush",
+  "bin": {
+    "terminal-jarvis": "bin/terminal-jarvis"
+  },
+  "files": [
+    "lib/",
+    "bin/",
+    "config/",
+    "README.md",
+    "package.json"
+  ],
+  "scripts": {
+    "generate-tools": "../../scripts/utils/generate-readme-tools.sh",
+    "sync-readme": "npm run generate-tools && cp ../../README.md .",
+    "sync-readme-npm": "npm run generate-tools && cp ../../README.md . && sed -i 's|screenshot_and_demo/|https://raw.githubusercontent.com/BA-CalderonMorales/terminal-jarvis/docs/screenshots_and_demos/screenshots_and_demo/|g' README.md",
+    "build-rust": "cd ../.. && cargo build --release",
+    "copy-binary": "mkdir -p bin && cp ../../target/release/terminal-jarvis bin/terminal-jarvis && chmod +x bin/terminal-jarvis",
+    "typecheck": "tsc --noEmit",
+    "lint": "biome lint src/",
+    "lint:fix": "biome lint --write src/",
+    "format": "biome format src/",
+    "format:fix": "biome format --write src/",
+    "check": "biome check src/",
+    "check:fix": "biome check --write src/",
+    "build": "npm run copy-binary && npm run sync-readme-npm && npx tsc",
+    "prepublishOnly": "npm run build",
+    "dev": "npm run build && node lib/index.js",
+    "postinstall": "node -e \"console.log('\\n🤖 Terminal Jarvis v0.0.67 installed successfully!\\n\\n✅ Full T.JARVIS interface ready to use!\\n\\nRun: npx terminal-jarvis\\n')\""
+  },
+  "keywords": [
+    "cli",
+    "ai",
+    "tools",
+    "wrapper",
+    "claude",
+    "gemini",
+    "qwen",
+    "opencode",
+    "llxprt"
+  ],
+  "author": "BA-CalderonMorales",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/BA-CalderonMorales/terminal-jarvis.git"
+  },
+  "homepage": "https://github.com/BA-CalderonMorales/terminal-jarvis#readme",
+  "devDependencies": {
+    "@biomejs/biome": "^2.1.3",
+    "@types/node": "^20.0.0",
+    "typescript": "^5.9.2"
+  },
+  "engines": {
+    "node": ">=16.0.0"
+  }
+}

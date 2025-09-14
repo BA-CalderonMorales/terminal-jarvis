@@ -1,0 +1,63 @@
+{
+  "name": "Terminal Jarvis Development",
+  "build": {
+    "dockerfile": "./Dockerfile"
+  },
+  "remoteUser": "vscode",
+  "mounts": [
+    "source=/var/run/docker.sock,target=/var/run/docker.sock,type=bind"
+  ],
+  "forwardPorts": [
+    3000,
+    8000,
+    8080
+  ],
+  "portsAttributes": {
+    "3000": {
+      "label": "Development Server",
+      "onAutoForward": "silent"
+    },
+    "8000": {
+      "label": "Local File Server",
+      "onAutoForward": "silent"
+    },
+    "8080": {
+      "label": "Alternative Server",
+      "onAutoForward": "silent"
+    }
+  },
+  "containerEnv": {
+    "RUST_LOG": "debug",
+    "CARGO_TERM_COLOR": "always",
+    "CARGO_INCREMENTAL": "1",
+    "RUST_BACKTRACE": "1"
+  },
+  "updateContentCommand": "bash .devcontainer/scripts/setup-dev-environment.sh",
+  "postCreateCommand": [
+    "bash",
+    ".devcontainer/scripts/setup-dev-environment.sh"
+  ],
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "vadimcn.vscode-lldb",
+        "tamasfe.even-better-toml",
+        "ms-vscode.vscode-typescript-next",
+        "GitHub.copilot",
+        "GitHub.copilot-chat"
+      ],
+      "settings": {
+        "files.watcherExclude": {
+          "**/target/**": true
+        },
+        "search.exclude": {
+          "**/target": true,
+          "**/Cargo.lock": true
+        },
+        "editor.formatOnSave": true
+      }
+    }
+  },
+  "shutdownAction": "stopContainer",
+  "waitFor": "postCreateCommand"
+}

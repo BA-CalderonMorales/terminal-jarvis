@@ -1,0 +1,29 @@
+# =============================================================================
+# USER PREFERENCES - Tool settings and user configurations
+# =============================================================================
+# Single Responsibility: Manages user-specific tool preferences and settings
+# Open/Closed Principle: Easy to extend with new tools without modifying existing preferences
+
+[preferences]
+# Tool-specific user preferences (enabled, auto_update, etc.)
+[preferences.tools]
+claude-code = { enabled = true, auto_update = true }
+gemini-cli = { enabled = true, auto_update = false }
+qwen-code = { enabled = true, auto_update = true }
+opencode = { enabled = true, auto_update = true }
+llxprt-code = { enabled = true, auto_update = true }
+codex = { enabled = true, auto_update = true }
+crush = { enabled = true, auto_update = true }
+
+# User interface preferences
+[preferences.ui]
+theme = "t-jarvis"  # Options: t-jarvis, classic, matrix
+show_welcome_screen = true
+auto_clear_screen = false
+verbose_output = false
+
+# Update behavior preferences  
+[preferences.updates]
+check_for_updates = true
+auto_update_tools = false  # Global override for tool auto_update settings
+update_frequency = "weekly"  # Options: daily, weekly, monthly, never

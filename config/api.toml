@@ -1,0 +1,31 @@
+# =============================================================================
+# API CONFIGURATION - Service endpoints and connection settings
+# =============================================================================
+# Single Responsibility: Manages API connections, endpoints, and network settings
+# Dependency Inversion: Abstract API configuration details from implementation
+
+[api]
+base_url = "https://api.terminal-jarvis.dev"
+timeout_seconds = 30
+max_retries = 3
+retry_delay_ms = 1000
+enable_compression = true
+
+# Authentication settings
+[api.auth]
+token_refresh_threshold = 300  # seconds before expiry to refresh
+cache_tokens = true
+token_cache_path = "~/.config/terminal-jarvis/tokens"
+
+# Rate limiting settings
+[api.rate_limiting]
+requests_per_minute = 60
+burst_limit = 10
+enable_backoff = true
+
+# Logging and monitoring
+[api.logging]
+log_requests = false
+log_responses = false
+log_errors = true
+max_log_size_mb = 10

@@ -1,0 +1,48 @@
+# =============================================================================
+# GEMINI - Google's AI coding assistant
+# =============================================================================
+# Single Responsibility: Manages Gemini tool configuration and settings
+
+[tool]
+display_name = "Gemini"
+config_key = "gemini"
+description = "Google's Gemini CLI tool"
+homepage = "https://ai.google.dev/"
+documentation = "https://ai.google.dev/docs"
+cli_command = "gemini"
+requires_npm = true
+requires_sudo = true
+status = "stable"
+
+[tool.install]
+command = "npm"
+args = ["install", "-g", "@google/gemini-cli"]
+verify_command = "gemini --version"
+post_install_message = "Gemini installed successfully! Set GOOGLE_API_KEY to get started."
+
+[tool.update]
+command = "npm"
+args = ["update", "-g", "@google/gemini-cli"]
+verify_command = "gemini --version"
+
+[tool.auth]
+env_vars = ["GOOGLE_API_KEY", "GEMINI_API_KEY"]
+setup_url = "https://aistudio.google.com/app/apikey"
+browser_auth = true
+auth_instructions = "Visit Google AI Studio to generate your API key"
+
+[tool.features]
+supports_files = true
+supports_streaming = true
+supports_conversation = true
+max_context_tokens = 128000
+supported_languages = [
+    "python",
+    "javascript",
+    "rust",
+    "go",
+    "java",
+    "cpp",
+    "typescript",
+    "kotlin",
+]
