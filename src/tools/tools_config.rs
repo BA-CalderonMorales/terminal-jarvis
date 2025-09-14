@@ -29,6 +29,7 @@ pub struct ToolDefinition {
 pub struct InstallCommand {
     pub command: String,
     pub args: Vec<String>,
+    pub pipe_to: Option<String>, // For curl-based installations that pipe to bash
     pub verify_command: Option<String>,
     pub post_install_message: Option<String>,
 }

@@ -171,8 +171,11 @@ crush.db
 .kilocode/
 .qwen/
 .roo/
+goose/
+goose*
 
 terminal-jarvis-agents/
 
 # Homebrew Tap Repository (managed separately)
 homebrew-terminal-jarvis/
+.aider*

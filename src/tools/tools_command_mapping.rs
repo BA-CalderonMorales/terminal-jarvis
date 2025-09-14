@@ -17,6 +17,7 @@ pub struct ToolCommand {
 pub struct InstallCommandInfo {
     pub command: String,
     pub args: Vec<String>,
+    pub pipe_to: Option<String>, // For curl-based installations that pipe to bash
     pub description: String,
     pub requires_npm: bool,
     pub requires_sudo: bool,
@@ -33,6 +34,9 @@ pub fn get_command_mapping() -> HashMap<&'static str, &'static str> {
     mapping.insert("llxprt", "llxprt"); // LLxprt Code installs as 'llxprt'
     mapping.insert("codex", "codex"); // OpenAI Codex CLI installs as 'codex'
     mapping.insert("crush", "crush"); // Crush installs as 'crush'
+    mapping.insert("goose", "goose"); // Block Goose CLI installs as 'goose'
+    mapping.insert("amp", "amp"); // Sourcegraph Amp installs as 'amp'
+    mapping.insert("aider", "aider"); // Aider installs as 'aider'
     mapping
 }
 
@@ -52,6 +56,7 @@ pub fn get_install_command(tool_name: &str) -> Option<InstallCommandInfo> {
             return Some(InstallCommandInfo {
                 command: install_cmd.command.clone(),
                 args: install_cmd.args.clone(),
+                pipe_to: install_cmd.pipe_to.clone(),
                 description: tool_def.description.clone(),
                 requires_npm: tool_def.requires_npm,
                 requires_sudo: tool_def.requires_sudo,
@@ -72,6 +77,7 @@ pub fn get_update_command(tool_name: &str) -> Option<InstallCommandInfo> {
             return Some(InstallCommandInfo {
                 command: update_cmd.command.clone(),
                 args: update_cmd.args.clone(),
+                pipe_to: update_cmd.pipe_to.clone(),
                 description: tool_def.description.clone(),
                 requires_npm: tool_def.requires_npm,
                 requires_sudo: tool_def.requires_sudo,

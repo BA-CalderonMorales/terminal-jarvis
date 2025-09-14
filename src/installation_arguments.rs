@@ -17,6 +17,7 @@ use std::collections::HashMap;
 pub struct InstallCommand {
     pub command: String,
     pub args: Vec<String>,
+    pub pipe_to: Option<String>, // For curl-based installations that pipe to bash
     pub description: String,
     pub requires_npm: bool,
     #[allow(dead_code)] // Used for installation privilege management
@@ -56,6 +57,40 @@ impl InstallationManager {
     /// ```
     pub fn check_npm_available() -> bool {
         std::process::Command::new("npm")
+            .arg("--version")
+            .output()
+            .map(|output| output.status.success())
+            .unwrap_or(false)
+    }
+
+    /// Checks if curl is available on the system
+    ///
+    /// Executes `curl --version` to verify curl installation and accessibility.
+    /// Used to validate prerequisites before attempting curl-based tool installations.
+    ///
+    /// # Returns
+    ///
+    /// * `true` - curl is installed and accessible
+    /// * `false` - curl is not available or execution failed
+    pub fn check_curl_available() -> bool {
+        std::process::Command::new("curl")
+            .arg("--version")
+            .output()
+            .map(|output| output.status.success())
+            .unwrap_or(false)
+    }
+
+    /// Checks if uv is available on the system
+    ///
+    /// Executes `uv --version` to verify uv installation and accessibility.
+    /// Used to validate prerequisites before attempting uv-based tool installations.
+    ///
+    /// # Returns
+    ///
+    /// * `true` - uv is installed and accessible
+    /// * `false` - uv is not available or execution failed
+    pub fn check_uv_available() -> bool {
+        std::process::Command::new("uv")
             .arg("--version")
             .output()
             .map(|output| output.status.success())
@@ -108,6 +143,7 @@ impl InstallationManager {
         get_install_command(tool).map(|cmd| InstallCommand {
             command: cmd.command,
             args: cmd.args,
+            pipe_to: cmd.pipe_to,
             description: cmd.description,
             requires_npm: cmd.requires_npm,
             requires_sudo: cmd.requires_sudo,
@@ -139,6 +175,7 @@ impl InstallationManager {
         get_update_command(tool).map(|cmd| InstallCommand {
             command: cmd.command,
             args: cmd.args,
+            pipe_to: cmd.pipe_to,
             description: cmd.description,
             requires_npm: cmd.requires_npm,
             requires_sudo: cmd.requires_sudo,
@@ -170,6 +207,7 @@ impl InstallationManager {
                     InstallCommand {
                         command: cmd.command,
                         args: cmd.args,
+                        pipe_to: cmd.pipe_to,
                         description: cmd.description,
                         requires_npm: cmd.requires_npm,
                         requires_sudo: cmd.requires_sudo,

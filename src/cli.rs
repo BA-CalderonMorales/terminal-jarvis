@@ -7,7 +7,7 @@ use clap::{Parser, Subcommand};
 #[command(about = "A thin Rust wrapper for managing and running AI coding tools")]
 #[command(version = env!("CARGO_PKG_VERSION"))]
 #[command(
-    long_about = "Terminal Jarvis provides a unified interface for managing multiple AI coding tools like claude-code, gemini-cli, qwen-code, and opencode."
+    long_about = "Terminal Jarvis provides a unified interface for managing multiple AI coding tools like claude-code, gemini-cli, qwen-code, opencode, aider, amp, and goose."
 )]
 pub struct Cli {
     #[command(subcommand)]
@@ -77,7 +77,7 @@ impl Cli {
 pub enum Commands {
     /// Run a specific AI coding tool
     Run {
-        /// The tool to run (claude, gemini, qwen, opencode, llxprt, codex)
+        /// The tool to run (claude, gemini, qwen, opencode, llxprt, codex, aider, amp, goose, crush)
         tool: String,
         /// Arguments to pass to the tool
         #[arg(trailing_var_arg = true, allow_hyphen_values = true)]

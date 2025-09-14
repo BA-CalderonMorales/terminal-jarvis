@@ -5,6 +5,32 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.0.68] - 2025-09-14
+
+### Added
+- **🎉 MAJOR: Three New AI Coding Tools Support**
+  - **Goose** - Block's AI-powered coding assistant with developer toolkit integration
+  - **Amp** - Sourcegraph's AI-powered code assistant with advanced context awareness  
+  - **Aider** - AI pair programming assistant that edits code in your local git repository
+
+### Enhanced
+- **💪 Multi-Installation Method Support**
+  - **curl-based installations** - Support for `curl | bash` installation scripts (Goose)
+  - **uv-based installations** - Support for Python uv tool installations (Aider) 
+  - **npm installations** - Enhanced existing npm support (Amp)
+  - **Dependency validation** - Automatic checking for curl, uv, and npm availability
+
+### Technical Improvements
+- **Extensible Configuration System** - Dynamic tool loading from `config/tools/` directory
+- **Enhanced Installation Engine** - Support for pipe operations and multiple installation backends
+- **Improved Error Handling** - Clear dependency requirement messages and installation guidance
+- **Updated Tool Detection** - Dynamic discovery of tools instead of hardcoded lists
+
+### Documentation
+- **Updated README.md** - Tool count increased from 7 to 10 AI coding tools
+- **Enhanced SOURCES.md** - Complete documentation for all installation methods
+- **Tool Configuration** - New TOML configurations for goose.toml, amp.toml, aider.toml
+
 ## [0.0.67] - 2025-08-23
 
 ### Fixed

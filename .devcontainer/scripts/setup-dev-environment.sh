@@ -9,15 +9,31 @@ curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
 sudo apt-get install -y nodejs
 
 # Verify installations
-echo "Rust toolchain info:"
+echo "Development environment verification:"
+echo "Rust toolchain:"
 rustc --version
 cargo --version
 
-echo "Node.js info:"
+echo "Node.js environment:"
 node --version
 npm --version
 
-echo "Git LFS info:"
+echo "Python environment:"
+python3 --version
+if command -v pip3 &> /dev/null; then
+    pip3 --version
+else
+    echo "pip3: Not available"
+fi
+
+echo "Python tooling:"
+if command -v uv &> /dev/null; then
+    uv --version
+else
+    echo "uv: Not available (will be installed)"
+fi
+
+echo "Version control:"
 git lfs version
 
 # Initialize git-lfs for the user (force update to handle existing hooks)
@@ -31,6 +47,14 @@ rustup component add clippy rustfmt || echo "Clippy and rustfmt already installe
 # Set up shell environment
 echo "Setting up shell environment..."
 echo 'export PATH="$HOME/.cargo/bin:$PATH"' >> ~/.bashrc
+
+# Ensure uv is available in PATH
+if [ -f "$HOME/.cargo/bin/uv" ]; then
+    echo "uv is already installed and available"
+else
+    echo "Installing uv for current user..."
+    curl -LsSf https://astral.sh/uv/install.sh | sh
+fi
 
 # Add custom PS1 prompt
 if ! grep -q "# Terminal Jarvis Custom PS1" ~/.bashrc; then
@@ -73,12 +97,13 @@ if ! grep -q "$WELCOME_MARKER" ~/.bashrc; then
 if [ "$TERM" != "dumb" ] && [ -t 1 ]; then
     echo ""
     echo "Welcome to Terminal Jarvis development!"
-    echo "Environment: Rust $(rustc --version 2>/dev/null | cut -d' ' -f2 || echo 'N/A') + Node.js $(node --version 2>/dev/null || echo 'N/A')"
+    echo "Environment: Rust $(rustc --version 2>/dev/null | cut -d' ' -f2 || echo 'N/A') + Node.js $(node --version 2>/dev/null || echo 'N/A') + Python $(python3 --version 2>/dev/null | cut -d' ' -f2 || echo 'N/A')"
+    echo "Package managers: npm $(npm --version 2>/dev/null || echo 'N/A') + uv $(uv --version 2>/dev/null | cut -d' ' -f2 || echo 'N/A') + pip $(pip3 --version 2>/dev/null | cut -d' ' -f2 || echo 'N/A')"
     echo ""
     echo "Available commands:"
     echo "  cargo check             # Verify Rust compilation"
     echo "  cargo run -- --help     # Terminal Jarvis help"
-    echo "  cargo run -- list       # List AI tools"
+    echo "  cargo run -- list       # List AI tools (now includes goose, amp, aider!)"
     echo "  cargo test              # Run all tests"
     echo "  ./scripts/cicd/local-ci.sh # CI checks"
     echo ""

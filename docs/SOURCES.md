@@ -1,6 +1,6 @@
 # Supported AI Coding Tools - Installation & Sources Guide
 
-Terminal Jarvis supports **7 AI coding tools** with seamless installation, updates, and execution. This comprehensive guide provides official sources, exact NPM installation commands, and detailed tool information.
+Terminal Jarvis supports **10 AI coding tools** with seamless installation, updates, and execution. This comprehensive guide provides official sources, exact installation commands, and detailed tool information.
 
 ## Complete Tool Overview
 
@@ -13,6 +13,9 @@ Terminal Jarvis supports **7 AI coding tools** with seamless installation, updat
 | **llxprt**   | VybeStack   | Testing     | [acoliver/llxprt-code](https://github.com/acoliver/llxprt-code) | `npm install -g @vybestack/llxprt-code-core` | • Multi-provider support<br>• Flexible AI backends<br>• Extensible architecture |
 | **codex**    | OpenAI      | Testing     | [openai/codex](https://github.com/openai/codex) | `npm install -g @openai/codex`               | • Local AI processing<br>• Code completion<br>• OpenAI integration              |
 | **crush**   | Charm       | New         | [charmbracelet/crush](https://github.com/charmbracelet/crush) | `npm install -g @charmland/crush`            | • LSP protocol support<br>• Multi-model AI<br>• MCP integration<br>• Beautiful TUI interface |
+| **goose**    | Block       | New         | [block/goose](https://github.com/block/goose)   | `curl -fsSL https://github.com/block/goose/releases/download/stable/download_cli.sh \| bash` | • AI-powered coding assistant<br>• Developer toolkit integration<br>• Multiple AI provider support |
+| **amp**      | Sourcegraph | New         | [sourcegraph/amp](https://github.com/sourcegraph/amp) | `npm install -g @sourcegraph/amp`             | • Advanced context awareness<br>• Sourcegraph integration<br>• Code intelligence |
+| **aider**    | Aider       | New         | [paul-gauthier/aider](https://github.com/paul-gauthier/aider) | `uv tool install --force --python python3.12 --with pip aider-chat@latest` | • AI pair programming<br>• Git repository editing<br>• Local file manipulation |
 
 ## Tool Status Indicators
 
@@ -39,6 +42,9 @@ terminal-jarvis run opencode --generate
 terminal-jarvis run llxprt --help
 terminal-jarvis run codex --complete
 terminal-jarvis run crush --lsp
+terminal-jarvis run goose --session
+terminal-jarvis run amp --context
+terminal-jarvis run aider --git
 ```
 
 ### Tool Management
@@ -47,6 +53,9 @@ terminal-jarvis run crush --lsp
 # Install specific tools
 terminal-jarvis install claude
 terminal-jarvis install crush
+terminal-jarvis install goose
+terminal-jarvis install amp
+terminal-jarvis install aider
 
 # Update all installed tools
 terminal-jarvis update

@@ -6,6 +6,7 @@ This devcontainer is optimized for Terminal Jarvis development with prebuilt Rus
 
 - **Rust Development Environment**: Latest Rust with clippy, rustfmt, and rust-analyzer
 - **Node.js LTS**: For NPM package development and testing
+- **Python 3 & uv**: For Python-based AI tools (aider, etc.) with modern package management
 - **GitHub CLI**: For GitHub operations and release management
 - **Docker-in-Docker**: For container-based builds and testing
 - **VS Code Extensions**: Rust Analyzer, Biome, GitHub Copilot, and development essentials
@@ -18,12 +19,21 @@ After the container builds and initializes:
 # Check Rust installation
 cargo --version
 
+# Check Python and AI tools installation
+python3 --version
+uv --version
+
 # Build and check the project
 cargo check
 
 # Run Terminal Jarvis
 cargo run -- --help
 cargo run -- list
+
+# Test new AI tools (requires dependencies)
+cargo run -- install amp     # NPM-based tool
+cargo run -- install aider   # uv-based tool  
+cargo run -- install goose   # curl-based tool
 
 # Run tests
 cargo test
