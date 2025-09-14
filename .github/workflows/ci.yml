@@ -14,8 +14,7 @@ env:
 jobs:
 
   test:
-
-    name: Test
+    name: Code Quality & Testing
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4
@@ -34,10 +33,71 @@ jobs:
     - name: Run tests
       run: cargo test --verbose
 
+  security:
+    name: Security Audit
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Install Rust
+      uses: dtolnay/rust-toolchain@stable
+
+    - name: Run cargo-audit
+      uses: RUSTSEC/cargo-audit-action@v1
+      with:
+        args: --deny warnings
+
+  npm-test:
+    name: NPM Package-Related Tests
+    needs: [test, security]
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+ 
+    - name: Install Rust
+      uses: dtolnay/rust-toolchain@stable
+ 
+    - name: Build release binary
+      run: cargo build --release
+ 
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+ 
+    - name: Install dependencies
+      run: |
+        cd npm/terminal-jarvis
+        npm install
+ 
+    - name: Build TypeScript
+      run: |
+        cd npm/terminal-jarvis
+        npm run build
+ 
+    - name: Lint NPM Package
+      run: |
+        cd npm/terminal-jarvis
+        npm run lint
+
+    - name: Ensure jq is installed
+      run: sudo apt-get update && sudo apt-get install -y jq
+
+    - name: NPM Audit (high severity)
+      run: |
+        cd npm/terminal-jarvis
+        npm audit --audit-level=high --json | jq '.' > npm-audit.json || true
+        # Fail build if high/critical vulnerabilities are present
+        HIGH=$(jq '.metadata.vulnerabilities.high // 0' npm-audit.json); \
+        CRIT=$(jq '.metadata.vulnerabilities.critical // 0' npm-audit.json); \
+        echo "High: $HIGH, Critical: $CRIT"; \
+        [ $((HIGH+CRIT)) -eq 0 ]
+
   # Multi-platform build testing
   multiplatform-build:
-
     name: Multi-Platform Build Test
+    needs: [test, security, npm-test]
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
@@ -79,34 +139,55 @@ jobs:
         chmod +x scripts/utils/generate-homebrew-release.sh
         ./scripts/utils/generate-homebrew-release.sh || echo "Homebrew generation completed with warnings"
 
-  npm-test:
-    name: Test NPM Package
+  cargo-deny:
+    name: Cargo Deny (advisories, bans, sources)
+    needs: [test, security]
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4
- 
     - name: Install Rust
       uses: dtolnay/rust-toolchain@stable
- 
-    - name: Build release binary
-      run: cargo build --release
- 
-    - name: Setup Node.js
-      uses: actions/setup-node@v4
+    - name: Run cargo-deny checks
+      uses: EmbarkStudios/cargo-deny-action@v2
       with:
-        node-version: '18'
- 
-    - name: Install dependencies
-      run: |
-        cd npm/terminal-jarvis
-        npm install
- 
-    - name: Build TypeScript
-      run: |
-        cd npm/terminal-jarvis
-        npm run build
- 
-    - name: Lint NPM Package
-      run: |
-        cd npm/terminal-jarvis
-        npm run lint
+        command: check advisories bans sources
+
+  shellcheck:
+    name: Shell Script Lint (shellcheck)
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - name: Run ShellCheck
+      uses: ludeeus/action-shellcheck@v2
+      with:
+        scandir: scripts
+
+  secrets-scan:
+    name: Secrets Scan (gitleaks)
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+    - name: Run Gitleaks
+      uses: gitleaks/gitleaks-action@v2
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        args: --verbose --redact
+
+  sbom-scan:
+    name: SBOM and Vulnerability Scan (Anchore)
+    needs: [test, security, npm-test]
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - name: Scan workspace with Anchore
+      uses: anchore/scan-action@v4
+      with:
+        path: .
+        fail-build: true
+        severity-cutoff: high
+
