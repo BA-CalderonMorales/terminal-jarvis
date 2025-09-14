@@ -34,6 +34,8 @@ futures = "0.3"
 shell-words = "1.1"
 term_size = "0.3"
 indicatif = "0.18.0"
+signal-hook = "0.3"
+libc = { version = "0.2", optional = false }
 
 [dev-dependencies]
 tokio-test = "0.4"

@@ -2,7 +2,7 @@
 // Handles special process management and terminal state preparation
 
 use anyhow::Result;
-use std::process::Command;
+use std::process::{Command, Stdio};
 
 /// Run a tool process with proper signal isolation to prevent parent process termination
 /// This ensures that Ctrl+C and other signals sent to child processes don't terminate Terminal Jarvis
@@ -39,6 +39,60 @@ pub fn run_tool_with_signal_isolation(mut cmd: Command) -> Result<std::process::
 pub fn run_opencode_with_clean_exit(cmd: Command) -> Result<std::process::ExitStatus> {
     // Use the same signal isolation approach for opencode
     run_tool_with_signal_isolation(cmd)
+}
+
+/// Run a tool while intercepting Ctrl+C (SIGINT) so it stops the child instead of Terminal Jarvis
+/// This ensures that pressing Ctrl+C during OAuth flows (like in aider) terminates only the child
+/// and always returns control back to Terminal Jarvis for post-tool menu handling.
+pub fn run_tool_intercepting_sigint(mut cmd: Command) -> Result<std::process::ExitStatus> {
+    // Inherit stdio so child is properly interactive
+    cmd.stdin(Stdio::inherit()).stdout(Stdio::inherit()).stderr(Stdio::inherit());
+    // IMPORTANT: Keep child in the SAME foreground process group so it can read from the TTY.
+    // If the child is in a different process group that's not foreground, reads from the terminal
+    // can result in SIGTTIN and appear as a hang. We'll still handle Ctrl+C by killing the child
+    // process explicitly instead of signaling a process group.
+
+    // Spawn child
+    let mut child = cmd
+        .spawn()
+        .map_err(|e| anyhow::anyhow!("Failed to spawn process: {}", e))?;
+
+    // Set up Ctrl+C (SIGINT) handler to forward termination to child and not kill parent
+    use std::sync::{Arc, atomic::{AtomicBool, Ordering}};
+    let child_id = child.id();
+    let sigint_flag = Arc::new(AtomicBool::new(false));
+    let _flag_handle = signal_hook::flag::register(signal_hook::consts::SIGINT, sigint_flag.clone())
+        .map_err(|e| anyhow::anyhow!("Failed to register SIGINT handler: {}", e))?;
+
+    // Wait loop: either child exits, or we get Ctrl+C signal
+    loop {
+        // Try non-blocking check if we received Ctrl+C
+        if sigint_flag.load(Ordering::Relaxed) {
+            // Received Ctrl+C: terminate the child process only (keep parent alive)
+            #[cfg(unix)]
+            unsafe {
+                let _ = libc::kill(child_id as i32, libc::SIGTERM);
+            }
+            // Fallback: ensure child is killed if still running
+            let _ = child.kill();
+            let status = child.wait().map_err(|e| anyhow::anyhow!("Failed to wait after SIGINT: {}", e))?;
+            return Ok(status);
+        }
+
+        // Check if child has exited
+        match child.try_wait() {
+            Ok(Some(status)) => return Ok(status),
+            Ok(None) => {
+                // Sleep briefly to avoid busy loop
+                std::thread::sleep(std::time::Duration::from_millis(30));
+            }
+            Err(e) => {
+                // On error, ensure child is terminated and return error
+                let _ = child.kill();
+                return Err(anyhow::anyhow!("Failed to wait on child: {}", e));
+            }
+        }
+    }
 }
 
 /// Prepare terminal state specifically for opencode to ensure proper input focus
