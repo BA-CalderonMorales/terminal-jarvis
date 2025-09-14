@@ -8,6 +8,8 @@ set -e  # Exit on any error
 
 # Source logger
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# shellcheck source=../logger/logger.sh
+# shellcheck disable=SC1091
 source "$SCRIPT_DIR/../logger/logger.sh"
 
 # Color definitions for consistent theming

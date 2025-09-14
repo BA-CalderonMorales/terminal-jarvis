@@ -109,6 +109,35 @@ Terminal Jarvis follows a **domain-based modular architecture** where large func
 
 The interactive mode provides a complete T.JARVIS experience with real-time tool status, installation management, and a beautiful terminal interface, all coordinated through this modular architecture.
 
+## Dependency Policy and Security (cargo-deny)
+
+Terminal Jarvis enforces dependency hygiene and supply-chain safety using cargo-deny, configured via the repository-level `deny.toml`.
+
+What cargo-deny does for us:
+- Security advisories: Fails on known-vulnerable crates and surfaces audit risks.
+- License allowlist: Ensures all dependencies comply with permissive licenses approved for this project.
+- Duplicate/banned crates: Highlights multiple versions and optionally denies problematic crates.
+- Source policy: Restricts dependencies to the official crates.io index and flags unknown git sources.
+
+How to run it locally:
+- Full suite: `cargo deny check`
+- Specific checks: `cargo deny check advisories`, `cargo deny check licenses`, `cargo deny check bans`, `cargo deny check sources`
+
+Key policy highlights (see `deny.toml`):
+- Licenses allowlist includes MIT, Apache-2.0, BSD-2/3-Clause, ISC, Zlib, 0BSD, MPL-2.0, CC0-1.0, and a few tooling-specific exceptions (e.g., LLVM exception) with a detection confidence threshold of 0.8.
+- Advisories: no global ignores by default; any temporary ignore must include justification.
+- Bans: multiple versions are warned (to encourage deduplication) and wildcards are not used in this workspace. Explicit allow/deny lists are supported for escalations.
+- Sources: Only the crates.io index is allowed; unknown registries and git sources are warned by default to prevent accidental drift.
+
+Team guidance:
+- When adding or updating dependencies, verify cargo-deny passes without new errors.
+- If a license or advisory exception is truly needed, add it narrowly in `deny.toml` with a reason comment and open a follow-up to remove it.
+- Keep dependency updates small and frequent; prefer upstream fixes for advisories.
+
+Quality gates integration:
+- We treat cargo-deny as part of our pre-commit checks alongside `cargo fmt`, `cargo clippy --all-targets --all-features -- -D warnings`, and `cargo test`.
+- CI should run `cargo deny check` to prevent merging policy regressions.
+
 ## Authentication & Environment Management
 
 Terminal Jarvis includes sophisticated authentication management to prevent browser opening in headless environments:

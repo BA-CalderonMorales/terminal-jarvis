@@ -46,6 +46,7 @@ rustup component add clippy rustfmt || echo "Clippy and rustfmt already installe
 
 # Set up shell environment
 echo "Setting up shell environment..."
+# shellcheck disable=SC2016  # Write literal $HOME and $PATH for expansion at shell startup
 echo 'export PATH="$HOME/.cargo/bin:$PATH"' >> ~/.bashrc
 
 # Ensure uv is available in PATH
@@ -59,6 +60,7 @@ fi
 # Add custom PS1 prompt
 if ! grep -q "# Terminal Jarvis Custom PS1" ~/.bashrc; then
     echo "Adding custom PS1 prompt..."
+    # shellcheck disable=SC2016  # Intentionally keep variables unexpanded in heredoc; evaluated by interactive shells later
     cat >> ~/.bashrc << 'EOF'
 
 # Terminal Jarvis Custom PS1
@@ -92,6 +94,7 @@ fi
 WELCOME_MARKER="# Terminal Jarvis Development Welcome"
 if ! grep -q "$WELCOME_MARKER" ~/.bashrc; then
     echo "Adding Terminal Jarvis development prompt..."
+    # shellcheck disable=SC2016  # Intentionally keep command substitutions and vars literal for later evaluation in interactive shells
     cat >> ~/.bashrc << 'EOF'
 # Terminal Jarvis Development Welcome
 if [ "$TERM" != "dumb" ] && [ -t 1 ]; then

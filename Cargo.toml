@@ -22,20 +22,21 @@ path = "src/lib.rs"
 [dependencies]
 clap = { version = "4.4", features = ["derive", "env", "wrap_help"] }
 clap_complete = "4.4"
-tokio = { version = "1.35", features = ["full"] }
+tokio = { version = "1.47", features = ["full"] }
 reqwest = { version = "0.12.23", features = ["json"] }
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
 anyhow = "1.0"
 toml = "0.9.5"
 dirs = "6.0.0"
-inquire = "0.7"
+inquire = "0.8"
 futures = "0.3"
 shell-words = "1.1"
-term_size = "0.3"
+terminal_size = "0.4"
 indicatif = "0.18.0"
 signal-hook = "0.3"
 libc = { version = "0.2", optional = false }
+slab = "0.4.11"
 
 [dev-dependencies]
 tokio-test = "0.4"

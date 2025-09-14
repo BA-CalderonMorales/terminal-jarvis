@@ -7,6 +7,8 @@ set -e
 
 # Source logger
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# shellcheck source=../logger/logger.sh
+# shellcheck disable=SC1091
 source "$SCRIPT_DIR/../logger/logger.sh"
 
 log_header "OpenCode Input Focus Fix - Manual Test"
@@ -54,7 +56,7 @@ test_opencode_launch() {
     log_info_if_enabled "6. Press Ctrl+C or exit opencode when done testing"
     echo
     
-    read -p "Press Enter to launch opencode and test input focus..."
+    read -r -p "Press Enter to launch opencode and test input focus..."
     echo
     
     # Launch using the specified method
@@ -86,7 +88,7 @@ log_info_if_enabled "4. Test input focus when opencode loads"
 log_info_if_enabled "5. Exit both opencode and terminal-jarvis when done"
 echo
 
-read -p "Press Enter to launch interactive terminal-jarvis..."
+read -r -p "Press Enter to launch interactive terminal-jarvis..."
 echo
 
 ./target/release/terminal-jarvis
@@ -106,7 +108,7 @@ log_info_if_enabled "2. Compare input focus behavior with previous tests"
 log_info_if_enabled "3. Direct launch should also work fine"
 echo
 
-read -p "Press Enter to launch opencode directly for comparison..."
+read -r -p "Press Enter to launch opencode directly for comparison..."
 echo
 
 opencode .

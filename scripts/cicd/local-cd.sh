@@ -8,6 +8,8 @@ set -e  # Exit on any error
 
 # Source logger
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# shellcheck source=../logger/logger.sh
+# shellcheck disable=SC1091
 source "$SCRIPT_DIR/../logger/logger.sh"
 
 # Color definitions for consistent theming
@@ -136,10 +138,14 @@ DEFAULT_BRANCH="develop"
 
 # Function to display version status
 display_version_status() {
-    local cargo_version=$(grep '^version = ' Cargo.toml | sed 's/version = "\(.*\)"/\1/')
-    local npm_version=$(grep '"version":' npm/terminal-jarvis/package.json | sed 's/.*"version": "\(.*\)".*/\1/')
-    local ts_version=$(grep "console.log.*Terminal Jarvis v" npm/terminal-jarvis/src/index.ts | sed 's/.*Terminal Jarvis v\([0-9.]*\).*/\1/')
-    local postinstall_version=$(grep "Terminal Jarvis v" npm/terminal-jarvis/package.json | sed 's/.*Terminal Jarvis v\([0-9.]*\).*/\1/')
+    local cargo_version
+    cargo_version=$(grep '^version = ' Cargo.toml | sed 's/version = "\(.*\)"/\1/')
+    local npm_version
+    npm_version=$(grep '"version":' npm/terminal-jarvis/package.json | sed 's/.*"version": "\(.*\)".*/\1/')
+    local ts_version
+    ts_version=$(grep "console.log.*Terminal Jarvis v" npm/terminal-jarvis/src/index.ts | sed 's/.*Terminal Jarvis v\([0-9.]*\).*/\1/')
+    local postinstall_version
+    postinstall_version=$(grep "Terminal Jarvis v" npm/terminal-jarvis/package.json | sed 's/.*Terminal Jarvis v\([0-9.]*\).*/\1/')
     local homebrew_version=""
     
     if [ -f "homebrew-terminal-jarvis/Formula/terminal-jarvis.rb" ]; then
@@ -158,7 +164,8 @@ display_version_status() {
     fi
     log_info_if_enabled "  • src/cli_logic.rs: Auto-synced from Cargo.toml"
     
-    local readme_versions=$(grep -o 'terminal-jarvis@[0-9.]*' README.md 2>/dev/null || echo "none")
+    local readme_versions
+    readme_versions=$(grep -o 'terminal-jarvis@[0-9.]*' README.md 2>/dev/null || echo "none")
     log_info_if_enabled "  • README.md version refs: ${readme_versions}"
     
     # Check if all versions match (including Homebrew and postinstall)
@@ -242,7 +249,7 @@ update_all_versions() {
 # Function to suggest next version based on current version
 suggest_next_version() {
     local current_version="$1"
-    IFS='.' read -ra VERSION_PARTS <<< "$current_version"
+    IFS='.' read -r -a VERSION_PARTS <<< "$current_version"
     
     local patch_version="${VERSION_PARTS[0]}.${VERSION_PARTS[1]}.$((VERSION_PARTS[2] + 1))"
     local minor_version="${VERSION_PARTS[0]}.$((VERSION_PARTS[1] + 1)).0"
@@ -480,7 +487,7 @@ suggest_next_version "$CANONICAL_VERSION"
 echo ""
 
 # Check CHANGELOG.md readiness for next version
-IFS='.' read -ra VERSION_PARTS <<< "$CANONICAL_VERSION"
+IFS='.' read -r -a VERSION_PARTS <<< "$CANONICAL_VERSION"
 SUGGESTED_PATCH="${VERSION_PARTS[0]}.${VERSION_PARTS[1]}.$((VERSION_PARTS[2] + 1))"
 
 if ! check_changelog_readiness "$SUGGESTED_PATCH"; then
@@ -496,7 +503,7 @@ echo ""
 echo -e "${CYAN}📋 Step 0: Prerequisite Verification${RESET}"
 log_warn "Have you run ./scripts/cicd/local-ci.sh successfully?"
 echo ""
-read -p "Continue with deployment? (y/N): " continue_deploy
+read -r -p "Continue with deployment? (y/N): " continue_deploy
 
 if [[ ! $continue_deploy =~ ^[Yy]$ ]]; then
     echo -e "${YELLOW}👋 Deployment cancelled. Run ./scripts/cicd/local-ci.sh first${RESET}"
@@ -526,7 +533,7 @@ if ! grep -q "\[${CURRENT_VERSION}\]" CHANGELOG.md; then
     echo "4) Exit and handle this later"
     echo ""
     
-    read -p "Enter your choice (1-4): " changelog_choice
+    read -r -p "Enter your choice (1-4): " changelog_choice
     
     case $changelog_choice in
         1)
@@ -546,7 +553,7 @@ if ! grep -q "\[${CURRENT_VERSION}\]" CHANGELOG.md; then
             echo "- Improvements to existing features"
             echo ""
             echo -e "${BLUE}Press Enter to open the editor...${RESET}"
-            read -p ""
+            read -r -p ""
             
             # Open CHANGELOG.md in default editor
             ${EDITOR:-nano} CHANGELOG.md
@@ -596,7 +603,7 @@ if [ "$CURRENT_BRANCH" != "$DEFAULT_BRANCH" ]; then
     echo "3) Cancel and exit"
     echo ""
     
-    read -p "Enter your choice (1-3): " choice
+    read -r -p "Enter your choice (1-3): " choice
     
     case $choice in
         1)
@@ -606,9 +613,9 @@ if [ "$CURRENT_BRANCH" != "$DEFAULT_BRANCH" ]; then
             git fetch origin
             
             # Switch to develop and merge
-            git checkout $DEFAULT_BRANCH
-            git pull origin $DEFAULT_BRANCH
-            git merge $CURRENT_BRANCH --no-ff -m "feat: merge ${CURRENT_BRANCH} - futuristic UX improvements"
+            git checkout "$DEFAULT_BRANCH"
+            git pull origin "$DEFAULT_BRANCH"
+            git merge "$CURRENT_BRANCH" --no-ff -m "feat: merge ${CURRENT_BRANCH} - futuristic UX improvements"
             
             log_success "Successfully merged into ${DEFAULT_BRANCH}!"
             ;;
@@ -648,23 +655,23 @@ echo "5) Publish current version to NPM registry only"
 echo "6) Deploy current version (I've already updated all version files manually)"
 echo ""
 
-read -p "Enter your choice (1-6): " version_choice
+read -r -p "Enter your choice (1-6): " version_choice
 
 case $version_choice in
     1)
         echo -e "${BLUE}→ Bumping patch version...${RESET}"
         # Calculate new patch version
-        IFS='.' read -ra VERSION_PARTS <<< "$CURRENT_VERSION"
+    IFS='.' read -r -a VERSION_PARTS <<< "$CURRENT_VERSION"
         NEW_VERSION="${VERSION_PARTS[0]}.${VERSION_PARTS[1]}.$((VERSION_PARTS[2] + 1))"
         ;;
     2)
         echo -e "${BLUE}→ Bumping minor version...${RESET}"
-        IFS='.' read -ra VERSION_PARTS <<< "$CURRENT_VERSION"
+    IFS='.' read -r -a VERSION_PARTS <<< "$CURRENT_VERSION"
         NEW_VERSION="${VERSION_PARTS[0]}.$((VERSION_PARTS[1] + 1)).0"
         ;;
     3)
         echo -e "${BLUE}→ Bumping major version...${RESET}"
-        IFS='.' read -ra VERSION_PARTS <<< "$CURRENT_VERSION"
+    IFS='.' read -r -a VERSION_PARTS <<< "$CURRENT_VERSION"
         NEW_VERSION="$((VERSION_PARTS[0] + 1)).0.0"
         ;;
     4)
@@ -752,7 +759,7 @@ if [ "${SKIP_GIT_OPERATIONS:-false}" != "true" ]; then
     # Push to GitHub
     echo -e "${BLUE}→ Pushing to GitHub...${RESET}"
     CURRENT_BRANCH=$(git branch --show-current)  # Refresh current branch after potential merge
-    git push origin $CURRENT_BRANCH
+    git push origin "$CURRENT_BRANCH"
     git push origin "v${NEW_VERSION}"
     
     log_success "Pushed to GitHub with tag v${NEW_VERSION}"
@@ -801,7 +808,7 @@ if [ "${SKIP_GIT_OPERATIONS:-false}" != "true" ]; then
         echo -e "${BLUE}→ Committing Homebrew release archives...${RESET}"
         git add homebrew/release/terminal-jarvis-*.tar.gz
         git commit -m "feat: add Homebrew release archives for v${NEW_VERSION}" || echo "No new archives to commit"
-        git push origin $(git branch --show-current)
+    git push origin "$(git branch --show-current)"
     else
         log_warn "Homebrew release archive generation failed"
         log_info_if_enabled "Archives may need to be created manually for Homebrew formula"

@@ -93,7 +93,8 @@ build_for_target() {
         local binary_path="target/$target/release/terminal-jarvis"
         
         if [ -f "$binary_path" ]; then
-            local size=$(du -h "$binary_path" | cut -f1)
+            local size
+            size=$(du -h "$binary_path" | cut -f1)
             print_info "Binary size: $size"
         fi
         return 0
@@ -104,8 +105,8 @@ build_for_target() {
 }
 
 # Parse command line arguments
-BUILD_MODE="all"
-FORCE_INSTALL=false
+_BUILD_MODE="all"
+_FORCE_INSTALL=false
 CURRENT_ONLY=false
 
 while [[ $# -gt 0 ]]; do
@@ -115,7 +116,7 @@ while [[ $# -gt 0 ]]; do
             shift
             ;;
         --force-install)
-            FORCE_INSTALL=true
+            _FORCE_INSTALL=true
             shift
             ;;
         --help)
