@@ -10,7 +10,7 @@
 
 <td width="75%" style="border: none; padding: 0;">
 
-<img src="screenshot_and_demo/promo_image_for_readme.png" alt="Terminal Jarvis Interface" width="100%">
+<img src="https://raw.githubusercontent.com/BA-CalderonMorales/terminal-jarvis/docs/screenshots_and_demos/screenshots_and_demo/promo_image_for_readme.png" alt="Terminal Jarvis Interface" width="100%">
 
 </td>
 
@@ -49,7 +49,7 @@ A unified command center for AI coding tools. Manage and run claude-code, gemini
 
 <div align="center" style="border-radius: 8px;">
 
-<img src="screenshot_and_demo/Terminal Jarvis v0.0.67 Demo.gif" alt="Terminal Jarvis Demo" width="100%" style="border-radius: 6px;">
+<img src="https://raw.githubusercontent.com/BA-CalderonMorales/terminal-jarvis/docs/screenshots_and_demos/screenshots_and_demo/Terminal Jarvis v0.0.67 Demo.gif" alt="Terminal Jarvis Demo" width="100%" style="border-radius: 6px;">
 
 </div>
 

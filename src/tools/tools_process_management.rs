@@ -23,7 +23,9 @@ pub fn run_opencode_with_clean_exit(cmd: Command) -> Result<std::process::ExitSt
 /// and always returns control back to Terminal Jarvis for post-tool menu handling.
 pub fn run_tool_intercepting_sigint(mut cmd: Command) -> Result<std::process::ExitStatus> {
     // Inherit stdio so child is properly interactive
-    cmd.stdin(Stdio::inherit()).stdout(Stdio::inherit()).stderr(Stdio::inherit());
+    cmd.stdin(Stdio::inherit())
+        .stdout(Stdio::inherit())
+        .stderr(Stdio::inherit());
     // IMPORTANT: Keep child in the SAME foreground process group so it can read from the TTY.
     // If the child is in a different process group that's not foreground, reads from the terminal
     // can result in SIGTTIN and appear as a hang. We'll still handle Ctrl+C by killing the child
@@ -35,11 +37,15 @@ pub fn run_tool_intercepting_sigint(mut cmd: Command) -> Result<std::process::Ex
         .map_err(|e| anyhow::anyhow!("Failed to spawn process: {}", e))?;
 
     // Set up Ctrl+C (SIGINT) handler to forward termination to child and not kill parent
-    use std::sync::{Arc, atomic::{AtomicBool, Ordering}};
+    use std::sync::{
+        atomic::{AtomicBool, Ordering},
+        Arc,
+    };
     let child_id = child.id();
     let sigint_flag = Arc::new(AtomicBool::new(false));
-    let _flag_handle = signal_hook::flag::register(signal_hook::consts::SIGINT, sigint_flag.clone())
-        .map_err(|e| anyhow::anyhow!("Failed to register SIGINT handler: {}", e))?;
+    let _flag_handle =
+        signal_hook::flag::register(signal_hook::consts::SIGINT, sigint_flag.clone())
+            .map_err(|e| anyhow::anyhow!("Failed to register SIGINT handler: {}", e))?;
 
     // Wait loop: either child exits, or we get Ctrl+C signal
     loop {
@@ -52,7 +58,9 @@ pub fn run_tool_intercepting_sigint(mut cmd: Command) -> Result<std::process::Ex
             }
             // Fallback: ensure child is killed if still running
             let _ = child.kill();
-            let status = child.wait().map_err(|e| anyhow::anyhow!("Failed to wait after SIGINT: {}", e))?;
+            let status = child
+                .wait()
+                .map_err(|e| anyhow::anyhow!("Failed to wait after SIGINT: {}", e))?;
             return Ok(status);
         }
 

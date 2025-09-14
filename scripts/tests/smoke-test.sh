@@ -51,7 +51,7 @@ run_test "All 7 tools loaded from configuration" \
     'TOOL_COUNT=$('$BINARY' list 2>/dev/null | grep -E "^ (claude|gemini|qwen|opencode|llxprt|codex|crush)" | wc -l); [ "$TOOL_COUNT" -eq 7 ]'
 
 run_test "All tools use NPM packages consistently" \
-    'NPM_TOOLS=$('$BINARY' list 2>/dev/null | grep -c "Requires: NPM"); [ "$NPM_TOOLS" -eq 7 ]'
+    'OUT=$('$BINARY' list 2>/dev/null); COUNT=0; for t in claude gemini qwen opencode llxprt codex crush; do echo "$OUT" | awk -v t="$t" '\''$0 ~ "^ " t " - " {in_tool=1} in_tool && /Requires: NPM/ {found=1} in_tool && /^ [a-z]/ && $1 != t {in_tool=0} END { exit found?0:1 }'\'' >/dev/null 2>&1 && COUNT=$((COUNT+1)); done; [ "$COUNT" -eq 7 ]'
 
 run_test "Update command help" \
     "$BINARY update --help > /dev/null 2>&1"
@@ -72,7 +72,7 @@ run_test "Example configuration file has all 7 tools" \
     'CONFIG_TOOLS=$(grep -E "^(claude|gemini|qwen|opencode|llxprt|codex|crush) = " terminal-jarvis.toml.example | wc -l); [ "$CONFIG_TOOLS" -eq 7 ]'
 
 run_test "Example config uses NPM for all installs" \
-    'NPM_INSTALL_COMMANDS=$(grep -c "npm" config/tools/*.toml | awk -F: "{sum += \$2} END {print sum}"); [ "$NPM_INSTALL_COMMANDS" -eq 21 ]'
+    'for t in claude gemini qwen opencode llxprt codex crush; do grep -q "command = \"npm\"" config/tools/$t.toml || exit 1; done'
 
 # Test the opencode input focus fix specifically
 run_test "OpenCode input focus tests pass" \
