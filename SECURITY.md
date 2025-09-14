@@ -105,6 +105,20 @@ We provide security updates for the following versions:
 - **Environment Isolation**: Temporary environment modifications with restoration
 - **Dependency Security**: Regular updates and vulnerability monitoring
 
+### SBOM Scanning Policy
+
+We use a Software Bill of Materials (SBOM) scan in CI to inventory dependencies across ecosystems (Rust Cargo + NPM) and check them against known vulnerability databases.
+
+- Tooling: Anchore scan action generates an SBOM and performs a vulnerability scan.
+- Thresholds: We fail builds on Critical severity findings; High and below are surfaced but do not gate merges by themselves.
+- PR vs Main: Pull requests surface results without blocking (continue-on-error). Enforcement occurs on the main branch via required checks.
+- Visibility: Scan results are uploaded in SARIF format to GitHub Code Scanning (Security tab) for tracking and triage.
+
+Handling Findings:
+- Critical: Must be remediated or explicitly justified and temporarily suppressed before merging to main.
+- High: Triage promptly; plan remediation and track via an issue if not immediately fixable.
+- Medium/Low: Address during routine dependency updates.
+
 ## Security Best Practices for Users
 
 ### Installation Security
