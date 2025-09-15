@@ -191,8 +191,6 @@ jobs:
       uses: gitleaks/gitleaks-action@v2
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        args: --verbose --redact
 
     # cargo-deny
     - name: Install Rust (cargo-deny)
@@ -226,10 +224,9 @@ jobs:
         fail-build: true
         severity-cutoff: critical
         output-format: sarif
-        output-file: anchore-results.sarif
     - name: Upload SARIF to code scanning
       # Upload only on push events and when the SARIF file exists
-      if: ${{ matrix.tool == 'sbom-scan' && always() && github.event_name == 'push' && hashFiles('anchore-results.sarif') != '' }}
+      if: ${{ matrix.tool == 'sbom-scan' && always() && github.event_name == 'push' && hashFiles('results.sarif') != '' }}
       uses: github/codeql-action/upload-sarif@v3
       with:
-        sarif_file: anchore-results.sarif
+        sarif_file: results.sarif
