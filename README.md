@@ -6,14 +6,6 @@
 
 <!-- Inline styles to control badge alignment responsiveness in Markdown renderers that support <style>. 
 		 Default inline style keeps right alignment; media queries center badges on small screens. -->
-<style>
-@media (max-width: 900px) {
-	.tj-badges { text-align: center !important; }
-}
-@media (min-width: 901px) {
-	.tj-badges { text-align: right !important; }
-}
-</style>
 
 <div>
 <img src="screenshot_and_demo/promo_image_for_readme.png" alt="Terminal Jarvis Interface" align="left" style="float: left; width: 72%; min-width: 230px; margin-right: 12px;">
