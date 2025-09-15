@@ -11,6 +11,10 @@ on:
 env:
   CARGO_TERM_COLOR: always
 
+# Minimal permissions by default; specific jobs can elevate
+permissions:
+  contents: read
+
 jobs:
   
   # Multi-platform build testing - can run independently of other jobs section
@@ -151,6 +155,9 @@ jobs:
   # Security jobs - matrix fan-out of all security checks
   security:
     name: Security - ${{ matrix.tool }}
+    permissions:
+      contents: read
+      security-events: write
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -221,7 +228,8 @@ jobs:
         output-format: sarif
         output-file: anchore-results.sarif
     - name: Upload SARIF to code scanning
-      if: ${{ always() && matrix.tool == 'sbom-scan' }}
+      # Upload only on push events and when the SARIF file exists
+      if: ${{ matrix.tool == 'sbom-scan' && always() && github.event_name == 'push' && hashFiles('anchore-results.sarif') != '' }}
       uses: github/codeql-action/upload-sarif@v3
       with:
         sarif_file: anchore-results.sarif
