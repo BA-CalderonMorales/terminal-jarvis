@@ -136,7 +136,7 @@ async fn handle_tool_launch(tool_name: &str) -> Result<()> {
 
     // Always launch the tool and show post-tool menu regardless of success/failure
     let _result = launch_tool_with_progress(tool_name, &args).await;
-    handle_post_tool_exit().await
+    handle_post_tool_exit(tool_name, &args).await
 }
 
 /// Launch a tool with detailed progress tracking
@@ -196,45 +196,63 @@ async fn launch_tool_with_progress(tool_name: &str, args: &[String]) -> Result<(
 }
 
 /// Handle user choice after tool exit
-async fn handle_post_tool_exit() -> Result<()> {
-    let theme = theme_global_config::current_theme();
+/// Adds an option to immediately reopen the last tool with the same arguments
+async fn handle_post_tool_exit(last_tool: &str, last_args: &[String]) -> Result<()> {
+    fn initial_case(s: &str) -> String {
+        let mut chars = s.chars();
+        match chars.next() {
+            Some(first) => first.to_uppercase().collect::<String>() + chars.as_str(),
+            None => String::new(),
+        }
+    }
 
-    // Enhanced exit options for faster context switching
-    let exit_options = vec![
-        "Back to Main Menu".to_string(),
-        "Switch to Another AI Tool".to_string(),
-        "Exit Terminal Jarvis".to_string(),
-    ];
+    loop {
+        let theme = theme_global_config::current_theme();
 
-    let exit_choice = match Select::new("What would you like to do next?", exit_options)
-        .with_render_config(get_themed_render_config())
-        .with_page_size(5)
-        .prompt()
-    {
-        Ok(choice) => choice,
-        Err(_) => {
-            // User interrupted - return to main menu by default
-            return Ok(());
-        }
-    };
+        // Enhanced exit options for faster context switching (numbered)
+        let tool_display = initial_case(last_tool);
+        let exit_options = vec![
+            format!("1. Reopen {}", tool_display),
+            "2. Back to Main Menu".to_string(),
+            "3. Switch to Another AI Tool".to_string(),
+            "4. Exit Terminal Jarvis".to_string(),
+        ];
 
-    match exit_choice.as_str() {
-        s if s.contains("Back to Main Menu") => {
-            // Return to main menu - break out of AI tools submenu
-            Ok(())
-        }
-        s if s.contains("Switch to Another AI Tool") => {
-            // Stay in AI tools menu for context switching - this will continue the loop in handle_ai_tools_menu
-            Ok(())
-        }
-        s if s.contains("Exit Terminal Jarvis") => {
-            // Exit completely - break out of everything
-            println!("{}", theme.accent("Goodbye!"));
-            std::process::exit(0);
-        }
-        _ => {
-            // Default to returning to main menu
-            Ok(())
+        let exit_choice = match Select::new("What would you like to do next?", exit_options)
+            .with_render_config(get_themed_render_config())
+            .with_page_size(6)
+            .prompt()
+        {
+            Ok(choice) => choice,
+            Err(_) => {
+                // User interrupted - return to main menu by default
+                return Ok(());
+            }
+        };
+
+        match exit_choice.as_str() {
+            s if s.contains("Reopen ") => {
+                // Relaunch the same tool with the same args, then show this menu again
+                let _ = launch_tool_with_progress(last_tool, last_args).await;
+                continue;
+            }
+            s if s.contains("Back to Main Menu") => {
+                // Return to main menu - break out of AI tools submenu
+                return Ok(());
+            }
+            s if s.contains("Switch to Another AI Tool") => {
+                // Stay in AI tools menu for context switching - this will continue the loop in handle_ai_tools_menu
+                return Ok(());
+            }
+            s if s.contains("Exit Terminal Jarvis") => {
+                // Exit completely - break out of everything
+                println!("{}", theme.accent("Goodbye!"));
+                std::process::exit(0);
+            }
+            _ => {
+                // Default to returning to main menu
+                return Ok(());
+            }
         }
     }
 }
