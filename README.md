@@ -14,7 +14,11 @@ A unified command center for AI coding tools. Manage and run a suite of coding a
 
 <img src="screenshot_and_demo/promo_image_for_readme.png" alt="Terminal Jarvis Interface">
 
-<br>
+<div align="left">
+
+## Badges
+
+</div>
 
 <p align="center">
     <a href="https://www.npmjs.com/package/terminal-jarvis"><img src="https://img.shields.io/npm/v/terminal-jarvis/stable.svg?label=NPM%20Stable&color=green&logo=npm&style=for-the-badge" alt="NPM Stable"></a>
@@ -39,6 +43,8 @@ A unified command center for AI coding tools. Manage and run a suite of coding a
 </p>
 
 </div>
+
+## Demo
 
 <p align="center">
 <img src="screenshot_and_demo/Terminal Jarvis v0.0.67 Demo.gif" alt="Terminal Jarvis Demo">
