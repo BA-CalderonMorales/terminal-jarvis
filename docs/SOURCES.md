@@ -1,8 +1,21 @@
 # Supported AI Coding Tools - Installation & Sources Guide
 
-Terminal Jarvis supports **10 AI coding tools** with seamless installation, updates, and execution. This comprehensive guide provides official sources, exact installation commands, and detailed tool information.
+Terminal Jarvis supports a suite of AI coding tools with seamless installation, updates, and execution. This guide is the authoritative reference for tool sources and install commands. The definitive source of truth is the modular configs in `config/tools/*.toml` and the CLI output from `terminal-jarvis list` and `terminal-jarvis info <tool>`.
 
 ## Complete Tool Overview
+
+The following tools are currently defined in `config/tools/` and supported by Terminal Jarvis:
+
+- claude
+- gemini
+- qwen
+- opencode
+- llxprt
+- codex
+- crush
+- goose
+- amp
+- aider
 
 | Tool         | Provider    | Status      | GitHub Repository                                | Installation Command                         | Key Features                                                                    |
 |--------------|-------------|-------------|--------------------------------------------------|----------------------------------------------|---------------------------------------------------------------------------------|
@@ -67,22 +80,24 @@ terminal-jarvis info claude
 
 ## Summary Table
 
-| Tool        | NPM Package Name              | NPM Install Command                          | Release Strategy              |
-| ----------- | ----------------------------- | -------------------------------------------- | ----------------------------- |
-| claude-code | `@anthropic-ai/claude-code`   | `npm install -g @anthropic-ai/claude-code`   | Stable/Latest/Versioned       |
-| qwen-code   | `@qwen-code/qwen-code`        | `npm install -g @qwen-code/qwen-code`        | Standard versioning           |
-| llxprt      | `@vybestack/llxprt-code-core` | `npm install -g @vybestack/llxprt-code-core` | Frequent updates              |
-| codex       | `@openai/codex`               | `npm install -g @openai/codex`               | Stable with experimental flag |
-| gemini      | `@google/gemini-cli`          | `npm install -g @google/gemini-cli`          | Stable releases               |
-| opencode    | `opencode-ai`                 | `npm install -g opencode-ai`                 | Daily updates                 |
-| crush       | `@charmland/crush`            | `npm install -g @charmland/crush`            | Active maintenance            |
+| Tool        | Package name (if NPM)         | Install command                               | Notes                         |
+| ----------- | ----------------------------- | --------------------------------------------- | ----------------------------- |
+| claude      | `@anthropic-ai/claude-code`   | `npm install -g @anthropic-ai/claude-code`    | Stable                        |
+| gemini      | `@google/gemini-cli`          | `npm install -g @google/gemini-cli`           | Stable                        |
+| qwen        | `@qwen-code/qwen-code`        | `npm install -g @qwen-code/qwen-code@latest`  | Stable                        |
+| opencode    | `opencode-ai`                 | `npm install -g opencode-ai@latest`           | Testing                       |
+| llxprt      | `@vybestack/llxprt-code`      | `npm install -g @vybestack/llxprt-code`       | Testing                       |
+| codex       | `@openai/codex`               | `npm install -g @openai/codex`                | Testing/Legacy                |
+| crush       | `@charmland/crush`            | `npm install -g @charmland/crush`             | New                           |
+| goose       | n/a                           | `curl -fsSL https://github.com/block/goose/releases/download/stable/download_cli.sh | bash` | Stable                        |
+| amp         | `@sourcegraph/amp`            | `npm install -g @sourcegraph/amp`             | Stable                        |
+| aider       | n/a (uv)                      | `uv tool install --force --python python3.12 --with pip aider-chat@latest` | Stable                        |
 
-**Note:** Four tools use different package names than their common names:
+Notes:
 
-- llxprt → `@vybestack/llxprt-code-core`
-- gemini → `@google/gemini-cli`
-- opencode → `opencode-ai`
-- crush → `@charmland/crush`
+- Some tools have CLI names that differ from their package names (see table).
+- Goose is installed via a publisher-provided script (not NPM).
+- Aider is installed via `uv` and Python, not NPM.
 
 ## Installation Verification
 
@@ -138,7 +153,7 @@ npm install -g [package-name]
 ### Wrong Package Installed
 **Solution:** Always use the exact package names from the tables above.
 
-**CRITICAL:** Use `@vybestack/llxprt-code-core` for llxprt (not `@vybestack/llxprt-code` which installs Gemini CLI instead).
+**CRITICAL:** Use `@vybestack/llxprt-code` for llxprt. Avoid similarly named packages that map to other tools.
 
 ### Authentication/Configuration Issues
 Terminal Jarvis v0.0.44+ handles authentication gracefully. You'll see "✨ [tool] session ended" instead of error messages for normal authentication flows like `/auth` or `/config` commands.
