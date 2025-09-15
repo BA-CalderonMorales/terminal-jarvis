@@ -52,19 +52,21 @@ terminal-jarvis templates apply my-template
 
 ## Supported AI Tools
 
-| Tool       | Description                               | Status     | Installation Command                         |
-| ---------- | ----------------------------------------- | ---------- | -------------------------------------------- |
-| `claude`   | Anthropic's Claude for code assistance    | Stable     | `npm install -g @anthropic-ai/claude-code`   |
-| `gemini`   | Google's Gemini CLI tool                  | Stable     | `npm install -g @google/gemini-cli`          |
-| `qwen`     | Qwen coding assistant                     | Stable     | `npm install -g @qwen-code/qwen-code@latest` |
-| `opencode` | Terminal-based AI coding agent            | Testing    | `npm install -g opencode-ai@latest`          |
-| `llxprt`   | Multi-provider AI coding assistant        | Testing    | `npm install -g @vybestack/llxprt-code-core` |
-| `codex`    | OpenAI Codex CLI for local AI coding      | Testing    | `npm install -g @openai/codex`               |
-| `crush`    | Charm's multi-model AI assistant with LSP | New        | `npm install -g @charmland/crush`            |
+Below is a concise overview. For official sources and exact installation commands, see [SOURCES.md](SOURCES.md).
 
-> [!NOTE]
-> BETA = _Looking for testers! These tools are new additions._
+| Tool       | Description                               | Status     |
+| ---------- | ----------------------------------------- | ---------- |
+| `claude`   | Anthropic's Claude for code assistance    | Stable     |
+| `gemini`   | Google's Gemini CLI tool                  | Stable     |
+| `qwen`     | Qwen coding assistant                     | Stable     |
+| `opencode` | Terminal-based AI coding agent            | Testing    |
+| `llxprt`   | Multi-provider AI coding assistant        | Testing    |
+| `codex`    | OpenAI Codex CLI for local AI coding      | Testing    |
+| `crush`    | Charm's multi-model AI assistant with LSP | New        |
+| `goose`    | Developer toolkit AI assistant            | New        |
+| `amp`      | Sourcegraph’s context-aware assistant     | New        |
+| `aider`    | AI pair programmer for Git repos          | New        |
 
-For detailed information about each tool, see [SOURCES.md](SOURCES.md) or run `terminal-jarvis info <tool-name>`.
+For detailed information and install commands, see [SOURCES.md](SOURCES.md) or run `terminal-jarvis info <tool-name>`.
 
 See [LIMITATIONS.md](LIMITATIONS.md) for known issues and workarounds.

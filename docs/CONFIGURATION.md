@@ -14,13 +14,16 @@ Terminal Jarvis uses a modular configuration system with individual tool definit
 ```
 config/
 ├── tools/           # Individual tool configurations
+│   ├── aider.toml
+│   ├── amp.toml
 │   ├── claude.toml  # Anthropic Claude configuration
-│   ├── gemini.toml  # Google Gemini configuration
-│   ├── qwen.toml    # Qwen coding assistant
-│   ├── opencode.toml
-│   ├── llxprt.toml
 │   ├── codex.toml
-│   └── crush.toml
+│   ├── crush.toml
+│   ├── gemini.toml  # Google Gemini configuration
+│   ├── goose.toml
+│   ├── llxprt.toml
+│   ├── opencode.toml
+│   └── qwen.toml    # Qwen coding assistant
 └── config.toml      # Global Terminal Jarvis settings
 ```
 
@@ -29,10 +32,9 @@ config/
 The `config.toml` file at the project root controls global Terminal Jarvis behavior:
 
 ```toml
-# Global Terminal Jarvis Configuration
+# Global Terminal Jarvis Configuration (example)
 
 [app]
-version = "0.0.67"
 theme = "default"
 auto_update_check = true
 
@@ -64,6 +66,9 @@ opencode = { enabled = false, auto_update = false }
 llxprt = { enabled = true, auto_update = true }
 codex = { enabled = true, auto_update = true }
 crush = { enabled = true, auto_update = true }
+goose = { enabled = true, auto_update = true }
+amp = { enabled = true, auto_update = true }
+aider = { enabled = true, auto_update = true }
 
 [templates]
 repository = "your-username/jarvis-templates"
