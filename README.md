@@ -6,6 +6,12 @@
 
 <div align="center">
 
+A unified command center for AI coding tools. Manage and run a suite of coding assistants from one beautiful terminal interface. See the full list in the [Supported AI Tools guide](docs/SOURCES.md).
+
+</div>
+
+<div align="center">
+
 <img src="screenshot_and_demo/promo_image_for_readme.png" alt="Terminal Jarvis Interface">
 
 <br>
@@ -31,12 +37,6 @@
     <a href="https://github.com/Piebald-AI/awesome-gemini-cli"><img src="https://img.shields.io/badge/Mentioned%20in-awesome-6f42c1?style=for-the-badge" alt="Mentioned in Awesome Gemini CLI"></a>
     <a href="https://www.buymeacoffee.com/brandoncalderonmorales"><img src="https://img.shields.io/badge/Buy%20Me%20a%20Coffee-orange.svg?style=for-the-badge" alt="Buy Me a Coffee"></a>
 </p>
-
-</div>
-
-<div align="center">
-
-A unified command center for AI coding tools. Manage and run a suite of coding assistants from one beautiful terminal interface. See the full list in the [Supported AI Tools guide](docs/SOURCES.md).
 
 </div>
 
