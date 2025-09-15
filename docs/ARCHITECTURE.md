@@ -212,46 +212,36 @@ This architecture ensures visual consistency throughout the entire Terminal Jarv
 
 ## Adding New Tools
 
-Terminal Jarvis is designed to make adding new CLI tools straightforward using the modular architecture:
+Terminal Jarvis is designed to make adding new CLI tools straightforward using the modular configuration system:
 
-1. **Define CLI interface** in `cli.rs` with new command structure
-2. **Add tool configuration** in `services/services_tool_configuration.rs` for display name mapping
-3. **Update tool detection** in `tools/tools_detection.rs` and `tools/tools_command_mapping.rs`
-4. **Implement tool execution** in `cli_logic/cli_logic_tool_execution.rs`
-5. **Add service operations** in appropriate `services/` modules if external integrations are needed
+1. **Create a tool configuration** file under `config/tools/` (e.g., `config/tools/newtool.toml`) defining install/auth/feature metadata.
+2. **Command mapping (if needed)**: If the new tool’s CLI binary name differs from its config key, add a mapping entry in `tools/tools_command_mapping.rs`.
+3. **Detection/verification**: Ensure `tools/tools_detection.rs` recognizes the tool by CLI name; verification typically uses `--version` or `--help`.
+4. **Execution path**: The generic `run <tool>` flow uses the config data; add special-casing in `cli_logic/cli_logic_tool_execution.rs` only if the tool needs a bespoke launch sequence.
 
-Example structure for adding a new tool:
+Example tool config:
 
-```rust
-// In cli.rs
-#[derive(Parser)]
-pub struct NewToolArgs {
-    // Tool-specific command arguments
-}
+```toml
+# config/tools/newtool.toml
+[tool]
+display_name = "New Tool"
+config_key = "newtool"
+description = "Description of the new tool"
+cli_command = "newtool"
+status = "testing"
 
-// In tools/tools_command_mapping.rs
-pub fn get_command_mapping() -> HashMap<&'static str, &'static str> {
-    let mut commands = HashMap::new();
-    // Add new tool mapping
-    commands.insert("newtool", "new-tool-cli");
-    commands
-}
+[tool.install]
+command = "npm"
+args = ["install", "-g", "newtool-package"]
+verify_command = "newtool --version"
 
-// In services/services_tool_configuration.rs
-pub fn get_display_name_to_config_mapping() -> HashMap<String, String> {
-    let mut mapping = HashMap::new();
-    // Add new tool configuration mapping
-    mapping.insert("New Tool".to_string(), "newtool".to_string());
-    mapping
-}
-
-// In cli_logic/cli_logic_tool_execution.rs
-pub fn handle_new_tool_execution(args: &NewToolArgs) -> Result<()> {
-    // Tool-specific execution logic here
-}
+[tool.auth]
+env_vars = ["NEWTOOL_API_KEY"]
+setup_url = "https://example.com/newtool/setup"
+auth_instructions = "Visit setup URL to get API key"
 ```
 
-This modular approach ensures that new tools integrate cleanly with all existing systems (detection, execution, configuration, and service management) while maintaining the separation of concerns.
+This approach ensures new tools integrate cleanly with detection, info display, and execution while keeping changes isolated.
 
 ## NPM Distribution Technical Details
 

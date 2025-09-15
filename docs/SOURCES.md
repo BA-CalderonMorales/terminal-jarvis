@@ -110,19 +110,16 @@ crush --help
 
 ## Terminal Jarvis Configuration Consistency
 
-To ensure all tools install and update correctly, the following configuration mappings are maintained in Terminal Jarvis:
+Terminal Jarvis now uses a modular configuration system. Each tool has its own TOML file under `config/tools/` (for example, `config/tools/claude.toml`, `config/tools/gemini.toml`, etc.). The app automatically discovers and loads these definitions, so you don't need to maintain a single monolithic mapping file.
 
-### Configuration File Mappings (`terminal-jarvis.toml.example`):
+Benefits of the modular system:
+- Automatic discovery of new tools added to `config/tools/`
+- Clear separation of per-tool install/auth/feature metadata
+- Reduced drift between docs and implementation
 
-```toml
-[tools]
-claude-code = { enabled = true, auto_update = true, install_command = "npm install -g @anthropic-ai/claude-code", update_command = "npm update -g @anthropic-ai/claude-code" }
-gemini-cli = { enabled = true, auto_update = false, install_command = "npm install -g @google/gemini-cli", update_command = "npm update -g @google/gemini-cli" }
-qwen-code = { enabled = true, auto_update = true, install_command = "npm install -g @qwen-code/qwen-code@latest", update_command = "npm update -g @qwen-code/qwen-code" }
-opencode = { enabled = true, auto_update = true, install_command = "npm install -g opencode-ai@latest", update_command = "npm update -g opencode-ai" }
-llxprt-code = { enabled = true, auto_update = true, install_command = "npm install -g @vybestack/llxprt-code-core", update_command = "npm update -g @vybestack/llxprt-code-core" }
-codex = { enabled = true, auto_update = true, install_command = "npm install -g @openai/codex", update_command = "npm update -g @openai/codex" }
-crush = { enabled = true, auto_update = true, install_command = "npm install -g @charmland/crush", update_command = "npm update -g @charmland/crush" }
+To see the exact configuration for a tool, open its TOML file in `config/tools/` or run:
+```
+terminal-jarvis info <tool>
 ```
 
 ## Common Installation Issues
