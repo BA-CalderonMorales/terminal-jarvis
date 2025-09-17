@@ -12,6 +12,7 @@ use tokio::process::Command as AsyncCommand;
 pub struct NpmOperationsManager;
 
 impl NpmOperationsManager {
+    #[allow(dead_code)] // Framework code for future use
     pub fn new() -> Self {
         Self
     }

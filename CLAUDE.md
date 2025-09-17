@@ -2,7 +2,7 @@
 
 **IMPORTANT**: This file references the unified agent guidelines. All detailed instructions, coding standards, deployment procedures, and development guidelines are maintained in a single source of truth.
 
-## 📖 Primary Reference Document
+## Primary Reference Document
 
 **READ FIRST**: All Claude AI instructions are documented in:
 
@@ -19,7 +19,7 @@ This document contains:
 
 For immediate access to key sections in AGENTS.md:
 
-- **🚨 [Critical Deployment Warning](AGENTS.md#critical-deployment-warning)** - THE #1 deployment failure pattern
+- **[Critical Deployment Warning](AGENTS.md#critical-deployment-warning)** - THE #1 deployment failure pattern
 - **[Communication Guidelines](AGENTS.md#communication--reference-guidelines)** - Reference clarity requirements
 - **[Deployment Commands Trigger](AGENTS.md#-deployment-commands-trigger---read-immediately)** - When users mention deployment
 - **[AI Assistant Development Guidelines](AGENTS.md#ai-assistant-development-guidelines)** - Claude-optimized workflows
@@ -60,7 +60,7 @@ For immediate access to key sections in AGENTS.md:
 - Provide full context of which section/workflow it belongs to
 - Explain where that reference appeared in the conversation
 
-## 🔄 Keep This Reference Updated
+## Keep This Reference Updated
 
 When updating agent guidelines:
 1. **Primary updates go to AGENTS.md** - Single source of truth

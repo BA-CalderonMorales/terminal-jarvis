@@ -5,6 +5,8 @@
 
 # Source logger
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# shellcheck source=../logger/logger.sh
+# shellcheck disable=SC1091
 source "$SCRIPT_DIR/../logger/logger.sh"
 
 log_header "Terminal Jarvis Authentication Test"
@@ -20,7 +22,7 @@ test_tool_without_fix() {
     
     # Try to run the tool in a way that might trigger browser opening
     log_info_if_enabled "Running: $tool --help"
-    timeout 10s $tool --help 2>&1 | head -20
+    timeout 10s "$tool" --help 2>&1 | head -20
     echo
 }
 
@@ -31,7 +33,7 @@ test_tool_with_fix() {
     
     # Use Terminal Jarvis to run the tool (which includes our fix)
     log_info_if_enabled "Running: terminal-jarvis run $tool --help"
-    timeout 10s terminal-jarvis run $tool --help 2>&1 | head -20
+    timeout 10s terminal-jarvis run "$tool" --help 2>&1 | head -20
     echo
 }
 

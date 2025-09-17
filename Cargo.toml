@@ -1,6 +1,6 @@
 [package]
 name = "terminal-jarvis"
-version = "0.0.67"
+version = "0.0.68"
 edition = "2021"
 description = "A thin Rust wrapper that provides a unified interface for managing and running AI coding tools"
 authors = ["BA-CalderonMorales"]
@@ -10,6 +10,15 @@ homepage = "https://github.com/BA-CalderonMorales/terminal-jarvis"
 readme = "README.md"
 keywords = ["cli", "ai", "tools", "wrapper"]
 categories = ["command-line-utilities"]
+include = [
+    "src/**",
+    "Cargo.toml",
+    "README.md",
+    "LICENSE",
+    "config/**",
+    "config.toml",
+    "terminal-jarvis.toml.example",
+]
 
 [[bin]]
 name = "terminal-jarvis"
@@ -22,18 +31,21 @@ path = "src/lib.rs"
 [dependencies]
 clap = { version = "4.4", features = ["derive", "env", "wrap_help"] }
 clap_complete = "4.4"
-tokio = { version = "1.35", features = ["full"] }
-reqwest = { version = "0.11", features = ["json"] }
+tokio = { version = "1.47", features = ["full"] }
+reqwest = { version = "0.12.23", features = ["json"] }
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
 anyhow = "1.0"
-toml = "0.8"
-dirs = "5.0"
-inquire = "0.7"
+toml = "0.9.5"
+dirs = "6.0.0"
+inquire = "0.8.1"
 futures = "0.3"
 shell-words = "1.1"
-term_size = "0.3"
+terminal_size = "0.4"
 indicatif = "0.18.0"
+signal-hook = "0.3"
+libc = { version = "0.2", optional = false }
+slab = "0.4.11"
 
 [dev-dependencies]
 tokio-test = "0.4"

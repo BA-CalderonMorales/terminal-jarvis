@@ -12,6 +12,12 @@ impl ApiKeyManager {
     /// Check if required API keys are set for a tool
     pub fn check_api_keys_for_tool(tool: &str) -> bool {
         match tool {
+            "aider" => {
+                // Aider supports multiple providers; consider any of these sufficient
+                env::var("OPENROUTER_API_KEY").is_ok()
+                    || env::var("OPENAI_API_KEY").is_ok()
+                    || env::var("ANTHROPIC_API_KEY").is_ok()
+            }
             "gemini" => {
                 env::var("GOOGLE_API_KEY").is_ok()
                     || env::var("GEMINI_API_KEY").is_ok()
@@ -29,6 +35,17 @@ impl ApiKeyManager {
     /// Provide helpful error messages for missing API keys
     pub fn get_api_key_help_message(tool: &str) -> String {
         match tool {
+            "aider" => {
+                "Aider supports multiple providers. Set one of these environment variables:\n\
+         export OPENROUTER_API_KEY=\"your-api-key\"\n\
+         export OPENAI_API_KEY=\"your-api-key\"\n\
+         export ANTHROPIC_API_KEY=\"your-api-key\"\n\
+         \n\
+         OpenRouter is a good default that aggregates many models:\n\
+         https://openrouter.ai/settings/keys\n\
+         See: https://aider.chat/docs/troubleshooting/models-and-keys.html"
+                    .to_string()
+            }
             "gemini" => {
                 "Gemini CLI requires authentication. Set one of these environment variables:\n\
          export GOOGLE_API_KEY=\"your-api-key\"\n\
@@ -70,6 +87,7 @@ impl ApiKeyManager {
     #[allow(dead_code)]
     pub fn get_supported_env_vars(tool: &str) -> Vec<&'static str> {
         match tool {
+            "aider" => vec!["OPENROUTER_API_KEY", "OPENAI_API_KEY", "ANTHROPIC_API_KEY"],
             "gemini" => vec![
                 "GOOGLE_API_KEY",
                 "GEMINI_API_KEY",

@@ -8,6 +8,8 @@ set -e  # Exit on any error
 
 # Source logger
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# shellcheck source=../logger/logger.sh
+# shellcheck disable=SC1091
 source "$SCRIPT_DIR/../logger/logger.sh"
 
 # Color definitions for consistent theming
@@ -229,12 +231,14 @@ log_progress "Checking version consistency"
 
 NPM_VERSION=$(grep '"version":' npm/terminal-jarvis/package.json | sed 's/.*"version": "\(.*\)".*/\1/')
 TS_VERSION=$(grep "console.log.*Terminal Jarvis v" npm/terminal-jarvis/src/index.ts | sed 's/.*Terminal Jarvis v\([0-9.]*\).*/\1/')
+POSTINSTALL_VERSION=$(grep "Terminal Jarvis v" npm/terminal-jarvis/package.json | sed 's/.*Terminal Jarvis v\([0-9.]*\).*/\1/')
 
 log_info_if_enabled "  Cargo.toml: ${CURRENT_VERSION}"
 log_info_if_enabled "  package.json: ${NPM_VERSION}"
 log_info_if_enabled "  index.ts: ${TS_VERSION}"
+log_info_if_enabled "  postinstall: ${POSTINSTALL_VERSION}"
 
-if [ "$CURRENT_VERSION" = "$NPM_VERSION" ] && [ "$CURRENT_VERSION" = "$TS_VERSION" ]; then
+if [ "$CURRENT_VERSION" = "$NPM_VERSION" ] && [ "$CURRENT_VERSION" = "$TS_VERSION" ] && [ "$CURRENT_VERSION" = "$POSTINSTALL_VERSION" ]; then
     log_progress_done
     log_success_if_enabled "All versions are synchronized"
 else

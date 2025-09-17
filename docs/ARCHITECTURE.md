@@ -109,6 +109,50 @@ Terminal Jarvis follows a **domain-based modular architecture** where large func
 
 The interactive mode provides a complete T.JARVIS experience with real-time tool status, installation management, and a beautiful terminal interface, all coordinated through this modular architecture.
 
+## Dependency Policy and Security (cargo-deny)
+
+Terminal Jarvis enforces dependency hygiene and supply-chain safety using cargo-deny, configured via the repository-level `deny.toml`.
+
+What cargo-deny does for us:
+- Security advisories: Fails on known-vulnerable crates and surfaces audit risks.
+- License allowlist: Ensures all dependencies comply with permissive licenses approved for this project.
+- Duplicate/banned crates: Highlights multiple versions and optionally denies problematic crates.
+- Source policy: Restricts dependencies to the official crates.io index and flags unknown git sources.
+
+How to run it locally:
+- Full suite: `cargo deny check`
+- Specific checks: `cargo deny check advisories`, `cargo deny check licenses`, `cargo deny check bans`, `cargo deny check sources`
+
+Key policy highlights (see `deny.toml`):
+- Licenses allowlist includes MIT, Apache-2.0, BSD-2/3-Clause, ISC, Zlib, 0BSD, MPL-2.0, CC0-1.0, and a few tooling-specific exceptions (e.g., LLVM exception) with a detection confidence threshold of 0.8.
+- Advisories: no global ignores by default; any temporary ignore must include justification.
+- Bans: multiple versions are warned (to encourage deduplication) and wildcards are not used in this workspace. Explicit allow/deny lists are supported for escalations.
+- Sources: Only the crates.io index is allowed; unknown registries and git sources are warned by default to prevent accidental drift.
+
+Team guidance:
+- When adding or updating dependencies, verify cargo-deny passes without new errors.
+- If a license or advisory exception is truly needed, add it narrowly in `deny.toml` with a reason comment and open a follow-up to remove it.
+- Keep dependency updates small and frequent; prefer upstream fixes for advisories.
+
+Quality gates integration:
+- We treat cargo-deny as part of our pre-commit checks alongside `cargo fmt`, `cargo clippy --all-targets --all-features -- -D warnings`, and `cargo test`.
+- CI should run `cargo deny check` to prevent merging policy regressions.
+
+## SBOM Scanning and Vulnerability Gate
+
+We generate a Software Bill of Materials (SBOM) and scan it for known vulnerabilities using Anchore's scan action in CI. This provides a cross-ecosystem view that covers both Rust (Cargo) and Node (NPM) dependencies.
+
+CI policy (tuned to reduce noise):
+- Severity threshold: critical (we fail only on Critical vulnerabilities).
+- Fail behavior: Build fails on main when a Critical is found.
+- PR experience: The job is marked as allowed to continue on pull_request events so findings surface without blocking developer workflows.
+- Visibility: Results are uploaded as SARIF to GitHub Code Scanning for centralized visibility under the Security tab.
+
+Rationale:
+- Defense in depth across ecosystems (Rust + Node) with a single gate.
+- Reduced flakiness by gating only on Critical severity while still surfacing High issues in SARIF.
+- Non-blocking signal during PR iteration, with enforcement at merge time.
+
 ## Authentication & Environment Management
 
 Terminal Jarvis includes sophisticated authentication management to prevent browser opening in headless environments:
@@ -168,46 +212,36 @@ This architecture ensures visual consistency throughout the entire Terminal Jarv
 
 ## Adding New Tools
 
-Terminal Jarvis is designed to make adding new CLI tools straightforward using the modular architecture:
+Terminal Jarvis is designed to make adding new CLI tools straightforward using the modular configuration system:
 
-1. **Define CLI interface** in `cli.rs` with new command structure
-2. **Add tool configuration** in `services/services_tool_configuration.rs` for display name mapping
-3. **Update tool detection** in `tools/tools_detection.rs` and `tools/tools_command_mapping.rs`
-4. **Implement tool execution** in `cli_logic/cli_logic_tool_execution.rs`
-5. **Add service operations** in appropriate `services/` modules if external integrations are needed
+1. **Create a tool configuration** file under `config/tools/` (e.g., `config/tools/newtool.toml`) defining install/auth/feature metadata.
+2. **Command mapping (if needed)**: If the new tool’s CLI binary name differs from its config key, add a mapping entry in `tools/tools_command_mapping.rs`.
+3. **Detection/verification**: Ensure `tools/tools_detection.rs` recognizes the tool by CLI name; verification typically uses `--version` or `--help`.
+4. **Execution path**: The generic `run <tool>` flow uses the config data; add special-casing in `cli_logic/cli_logic_tool_execution.rs` only if the tool needs a bespoke launch sequence.
 
-Example structure for adding a new tool:
+Example tool config:
 
-```rust
-// In cli.rs
-#[derive(Parser)]
-pub struct NewToolArgs {
-    // Tool-specific command arguments
-}
+```toml
+# config/tools/newtool.toml
+[tool]
+display_name = "New Tool"
+config_key = "newtool"
+description = "Description of the new tool"
+cli_command = "newtool"
+status = "testing"
 
-// In tools/tools_command_mapping.rs
-pub fn get_command_mapping() -> HashMap<&'static str, &'static str> {
-    let mut commands = HashMap::new();
-    // Add new tool mapping
-    commands.insert("newtool", "new-tool-cli");
-    commands
-}
+[tool.install]
+command = "npm"
+args = ["install", "-g", "newtool-package"]
+verify_command = "newtool --version"
 
-// In services/services_tool_configuration.rs
-pub fn get_display_name_to_config_mapping() -> HashMap<String, String> {
-    let mut mapping = HashMap::new();
-    // Add new tool configuration mapping
-    mapping.insert("New Tool".to_string(), "newtool".to_string());
-    mapping
-}
-
-// In cli_logic/cli_logic_tool_execution.rs
-pub fn handle_new_tool_execution(args: &NewToolArgs) -> Result<()> {
-    // Tool-specific execution logic here
-}
+[tool.auth]
+env_vars = ["NEWTOOL_API_KEY"]
+setup_url = "https://example.com/newtool/setup"
+auth_instructions = "Visit setup URL to get API key"
 ```
 
-This modular approach ensures that new tools integrate cleanly with all existing systems (detection, execution, configuration, and service management) while maintaining the separation of concerns.
+This approach ensures new tools integrate cleanly with detection, info display, and execution while keeping changes isolated.
 
 ## NPM Distribution Technical Details
 

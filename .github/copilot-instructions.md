@@ -2,7 +2,7 @@
 
 **IMPORTANT**: This file references the unified agent guidelines. All detailed instructions, coding standards, deployment procedures, and development guidelines are maintained in a single source of truth.
 
-## 📖 Primary Reference Document
+## Primary Reference Document
 
 **READ FIRST**: All GitHub Copilot instructions are documented in:
 
@@ -19,7 +19,7 @@ This document contains:
 
 For immediate access to key sections in AGENTS.md:
 
-- **🚨 [Deployment Commands Trigger](../AGENTS.md#-deployment-commands-trigger---read-immediately)** - Critical deployment procedures
+- **[Deployment Commands Trigger](../AGENTS.md#-deployment-commands-trigger---read-immediately)** - Critical deployment procedures
 - **[AI Assistant Development Guidelines](../AGENTS.md#ai-assistant-development-guidelines)** - Optimal Copilot workflows
 - **[Version Management](../AGENTS.md#version-numbers-are-important)** - Version synchronization requirements
 - **[Pre-Commit Checklist](../AGENTS.md#pre-commit-checklist)** - Essential validation steps
@@ -43,7 +43,7 @@ For immediate access to key sections in AGENTS.md:
 3. **Test-driven development** → Write tests first, implement features second
 4. **Continuous validation** → Verify compilation and tests after each change
 
-## 🔄 Keep This Reference Updated
+## Keep This Reference Updated
 
 When updating agent guidelines:
 1. **Primary updates go to AGENTS.md** - Single source of truth

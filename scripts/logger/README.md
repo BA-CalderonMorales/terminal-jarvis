@@ -90,8 +90,8 @@ Replace emoji-based output with professional logging:
 
 ```bash
 # Old approach
-echo "✅ Success: Operation completed"
-echo "❌ Error: Something failed"
+echo "Success: Operation completed"
+echo "Error: Something failed"
 
 # New approach  
 log_success_if_enabled "Operation completed"

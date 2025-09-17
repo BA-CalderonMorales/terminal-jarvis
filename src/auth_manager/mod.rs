@@ -5,6 +5,7 @@
 
 // Domain modules
 mod auth_api_key_management;
+mod auth_credentials_store;
 mod auth_entry_point;
 mod auth_environment_detection;
 mod auth_environment_setup;

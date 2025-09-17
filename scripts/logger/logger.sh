@@ -9,9 +9,11 @@ LOGGER_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 # Source configuration and utilities
 # shellcheck source=./log_config.sh
+# shellcheck disable=SC1091
 source "$LOGGER_DIR/log_config.sh"
 
 # shellcheck source=./log_utils.sh  
+# shellcheck disable=SC1091
 source "$LOGGER_DIR/log_utils.sh"
 
 # Enhanced logging functions that respect configuration
@@ -40,7 +42,8 @@ log_debug_if_enabled() {
 source_logger() {
     local logger_path="$1"
     if [[ -f "$logger_path/logger.sh" ]]; then
-        # shellcheck source=./logger.sh
+    # shellcheck source=./logger.sh
+    # shellcheck disable=SC1091
         source "$logger_path/logger.sh"
     else
         echo "ERROR: Logger not found at $logger_path/logger.sh" >&2

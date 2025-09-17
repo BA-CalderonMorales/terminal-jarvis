@@ -9,6 +9,7 @@ use std::collections::HashMap;
 pub struct ToolConfigurationManager;
 
 impl ToolConfigurationManager {
+    #[allow(dead_code)] // Framework code for future use
     pub fn new() -> Self {
         Self
     }

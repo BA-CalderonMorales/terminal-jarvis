@@ -2,7 +2,9 @@
 // Each module handles a specific area of tool management
 
 pub mod tools_command_mapping;
+pub mod tools_config;
 pub mod tools_detection;
+pub mod tools_display;
 pub mod tools_entry_point;
 pub mod tools_execution_engine;
 pub mod tools_process_management;

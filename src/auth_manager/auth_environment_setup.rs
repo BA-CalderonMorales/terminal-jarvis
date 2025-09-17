@@ -14,7 +14,12 @@ impl EnvironmentSetup {
     pub fn set_no_browser_env_vars() -> Result<()> {
         // Set common no-browser flags
         env::set_var("NO_BROWSER", "1");
-        env::set_var("BROWSER", "echo 'Browser prevented by Terminal Jarvis:'"); // Override browser command
+        // Save original BROWSER if present and override with a safe no-op
+        if let Ok(orig) = env::var("BROWSER") {
+            env::set_var("ORIGINAL_BROWSER", orig);
+        }
+        // Using a simple no-op avoids shell quoting issues when invoked via sh -c
+        env::set_var("BROWSER", "true");
 
         // OAuth and authentication prevention
         env::set_var("OAUTH_NO_BROWSER", "1");
@@ -34,8 +39,8 @@ impl EnvironmentSetup {
         if let Ok(original_display) = env::var("DISPLAY") {
             // Temporarily disable DISPLAY to prevent GUI applications
             env::set_var("ORIGINAL_DISPLAY", original_display);
-            env::set_var("DISPLAY", "");
         }
+        env::set_var("DISPLAY", "");
 
         Ok(())
     }
@@ -46,6 +51,16 @@ impl EnvironmentSetup {
         if let Ok(original_display) = env::var("ORIGINAL_DISPLAY") {
             env::set_var("DISPLAY", original_display);
             env::remove_var("ORIGINAL_DISPLAY");
+        } else if env::var("DISPLAY").ok().as_deref() == Some("") {
+            env::remove_var("DISPLAY");
+        }
+
+        // Restore or unset BROWSER
+        if let Ok(orig) = env::var("ORIGINAL_BROWSER") {
+            env::set_var("BROWSER", orig);
+            env::remove_var("ORIGINAL_BROWSER");
+        } else if env::var("BROWSER").ok().as_deref() == Some("true") {
+            env::remove_var("BROWSER");
         }
 
         // Restore CI flag if we're actually in CI
@@ -59,6 +74,20 @@ impl EnvironmentSetup {
         // Clean up temporary interactive flags
         env::remove_var("INTERACTIVE");
         env::remove_var("FORCE_INTERACTIVE");
+        // Remove no-browser flags and GUI suppressors
+        for v in [
+            "NO_BROWSER",
+            "OAUTH_NO_BROWSER",
+            "GOOGLE_APPLICATION_CREDENTIALS_NO_BROWSER",
+            "GEMINI_NO_BROWSER",
+            "QWEN_NO_BROWSER",
+            "CLAUDE_NO_BROWSER",
+            "CODEX_NO_BROWSER",
+            "DISABLE_GUI",
+            "HEADLESS",
+        ] {
+            env::remove_var(v);
+        }
 
         Ok(())
     }
