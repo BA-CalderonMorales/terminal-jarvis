@@ -12,6 +12,9 @@ pub async fn handle_interactive_mode() -> Result<()> {
     // Initialize theme configuration
     let _ = theme_global_config::initialize_theme_config();
 
+    // Export saved credentials at session start so tools inherit API keys
+    let _ = crate::auth_manager::AuthManager::export_saved_env_vars();
+
     // Check NPM availability upfront
     let npm_available = InstallationManager::check_npm_available();
 
@@ -23,9 +26,9 @@ pub async fn handle_interactive_mode() -> Result<()> {
 
         display_welcome_interface(&theme, npm_available).await?;
 
-        // Main menu options - clean styling without redundant indicators
         let options = vec![
             "AI CLI Tools".to_string(),
+            "Authentication".to_string(),
             "Important Links".to_string(),
             "Settings".to_string(),
             "Exit".to_string(),
@@ -49,6 +52,9 @@ pub async fn handle_interactive_mode() -> Result<()> {
         match selection.as_str() {
             s if s.contains("AI CLI Tools") => {
                 handle_ai_tools_menu().await?;
+            }
+            s if s.contains("Authentication") => {
+                crate::cli_logic::handle_authentication_menu().await?;
             }
             s if s.contains("Important Links") => {
                 handle_important_links().await?;

@@ -31,7 +31,12 @@ args = ["update"]
 verify_command = "goose --version"
 
 [tool.auth]
-env_vars = ["OPENAI_API_KEY", "ANTHROPIC_API_KEY", "GEMINI_API_KEY"]
+env_vars = [
+    "OPENAI_API_KEY",
+    "ANTHROPIC_API_KEY",
+    "GEMINI_API_KEY",
+    "GOOGLE_API_KEY",
+]
 setup_url = "https://block.github.io/goose/docs/getting-started/providers"
 browser_auth = true
 auth_instructions = "Run 'goose configure' to set up your preferred AI provider (Tetrate, OpenRouter, or manual API key configuration)"

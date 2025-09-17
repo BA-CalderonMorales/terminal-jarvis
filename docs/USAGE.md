@@ -70,3 +70,15 @@ Below is a concise overview. For official sources and exact installation command
 For detailed information and install commands, see [SOURCES.md](SOURCES.md) or run `terminal-jarvis info <tool-name>`.
 
 See [LIMITATIONS.md](LIMITATIONS.md) for known issues and workarounds.
+
+## Authentication (Unified)
+
+Manage credentials for all tools from one place:
+
+- Interactive: from the main menu, choose "Authentication"
+- CLI:
+	- `terminal-jarvis auth manage` – open the Authentication Manager
+	- `terminal-jarvis auth help <tool>` – show required env vars and setup URL
+	- `terminal-jarvis auth set <tool>` – guided prompts to save API keys
+
+Saved credentials are stored at `~/.config/terminal-jarvis/credentials.toml` and are auto-exported to the environment when Terminal Jarvis starts in interactive mode. Tools inherit these variables so you don’t need to login in each tool separately.
