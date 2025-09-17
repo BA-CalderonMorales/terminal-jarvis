@@ -6,6 +6,8 @@
 use crate::installation_arguments::InstallationManager;
 use crate::progress_utils::{ProgressContext, ProgressUtils};
 use anyhow::{anyhow, Result};
+use std::collections::HashMap;
+use std::io::{self, Write};
 use std::time::Duration;
 use tokio::process::Command as AsyncCommand;
 use tokio::task::JoinSet;
@@ -40,7 +42,7 @@ async fn update_single_package(pkg: &str) -> Result<()> {
     }
 }
 
-/// Update all packages concurrently with clean, non-animated output and summary
+/// Update all packages concurrently with minimal, non-animated feedback
 async fn update_all_packages() -> Result<()> {
     let tools = InstallationManager::get_tool_names();
     if tools.is_empty() {
@@ -49,67 +51,110 @@ async fn update_all_packages() -> Result<()> {
     }
 
     let total = tools.len();
-    println!("\nUpdating tools concurrently ({total})...");
-    println!("----------------------------------------------------------------");
-    let mut join_set: JoinSet<(String, Result<()>)> = JoinSet::new();
 
+    println!("\nUpdating {} tools concurrently...", total);
+
+    // Compute fixed column widths for consistent alignment
+    let idx_width = total.to_string().len().max(2); // width for the left index
+    let name_width = tools.iter().map(|t| t.len()).max().unwrap_or(0).max(8);
+
+    // Map tool -> index for quick updates
+    let mut index_map: HashMap<String, usize> = HashMap::new();
+
+    // Print all lines upfront with DOWNLOADING state
+    for (i, tool) in tools.iter().enumerate() {
+        index_map.insert(tool.clone(), i);
+        println!(
+            "[{:>idx$}/{}]  {:<name$}  DOWNLOADING",
+            i + 1,
+            total,
+            tool,
+            idx = idx_width,
+            name = name_width
+        );
+    }
+    let _ = io::stdout().flush();
+
+    // Helper to update a single printed line in-place
+    let update_line = |tool_index: usize, status: &str| {
+        let lines_up = total - tool_index; // from one line below the last entry
+                                           // Build the updated line text
+        let line_text = format!(
+            "[{:>idx$}/{}]  {:<name$}  {}",
+            tool_index + 1,
+            total,
+            tools[tool_index],
+            status,
+            idx = idx_width,
+            name = name_width
+        );
+        // Move up, clear line, write, move back down
+        print!("\x1b[{}A", lines_up);
+        print!("\r\x1b[2K{}", line_text);
+        print!("\x1b[{}B\r", lines_up);
+        let _ = io::stdout().flush();
+    };
+
+    // Spawn all updates after printing lines to ensure they show immediately
+    let mut join_set: JoinSet<(String, Result<()>)> = JoinSet::new();
     for (i, tool) in tools.iter().cloned().enumerate() {
-        println!("* [START] Updating {tool} ({}/{})", i + 1, total);
         join_set.spawn(async move {
-            // Small stagger to create a natural startup cadence
             tokio::time::sleep(Duration::from_millis((i as u64) * 50)).await;
             let res = update_tool_using_install_manager(&tool).await;
             (tool, res)
         });
     }
 
-    let mut had_errors = false;
-    let mut results: Vec<(String, bool, String)> = Vec::with_capacity(total);
+    let mut ok_count: usize = 0;
+    let mut fail_count: usize = 0;
+    let mut failures: Vec<(String, String)> = Vec::new();
 
     while let Some(join_res) = join_set.join_next().await {
         match join_res {
             Ok((tool, Ok(()))) => {
-                println!("* [OK]    {tool} updated successfully");
-                results.push((tool, true, String::from("updated")));
+                ok_count += 1;
+                if let Some(&idx) = index_map.get(&tool) {
+                    update_line(idx, "DONE");
+                }
             }
             Ok((tool, Err(e))) => {
-                had_errors = true;
-                println!("* [FAIL]  {tool} — {}", e);
-                results.push((tool, false, e.to_string()));
+                fail_count += 1;
+                let msg = truncate(&e.to_string(), 80);
+                if let Some(&idx) = index_map.get(&tool) {
+                    update_line(idx, "FAILED");
+                }
+                failures.push((tool, msg));
             }
             Err(e) => {
-                had_errors = true;
-                println!("* [FAIL]  update task join error — {}", e);
+                fail_count += 1;
+                let msg = truncate(&format!("join error: {}", e), 80);
+                // We cannot map to a specific line, so append failure list only
+                failures.push(("<task>".to_string(), msg));
             }
         }
     }
 
-    // Final summary table (ASCII only)
-    println!("\nUpdate summary:");
-    println!("----------------+--------+----------------------------------------");
-    println!("{:<16}| {:<6} | DETAILS", "TOOL", "STATUS");
-    println!("----------------+--------+----------------------------------------");
-    // Sort results by tool name for deterministic output
-    results.sort_by(|a, b| a.0.cmp(&b.0));
-    for (tool, ok, info) in results {
-        let status = if ok { "OK" } else { "FAIL" };
-        let max_details = 56usize; // keep table within ~80 cols
-        let details = if info.len() > max_details {
-            format!("{}…", &info[..max_details])
-        } else {
-            info
-        };
-        println!("{:<16}| {:<6} | {}", tool, status, details);
+    // Compact final status
+    println!("\nUpdate complete: {} OK, {} FAIL", ok_count, fail_count);
+    if !failures.is_empty() {
+        println!("Failures:");
+        for (tool, msg) in failures {
+            println!("- {}: {}", tool, msg);
+        }
     }
-    println!("----------------+--------+----------------------------------------\n");
-
-    if had_errors {
-        println!("Some packages failed to update. See details above.");
-    } else {
-        println!("All packages updated successfully.");
-    }
+    // Ensure we end on a clean new line and flush, so follow-up prompts work reliably
+    let _ = io::stdout().flush();
 
     Ok(())
+}
+
+/// Truncate a string to a maximum length, appending ellipsis if needed
+fn truncate(s: &str, max: usize) -> String {
+    if s.len() > max {
+        format!("{}...", &s[..max])
+    } else {
+        s.to_string()
+    }
 }
 
 /// Update a tool using the InstallationManager configuration
@@ -165,15 +210,31 @@ async fn execute_command(command: &str) -> Result<()> {
 
         if sudo_available {
             let mut sudo_cmd = AsyncCommand::new("sudo");
+            // Non-interactive sudo to avoid blocking on password prompts
+            sudo_cmd.arg("-n");
             sudo_cmd.arg(cmd);
             sudo_cmd.args(&args);
+            // Ensure child doesn't read stdin; we suppress all IO
+            sudo_cmd.stdin(std::process::Stdio::null());
             sudo_cmd.stdout(std::process::Stdio::null());
             sudo_cmd.stderr(std::process::Stdio::null());
-            sudo_cmd.status().await?
+            let status = sudo_cmd.status().await?;
+            if status.success() {
+                status
+            } else {
+                // Fallback to running without sudo to avoid interactive password prompts
+                let mut regular_cmd = AsyncCommand::new(cmd);
+                regular_cmd.args(&args);
+                regular_cmd.stdin(std::process::Stdio::null());
+                regular_cmd.stdout(std::process::Stdio::null());
+                regular_cmd.stderr(std::process::Stdio::null());
+                regular_cmd.status().await?
+            }
         } else {
             // Fallback to regular command if sudo isn't available
             let mut regular_cmd = AsyncCommand::new(cmd);
             regular_cmd.args(&args);
+            regular_cmd.stdin(std::process::Stdio::null());
             regular_cmd.stdout(std::process::Stdio::null());
             regular_cmd.stderr(std::process::Stdio::null());
             regular_cmd.status().await?
@@ -182,6 +243,7 @@ async fn execute_command(command: &str) -> Result<()> {
         // Non-global npm commands or other commands
         let mut regular_cmd = AsyncCommand::new(cmd);
         regular_cmd.args(&args);
+        regular_cmd.stdin(std::process::Stdio::null());
         regular_cmd.stdout(std::process::Stdio::null());
         regular_cmd.stderr(std::process::Stdio::null());
         regular_cmd.status().await?

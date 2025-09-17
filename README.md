@@ -51,7 +51,7 @@ Distribution and project status at a glance: NPM and Crates.io versions/download
 This short clip shows the interactive T.JARVIS interface in action: list installed/available tools, perform one-command installs, and continue sessions seamlessly during authentication. Try it locally with `npx terminal-jarvis`.
 
 <p align="center">
-<img src="screenshot_and_demo/Terminal Jarvis v0.0.67 Demo.gif" alt="Terminal Jarvis Demo">
+<img src="screenshot_and_demo/Terminal Jarvis Demo.gif" alt="Terminal Jarvis Demo">
 </p>
 
 ## Prerequisites
