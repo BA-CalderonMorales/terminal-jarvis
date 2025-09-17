@@ -156,7 +156,7 @@ npm install -g [package-name]
 **CRITICAL:** Use `@vybestack/llxprt-code` for llxprt. Avoid similarly named packages that map to other tools.
 
 ### Authentication/Configuration Issues
-Terminal Jarvis v0.0.44+ handles authentication gracefully. You'll see "✨ [tool] session ended" instead of error messages for normal authentication flows like `/auth` or `/config` commands.
+Terminal Jarvis v0.0.44+ handles authentication gracefully. You'll see "[INFO] [tool] session ended" instead of error messages for normal authentication flows like `/auth` or `/config` commands.
 
 ## Security & Maintenance
 

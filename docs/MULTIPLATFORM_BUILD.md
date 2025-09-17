@@ -273,5 +273,5 @@ RUST_LOG=debug ./scripts/utils/build-multiplatform.sh
 
 For questions or issues with the multi-platform build system, see:
 - [GitHub Issues](https://github.com/BA-CalderonMorales/terminal-jarvis/issues)
-- [Build Troubleshooting](./TROUBLESHOOTING.md)
+- [Known Limitations](./LIMITATIONS.md)
 - [Architecture Documentation](./ARCHITECTURE.md)
