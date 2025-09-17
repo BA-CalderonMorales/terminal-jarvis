@@ -9,6 +9,7 @@ mod auth_entry_point;
 mod auth_environment_detection;
 mod auth_environment_setup;
 mod auth_warning_system;
+mod auth_credentials_store;
 
 // Re-export main interface
 pub use auth_entry_point::AuthManager;

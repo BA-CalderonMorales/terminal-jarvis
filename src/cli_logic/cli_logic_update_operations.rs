@@ -6,6 +6,8 @@
 use crate::installation_arguments::InstallationManager;
 use crate::progress_utils::{ProgressContext, ProgressUtils};
 use anyhow::{anyhow, Result};
+use std::time::Duration;
+use tokio::task::JoinSet;
 use tokio::process::Command as AsyncCommand;
 
 /// Handle updating packages - either a specific package or all packages
@@ -38,33 +40,73 @@ async fn update_single_package(pkg: &str) -> Result<()> {
     }
 }
 
-/// Update all packages with progress tracking and error handling
+/// Update all packages concurrently with clean, non-animated output and summary
 async fn update_all_packages() -> Result<()> {
-    let overall_progress = ProgressContext::new("Updating all packages");
     let tools = InstallationManager::get_tool_names();
+    if tools.is_empty() {
+        ProgressUtils::info_message("No tools to update");
+        return Ok(());
+    }
+
+    let total = tools.len();
+    println!("\nUpdating tools concurrently ({total})...");
+    println!("----------------------------------------------------------------");
+    let mut join_set: JoinSet<(String, Result<()>)> = JoinSet::new();
+
+    for (i, tool) in tools.iter().cloned().enumerate() {
+        println!("* [START] Updating {tool} ({}/{})", i + 1, total);
+        join_set.spawn(async move {
+            // Small stagger to create a natural startup cadence
+            tokio::time::sleep(Duration::from_millis((i as u64) * 50)).await;
+            let res = update_tool_using_install_manager(&tool).await;
+            (tool, res)
+        });
+    }
+
     let mut had_errors = false;
+    let mut results: Vec<(String, bool, String)> = Vec::with_capacity(total);
 
-    for (index, tool) in tools.iter().enumerate() {
-        overall_progress.update_message(&format!(
-            "Updating {tool} ({}/{})...",
-            index + 1,
-            tools.len()
-        ));
-
-        tokio::time::sleep(tokio::time::Duration::from_millis(100)).await;
-
-        if let Err(e) = update_tool_using_install_manager(tool).await {
-            ProgressUtils::error_message(&format!("Failed to update {tool}: {e}"));
-            had_errors = true;
-        } else {
-            ProgressUtils::success_message(&format!("{tool} updated successfully"));
+    while let Some(join_res) = join_set.join_next().await {
+        match join_res {
+            Ok((tool, Ok(()))) => {
+                println!("* [OK]    {tool} updated successfully");
+                results.push((tool, true, String::from("updated")));
+            }
+            Ok((tool, Err(e))) => {
+                had_errors = true;
+                println!("* [FAIL]  {tool} — {}", e);
+                results.push((tool, false, e.to_string()));
+            }
+            Err(e) => {
+                had_errors = true;
+                println!("* [FAIL]  update task join error — {}", e);
+            }
         }
     }
 
+    // Final summary table (ASCII only)
+    println!("\nUpdate summary:");
+    println!("----------------+--------+----------------------------------------");
+    println!("{:<16}| {:<6} | {}", "TOOL", "STATUS", "DETAILS");
+    println!("----------------+--------+----------------------------------------");
+    // Sort results by tool name for deterministic output
+    results.sort_by(|a, b| a.0.cmp(&b.0));
+    for (tool, ok, info) in results {
+        let status = if ok { "OK" } else { "FAIL" };
+        let max_details = 56usize; // keep table within ~80 cols
+        let details = if info.len() > max_details {
+            format!("{}…", &info[..max_details])
+        } else {
+            info
+        };
+        println!("{:<16}| {:<6} | {}", tool, status, details);
+    }
+    println!("----------------+--------+----------------------------------------\n");
+
     if had_errors {
-        overall_progress.finish_error("Some packages failed to update");
+        println!("Some packages failed to update. See details above.");
     } else {
-        overall_progress.finish_success("All packages updated successfully");
+        println!("All packages updated successfully.");
     }
 
     Ok(())
@@ -77,8 +119,6 @@ async fn update_tool_using_install_manager(tool_name: &str) -> Result<()> {
     let install_info = install_commands
         .get(tool_name)
         .ok_or_else(|| anyhow!("Tool '{}' not found in configuration", tool_name))?;
-
-    println!("Updating {}...", tool_name);
 
     // Convert install command to update command
     let update_command =

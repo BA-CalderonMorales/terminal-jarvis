@@ -367,6 +367,7 @@ pub async fn handle_manage_tools_menu() -> Result<()> {
             "Update Tools".to_string(),
             "List All Tools".to_string(),
             "Tool Information".to_string(),
+            "Authentication".to_string(),
             "Switch Theme".to_string(),
             "Back to Main Menu".to_string(),
         ];
@@ -397,6 +398,9 @@ pub async fn handle_manage_tools_menu() -> Result<()> {
             }
             s if s.contains("Tool Information") => {
                 handle_tool_info_menu().await?;
+            }
+            s if s.contains("Authentication") => {
+                crate::cli_logic::handle_authentication_menu().await?;
             }
             s if s.contains("Switch Theme") => {
                 handle_theme_switch_menu().await?;
@@ -466,10 +470,9 @@ async fn handle_install_tools_menu() -> Result<()> {
     // Implementation moved to a focused module - placeholder for now
     use crate::progress_utils::ProgressUtils;
 
-    // Check NPM availability with progress
+    // Check installer prerequisites with progress (npm, uv, curl)
     let npm_check = ProgressContext::new("Checking NPM availability");
-    tokio::time::sleep(tokio::time::Duration::from_millis(200)).await;
-
+    tokio::time::sleep(tokio::time::Duration::from_millis(150)).await;
     if !InstallationManager::check_npm_available() {
         npm_check.finish_error("Node.js ecosystem unavailable");
         ProgressUtils::error_message("Node.js runtime required. Install from: https://nodejs.org/");
@@ -478,8 +481,121 @@ async fn handle_install_tools_menu() -> Result<()> {
         std::io::stdin().read_line(&mut String::new())?;
         return Ok(());
     }
-
     npm_check.finish_success("NPM is available");
+
+    let curl_check = ProgressContext::new("Checking curl availability");
+    tokio::time::sleep(tokio::time::Duration::from_millis(100)).await;
+    if InstallationManager::check_curl_available() {
+        curl_check.finish_success("curl is available");
+    } else {
+        curl_check.finish_error("curl not found");
+        ProgressUtils::info_message(
+            "Some tools (e.g., Goose) use curl-based installers. Please install curl via your package manager.",
+        );
+        // Optional: Offer auto-install via apt-get if available
+        let apt_exists = std::process::Command::new("which")
+            .arg("apt-get")
+            .output()
+            .map(|o| o.status.success())
+            .unwrap_or(false);
+        if apt_exists {
+            use inquire::Confirm;
+            if Confirm::new("Install curl now using apt-get?")
+                .with_default(false)
+                .prompt()
+                .unwrap_or(false)
+            {
+                let sudo_available = std::process::Command::new("which")
+                    .arg("sudo")
+                    .output()
+                    .map(|o| o.status.success())
+                    .unwrap_or(false);
+                use tokio::process::Command as AsyncCommand;
+                let mut install = if sudo_available {
+                    let mut c = AsyncCommand::new("sudo");
+                    c.arg("apt-get");
+                    c
+                } else {
+                    AsyncCommand::new("apt-get")
+                };
+                let _ = install
+                    .args(["update"]) // update first (best effort)
+                    .status()
+                    .await;
+                let mut install = if sudo_available {
+                    let mut c = AsyncCommand::new("sudo");
+                    c.arg("apt-get");
+                    c
+                } else {
+                    AsyncCommand::new("apt-get")
+                };
+                let status = install
+                    .args(["install", "-y", "curl"]) // non-interactive
+                    .status()
+                    .await;
+                match status {
+                    Ok(s) if s.success() => ProgressUtils::success_message("curl installed."),
+                    _ => ProgressUtils::error_message("Failed to install curl with apt-get."),
+                }
+            }
+        }
+    }
+
+    let uv_check = ProgressContext::new("Checking uv availability");
+    tokio::time::sleep(tokio::time::Duration::from_millis(100)).await;
+    let uv_available = InstallationManager::check_uv_available();
+    if uv_available {
+        uv_check.finish_success("uv is available");
+    } else {
+        uv_check.finish_error("uv not found");
+        ProgressUtils::info_message(
+            "Some tools (e.g., Aider) use uv for installation. Install uv: https://docs.astral.sh/uv/getting-started/installation/",
+        );
+        // Offer to install uv automatically if curl is available
+        if InstallationManager::check_curl_available() {
+            use inquire::Confirm;
+            if Confirm::new("Install uv now via official script?")
+                .with_default(false)
+                .prompt()
+                .unwrap_or(false)
+            {
+                // Download and run uv installer: curl -LsSf https://astral.sh/uv/install.sh | sh
+                use tokio::process::Command as AsyncCommand;
+                let url = "https://astral.sh/uv/install.sh";
+                let curl_output = AsyncCommand::new("curl")
+                    .args(["-LsSf", url])
+                    .output()
+                    .await;
+                match curl_output {
+                    Ok(out) if out.status.success() => {
+                        let mut sh = AsyncCommand::new("sh");
+                        sh.stdin(std::process::Stdio::piped());
+                        sh.stdout(std::process::Stdio::null());
+                        sh.stderr(std::process::Stdio::null());
+                        match sh.spawn() {
+                            Ok(mut child) => {
+                                if let Some(stdin) = child.stdin.as_mut() {
+                                    use tokio::io::AsyncWriteExt;
+                                    let _ = stdin.write_all(&out.stdout).await;
+                                }
+                                let _ = child.wait().await;
+                            }
+                            Err(_) => {}
+                        }
+                        // Re-check availability
+                        if InstallationManager::check_uv_available() {
+                            ProgressUtils::success_message("uv installed successfully. You may need to restart your shell for PATH updates.");
+                        } else {
+                            ProgressUtils::warning_message("uv installation finished but not detected on PATH yet. Try restarting your terminal.");
+                        }
+                    }
+                    _ => {
+                        ProgressUtils::error_message("Failed to download uv installer. See docs link above.");
+                    }
+                }
+            }
+        }
+    }
 
     // Check which tools are uninstalled with progress
     let check_progress = ProgressContext::new("Scanning for uninstalled tools");
