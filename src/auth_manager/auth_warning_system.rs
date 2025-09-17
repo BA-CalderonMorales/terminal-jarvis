@@ -17,12 +17,10 @@ impl WarningSystem {
         if EnvironmentDetector::should_prevent_browser_opening()
             && !ApiKeyManager::check_api_keys_for_tool(tool)
         {
-            eprintln!("WARNING: {tool} may attempt to open a browser for authentication.");
-            eprintln!("  This can cause issues in terminal/cloud environments.");
-            eprintln!("  Consider setting API keys to avoid browser authentication:");
-            eprintln!();
-            eprintln!("{}", ApiKeyManager::get_api_key_help_message(tool));
-            eprintln!();
+            // Minimal one-line preamble (stderr). Styled sections are handled by tool startup guidance.
+            eprintln!(
+                "Notice: {tool} may try to open a browser. Prefer API keys. Run 'terminal-jarvis auth help {tool}'."
+            );
         }
 
         Ok(())
@@ -60,11 +58,13 @@ impl WarningSystem {
         if !env_vars.is_empty() {
             eprintln!("Available authentication methods for {tool}:");
             eprintln!("  Environment variables: {}", env_vars.join(", "));
-            eprintln!("  Help: Run 'terminal-jarvis auth-help {tool}' for detailed setup");
+            eprintln!("  Help: Run 'terminal-jarvis auth help {tool}' for detailed setup");
             eprintln!();
         }
     }
 }
+
+// Removed unused formatting helper after simplifying advisories
 
 #[cfg(test)]
 mod tests {

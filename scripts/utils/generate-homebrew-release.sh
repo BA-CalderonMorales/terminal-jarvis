@@ -22,6 +22,7 @@ print_step() { echo -e "${BLUE}[STEP]${NC} $1"; }
 MACOS_TARGET="x86_64-apple-darwin"
 MACOS_ARM_TARGET="aarch64-apple-darwin"
 LINUX_TARGET="x86_64-unknown-linux-gnu"
+# shellcheck disable=SC2034
 LINUX_ARM_TARGET="aarch64-unknown-linux-gnu"
 
 # Script directory and project root
@@ -80,8 +81,10 @@ build_for_target() {
     local build_command="cargo"
     if command -v cross >/dev/null 2>&1; then
         # Get current target to avoid using cross for native builds
-        local current_os=$(uname -s)
-        local current_arch=$(uname -m)
+    local current_os
+    current_os=$(uname -s)
+    local current_arch
+    current_arch=$(uname -m)
         local current_target=""
         
         case "$current_os-$current_arch" in
@@ -275,7 +278,7 @@ fi
 
 # Calculate checksums
 print_info "Calculating checksums..."
-CHECKSUMS_CALCULATED=false
+CHECKSUMS_CALCULATED=false # informational flag used for messaging
 
 if [ -f "terminal-jarvis-mac.tar.gz" ]; then
     MAC_SHA256=$(shasum -a 256 terminal-jarvis-mac.tar.gz | cut -d' ' -f1)
@@ -295,6 +298,11 @@ if [ -n "${MAC_SHA256:-}" ]; then
 fi
 if [ -n "${LINUX_SHA256:-}" ]; then
     echo "  - terminal-jarvis-linux.tar.gz (SHA256: $LINUX_SHA256)"
+fi
+
+# Provide guidance if no checksums were produced (e.g., build failures)
+if [ "$CHECKSUMS_CALCULATED" = false ]; then
+    print_warning "No archives found to checksum. Ensure builds completed successfully before releasing."
 fi
 
 # Get current version

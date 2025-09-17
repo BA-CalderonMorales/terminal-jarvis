@@ -5,6 +5,8 @@
 
 use anyhow::Result;
 
+use super::auth_credentials_store::CredentialsStore;
+
 /// Main authentication manager that coordinates all authentication functionality
 pub struct AuthManager;
 
@@ -56,5 +58,39 @@ impl AuthManager {
     pub fn warn_if_browser_likely(tool: &str) -> Result<()> {
         use crate::auth_manager::auth_warning_system::WarningSystem;
         WarningSystem::warn_if_browser_likely(tool)
+    }
+
+    /// Load saved credentials from store and export as env vars (session-scoped)
+    pub fn export_saved_env_vars() -> Result<()> {
+        let creds = CredentialsStore::load()?;
+        for (_tool, vars) in creds.tools.iter() {
+            for (k, v) in vars {
+                std::env::set_var(k, v);
+            }
+        }
+        Ok(())
+    }
+
+    /// Persist credentials for a specific tool
+    pub fn save_tool_credentials(
+        tool: &str,
+        vars: &std::collections::HashMap<String, String>,
+    ) -> Result<()> {
+        CredentialsStore::upsert_tool_env_vars(tool, vars)
+    }
+
+    /// Fetch saved credentials for a specific tool
+    pub fn get_tool_credentials(tool: &str) -> Result<std::collections::HashMap<String, String>> {
+        CredentialsStore::get_tool_env_vars(tool)
+    }
+
+    /// Delete specific credentials for a tool (if keys empty, removes the tool entirely)
+    pub fn delete_tool_credentials(tool: &str, keys: &[String]) -> Result<()> {
+        CredentialsStore::delete_tool_env_vars(tool, keys)
+    }
+
+    /// Clear all saved credentials for all tools
+    pub fn clear_all_credentials() -> Result<()> {
+        CredentialsStore::clear_all()
     }
 }

@@ -67,9 +67,12 @@ mod integration_tests {
 
         // Verify no-browser environment variables are set
         assert_eq!(env::var("NO_BROWSER").unwrap(), "1");
-        assert_eq!(
-            env::var("BROWSER").unwrap(),
-            "echo 'Browser prevented by Terminal Jarvis:'"
+        let browser_cmd = env::var("BROWSER").unwrap();
+        // Accept either the legacy echo override or the new safe no-op 'true'
+        assert!(
+            browser_cmd == "true" || browser_cmd.starts_with("echo "),
+            "Unexpected BROWSER override: {}",
+            browser_cmd
         );
 
         println!("✅ No-browser environment setup successful");

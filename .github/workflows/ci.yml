@@ -3,40 +3,22 @@ name: Continuous Integration
 on:
 
   push:
-    branches: [ "main", "develop" ]
+    branches: [ "main", "develop", "feat/*", "bug/*", "security/*", "hotfix/*" ]
 
   pull_request:
-    branches: [ "main", "develop" ]
+    branches: [ "main", "develop", "feat/*", "bug/*", "security/*", "hotfix/*" ]
 
 env:
   CARGO_TERM_COLOR: always
 
+# Minimal permissions by default; specific jobs can elevate
+permissions:
+  contents: read
+
 jobs:
-
-  test:
-
-    name: Test
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v4
-
-    - name: Install Rust
-      uses: dtolnay/rust-toolchain@stable
-      with:
-        components: rustfmt, clippy
-
-    - name: Check formatting
-      run: cargo fmt --all -- --check
-
-    - name: Check clippy
-      run: cargo clippy --all-targets --all-features -- -D warnings
-
-    - name: Run tests
-      run: cargo test --verbose
-
-  # Multi-platform build testing
+  
+  # Multi-platform build testing - can run independently of other jobs section
   multiplatform-build:
-
     name: Multi-Platform Build Test
     runs-on: ${{ matrix.os }}
     strategy:
@@ -79,34 +61,172 @@ jobs:
         chmod +x scripts/utils/generate-homebrew-release.sh
         ./scripts/utils/generate-homebrew-release.sh || echo "Homebrew generation completed with warnings"
 
-  npm-test:
-    name: Test NPM Package
-    runs-on: ubuntu-latest
+  # Test jobs - combined Rust + NPM suites via matrix
+  test:
+    name: Test - ${{ matrix.name }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        include:
+          - name: Rust (Ubuntu)
+            suite: rust
+            os: ubuntu-latest
+          - name: Rust (macOS)
+            suite: rust
+            os: macos-latest
+          - name: NPM (Node 18)
+            suite: npm
+            os: ubuntu-latest
+            node: 18
+          - name: NPM (Node 20)
+            suite: npm
+            os: ubuntu-latest
+            node: 20
     steps:
     - uses: actions/checkout@v4
- 
-    - name: Install Rust
+
+    # Rust code quality + tests
+    - name: Install Rust toolchain
+      if: ${{ matrix.suite == 'rust' }}
       uses: dtolnay/rust-toolchain@stable
- 
+      with:
+        components: rustfmt, clippy
+
+    - name: Check formatting
+      if: ${{ matrix.suite == 'rust' }}
+      run: cargo fmt --all -- --check
+
+    - name: Check clippy
+      if: ${{ matrix.suite == 'rust' }}
+      run: cargo clippy --all-targets --all-features -- -D warnings
+
+    - name: Run Rust tests
+      if: ${{ matrix.suite == 'rust' }}
+      run: cargo test --verbose
+
+    # NPM package tests (build the Rust binary first)
+    - name: Install Rust toolchain (for npm build)
+      if: ${{ matrix.suite == 'npm' }}
+      uses: dtolnay/rust-toolchain@stable
+
     - name: Build release binary
+      if: ${{ matrix.suite == 'npm' }}
       run: cargo build --release
- 
+
     - name: Setup Node.js
+      if: ${{ matrix.suite == 'npm' }}
       uses: actions/setup-node@v4
       with:
-        node-version: '18'
- 
+        node-version: ${{ matrix.node }}
+
     - name: Install dependencies
+      if: ${{ matrix.suite == 'npm' }}
       run: |
         cd npm/terminal-jarvis
         npm install
- 
+
     - name: Build TypeScript
+      if: ${{ matrix.suite == 'npm' }}
       run: |
         cd npm/terminal-jarvis
         npm run build
- 
+
     - name: Lint NPM Package
+      if: ${{ matrix.suite == 'npm' }}
       run: |
         cd npm/terminal-jarvis
         npm run lint
+
+    - name: Ensure jq is installed
+      if: ${{ matrix.suite == 'npm' }}
+      run: sudo apt-get update && sudo apt-get install -y jq
+
+    - name: NPM Audit (high severity)
+      if: ${{ matrix.suite == 'npm' }}
+      run: |
+        cd npm/terminal-jarvis
+        npm audit --audit-level=high --json | jq '.' > npm-audit.json || true
+        # Fail build if high/critical vulnerabilities are present
+        HIGH=$(jq '.metadata.vulnerabilities.high // 0' npm-audit.json); \
+        CRIT=$(jq '.metadata.vulnerabilities.critical // 0' npm-audit.json); \
+        echo "High: $HIGH, Critical: $CRIT"; \
+        [ $((HIGH+CRIT)) -eq 0 ]
+
+  # Security jobs - matrix fan-out of all security checks
+  security:
+    name: Security - ${{ matrix.tool }}
+    permissions:
+      contents: read
+      security-events: write
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        tool: [cargo-audit, secrets-scan, cargo-deny, shellcheck, sbom-scan]
+    # Allow PRs to surface SBOM findings without blocking; block on main by required checks
+    continue-on-error: ${{ github.event_name == 'pull_request' && matrix.tool == 'sbom-scan' }}
+    steps:
+    - uses: actions/checkout@v4
+
+    # cargo-audit
+    - name: Install Rust (cargo-audit)
+      if: ${{ matrix.tool == 'cargo-audit' }}
+      uses: dtolnay/rust-toolchain@stable
+    - name: Install dependencies for cargo-audit
+      if: ${{ matrix.tool == 'cargo-audit' }}
+      run: sudo apt-get update && sudo apt-get install -y pkg-config libssl-dev
+    - name: Install cargo-audit
+      if: ${{ matrix.tool == 'cargo-audit' }}
+      run: cargo install cargo-audit
+    - name: Run cargo-audit
+      if: ${{ matrix.tool == 'cargo-audit' }}
+      run: cargo audit --deny warnings
+
+    # secrets-scan (gitleaks)
+    - name: Ensure full history for secrets scan
+      if: ${{ matrix.tool == 'secrets-scan' }}
+      run: |
+        git fetch --prune --unshallow || true
+    - name: Run Gitleaks
+      if: ${{ matrix.tool == 'secrets-scan' }}
+      uses: gitleaks/gitleaks-action@v2
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+    # cargo-deny
+    - name: Install Rust (cargo-deny)
+      if: ${{ matrix.tool == 'cargo-deny' }}
+      uses: dtolnay/rust-toolchain@stable
+    - name: Run cargo-deny checks
+      if: ${{ matrix.tool == 'cargo-deny' }}
+      uses: EmbarkStudios/cargo-deny-action@v2
+      with:
+        command: check advisories bans sources
+
+    # shellcheck
+    - name: Install ShellCheck
+      if: ${{ matrix.tool == 'shellcheck' }}
+      run: sudo apt-get update && sudo apt-get install -y shellcheck
+    - name: Run ShellCheck
+      if: ${{ matrix.tool == 'shellcheck' }}
+      run: |
+        set -e
+        if [ -d scripts ]; then
+          find scripts -type f -name "*.sh" -print0 | xargs -0 -r shellcheck -S style -x
+        fi
+
+    # SBOM and vulnerability scan (Anchore)
+    - name: Scan workspace with Anchore
+      if: ${{ matrix.tool == 'sbom-scan' }}
+      id: anchore
+      uses: anchore/scan-action@v4
+      with:
+        path: .
+        fail-build: true
+        severity-cutoff: critical
+        output-format: sarif
+    - name: Upload SARIF to code scanning
+      # Upload only on push events and when the SARIF file exists
+      if: ${{ matrix.tool == 'sbom-scan' && always() && github.event_name == 'push' && hashFiles('results.sarif') != '' }}
+      uses: github/codeql-action/upload-sarif@v3
+      with:
+        sarif_file: results.sarif

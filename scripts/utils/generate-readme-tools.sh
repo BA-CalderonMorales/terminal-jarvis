@@ -1,70 +1,61 @@
 #!/bin/bash
 
-# Generate README tools sections from manifest
-# Simple and reliable version using pure bash
+# Generate README tools sections from modular config system
+# Reads from config/tools/ directory instead of manifest file
 
 set -e
 
 # Source logger
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# shellcheck source=../logger/logger.sh
+# shellcheck disable=SC1091
 source "$SCRIPT_DIR/../logger/logger.sh"
 
 REPO_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
-MANIFEST_FILE="$REPO_ROOT/tools-manifest.toml"
+TOOLS_CONFIG_DIR="$REPO_ROOT/config/tools"
 
-if [ ! -f "$MANIFEST_FILE" ]; then
-    log_error_if_enabled "Error: tools-manifest.toml not found in repo root"
+if [ ! -d "$TOOLS_CONFIG_DIR" ]; then
+    log_error_if_enabled "Error: config/tools/ directory not found in repo root"
     exit 1
 fi
 
-log_info_if_enabled "Generating README tools sections from manifest..."
+log_info_if_enabled "Generating README tools sections from config/tools/ directory..."
 
-# Parse TOML and generate bullet list
+# Parse TOML files and generate bullet list
 generate_bullet_list() {
     echo "- **Supported Tools**:"
     
-    local in_tool=false
-    local tool_id=""
-    local description=""
-    local status=""
-    
-    while IFS= read -r line; do
-        line=$(echo "$line" | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')
+    # Process each tool config file
+    for tool_file in "$TOOLS_CONFIG_DIR"/*.toml; do
+        [ -f "$tool_file" ] || continue
         
-        if [[ "$line" == "[[tools]]" ]]; then
-            # Output previous tool if we have complete info
-            if [[ -n "$tool_id" && -n "$description" ]]; then
-                local status_text=""
-                case "$status" in
-                    "testing") status_text=" (Testing)" ;;
-                    "new") status_text=" (New)" ;;
-                esac
-                echo "  - \`$tool_id\` - $description$status_text"
-            fi
+        local tool_id=""
+        local description=""
+        local status=""
+        
+        # Parse the TOML file
+        while IFS= read -r line; do
+            line=$(echo "$line" | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')
             
-            # Reset for new tool
-            in_tool=true
-            tool_id=""
-            description=""
-            status=""
-        elif [[ "$in_tool" == true && "$line" =~ ^id\ =\ \"(.+)\"$ ]]; then
-            tool_id="${BASH_REMATCH[1]}"
-        elif [[ "$in_tool" == true && "$line" =~ ^description\ =\ \"(.+)\"$ ]]; then
-            description="${BASH_REMATCH[1]}"
-        elif [[ "$in_tool" == true && "$line" =~ ^status\ =\ \"(.+)\"$ ]]; then
-            status="${BASH_REMATCH[1]}"
+            if [[ "$line" =~ ^cli_command\ =\ \"(.+)\"$ ]]; then
+                tool_id="${BASH_REMATCH[1]}"
+            elif [[ "$line" =~ ^description\ =\ \"(.+)\"$ ]]; then
+                description="${BASH_REMATCH[1]}"
+            elif [[ "$line" =~ ^status\ =\ \"(.+)\"$ ]]; then
+                status="${BASH_REMATCH[1]}"
+            fi
+        done < "$tool_file"
+        
+        # Generate output if we have complete info
+        if [[ -n "$tool_id" && -n "$description" ]]; then
+            local status_text=""
+            case "$status" in
+                "testing") status_text=" (Testing)" ;;
+                "new") status_text=" (New)" ;;
+            esac
+            echo "  - \`$tool_id\` - $description$status_text"
         fi
-    done < "$MANIFEST_FILE"
-    
-    # Output the last tool
-    if [[ -n "$tool_id" && -n "$description" ]]; then
-        local status_text=""
-        case "$status" in
-            "testing") status_text=" (Testing)" ;;
-            "new") status_text=" (New)" ;;
-        esac
-        echo "  - \`$tool_id\` - $description$status_text"
-    fi
+    done
 }
 
 # Generate tools table
@@ -72,87 +63,88 @@ generate_tools_table() {
     echo "| Tool       | Description                               | Status     | Installation Command                         |"
     echo "| ---------- | ----------------------------------------- | ---------- | -------------------------------------------- |"
     
-    local in_tool=false
-    local tool_id=""
-    local description=""
-    local status=""
-    local install_cmd=""
-    
-    while IFS= read -r line; do
-        line=$(echo "$line" | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')
+    # Process each tool config file
+    for tool_file in "$TOOLS_CONFIG_DIR"/*.toml; do
+        [ -f "$tool_file" ] || continue
         
-        if [[ "$line" == "[[tools]]" ]]; then
-            # Output previous tool if we have complete info
-            if [[ -n "$tool_id" && -n "$description" && -n "$status" && -n "$install_cmd" ]]; then
-                local status_display=""
-                case "$status" in
-                    "stable") status_display="Stable" ;;
-                    "testing") status_display="Testing" ;;
-                    "new") status_display="New" ;;
-                esac
-                printf "| %-10s | %-41s | %-10s | %-44s |\n" "\`$tool_id\`" "$description" "$status_display" "\`$install_cmd\`"
+        local tool_id=""
+        local description=""
+        local status=""
+        local install_cmd=""
+        local in_install_section=false
+        
+        # Parse the TOML file
+        while IFS= read -r line; do
+            line=$(echo "$line" | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')
+            
+            # Check for section headers
+            if [[ "$line" == "[tool.install]" ]]; then
+                in_install_section=true
+                continue
+            elif [[ "$line" =~ ^\[.*\]$ ]]; then
+                in_install_section=false
+                continue
             fi
             
-            # Reset for new tool
-            in_tool=true
-            tool_id=""
-            description=""
-            status=""
-            install_cmd=""
-        elif [[ "$in_tool" == true && "$line" =~ ^id\ =\ \"(.+)\"$ ]]; then
-            tool_id="${BASH_REMATCH[1]}"
-        elif [[ "$in_tool" == true && "$line" =~ ^description\ =\ \"(.+)\"$ ]]; then
-            description="${BASH_REMATCH[1]}"
-        elif [[ "$in_tool" == true && "$line" =~ ^status\ =\ \"(.+)\"$ ]]; then
-            status="${BASH_REMATCH[1]}"
-        elif [[ "$in_tool" == true && "$line" =~ ^installation_command\ =\ \"(.+)\"$ ]]; then
-            install_cmd="${BASH_REMATCH[1]}"
+            # Parse fields
+            if [[ "$line" =~ ^cli_command\ =\ \"(.+)\"$ ]]; then
+                tool_id="${BASH_REMATCH[1]}"
+            elif [[ "$line" =~ ^description\ =\ \"(.+)\"$ ]]; then
+                description="${BASH_REMATCH[1]}"
+            elif [[ "$line" =~ ^status\ =\ \"(.+)\"$ ]]; then
+                status="${BASH_REMATCH[1]}"
+            elif [[ "$in_install_section" == true && "$line" =~ ^command\ =\ \"(.+)\"$ ]]; then
+                install_cmd="${BASH_REMATCH[1]}"
+            elif [[ "$in_install_section" == true && "$line" =~ ^args\ =\ \[(.+)\]$ ]]; then
+                # Parse args array and combine with command
+                local args_str="${BASH_REMATCH[1]}"
+                args_str=$(echo "$args_str" | sed 's/"//g' | sed 's/,/ /g')
+                if [[ -n "$install_cmd" ]]; then
+                    install_cmd="$install_cmd $args_str"
+                fi
+            fi
+        done < "$tool_file"
+        
+        # Generate output if we have complete info
+        if [[ -n "$tool_id" && -n "$description" && -n "$status" && -n "$install_cmd" ]]; then
+            local status_display=""
+            case "$status" in
+                "stable") status_display="Stable" ;;
+                "testing") status_display="Testing" ;;
+                "new") status_display="New" ;;
+            esac
+            printf "| %-10s | %-41s | %-10s | %-44s |\n" "\`$tool_id\`" "$description" "$status_display" "\`$install_cmd\`"
         fi
-    done < "$MANIFEST_FILE"
-    
-    # Output the last tool
-    if [[ -n "$tool_id" && -n "$description" && -n "$status" && -n "$install_cmd" ]]; then
-        local status_display=""
-        case "$status" in
-            "stable") status_display="Stable" ;;
-            "testing") status_display="Testing" ;;
-            "new") status_display="New" ;;
-        esac
-        printf "| %-10s | %-41s | %-10s | %-44s |\n" "\`$tool_id\`" "$description" "$status_display" "\`$install_cmd\`"
-    fi
+    done
 }
 
 # Generate testing phase note
 generate_testing_note() {
     local testing_tools=()
-    local in_tool=false
-    local tool_id=""
-    local status=""
     
-    while IFS= read -r line; do
-        line=$(echo "$line" | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')
+    # Process each tool config file
+    for tool_file in "$TOOLS_CONFIG_DIR"/*.toml; do
+        [ -f "$tool_file" ] || continue
         
-        if [[ "$line" == "[[tools]]" ]]; then
-            # Check previous tool
-            if [[ -n "$tool_id" && "$status" == "testing" ]]; then
-                testing_tools+=("$tool_id")
-            fi
+        local tool_id=""
+        local status=""
+        
+        # Parse the TOML file
+        while IFS= read -r line; do
+            line=$(echo "$line" | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')
             
-            # Reset for new tool
-            in_tool=true
-            tool_id=""
-            status=""
-        elif [[ "$in_tool" == true && "$line" =~ ^id\ =\ \"(.+)\"$ ]]; then
-            tool_id="${BASH_REMATCH[1]}"
-        elif [[ "$in_tool" == true && "$line" =~ ^status\ =\ \"(.+)\"$ ]]; then
-            status="${BASH_REMATCH[1]}"
+            if [[ "$line" =~ ^cli_command\ =\ \"(.+)\"$ ]]; then
+                tool_id="${BASH_REMATCH[1]}"
+            elif [[ "$line" =~ ^status\ =\ \"(.+)\"$ ]]; then
+                status="${BASH_REMATCH[1]}"
+            fi
+        done < "$tool_file"
+        
+        # Add to testing tools if status is testing
+        if [[ -n "$tool_id" && "$status" == "testing" ]]; then
+            testing_tools+=("$tool_id")
         fi
-    done < "$MANIFEST_FILE"
-    
-    # Check the last tool
-    if [[ -n "$tool_id" && "$status" == "testing" ]]; then
-        testing_tools+=("$tool_id")
-    fi
+    done
     
     if [[ ${#testing_tools[@]} -gt 0 ]]; then
         local tools_list=""

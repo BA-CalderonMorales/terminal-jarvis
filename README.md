@@ -2,43 +2,94 @@
 
 # Terminal Jarvis
 
-<img src="screenshots/promo_image_for_readme.png" alt="Terminal Jarvis Interface" width="100%">
+</div>
 
-A unified command center for AI coding tools. Manage and run claude-code, gemini-cli, qwen-code, opencode, llxprt, codex, and crush from one beautiful terminal interface.
+<div align="center">
 
-<!-- NPM Package -->
-
-[![NPM Version](https://img.shields.io/npm/v/terminal-jarvis.svg?logo=npm&label=NPM%20Version)](https://www.npmjs.com/package/terminal-jarvis)
-[![NPM Downloads](https://img.shields.io/npm/dm/terminal-jarvis.svg?logo=npm&label=NPM%20Downloads)](https://www.npmjs.com/package/terminal-jarvis)
-[![NPM Stable](https://img.shields.io/npm/v/terminal-jarvis/stable.svg?label=NPM%20Stable&color=green&logo=npm)](https://www.npmjs.com/package/terminal-jarvis)
-[![NPM Beta](https://img.shields.io/npm/v/terminal-jarvis/beta.svg?label=NPM%20Beta&color=orange&logo=npm)](https://www.npmjs.com/package/terminal-jarvis)
-
-<!-- Rust Crate -->
-
-[![Crates.io Version](https://img.shields.io/crates/v/terminal-jarvis.svg?logo=rust&label=Crates.io%20Version)](https://crates.io/crates/terminal-jarvis)
-[![Crates.io Downloads](https://img.shields.io/crates/d/terminal-jarvis.svg?logo=rust&label=Crates.io%20Downloads)](https://crates.io/crates/terminal-jarvis)
-
-<!-- Homebrew -->
-
-[![Homebrew](https://img.shields.io/badge/Homebrew-Available-blue.svg?logo=homebrew)](https://github.com/BA-CalderonMorales/homebrew-terminal-jarvis)
-
-<!-- General -->
-
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Mentioned in Awesome Gemini CLI](https://awesome.re/mentioned-badge.svg)](https://github.com/Piebald-AI/awesome-gemini-cli)
-[![Buy Me a Coffee](https://img.shields.io/badge/☕-Buy%20Me%20a%20Coffee-orange.svg)](https://www.buymeacoffee.com/brandoncalderonmorales)
+A unified command center for AI coding tools. Manage and run a suite of coding assistants from one beautiful terminal interface. See the full list in the [Supported AI Tools guide](docs/SOURCES.md).
 
 </div>
 
+<div align="center">
+
+<img src="https://raw.githubusercontent.com/BA-CalderonMorales/terminal-jarvis/docs/screenshots_and_demos/screenshots_and_demo/promo_image_for_readme.png" alt="Terminal Jarvis Interface">
+
+<div align="left">
+
+## Badges
+
+Distribution and project status at a glance: NPM and Crates.io versions/downloads, Homebrew availability, license, acknowledgements, and support. Click any badge for details.
+
+</div>
+
+<p align="center">
+    <a href="https://www.npmjs.com/package/terminal-jarvis"><img src="https://img.shields.io/npm/v/terminal-jarvis/stable.svg?label=NPM%20Stable&color=green&logo=npm&style=for-the-badge" alt="NPM Stable"></a>
+    <a href="https://www.npmjs.com/package/terminal-jarvis"><img src="https://img.shields.io/npm/v/terminal-jarvis/beta.svg?label=NPM%20Beta&color=orange&logo=npm&style=for-the-badge" alt="NPM Beta"></a>
+    <a href="https://www.npmjs.com/package/terminal-jarvis"><img src="https://img.shields.io/npm/v/terminal-jarvis.svg?logo=npm&label=NPM%20Version&style=for-the-badge" alt="NPM Version"></a>
+    <a href="https://www.npmjs.com/package/terminal-jarvis"><img src="https://img.shields.io/npm/dm/terminal-jarvis.svg?logo=npm&label=NPM%20Downloads&style=for-the-badge" alt="NPM Downloads"></a>
+</p>
+
+<p align="center">
+    <a href="https://crates.io/crates/terminal-jarvis"><img src="https://img.shields.io/crates/v/terminal-jarvis.svg?logo=rust&label=Crates.io%20Version&style=for-the-badge" alt="Crates.io Version"></a>
+    <a href="https://crates.io/crates/terminal-jarvis"><img src="https://img.shields.io/crates/d/terminal-jarvis.svg?logo=rust&label=Crates.io%20Downloads&style=for-the-badge" alt="Crates.io Downloads"></a>
+</p>
+
+<p align="center">
+    <a href="https://github.com/BA-CalderonMorales/homebrew-terminal-jarvis"><img src="https://img.shields.io/badge/Homebrew-Available-blue.svg?logo=homebrew&style=for-the-badge" alt="Homebrew"></a>
+</p>
+
+<p align="center">
+    <a href="https://opensource.org/licenses/MIT"><img src="https://img.shields.io/badge/License-MIT-yellow.svg?style=for-the-badge" alt="License: MIT"></a>
+    <a href="https://github.com/Piebald-AI/awesome-gemini-cli"><img src="https://img.shields.io/badge/Mentioned%20in-awesome-6f42c1?style=for-the-badge" alt="Mentioned in Awesome Gemini CLI"></a>
+    <a href="https://www.buymeacoffee.com/brandoncalderonmorales"><img src="https://img.shields.io/badge/Buy%20Me%20a%20Coffee-orange.svg?style=for-the-badge" alt="Buy Me a Coffee"></a>
+</p>
+
+</div>
+
+## Demo
+
+This short clip shows the interactive T.JARVIS interface in action: list installed/available tools, perform one-command installs, and continue sessions seamlessly during authentication. Try it locally with `npx terminal-jarvis`.
+
+<p align="center">
+    <img src="https://raw.githubusercontent.com/BA-CalderonMorales/terminal-jarvis/docs/screenshots_and_demos/screenshots_and_demo/Terminal%20Jarvis%20Demo.gif" alt="Terminal Jarvis Demo" width="100%">
+</p>
+
 ## Prerequisites
 
-- Node.js and NPM
+Pick your setup path: zero-setup cloud/dev container, or local tools—whichever gets you coding fastest.
+
+### **1. Recommended: Remote Development Environment (Zero Setup)**
+
+The optimal way to use Terminal Jarvis is through a pre-configured remote development environment:
+
+- **[Open in GitHub Codespaces](https://github.com/codespaces/new?template_repository=BA-CalderonMorales/terminal-jarvis)** - Instant, cloud-based development environment
+- **[Use VS Code Dev Containers](https://code.visualstudio.com/docs/remote/containers)** - Local containerized environment
+- **[Coder](https://coder.com), [DevPod](https://devpod.sh), or [Ona (GitPod)](https://www.gitpod.io)** - Alternative remote dev environments with cloud or self-hosted options
+
+**Why this approach is ideal:**
+- **Zero Setup Time**: Complete development environment ready in ~60 seconds
+- **Consistent Environment**: Same setup across all contributors and platforms
+- **Pre-installed Tools**: Rust 1.87, Node.js 20, GitHub CLI, Git LFS, LLDB debugger
+- **VS Code Extensions**: GitHub Copilot, Rust debugging, TOML support pre-configured
+- **Optimized Settings**: File watching excludes, format-on-save, search optimization
+- **AI-Assisted Development**: GitHub Copilot pre-configured
+- **All Dependencies Ready**: No manual installation of compilers or tools
+
+### **2. Alternative: Local Installation**
+
+If you prefer local development:
+
+- **Node.js 20+** and NPM
 - **macOS users**: [Rust toolchain required](docs/INSTALLATION.md#macos-prerequisites)
+- **Linux users**: Build tools and development headers
+- **Windows users**: Windows Subsystem for Linux (WSL2) recommended
 
 > [!IMPORTANT]
 > **Full installation guide:** [docs/INSTALLATION.md](docs/INSTALLATION.md)
 
 ## Quick Start
+
+Launch in seconds or install for daily use—choose the method that fits your workflow.
 
 ```bash
 # Try instantly (no installation required)
@@ -64,155 +115,36 @@ Terminal Jarvis is your AI coding assistant command center:
 
 - **Interactive T.JARVIS Interface**: Beautiful ASCII art terminal UI with responsive design
 - **One-Click Tool Management**: Install, update, and run AI coding tools seamlessly
-- **Supported Tools**:
-  - `claude` - Anthropic's Claude for code assistance
-  - `gemini` - Google's Gemini CLI tool
-  - `qwen` - Qwen coding assistant
-  - `opencode` - Terminal-based AI coding agent (Testing)
-  - `llxprt` - Multi-provider AI coding assistant (Testing)
-  - `codex` - OpenAI Codex CLI for local AI coding (Testing)
-  - `crush` - Charm's multi-model AI assistant with LSP (New)
-
-> [!NOTE]
-> BETA = _Looking for testers! These tools are new additions._
-
-## How to Use Terminal Jarvis
-
-### Interactive Mode (Recommended)
-
-```bash
-# Launch the full T.JARVIS experience
-terminal-jarvis
-```
-
-Get the complete interface with:
-
-- Beautiful ASCII art welcome screen
-- Real-time tool status dashboard
-- Quick tool selection and launching
-- Built-in management options
-- Smart guidance and tips
-
-### Direct Commands
-
-```bash
-# Install and manage tools
-terminal-jarvis install claude
-terminal-jarvis update               # Update all tools
-terminal-jarvis list                # Show tool status
-terminal-jarvis info claude         # Tool details
-
-# Run tools directly
-terminal-jarvis run claude --prompt "Refactor this function"
-terminal-jarvis run gemini --file src/main.rs
-terminal-jarvis run qwen --analyze
-terminal-jarvis run opencode --generate
-terminal-jarvis run llxprt --help
-```
-
-### Template Management
-
-```bash
-# Template workflow (requires gh CLI)
-terminal-jarvis templates init       # Setup templates repo
-terminal-jarvis templates create my-template
-terminal-jarvis templates list
-terminal-jarvis templates apply my-template
-```
-
-## Supported AI Tools
-
-| Tool       | Description                               | Status     | Installation Command                         |
-| ---------- | ----------------------------------------- | ---------- | -------------------------------------------- |
-| `claude`   | Anthropic's Claude for code assistance    | Stable     | `npm install -g @anthropic-ai/claude-code`   |
-| `gemini`   | Google's Gemini CLI tool                  | Stable     | `npm install -g @google/gemini-cli`          |
-| `qwen`     | Qwen coding assistant                     | Stable     | `npm install -g @qwen-code/qwen-code@latest` |
-| `opencode` | Terminal-based AI coding agent            | Testing    | `npm install -g opencode-ai@latest`          |
-| `llxprt`   | Multi-provider AI coding assistant        | Testing    | `npm install -g @vybestack/llxprt-code-core` |
-| `codex`    | OpenAI Codex CLI for local AI coding      | Testing    | `npm install -g @openai/codex`               |
-| `crush`    | Charm's multi-model AI assistant with LSP | New        | `npm install -g @charmland/crush`            |
-
-\*See [limitations](docs/LIMITATIONS.md) for known issues and workarounds
-
-## Configuration (Optional)
-
-Terminal Jarvis works out-of-the-box, but you can customize behavior with configuration files:
-
-**Locations** (in priority order):
-
-- `./terminal-jarvis.toml` (project-specific)
-- `~/.config/terminal-jarvis/config.toml` (user-wide)
-
-**Example configuration:**
-
-```toml
-[tools]
-claude = { enabled = true, auto_update = true }
-gemini = { enabled = true, auto_update = false }
-qwen = { enabled = true, auto_update = true }
-opencode = { enabled = false, auto_update = false }
-llxprt = { enabled = true, auto_update = true }
-codex = { enabled = true, auto_update = true }
-crush = { enabled = true, auto_update = true }
-
-[templates]
-repository = "your-username/jarvis-templates"
-auto_sync = true
-```
 
 ## Documentation
 
+Targeted guides and references when you need more than the quick start.
+
 - **[Installation Guide](docs/INSTALLATION.md)** - Platform-specific setup instructions
+- **[Usage Guide](docs/USAGE.md)** - How to use Terminal Jarvis effectively
+- **[Configuration Guide](docs/CONFIGURATION.md)** - Customize Terminal Jarvis behavior
 - **[Known Limitations](docs/LIMITATIONS.md)** - Current issues and workarounds
 - **[Architecture Guide](docs/ARCHITECTURE.md)** - Technical details and development info
 - **[Testing Guide](docs/TESTING.md)** - How to test and contribute
+- **[Contribution Guide](docs/CONTRIBUTIONS.md)** - Complete contributor guidelines
+- **[Roadmap](docs/ROADMAP.md)** - Future plans and development priorities
+- **[Supported AI Tools](docs/SOURCES.md)** - Complete overview of all integrated AI coding tools
 
-## Additional Insights
-
-- **[View all 7 supported AI tools →](docs/SOURCES.md)**
-- **Try it instantly:** `npx terminal-jarvis`
+Terminal Jarvis provides a unified interface for multiple AI coding tools including Claude, Gemini, Qwen, and an expanding ecosystem of others. Each tool is carefully integrated with intelligent authentication flows and session management. For detailed tool information, capabilities, and current status, see our [comprehensive tool guide](docs/SOURCES.md).
 
 > [!CAUTION]
 > **Known Issues**: [View current limitations and workarounds](docs/LIMITATIONS.md)
-
-## Contributing
-
-We welcome contributions! Please join our [Discord community](https://discord.gg/WteQm6MTZW) first to discuss your ideas.
-
-**Quick Start:**
-
-1. Join the [Terminal Jarvis Discord](https://discord.gg/WteQm6MTZW)
-2. Discuss your contribution in `#features` or `#bugfix` channels
-3. Fork the repository
-4. Create a feature branch (`git checkout -b feature/amazing-feature`)
-5. Follow our [contribution guidelines](docs/CONTRIBUTIONS.md)
-6. Ensure tests pass (`cargo test`)
-7. Use our PR template for submitting changes
-
-**Full Guide:** [docs/CONTRIBUTIONS.md](docs/CONTRIBUTIONS.md) - Complete contributor guide with coding standards, testing requirements, and development workflow.
-
-**Technical Details:** [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) - Architecture overview and development setup.
 
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-## Roadmap
-
-- [x] Interactive T.JARVIS Interface with ASCII art
-- [x] Smart tool detection and status reporting
-- [x] One-click installation with NPM validation
-- [x] Responsive terminal design
-- [x] Enhanced authentication flows (addressing current login issues)
-- [ ] Improved wrapper layer stability
-- [ ] Plugin system for custom tools
-- [ ] Shell completion scripts
-- [ ] Web dashboard for tool management
-
 ## Support the Project
+
+Help sustain development and unlock more tool integrations.
 
 If Terminal Jarvis has been helpful for your AI coding workflow or you just thought the project is worth the maintainers going down this rabbit hole, consider supporting development:
 
-[![Buy Me a Coffee](https://img.shields.io/badge/☕-Buy%20Me%20a%20Coffee-orange.svg?style=for-the-badge)](https://www.buymeacoffee.com/brandoncalderonmorales)
+[![Buy Me a Coffee](https://img.shields.io/badge/Buy%20Me%20a%20Coffee-orange.svg?style=for-the-badge)](https://www.buymeacoffee.com/brandoncalderonmorales)
 
-Your support helps maintain and improve Terminal Jarvis for the entire community! 🙏
+Your support helps maintain and improve Terminal Jarvis for the entire community!

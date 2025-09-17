@@ -5,6 +5,7 @@ use std::collections::BTreeMap;
 use std::process::Command;
 
 use super::tools_command_mapping::get_command_mapping;
+use super::tools_config::get_tool_config_loader;
 
 #[derive(Clone, Debug)]
 pub struct ToolInfo {
@@ -12,22 +13,38 @@ pub struct ToolInfo {
     pub is_installed: bool,
 }
 
-/// Get all available tools with their installation status
+/// Get all available tools with their installation status and command
 pub fn get_available_tools() -> BTreeMap<&'static str, ToolInfo> {
     let mut tools = BTreeMap::new();
     let mapping = get_command_mapping();
+    let config_loader = get_tool_config_loader();
 
-    // Define consistent order for tools display
-    let tool_order = [
-        "claude", "gemini", "qwen", "opencode", "llxprt", "codex", "crush",
-    ];
+    // Get all tools from configuration (dynamic approach)
+    let tool_names = config_loader.get_tool_names();
 
-    // Insert tools in defined order for consistent display
-    for display_name in tool_order.iter() {
-        if let Some(cli_command) = mapping.get(display_name) {
+    // Insert tools with installation status
+    for tool_name in tool_names {
+        if let Some(cli_command) = mapping.get(tool_name.as_str()) {
             let is_installed = check_tool_installed(cli_command);
+
+            // We need to use &'static str for the BTreeMap, so we'll use a different approach
+            // For now, let's create a mapping that includes the new tools
+            let static_name = match tool_name.as_str() {
+                "claude" => "claude",
+                "gemini" => "gemini",
+                "qwen" => "qwen",
+                "opencode" => "opencode",
+                "llxprt" => "llxprt",
+                "codex" => "codex",
+                "crush" => "crush",
+                "goose" => "goose",
+                "amp" => "amp",
+                "aider" => "aider",
+                _ => continue, // Skip unknown tools
+            };
+
             tools.insert(
-                *display_name,
+                static_name,
                 ToolInfo {
                     command: cli_command,
                     is_installed,

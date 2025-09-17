@@ -325,6 +325,78 @@ git push origin --delete v0.0.X
 # Re-run deployment
 ```
 
+### Crates.io: 413 Payload Too Large (Max Upload 10MB)
+
+If publishing fails with:
+
+```
+error: failed to publish to registry at https://crates.io
+Caused by:
+  the remote server responded with an error (status 413 Payload Too Large): max upload size is: 10485760
+```
+
+Resolution (v0.0.68 case study):
+
+1. Restrict crate contents to essentials in `Cargo.toml` using `[package].include`:
+
+   ```toml
+   include = [
+       "src/**",
+       "Cargo.toml",
+       "README.md",
+       "LICENSE",
+       "config/**",
+       "config.toml",
+       "terminal-jarvis.toml.example",
+   ]
+   ```
+
+2. Remove large assets from the repo (not needed for the crate):
+   - Delete `screenshot_and_demo/` directory
+   - Ensure README does not reference local assets intended for crates.io
+
+3. Externalize promo image in `README.md` to a hosted URL (raw GitHub):
+
+   ```markdown
+   <img src="https://raw.githubusercontent.com/BA-CalderonMorales/terminal-jarvis/docs/screenshots_and_demos/screenshots_and_demo/promo_image_for_readme.png" alt="Terminal Jarvis Interface">
+   ```
+
+4. Validate crate contents and size locally:
+
+   ```bash
+   cargo package --allow-dirty --list
+   cargo package --allow-dirty && ls -lh target/package/*.crate | cat
+   # Expect ~93–94 KB .crate for this project after changes
+   ```
+
+5. Re-run publish (`local-cd.sh` will handle publish automatically after git push), or manually:
+
+   ```bash
+   cargo publish
+   ```
+
+### Retagging After Fix (Move v0.0.68 to Latest Commit)
+
+If a tag was created before critical fixes (e.g., size reduction) and needs to point to the new commit:
+
+```bash
+# 1) Delete local tag
+git tag -d v0.0.68
+
+# 2) Delete remote tag
+git push origin --delete v0.0.68
+
+# 3) Create tag at current HEAD (annotated)
+git tag -a v0.0.68 -m "Release v0.0.68"
+
+# 4) Push the tag
+git push origin v0.0.68
+```
+
+Notes:
+- If a GitHub Release exists tied to the previous tag commit, review release notes/assets afterwards.
+- Our enhanced workflow prefers ensuring all changes (including docs) are committed before tagging.
+
 ## Script Safety Features
 
 ### Version Validation

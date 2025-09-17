@@ -25,6 +25,18 @@ This project is a unified command center for AI coding tools, and we welcome con
 - `#development` - Technical discussions, architecture questions, and code reviews
 - `#general` - Community chat and project updates
 
+## Quick Start for Contributors
+
+Ready to contribute? Follow these steps:
+
+1. **Join the [Terminal Jarvis Discord](https://discord.gg/WteQm6MTZW)**
+2. **Discuss your contribution** in `#features` or `#bugfix` channels
+3. **Fork the repository**
+4. **Create a feature branch** (`git checkout -b feature/amazing-feature`)
+5. **Follow our contribution guidelines** (detailed below)
+6. **Ensure tests pass** (`cargo test`)
+7. **Use our PR template** for submitting changes
+
 ## Contribution Types
 
 We welcome various types of contributions:

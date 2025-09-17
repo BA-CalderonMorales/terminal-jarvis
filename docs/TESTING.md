@@ -102,7 +102,7 @@ Our test suite validates these essential behaviors:
 
 ### 1. **Tool Management**
 
-- All 7 AI tools are available: claude, gemini, qwen, opencode, llxprt, codex, crush
+- All 10 AI tools are available: claude, gemini, qwen, opencode, llxprt, codex, crush, goose, amp, aider
 - All tools use consistent NPM package installation
 - Tool listing shows proper status and requirements
 - Install/update commands work for each tool

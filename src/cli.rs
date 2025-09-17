@@ -7,7 +7,7 @@ use clap::{Parser, Subcommand};
 #[command(about = "A thin Rust wrapper for managing and running AI coding tools")]
 #[command(version = env!("CARGO_PKG_VERSION"))]
 #[command(
-    long_about = "Terminal Jarvis provides a unified interface for managing multiple AI coding tools like claude-code, gemini-cli, qwen-code, and opencode."
+    long_about = "Terminal Jarvis provides a unified interface for managing multiple AI coding tools like claude-code, gemini-cli, qwen-code, opencode, aider, amp, and goose."
 )]
 pub struct Cli {
     #[command(subcommand)]
@@ -39,6 +39,18 @@ impl Cli {
 
             Some(Commands::Info { tool }) => cli_logic::handle_tool_info(&tool).await,
 
+            Some(Commands::Auth { action }) => match action {
+                AuthCommands::Manage => cli_logic::handle_authentication_menu().await,
+                AuthCommands::Help { tool } => cli_logic::handle_auth_help(&tool).await,
+                AuthCommands::Set { tool } => {
+                    if let Some(t) = tool {
+                        cli_logic::handle_auth_set(&t).await
+                    } else {
+                        cli_logic::handle_authentication_menu().await
+                    }
+                }
+            },
+
             Some(Commands::Templates { action }) => match action {
                 TemplateCommands::Init => cli_logic::handle_templates_init().await,
 
@@ -67,6 +79,7 @@ impl Cli {
                 CacheCommands::Refresh { ttl } => cli_logic::handle_cache_refresh(ttl).await,
             },
 
+            // (Duplicate Auth handler removed; handled above)
             None => cli_logic::handle_interactive_mode().await,
         }
     }
@@ -77,7 +90,7 @@ impl Cli {
 pub enum Commands {
     /// Run a specific AI coding tool
     Run {
-        /// The tool to run (claude, gemini, qwen, opencode, llxprt, codex)
+        /// The tool to run (claude, gemini, qwen, opencode, llxprt, codex, aider, amp, goose, crush)
         tool: String,
         /// Arguments to pass to the tool
         #[arg(trailing_var_arg = true, allow_hyphen_values = true)]
@@ -103,6 +116,12 @@ pub enum Commands {
     Info {
         /// The tool to show information about
         tool: String,
+    },
+
+    /// Authentication management commands
+    Auth {
+        #[command(subcommand)]
+        action: AuthCommands,
     },
 
     /// Template management commands
@@ -170,5 +189,25 @@ pub enum TemplateCommands {
     Apply {
         /// Name of the template to apply
         name: String,
+    },
+}
+
+#[derive(Subcommand)]
+#[command(disable_help_subcommand = true)]
+pub enum AuthCommands {
+    /// Open interactive authentication menu
+    Manage,
+
+    /// Show auth help for a tool
+    Help {
+        /// Tool name (e.g., claude, gemini, goose)
+        tool: String,
+    },
+
+    /// Set and save credentials for a tool (guided)
+    Set {
+        /// Optional tool name; if omitted, opens interactive menu
+        #[arg(long)]
+        tool: Option<String>,
     },
 }

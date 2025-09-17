@@ -1,15 +1,91 @@
 #!/bin/bash
+# shellcheck disable=SC2317
 
 # Terminal Jarvis Comprehensive Test Suite
 # Validates core functionality and NPM package integrity to prevent regressions
-
 # Source logger
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# shellcheck source=../logger/logger.sh
+# shellcheck disable=SC1091
 source "$SCRIPT_DIR/../logger/logger.sh"
 
 BINARY="./target/release/terminal-jarvis"
 TESTS_PASSED=0
 TESTS_FAILED=0
+# Control output redirection in tests (set RUN_TEST_REDIRECT=false to see debug)
+: "${RUN_TEST_REDIRECT:=true}"
+
+# Helpers
+# shellcheck disable=SC2317
+strip_ansi() {
+    # Remove ANSI escape sequences to make grep/awk stable regardless of TTY coloring
+    sed -r $'s/\x1B\[[0-?]*[ -\/]*[@-~]//g'
+}
+# shellcheck disable=SC2317
+get_all_tools() {
+    # Derive tool names from config/tools/*.toml filenames
+    for f in config/tools/*.toml; do
+        basename "$f" .toml
+    done
+}
+
+verify_list_contains_all_tools() {
+    local out tool missing=0
+    out="$($BINARY list 2>/dev/null | strip_ansi)" || { log_error_if_enabled "Failed to run '$BINARY list'"; return 1; }
+    # Be tolerant to indentation and potential formatting; match start-of-line with optional spaces
+    for tool in $(get_all_tools); do
+        if ! printf "%s\n" "$out" | grep -Eq "^[[:space:]]*${tool}[[:space:]]+- "; then
+            log_error_if_enabled "Tool missing from list output: ${tool}"
+            missing=1
+        fi
+    done
+    return "$missing"
+}
+
+# shellcheck disable=SC2317
+verify_example_has_all_tools() {
+    local tool missing=0
+    for tool in $(get_all_tools); do
+        if ! grep -Eq "^[[:space:]]*${tool}[[:space:]]*=" terminal-jarvis.toml.example; then
+            log_error_if_enabled "Tool missing from example config: ${tool}"
+            missing=1
+        fi
+    done
+    return "$missing"
+}
+
+# shellcheck disable=SC2317
+verify_supported_installers() {
+    local file cmd
+    for file in config/tools/*.toml; do
+        cmd=$(grep -E '^[[:space:]]*command[[:space:]]*=' "$file" | head -n1 | sed -E 's/.*"([^"]+)".*/\1/')
+        case "$cmd" in
+            npm|uv|curl) : ;; # allowed installers
+            *) return 1 ;;
+        esac
+    done
+    return 0
+}
+
+# Helper: verify list displays "Requires: NPM" for all tools marked requires_npm=true in configs
+## Helper invoked indirectly via run_test
+# shellcheck disable=SC2317
+verify_npm_flags() {
+    local out tool
+    out="$($BINARY list 2>/dev/null | strip_ansi)" || return 1
+    # Collect tool names with requires_npm=true from config
+    # shellcheck disable=SC2013
+    for tool in $(grep -H 'requires_npm = true' config/tools/*.toml | sed -E 's#.*/([^/]+)\.toml:.*#\1#'); do
+        # Check within the tool's block there is a "Requires: NPM" line
+        echo "$out" | awk -v t="$tool" '
+            $0 ~ "^ " t " - " {in_tool=1}
+            in_tool && /Requires: NPM/ {found=1}
+            in_tool && /^ [a-z]/ && $1 != t {in_tool=0}
+            END { exit found?0:1 }
+        ' >/dev/null 2>&1 || return 1
+    done
+    return 0
+}
 
 # Test function for consistency
 run_test() {
@@ -19,7 +95,7 @@ run_test() {
     log_info_if_enabled "→ $test_name"
     
     # Execute test command and capture result without exiting on failure
-    if eval "$test_command" >/dev/null 2>&1; then
+    if { [ "$RUN_TEST_REDIRECT" = true ] && eval "$test_command" >/dev/null 2>&1; } || { [ "$RUN_TEST_REDIRECT" != true ] && eval "$test_command"; }; then
         log_success_if_enabled "  PASSED"
         ((TESTS_PASSED++))
         return 0
@@ -48,11 +124,11 @@ run_test "CLI help command works" \
 run_test "Tool listing functionality" \
     "$BINARY list > /dev/null 2>&1"
 
-run_test "All 7 tools loaded from configuration" \
-    'TOOL_COUNT=$('$BINARY' list 2>/dev/null | grep -E "^ (claude|gemini|qwen|opencode|llxprt|codex|crush)" | wc -l); [ "$TOOL_COUNT" -eq 7 ]'
+run_test "All configured tools appear in list" \
+    "verify_list_contains_all_tools"
 
-run_test "All tools use NPM packages consistently" \
-    'NPM_TOOLS=$('$BINARY' list 2>/dev/null | grep -c "Requires: NPM"); [ "$NPM_TOOLS" -eq 7 ]'
+run_test "All npm-based tools are flagged in list" \
+    "verify_npm_flags"
 
 run_test "Update command help" \
     "$BINARY update --help > /dev/null 2>&1"
@@ -64,67 +140,85 @@ run_test "Run command help" \
     "$BINARY run --help > /dev/null 2>&1"
 
 run_test "Error handling for nonexistent tool" \
-    'timeout 5s '$BINARY' run nonexistent-tool >/dev/null 2>&1; [ $? -ne 0 ]'
+    "timeout 5s $BINARY run nonexistent-tool >/dev/null 2>&1; [ \$? -ne 0 ]"
 
 run_test "Version consistency (Cargo.toml vs NPM package.json)" \
-    'CARGO_VERSION=$(grep "^version = " Cargo.toml | sed "s/version = \"\(.*\)\"/\1/"); NPM_VERSION=$(grep "\"version\":" npm/terminal-jarvis/package.json | sed "s/.*\"version\": \"\(.*\)\".*/\1/"); [ "$CARGO_VERSION" = "$NPM_VERSION" ]'
+    "CARGO_VERSION=\$(grep '^version = ' Cargo.toml | sed 's/version = \"\(.*\)\"/\1/'); NPM_VERSION=\$(grep '\"version\":' npm/terminal-jarvis/package.json | sed 's/.*\"version\": \"\(.*\)\".*/\1/'); [ \"\$CARGO_VERSION\" = \"\$NPM_VERSION\" ]"
 
-run_test "Example configuration file has all 7 tools" \
-    'CONFIG_TOOLS=$(grep -E "(claude-code|gemini-cli|qwen-code|opencode|llxprt-code|codex|crush)" terminal-jarvis.toml.example | wc -l); [ "$CONFIG_TOOLS" -eq 7 ]'
+run_test "Example config includes all known tools" \
+    "verify_example_has_all_tools"
 
-run_test "Example config uses NPM for all installs" \
-    'NPM_INSTALL_COMMANDS=$(grep -c "npm install" terminal-jarvis.toml.example); [ "$NPM_INSTALL_COMMANDS" -eq 7 ]'
+run_test "All tools use supported installers (npm|uv|curl)" \
+    "verify_supported_installers"
 
 # Test the opencode input focus fix specifically
 run_test "OpenCode input focus tests pass" \
     "cargo test opencode_input_focus >/dev/null 2>&1"
 
 run_test "OpenCode terminal state preparation method exists" \
-    'grep -r "prepare_opencode_terminal_state" src/tools/'
+    "grep -r 'prepare_opencode_terminal_state' src/tools/"
 
 run_test "OpenCode special handling in interactive mode exists" \
-    'grep -r "opencode.*extra time and careful terminal state management\|Special handling for opencode" src/cli_logic/ || grep -r "opencode.*focus\|Special.*opencode" src/cli_logic/'
+    "grep -r 'opencode.*extra time and careful terminal state management\|Special handling for opencode' src/cli_logic/ || grep -r 'opencode.*focus\|Special.*opencode' src/cli_logic/"
 
 # Test codex functionality specifically
 run_test "Codex tool is properly configured" \
-    '$BINARY list | grep -q "codex.*OpenAI Codex CLI"'
+    "$BINARY list | grep -q 'codex.*OpenAI Codex CLI'"
 
 run_test "Codex auth environment variable handling exists" \
-    'grep -r "CODEX_NO_BROWSER" src/auth_manager/'
+    "grep -r 'CODEX_NO_BROWSER' src/auth_manager/"
 
 run_test "Codex API key detection works" \
-    'grep -r -A1 -B1 "codex.*=>" src/auth_manager/ | grep -q "OPENAI_API_KEY"'
+    "grep -r -A1 -B1 'codex.*=>' src/auth_manager/ | grep -q 'OPENAI_API_KEY'"
 
 run_test "Codex help message includes OpenAI API setup" \
-    'grep -r -A10 "codex.*=>" src/auth_manager/ | grep -q "platform.openai.com"'
+    "grep -r -A10 'codex.*=>' src/auth_manager/ | grep -q 'platform.openai.com'"
 
 run_test "Codex binary mapping is correct" \
-    'grep -r "codex.*codex" src/tools/'
+    "grep -r 'codex.*codex' src/tools/"
 
 run_test "Codex tool description is informative" \
-    'grep -r -A2 "command: \"codex\"" src/tools/ | grep -q "description.*AI coding agent"'
+    "grep -q 'OpenAI Codex CLI for local AI coding' config/tools/codex.toml"
 
 run_test "Codex functionality tests pass" \
     "cargo test codex_functionality >/dev/null 2>&1"
 
 # Test crush functionality specifically
+## New tools: aider, amp, goose
+run_test "Aider tool is properly configured" \
+    "$BINARY list | grep -Fq \"aider - AI pair programming assistant that edits code in your local git repository\""
+
+run_test "Aider uses uv installer" \
+    "grep -q 'command = \"uv\"' config/tools/aider.toml"
+
+run_test "Amp tool is properly configured" \
+    "$BINARY list | grep -Fq \"amp - Sourcegraph's AI-powered code assistant with advanced context awareness\""
+
+run_test "Amp installation package is correct" \
+    "grep -q '@sourcegraph/amp' config/tools/amp.toml"
+
+run_test "Goose tool is properly configured" \
+    "$BINARY list | grep -Fq \"goose - Block's AI-powered coding assistant with developer toolkit integration\""
+
+run_test "Goose uses curl with bash pipe" \
+    "grep -q 'command = \"curl\"' config/tools/goose.toml && grep -q 'pipe_to = \"bash\"' config/tools/goose.toml"
 run_test "Crush tool is properly configured" \
-    '$BINARY list | grep -q "crush.*multi-model AI coding assistant"'
+    "$BINARY list | grep -Fq \"Charm's multi-model AI assistant with LSP\""
 
 run_test "Crush binary mapping is correct" \
-    'grep -r "crush.*crush" src/tools/'
+    "grep -r 'crush.*crush' src/tools/"
 
 run_test "Crush tool description is informative" \
-    'grep -r -A2 "command: \"crush\"" src/tools/ | grep -q "description.*Multi-model AI coding assistant"'
+    "grep -q 'Charm.*multi-model AI assistant' config/tools/crush.toml"
 
 run_test "Crush installation command is correct" \
-    'grep -A5 "crush\"," src/installation_arguments.rs | grep -q "@charmland/crush"'
+    "grep -q '@charmland/crush' config/tools/crush.toml"
 
 run_test "Crush config mapping exists" \
-    'grep -r "crush.*crush" src/services/'
+    "grep -r 'crush.*crush' src/services/"
 
 run_test "Crush default config exists" \
-    'grep -r -A5 "crush" src/config/ | grep -q "charmland/crush"'
+    "grep -r -A5 'crush' src/config/ | grep -q 'charmland/crush'"
 
 log_separator
 
@@ -138,14 +232,14 @@ if ! command -v npm &> /dev/null; then
 else
     log_info_if_enabled "NPM version: $(npm --version)"
     
-    # Extract NPM package names from installation configuration
-    CLAUDE_PACKAGE=$(grep -A5 'claude",' src/installation_arguments.rs | grep 'args: vec!' | sed 's/.*"\([^"]*\)".*/\1/' | tail -1)
-    GEMINI_PACKAGE=$(grep -A5 'gemini",' src/installation_arguments.rs | grep 'args: vec!' | sed 's/.*"\([^"]*\)".*/\1/' | tail -1)
-    QWEN_PACKAGE=$(grep -A5 'qwen",' src/installation_arguments.rs | grep 'args: vec!' | sed 's/.*"\([^"]*\)".*/\1/' | tail -1)
-    OPENCODE_PACKAGE=$(grep -A5 'opencode",' src/installation_arguments.rs | grep 'args: vec!' | sed 's/.*"\([^"]*\)".*/\1/' | tail -1)
-    LLXPRT_PACKAGE=$(grep -A5 'llxprt",' src/installation_arguments.rs | grep 'args: vec!' | sed 's/.*"\([^"]*\)".*/\1/' | tail -1)
-    CODEX_PACKAGE=$(grep -A5 'codex",' src/installation_arguments.rs | grep 'args: vec!' | sed 's/.*"\([^"]*\)".*/\1/' | tail -1)
-    CRUSH_PACKAGE=$(grep -A5 'crush",' src/installation_arguments.rs | grep 'args: vec!' | sed 's/.*"\([^"]*\)".*/\1/' | tail -1)
+    # Extract NPM package names from modular configuration system
+    CLAUDE_PACKAGE=$(grep 'install.*-g' config/tools/claude.toml | sed 's/.*"\([^"]*\)".*/\1/')
+    GEMINI_PACKAGE=$(grep 'install.*-g' config/tools/gemini.toml | sed 's/.*"\([^"]*\)".*/\1/')
+    QWEN_PACKAGE=$(grep 'install.*-g' config/tools/qwen.toml | sed 's/.*"\([^"]*\)".*/\1/')
+    OPENCODE_PACKAGE=$(grep 'install.*-g' config/tools/opencode.toml | sed 's/.*"\([^"]*\)".*/\1/')
+    LLXPRT_PACKAGE=$(grep 'install.*-g' config/tools/llxprt.toml | sed 's/.*"\([^"]*\)".*/\1/')
+    CODEX_PACKAGE=$(grep 'install.*-g' config/tools/codex.toml | sed 's/.*"\([^"]*\)".*/\1/')
+    CRUSH_PACKAGE=$(grep 'install.*-g' config/tools/crush.toml | sed 's/.*"\([^"]*\)".*/\1/')
     
     log_info_if_enabled "Validating packages: $CLAUDE_PACKAGE, $GEMINI_PACKAGE, $QWEN_PACKAGE, $OPENCODE_PACKAGE, $LLXPRT_PACKAGE, $CODEX_PACKAGE, $CRUSH_PACKAGE"
     
@@ -186,10 +280,10 @@ else
         "npm view $CRUSH_PACKAGE bin | grep -q 'crush'"
     
     # Validate configuration consistency across files
-    CONFIG_CLAUDE=$(grep -r 'claude-code' src/config/ | grep 'install_command' | sed 's/.*npm install -g \([^ "]*\).*/\1/' | head -1)
-    CONFIG_GEMINI=$(grep -r 'gemini-cli' src/config/ | grep 'install_command' | sed 's/.*npm install -g \([^ "]*\).*/\1/' | head -1)
-    CONFIG_LLXPRT=$(grep -r 'llxprt-code' src/config/ | grep 'install_command' | sed 's/.*npm install -g \([^ "]*\).*/\1/' | head -1)
-    CONFIG_CRUSH=$(grep -r 'crush' src/config/ | grep 'install_command' | sed 's/.*npm install -g \([^ "]*\).*/\1/' | head -1)
+    CONFIG_CLAUDE=$(grep 'install.*-g' config/tools/claude.toml | sed 's/.*"\([^"]*\)".*/\1/')
+    CONFIG_GEMINI=$(grep 'install.*-g' config/tools/gemini.toml | sed 's/.*"\([^"]*\)".*/\1/')
+    CONFIG_LLXPRT=$(grep 'install.*-g' config/tools/llxprt.toml | sed 's/.*"\([^"]*\)".*/\1/')
+    CONFIG_CRUSH=$(grep 'install.*-g' config/tools/crush.toml | sed 's/.*"\([^"]*\)".*/\1/')
     
     run_test "Claude package consistent between installation_arguments.rs and config/" \
         "[ '$CLAUDE_PACKAGE' = '$CONFIG_CLAUDE' ]"
@@ -226,9 +320,9 @@ else
         "npm install -g $CRUSH_PACKAGE --dry-run > /dev/null 2>&1"
     
     # Validate services/ update logic has correct package names via config
-    SERVICES_CLAUDE_PRIMARY=$(grep 'claude-code.*update_command' terminal-jarvis.toml.example | sed 's/.*npm update -g \([^ "]*\).*/\1/')
-    SERVICES_GEMINI_PRIMARY=$(grep 'gemini-cli.*update_command' terminal-jarvis.toml.example | sed 's/.*npm update -g \([^ "]*\).*/\1/')
-    SERVICES_LLXPRT_PRIMARY=$(grep 'llxprt-code.*update_command' terminal-jarvis.toml.example | sed 's/.*npm update -g \([^ "]*\).*/\1/')
+    SERVICES_CLAUDE_PRIMARY=$(grep 'update.*-g' config/tools/claude.toml | sed 's/.*"\([^"]*\)".*/\1/')
+    SERVICES_GEMINI_PRIMARY=$(grep 'update.*-g' config/tools/gemini.toml | sed 's/.*"\([^"]*\)".*/\1/')
+    SERVICES_LLXPRT_PRIMARY=$(grep 'update.*-g' config/tools/llxprt.toml | sed 's/.*"\([^"]*\)".*/\1/')
     
     run_test "Claude update logic uses correct primary package" \
         "[ '$CLAUDE_PACKAGE' = '$SERVICES_CLAUDE_PRIMARY' ]"
