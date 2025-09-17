@@ -16,6 +16,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - OpenCode launch hang by avoiding detached process groups and running with SIGINT interception; prevents SIGTTIN input blocking and ensures clean exit handling
 - Qwen authentication flicker in headless/Codespaces by preferring API key prompt when a browser is not appropriate and keeping stdio/TTY stable
+- Crates.io publish failure (413 Payload Too Large): reduced crate size by whitelisting package contents, removing `screenshot_and_demo/`, and externalizing README promo image
 
 ### Enhanced
 - Multi-installation method support
@@ -31,6 +32,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Improved error handling with clear dependency requirement messages and installation guidance
 - Removed dead code in tools process management and cleaned up clippy warnings (simplified boolean checks, removed redundant bindings)
 - Standardized Node wrapper messages to plain text with bracketed tags to align with project logging style and no‑emoji policy
+- Packaging optimization: added `[package].include` to `Cargo.toml` to limit crate contents; validated final .crate size ~94 KB
 
 ### Documentation
 - Updated README.md to reflect tool additions, supported tools table, and testing notes
