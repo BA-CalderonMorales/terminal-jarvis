@@ -171,6 +171,7 @@ crush.db
 .kilocode/
 .qwen/
 .roo/
+.aider*
 
 terminal-jarvis-agents/
 

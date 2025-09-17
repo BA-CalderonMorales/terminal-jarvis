@@ -22,7 +22,7 @@ This branch (`docs/screenshots_and_demos`) contains:
 Reference assets directly from this branch:
 
 ```markdown
-![Demo](https://raw.githubusercontent.com/BA-CalderonMorales/terminal-jarvis/docs/screenshots_and_demos/screenshots_and_demo/Terminal%20Jarvis%20v0.0.67%20Demo.gif)
+![Demo](https://raw.githubusercontent.com/BA-CalderonMorales/terminal-jarvis/docs/screenshots_and_demos/screenshots_and_demo/Terminal Jarvis Demo.gif)
 ```
 
 ## Main Project
