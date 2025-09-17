@@ -12,7 +12,7 @@ A unified command center for AI coding tools. Manage and run a suite of coding a
 
 <div align="center">
 
-<img src="screenshot_and_demo/promo_image_for_readme.png" alt="Terminal Jarvis Interface">
+<img src="https://raw.githubusercontent.com/BA-CalderonMorales/terminal-jarvis/docs/screenshots_and_demos/screenshots_and_demo/promo_image_for_readme.png" alt="Terminal Jarvis Interface">
 
 <div align="left">
 
