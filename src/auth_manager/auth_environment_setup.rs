@@ -12,14 +12,14 @@ pub struct EnvironmentSetup;
 impl EnvironmentSetup {
     /// Set environment variables to prevent browser opening for tools that support it
     pub fn set_no_browser_env_vars() -> Result<()> {
-    // Set common no-browser flags
-    env::set_var("NO_BROWSER", "1");
-    // Save original BROWSER if present and override with a safe no-op
-    if let Ok(orig) = env::var("BROWSER") {
-        env::set_var("ORIGINAL_BROWSER", orig);
-    }
-    // Using a simple no-op avoids shell quoting issues when invoked via sh -c
-    env::set_var("BROWSER", "true");
+        // Set common no-browser flags
+        env::set_var("NO_BROWSER", "1");
+        // Save original BROWSER if present and override with a safe no-op
+        if let Ok(orig) = env::var("BROWSER") {
+            env::set_var("ORIGINAL_BROWSER", orig);
+        }
+        // Using a simple no-op avoids shell quoting issues when invoked via sh -c
+        env::set_var("BROWSER", "true");
 
         // OAuth and authentication prevention
         env::set_var("OAUTH_NO_BROWSER", "1");

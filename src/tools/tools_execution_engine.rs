@@ -2,10 +2,10 @@
 // Handles tool execution, session continuation, and argument processing
 
 use anyhow::Result;
-use std::process::Command;
-use std::io::Write;
-use std::io::IsTerminal;
 use std::collections::HashMap;
+use std::io::IsTerminal;
+use std::io::Write;
+use std::process::Command;
 
 use super::tools_command_mapping::get_cli_command;
 use super::tools_detection::check_tool_installed;
@@ -22,7 +22,8 @@ fn looks_like_gemini_api_key(key: &str) -> bool {
     let k = key.trim();
     (k.starts_with("AIza") || k.starts_with("AI"))
         && k.len() >= 25
-        && k.chars().all(|c| c.is_ascii_alphanumeric() || c == '_' || c == '-')
+        && k.chars()
+            .all(|c| c.is_ascii_alphanumeric() || c == '_' || c == '-')
 }
 
 fn looks_like_oauth_token(token: &str) -> bool {
@@ -218,13 +219,13 @@ pub async fn run_tool_once(display_name: &str, args: &[String]) -> Result<()> {
                 && std::env::var("OPENAI_API_KEY").is_err()
                 && std::env::var("ANTHROPIC_API_KEY").is_err();
             if no_provider_keys {
-            println!(
-                "{}",
-                crate::theme::theme_global_config::current_theme()
-                    .accent("OpenRouter API keys: https://openrouter.ai/settings/keys")
-            );
-            // Lightweight inline prompt; user can press Enter to skip
-            if let Ok(input) = Text::new("Enter an API key for Aider (recommended: OPENROUTER_API_KEY). Leave blank to skip:")
+                println!(
+                    "{}",
+                    crate::theme::theme_global_config::current_theme()
+                        .accent("OpenRouter API keys: https://openrouter.ai/settings/keys")
+                );
+                // Lightweight inline prompt; user can press Enter to skip
+                if let Ok(input) = Text::new("Enter an API key for Aider (recommended: OPENROUTER_API_KEY). Leave blank to skip:")
                 .with_placeholder("skips if empty")
                 .prompt()
             {
@@ -355,11 +356,19 @@ pub async fn run_tool_once(display_name: &str, args: &[String]) -> Result<()> {
                 // Fall back to saved creds if not in env
                 AuthManager::get_tool_credentials("goose")
                     .ok()
-                    .and_then(|m| m.get("GOOGLE_API_KEY").cloned().or_else(|| m.get("GEMINI_API_KEY").cloned()))
+                    .and_then(|m| {
+                        m.get("GOOGLE_API_KEY")
+                            .cloned()
+                            .or_else(|| m.get("GEMINI_API_KEY").cloned())
+                    })
                     .or_else(|| {
                         AuthManager::get_tool_credentials("gemini")
                             .ok()
-                            .and_then(|m| m.get("GOOGLE_API_KEY").cloned().or_else(|| m.get("GEMINI_API_KEY").cloned()))
+                            .and_then(|m| {
+                                m.get("GOOGLE_API_KEY")
+                                    .cloned()
+                                    .or_else(|| m.get("GEMINI_API_KEY").cloned())
+                            })
                     })
             });
         if let Some(k) = candidate_key {
@@ -376,9 +385,10 @@ pub async fn run_tool_once(display_name: &str, args: &[String]) -> Result<()> {
                     )
                 );
                 if std::io::stdin().is_terminal() {
-                    if let Ok(input) = Text::new("Enter a valid GOOGLE_API_KEY (leave blank to cancel):")
-                        .with_placeholder("AIza... or AI...")
-                        .prompt()
+                    if let Ok(input) =
+                        Text::new("Enter a valid GOOGLE_API_KEY (leave blank to cancel):")
+                            .with_placeholder("AIza... or AI...")
+                            .prompt()
                     {
                         let new_key = input.trim().to_string();
                         if !new_key.is_empty() {
@@ -504,13 +514,12 @@ pub async fn run_tool_once(display_name: &str, args: &[String]) -> Result<()> {
             }
         }
 
-        if (is_codespaces || headless) && {
-            let no_keys = std::env::var("OPENAI_API_KEY").is_err()
-                && std::env::var("ANTHROPIC_API_KEY").is_err()
-                && std::env::var("GEMINI_API_KEY").is_err()
-                && std::env::var("GOOGLE_API_KEY").is_err();
-            no_keys
-        } {
+        if (is_codespaces || headless)
+            && std::env::var("OPENAI_API_KEY").is_err()
+            && std::env::var("ANTHROPIC_API_KEY").is_err()
+            && std::env::var("GEMINI_API_KEY").is_err()
+            && std::env::var("GOOGLE_API_KEY").is_err()
+        {
             println!(
                 "{}",
                 crate::theme::theme_global_config::current_theme()

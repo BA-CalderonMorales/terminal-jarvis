@@ -80,7 +80,6 @@ impl Cli {
             },
 
             // (Duplicate Auth handler removed; handled above)
-
             None => cli_logic::handle_interactive_mode().await,
         }
     }

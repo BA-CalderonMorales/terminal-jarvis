@@ -86,8 +86,8 @@ impl PackageOperationsManager {
             .as_ref()
             .ok_or_else(|| anyhow!("No update command configured for tool '{}'", tool_name))?;
 
-    // Avoid printing per-tool updating lines here; the caller is responsible for
-    // concise, non-overlapping progress output when running concurrently.
+        // Avoid printing per-tool updating lines here; the caller is responsible for
+        // concise, non-overlapping progress output when running concurrently.
 
         let spinner = ProgressUtils::spinner("Updating");
 

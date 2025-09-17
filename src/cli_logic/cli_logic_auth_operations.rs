@@ -92,7 +92,10 @@ pub async fn handle_auth_set(tool: &str) -> Result<()> {
         .get_auth_info(&key)
         .ok_or_else(|| anyhow!("Unknown tool '{}'", tool))?;
 
-    println!("\n{}", theme.secondary(&format!("Set credentials for {}:", tool)));
+    println!(
+        "\n{}",
+        theme.secondary(&format!("Set credentials for {}:", tool))
+    );
     println!("  You can enter values for any of these env vars. Leave blank to skip.");
 
     let mut new_vars: HashMap<String, String> = HashMap::new();
@@ -216,7 +219,11 @@ async fn handle_remove_for_tool(tool: &str) -> Result<()> {
     } else {
         format!("Remove {} selected key(s) for {}?", selections.len(), tool)
     };
-    if Confirm::new(&confirm_msg).with_default(false).prompt().unwrap_or(false) {
+    if Confirm::new(&confirm_msg)
+        .with_default(false)
+        .prompt()
+        .unwrap_or(false)
+    {
         AuthManager::delete_tool_credentials(tool, &selections)?;
         println!("{}", theme.accent("Credentials removed."));
     }

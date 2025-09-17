@@ -7,8 +7,8 @@ use crate::installation_arguments::InstallationManager;
 use crate::progress_utils::{ProgressContext, ProgressUtils};
 use anyhow::{anyhow, Result};
 use std::time::Duration;
-use tokio::task::JoinSet;
 use tokio::process::Command as AsyncCommand;
+use tokio::task::JoinSet;
 
 /// Handle updating packages - either a specific package or all packages
 pub async fn handle_update_packages(package: Option<&str>) -> Result<()> {
@@ -87,7 +87,7 @@ async fn update_all_packages() -> Result<()> {
     // Final summary table (ASCII only)
     println!("\nUpdate summary:");
     println!("----------------+--------+----------------------------------------");
-    println!("{:<16}| {:<6} | {}", "TOOL", "STATUS", "DETAILS");
+    println!("{:<16}| {:<6} | DETAILS", "TOOL", "STATUS");
     println!("----------------+--------+----------------------------------------");
     // Sort results by tool name for deterministic output
     results.sort_by(|a, b| a.0.cmp(&b.0));

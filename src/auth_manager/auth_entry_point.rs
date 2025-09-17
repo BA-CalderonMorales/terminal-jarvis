@@ -80,9 +80,7 @@ impl AuthManager {
     }
 
     /// Fetch saved credentials for a specific tool
-    pub fn get_tool_credentials(
-        tool: &str,
-    ) -> Result<std::collections::HashMap<String, String>> {
+    pub fn get_tool_credentials(tool: &str) -> Result<std::collections::HashMap<String, String>> {
         CredentialsStore::get_tool_env_vars(tool)
     }
 

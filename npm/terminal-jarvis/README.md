@@ -12,7 +12,7 @@ A unified command center for AI coding tools. Manage and run a suite of coding a
 
 <div align="center">
 
-<img src="screenshot_and_demo/promo_image_for_readme.png" alt="Terminal Jarvis Interface">
+<img src="https://raw.githubusercontent.com/BA-CalderonMorales/terminal-jarvis/docs/screenshots_and_demos/screenshots_and_demo/promo_image_for_readme.png" alt="Terminal Jarvis Interface">
 
 <div align="left">
 
@@ -51,7 +51,7 @@ Distribution and project status at a glance: NPM and Crates.io versions/download
 This short clip shows the interactive T.JARVIS interface in action: list installed/available tools, perform one-command installs, and continue sessions seamlessly during authentication. Try it locally with `npx terminal-jarvis`.
 
 <p align="center">
-<img src="screenshot_and_demo/Terminal Jarvis v0.0.67 Demo.gif" alt="Terminal Jarvis Demo">
+<img src="https://raw.githubusercontent.com/BA-CalderonMorales/terminal-jarvis/docs/screenshots_and_demos/screenshots_and_demo/Terminal Jarvis v0.0.67 Demo.gif" alt="Terminal Jarvis Demo">
 </p>
 
 ## Prerequisites

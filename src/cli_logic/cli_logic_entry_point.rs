@@ -572,15 +572,12 @@ async fn handle_install_tools_menu() -> Result<()> {
                         sh.stdin(std::process::Stdio::piped());
                         sh.stdout(std::process::Stdio::null());
                         sh.stderr(std::process::Stdio::null());
-                        match sh.spawn() {
-                            Ok(mut child) => {
-                                if let Some(stdin) = child.stdin.as_mut() {
-                                    use tokio::io::AsyncWriteExt;
-                                    let _ = stdin.write_all(&out.stdout).await;
-                                }
-                                let _ = child.wait().await;
+                        if let Ok(mut child) = sh.spawn() {
+                            if let Some(stdin) = child.stdin.as_mut() {
+                                use tokio::io::AsyncWriteExt;
+                                let _ = stdin.write_all(&out.stdout).await;
                             }
-                            Err(_) => {}
+                            let _ = child.wait().await;
                         }
                         // Re-check availability
                         if InstallationManager::check_uv_available() {
@@ -590,7 +587,9 @@ async fn handle_install_tools_menu() -> Result<()> {
                         }
                     }
                     _ => {
-                        ProgressUtils::error_message("Failed to download uv installer. See docs link above.");
+                        ProgressUtils::error_message(
+                            "Failed to download uv installer. See docs link above.",
+                        );
                     }
                 }
             }
