@@ -27,6 +27,10 @@ config/
 └── config.toml      # Global Terminal Jarvis settings
 ```
 
+Note for NPM installations:
+
+- The NPM package includes `config/tools/*.toml` inside the package. The runtime binary looks for these definitions relative to the installed binary as well as standard config search paths. Project-level or user-level overrides still take precedence per the load order described above.
+
 ## Root config.toml File
 
 The `config.toml` file at the project root controls global Terminal Jarvis behavior:

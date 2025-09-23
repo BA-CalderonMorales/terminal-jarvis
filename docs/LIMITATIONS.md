@@ -29,13 +29,17 @@ This document outlines current limitations, known issues, and workarounds for Te
 
 ## Platform-Specific Requirements
 
-### macOS Prerequisites
+### NPM channel prerequisites
 
-- **Requirement**: Rust toolchain must be installed before using Terminal Jarvis
-- **Details**: See [INSTALLATION.md](INSTALLATION.md#macos-prerequisites) for complete setup instructions
-- **Why**: Some tools require compilation or Rust-specific dependencies on macOS
+- NPM installs require `tar` to extract the downloaded binary during postinstall.
+- Internet access is required at install time to fetch the binary from GitHub Releases.
+- Offline or air-gapped NPM installs are not supported. Use Cargo or pre-distributed binaries for offline workflows.
 
-> **Note**: For complete installation instructions and prerequisites, see [INSTALLATION.md](INSTALLATION.md)
+### Windows support
+
+- Native Windows support for the NPM package is not yet available. Use WSL2 for a seamless Linux environment.
+
+> For complete installation instructions and prerequisites, see [INSTALLATION.md](INSTALLATION.md)
 
 ## Performance Considerations
 

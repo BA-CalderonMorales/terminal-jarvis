@@ -80,8 +80,8 @@ The optimal way to use Terminal Jarvis is through a pre-configured remote develo
 If you prefer local development:
 
 - **Node.js 20+** and NPM
-- **macOS users**: [Rust toolchain required](docs/INSTALLATION.md#macos-prerequisites)
-- **Linux users**: Build tools and development headers
+- **macOS users**: No Rust required for NPM/Homebrew; Rust only needed for Cargo/source builds
+- **Linux users**: `tar` for NPM installs; standard build tools if building from source
 - **Windows users**: Windows Subsystem for Linux (WSL2) recommended
 
 > [!IMPORTANT]
@@ -148,3 +148,5 @@ If Terminal Jarvis has been helpful for your AI coding workflow or you just thou
 [![Buy Me a Coffee](https://img.shields.io/badge/Buy%20Me%20a%20Coffee-orange.svg?style=for-the-badge)](https://www.buymeacoffee.com/brandoncalderonmorales)
 
 Your support helps maintain and improve Terminal Jarvis for the entire community!
+
+

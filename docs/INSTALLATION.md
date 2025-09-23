@@ -47,6 +47,80 @@ npm install -g terminal-jarvis@stable
 npm install -g terminal-jarvis@beta
 ```
 
+#### How NPM installation works
+
+- The NPM package does not bundle large binaries.
+- During installation, a postinstall script detects your OS/arch and downloads the correct binary from GitHub Releases.
+- The binary is installed under the package’s `bin/` directory and launched via the `terminal-jarvis` shim.
+- Tool configurations (`config/tools/*.toml`) are included and loaded at runtime by the binary.
+
+#### NPM prerequisites
+
+- `tar` must be available to extract the downloaded archive.
+- Internet access is required during installation.
+
+Install `tar` if needed:
+
+```bash
+# Debian/Ubuntu
+sudo apt-get update && sudo apt-get install -y tar
+
+# Fedora/RHEL/CentOS
+sudo dnf install -y tar || sudo yum install -y tar
+
+# Arch Linux
+sudo pacman -S --noconfirm tar
+```
+
+macOS ships with `tar`. Windows users should prefer WSL2.
+
+#### Re-running the installer
+
+If the binary is missing (interrupted install), re-run postinstall:
+
+```bash
+# Global
+npm rebuild -g terminal-jarvis || npm install -g terminal-jarvis@latest
+
+# Local/project
+npm rebuild terminal-jarvis || npm install terminal-jarvis@latest
+
+# One-off run will also try to complete setup
+npx terminal-jarvis --version
+```
+
+#### NPM Postinstall Behavior (Under the Hood)
+
+To keep the NPM package lightweight and always deliver the correct binary for your platform, Terminal Jarvis uses a postinstall step:
+
+- Version source: Uses the NPM package version to select the matching GitHub Release (tag `vX.Y.Z`).
+- Download origin: Official release assets from this repository’s GitHub Releases.
+- Asset naming:
+	- macOS: `terminal-jarvis-mac.tar.gz`
+	- Linux: `terminal-jarvis-linux.tar.gz`
+- Extraction: Uses your system `tar` to extract the archive.
+- Install location: Places the binary under the package’s `bin/` directory and launches it via the `terminal-jarvis` shim (exposed through NPM’s `bin`).
+- Configs: Tool definitions (`config/tools/*.toml`) are included in the NPM package and loaded by the binary at runtime.
+- Automatic retry: If you invoke `terminal-jarvis` and the binary is missing (e.g., interrupted install), the launcher will attempt to complete setup automatically.
+
+Verification:
+
+```bash
+# Confirm version and tool discovery
+npx terminal-jarvis --version
+npx terminal-jarvis list
+```
+
+Corporate networks and proxies:
+
+- Ensure your environment allows access to GitHub Releases.
+- If behind a proxy, configure NPM accordingly (e.g., `npm config set https-proxy http://proxy:port`).
+
+Security & provenance:
+
+- Binaries are fetched directly from this repository’s official GitHub Releases under the exact version tag.
+- No additional telemetry is collected by the installer.
+
 ### 2. Rust Crate Installation (For Rust Developers)
 
 ```bash
@@ -86,45 +160,31 @@ terminal-jarvis --version
 
 ## Platform-Specific Instructions
 
-### macOS Prerequisites
+### macOS
 
-**Important**: macOS users must install Rust before using Terminal Jarvis.
+- macOS includes `tar` by default.
+- Install via NPM, Homebrew, or Cargo.
 
 ```bash
-# 1. Install Rust via rustup
-curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
-
-# 2. Reload your shell environment
-source ~/.cargo/env
-
-# 3. Install Terminal Jarvis
-npm install -g terminal-jarvis
-
-# 4. Verify installation
-terminal-jarvis --help
+npm install -g terminal-jarvis && terminal-jarvis --help
 ```
 
 ### Linux
 
 ```bash
 # Most Linux distributions work out-of-the-box
+sudo apt-get update && sudo apt-get install -y tar  # Debian/Ubuntu
 npm install -g terminal-jarvis
-
-# If you encounter issues, install Node.js first:
-# Ubuntu/Debian:
-sudo apt update && sudo apt install nodejs npm
-
-# CentOS/RHEL/Fedora:
-sudo dnf install nodejs npm
 ```
 
 ### Windows
 
-```bash
-# Install via NPM (works with PowerShell, Command Prompt, and WSL)
-npm install -g terminal-jarvis
+Native Windows installation via the NPM package is not yet supported. Use WSL2 for a seamless experience:
 
-# For WSL users, follow Linux instructions
+```bash
+# In WSL2 (Ubuntu example)
+sudo apt-get update && sudo apt-get install -y tar
+npm install -g terminal-jarvis && terminal-jarvis --help
 ```
 
 ## Building from Source
@@ -156,12 +216,13 @@ terminal-jarvis --help
 
 ### Required
 
-- **Node.js and NPM**: Required for most AI coding tools
-- **Internet connection**: For package updates and installations
+- **Node.js and NPM**: Required for NPM channel
+- **tar**: Required for NPM installs to extract binaries
+- **Internet connection**: For postinstall binary download
 
 ### Optional
 
-- **Rust toolchain**: Only required for building from source or on macOS
+- **Rust toolchain**: Only required for building from source (Cargo channel)
 - **`gh` CLI**: Optional, for template management features
 - **Modern terminal**: For best visual experience (Unicode and color support)
 
@@ -239,12 +300,13 @@ cargo uninstall terminal-jarvis
 
 **NPM Package Details:**
 
-- **Size**: ~1.2MB compressed / ~2.9MB unpacked
-- **Contents**: Pre-compiled binaries, TypeScript wrapper
-- **Dependencies**: Zero runtime dependencies
-- **Platforms**: Cross-platform support (Windows, macOS, Linux)
-- **Testing**: All tools undergo comprehensive integration testing, but real-world usage patterns help identify edge cases
+- **Size**: Very small tarball (no bundled Rust binary)
+- **Contents**: POSIX launcher, postinstall script, tool configs (`config/tools/*.toml`)
+- **Runtime Fetch**: Binary downloaded on install via postinstall
+- **Dependencies**: Requires `tar` at install time; no runtime Node deps
+- **Platforms**: Linux, macOS (Windows via WSL2)
+- **Testing**: Integration tests and install-time verification
 - **Current Version**: See the README badges or run `terminal-jarvis --version`
-- **Known Issues**: See [LIMITATIONS.md](LIMITATIONS.md) for detailed information on resolved and current limitations
+- **Known Issues**: See [LIMITATIONS.md](LIMITATIONS.md)
 
-> **Note**: The current NPM version includes full binary functionality with the complete T.JARVIS interface. No additional installation required!
+> Note: Offline installs via NPM are not supported due to install-time download. Use Cargo or prebuilt binaries for air-gapped environments.

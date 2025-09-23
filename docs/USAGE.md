@@ -82,3 +82,13 @@ Manage credentials for all tools from one place:
 	- `terminal-jarvis auth set <tool>` – guided prompts to save API keys
 
 Saved credentials are stored at `~/.config/terminal-jarvis/credentials.toml` and are auto-exported to the environment when Terminal Jarvis starts in interactive mode. Tools inherit these variables so you don’t need to login in each tool separately.
+
+## Installation Notes (NPM channel)
+
+If you installed via NPM and encounter a "binary not found" error, the postinstall step may have been interrupted. Re-run it with:
+
+```bash
+npm rebuild -g terminal-jarvis || npm install -g terminal-jarvis@latest
+```
+
+See the "NPM Install Behavior (Postinstall Download)" section in the project README or the Installation Guide for prerequisites and troubleshooting.
