@@ -184,3 +184,6 @@ terminal-jarvis-agents/
 homebrew-terminal-jarvis/
 .aider*
 login
+
+!npm/terminal-jarvis/config/
+!npm/terminal-jarvis/config/**
