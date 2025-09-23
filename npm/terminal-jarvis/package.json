@@ -8,6 +8,7 @@
   "files": [
     "lib/",
     "bin/",
+    "scripts/",
     "config/",
     "README.md",
     "package.json"
@@ -17,7 +18,7 @@
     "sync-readme": "npm run generate-tools && cp ../../README.md .",
     "sync-readme-npm": "npm run generate-tools && cp ../../README.md . && sed -i 's|screenshot_and_demo/|https://raw.githubusercontent.com/BA-CalderonMorales/terminal-jarvis/docs/screenshots_and_demos/screenshots_and_demo/|g' README.md",
     "build-rust": "cd ../.. && cargo build --release",
-    "copy-binary": "mkdir -p bin && cp ../../target/release/terminal-jarvis bin/terminal-jarvis && chmod +x bin/terminal-jarvis",
+    "copy-configs": "node ./scripts/copy-configs.js",
     "typecheck": "tsc --noEmit",
     "lint": "biome lint src/",
     "lint:fix": "biome lint --write src/",
@@ -25,10 +26,11 @@
     "format:fix": "biome format --write src/",
     "check": "biome check src/",
     "check:fix": "biome check --write src/",
-    "build": "npm run copy-binary && npm run sync-readme-npm && npx tsc",
+    "build": "npm run copy-configs && npm run sync-readme-npm",
+    "prepack": "npm run build",
     "prepublishOnly": "npm run build",
     "dev": "npm run build && node lib/index.js",
-    "postinstall": "node -e \"console.log('\\nTerminal Jarvis v0.0.68 installed successfully.\\n\\nFull T.JARVIS interface is ready to use.\\n\\nRun: npx terminal-jarvis\\n')\""
+    "postinstall": "node ./scripts/postinstall.js"
   },
   "keywords": [
     "cli",

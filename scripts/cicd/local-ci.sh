@@ -231,7 +231,7 @@ log_progress "Checking version consistency"
 
 NPM_VERSION=$(grep '"version":' npm/terminal-jarvis/package.json | sed 's/.*"version": "\(.*\)".*/\1/')
 TS_VERSION=$(grep "console.log.*Terminal Jarvis v" npm/terminal-jarvis/src/index.ts | sed 's/.*Terminal Jarvis v\([0-9.]*\).*/\1/')
-POSTINSTALL_VERSION=$(grep "Terminal Jarvis v" npm/terminal-jarvis/package.json | sed 's/.*Terminal Jarvis v\([0-9.]*\).*/\1/')
+POSTINSTALL_VERSION=$(grep "Terminal Jarvis v" npm/terminal-jarvis/scripts/postinstall.js | sed 's/.*Terminal Jarvis v\([0-9.]*\).*/\1/')
 
 log_info_if_enabled "  Cargo.toml: ${CURRENT_VERSION}"
 log_info_if_enabled "  package.json: ${NPM_VERSION}"
