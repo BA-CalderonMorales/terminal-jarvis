@@ -198,6 +198,29 @@ brew test local/test/terminal-jarvis
 ./scripts/test-core-functionality.sh
 ```
 
+### NPM Package (postinstall) Testing
+
+Validate the NPM package locally, including the postinstall binary download:
+
+```bash
+# Build and pack the NPM package
+cd npm/terminal-jarvis && npm run build && npm pack
+
+# Test install in a clean temp project
+cd /tmp && mkdir -p tj-npm-test && cd tj-npm-test && npm init -y
+npm install /workspaces/terminal-jarvis/npm/terminal-jarvis/terminal-jarvis-*.tgz
+
+# Verify postinstall fetched the binary and the CLI runs
+npx terminal-jarvis --version
+npx terminal-jarvis list
+```
+
+Troubleshooting:
+
+- If installation fails with extraction errors, ensure `tar` is installed and in `PATH`.
+- If the binary is missing (interrupted install), re-run: `npm rebuild terminal-jarvis`.
+- For global tests, use: `npm install -g /path/to/terminal-jarvis-*.tgz` then `terminal-jarvis --help`.
+
 ### Full Release Pipeline
 
 ```bash

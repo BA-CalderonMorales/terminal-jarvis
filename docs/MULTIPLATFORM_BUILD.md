@@ -9,7 +9,7 @@ Terminal Jarvis supports multi-platform builds using Rust's cross-compilation ca
 - **macOS**: Intel (x86_64) and Apple Silicon (ARM64) architectures  
 - **Linux**: Intel/AMD (x86_64) and ARM64 architectures
 
-**Note**: Windows support was removed due to cross-compilation complexity and toolchain requirements. Windows users can build from source using `cargo install terminal-jarvis`.
+Windows users should use WSL2 for the best experience. Native Windows binaries may be provided in the future.
 
 ## Architecture
 
@@ -205,7 +205,7 @@ The build system includes comprehensive error handling:
 
 ### NPM Package
 
-The NPM package continues to use a single binary (from the host platform), ensuring compatibility with existing workflows.
+The NPM package does not bundle platform binaries. Instead, it downloads the correct binary from GitHub Releases during installation (postinstall). This keeps the tarball small and ensures users receive the right binary for their platform.
 
 ### Homebrew
 
