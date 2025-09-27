@@ -5,6 +5,24 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.0.69] - 2025-09-27
+
+### Added
+- NPM package now bundles modular tool definitions from `config/tools/*.toml` so users can leverage the config system to install and launch tools without manual setup
+
+### Fixed
+- Eliminated menu hang by ensuring tool configs are available in npm installs; tool discovery no longer yields an empty list
+
+### Enhanced
+- Moved `build-binaries.js` into `npm/terminal-jarvis/scripts/` for consistency with other scripts
+- Build pipeline simplified: `prepack` runs a lean build that copies tool configs and syncs README; TypeScript compilation no longer required during pack
+
+### Technical
+- Removed `npm/terminal-jarvis/config/default.toml` from the npm package since runtime defaults come from code and per-tool TOMLs are now bundled
+- Added `copy-configs` script to populate `npm/terminal-jarvis/config/tools` during build
+- Updated packaging `files` list to include `scripts/` for postinstall and copy scripts
+
+
 ## [0.0.68] - 2025-09-17
 
 ### Added

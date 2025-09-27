@@ -9,7 +9,7 @@
  - Verify by running `--version`
  
  Version Hint (used by CI for consistency checks):
- Terminal Jarvis v0.0.68
+ Terminal Jarvis v0.0.69
 */
 
 const fs = require('fs');

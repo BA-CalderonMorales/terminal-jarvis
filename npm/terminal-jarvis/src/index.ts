@@ -136,7 +136,7 @@ async function main() {
 }
 
 function showFallbackMessage() {
-    console.log("Terminal Jarvis v0.0.68");
+    console.log("Terminal Jarvis v0.0.69");
     console.log("");
     console.log("[ERROR] T.JARVIS SYSTEM: Could not locate or execute the core binary.");
     console.log("");
