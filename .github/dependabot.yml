@@ -2,18 +2,21 @@ version: 2
 updates:
   - package-ecosystem: "github-actions"
     directory: "/"
+    target-branch: "develop"
     schedule:
       interval: "weekly"
     open-pull-requests-limit: 1
 
   - package-ecosystem: "cargo"
     directory: "/"
+    target-branch: "develop"
     schedule:
       interval: "weekly"
     open-pull-requests-limit: 1
 
   - package-ecosystem: "npm"
     directory: "/npm/terminal-jarvis"
+    target-branch: "develop"
     schedule:
       interval: "weekly"
     open-pull-requests-limit: 1
