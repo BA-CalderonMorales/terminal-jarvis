@@ -131,12 +131,12 @@ Includes:
 - Testing Guide - How to test and contribute
 - Contribution Guide - Complete contributor guidelines
 - Roadmap - Future plans and development priorities
-- **[Supported AI Tools](docs/SOURCES.md)** - Complete overview of all integrated AI coding tools
+- **[Supported AI Tools](https://ba-calderonmorales.github.io/my-life-as-a-dev/projects/active/terminal-jarvis/quick_start/ai-tools/)** - Complete overview of all integrated AI coding tools
 
-Terminal Jarvis provides a unified interface for multiple AI coding tools including Claude, Gemini, Qwen, and an expanding ecosystem of others. Each tool is carefully integrated with intelligent authentication flows and session management. For detailed tool information, capabilities, and current status, see our [comprehensive tool guide](docs/SOURCES.md).
+Terminal Jarvis provides a unified interface for multiple AI coding tools including Claude, Gemini, Qwen, and an expanding ecosystem of others. Each tool is carefully integrated with intelligent authentication flows and session management. For detailed tool information, capabilities, and current status, see our [comprehensive tool guide](https://ba-calderonmorales.github.io/my-life-as-a-dev/projects/active/terminal-jarvis/quick_start/ai-tools/).
 
 > [!CAUTION]
-> **Known Issues**: [View current limitations and workarounds](docs/LIMITATIONS.md)
+> **Known Issues**: [View current limitations and workarounds](https://ba-calderonmorales.github.io/my-life-as-a-dev/projects/active/terminal-jarvis/details/limitations/)
 
 ## License
 
