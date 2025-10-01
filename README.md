@@ -6,7 +6,7 @@
 
 <div align="center">
 
-A unified command center for AI coding tools. Manage and run a suite of coding assistants from one beautiful terminal interface. See the full list in the [Supported AI Tools guide](docs/SOURCES.md).
+A unified command center for AI coding tools. Manage and run a suite of coding assistants from one beautiful terminal interface. See the full list in the [Supported AI Tools guide](https://ba-calderonmorales.github.io/my-life-as-a-dev/projects/active/terminal-jarvis/).
 
 </div>
 
@@ -85,7 +85,7 @@ If you prefer local development:
 - **Windows users**: Windows Subsystem for Linux (WSL2) recommended
 
 > [!IMPORTANT]
-> **Full installation guide:** [docs/INSTALLATION.md](docs/INSTALLATION.md)
+> **Full documentation:** [Terminal Jarvis Docs](https://ba-calderonmorales.github.io/my-life-as-a-dev/projects/active/terminal-jarvis/)
 
 ## Quick Start
 
@@ -118,16 +118,19 @@ Terminal Jarvis is your AI coding assistant command center:
 
 ## Documentation
 
-Targeted guides and references when you need more than the quick start.
+Comprehensive guides and references available at the external docs site:
 
-- **[Installation Guide](docs/INSTALLATION.md)** - Platform-specific setup instructions
-- **[Usage Guide](docs/USAGE.md)** - How to use Terminal Jarvis effectively
-- **[Configuration Guide](docs/CONFIGURATION.md)** - Customize Terminal Jarvis behavior
-- **[Known Limitations](docs/LIMITATIONS.md)** - Current issues and workarounds
-- **[Architecture Guide](docs/ARCHITECTURE.md)** - Technical details and development info
-- **[Testing Guide](docs/TESTING.md)** - How to test and contribute
-- **[Contribution Guide](docs/CONTRIBUTIONS.md)** - Complete contributor guidelines
-- **[Roadmap](docs/ROADMAP.md)** - Future plans and development priorities
+**➤ [Terminal Jarvis Documentation](https://ba-calderonmorales.github.io/my-life-as-a-dev/projects/active/terminal-jarvis/)**
+
+Includes:
+- Installation Guide - Platform-specific setup instructions
+- Usage Guide - How to use Terminal Jarvis effectively
+- Configuration Guide - Customize Terminal Jarvis behavior
+- Known Limitations - Current issues and workarounds
+- Architecture Guide - Technical details and development info
+- Testing Guide - How to test and contribute
+- Contribution Guide - Complete contributor guidelines
+- Roadmap - Future plans and development priorities
 - **[Supported AI Tools](docs/SOURCES.md)** - Complete overview of all integrated AI coding tools
 
 Terminal Jarvis provides a unified interface for multiple AI coding tools including Claude, Gemini, Qwen, and an expanding ecosystem of others. Each tool is carefully integrated with intelligent authentication flows and session management. For detailed tool information, capabilities, and current status, see our [comprehensive tool guide](docs/SOURCES.md).

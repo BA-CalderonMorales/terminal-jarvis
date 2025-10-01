@@ -177,7 +177,7 @@ fn print_help() {
     println!("  - Uses temporary directories for isolated testing");
     println!("  - Includes environment cleanup and restoration");
     println!();
-    println!("For more information, see docs/TESTING.md");
+    println!("For more information, see: https://ba-calderonmorales.github.io/my-life-as-a-dev/projects/active/terminal-jarvis/");
 }
 
 fn main() {

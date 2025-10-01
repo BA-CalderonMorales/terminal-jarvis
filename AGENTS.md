@@ -4,6 +4,39 @@
 
 This document serves as the unified guideline for all AI coding assistants working on Terminal Jarvis, including GitHub Copilot, Claude, and any future AI tools. Both `.github/copilot-instructions.md` and `CLAUDE.md` reference this document to ensure consistency.
 
+---
+
+## Quick Start for AI Assistants
+
+**If you're new here or need immediate guidance:**
+
+### Most Common User Requests & Where to Look
+
+| User Request | Section to Check | Key Info |
+|-------------|------------------|----------|
+| "Let's deploy" / "Run local-cd.sh" | [Deployment Commands Trigger](#deployment-commands-trigger---read-immediately) | Pre-flight checks, version management, deployment pipeline |
+| "Fix this bug" | [Test-Driven Bugfixes](#test-driven-bugfixes-mandatory) | Write failing test FIRST, then fix |
+| "Add new AI tool" | [Tool Configuration Consistency](#tool-configuration-consistency-critical-for-new-features) | Modular config system workflow |
+| "Refactor this file" | [Refactoring Best Practices](#refactoring-best-practices-critical) | Domain-based module extraction |
+| "Update version" | [Version Numbers Are Important](#version-numbers-are-important) | Synchronize ALL version files |
+| "Before I commit" | [Pre-Commit Checklist](#pre-commit-checklist) | Complete validation checklist |
+
+### Critical Rules to Remember
+
+1. **NO EMOJIS** - Professional text-based indicators only
+2. **CHANGELOG.md FIRST** - Always update before running deployment scripts
+3. **Homebrew Formula BEFORE Release** - Commit Formula changes before creating GitHub release
+4. **Test-Driven Bugfixes** - Write failing test first, implement fix second
+5. **Version Synchronization** - Update Cargo.toml, package.json, AND Homebrew Formula
+
+### Navigation Tips
+
+- Use Ctrl+F / Cmd+F to search for specific topics
+- Section headers are anchor links: `#section-name-in-lowercase-with-hyphens`
+- Critical sections marked with "CRITICAL" or "MANDATORY" in headers
+
+---
+
 ## CRITICAL NO-EMOJIS RULE
 
 **ABSOLUTE REQUIREMENT**: NO EMOJIS anywhere in the codebase, commits, documentation, or any output.
@@ -92,11 +125,18 @@ Steps:
 
 ## What This Project Does
 
-Terminal Jarvis is a thin Rust wrapper that provides a unified interface for managing and running AI coding tools like claude-code, gemini-cli, qwen-code, opencode, llxprt, and codex. Think of it as a package manager and runner for AI coding assistants.
+**Terminal Jarvis** is a unified command center for AI coding tools.
 
-Key innovation: **Session Continuation System** prevents users from being kicked out of tools during authentication workflows.
+**Core Purpose**: Thin Rust wrapper providing a package manager and runner for AI coding assistants (claude-code, gemini-cli, qwen-code, opencode, llxprt, codex).
 
-The project follows Orhun Parmaksız's approach for packaging Rust applications via NPM, making it easy to install with `npm install -g terminal-jarvis`.
+**Key Innovation**: **Session Continuation System** - Prevents users from being kicked out during authentication workflows. This is THE defining feature that makes Terminal Jarvis unique.
+
+**Distribution**: Follows Orhun Parmaksız's NPM packaging approach for Rust applications.
+
+**Installation Methods**: 
+- NPM: `npm install -g terminal-jarvis`
+- Cargo: `cargo install terminal-jarvis`
+- Homebrew: `brew tap ba-calderonmorales/terminal-jarvis && brew install terminal-jarvis`
 
 ## Current Version & Key Features
 
@@ -864,7 +904,7 @@ We use a controlled deployment approach with programmatic version management:
 **Phase 2: Documentation (MANDATORY)**
 
 - Update CHANGELOG.md with version entry and detailed changes
-- Review docs/ directory for consistency
+- Review external documentation site: https://ba-calderonmorales.github.io/my-life-as-a-dev/projects/active/terminal-jarvis/
 - Update README.md to reflect any documentation changes
 
 **Phase 3: Deployment**
@@ -895,12 +935,11 @@ npm dist-tag add terminal-jarvis@X.X.X stable  # optional
 **Recommended: Use Enhanced Deployment Workflow (see section above for details)**
 
 1. **FIRST: Update CHANGELOG.md** - Add entry for current version with clear change descriptions
-2. **MANDATORY: Review docs/ Directory** - **EVERY TIME** CHANGELOG.md is modified, you **MUST** review and update docs/
-   - Check docs/ARCHITECTURE.md, docs/INSTALLATION.md, docs/TESTING.md, docs/LIMITATIONS.md
-   - Update version references in docs/ files if version was bumped
+2. **MANDATORY: Review External Documentation** - Update documentation at https://ba-calderonmorales.github.io/my-life-as-a-dev/projects/active/terminal-jarvis/
+   - Update version references if version was bumped
    - Verify new features/fixes are properly documented
-   - This is **NON-NEGOTIABLE** - no CHANGELOG.md updates without docs/ review
-   - **ALSO MANDATORY: Review and update README.md** - Required when CHANGELOG.md or docs/ are modified
+   - This is **NON-NEGOTIABLE** - no CHANGELOG.md updates without documentation review
+   - **ALSO MANDATORY: Review and update README.md** - Required when CHANGELOG.md is modified
 3. **THEN: Use Enhanced Workflow** - `./scripts/cicd/local-cd.sh --check-versions`, validation with `./scripts/cicd/local-ci.sh`, then deployment with `./scripts/cicd/local-cd.sh`
 
 **Legacy One-Shot: Use Local CI/CD Script**
@@ -914,8 +953,8 @@ npm dist-tag add terminal-jarvis@X.X.X stable  # optional
 2. Update version display in `npm/terminal-jarvis/src/index.ts`
 3. Update version display in `src/cli_logic.rs` (interactive mode version)
 4. **Update CHANGELOG.md with new version and changes** (CRITICAL - must be done first)
-5. **MANDATORY: Review and update docs/ directory** - Required whenever CHANGELOG.md is modified
-6. **MANDATORY: Review and update README.md** - Required when CHANGELOG.md or docs/ are modified
+5. **MANDATORY: Review and update external documentation** - https://ba-calderonmorales.github.io/my-life-as-a-dev/projects/active/terminal-jarvis/
+6. **MANDATORY: Review and update README.md** - Required when CHANGELOG.md is modified
 7. Update version references in README.md (root and NPM package will sync automatically)
 8. Run `npm run sync-readme` to sync the README
 9. Commit with clear message: `feat: add new feature X`
@@ -1131,7 +1170,7 @@ When conducting local continuous deployment with agents, **ALWAYS** follow this 
 **Phase 3: Documentation (MANDATORY)**
 
 1. **Update CHANGELOG.md** - Add detailed entry for current version
-2. **Review docs/ directory** - Update all relevant documentation
+2. **Review external documentation** - Update https://ba-calderonmorales.github.io/my-life-as-a-dev/projects/active/terminal-jarvis/
 3. **Update README.md** - Ensure consistency with changes
 
 **Phase 4: Deployment**
@@ -1146,7 +1185,7 @@ When conducting local continuous deployment with agents, **ALWAYS** follow this 
 - **Controlled deployment**: Separate validation from deployment
 - **Version consistency**: Programmatic management prevents human error
 - **Quality assurance**: CI validation catches issues before deployment
-- **Documentation completeness**: Enforced CHANGELOG.md and docs/ updates
+- **Documentation completeness**: Enforced CHANGELOG.md and external docs updates
 - **Flexibility**: Choose validation vs deployment vs combined approach
 
 **Agent Instructions:**
