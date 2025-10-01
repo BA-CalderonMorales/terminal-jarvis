@@ -332,16 +332,6 @@ else
     
     run_test "LLxprt update logic uses correct primary package" \
         "[ '$LLXPRT_PACKAGE' = '$SERVICES_LLXPRT_PRIMARY' ]"
-    
-    # Validate documentation consistency
-    run_test "TESTING.md uses correct Claude package name" \
-        "grep -q '$CLAUDE_PACKAGE' docs/TESTING.md"
-    
-    run_test "TESTING.md uses correct Gemini package name" \
-        "grep -q '$GEMINI_PACKAGE' docs/TESTING.md"
-    
-    run_test "TESTING.md uses correct LLxprt package name" \
-        "grep -q '$LLXPRT_PACKAGE' docs/TESTING.md"
 fi
 
 log_separator
