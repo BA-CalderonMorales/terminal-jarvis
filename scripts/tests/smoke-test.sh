@@ -5,7 +5,13 @@
 # Validates core functionality and NPM package integrity to prevent regressions
 # Source logger
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-# shellcheck source=../logger/logger.sh
+# sh    log_info_if_enabled "Validating packages: $AMP_PACKAGE, $CLAUDE_PACKAGE, $GEMINI_PACKAGE, $QWEN_PACKAGE, $OPENCODE_PACKAGE, $LLXPRT_PACKAGE, $CODEX_PACKAGE, $CRUSH_PACKAGE"
+    
+    run_test "Amp package exists in NPM registry" \
+        "npm view $AMP_PACKAGE version > /dev/null 2>&1"
+    
+    run_test "Claude package exists in NPM registry" \
+        "npm view $CLAUDE_PACKAGE version > /dev/null 2>&1"heck source=../logger/logger.sh
 # shellcheck disable=SC1091
 source "$SCRIPT_DIR/../logger/logger.sh"
 
@@ -233,6 +239,7 @@ else
     log_info_if_enabled "NPM version: $(npm --version)"
     
     # Extract NPM package names from modular configuration system
+    AMP_PACKAGE=$(grep 'install.*-g' config/tools/amp.toml | sed 's/.*"\([^"]*\)".*/\1/')
     CLAUDE_PACKAGE=$(grep 'install.*-g' config/tools/claude.toml | sed 's/.*"\([^"]*\)".*/\1/')
     GEMINI_PACKAGE=$(grep 'install.*-g' config/tools/gemini.toml | sed 's/.*"\([^"]*\)".*/\1/')
     QWEN_PACKAGE=$(grep 'install.*-g' config/tools/qwen.toml | sed 's/.*"\([^"]*\)".*/\1/')
@@ -241,7 +248,7 @@ else
     CODEX_PACKAGE=$(grep 'install.*-g' config/tools/codex.toml | sed 's/.*"\([^"]*\)".*/\1/')
     CRUSH_PACKAGE=$(grep 'install.*-g' config/tools/crush.toml | sed 's/.*"\([^"]*\)".*/\1/')
     
-    log_info_if_enabled "Validating packages: $CLAUDE_PACKAGE, $GEMINI_PACKAGE, $QWEN_PACKAGE, $OPENCODE_PACKAGE, $LLXPRT_PACKAGE, $CODEX_PACKAGE, $CRUSH_PACKAGE"
+    log_info_if_enabled "Validating packages: $AMP_PACKAGE, $CLAUDE_PACKAGE, $GEMINI_PACKAGE, $QWEN_PACKAGE, $OPENCODE_PACKAGE, $LLXPRT_PACKAGE, $CODEX_PACKAGE, $CRUSH_PACKAGE"
     
     run_test "Claude package exists in NPM registry" \
         "npm view $CLAUDE_PACKAGE version > /dev/null 2>&1"
@@ -264,6 +271,9 @@ else
     run_test "Crush package exists in NPM registry" \
         "npm view $CRUSH_PACKAGE version > /dev/null 2>&1"
     
+    run_test "Amp package provides 'amp' binary" \
+        "npm view $AMP_PACKAGE bin | grep -q 'amp'"
+    
     run_test "Claude package provides 'claude' binary" \
         "npm view $CLAUDE_PACKAGE bin | grep -q 'claude'"
     
@@ -280,10 +290,14 @@ else
         "npm view $CRUSH_PACKAGE bin | grep -q 'crush'"
     
     # Validate configuration consistency across files
+    CONFIG_AMP=$(grep 'install.*-g' config/tools/amp.toml | sed 's/.*"\([^"]*\)".*/\1/')
     CONFIG_CLAUDE=$(grep 'install.*-g' config/tools/claude.toml | sed 's/.*"\([^"]*\)".*/\1/')
     CONFIG_GEMINI=$(grep 'install.*-g' config/tools/gemini.toml | sed 's/.*"\([^"]*\)".*/\1/')
     CONFIG_LLXPRT=$(grep 'install.*-g' config/tools/llxprt.toml | sed 's/.*"\([^"]*\)".*/\1/')
     CONFIG_CRUSH=$(grep 'install.*-g' config/tools/crush.toml | sed 's/.*"\([^"]*\)".*/\1/')
+    
+    run_test "Amp package consistent between installation_arguments.rs and config/" \
+        "[ '$AMP_PACKAGE' = '$CONFIG_AMP' ]"
     
     run_test "Claude package consistent between installation_arguments.rs and config/" \
         "[ '$CLAUDE_PACKAGE' = '$CONFIG_CLAUDE' ]"
@@ -298,6 +312,9 @@ else
         "[ '$CRUSH_PACKAGE' = '$CONFIG_CRUSH' ]"
     
     # Validate package installation compatibility (dry run)
+    run_test "Amp package can be installed (dry run)" \
+        "npm install -g $AMP_PACKAGE --dry-run > /dev/null 2>&1"
+    
     run_test "Claude package can be installed (dry run)" \
         "npm install -g $CLAUDE_PACKAGE --dry-run > /dev/null 2>&1"
     
