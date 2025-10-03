@@ -46,6 +46,8 @@ indicatif = "0.18.0"
 signal-hook = "0.3"
 libc = { version = "0.2", optional = false }
 slab = "0.4.11"
+crossterm = "0.28"
+unicode-width = "0.2"
 
 [dev-dependencies]
 tokio-test = "0.4"

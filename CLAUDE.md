@@ -1,5 +1,15 @@
 # Claude AI Assistant Instructions for Terminal Jarvis
 
+## CRITICAL: NO EMOJIS POLICY - READ FIRST
+
+**NEVER use emojis in any output, code, comments, documentation, commit messages, or communication.**
+
+Use text-based indicators instead: `[INSTALLED]`, `[SUCCESS]`, `[ERROR]`, `[WARNING]`, etc.
+
+See `.claude/NO_EMOJIS_POLICY.md` for complete details.
+
+---
+
 ## SINGLE SOURCE OF TRUTH: AGENTS.md
 
 **CRITICAL**: This file is a lightweight reference pointer. ALL detailed instructions, coding standards, deployment procedures, and development guidelines are in:
