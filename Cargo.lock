@@ -1500,6 +1500,7 @@ dependencies = [
  "anyhow",
  "clap",
  "clap_complete",
+ "crossterm",
  "dirs",
  "futures",
  "indicatif",
@@ -1516,6 +1517,7 @@ dependencies = [
  "tokio",
  "tokio-test",
  "toml",
+ "unicode-width 0.2.1",
 ]
 
 [[package]]
