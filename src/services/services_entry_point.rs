@@ -72,6 +72,7 @@ impl PackageService {
         NpmOperationsManager::get_npm_dist_tag_info().await
     }
 
+    #[allow(dead_code)]
     pub async fn get_cached_npm_dist_tag_info(
         config_manager: &ConfigManager,
     ) -> Result<Option<String>> {

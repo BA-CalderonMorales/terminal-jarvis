@@ -26,6 +26,11 @@
     "format:fix": "biome format --write src/",
     "check": "biome check src/",
     "check:fix": "biome check --write src/",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:ui": "vitest --ui",
+    "test:coverage": "vitest run --coverage",
+    "test:e2e": "npm run build-rust && vitest run",
     "build": "npm run copy-configs && npm run sync-readme-npm",
     "prepack": "npm run build",
     "prepublishOnly": "npm run build",
@@ -53,7 +58,11 @@
   "devDependencies": {
     "@biomejs/biome": "^2.1.3",
     "@types/node": "^20.0.0",
-    "typescript": "^5.9.2"
+    "@vitest/ui": "^3.2.4",
+    "cli-testing-library": "^3.0.1",
+    "string-width": "^5.1.2",
+    "typescript": "^5.9.2",
+    "vitest": "^3.2.4"
   },
   "engines": {
     "node": ">=16.0.0"
