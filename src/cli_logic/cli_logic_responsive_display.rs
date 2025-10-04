@@ -139,6 +139,7 @@ impl ResponsiveDisplay {
     }
 
     /// Print logo - clean text-based design with responsive sizing
+    #[allow(dead_code)]
     pub fn print_logo(&self, theme: &Theme) {
         // Wide terminal (80+ chars): Full branding with spacing
         if self.config.content_width >= 80 {
@@ -189,7 +190,7 @@ impl Default for ResponsiveDisplay {
 }
 
 /// Strip ANSI escape codes for accurate length measurement
-fn strip_ansi_codes(text: &str) -> String {
+pub(crate) fn strip_ansi_codes(text: &str) -> String {
     let mut result = String::new();
     let mut in_escape = false;
 
@@ -209,7 +210,7 @@ fn strip_ansi_codes(text: &str) -> String {
 }
 
 /// Truncate text while preserving ANSI escape codes
-fn truncate_preserving_ansi(text: &str, max_visible_len: usize) -> String {
+pub(crate) fn truncate_preserving_ansi(text: &str, max_visible_len: usize) -> String {
     let mut result = String::new();
     let mut visible_count = 0;
     let mut in_escape = false;

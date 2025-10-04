@@ -308,6 +308,102 @@ git status && git log -1 --name-only
 
 **AI assistant code generation strength**: Use AI assistants for implementing well-defined features, creating test suites, generating documentation that matches actual code behavior, and domain-based module extraction.
 
+### Proactive Specialized Agent Usage (MANDATORY)
+
+**CRITICAL REQUIREMENT**: AI assistants MUST proactively leverage specialized agents without waiting to be asked. This is mandatory behavior, not optional.
+
+**When to Pull in Specialized Agents Automatically**:
+
+- **Documentation work** → Immediately invoke @documentation-specialist
+  - Writing README files, API docs, user guides
+  - Updating CHANGELOG.md entries
+  - Creating technical specifications or architecture docs
+  - Any content that requires clear, professional technical writing
+
+- **Testing and QA** → Immediately invoke @qa-automation-engineer or @test-automation-expert
+  - Writing test suites (unit, integration, end-to-end)
+  - Setting up test infrastructure
+  - Creating test fixtures or mock data
+  - Implementing test-driven bugfixes (mandatory for all bugs)
+
+- **Code review** → Immediately invoke @code-reviewer
+  - Reviewing pull requests or commits
+  - Checking code quality before deployment
+  - Validating adherence to project standards
+  - Ensuring clippy/fmt compliance
+
+- **Security concerns** → Immediately invoke @security-specialist
+  - Reviewing authentication/authorization code
+  - Handling sensitive data or credentials
+  - Implementing security best practices
+  - API key management or encryption
+
+- **Infrastructure/DevOps** → Immediately invoke @infrastructure-expert or @devops-engineer
+  - CI/CD pipeline modifications
+  - Deployment script changes
+  - Docker/containerization work
+  - Build system configurations
+
+- **Architecture decisions** → Immediately invoke @software-architect or @api-architect
+  - Designing new system components
+  - Refactoring large modules
+  - Making structural decisions
+  - Planning domain-based separations
+
+- **Performance optimization** → Immediately invoke @performance-specialist
+  - Profiling code bottlenecks
+  - Optimizing algorithms or queries
+  - Reducing memory footprint
+  - Improving compilation times
+
+- **Frontend/UI work** → Immediately invoke @frontend-specialist or @ui-ux-designer
+  - CLI interface improvements
+  - Interactive menu design
+  - User experience enhancements
+  - Terminal output formatting
+
+**How to Leverage Agents**:
+
+```
+Example: User asks "Can you update the README with the new features?"
+
+CORRECT Response:
+"I'll bring in @documentation-specialist to ensure professional technical writing.
+
+@documentation-specialist, please help update the README with:
+- New Homebrew installation method
+- Updated feature list
+- Current version information
+"
+
+INCORRECT Response:
+[Starts editing README without involving documentation-specialist]
+```
+
+**Agent Attribution in Commits** (See CRITICAL section at top):
+
+When specialized agents contribute, they MUST be listed in commit messages:
+
+```bash
+# Single agent
+docs(readme): update installation methods - @documentation-specialist
+
+# Multiple agents
+feat(auth): implement OAuth flow - @security-specialist @software-engineering-expert
+
+# Complex feature
+refactor(cli): extract domain modules - @software-architect @code-reviewer @documentation-specialist
+```
+
+**Why This Matters**:
+
+- **Quality**: Specialized agents bring domain expertise that general assistants may lack
+- **Efficiency**: Right expert for the task means faster, better results
+- **Consistency**: Agents ensure adherence to project-specific standards
+- **Attribution**: Clear commit history shows which expertise contributed to changes
+
+**ABSOLUTE RULE**: Don't wait for permission. If the task matches an agent's expertise, invoke them immediately. This is a quality requirement, not a suggestion.
+
 ### AI-Optimized Quality Checks
 
 ```bash
