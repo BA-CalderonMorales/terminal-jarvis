@@ -2,8 +2,106 @@
 
 All notable changes to this project will be documented in this file.
 
+## [Unreleased]
+
+### Added - Benchmarks Framework (Phase 1)
+
+#### Core Infrastructure
+- **BenchmarkTestEnvironment**: Isolated test execution environments with automatic cleanup
+  - Temporary workspace creation with src/ directory structure
+  - Environment variable isolation for benchmark execution
+  - Automatic cleanup on drop (similar to AuthTestEnvironment pattern)
+  - Location: `src/evals/benchmarks/test_environment.rs`
+
+#### Scenario Management
+- **TOML-based Scenario Definitions**: Community-driven benchmark scenarios
+  - BenchmarkScenario, ScenarioMetadata, PromptConfig, ValidationConfig, ScoringConfig
+  - Example: `config/benchmarks/scenarios/code-completion/basic-001.toml`
+  - Location: `src/evals/benchmarks/scenario.rs`
+
+- **BenchmarkRegistry**: Centralized scenario management
+  - Recursive directory loading of .toml scenario files
+  - Query scenarios by ID, category, or difficulty
+  - Location: `src/evals/benchmarks/registry.rs`
+
+#### Results & JSON Bridge
+- **JSON-Exportable Results**: Language-agnostic result exchange
+  - BenchmarkResult with execution metadata and validation details
+  - Pretty-printed JSON export with automatic directory creation
+  - Filename format: `{benchmark_id}_{tool_name}_{timestamp}.json`
+  - Location: `src/evals/benchmarks/results.rs`
+
+- **TypeScript Validation Layer**: Dual testing approach
+  - Zod schemas matching Rust structs exactly
+  - loadBenchmarkResult() and validateBenchmarkResult() helpers
+  - 24 comprehensive validation tests (all passing)
+  - Location: `npm/terminal-jarvis/tests/helpers/benchmark-helpers.ts`
+
+#### Testing
+- **16 Rust Integration Tests**: TDD-driven implementation
+  - BenchmarkTestEnvironment: 4 tests (workspace, cleanup, env vars)
+  - Scenario loading: 5 tests (TOML parsing, registry, validation)
+  - JSON bridge: 7 tests (serialization, export, file creation)
+  - Location: `tests/benchmarks/`
+
+- **24 TypeScript E2E Tests**: Real process validation
+  - Schema validation, file loading, criteria matching
+  - Mock data generation and error handling
+  - Location: `npm/terminal-jarvis/tests/benchmarks/json-bridge.test.ts`
+
+#### Directory Structure
+- Created `config/benchmarks/scenarios/` for community scenarios
+- Created `config/benchmarks/validators/` for validation scripts
+- Created `config/benchmarks/suites/` for benchmark collections
+
+### Technical Details
+- Added `tempfile` dependency for isolated test environments
+- Leveraged existing `cli-testing-library` for E2E validation
+- Used `zod` for TypeScript schema validation
+- All implementations follow TDD principles (test first, then implement)
+- NO EMOJIS policy enforced (text-based indicators only)
+
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+## [0.0.70] - 2025-10-04
+
+### Added
+- **Evals & Comparisons Framework v2.0** — Metrics-based evaluation system for AI coding tools
+  - **Real-world verifiable metrics** instead of arbitrary scores:
+    - GitHub: Stars, forks, contributors, commit frequency, last commit date
+    - Package stats: Weekly downloads, total downloads, publish dates (NPM, PyPI, Crates.io)
+    - Community: Discord members, Twitter followers, Reddit subscribers
+    - Documentation: Section availability, last update date, multilingual support
+    - Platform support: OS matrix (macOS, Linux, Windows), architectures (x86_64, ARM64)
+    - Team transparency: Organization info, team size, public members, backing/funding
+    - Support metrics: Response times, issue close rates, support channels, SLAs
+  - **Decision-making framework** for researchers, companies, and hobbyists
+  - Multi-format export support (JSON, CSV, Markdown, HTML)
+  - Interactive CLI menu for viewing, comparing, and exporting evaluations
+  - Sample evaluation with real metrics for Claude (GitHub, NPM, Discord data)
+  - Future-ready scaffold for automated data fetching via APIs
+- New "Evals & Comparisons" menu option in main Terminal Jarvis interface
+- Comprehensive documentation: `docs/EVALS_METRICS_GUIDE.md`
+- Comprehensive test suite with 11 integration tests for Evals framework
+
+### Enhanced
+- Configuration system extended to support modular evaluation data in `config/evals/`
+- Domain-based architecture: new `src/evals/` module with focused submodules
+  - `evals_entry_point.rs` — Main EvalManager API
+  - `evals_criteria.rs` — Standard and custom criteria definitions
+  - `evals_data.rs` — Core data structures with metrics support
+  - `evals_export.rs` — Multi-format export engine
+  - `evals_scoring.rs` — Comparison, ranking, and statistical analysis
+  - `evals_metrics.rs` — Real-world metrics data structures and fetching scaffold
+- About screen now displays Terminal Jarvis version dynamically from Cargo.toml
+
+### Technical
+- Evaluation data stored as TOML files for easy community contributions
+- Metrics-first evaluation schema prioritizing objective, verifiable data
+- Health score calculation based on objective indicators (repo active, community engaged, documented)
+- Scaffold for future automated data fetching: GitHub API, NPM API, documentation crawling
+- Backward compatibility with traditional score-based evaluations
 
 ## [0.0.69] - 2025-09-27
 

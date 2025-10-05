@@ -9,7 +9,7 @@ pub fn display_welcome_screen() {
     let theme = theme_global_config::current_theme();
     let version = env!("CARGO_PKG_VERSION");
 
-        // Get current working directory
+    // Get current working directory
     let cwd = env::current_dir()
         .map(|p| p.display().to_string())
         .unwrap_or_else(|_| String::from("unknown"));
@@ -20,8 +20,14 @@ pub fn display_welcome_screen() {
     println!("{}", theme.primary("   ┌─────┐  Terminal Jarvis"));
     println!("{}", theme.primary(&format!("   │ T.J │  v{}", version)));
     println!("{}", theme.primary(&format!("   │ ═ ═ │  {}", cwd)));
-    println!("{}", theme.secondary("   │     │  ---------------------------------"));
-    println!("{}", theme.accent("   └─────┘  Tip: Check Important Links for docs"));
+    println!(
+        "{}",
+        theme.secondary("   │     │  ---------------------------------")
+    );
+    println!(
+        "{}",
+        theme.accent("   └─────┘  Tip: Check Important Links for docs")
+    );
     println!();
 }
 

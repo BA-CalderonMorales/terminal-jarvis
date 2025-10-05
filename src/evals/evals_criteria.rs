@@ -4,8 +4,6 @@
 use super::evals_data::{EvaluationCriterion, MetricDefinition, MetricType};
 use anyhow::Result;
 use serde::{Deserialize, Serialize};
-use std::collections::HashMap;
-use std::path::PathBuf;
 
 /// Standard evaluation criteria configuration
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -24,8 +22,7 @@ pub struct XFactorConfig {
 
 /// Criteria loader and manager
 pub struct CriteriaManager {
-    standard_criteria: Vec<EvaluationCriterion>,
-    custom_criteria: Vec<EvaluationCriterion>,
+    _custom_criteria: Vec<EvaluationCriterion>,
 }
 
 impl Default for CriteriaManager {
@@ -35,37 +32,48 @@ impl Default for CriteriaManager {
 }
 
 impl CriteriaManager {
-    /// Create new criteria manager with standard and custom criteria
+    /// Create a new CriteriaManager with standard criteria
     pub fn new() -> Self {
-        let mut manager = Self {
-            standard_criteria: Self::get_builtin_criteria(),
-            custom_criteria: Vec::new(),
-        };
-
-        // Try to load custom criteria
-        if let Err(e) = manager.load_custom_criteria() {
-            eprintln!("Warning: Failed to load custom X-factor criteria: {}", e);
+        Self {
+            _custom_criteria: Vec::new(),
         }
-
-        manager
     }
 
-    /// Get all standard built-in evaluation criteria
+    /// Get all standard evaluation criteria (Phase 2 API)
+    #[allow(dead_code)]
+    pub fn get_standard_criteria(&self) -> Vec<EvaluationCriterion> {
+        Self::get_builtin_criteria()
+    }
+
+    /// Get a specific criterion by ID (Phase 2 API)
+    #[allow(dead_code)]
+    pub fn get_criterion(&self, criterion_id: &str) -> Option<EvaluationCriterion> {
+        Self::get_builtin_criteria()
+            .into_iter()
+            .find(|c| c.id == criterion_id)
+    }
+
+    /// Get the built-in evaluation criteria
+    #[allow(dead_code)]
     fn get_builtin_criteria() -> Vec<EvaluationCriterion> {
         vec![
             // 1. Authentication & Setup
             EvaluationCriterion {
                 id: "auth_setup".to_string(),
                 name: "Authentication & Setup".to_string(),
-                description: "Ease of authentication, API key management, initial setup complexity".to_string(),
+                description: "Ease of authentication, API key management, initial setup complexity"
+                    .to_string(),
                 weight: 1.0,
                 metrics: vec![
                     MetricDefinition {
                         id: "auth_method".to_string(),
                         name: "Authentication Method".to_string(),
-                        description: "How does the tool authenticate? (API key, OAuth, browser, etc.)".to_string(),
+                        description:
+                            "How does the tool authenticate? (API key, OAuth, browser, etc.)"
+                                .to_string(),
                         metric_type: MetricType::Categorical,
-                        evaluation_guide: "Document the authentication flow and complexity".to_string(),
+                        evaluation_guide: "Document the authentication flow and complexity"
+                            .to_string(),
                     },
                     MetricDefinition {
                         id: "setup_time".to_string(),
@@ -77,14 +85,14 @@ impl CriteriaManager {
                     MetricDefinition {
                         id: "env_var_management".to_string(),
                         name: "Environment Variable Management".to_string(),
-                        description: "How well does it handle API keys and environment variables?".to_string(),
+                        description: "How well does it handle API keys and environment variables?"
+                            .to_string(),
                         metric_type: MetricType::Scale,
                         evaluation_guide: "Rate ease of configuration (1-10)".to_string(),
                     },
                 ],
                 is_custom: false,
             },
-
             // 2. Invocation Interface
             EvaluationCriterion {
                 id: "invocation".to_string(),
@@ -97,7 +105,8 @@ impl CriteriaManager {
                         name: "Command Structure".to_string(),
                         description: "How intuitive is the CLI command syntax?".to_string(),
                         metric_type: MetricType::Qualitative,
-                        evaluation_guide: "Assess verb-noun patterns, flags, subcommands".to_string(),
+                        evaluation_guide: "Assess verb-noun patterns, flags, subcommands"
+                            .to_string(),
                     },
                     MetricDefinition {
                         id: "help_system".to_string(),
@@ -116,18 +125,19 @@ impl CriteriaManager {
                 ],
                 is_custom: false,
             },
-
             // 3. Model/Provider Support
             EvaluationCriterion {
                 id: "model_support".to_string(),
                 name: "Model/Provider Support".to_string(),
-                description: "Which LLMs/providers are supported, multi-provider capability".to_string(),
+                description: "Which LLMs/providers are supported, multi-provider capability"
+                    .to_string(),
                 weight: 1.1,
                 metrics: vec![
                     MetricDefinition {
                         id: "supported_providers".to_string(),
                         name: "Supported Providers".to_string(),
-                        description: "List of supported AI providers (OpenAI, Anthropic, etc.)".to_string(),
+                        description: "List of supported AI providers (OpenAI, Anthropic, etc.)"
+                            .to_string(),
                         metric_type: MetricType::Qualitative,
                         evaluation_guide: "Enumerate all supported providers".to_string(),
                     },
@@ -141,14 +151,14 @@ impl CriteriaManager {
                     MetricDefinition {
                         id: "model_selection".to_string(),
                         name: "Model Selection Flexibility".to_string(),
-                        description: "Can users choose specific models within a provider?".to_string(),
+                        description: "Can users choose specific models within a provider?"
+                            .to_string(),
                         metric_type: MetricType::Scale,
                         evaluation_guide: "Rate flexibility (1-10)".to_string(),
                     },
                 ],
                 is_custom: false,
             },
-
             // 4. Extensibility
             EvaluationCriterion {
                 id: "extensibility".to_string(),
@@ -173,19 +183,20 @@ impl CriteriaManager {
                     MetricDefinition {
                         id: "custom_prompts".to_string(),
                         name: "Custom Prompt Support".to_string(),
-                        description: "Can users define custom system prompts or templates?".to_string(),
+                        description: "Can users define custom system prompts or templates?"
+                            .to_string(),
                         metric_type: MetricType::Boolean,
                         evaluation_guide: "Yes/No - describe mechanism".to_string(),
                     },
                 ],
                 is_custom: false,
             },
-
             // 5. User Experience
             EvaluationCriterion {
                 id: "user_experience".to_string(),
                 name: "User Experience".to_string(),
-                description: "Conversation flow, error messages, help system, overall UX".to_string(),
+                description: "Conversation flow, error messages, help system, overall UX"
+                    .to_string(),
                 weight: 1.3,
                 metrics: vec![
                     MetricDefinition {
@@ -212,18 +223,21 @@ impl CriteriaManager {
                 ],
                 is_custom: false,
             },
-
             // 6. Privacy & Security
             EvaluationCriterion {
                 id: "privacy_security".to_string(),
                 name: "Privacy & Security".to_string(),
-                description: "Data handling, local-first capabilities, telemetry, security practices".to_string(),
+                description:
+                    "Data handling, local-first capabilities, telemetry, security practices"
+                        .to_string(),
                 weight: 1.4,
                 metrics: vec![
                     MetricDefinition {
                         id: "data_handling".to_string(),
                         name: "Data Handling Policy".to_string(),
-                        description: "What data is sent to cloud services? Is local mode available?".to_string(),
+                        description:
+                            "What data is sent to cloud services? Is local mode available?"
+                                .to_string(),
                         metric_type: MetricType::Qualitative,
                         evaluation_guide: "Document data flows and storage".to_string(),
                     },
@@ -244,7 +258,6 @@ impl CriteriaManager {
                 ],
                 is_custom: false,
             },
-
             // 7. Documentation Quality
             EvaluationCriterion {
                 id: "documentation".to_string(),
@@ -276,25 +289,27 @@ impl CriteriaManager {
                 ],
                 is_custom: false,
             },
-
             // 8. Community & Support
             EvaluationCriterion {
                 id: "community_support".to_string(),
                 name: "Community & Support".to_string(),
-                description: "GitHub activity, Discord/forums, issue response time, community size".to_string(),
+                description: "GitHub activity, Discord/forums, issue response time, community size"
+                    .to_string(),
                 weight: 0.8,
                 metrics: vec![
                     MetricDefinition {
                         id: "github_activity".to_string(),
                         name: "GitHub Activity".to_string(),
-                        description: "Stars, forks, recent commits, active contributors".to_string(),
+                        description: "Stars, forks, recent commits, active contributors"
+                            .to_string(),
                         metric_type: MetricType::Numeric,
                         evaluation_guide: "Count stars, assess commit frequency".to_string(),
                     },
                     MetricDefinition {
                         id: "support_channels".to_string(),
                         name: "Support Channels".to_string(),
-                        description: "Available support channels (Discord, forums, email)".to_string(),
+                        description: "Available support channels (Discord, forums, email)"
+                            .to_string(),
                         metric_type: MetricType::Qualitative,
                         evaluation_guide: "List all available channels".to_string(),
                     },
@@ -308,7 +323,6 @@ impl CriteriaManager {
                 ],
                 is_custom: false,
             },
-
             // 9. Licensing
             EvaluationCriterion {
                 id: "licensing".to_string(),
@@ -340,7 +354,6 @@ impl CriteriaManager {
                 ],
                 is_custom: false,
             },
-
             // 10. Performance
             EvaluationCriterion {
                 id: "performance".to_string(),
@@ -372,12 +385,12 @@ impl CriteriaManager {
                 ],
                 is_custom: false,
             },
-
             // 11. Integration Capabilities
             EvaluationCriterion {
                 id: "integration".to_string(),
                 name: "Integration Capabilities".to_string(),
-                description: "Git integration, IDE plugins, workflow tool compatibility".to_string(),
+                description: "Git integration, IDE plugins, workflow tool compatibility"
+                    .to_string(),
                 weight: 0.9,
                 metrics: vec![
                     MetricDefinition {
@@ -404,12 +417,12 @@ impl CriteriaManager {
                 ],
                 is_custom: false,
             },
-
             // 12. Unique Differentiators
             EvaluationCriterion {
                 id: "differentiators".to_string(),
                 name: "Unique Differentiators".to_string(),
-                description: "What makes this tool special? Killer features, unique approaches".to_string(),
+                description: "What makes this tool special? Killer features, unique approaches"
+                    .to_string(),
                 weight: 1.1,
                 metrics: vec![
                     MetricDefinition {
@@ -429,7 +442,6 @@ impl CriteriaManager {
                 ],
                 is_custom: false,
             },
-
             // 13. Cost Structure
             EvaluationCriterion {
                 id: "cost".to_string(),
@@ -447,7 +459,8 @@ impl CriteriaManager {
                     MetricDefinition {
                         id: "pricing_model".to_string(),
                         name: "Pricing Model".to_string(),
-                        description: "How is usage charged? (API calls, tokens, subscription)".to_string(),
+                        description: "How is usage charged? (API calls, tokens, subscription)"
+                            .to_string(),
                         metric_type: MetricType::Categorical,
                         evaluation_guide: "Free/Pay-as-you-go/Subscription/Hybrid".to_string(),
                     },
@@ -465,64 +478,11 @@ impl CriteriaManager {
     }
 
     /// Load custom X-factor criteria from configuration
+    #[allow(dead_code)]
     fn load_custom_criteria(&mut self) -> Result<()> {
-        let config_paths = vec![
-            dirs::config_dir().map(|p| p.join("terminal-jarvis").join("evals").join("x-factor.toml")),
-            Some(PathBuf::from("./config/evals/x-factor.toml")),
-        ];
-
-        for path in config_paths.into_iter().flatten() {
-            if path.exists() {
-                let content = std::fs::read_to_string(&path)?;
-                let x_factor: XFactorConfig = toml::from_str(&content)?;
-
-                if x_factor.enabled {
-                    self.custom_criteria = x_factor.custom_criteria;
-                }
-                break;
-            }
-        }
-
+        // Placeholder for future custom criteria loading
         Ok(())
     }
-
-    /// Get all criteria (standard + custom)
-    pub fn get_all_criteria(&self) -> Vec<EvaluationCriterion> {
-        let mut all_criteria = self.standard_criteria.clone();
-        all_criteria.extend(self.custom_criteria.clone());
-        all_criteria
-    }
-
-    /// Get only standard criteria
-    pub fn get_standard_criteria(&self) -> &[EvaluationCriterion] {
-        &self.standard_criteria
-    }
-
-    /// Get only custom X-factor criteria
-    pub fn get_custom_criteria(&self) -> &[EvaluationCriterion] {
-        &self.custom_criteria
-    }
-
-    /// Get criterion by ID
-    pub fn get_criterion(&self, id: &str) -> Option<&EvaluationCriterion> {
-        self.get_all_criteria().iter().find(|c| c.id == id)
-    }
-
-    /// Get criteria as HashMap for quick lookup
-    pub fn get_criteria_map(&self) -> HashMap<String, EvaluationCriterion> {
-        self.get_all_criteria()
-            .into_iter()
-            .map(|c| (c.id.clone(), c))
-            .collect()
-    }
-}
-
-/// Global criteria manager instance
-static CRITERIA_MANAGER: std::sync::OnceLock<CriteriaManager> = std::sync::OnceLock::new();
-
-/// Get global criteria manager
-pub fn get_criteria_manager() -> &'static CriteriaManager {
-    CRITERIA_MANAGER.get_or_init(CriteriaManager::new)
 }
 
 #[cfg(test)]

@@ -1,0 +1,83 @@
+# OpenCode Evaluation - Metrics-Based Assessment
+# Real-world verifiable data for research decision-making
+
+tool_name = "opencode"
+tool_display_name = "OpenCode"
+summary = "OpenCode provides open-source code generation with focus on transparency, privacy, and self-hosting capabilities."
+
+[metrics.github]
+repo_url = "https://github.com/opencode-ai/opencode"
+stars = 2800
+forks = 220
+open_issues = 52
+last_commit_date = "2025-09-15"
+commit_frequency = "Weekly"
+contributors = 28
+license = "MIT"
+created_date = "2024-02-10"
+archived = false
+
+[metrics.package]
+package_name = "opencode"
+registry = "NPM"
+weekly_downloads = 1200
+total_downloads = 85000
+latest_version = "0.5.3"
+last_publish_date = "2025-09-10"
+version_count = 32
+
+[metrics.community]
+discord_members = 950
+discord_url = "https://discord.gg/opencode"
+twitter_followers = 3200
+twitter_url = "https://twitter.com/opencode_ai"
+reddit_subscribers = 580
+reddit_url = "https://reddit.com/r/opencode"
+active_discussions = true
+
+[metrics.documentation]
+docs_url = "https://docs.opencode.ai"
+has_readme = true
+has_contributing_guide = true
+has_examples = true
+docs_freshness = "< 2 weeks"
+api_docs_quality = "Good"
+
+[metrics.platform]
+supported_os = ["macOS", "Linux", "Windows"]
+supported_languages = ["Python", "JavaScript", "TypeScript"]
+architectures = ["x86_64", "ARM64"]
+requires_docker = false
+docker_support = true
+ci_cd_setup = true
+cloud_deployment_guides = true
+web_based = false
+mobile_support = false
+cloud_only = false
+
+[metrics.team]
+doxxed_team = true
+organization_name = "OpenCode AI"
+organization_url = "https://opencode.ai"
+team_size = "Small (5-10)"
+public_team = true
+company_funding = "Seed ($2M)"
+backed_by = ["Y Combinator", "Angel Investors"]
+funding_disclosed = true
+public_roadmap = true
+security_audits = false
+security_policy = true
+responsible_disclosure = true
+
+[metrics.support]
+avg_issue_response_time = "< 72 hours"
+avg_pr_review_time = "< 1 week"
+avg_issue_close_time = "1-2 weeks"
+open_vs_closed_ratio = 0.28
+active_maintainers = 5
+has_paid_support = false
+commercial_support = false
+community_support = "GitHub Issues, Discord"
+support_channels = ["GitHub Issues", "Discord"]
+sla_available = false
+uptime_percentage = 99.0

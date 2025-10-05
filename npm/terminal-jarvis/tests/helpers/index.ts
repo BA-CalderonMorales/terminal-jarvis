@@ -20,6 +20,11 @@
  * - Simulate responsive behavior
  * - Standard breakpoint testing
  *
+ * ### Benchmark Helpers (`benchmark-helpers.ts`)
+ * - Validate Rust-exported benchmark results
+ * - Zod schema validation for JSON bridge
+ * - Mock data generation and criteria matching
+ *
  * @packageDocumentation
  */
 
@@ -54,3 +59,20 @@ export {
   testAcrossWidths,
   type WidthRangeOptions,
 } from "./width-simulation";
+
+// Re-export benchmark helpers
+export {
+  BenchmarkResultSchema,
+  ValidationResultSchema,
+  TestCaseResultSchema,
+  type BenchmarkResult,
+  type ValidationResult as BenchmarkValidationResult,
+  type TestCaseResult,
+  type BenchmarkValidation,
+  type BenchmarkValidationError,
+  type BenchmarkValidationSuccess,
+  loadBenchmarkResult,
+  validateBenchmarkResult,
+  createMockBenchmarkResult,
+  matchesCriteria,
+} from "./benchmark-helpers";

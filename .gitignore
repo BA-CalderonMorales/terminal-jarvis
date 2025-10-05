@@ -187,3 +187,4 @@ login
 
 !npm/terminal-jarvis/config/
 !npm/terminal-jarvis/config/**
+!config/evals/goose-metrics.toml
