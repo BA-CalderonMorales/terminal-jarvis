@@ -636,14 +636,8 @@ mod tests {
 
     #[test]
     fn test_export_format_from_str() {
-        assert_eq!(
-            ExportFormat::parse_format("json"),
-            Some(ExportFormat::Json)
-        );
-        assert_eq!(
-            ExportFormat::parse_format("CSV"),
-            Some(ExportFormat::Csv)
-        );
+        assert_eq!(ExportFormat::parse_format("json"), Some(ExportFormat::Json));
+        assert_eq!(ExportFormat::parse_format("CSV"), Some(ExportFormat::Csv));
         assert_eq!(
             ExportFormat::parse_format("markdown"),
             Some(ExportFormat::Markdown)
@@ -652,10 +646,7 @@ mod tests {
             ExportFormat::parse_format("md"),
             Some(ExportFormat::Markdown)
         );
-        assert_eq!(
-            ExportFormat::parse_format("html"),
-            Some(ExportFormat::Html)
-        );
+        assert_eq!(ExportFormat::parse_format("html"), Some(ExportFormat::Html));
         assert_eq!(ExportFormat::parse_format("invalid"), None);
     }
 

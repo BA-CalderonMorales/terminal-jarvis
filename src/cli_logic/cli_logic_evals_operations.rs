@@ -249,21 +249,12 @@ fn compare_tools_interactive() -> Result<()> {
             let rank_display = format!("{}.", entry.rank);
             let score_display = format!("{:.2}/10", entry.score);
 
-            let score_colored = if entry.score >= 9.0 {
-                score_display
-            } else if entry.score >= 7.0 {
-                score_display
-            } else if entry.score >= 5.0 {
-                score_display
-            } else {
-                score_display
-            };
-
+            // Note: Color-coding removed - all scores display the same way
             println!(
                 "    {} {:<20} {} ({})",
                 rank_display,
                 entry.tool_name,
-                score_colored,
+                score_display,
                 entry.rating.to_string()
             );
         }
@@ -323,16 +314,7 @@ fn view_tool_details_interactive() -> Result<()> {
 
     if let Some(score) = evaluation.overall_score {
         let score_str = format!("{:.2}/10", score);
-        let score_colored = if score >= 9.0 {
-            score_str
-        } else if score >= 7.0 {
-            score_str
-        } else if score >= 5.0 {
-            score_str
-        } else {
-            score_str
-        };
-        println!("  Overall Score: {}", score_colored);
+        println!("  Overall Score: {}", score_str);
     }
 
     println!();
@@ -366,7 +348,7 @@ fn view_tool_details_interactive() -> Result<()> {
 
 /// Export evaluations to various formats
 fn export_evaluations_interactive() -> Result<()> {
-    println!("\n{}", "=== EXPORT EVALUATIONS ===");
+    println!("\n=== EXPORT EVALUATIONS ===");
 
     let mut manager = EvalManager::new();
     manager
@@ -391,7 +373,7 @@ fn export_evaluations_interactive() -> Result<()> {
         "3" => ExportFormat::Markdown,
         "4" => ExportFormat::Html,
         _ => {
-            println!("\n  {} Invalid format.", "[!]");
+            println!("\n  [!] Invalid format.");
             return Ok(());
         }
     };
@@ -437,24 +419,24 @@ fn export_evaluations_interactive() -> Result<()> {
             let tool_name = &summary.tools[index - 1];
             let path = manager.export_evaluation(tool_name, format, None)?;
 
-            println!("\n  {} Evaluation exported successfully!", "[DONE]");
+            println!("\n  [DONE] Evaluation exported successfully!");
             println!("  Location: {}", path.display());
         }
         "2" => {
             // Comparison export
             if summary.total_evaluations < 2 {
-                println!("\n  {} At least 2 evaluations needed.", "[!]");
+                println!("\n  [!] At least 2 evaluations needed.");
                 return Ok(());
             }
 
             let tool_names = summary.tools.clone();
             let path = manager.export_comparison(&tool_names, format, None)?;
 
-            println!("\n  {} Comparison exported successfully!", "[DONE]");
+            println!("\n  [DONE] Comparison exported successfully!");
             println!("  Location: {}", path.display());
         }
         _ => {
-            println!("\n  {} Invalid type.", "[!]");
+            println!("\n  [!] Invalid type.");
         }
     }
 
@@ -463,7 +445,7 @@ fn export_evaluations_interactive() -> Result<()> {
 
 /// Show statistics and insights
 fn show_statistics() -> Result<()> {
-    println!("\n{}", "=== STATISTICS & INSIGHTS ===");
+    println!("\n=== STATISTICS & INSIGHTS ===");
 
     let mut manager = EvalManager::new();
     manager
@@ -473,7 +455,7 @@ fn show_statistics() -> Result<()> {
     let stats = manager.calculate_statistics();
 
     if stats.count == 0 {
-        println!("\n  {} No evaluations with scores available.", "[!]");
+        println!("\n  [!] No evaluations with scores available.");
         return Ok(());
     }
 
@@ -490,7 +472,7 @@ fn show_statistics() -> Result<()> {
     let leaders = manager.find_category_leaders();
 
     if !leaders.is_empty() {
-        println!("\n  {}:", "Category Leaders");
+        println!("\n  Category Leaders:");
         println!("  {}", "-".repeat(60));
 
         for (category_id, top_tools) in leaders.iter().take(5) {
@@ -505,13 +487,13 @@ fn show_statistics() -> Result<()> {
     let recommendations = manager.generate_recommendations();
 
     if !recommendations.is_empty() {
-        println!("\n  {}:", "Recommendations");
+        println!("\n  Recommendations:");
         println!("  {}", "-".repeat(60));
 
         for rec in recommendations {
-            println!("\n  {}: {}", "Tool", rec.tool_name);
-            println!("  {}: {}", "Use Case", rec.use_case);
-            println!("  {}: {}", "Reason", rec.reason);
+            println!("\n  Tool: {}", rec.tool_name);
+            println!("  Use Case: {}", rec.use_case);
+            println!("  Reason: {}", rec.reason);
         }
     }
 
@@ -520,7 +502,7 @@ fn show_statistics() -> Result<()> {
 
 /// Show coverage report for integrated tools
 fn show_coverage_report() -> Result<()> {
-    println!("\n{}", "=== COVERAGE REPORT ===");
+    println!("\n=== COVERAGE REPORT ===");
 
     let mut manager = EvalManager::new();
     manager
@@ -548,15 +530,12 @@ fn show_coverage_report() -> Result<()> {
     println!("  Coverage: {:.1}%", coverage.coverage_percentage);
 
     if !coverage.missing_evaluations.is_empty() {
-        println!("\n  {}:", "Missing Evaluations");
+        println!("\n  Missing Evaluations:");
         for tool in &coverage.missing_evaluations {
             println!("    - {}", tool);
         }
     } else {
-        println!(
-            "\n  {} All integrated tools have been evaluated!",
-            "[COMPLETE]"
-        );
+        println!("\n  [COMPLETE] All integrated tools have been evaluated!");
     }
 
     Ok(())
@@ -564,7 +543,7 @@ fn show_coverage_report() -> Result<()> {
 
 /// Validate all evaluations
 fn validate_evaluations() -> Result<()> {
-    println!("\n{}", "=== VALIDATE EVALUATIONS ===");
+    println!("\n=== VALIDATE EVALUATIONS ===");
 
     let mut manager = EvalManager::new();
     manager
@@ -574,7 +553,7 @@ fn validate_evaluations() -> Result<()> {
     let issues = manager.validate_evaluations();
 
     if issues.is_empty() {
-        println!("\n  {} All evaluations are valid!", "[OK]");
+        println!("\n  [OK] All evaluations are valid!");
         return Ok(());
     }
 
@@ -589,15 +568,15 @@ fn validate_evaluations() -> Result<()> {
         let severity_str = match issue.severity {
             IssueSeverity::Error => {
                 errors += 1;
-                format!("[ERROR]")
+                "[ERROR]".to_string()
             }
             IssueSeverity::Warning => {
                 warnings += 1;
-                format!("[WARNING]")
+                "[WARNING]".to_string()
             }
             IssueSeverity::Info => {
                 info += 1;
-                format!("[INFO]")
+                "[INFO]".to_string()
             }
         };
 
@@ -614,14 +593,14 @@ fn validate_evaluations() -> Result<()> {
 
 /// Show information about the Evals framework
 fn show_about() -> Result<()> {
-    println!("\n{}", "=== ABOUT EVALS FRAMEWORK ===");
+    println!("\n=== ABOUT EVALS FRAMEWORK ===");
 
-    println!("\n  {}:", "Overview");
+    println!("\n  Overview:");
     println!("  Terminal Jarvis Evals Framework provides comprehensive, structured");
     println!("  evaluation of AI coding tools across 13 standard criteria plus");
     println!("  customizable X-factor categories.");
 
-    println!("\n  {}:", "Standard Evaluation Criteria");
+    println!("\n  Standard Evaluation Criteria:");
     println!("   1. Authentication & Setup");
     println!("   2. Invocation Interface");
     println!("   3. Model/Provider Support");
@@ -636,22 +615,22 @@ fn show_about() -> Result<()> {
     println!("  12. Unique Differentiators");
     println!("  13. Cost Structure");
 
-    println!("\n  {}:", "Export Formats");
+    println!("\n  Export Formats:");
     println!("  - JSON (structured data for programmatic use)");
     println!("  - CSV (spreadsheet compatibility)");
     println!("  - Markdown (documentation and reports)");
     println!("  - HTML (web-ready comparisons)");
 
-    println!("\n  {}:", "Configuration");
+    println!("\n  Configuration:");
     println!("  - Standard criteria: config/evals/criteria.toml");
     println!("  - Custom X-factor: config/evals/x-factor.toml");
     println!("  - Evaluations: config/evals/evaluations/*.toml");
 
-    println!("\n  {}:", "Version");
+    println!("\n  Version:");
     println!("  Terminal Jarvis v{}", env!("CARGO_PKG_VERSION"));
     println!("  Evals Framework v{}", EVALS_VERSION);
 
-    println!("\n  {}:", "New in v0.0.70");
+    println!("\n  New in v0.0.70:");
     println!("  - Real-world verifiable metrics (GitHub stars, forks, community size)");
     println!("  - Objective decision factors (docs freshness, response times, team transparency)");
     println!("  - Platform support matrix (macOS, Linux, Windows, architectures)");

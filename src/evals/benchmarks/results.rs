@@ -121,10 +121,7 @@ impl BenchmarkResult {
         fs::create_dir_all(output_dir)?;
 
         // Extract timestamp portion for filename (remove special characters)
-        let timestamp_safe = self
-            .execution_timestamp
-            .replace(':', "-")
-            .replace(' ', "_");
+        let timestamp_safe = self.execution_timestamp.replace(':', "-").replace(' ', "_");
 
         // Construct filename: {benchmark_id}_{tool_name}_{timestamp}.json
         let filename = format!(

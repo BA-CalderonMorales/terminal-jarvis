@@ -49,6 +49,8 @@ slab = "0.4.11"
 crossterm = "0.28"
 unicode-width = "0.2"
 tempfile = "3.8"
+regex = "1.10"
+chrono = { version = "0.4.42", features = ["serde"] }
 
 [dev-dependencies]
 tokio-test = "0.4"

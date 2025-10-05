@@ -226,8 +226,11 @@ impl EvalManager {
         let mut issues = Vec::new();
 
         for (tool_name, evaluation) in &self.evaluations {
-            // Check for missing overall score
-            if evaluation.overall_score.is_none() {
+            // Determine if this is a metrics-only evaluation
+            let is_metrics_only = evaluation.metrics.is_some() && evaluation.categories.is_empty();
+
+            // Check for missing overall score (only for traditional evaluations)
+            if evaluation.overall_score.is_none() && !is_metrics_only {
                 issues.push(ValidationIssue {
                     tool_name: tool_name.clone(),
                     severity: IssueSeverity::Warning,
@@ -235,12 +238,12 @@ impl EvalManager {
                 });
             }
 
-            // Check for empty categories
-            if evaluation.categories.is_empty() {
+            // Check for empty categories (only error if no metrics either)
+            if evaluation.categories.is_empty() && evaluation.metrics.is_none() {
                 issues.push(ValidationIssue {
                     tool_name: tool_name.clone(),
                     severity: IssueSeverity::Error,
-                    message: "No categories evaluated".to_string(),
+                    message: "No categories evaluated and no metrics provided".to_string(),
                 });
             }
 

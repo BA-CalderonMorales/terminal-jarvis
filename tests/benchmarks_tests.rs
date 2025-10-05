@@ -3,6 +3,3 @@
 
 // Test modules are in tests/benchmarks/
 mod benchmarks;
-
-// Re-export for convenience
-pub use benchmarks::*;

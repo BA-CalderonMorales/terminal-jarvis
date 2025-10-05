@@ -3,9 +3,7 @@
 // These tests define the expected behavior for JSON-exportable benchmark results.
 // They serve as the bridge between Rust benchmark execution and TypeScript validation.
 
-use serde_json;
 use std::fs;
-use std::path::PathBuf;
 use tempfile::TempDir;
 use terminal_jarvis::evals::benchmarks::{BenchmarkResult, TestCaseResult, ValidationResult};
 
@@ -77,8 +75,7 @@ fn test_benchmark_result_deserializes_from_json() {
     }"#;
 
     // Act: Deserialize from JSON
-    let result: BenchmarkResult =
-        serde_json::from_str(json).expect("Failed to deserialize");
+    let result: BenchmarkResult = serde_json::from_str(json).expect("Failed to deserialize");
 
     // Assert: Verify fields
     assert_eq!(result.benchmark_id, "code-completion-basic-001");
@@ -216,14 +213,14 @@ fn test_json_output_format_demonstration() {
     // This test demonstrates the actual JSON output format
     let result = create_sample_result();
     let json = serde_json::to_string_pretty(&result).expect("Failed to serialize");
-    
+
     // Print to verify format (visible with --nocapture)
     println!("Generated JSON:");
     println!("{}", json);
-    
+
     // Verify it's valid JSON and contains all required fields
     let parsed: serde_json::Value = serde_json::from_str(&json).expect("Invalid JSON");
-    
+
     assert!(parsed["benchmark_id"].is_string());
     assert!(parsed["tool_name"].is_string());
     assert!(parsed["scenario_version"].is_string());

@@ -1,6 +1,5 @@
 // Evals Framework Integration Tests
 
-use std::collections::HashMap;
 use terminal_jarvis::evals::evals_criteria::CriteriaManager;
 use terminal_jarvis::evals::evals_data::{
     CategoryEvaluation, EvaluationCriterion, Rating, ToolEvaluation,
@@ -109,10 +108,7 @@ fn test_criteria_manager() {
 
 #[test]
 fn test_export_format_parsing() {
-    assert_eq!(
-        ExportFormat::parse_format("json"),
-        Some(ExportFormat::Json)
-    );
+    assert_eq!(ExportFormat::parse_format("json"), Some(ExportFormat::Json));
     assert_eq!(ExportFormat::parse_format("CSV"), Some(ExportFormat::Csv));
     assert_eq!(
         ExportFormat::parse_format("markdown"),
@@ -250,4 +246,25 @@ fn test_all_metrics_files_load_successfully() {
             file_path
         );
     }
+}
+
+#[test]
+fn test_metrics_only_evaluations_are_valid() {
+    // Test that metrics-only evaluations (no categories, no overall_score) are considered valid
+    let mut manager = EvalManager::new();
+
+    // Load the actual metrics files to test real-world scenarios
+    manager.load_evaluations().expect("Failed to load evaluations");
+
+    let issues = manager.validate_evaluations();
+
+    // Filter for errors only (metrics-only evaluations should not trigger errors)
+    let errors: Vec<_> = issues.iter().filter(|i| matches!(i.severity, terminal_jarvis::evals::IssueSeverity::Error)).collect();
+
+    // There should be no errors for metrics-only evaluations
+    assert!(
+        errors.is_empty(),
+        "Metrics-only evaluations should not trigger validation errors. Found: {:?}",
+        errors
+    );
 }

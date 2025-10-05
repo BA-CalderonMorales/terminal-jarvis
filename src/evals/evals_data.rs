@@ -32,7 +32,7 @@ pub struct ToolEvaluation {
     pub notes: Vec<String>,
 
     // Real-world verifiable metrics (optional for backward compatibility)
-    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub metrics: Option<crate::evals::evals_metrics::ToolMetrics>,
 }
 

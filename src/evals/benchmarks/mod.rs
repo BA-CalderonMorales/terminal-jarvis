@@ -24,14 +24,18 @@
 
 pub mod registry;
 pub mod results;
+pub mod runner;
 pub mod scenario;
 pub mod test_environment;
+pub mod validators;
 
 // Re-export main types (Phase 2 API - intentionally unused in Phase 1)
 #[allow(unused_imports)]
 pub use registry::BenchmarkRegistry;
 #[allow(unused_imports)]
 pub use results::{BenchmarkResult, TestCaseResult, ValidationResult};
+#[allow(unused_imports)]
+pub use runner::BenchmarkRunner;
 #[allow(unused_imports)]
 pub use scenario::{
     BenchmarkScenario, PromptConfig, ScenarioMetadata, ScoringConfig, ValidationConfig,
