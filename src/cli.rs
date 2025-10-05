@@ -1,5 +1,6 @@
 use crate::cli_logic;
 use clap::{Parser, Subcommand};
+use std::path::PathBuf;
 
 /// Terminal Jarvis - A unified interface for AI coding tools
 #[derive(Parser)]
@@ -79,6 +80,20 @@ impl Cli {
                 CacheCommands::Refresh { ttl } => cli_logic::handle_cache_refresh(ttl).await,
             },
 
+            Some(Commands::Benchmark { action }) => match action {
+                BenchmarkCommands::List => cli_logic::handle_benchmark_list().await,
+
+                BenchmarkCommands::Run {
+                    scenario,
+                    tool,
+                    export_json,
+                } => cli_logic::handle_benchmark_run(&scenario, &tool, export_json.as_ref()).await,
+
+                BenchmarkCommands::Validate { scenario_file } => {
+                    cli_logic::handle_benchmark_validate(&scenario_file).await
+                }
+            },
+
             // (Duplicate Auth handler removed; handled above)
             None => cli_logic::handle_interactive_mode().await,
         }
@@ -140,6 +155,12 @@ pub enum Commands {
     Cache {
         #[command(subcommand)]
         action: CacheCommands,
+    },
+
+    /// Benchmark management commands
+    Benchmark {
+        #[command(subcommand)]
+        action: BenchmarkCommands,
     },
 }
 
@@ -209,5 +230,33 @@ pub enum AuthCommands {
         /// Optional tool name; if omitted, opens interactive menu
         #[arg(long)]
         tool: Option<String>,
+    },
+}
+
+#[derive(Subcommand)]
+pub enum BenchmarkCommands {
+    /// List all available benchmark scenarios
+    List,
+
+    /// Run a benchmark scenario against a tool
+    Run {
+        /// Benchmark scenario ID to run
+        #[arg(long)]
+        scenario: String,
+
+        /// Tool name to test
+        #[arg(long)]
+        tool: String,
+
+        /// Optional path to export results as JSON
+        #[arg(long)]
+        export_json: Option<PathBuf>,
+    },
+
+    /// Validate a benchmark scenario file
+    Validate {
+        /// Path to the scenario TOML file
+        #[arg(long)]
+        scenario_file: PathBuf,
     },
 }

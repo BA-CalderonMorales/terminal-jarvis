@@ -115,7 +115,7 @@ fn test_scenario_registry_get_by_id() {
         BenchmarkRegistry::from_directory(&scenarios_dir).expect("Failed to load scenarios");
 
     // Try to get the example scenario
-    let scenario = registry.get_scenario("code-completion-basic-001");
+    let _scenario = registry.get_scenario("code-completion-basic-001");
 
     if !registry.list_scenarios().is_empty() {
         // If we have scenarios, at least one should be retrievable

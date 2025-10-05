@@ -61,6 +61,62 @@ All notable changes to this project will be documented in this file.
 - All implementations follow TDD principles (test first, then implement)
 - NO EMOJIS policy enforced (text-based indicators only)
 
+### Added - Benchmarks Framework (Phase 2)
+
+#### CLI Commands
+- **Benchmark List Command**: `terminal-jarvis benchmark list`
+  - Lists all available benchmark scenarios from registry
+  - Displays scenario metadata (ID, name, category, difficulty)
+  - Location: `src/cli_logic/cli_logic_benchmark_operations.rs`
+
+- **Benchmark Run Command**: `terminal-jarvis benchmark run --scenario <id> --tool <name>`
+  - Executes benchmarks against specified tools
+  - Optional `--export-json` flag for JSON result export
+  - Validates tool output against scenario criteria
+  - Location: `src/cli_logic/cli_logic_benchmark_operations.rs`
+
+- **Benchmark Validate Command**: `terminal-jarvis benchmark validate --scenario-file <path>`
+  - Validates TOML scenario file structure
+  - Ensures all required fields are present
+  - Location: `src/cli_logic/cli_logic_benchmark_operations.rs`
+
+#### Pattern Matching Validator
+- **Regex-Based Validation**: Pattern matching validator for output validation
+  - Supports multiple regex patterns from TOML scenarios
+  - Proper handling of TOML escape sequences
+  - Detailed validation results with pattern match status
+  - Location: `src/evals/benchmarks/validators/pattern_match.rs`
+
+#### Benchmark Runner
+- **Orchestration Engine**: Complete benchmark execution flow
+  - Loads scenarios from registry
+  - Spawns tool processes (mock in Phase 2, real in Phase 3)
+  - Captures stdout/stderr output
+  - Runs validators and calculates scores
+  - Creates structured BenchmarkResult
+  - Exports JSON with proper formatting
+  - Location: `src/evals/benchmarks/runner.rs` (280 lines)
+
+#### TypeScript E2E Tests
+- **7 Comprehensive E2E Tests**: Full integration testing via cli-testing-library
+  - Tests: "lists available benchmarks", "runs benchmark and exports JSON"
+  - Tests: "validates benchmark scenario file", "handles invalid scenario gracefully"
+  - Tests: "handles validation failures with detailed output"
+  - Tests: "exports JSON with correct schema and values"
+  - Tests: "runs benchmark with pattern matching validator"
+  - All tests execute real CLI commands in spawned processes
+  - Full JSON schema validation with Zod
+  - Proper temp directory management and cleanup
+  - Location: `npm/terminal-jarvis/tests/benchmarks/benchmark-e2e.test.ts` (333 lines)
+
+### Technical Details (Phase 2)
+- Pattern validator uses `regex` crate for pattern matching
+- BenchmarkRunner uses mock tool output for Phase 2 (real spawning in Phase 3)
+- CLI commands integrated with existing Clap command structure
+- All Phase 2 tests passing (185+ total: Rust + TypeScript)
+- Zero compilation warnings maintained
+- TDD workflow: tests written first, then implementation
+
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 

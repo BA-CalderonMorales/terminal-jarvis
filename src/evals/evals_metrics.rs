@@ -136,9 +136,9 @@ pub struct TeamMetrics {
     pub organization_url: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub team_size: Option<String>, // "Solo", "Small (2-10)", "Medium (11-50)", "Large (50+)"
-    pub public_team: bool,         // Are team members publicly listed?
+    pub public_team: bool, // Are team members publicly listed?
     #[serde(default)]
-    pub backed_by: Vec<String>,    // Investors, companies, foundations
+    pub backed_by: Vec<String>, // Investors, companies, foundations
     pub funding_disclosed: bool,
     pub security_policy: bool,
     pub responsible_disclosure: bool,

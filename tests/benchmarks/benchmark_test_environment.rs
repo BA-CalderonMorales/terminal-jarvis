@@ -4,7 +4,6 @@
 // Pattern: Similar to AuthTestEnvironment for consistency.
 
 use anyhow::Result;
-use std::path::PathBuf;
 
 // Test helper to access internal types
 // This will fail until we implement the actual BenchmarkTestEnvironment
