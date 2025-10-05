@@ -3,6 +3,7 @@ mod auth_manager;
 mod cli;
 mod cli_logic;
 mod config;
+mod evals;
 mod installation_arguments;
 mod progress_utils;
 mod services;

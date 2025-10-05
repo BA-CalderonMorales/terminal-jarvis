@@ -9,36 +9,157 @@ use std::collections::HashMap;
 pub struct ToolEvaluation {
     pub tool_name: String,
     pub tool_display_name: String,
+
+    // Optional fields for full evaluations
+    #[serde(default)]
     pub evaluated_version: String,
+    #[serde(default)]
     pub evaluation_date: String,
+    #[serde(default)]
     pub evaluator: String,
+
+    // Categories are optional (for metrics-only evaluations)
+    #[serde(default, skip_serializing_if = "HashMap::is_empty")]
     pub categories: HashMap<String, CategoryEvaluation>,
+
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub overall_score: Option<f64>,
+
+    #[serde(default)]
     pub summary: String,
+
+    #[serde(default)]
     pub notes: Vec<String>,
+
+    // Real-world verifiable metrics (optional for backward compatibility)
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub metrics: Option<crate::evals::evals_metrics::ToolMetrics>,
+}
+
+impl ToolEvaluation {
+    /// Create a new ToolEvaluation (Phase 2 API)
+    #[allow(dead_code)]
+    pub fn new(
+        tool_name: String,
+        tool_display_name: String,
+        evaluated_version: String,
+        evaluator: String,
+    ) -> Self {
+        let now = std::time::SystemTime::now()
+            .duration_since(std::time::UNIX_EPOCH)
+            .unwrap()
+            .as_secs();
+        let days = now / 86400;
+        let years = 1970 + days / 365;
+        let year_days = days % 365;
+        let month = (year_days / 30).min(11) + 1;
+        let day = (year_days % 30) + 1;
+        let evaluation_date = format!("{:04}-{:02}-{:02}", years, month, day);
+
+        Self {
+            tool_name,
+            tool_display_name,
+            evaluated_version,
+            evaluation_date,
+            evaluator,
+            categories: HashMap::new(),
+            overall_score: None,
+            summary: String::new(),
+            notes: Vec::new(),
+            metrics: None,
+        }
+    }
+
+    /// Add a category evaluation (Phase 2 API)
+    #[allow(dead_code)]
+    pub fn add_category(&mut self, category_id: String, category: CategoryEvaluation) {
+        self.categories.insert(category_id, category);
+    }
+
+    /// Calculate overall score from category scores (Phase 2 API)
+    #[allow(dead_code)]
+    pub fn calculate_overall_score(&mut self, criteria: &[EvaluationCriterion]) {
+        let mut total_weighted_score = 0.0;
+        let mut total_weight = 0.0;
+
+        for criterion in criteria {
+            if let Some(category) = self.categories.get(&criterion.id) {
+                if let Some(score) = category.score {
+                    total_weighted_score += score * criterion.weight;
+                    total_weight += criterion.weight;
+                }
+            }
+        }
+
+        if total_weight > 0.0 {
+            self.overall_score = Some(total_weighted_score / total_weight);
+        }
+    }
 }
 
 /// Evaluation data for a single category
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct CategoryEvaluation {
     pub category_name: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub score: Option<f64>, // 0.0-10.0 scale, None if not applicable
     pub rating: Rating,
+    #[serde(default)]
     pub findings: Vec<String>,
+    #[serde(default)]
     pub metrics: HashMap<String, String>,
+    #[serde(default)]
     pub strengths: Vec<String>,
+    #[serde(default)]
     pub weaknesses: Vec<String>,
+    #[serde(default)]
     pub evidence: Vec<String>, // Citations, references, examples
+}
+
+impl CategoryEvaluation {
+    /// Create a new CategoryEvaluation (Phase 2 API)
+    #[allow(dead_code)]
+    pub fn new(category_name: String) -> Self {
+        Self {
+            category_name,
+            score: None,
+            rating: Rating::NotApplicable,
+            findings: Vec::new(),
+            metrics: HashMap::new(),
+            strengths: Vec::new(),
+            weaknesses: Vec::new(),
+            evidence: Vec::new(),
+        }
+    }
+
+    /// Set the score and update the rating (Phase 2 API)
+    #[allow(dead_code)]
+    pub fn set_score(&mut self, score: f64) {
+        self.score = Some(score);
+        self.rating = Rating::from_score(score);
+    }
+
+    /// Add a strength to the evaluation (Phase 2 API)
+    #[allow(dead_code)]
+    pub fn add_strength(&mut self, strength: String) {
+        self.strengths.push(strength);
+    }
+
+    /// Add a weakness to the evaluation (Phase 2 API)
+    #[allow(dead_code)]
+    pub fn add_weakness(&mut self, weakness: String) {
+        self.weaknesses.push(weakness);
+    }
 }
 
 /// Rating scale for qualitative assessments
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
 pub enum Rating {
-    Excellent,   // 9-10
-    Good,        // 7-8
-    Adequate,    // 5-6
-    Poor,        // 3-4
-    Inadequate,  // 0-2
+    Excellent,  // 9-10
+    Good,       // 7-8
+    Adequate,   // 5-6
+    Poor,       // 3-4
+    Inadequate, // 0-2
     NotApplicable,
 }
 
@@ -89,12 +210,12 @@ pub struct MetricDefinition {
 /// Types of metrics that can be evaluated
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub enum MetricType {
-    Boolean,           // Yes/No
-    Numeric,           // Quantitative value
-    Scale,             // 1-10 scale
-    Categorical,       // Multiple choice
-    Qualitative,       // Free text assessment
-    Evidence,          // Requires citation/proof
+    Boolean,     // Yes/No
+    Numeric,     // Quantitative value
+    Scale,       // 1-10 scale
+    Categorical, // Multiple choice
+    Qualitative, // Free text assessment
+    Evidence,    // Requires citation/proof
 }
 
 /// Comparison result between multiple tools
@@ -116,101 +237,6 @@ pub struct RankingEntry {
     pub score: f64,
     pub rating: Rating,
     pub key_differentiator: String,
-}
-
-impl ToolEvaluation {
-    /// Create a new empty evaluation
-    pub fn new(
-        tool_name: String,
-        tool_display_name: String,
-        version: String,
-        evaluator: String,
-    ) -> Self {
-        Self {
-            tool_name,
-            tool_display_name,
-            evaluated_version: version,
-            evaluation_date: chrono::Utc::now().format("%Y-%m-%d").to_string(),
-            evaluator,
-            categories: HashMap::new(),
-            overall_score: None,
-            summary: String::new(),
-            notes: Vec::new(),
-        }
-    }
-
-    /// Add a category evaluation
-    pub fn add_category(&mut self, category_id: String, evaluation: CategoryEvaluation) {
-        self.categories.insert(category_id, evaluation);
-    }
-
-    /// Calculate overall score from category scores
-    pub fn calculate_overall_score(&mut self, criteria: &[EvaluationCriterion]) {
-        let mut weighted_sum = 0.0;
-        let mut total_weight = 0.0;
-
-        for criterion in criteria {
-            if let Some(category_eval) = self.categories.get(&criterion.id) {
-                if let Some(score) = category_eval.score {
-                    weighted_sum += score * criterion.weight;
-                    total_weight += criterion.weight;
-                }
-            }
-        }
-
-        self.overall_score = if total_weight > 0.0 {
-            Some(weighted_sum / total_weight)
-        } else {
-            None
-        };
-    }
-}
-
-impl CategoryEvaluation {
-    /// Create a new category evaluation
-    pub fn new(category_name: String) -> Self {
-        Self {
-            category_name,
-            score: None,
-            rating: Rating::NotApplicable,
-            findings: Vec::new(),
-            metrics: HashMap::new(),
-            strengths: Vec::new(),
-            weaknesses: Vec::new(),
-            evidence: Vec::new(),
-        }
-    }
-
-    /// Set score and automatically derive rating
-    pub fn set_score(&mut self, score: f64) {
-        self.score = Some(score);
-        self.rating = Rating::from_score(score);
-    }
-
-    /// Add a metric result
-    pub fn add_metric(&mut self, metric_id: String, value: String) {
-        self.metrics.insert(metric_id, value);
-    }
-
-    /// Add finding
-    pub fn add_finding(&mut self, finding: String) {
-        self.findings.push(finding);
-    }
-
-    /// Add strength
-    pub fn add_strength(&mut self, strength: String) {
-        self.strengths.push(strength);
-    }
-
-    /// Add weakness
-    pub fn add_weakness(&mut self, weakness: String) {
-        self.weaknesses.push(weakness);
-    }
-
-    /// Add evidence
-    pub fn add_evidence(&mut self, evidence: String) {
-        self.evidence.push(evidence);
-    }
 }
 
 #[cfg(test)]

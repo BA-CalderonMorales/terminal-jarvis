@@ -34,6 +34,7 @@ pub async fn handle_interactive_mode() -> Result<()> {
 
         let options = vec![
             "AI CLI Tools".to_string(),
+            "Evals & Comparisons".to_string(),
             "Authentication".to_string(),
             "Important Links".to_string(),
             "Settings".to_string(),
@@ -63,6 +64,26 @@ pub async fn handle_interactive_mode() -> Result<()> {
                 print!("\x1b[2J\x1b[H");
                 handle_ai_tools_menu().await?;
                 // Redisplay welcome after submenu
+                print!("\x1b[2J\x1b[H");
+                display_welcome_screen();
+                display_welcome_interface(&theme, npm_available).await?;
+                println!();
+            }
+            s if s.contains("Evals & Comparisons") => {
+                print!("\x1b[2J\x1b[H");
+                if let Err(e) = crate::cli_logic::cli_logic_evals_operations::show_evals_menu() {
+                    eprintln!("Error in Evals menu: {}", e);
+                }
+                print!("\x1b[2J\x1b[H");
+                display_welcome_screen();
+                display_welcome_interface(&theme, npm_available).await?;
+                println!();
+            }
+            s if s.contains("Evals & Comparisons") => {
+                print!("\x1b[2J\x1b[H");
+                if let Err(e) = crate::cli_logic::cli_logic_evals_operations::show_evals_menu() {
+                    eprintln!("Error in Evals menu: {}", e);
+                }
                 print!("\x1b[2J\x1b[H");
                 display_welcome_screen();
                 display_welcome_interface(&theme, npm_available).await?;
