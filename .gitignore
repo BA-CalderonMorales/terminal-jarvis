@@ -175,7 +175,8 @@ crush.db
 .kilocode/
 .qwen/
 .roo/
-.opencode
+.opencode/
+.agents/
 goose/
 goose*
 

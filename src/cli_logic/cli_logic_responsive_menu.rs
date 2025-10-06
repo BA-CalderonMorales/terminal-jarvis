@@ -5,11 +5,11 @@ use inquire::Select;
 /// Create an inquire Select menu styled with Terminal Jarvis theme
 /// This renders inline without clearing the screen
 pub fn create_themed_select<'a>(
-    _theme: &Theme,
+    theme: &Theme,
     prompt: &'a str,
     options: Vec<String>,
 ) -> Select<'a, String> {
-    let render_config = create_render_config();
+    let render_config = create_render_config(theme);
 
     Select::new(prompt, options)
         .with_render_config(render_config)
@@ -17,14 +17,32 @@ pub fn create_themed_select<'a>(
         .with_vim_mode(true)
 }
 
-/// Create inquire RenderConfig for Terminal Jarvis theme
-fn create_render_config() -> RenderConfig<'static> {
-    RenderConfig {
-        highlighted_option_prefix: Styled::new("▶").with_fg(InquireColor::LightCyan),
-        selected_option: Some(StyleSheet::new().with_attr(Attributes::BOLD)),
-        prompt_prefix: Styled::new("?").with_fg(InquireColor::LightCyan),
-        scroll_up_prefix: Styled::new("↑"),
-        scroll_down_prefix: Styled::new("↓"),
-        ..Default::default()
+/// Map theme to appropriate InquireColor
+/// Inquire supports: Black, DarkGrey, Red, DarkRed, Green, DarkGreen, Yellow, DarkYellow,
+/// Blue, DarkBlue, Magenta, DarkMagenta, Cyan, DarkCyan, White, Grey, LightRed, LightGreen,
+/// LightYellow, LightBlue, LightMagenta, LightCyan
+fn get_theme_color(theme: &Theme) -> InquireColor {
+    match theme.name {
+        "Default" => InquireColor::LightCyan,   // Cyan theme
+        "Minimal" => InquireColor::DarkCyan,    // Minimal cyan
+        "Terminal" => InquireColor::LightGreen, // Green theme
+        _ => InquireColor::LightCyan,           // Default fallback
     }
+}
+
+/// Create inquire RenderConfig using the active theme
+fn create_render_config(theme: &Theme) -> RenderConfig<'static> {
+    let theme_color = get_theme_color(theme);
+
+    RenderConfig::default()
+        .with_highlighted_option_prefix(Styled::new("▶").with_fg(theme_color))
+        .with_selected_option(Some(
+            StyleSheet::new()
+                .with_attr(Attributes::BOLD)
+                .with_fg(theme_color),
+        ))
+        .with_prompt_prefix(Styled::new("?").with_fg(theme_color))
+        .with_scroll_up_prefix(Styled::new("↑").with_fg(theme_color))
+        .with_scroll_down_prefix(Styled::new("↓").with_fg(theme_color))
+        .with_option(StyleSheet::new().with_fg(theme_color))
 }

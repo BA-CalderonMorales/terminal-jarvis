@@ -227,21 +227,24 @@ impl ScoringEngine {
     }
 
     /// Find tools that excel in specific categories
+    /// Returns HashMap<category_id, (category_name, top_tools)>
     pub fn find_category_leaders(
         evaluations: &[ToolEvaluation],
-    ) -> HashMap<String, Vec<(String, f64)>> {
-        let mut leaders: HashMap<String, Vec<(String, f64)>> = HashMap::new();
+    ) -> HashMap<String, (String, Vec<(String, f64)>)> {
+        let mut leaders: HashMap<String, (String, Vec<(String, f64)>)> = HashMap::new();
 
-        // Collect all categories
-        let mut all_categories = std::collections::HashSet::new();
+        // Collect all categories with their names
+        let mut all_categories: HashMap<String, String> = HashMap::new();
         for eval in evaluations {
-            for category_id in eval.categories.keys() {
-                all_categories.insert(category_id.clone());
+            for (category_id, category_eval) in &eval.categories {
+                all_categories
+                    .entry(category_id.clone())
+                    .or_insert_with(|| category_eval.category_name.clone());
             }
         }
 
         // For each category, find the top tools
-        for category_id in all_categories {
+        for (category_id, category_name) in all_categories {
             let mut category_scores: Vec<(String, f64)> = evaluations
                 .iter()
                 .filter_map(|eval| {
@@ -257,7 +260,7 @@ impl ScoringEngine {
 
             // Take top 3
             let top_tools: Vec<(String, f64)> = category_scores.into_iter().take(3).collect();
-            leaders.insert(category_id, top_tools);
+            leaders.insert(category_id, (category_name, top_tools));
         }
 
         leaders

@@ -22,10 +22,9 @@ pub fn show_evals_menu() -> Result<()> {
         println!("  {}  Compare Tools", theme.accent("2."));
         println!("  {}  View Tool Details", theme.accent("3."));
         println!("  {}  Export Evaluations", theme.accent("4."));
-        println!("  {}  Statistics & Insights", theme.accent("5."));
-        println!("  {}  Coverage Report", theme.accent("6."));
-        println!("  {}  Validate Evaluations", theme.accent("7."));
-        println!("  {}  About Evals Framework", theme.accent("8."));
+        println!("  {}  Coverage Report", theme.accent("5."));
+        println!("  {}  Validate Evaluations", theme.accent("6."));
+        println!("  {}  About Evals Framework", theme.accent("7."));
         println!("  {}  Return to Main Menu", theme.accent("0."));
         println!();
         print!("  {} ", theme.primary("Choice:"));
@@ -39,10 +38,9 @@ pub fn show_evals_menu() -> Result<()> {
             "2" => compare_tools_interactive()?,
             "3" => view_tool_details_interactive()?,
             "4" => export_evaluations_interactive()?,
-            "5" => show_statistics()?,
-            "6" => show_coverage_report()?,
-            "7" => validate_evaluations()?,
-            "8" => show_about()?,
+            "5" => show_coverage_report()?,
+            "6" => validate_evaluations()?,
+            "7" => show_about()?,
             "0" => break,
             _ => println!("\n  [!] Invalid choice. Please try again."),
         }
@@ -308,39 +306,160 @@ fn view_tool_details_interactive() -> Result<()> {
     println!("  {}", evaluation.tool_display_name);
     println!("{}", "=".repeat(70));
     println!();
-    println!("  Version: {}", evaluation.evaluated_version);
-    println!("  Evaluated: {}", evaluation.evaluation_date);
-    println!("  Evaluator: {}", evaluation.evaluator);
 
-    if let Some(score) = evaluation.overall_score {
-        let score_str = format!("{:.2}/10", score);
-        println!("  Overall Score: {}", score_str);
+    // Check if this is a metrics-only evaluation or full evaluation
+    let is_metrics_only = evaluation.metrics.is_some() && evaluation.categories.is_empty();
+
+    if is_metrics_only {
+        // Display metrics-only evaluation
+        println!("  Evaluation Type: Metrics-Based Assessment");
+        println!("  Data Source: Real-world verifiable metrics");
+
+        if let Some(metrics) = &evaluation.metrics {
+            // GitHub stats
+            if let Some(gh) = &metrics.github {
+                println!();
+                println!("  GitHub Repository:");
+                println!("    Stars: {}", gh.stars.unwrap_or(0));
+                println!("    Forks: {}", gh.forks.unwrap_or(0));
+                println!("    Contributors: {}", gh.contributors.unwrap_or(0));
+                if let Some(last_commit) = &gh.last_commit_date {
+                    println!(
+                        "    Last Commit: {} ({})",
+                        last_commit,
+                        gh.commit_frequency.as_deref().unwrap_or("Unknown")
+                    );
+                }
+                println!(
+                    "    License: {}",
+                    gh.license.as_deref().unwrap_or("Unknown")
+                );
+            }
+
+            // Package stats
+            if let Some(pkg) = &metrics.package {
+                println!();
+                println!("  Package Registry ({}):", pkg.registry);
+                println!(
+                    "    Weekly Downloads: {}",
+                    pkg.weekly_downloads.unwrap_or(0)
+                );
+                println!(
+                    "    Latest Version: {}",
+                    pkg.latest_version.as_deref().unwrap_or("Unknown")
+                );
+                if let Some(last_publish) = &pkg.last_publish_date {
+                    println!("    Last Published: {}", last_publish);
+                }
+            }
+
+            // Community
+            if let Some(community) = &metrics.community {
+                println!();
+                println!("  Community:");
+                if let Some(discord) = community.discord_members {
+                    println!("    Discord Members: {}", discord);
+                }
+                if let Some(twitter) = community.twitter_followers {
+                    println!("    Twitter Followers: {}", twitter);
+                }
+                if let Some(reddit) = community.reddit_subscribers {
+                    println!("    Reddit Subscribers: {}", reddit);
+                }
+            }
+
+            // Platform support
+            println!();
+            println!("  Platform Support:");
+            println!(
+                "    Operating Systems: {}",
+                metrics.platform.supported_os.join(", ")
+            );
+            println!(
+                "    Architectures: {}",
+                metrics.platform.architectures.join(", ")
+            );
+
+            // Team transparency
+            if let Some(team) = &metrics.team {
+                println!();
+                println!("  Organization:");
+                println!("    Name: {}", team.organization_name);
+                println!(
+                    "    Team Size: {}",
+                    team.team_size.as_deref().unwrap_or("Unknown")
+                );
+                println!(
+                    "    Public Team: {}",
+                    if team.public_team { "Yes" } else { "No" }
+                );
+                if !team.backed_by.is_empty() {
+                    println!("    Backed By: {}", team.backed_by.join(", "));
+                }
+            }
+
+            // Support metrics
+            if let Some(support) = &metrics.support {
+                println!();
+                println!("  Support:");
+                println!(
+                    "    Response Time: {}",
+                    support
+                        .avg_issue_response_time
+                        .as_deref()
+                        .unwrap_or("Unknown")
+                );
+                println!(
+                    "    Support Channels: {}",
+                    support.support_channels.join(", ")
+                );
+            }
+        }
+    } else {
+        // Display traditional evaluation with categories
+        if !evaluation.evaluated_version.is_empty() {
+            println!("  Version: {}", evaluation.evaluated_version);
+        }
+        if !evaluation.evaluation_date.is_empty() {
+            println!("  Evaluated: {}", evaluation.evaluation_date);
+        }
+        if !evaluation.evaluator.is_empty() {
+            println!("  Evaluator: {}", evaluation.evaluator);
+        }
+
+        if let Some(score) = evaluation.overall_score {
+            let score_str = format!("{:.2}/10", score);
+            println!("  Overall Score: {}", score_str);
+        }
+
+        println!();
+        println!("  Category Scores:");
+        println!("  {}", "-".repeat(60));
+
+        let mut categories: Vec<_> = evaluation.categories.iter().collect();
+        categories.sort_by_key(|(id, _)| id.as_str());
+
+        for (_category_id, category) in categories {
+            let score_str = if let Some(score) = category.score {
+                format!("{:.1}/10", score)
+            } else {
+                "N/A".to_string()
+            };
+
+            println!(
+                "  {:<35} {} ({})",
+                category.category_name,
+                score_str,
+                category.rating.to_string()
+            );
+        }
     }
 
-    println!();
-    println!("  Summary:");
-    println!("  {}", evaluation.summary);
-
-    println!();
-    println!("  Category Scores:");
-    println!("  {}", "-".repeat(60));
-
-    let mut categories: Vec<_> = evaluation.categories.iter().collect();
-    categories.sort_by_key(|(id, _)| id.as_str());
-
-    for (_category_id, category) in categories {
-        let score_str = if let Some(score) = category.score {
-            format!("{:.1}/10", score)
-        } else {
-            "N/A".to_string()
-        };
-
-        println!(
-            "  {:<35} {} ({})",
-            category.category_name,
-            score_str,
-            category.rating.to_string()
-        );
+    // Always show summary
+    if !evaluation.summary.is_empty() {
+        println!();
+        println!("  Summary:");
+        println!("  {}", evaluation.summary);
     }
 
     Ok(())
@@ -437,63 +556,6 @@ fn export_evaluations_interactive() -> Result<()> {
         }
         _ => {
             println!("\n  [!] Invalid type.");
-        }
-    }
-
-    Ok(())
-}
-
-/// Show statistics and insights
-fn show_statistics() -> Result<()> {
-    println!("\n=== STATISTICS & INSIGHTS ===");
-
-    let mut manager = EvalManager::new();
-    manager
-        .load_evaluations()
-        .context("Failed to load evaluations")?;
-
-    let stats = manager.calculate_statistics();
-
-    if stats.count == 0 {
-        println!("\n  [!] No evaluations with scores available.");
-        return Ok(());
-    }
-
-    println!("\n  Statistical Overview:");
-    println!("  {}", "-".repeat(60));
-    println!("  Total Evaluations: {}", stats.count);
-    println!("  Mean Score: {:.2}/10", stats.mean);
-    println!("  Median Score: {:.2}/10", stats.median);
-    println!("  Std Deviation: {:.2}", stats.std_dev);
-    println!("  Min Score: {:.2}/10", stats.min);
-    println!("  Max Score: {:.2}/10", stats.max);
-
-    // Category leaders
-    let leaders = manager.find_category_leaders();
-
-    if !leaders.is_empty() {
-        println!("\n  Category Leaders:");
-        println!("  {}", "-".repeat(60));
-
-        for (category_id, top_tools) in leaders.iter().take(5) {
-            println!("\n  {}:", category_id);
-            for (i, (tool_name, score)) in top_tools.iter().enumerate() {
-                println!("    {}. {:<20} {:.2}/10", i + 1, tool_name, score);
-            }
-        }
-    }
-
-    // Recommendations
-    let recommendations = manager.generate_recommendations();
-
-    if !recommendations.is_empty() {
-        println!("\n  Recommendations:");
-        println!("  {}", "-".repeat(60));
-
-        for rec in recommendations {
-            println!("\n  Tool: {}", rec.tool_name);
-            println!("  Use Case: {}", rec.use_case);
-            println!("  Reason: {}", rec.reason);
         }
     }
 
