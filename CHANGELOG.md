@@ -2,6 +2,26 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.0.69] - 2025-10-06
+
+### Enhanced
+- **MVVM Architecture Refactoring**: Implemented proper separation of concerns with presentation domain
+  - Created dedicated presentation bucket for UI components
+  - Improved code organization and maintainability
+  - Better domain-based module structure
+
+### Fixed
+- **CI Pipeline Issues**: Resolved continuous integration failures
+  - Fixed code formatting violations causing clippy failures
+  - Resolved shellcheck warnings in test scripts
+  - Ensured all shell scripts pass linting validation
+
+### Technical
+- **Test Infrastructure**: Enhanced test script reliability
+  - Fixed function definition order in smoke-test.sh
+  - Added proper shellcheck disable comments for indirectly used functions
+  - Improved script maintainability and CI compliance
+
 ## [Unreleased]
 
 ### Added - Benchmarks Framework (Phase 1)
