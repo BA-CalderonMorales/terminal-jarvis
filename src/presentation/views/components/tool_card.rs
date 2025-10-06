@@ -39,9 +39,7 @@ impl ToolCard {
 
         format!(
             "{} {} - {}",
-            status,
-            self.tool.display_name,
-            self.tool.description
+            status, self.tool.display_name, self.tool.description
         )
     }
 }
