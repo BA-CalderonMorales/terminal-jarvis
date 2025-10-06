@@ -4,9 +4,9 @@
 //! Uses the ToolListViewModel for MVVM-inspired presentation logic.
 
 use crate::presentation::models::Tool;
+use crate::presentation::view_models::ToolListViewModel;
 use crate::tools::tools_config::get_tool_config_loader;
 use crate::tools::tools_detection::get_available_tools;
-use crate::presentation::view_models::ToolListViewModel;
 use anyhow::Result;
 
 /// Handle listing all available AI coding tools with their status

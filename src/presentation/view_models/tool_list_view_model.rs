@@ -29,8 +29,7 @@ impl ToolListViewModel {
     }
 
     pub fn selected_tool(&self) -> Option<&Tool> {
-        self.selected_index
-            .and_then(|index| self.tools.get(index))
+        self.selected_index.and_then(|index| self.tools.get(index))
     }
 
     pub fn select_tool(&mut self, index: usize) {
