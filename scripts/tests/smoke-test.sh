@@ -5,13 +5,8 @@
 # Validates core functionality and NPM package integrity to prevent regressions
 # Source logger
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-# sh    log_info_if_enabled "Validating packages: $AMP_PACKAGE, $CLAUDE_PACKAGE, $GEMINI_PACKAGE, $QWEN_PACKAGE, $OPENCODE_PACKAGE, $LLXPRT_PACKAGE, $CODEX_PACKAGE, $CRUSH_PACKAGE"
-    
-    run_test "Amp package exists in NPM registry" \
-        "npm view $AMP_PACKAGE version > /dev/null 2>&1"
-    
-    run_test "Claude package exists in NPM registry" \
-        "npm view $CLAUDE_PACKAGE version > /dev/null 2>&1"heck source=../logger/logger.sh
+# Source logger
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # shellcheck disable=SC1091
 source "$SCRIPT_DIR/../logger/logger.sh"
 
@@ -21,13 +16,32 @@ TESTS_FAILED=0
 # Control output redirection in tests (set RUN_TEST_REDIRECT=false to see debug)
 : "${RUN_TEST_REDIRECT:=true}"
 
+# Test function for consistency
+run_test() {
+    local test_name="$1"
+    local test_command="$2"
+
+    log_info_if_enabled "→ $test_name"
+
+    # Execute test command and capture result without exiting on failure
+    if { [ "$RUN_TEST_REDIRECT" = true ] && eval "$test_command" >/dev/null 2>&1; } || { [ "$RUN_TEST_REDIRECT" != true ] && eval "$test_command"; }; then
+        log_success_if_enabled "  PASSED"
+        ((TESTS_PASSED++))
+        return 0
+    else
+        log_error_if_enabled "  FAILED"
+        ((TESTS_FAILED++))
+        return 1
+    fi
+}
+
 # Helpers
-# shellcheck disable=SC2317
+# shellcheck disable=SC2317,SC2329
 strip_ansi() {
     # Remove ANSI escape sequences to make grep/awk stable regardless of TTY coloring
     sed -r $'s/\x1B\[[0-?]*[ -\/]*[@-~]//g'
 }
-# shellcheck disable=SC2317
+# shellcheck disable=SC2317,SC2329
 get_all_tools() {
     # Derive tool names from config/tools/*.toml filenames
     for f in config/tools/*.toml; do
@@ -35,6 +49,7 @@ get_all_tools() {
     done
 }
 
+# shellcheck disable=SC2329
 verify_list_contains_all_tools() {
     local out tool missing=0
     out="$($BINARY list 2>/dev/null | strip_ansi)" || { log_error_if_enabled "Failed to run '$BINARY list'"; return 1; }
@@ -48,7 +63,7 @@ verify_list_contains_all_tools() {
     return "$missing"
 }
 
-# shellcheck disable=SC2317
+# shellcheck disable=SC2317,SC2329
 verify_example_has_all_tools() {
     local tool missing=0
     for tool in $(get_all_tools); do
@@ -60,7 +75,7 @@ verify_example_has_all_tools() {
     return "$missing"
 }
 
-# shellcheck disable=SC2317
+# shellcheck disable=SC2317,SC2329
 verify_supported_installers() {
     local file cmd
     for file in config/tools/*.toml; do
@@ -75,7 +90,7 @@ verify_supported_installers() {
 
 # Helper: verify list displays "Requires: NPM" for all tools marked requires_npm=true in configs
 ## Helper invoked indirectly via run_test
-# shellcheck disable=SC2317
+# shellcheck disable=SC2317,SC2329
 verify_npm_flags() {
     local out tool
     out="$($BINARY list 2>/dev/null | strip_ansi)" || return 1
@@ -93,24 +108,7 @@ verify_npm_flags() {
     return 0
 }
 
-# Test function for consistency
-run_test() {
-    local test_name="$1"
-    local test_command="$2"
-    
-    log_info_if_enabled "→ $test_name"
-    
-    # Execute test command and capture result without exiting on failure
-    if { [ "$RUN_TEST_REDIRECT" = true ] && eval "$test_command" >/dev/null 2>&1; } || { [ "$RUN_TEST_REDIRECT" != true ] && eval "$test_command"; }; then
-        log_success_if_enabled "  PASSED"
-        ((TESTS_PASSED++))
-        return 0
-    else
-        log_error_if_enabled "  FAILED"
-        ((TESTS_FAILED++))
-        return 1
-    fi
-}
+
 
 log_header "Terminal Jarvis Comprehensive Test Suite"
 log_info_if_enabled "Running core functionality and NPM package validation..."
