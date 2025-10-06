@@ -177,7 +177,7 @@ impl EvalManager {
     }
 
     /// Find category leaders across all tools
-    pub fn find_category_leaders(&self) -> HashMap<String, Vec<(String, f64)>> {
+    pub fn find_category_leaders(&self) -> HashMap<String, (String, Vec<(String, f64)>)> {
         let evaluations: Vec<ToolEvaluation> = self.evaluations.values().cloned().collect();
         ScoringEngine::find_category_leaders(&evaluations)
     }

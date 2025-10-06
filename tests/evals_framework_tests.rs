@@ -254,12 +254,17 @@ fn test_metrics_only_evaluations_are_valid() {
     let mut manager = EvalManager::new();
 
     // Load the actual metrics files to test real-world scenarios
-    manager.load_evaluations().expect("Failed to load evaluations");
+    manager
+        .load_evaluations()
+        .expect("Failed to load evaluations");
 
     let issues = manager.validate_evaluations();
 
     // Filter for errors only (metrics-only evaluations should not trigger errors)
-    let errors: Vec<_> = issues.iter().filter(|i| matches!(i.severity, terminal_jarvis::evals::IssueSeverity::Error)).collect();
+    let errors: Vec<_> = issues
+        .iter()
+        .filter(|i| matches!(i.severity, terminal_jarvis::evals::IssueSeverity::Error))
+        .collect();
 
     // There should be no errors for metrics-only evaluations
     assert!(
@@ -267,4 +272,108 @@ fn test_metrics_only_evaluations_are_valid() {
         "Metrics-only evaluations should not trigger validation errors. Found: {:?}",
         errors
     );
+}
+
+#[test]
+fn test_metrics_only_evaluation_display_logic() {
+    // Test that metrics-only evaluations (like codex) display metrics data instead of empty evaluation fields
+    let mut manager = EvalManager::new();
+    manager
+        .load_evaluations()
+        .expect("Failed to load evaluations");
+
+    // Get the codex evaluation (should be metrics-only)
+    let codex_eval = manager
+        .get_evaluation("codex")
+        .expect("Codex evaluation should exist");
+
+    // Verify it's metrics-only (has metrics but no categories)
+    assert!(codex_eval.metrics.is_some(), "Codex should have metrics");
+    assert!(
+        codex_eval.categories.is_empty(),
+        "Codex should have no categories"
+    );
+
+    // Verify traditional evaluation fields are empty (as expected for metrics-only)
+    assert!(
+        codex_eval.evaluated_version.is_empty(),
+        "Metrics-only evaluations should have empty version"
+    );
+    assert!(
+        codex_eval.evaluation_date.is_empty(),
+        "Metrics-only evaluations should have empty date"
+    );
+    assert!(
+        codex_eval.evaluator.is_empty(),
+        "Metrics-only evaluations should have empty evaluator"
+    );
+
+    // Verify it has the expected metrics data
+    let metrics = codex_eval.metrics.as_ref().unwrap();
+    assert!(metrics.github.is_some(), "Codex should have GitHub metrics");
+    assert!(
+        metrics.package.is_some(),
+        "Codex should have package metrics"
+    );
+    assert!(
+        metrics.community.is_some(),
+        "Codex should have community metrics"
+    );
+    assert!(
+        metrics.documentation.is_some(),
+        "Codex should have documentation metrics"
+    );
+    assert!(
+        !metrics.platform.supported_os.is_empty(),
+        "Codex should have platform support info"
+    );
+    assert!(metrics.team.is_some(), "Codex should have team metrics");
+    assert!(
+        metrics.support.is_some(),
+        "Codex should have support metrics"
+    );
+}
+
+#[test]
+fn test_traditional_evaluation_display_logic() {
+    // Test that traditional evaluations (like qwen) display evaluation fields and categories
+    let mut manager = EvalManager::new();
+    manager
+        .load_evaluations()
+        .expect("Failed to load evaluations");
+
+    // Get the qwen evaluation (should be traditional evaluation with categories only)
+    let qwen_eval = manager
+        .get_evaluation("qwen")
+        .expect("Qwen evaluation should exist");
+
+    // Verify it has categories but no metrics (traditional evaluation)
+    assert!(qwen_eval.metrics.is_none(), "Qwen should not have metrics");
+    assert!(
+        !qwen_eval.categories.is_empty(),
+        "Qwen should have categories"
+    );
+
+    // Verify traditional evaluation fields are populated
+    assert!(
+        !qwen_eval.evaluated_version.is_empty(),
+        "Traditional evaluations should have version"
+    );
+    assert!(
+        !qwen_eval.evaluation_date.is_empty(),
+        "Traditional evaluations should have date"
+    );
+    assert!(
+        !qwen_eval.evaluator.is_empty(),
+        "Traditional evaluations should have evaluator"
+    );
+    assert!(
+        qwen_eval.overall_score.is_some(),
+        "Traditional evaluations should have overall score"
+    );
+
+    // Verify expected values
+    assert_eq!(qwen_eval.evaluated_version, "1.0.0");
+    assert_eq!(qwen_eval.evaluator, "Terminal Jarvis Research Team");
+    assert_eq!(qwen_eval.overall_score, Some(7.2));
 }

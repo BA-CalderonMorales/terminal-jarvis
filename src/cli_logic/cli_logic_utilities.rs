@@ -8,9 +8,9 @@ pub fn get_themed_render_config() -> RenderConfig<'static> {
 
     // Map our theme to inquire colors based on theme name
     let (primary_color, accent_color, secondary_color) = match theme.name {
-        "T.JARVIS" => (Color::DarkCyan, Color::LightCyan, Color::DarkBlue),
-        "Classic" => (Color::White, Color::DarkCyan, Color::DarkGrey),
-        "Matrix" => (Color::DarkGreen, Color::LightGreen, Color::Black),
+        "Default" => (Color::DarkCyan, Color::LightCyan, Color::DarkBlue),
+        "Minimal" => (Color::White, Color::DarkCyan, Color::DarkGrey),
+        "Terminal" => (Color::DarkGreen, Color::LightGreen, Color::Black),
         _ => (Color::DarkCyan, Color::LightCyan, Color::DarkGrey),
     };
 

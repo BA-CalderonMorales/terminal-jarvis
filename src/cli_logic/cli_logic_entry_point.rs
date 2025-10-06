@@ -3,6 +3,7 @@
 
 use crate::cli_logic::cli_logic_responsive_menu::create_themed_select;
 use crate::cli_logic::cli_logic_utilities::{apply_theme_to_multiselect, get_themed_render_config};
+use crate::cli_logic::cli_logic_welcome::display_welcome_screen;
 use crate::installation_arguments::InstallationManager;
 use crate::progress_utils::ProgressContext;
 use crate::theme::theme_global_config;
@@ -421,9 +422,9 @@ async fn handle_theme_switch_menu() -> Result<()> {
     println!();
 
     let theme_options = vec![
-        "T.JARVIS".to_string(),
-        "Classic".to_string(),
-        "Matrix".to_string(),
+        "Default".to_string(),
+        "Minimal".to_string(),
+        "Terminal".to_string(),
     ];
 
     let theme = theme_global_config::current_theme();
@@ -438,21 +439,36 @@ async fn handle_theme_switch_menu() -> Result<()> {
 
     // Apply the selected theme
     let theme_type = match selected_theme.as_str() {
-        "T.JARVIS" => crate::theme::ThemeType::TJarvis,
-        "Classic" => crate::theme::ThemeType::Classic,
-        "Matrix" => crate::theme::ThemeType::Matrix,
+        "Default" => crate::theme::ThemeType::TJarvis,
+        "Minimal" => crate::theme::ThemeType::Classic,
+        "Terminal" => crate::theme::ThemeType::Matrix,
         _ => crate::theme::ThemeType::TJarvis,
     };
 
     theme_global_config::set_theme(theme_type);
     let new_theme = theme_global_config::current_theme();
+
+    // Clear screen and redraw with new theme to show immediate visual update
+    print!("\x1b[2J\x1b[H");
+
+    // Display welcome screen with new theme so ASCII art and welcome text update immediately
+    display_welcome_screen();
+    println!();
+
     println!(
-        "\n{}",
+        "{}",
         new_theme.primary(&format!("Theme changed to: {}", selected_theme))
     );
-    println!("The new theme will be applied immediately.");
+    println!(
+        "{}",
+        new_theme.secondary("The new theme has been applied immediately.")
+    );
+    println!(
+        "{}",
+        new_theme.secondary("All menu text will now use the new theme colors.")
+    );
 
-    println!("\n{}", current_theme.accent("Press Enter to continue..."));
+    println!("\n{}", new_theme.accent("Press Enter to continue..."));
     let _ = std::io::stdin().read_line(&mut String::new());
 
     Ok(())

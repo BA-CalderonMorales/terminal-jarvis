@@ -1,25 +1,32 @@
 //! Tool List Operations
 //!
 //! Handles listing all available AI coding tools with their installation status.
-//! Uses the unified ToolDisplayFormatter for consistent formatting across all tools.
+//! Uses the ToolListViewModel for MVVM-inspired presentation logic.
 
-use crate::installation_arguments::InstallationManager;
-use crate::tools::{tools_display::ToolDisplayFormatter, ToolManager};
+use crate::presentation::models::Tool;
+use crate::tools::tools_config::get_tool_config_loader;
+use crate::tools::tools_detection::get_available_tools;
+use crate::presentation::view_models::ToolListViewModel;
 use anyhow::Result;
 
 /// Handle listing all available AI coding tools with their status
 pub async fn handle_list_tools() -> Result<()> {
-    let tools = ToolManager::get_available_tools();
-    let install_commands = InstallationManager::get_install_commands();
+    // Get tools from the new model system
+    let config_loader = get_tool_config_loader();
+    let available_tools = get_available_tools();
 
-    // Create iterator that combines tool info with install commands
-    let tools_iter = tools.iter().map(|(tool_name, tool_info)| {
-        let install_info = install_commands.get(*tool_name).unwrap();
-        (*tool_name, tool_info, install_info)
-    });
+    let mut tools = Vec::new();
+    for (tool_name, tool_info) in available_tools {
+        if let Some(tool_def) = config_loader.get_tool_definition(tool_name) {
+            let tool =
+                Tool::from_tool_definition(tool_name.to_string(), tool_def, tool_info.is_installed);
+            tools.push(tool);
+        }
+    }
 
-    ToolDisplayFormatter::display_tool_list(tools_iter);
-    ToolDisplayFormatter::show_system_requirements_advisory();
+    // Use the view model for presentation
+    let view_model = ToolListViewModel::new(tools);
+    view_model.display_list();
 
     Ok(())
 }

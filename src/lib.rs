@@ -5,6 +5,7 @@ pub mod cli_logic;
 pub mod config;
 pub mod evals;
 pub mod installation_arguments;
+pub mod presentation;
 pub mod progress_utils;
 pub mod services;
 pub mod theme;

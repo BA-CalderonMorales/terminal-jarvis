@@ -1,16 +1,4 @@
-mod api;
-mod auth_manager;
-mod cli;
-mod cli_logic;
-mod config;
-mod evals;
-mod installation_arguments;
-mod progress_utils;
-mod services;
-mod theme;
-mod tools;
-
-use cli::Cli;
+use terminal_jarvis::cli::Cli;
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
