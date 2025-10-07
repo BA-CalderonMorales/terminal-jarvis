@@ -191,3 +191,9 @@ login
 !npm/terminal-jarvis/config/
 !npm/terminal-jarvis/config/**
 !config/evals/goose-metrics.toml
+
+# NPM package binary (dynamically downloaded by postinstall)
+npm/terminal-jarvis/bin/terminal-jarvis-bin
+npm/terminal-jarvis/bin/terminal-jarvis.exe
+npm/terminal-jarvis/bin/terminal-jarvis.cmd
+npm/terminal-jarvis/downloads/

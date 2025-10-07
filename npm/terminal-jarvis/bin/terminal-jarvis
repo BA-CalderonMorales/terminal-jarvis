@@ -1,21 +1,33 @@
 #!/usr/bin/env bash
-# POSIX launcher that invokes the downloaded binary
-# This script expects the postinstall step to have downloaded the appropriate binary to this same directory.
+# Terminal Jarvis POSIX launcher
+# This script ensures the binary is available and executable
 
 set -euo pipefail
 
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-BIN_PATH="$SCRIPT_DIR/terminal-jarvis"
+# Resolve the real path of this script, following symlinks
+# This is important because npx creates symlinks in node_modules/.bin
+SCRIPT_PATH="${BASH_SOURCE[0]}"
+while [ -L "$SCRIPT_PATH" ]; do
+  SCRIPT_DIR="$(cd "$(dirname "$SCRIPT_PATH")" && pwd)"
+  SCRIPT_PATH="$(readlink "$SCRIPT_PATH")"
+  [[ $SCRIPT_PATH != /* ]] && SCRIPT_PATH="$SCRIPT_DIR/$SCRIPT_PATH"
+done
+SCRIPT_DIR="$(cd "$(dirname "$SCRIPT_PATH")" && pwd)"
 
+BIN_PATH="$SCRIPT_DIR/terminal-jarvis-bin"
+
+# If binary is missing, try to run postinstall
 if [ ! -x "$BIN_PATH" ]; then
-  echo "[terminal-jarvis] Binary not found. Attempting to run postinstall to fetch it..." >&2
+  echo "[terminal-jarvis] Binary not found. Running postinstall..." >&2
   node "$SCRIPT_DIR/../scripts/postinstall.js" || true
 fi
 
+# Verify binary exists
 if [ ! -x "$BIN_PATH" ]; then
-  echo "[terminal-jarvis] Error: terminal-jarvis binary is missing or not executable." >&2
-  echo "[terminal-jarvis] Try reinstalling the package or check network access to GitHub releases." >&2
+  echo "[terminal-jarvis] Error: Binary is missing or not executable." >&2
+  echo "[terminal-jarvis] Try reinstalling: npm install terminal-jarvis" >&2
   exit 1
 fi
 
+# Execute the binary
 exec "$BIN_PATH" "$@"

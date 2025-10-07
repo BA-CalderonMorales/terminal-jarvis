@@ -104,8 +104,8 @@ verify_npm_flags() {
 log_header "Terminal Jarvis Comprehensive Test Suite"
 log_info_if_enabled "Running core functionality and NPM package validation..."
 
-# Change to project root
-cd ../../
+# Change to project root (relative to script location, not current directory)
+cd "$SCRIPT_DIR/../../" || exit 1
 
 # Build if needed
 if [ ! -f "$BINARY" ]; then
@@ -304,29 +304,31 @@ else
         "[ '$CRUSH_PACKAGE' = '$CONFIG_CRUSH' ]"
     
     # Validate package installation compatibility (dry run)
+    # Using timeout to prevent hanging on packages with interactive prompts
+    # Note: 15s timeout allows npm to resolve large dependency trees
     run_test "Amp package can be installed (dry run)" \
-        "npm install -g $AMP_PACKAGE --dry-run > /dev/null 2>&1"
-    
+        "timeout 15s npm install -g $AMP_PACKAGE --dry-run > /dev/null 2>&1"
+
     run_test "Claude package can be installed (dry run)" \
-        "npm install -g $CLAUDE_PACKAGE --dry-run > /dev/null 2>&1"
-    
+        "timeout 15s npm install -g $CLAUDE_PACKAGE --dry-run > /dev/null 2>&1"
+
     run_test "Gemini package can be installed (dry run)" \
-        "npm install -g $GEMINI_PACKAGE --dry-run > /dev/null 2>&1"
-    
+        "timeout 15s npm install -g $GEMINI_PACKAGE --dry-run > /dev/null 2>&1"
+
     run_test "Qwen package can be installed (dry run)" \
-        "npm install -g $QWEN_PACKAGE --dry-run > /dev/null 2>&1"
-    
+        "timeout 15s npm install -g $QWEN_PACKAGE --dry-run > /dev/null 2>&1"
+
     run_test "OpenCode package can be installed (dry run)" \
-        "npm install -g $OPENCODE_PACKAGE --dry-run > /dev/null 2>&1"
-    
+        "timeout 15s npm install -g $OPENCODE_PACKAGE --dry-run > /dev/null 2>&1"
+
     run_test "LLxprt package can be installed (dry run)" \
-        "npm install -g $LLXPRT_PACKAGE --dry-run > /dev/null 2>&1"
-    
+        "timeout 15s npm install -g $LLXPRT_PACKAGE --dry-run > /dev/null 2>&1"
+
     run_test "Codex package can be installed (dry run)" \
-        "npm install -g $CODEX_PACKAGE --dry-run > /dev/null 2>&1"
-    
+        "timeout 15s npm install -g $CODEX_PACKAGE --dry-run > /dev/null 2>&1"
+
     run_test "Crush package can be installed (dry run)" \
-        "npm install -g $CRUSH_PACKAGE --dry-run > /dev/null 2>&1"
+        "timeout 15s npm install -g $CRUSH_PACKAGE --dry-run > /dev/null 2>&1"
     
     # Validate services/ update logic has correct package names via config
     SERVICES_CLAUDE_PRIMARY=$(grep 'update.*-g' config/tools/claude.toml | sed 's/.*"\([^"]*\)".*/\1/')

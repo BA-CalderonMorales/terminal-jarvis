@@ -61,23 +61,29 @@ export function createPackageTestEnvironment(): PackageTestContext {
     stdio: "pipe",
   });
 
-  // After installation, copy the local binary to where the launcher script expects it
+  // After installation, copy the local binary to where the postinstall script expects it
   // This bypasses the postinstall GitHub download for local testing
   const installedBinDir = join(testDir, "node_modules/terminal-jarvis/bin");
-  const _launcherScript = join(installedBinDir, "terminal-jarvis");
 
-  // The launcher script is a bash script, we need to put the actual binary next to it
-  // but the script references itself! We need to rename the launcher and put binary in its place
-  const _launcherBackup = join(installedBinDir, "terminal-jarvis.sh");
-  const binaryDestination = join(installedBinDir, "terminal-jarvis");
+  // The package structure:
+  // - terminal-jarvis (launcher script - committed to repo, installed by npm)
+  // - terminal-jarvis-bin (actual binary - downloaded by postinstall or placed by test)
+  const binaryDestination = join(installedBinDir, "terminal-jarvis-bin");
 
   try {
-    // For testing, just directly use the binary (bypass the launcher complexity)
-    // Copy the binary as the launcher expects
-    execSync(`cp -f ${localBinary} ${binaryDestination}`, { stdio: "pipe" });
-    execSync(`chmod +x ${binaryDestination}`, { stdio: "pipe" });
+    const fs = require("fs");
+
+    // Ensure bin directory exists
+    if (!fs.existsSync(installedBinDir)) {
+      fs.mkdirSync(installedBinDir, { recursive: true });
+    }
+
+    // Copy the compiled binary as terminal-jarvis-bin
+    // The launcher script is already installed by npm from the package
+    fs.copyFileSync(localBinary, binaryDestination);
+    fs.chmodSync(binaryDestination, 0o755);
   } catch (error) {
-    throw new Error(`Failed to copy binary to installed package: ${error}`);
+    throw new Error(`Failed to setup binary in installed package: ${error}`);
   }
 
   return {
