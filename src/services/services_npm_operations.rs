@@ -102,6 +102,7 @@ impl NpmOperationsManager {
 
     /// Get NPM distribution tag information with caching
     /// Cache TTL: 1 hour by default
+    #[allow(dead_code)]
     pub async fn get_cached_npm_dist_tag_info(
         config_manager: &ConfigManager,
     ) -> Result<Option<String>> {

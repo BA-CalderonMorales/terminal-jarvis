@@ -6,7 +6,7 @@
 
 <div align="center">
 
-A unified command center for AI coding tools. Manage and run a suite of coding assistants from one beautiful terminal interface. See the full list in the [Supported AI Tools guide](docs/SOURCES.md).
+A unified command center for AI coding tools. Manage and run a suite of coding assistants from one beautiful terminal interface. See the full list in the [Supported AI Tools guide](https://ba-calderonmorales.github.io/my-life-as-a-dev/projects/active/terminal-jarvis/).
 
 </div>
 
@@ -80,12 +80,12 @@ The optimal way to use Terminal Jarvis is through a pre-configured remote develo
 If you prefer local development:
 
 - **Node.js 20+** and NPM
-- **macOS users**: [Rust toolchain required](docs/INSTALLATION.md#macos-prerequisites)
-- **Linux users**: Build tools and development headers
+- **macOS users**: No Rust required for NPM/Homebrew; Rust only needed for Cargo/source builds
+- **Linux users**: `tar` for NPM installs; standard build tools if building from source
 - **Windows users**: Windows Subsystem for Linux (WSL2) recommended
 
 > [!IMPORTANT]
-> **Full installation guide:** [docs/INSTALLATION.md](docs/INSTALLATION.md)
+> **Full documentation:** [Terminal Jarvis Docs](https://ba-calderonmorales.github.io/my-life-as-a-dev/projects/active/terminal-jarvis/)
 
 ## Quick Start
 
@@ -118,22 +118,23 @@ Terminal Jarvis is your AI coding assistant command center:
 
 ## Documentation
 
-Targeted guides and references when you need more than the quick start.
+Comprehensive guides and references available at the external docs site: **[Terminal Jarvis Documentation](https://ba-calderonmorales.github.io/my-life-as-a-dev/projects/active/terminal-jarvis/)**
 
-- **[Installation Guide](docs/INSTALLATION.md)** - Platform-specific setup instructions
-- **[Usage Guide](docs/USAGE.md)** - How to use Terminal Jarvis effectively
-- **[Configuration Guide](docs/CONFIGURATION.md)** - Customize Terminal Jarvis behavior
-- **[Known Limitations](docs/LIMITATIONS.md)** - Current issues and workarounds
-- **[Architecture Guide](docs/ARCHITECTURE.md)** - Technical details and development info
-- **[Testing Guide](docs/TESTING.md)** - How to test and contribute
-- **[Contribution Guide](docs/CONTRIBUTIONS.md)** - Complete contributor guidelines
-- **[Roadmap](docs/ROADMAP.md)** - Future plans and development priorities
-- **[Supported AI Tools](docs/SOURCES.md)** - Complete overview of all integrated AI coding tools
+Includes:
+- **[Installation Guide](https://ba-calderonmorales.github.io/my-life-as-a-dev/projects/active/terminal-jarvis/quick_start/installation/)** - Platform-specific setup instructions
+- **[Usage Guide](https://ba-calderonmorales.github.io/my-life-as-a-dev/projects/active/terminal-jarvis/quick_start/usage/)** - How to use Terminal Jarvis effectively
+- **[Configuration Guide](https://ba-calderonmorales.github.io/my-life-as-a-dev/projects/active/terminal-jarvis/quick_start/configuration/)** - Customize Terminal Jarvis behavior
+- **[Supported AI Tools](https://ba-calderonmorales.github.io/my-life-as-a-dev/projects/active/terminal-jarvis/quick_start/ai-tools/)** - Complete overview of all integrated AI coding tools
+- **[Architecture Guide](https://ba-calderonmorales.github.io/my-life-as-a-dev/projects/active/terminal-jarvis/details/architecture/)** - Technical details and development info
+- **[Testing Guide](https://ba-calderonmorales.github.io/my-life-as-a-dev/projects/active/terminal-jarvis/details/testing/)** - How to test and contribute
+- **[Contribution Guide](https://ba-calderonmorales.github.io/my-life-as-a-dev/projects/active/terminal-jarvis/details/contributions/)** - Complete contributor guidelines
+- **[Roadmap](https://ba-calderonmorales.github.io/my-life-as-a-dev/projects/active/terminal-jarvis/details/roadmap/)** - Future plans and development priorities
+- **[Known Limitations](https://ba-calderonmorales.github.io/my-life-as-a-dev/projects/active/terminal-jarvis/details/limitations/)** - Current issues and workarounds
 
-Terminal Jarvis provides a unified interface for multiple AI coding tools including Claude, Gemini, Qwen, and an expanding ecosystem of others. Each tool is carefully integrated with intelligent authentication flows and session management. For detailed tool information, capabilities, and current status, see our [comprehensive tool guide](docs/SOURCES.md).
+Terminal Jarvis provides a unified interface for multiple AI coding tools including Claude, Gemini, Qwen, and an expanding ecosystem of others. Each tool is carefully integrated with intelligent authentication flows and session management. For detailed tool information, capabilities, and current status, see our [comprehensive tool guide](https://ba-calderonmorales.github.io/my-life-as-a-dev/projects/active/terminal-jarvis/quick_start/ai-tools/).
 
 > [!CAUTION]
-> **Known Issues**: [View current limitations and workarounds](docs/LIMITATIONS.md)
+> **Known Issues**: [View current limitations and workarounds](https://ba-calderonmorales.github.io/my-life-as-a-dev/projects/active/terminal-jarvis/details/limitations/)
 
 ## License
 
@@ -148,3 +149,5 @@ If Terminal Jarvis has been helpful for your AI coding workflow or you just thou
 [![Buy Me a Coffee](https://img.shields.io/badge/Buy%20Me%20a%20Coffee-orange.svg?style=for-the-badge)](https://www.buymeacoffee.com/brandoncalderonmorales)
 
 Your support helps maintain and improve Terminal Jarvis for the entire community!
+
+

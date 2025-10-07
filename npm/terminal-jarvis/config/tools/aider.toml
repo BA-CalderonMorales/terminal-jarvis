@@ -1,0 +1,69 @@
+# =============================================================================
+# AIDER - AI pair programming assistant
+# =============================================================================
+# Single Responsibility: Manages Aider tool configuration and settings
+# Open/Closed Principle: Self-contained tool definition, extensible without modification
+
+[tool]
+display_name = "Aider"
+config_key = "aider"
+description = "AI pair programming assistant that edits code in your local git repository"
+homepage = "https://aider.chat/"
+documentation = "https://aider.chat/docs/"
+cli_command = "aider"
+requires_npm = false
+requires_sudo = false
+status = "stable"
+
+[tool.install]
+command = "uv"
+args = [
+    "tool",
+    "install",
+    "--force",
+    "--python",
+    "python3.12",
+    "--with",
+    "pip",
+    "aider-chat@latest",
+]
+verify_command = "aider --version"
+post_install_message = "Aider installed successfully! Set your OpenAI API key or other provider credentials to get started."
+
+[tool.update]
+command = "uv"
+args = ["tool", "upgrade", "aider-chat"]
+verify_command = "aider --version"
+
+[tool.auth]
+env_vars = [
+    "OPENAI_API_KEY",
+    "ANTHROPIC_API_KEY",
+    "GEMINI_API_KEY",
+    "AZURE_API_KEY",
+]
+setup_url = "https://aider.chat/docs/install.html#api-keys"
+browser_auth = false
+auth_instructions = "Set your preferred AI provider API key (OpenAI, Anthropic, Google, Azure, etc.)"
+
+[tool.features]
+supports_files = true
+supports_streaming = true
+supports_conversation = true
+max_context_tokens = 128000
+supported_languages = [
+    "python",
+    "javascript",
+    "rust",
+    "go",
+    "java",
+    "cpp",
+    "typescript",
+    "html",
+    "css",
+    "bash",
+    "shell",
+    "sql",
+    "yaml",
+    "json",
+]

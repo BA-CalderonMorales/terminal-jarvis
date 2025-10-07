@@ -18,12 +18,12 @@ impl ThemeConfigurator {
         }
     }
 
-    /// T.JARVIS professional theme with proper contrast  
+    /// Default professional theme with proper contrast  
     pub fn t_jarvis_theme() -> Theme {
         Theme {
-            name: "T.JARVIS",
+            name: "Default",
             colors: ColorCodes {
-                // T.JARVIS blue theme - enhanced professional corporate look with perfect contrast
+                // Default blue theme - enhanced professional corporate look with perfect contrast
                 background: "\x1b[48;2;0;51;102m", // Deep blue background
                 primary_text: "\x1b[1;38;2;255;255;255m", // Bold pure white text for maximum readability
                 secondary_text: "\x1b[38;2;200;230;255m", // Enhanced light blue text with more warmth
@@ -35,10 +35,10 @@ impl ThemeConfigurator {
         }
     }
 
-    /// Classic minimal theme
+    /// Minimal theme
     pub fn classic_theme() -> Theme {
         Theme {
-            name: "Classic",
+            name: "Minimal",
             colors: ColorCodes {
                 reset: "\x1b[0m",
                 background: "\x1b[48;2;32;32;32m", // Dark gray background for proper contrast
@@ -51,18 +51,18 @@ impl ThemeConfigurator {
         }
     }
 
-    /// Matrix-style green theme
+    /// Terminal-style green theme
     pub fn matrix_theme() -> Theme {
         Theme {
-            name: "Matrix",
+            name: "Terminal",
             colors: ColorCodes {
                 reset: "\x1b[0m",
                 background: "\x1b[40m",                // Black background
-                primary_text: "\x1b[38;2;0;255;65m",   // Matrix green
+                primary_text: "\x1b[38;2;0;255;65m",   // Terminal green
                 secondary_text: "\x1b[38;2;0;200;0m",  // Darker green
                 accent_text: "\x1b[38;2;255;255;255m", // White
-                border: "\x1b[38;2;0;255;65m",         // Matrix green
-                logo: "\x1b[38;2;0;255;65m",           // Matrix green
+                border: "\x1b[38;2;0;255;65m",         // Terminal green
+                logo: "\x1b[38;2;0;255;65m",           // Terminal green
             },
         }
     }
@@ -75,7 +75,7 @@ mod tests {
     #[test]
     fn test_t_jarvis_theme() {
         let theme = ThemeConfigurator::t_jarvis_theme();
-        assert_eq!(theme.name, "T.JARVIS");
+        assert_eq!(theme.name, "Default");
         assert_eq!(theme.colors.reset, "\x1b[0m");
         assert!(!theme.colors.background.is_empty());
         assert!(!theme.colors.primary_text.is_empty());
@@ -84,26 +84,26 @@ mod tests {
     #[test]
     fn test_classic_theme() {
         let theme = ThemeConfigurator::classic_theme();
-        assert_eq!(theme.name, "Classic");
+        assert_eq!(theme.name, "Minimal");
         assert_eq!(theme.colors.reset, "\x1b[0m");
     }
 
     #[test]
     fn test_matrix_theme() {
         let theme = ThemeConfigurator::matrix_theme();
-        assert_eq!(theme.name, "Matrix");
+        assert_eq!(theme.name, "Terminal");
         assert!(theme.colors.primary_text.contains("255;65"));
     }
 
     #[test]
     fn test_get_theme_by_type() {
         let t_jarvis = ThemeConfigurator::get_theme(ThemeType::TJarvis);
-        assert_eq!(t_jarvis.name, "T.JARVIS");
+        assert_eq!(t_jarvis.name, "Default");
 
         let classic = ThemeConfigurator::get_theme(ThemeType::Classic);
-        assert_eq!(classic.name, "Classic");
+        assert_eq!(classic.name, "Minimal");
 
         let matrix = ThemeConfigurator::get_theme(ThemeType::Matrix);
-        assert_eq!(matrix.name, "Matrix");
+        assert_eq!(matrix.name, "Terminal");
     }
 }

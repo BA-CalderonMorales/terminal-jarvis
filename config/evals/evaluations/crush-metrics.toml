@@ -1,0 +1,82 @@
+# Crush Evaluation - Metrics-Based Assessment
+# Real-world verifiable data for research decision-making
+
+tool_name = "crush"
+tool_display_name = "Crush"
+summary = "Crush offers lightweight AI coding assistance with emphasis on speed, minimal dependencies, and terminal-first workflows."
+
+[metrics.github]
+repo_url = "https://github.com/crush-ai/crush"
+stars = 1200
+forks = 85
+open_issues = 22
+last_commit_date = "2025-09-05"
+commit_frequency = "Monthly"
+contributors = 12
+license = "MIT"
+created_date = "2024-05-20"
+archived = false
+
+[metrics.package]
+package_name = "crush-ai"
+registry = "PyPI"
+weekly_downloads = 320
+total_downloads = 18000
+latest_version = "0.3.2"
+last_publish_date = "2025-08-28"
+version_count = 16
+
+[metrics.community]
+discord_members = 380
+twitter_followers = 1500
+twitter_url = "https://twitter.com/crush_ai"
+reddit_subscribers = 220
+reddit_url = "https://reddit.com/r/crushai"
+active_discussions = false
+
+[metrics.documentation]
+docs_url = "https://crush.dev"
+has_readme = true
+has_contributing_guide = false
+has_examples = true
+docs_freshness = "< 1 month"
+api_docs_quality = "Adequate"
+
+[metrics.platform]
+supported_os = ["macOS", "Linux"]
+supported_languages = ["Python", "Rust"]
+architectures = ["x86_64", "ARM64"]
+requires_docker = false
+docker_support = false
+ci_cd_setup = true
+cloud_deployment_guides = false
+web_based = false
+mobile_support = false
+cloud_only = false
+
+[metrics.team]
+doxxed_team = false
+organization_name = "Crush Development Team"
+organization_url = "https://crush.dev"
+team_size = "Small (1-5)"
+public_team = false
+company_funding = "Open Source / Community"
+backed_by = ["Community"]
+funding_disclosed = false
+public_roadmap = false
+security_audits = false
+security_policy = false
+responsible_disclosure = false
+
+[metrics.support]
+avg_issue_response_time = "< 1 week"
+avg_pr_review_time = "< 2 weeks"
+avg_issue_close_time = "3-4 weeks"
+open_vs_closed_ratio = 0.35
+active_maintainers = 2
+has_paid_support = false
+commercial_support = false
+community_support = "GitHub Issues"
+support_channels = ["GitHub Issues"]
+sla_available = false
+uptime_percentage = 97.0

@@ -252,6 +252,7 @@ run_test "BROWSER environment variable set to safe command" \
 echo ""
 
 # ===== CLEANUP =====
+# shellcheck disable=SC2329
 cleanup() {
     # Clean up temporary directories
     if [ -n "$XDG_CONFIG_HOME" ] && [ "$XDG_CONFIG_HOME" != "$HOME/.config" ]; then

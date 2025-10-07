@@ -52,12 +52,14 @@ impl Theme {
     }
 
     /// Format text with logo colors without reset (for use with backgrounds)
+    #[allow(dead_code)]
     pub fn logo_no_reset(&self, text: &str) -> String {
         use crate::theme::theme_text_formatting::TextFormatter;
         TextFormatter::logo_no_reset(self, text)
     }
 
     /// Format text with secondary colors without reset (for use with backgrounds)  
+    #[allow(dead_code)]
     pub fn secondary_no_reset(&self, text: &str) -> String {
         use crate::theme::theme_text_formatting::TextFormatter;
         TextFormatter::secondary_no_reset(self, text)
@@ -71,6 +73,7 @@ impl Theme {
     }
 
     /// Create a complete background line with content
+    #[allow(dead_code)]
     pub fn background_line_with_content(&self, content: &str, width: usize) -> String {
         use crate::theme::theme_background_layout::BackgroundLayoutManager;
         BackgroundLayoutManager::background_line_with_content(self, content, width)
@@ -105,13 +108,13 @@ mod tests {
     #[test]
     fn test_theme_get_method() {
         let theme = Theme::get(ThemeType::TJarvis);
-        assert_eq!(theme.name, "T.JARVIS");
+        assert_eq!(theme.name, "Default");
 
         let classic = Theme::get(ThemeType::Classic);
-        assert_eq!(classic.name, "Classic");
+        assert_eq!(classic.name, "Minimal");
 
         let matrix = Theme::get(ThemeType::Matrix);
-        assert_eq!(matrix.name, "Matrix");
+        assert_eq!(matrix.name, "Terminal");
     }
 
     #[test]
@@ -152,7 +155,7 @@ mod tests {
     #[test]
     fn test_backward_compatibility() {
         let theme = Theme::t_jarvis_theme();
-        assert_eq!(theme.name, "T.JARVIS");
+        assert_eq!(theme.name, "Default");
 
         let reset = theme.reset();
         assert_eq!(reset, "\x1b[0m");

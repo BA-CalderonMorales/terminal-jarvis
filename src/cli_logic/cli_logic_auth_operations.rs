@@ -1,6 +1,8 @@
 use anyhow::{anyhow, Result};
-use inquire::{Confirm, Select, Text};
+use inquire::{Confirm, Text};
 use std::collections::HashMap;
+
+use crate::cli_logic::cli_logic_responsive_menu::create_themed_select;
 
 use crate::auth_manager::AuthManager;
 use crate::theme::theme_global_config;
@@ -19,14 +21,11 @@ pub async fn handle_authentication_menu() -> Result<()> {
             "Back to Main Menu".to_string(),
         ];
 
-        let selection = match Select::new("Choose an action:", options.clone())
-            .with_render_config(crate::cli_logic::cli_logic_utilities::get_themed_render_config())
-            .with_page_size(10)
-            .prompt()
-        {
-            Ok(s) => s,
-            Err(_) => return Ok(()),
-        };
+        let selection =
+            match create_themed_select(&theme, "Choose an action:", options.clone()).prompt() {
+                Ok(s) => s,
+                Err(_) => return Ok(()),
+            };
 
         match selection.as_str() {
             s if s.contains("Set credentials") => {
@@ -144,14 +143,11 @@ pub async fn handle_auth_set(tool: &str) -> Result<()> {
 }
 
 async fn pick_tool_name() -> Result<Option<String>> {
+    let theme = theme_global_config::current_theme();
     let tools_map = ToolManager::get_available_tools();
     let mut options: Vec<String> = tools_map.keys().map(|s| s.to_string()).collect();
     options.sort();
-    let prompt = Select::new("Select a tool:", options.clone())
-        .with_render_config(crate::cli_logic::cli_logic_utilities::get_themed_render_config())
-        .with_page_size(15)
-        .prompt();
-    match prompt {
+    match create_themed_select(&theme, "Select a tool:", options.clone()).prompt() {
         Ok(choice) => Ok(Some(choice)),
         Err(_) => Ok(None),
     }
@@ -165,10 +161,8 @@ async fn handle_auth_remove_menu() -> Result<()> {
         "Clear ALL credentials".to_string(),
         "Back".to_string(),
     ];
-    let choice = Select::new("Choose a removal option:", options.clone())
-        .with_render_config(crate::cli_logic::cli_logic_utilities::get_themed_render_config())
-        .with_page_size(10)
-        .prompt()?;
+    let choice =
+        create_themed_select(&theme, "Choose a removal option:", options.clone()).prompt()?;
 
     match choice.as_str() {
         "Remove credentials for one tool" => {

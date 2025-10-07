@@ -175,8 +175,11 @@ crush.db
 .kilocode/
 .qwen/
 .roo/
+.opencode/
+.agents/
 goose/
 goose*
+!config/evals/evaluations/goose-metrics.toml
 
 terminal-jarvis-agents/
 
@@ -184,3 +187,13 @@ terminal-jarvis-agents/
 homebrew-terminal-jarvis/
 .aider*
 login
+
+!npm/terminal-jarvis/config/
+!npm/terminal-jarvis/config/**
+!config/evals/goose-metrics.toml
+
+# NPM package binary (dynamically downloaded by postinstall)
+npm/terminal-jarvis/bin/terminal-jarvis-bin
+npm/terminal-jarvis/bin/terminal-jarvis.exe
+npm/terminal-jarvis/bin/terminal-jarvis.cmd
+npm/terminal-jarvis/downloads/

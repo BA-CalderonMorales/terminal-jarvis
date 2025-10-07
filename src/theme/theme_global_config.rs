@@ -48,9 +48,9 @@ impl ThemeConfig {
     #[allow(dead_code)]
     pub fn available_themes() -> Vec<(&'static str, ThemeType)> {
         vec![
-            ("T.JARVIS (Default)", ThemeType::TJarvis),
-            ("Classic", ThemeType::Classic),
-            ("Matrix", ThemeType::Matrix),
+            ("Default", ThemeType::TJarvis),
+            ("Minimal", ThemeType::Classic),
+            ("Terminal", ThemeType::Matrix),
         ]
     }
 
