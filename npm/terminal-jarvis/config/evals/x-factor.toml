@@ -1,0 +1,109 @@
+# X-Factor Custom Evaluation Criteria
+# Community-driven and research-specific evaluation categories
+
+enabled = true
+
+# Custom criteria can be added here for domain-specific or emerging research interests
+# Follow the same structure as standard criteria
+
+[[custom_criteria]]
+id = "academic_research_value"
+name = "Academic Research Value"
+description = "Suitability for academic research, reproducibility, experiment tracking"
+weight = 1.0
+is_custom = true
+
+[[custom_criteria.metrics]]
+id = "reproducibility"
+name = "Reproducibility"
+description = "Can results be reproduced consistently?"
+metric_type = "Scale"
+evaluation_guide = "Rate ease of reproducing results (1-10)"
+
+[[custom_criteria.metrics]]
+id = "experiment_tracking"
+name = "Experiment Tracking"
+description = "Built-in experiment tracking or integration with tools like MLflow"
+metric_type = "Boolean"
+evaluation_guide = "Yes/No - describe capabilities"
+
+[[custom_criteria.metrics]]
+id = "citation_support"
+name = "Citation Support"
+description = "Does the tool provide proper citations for academic use?"
+metric_type = "Qualitative"
+evaluation_guide = "Assess citation format and completeness"
+
+# Example: Enterprise-specific criterion
+[[custom_criteria]]
+id = "enterprise_readiness"
+name = "Enterprise Readiness"
+description = "Suitability for enterprise deployment, compliance, audit trails"
+weight = 1.2
+is_custom = true
+
+[[custom_criteria.metrics]]
+id = "sso_support"
+name = "SSO Support"
+description = "Single Sign-On support (SAML, OAuth, etc.)"
+metric_type = "Boolean"
+evaluation_guide = "Yes/No - list supported protocols"
+
+[[custom_criteria.metrics]]
+id = "audit_logging"
+name = "Audit Logging"
+description = "Comprehensive audit trail for compliance"
+metric_type = "Scale"
+evaluation_guide = "Rate audit logging capabilities (1-10)"
+
+[[custom_criteria.metrics]]
+id = "on_premise_deployment"
+name = "On-Premise Deployment"
+description = "Can be deployed on-premise or in private cloud"
+metric_type = "Boolean"
+evaluation_guide = "Yes/No - describe deployment options"
+
+# Example: Code quality focus
+[[custom_criteria]]
+id = "code_quality_focus"
+name = "Code Quality Focus"
+description = "Emphasis on code quality, testing, best practices"
+weight = 1.1
+is_custom = true
+
+[[custom_criteria.metrics]]
+id = "test_generation"
+name = "Test Generation"
+description = "Automatic test generation capabilities"
+metric_type = "Scale"
+evaluation_guide = "Rate test generation quality (1-10)"
+
+[[custom_criteria.metrics]]
+id = "refactoring_support"
+name = "Refactoring Support"
+description = "Built-in refactoring suggestions and assistance"
+metric_type = "Scale"
+evaluation_guide = "Rate refactoring capabilities (1-10)"
+
+[[custom_criteria.metrics]]
+id = "code_review"
+name = "Code Review Assistance"
+description = "Helps with code review process"
+metric_type = "Qualitative"
+evaluation_guide = "Describe code review features"
+
+# Add your own custom criteria here
+# Follow the structure above:
+# [[custom_criteria]]
+# id = "unique_criterion_id"
+# name = "Display Name"
+# description = "What this evaluates"
+# weight = 1.0
+# is_custom = true
+#
+# [[custom_criteria.metrics]]
+# id = "metric_id"
+# name = "Metric Name"
+# description = "What this metric measures"
+# metric_type = "Boolean|Numeric|Scale|Categorical|Qualitative|Evidence"
+# evaluation_guide = "How to evaluate this metric"
