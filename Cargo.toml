@@ -54,3 +54,29 @@ chrono = { version = "0.4.42", features = ["serde"] }
 
 [dev-dependencies]
 tokio-test = "0.4"
+
+# cargo-binstall support: download pre-built binaries from GitHub releases
+# Users can install with: cargo binstall terminal-jarvis
+[package.metadata.binstall]
+pkg-url = "{ repo }/releases/download/v{ version }/{ name }-{ target }{ archive-suffix }"
+bin-dir = "{ bin }{ binary-ext }"
+pkg-fmt = "tgz"
+
+# Platform-specific overrides for GitHub release naming
+[package.metadata.binstall.overrides.x86_64-apple-darwin]
+pkg-url = "{ repo }/releases/download/v{ version }/terminal-jarvis-mac.tar.gz"
+
+[package.metadata.binstall.overrides.aarch64-apple-darwin]
+pkg-url = "{ repo }/releases/download/v{ version }/terminal-jarvis-mac.tar.gz"
+
+[package.metadata.binstall.overrides.x86_64-unknown-linux-gnu]
+pkg-url = "{ repo }/releases/download/v{ version }/terminal-jarvis-linux.tar.gz"
+
+[package.metadata.binstall.overrides.aarch64-unknown-linux-gnu]
+pkg-url = "{ repo }/releases/download/v{ version }/terminal-jarvis-linux.tar.gz"
+
+[package.metadata.binstall.overrides.x86_64-pc-windows-msvc]
+pkg-url = "{ repo }/releases/download/v{ version }/terminal-jarvis-windows.tar.gz"
+
+[package.metadata.binstall.overrides.aarch64-pc-windows-msvc]
+pkg-url = "{ repo }/releases/download/v{ version }/terminal-jarvis-windows.tar.gz"

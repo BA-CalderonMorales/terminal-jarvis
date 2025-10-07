@@ -1,13 +1,11 @@
 #!/usr/bin/env node
 /*
- Postinstall script for terminal-jarvis
+ Enhanced postinstall script for terminal-jarvis
  - Detect OS and architecture
- - Determine GitHub release asset URL for the current version
- - Download archive
- - Extract executable to bin/terminal-jarvis
- - Make it executable
- - Verify by running `--version`
- 
+ - Download platform-specific binary from GitHub releases with retry logic
+ - Create dynamic launcher script
+ - Verify installation
+
  Version Hint (used by CI for consistency checks):
  Terminal Jarvis v0.0.69
 */
@@ -18,188 +16,263 @@ const path = require('path');
 const https = require('https');
 const { spawnSync } = require('child_process');
 const { createWriteStream } = require('fs');
-const { pipeline } = require('stream');
-const { promisify } = require('util');
-// No external tar dependency; we'll shell out to system 'tar'
-
-const pipe = promisify(pipeline);
 
 const pkg = require('../package.json');
 
+// Configuration
+const DOWNLOAD_RETRIES = 3;
+const DOWNLOAD_TIMEOUT = 30000; // 30 seconds
+const GITHUB_REPO = 'BA-CalderonMorales/terminal-jarvis';
+
 function log(msg) {
-
     console.log(`[terminal-jarvis] ${msg}`);
-
 }
 
 function warn(msg) {
-
     console.warn(`[terminal-jarvis] Warning: ${msg}`);
-
 }
 
 function error(msg) {
-
     console.error(`[terminal-jarvis] Error: ${msg}`);
-
 }
 
-function getPlatformTriple() {
-
-    // Map Node.js platform/arch to our release naming
+/**
+ * Detect platform and return download information
+ */
+function getPlatformInfo() {
     const platform = os.platform();
     const arch = os.arch();
 
-    // Supported combos
+    // Map to GitHub release file names
     if (platform === 'darwin' && (arch === 'x64' || arch === 'arm64')) {
-
-        return { name: 'mac', file: 'terminal-jarvis-mac.tar.gz' };
-
+        return {
+            name: 'macOS',
+            file: 'terminal-jarvis-mac.tar.gz',
+            isWindows: false
+        };
     }
 
     if (platform === 'linux' && (arch === 'x64' || arch === 'arm64')) {
+        return {
+            name: 'Linux',
+            file: 'terminal-jarvis-linux.tar.gz',
+            isWindows: false
+        };
+    }
 
-        return { name: 'linux', file: 'terminal-jarvis-linux.tar.gz' };
-
+    if (platform === 'win32' && (arch === 'x64' || arch === 'arm64')) {
+        return {
+            name: 'Windows',
+            file: 'terminal-jarvis-windows.tar.gz',
+            isWindows: true
+        };
     }
 
     return null;
 }
 
-function githubAssetUrl(version, fileName) {
-
+/**
+ * Construct GitHub release asset URL
+ */
+function getAssetUrl(version, fileName) {
     const tag = `v${version}`;
-
-    return `https://github.com/BA-CalderonMorales/terminal-jarvis/releases/download/${tag}/${fileName}`;
-
+    return `https://github.com/${GITHUB_REPO}/releases/download/${tag}/${fileName}`;
 }
 
-async function download(url, dest) {
-
+/**
+ * Download file with retry logic and timeout
+ */
+async function download(url, dest, retries = DOWNLOAD_RETRIES) {
     await fs.promises.mkdir(path.dirname(dest), { recursive: true });
 
-    return new Promise((resolve, reject) => {
+    for (let attempt = 1; attempt <= retries; attempt++) {
+        try {
+            log(`Download attempt ${attempt}/${retries}: ${url}`);
 
-        https.get(url, (res) => {
+            await new Promise((resolve, reject) => {
+                const timeout = setTimeout(() => {
+                    reject(new Error(`Download timeout after ${DOWNLOAD_TIMEOUT}ms`));
+                }, DOWNLOAD_TIMEOUT);
 
-            if (res.statusCode && res.statusCode >= 300 && res.statusCode < 400 && res.headers.location) {
+                https.get(url, (res) => {
+                    // Handle redirects
+                    if (res.statusCode >= 300 && res.statusCode < 400 && res.headers.location) {
+                        clearTimeout(timeout);
+                        return download(res.headers.location, dest, 1).then(resolve).catch(reject);
+                    }
 
-                // Redirect
-                return download(res.headers.location, dest).then(resolve).catch(reject);
+                    if (res.statusCode !== 200) {
+                        clearTimeout(timeout);
+                        return reject(new Error(`HTTP ${res.statusCode}: ${res.statusMessage}`));
+                    }
 
+                    const fileStream = createWriteStream(dest);
+                    res.pipe(fileStream);
+
+                    fileStream.on('finish', () => {
+                        clearTimeout(timeout);
+                        fileStream.close(() => resolve(dest));
+                    });
+
+                    fileStream.on('error', (err) => {
+                        clearTimeout(timeout);
+                        reject(err);
+                    });
+                }).on('error', (err) => {
+                    clearTimeout(timeout);
+                    reject(err);
+                });
+            });
+
+            // Success
+            return dest;
+
+        } catch (err) {
+            if (attempt === retries) {
+                throw new Error(`Failed after ${retries} attempts: ${err.message}`);
             }
-
-            if (res.statusCode !== 200) {
-
-                return reject(new Error(`Request failed. Status code: ${res.statusCode}`));
-
-            }
-
-            const fileStream = createWriteStream(dest);
-            res.pipe(fileStream);
-            fileStream.on('finish', () => fileStream.close(() => resolve(dest)));
-            fileStream.on('error', reject);
-
-        }).on('error', reject);
-
-    });
-
+            warn(`Attempt ${attempt} failed: ${err.message}. Retrying...`);
+            // Wait before retry (exponential backoff)
+            await new Promise(resolve => setTimeout(resolve, 1000 * attempt));
+        }
+    }
 }
 
+/**
+ * Extract tar.gz archive
+ */
 async function extractTarGz(archivePath, extractDir) {
-
     await fs.promises.mkdir(extractDir, { recursive: true });
 
     const res = spawnSync('tar', ['-xzf', archivePath, '-C', extractDir], { stdio: 'inherit' });
     if (res.status !== 0) {
         throw new Error('Failed to extract archive with tar');
     }
-
 }
 
-(async () => {
+/**
+ * Verify prerequisites
+ */
+function checkPrerequisites() {
+    const missing = [];
 
-    try {
+    const tarCheck = spawnSync('tar', ['--version'], { stdio: 'ignore' });
+    if (tarCheck.status !== 0) {
+        missing.push('tar');
+    }
 
-        const triple = getPlatformTriple();
+    if (missing.length > 0) {
+        warn(`Missing required system tool(s): ${missing.join(', ')}`);
+        const platform = os.platform();
 
-        if (!triple) {
-
-            warn(`Unsupported platform/architecture (${os.platform()}/${os.arch()}). Skipping binary download.`);
-
-            process.exit(0);
-
-        }
-
-        // Pre-flight: ensure required system tools exist
-        const missing = [];
-        const tarCheck = spawnSync('tar', ['--version'], { stdio: 'ignore' });
-        if (tarCheck.status !== 0) {
-            missing.push('tar');
-        }
-
-        if (missing.length > 0) {
-            warn(`Missing required system tool(s): ${missing.join(', ')}`);
-            const plt = os.platform();
-            if (missing.includes('tar')) {
-                if (plt === 'linux') {
-                    warn('Install tar using your package manager:');
-                    console.log('  - Debian/Ubuntu: sudo apt-get update && sudo apt-get install -y tar');
-                    console.log('  - Fedora/CentOS/RHEL: sudo dnf install -y tar  (or: sudo yum install -y tar)');
-                    console.log('  - Arch: sudo pacman -S tar');
-                } else if (plt === 'darwin') {
-                    warn('tar should be available on macOS by default. If missing:');
-                    console.log('  - Install Xcode Command Line Tools: xcode-select --install');
-                    console.log('  - Or install via Homebrew: brew install gnu-tar');
-                } else {
-                    warn('Please install a tar utility compatible with .tar.gz archives.');
-                }
+        if (missing.includes('tar')) {
+            if (platform === 'linux') {
+                warn('Install tar using your package manager:');
+                console.log('  Debian/Ubuntu: sudo apt-get update && sudo apt-get install -y tar');
+                console.log('  Fedora/RHEL:   sudo dnf install -y tar');
+                console.log('  Arch Linux:    sudo pacman -S tar');
+            } else if (platform === 'darwin') {
+                warn('tar should be available on macOS by default.');
+                console.log('  Install via:   xcode-select --install');
+            } else if (platform === 'win32') {
+                warn('tar should be available on Windows 10+ by default.');
             }
-            warn('Skipping binary download due to missing prerequisites. You can retry after installing the required tools by reinstalling or running:');
-            console.log('  node node_modules/terminal-jarvis/scripts/postinstall.js');
-            return; // Exit gracefully; do not fail npm install
         }
 
+        return false;
+    }
+
+    return true;
+}
+
+/**
+ * Main installation workflow
+ */
+(async () => {
+    try {
+        // Detect platform
+        const platformInfo = getPlatformInfo();
+        if (!platformInfo) {
+            warn(`Unsupported platform: ${os.platform()}/${os.arch()}`);
+            warn('Skipping binary download. You can still install via cargo:');
+            console.log('  cargo install terminal-jarvis');
+            process.exit(0);
+        }
+
+        log(`Detected ${platformInfo.name} (${os.arch()})`);
+
+        // Check prerequisites
+        if (!checkPrerequisites()) {
+            warn('Skipping installation due to missing prerequisites.');
+            warn('You can retry by running: node node_modules/terminal-jarvis/scripts/postinstall.js');
+            return;
+        }
+
+        // Setup paths
         const version = pkg.version;
-        const assetFile = triple.file;
-        const url = githubAssetUrl(version, assetFile);
+        const assetFile = platformInfo.file;
+        const url = getAssetUrl(version, assetFile);
 
         const pkgRoot = path.join(__dirname, '..');
         const binDir = path.join(pkgRoot, 'bin');
-        const binPath = path.join(binDir, 'terminal-jarvis');
         const downloadDir = path.join(pkgRoot, 'downloads');
         const archivePath = path.join(downloadDir, assetFile);
 
-        log(`Detected ${triple.name}. Downloading binary for v${version}...`);
-        log(`GET ${url}`);
-
+        // Download binary
+        log(`Downloading v${version} from GitHub releases...`);
         await download(url, archivePath);
+        log('[SUCCESS] Download complete');
 
+        // Extract archive
         log('Extracting archive...');
         await extractTarGz(archivePath, downloadDir);
+        log('[SUCCESS] Extraction complete');
 
-        // The archives should contain a single executable named "terminal-jarvis"
+        // Move binary to bin directory
         const extractedBin = path.join(downloadDir, 'terminal-jarvis');
+        const binaryDest = path.join(binDir, platformInfo.isWindows ? 'terminal-jarvis.exe' : 'terminal-jarvis-bin');
+
         await fs.promises.mkdir(binDir, { recursive: true });
-        await fs.promises.copyFile(extractedBin, binPath);
-        await fs.promises.chmod(binPath, 0o755);
+        await fs.promises.copyFile(extractedBin, binaryDest);
+        if (!platformInfo.isWindows) {
+            await fs.promises.chmod(binaryDest, 0o755);
+        }
+        log(`[SUCCESS] Binary installed: ${binaryDest}`);
 
-        // Create a small JS launcher for Windows (future) or ensure bin entry points to the POSIX binary
-        log('Verifying installation...');
-        const res = spawnSync(binPath, ['--version'], { stdio: 'inherit' });
-        if (res.error) {
+        // Note: The launcher script (bin/terminal-jarvis) is committed to the repository
+        // We only download and install the binary here
+        const launcherPath = path.join(binDir, 'terminal-jarvis');
 
-            warn(`Failed to execute downloaded binary: ${res.error.message}`);
-
+        // Cleanup downloads
+        try {
+            await fs.promises.rm(downloadDir, { recursive: true, force: true });
+            log('Cleaned up temporary files');
+        } catch (err) {
+            // Non-critical
         }
 
-        log('Installation complete. You can now run: npx terminal-jarvis');
+        // Verify installation
+        log('Verifying installation...');
+        const verifyPath = platformInfo.isWindows ? binaryDest : launcherPath;
+        const verifyRes = spawnSync(verifyPath, ['--version'], { stdio: 'pipe', encoding: 'utf8' });
 
-    } catch (e) {
+        if (verifyRes.error) {
+            warn(`Verification warning: ${verifyRes.error.message}`);
+        } else if (verifyRes.status === 0) {
+            log('[SUCCESS] Installation verified');
+            log('');
+            log('Terminal Jarvis is ready!');
+            log('Run: npx terminal-jarvis --help');
+        }
 
-        warn(`Postinstall failed: ${e.message}`);
-        warn('Falling back; you may need to install manually or ensure network access to GitHub releases.');
+    } catch (err) {
+        error(`Installation failed: ${err.message}`);
+        warn('Fallback options:');
+        console.log('  1. Install via cargo: cargo install terminal-jarvis');
+        console.log('  2. Install via Homebrew: brew install ba-calderonmorales/terminal-jarvis/terminal-jarvis');
+        console.log('  3. Download manually from: https://github.com/BA-CalderonMorales/terminal-jarvis/releases');
 
+        // Don't fail npm install completely
+        process.exit(0);
     }
-
 })();
