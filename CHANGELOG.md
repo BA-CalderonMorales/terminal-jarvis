@@ -2,25 +2,80 @@
 
 All notable changes to this project will be documented in this file.
 
-## [0.0.69] - 2025-10-06
+## [0.0.69] - 2025-10-07
+
+### Added
+- **Weekly Repository Maintenance Automation**: Comprehensive GitHub Actions workflow system
+  - Issue health check with AI-powered summary generation
+  - README sync validation with automatic PR creation
+  - Weekly scheduled maintenance tasks (Mondays at 9 AM UTC)
+  - Custom composite actions for reusable workflows
+  - Location: `.github/workflows/weekly-maintenance.yml`, `.github/actions/weekly-maintenance/`
 
 ### Enhanced
-- **MVVM Architecture Refactoring**: Implemented proper separation of concerns with presentation domain
+- **Cross-Platform Installation System**: Seamless GitHub releases integration
+  - NPM postinstall script with retry logic (3 attempts, exponential backoff)
+  - Launcher script committed to repository for npx compatibility
+  - Cargo-binstall metadata for `cargo binstall terminal-jarvis` support
+  - Platform-specific URL overrides for all supported architectures
+  - All distribution methods (npm, cargo, homebrew) now pull from GitHub releases
+  - Location: `npm/terminal-jarvis/scripts/postinstall.js`, `Cargo.toml`
+
+- **Documentation Improvements**: External documentation site integration
+  - Migrated docs/ directory to external docs-as-code site
+  - Added direct clickable links to all documentation sections in README
+  - Single source of truth: https://ba-calderonmorales.github.io/my-life-as-a-dev/projects/active/terminal-jarvis/
+  - Clean separation between code repository and documentation
+  - Updated all references across AGENTS.md, CLAUDE.md, and copilot-instructions.md
+
+- **CI/CD Accuracy**: Updated validation to reflect all 10 supported tools
+  - Updated tool count from 7 to 10 throughout codebase
+  - Added Amp package validation to smoke tests
+  - Tool breakdown: 8 NPM tools (amp, claude, codex, crush, gemini, llxprt, opencode, qwen), 1 uv tool (aider), 1 curl tool (goose)
+  - Test count increased from 59 to 62 tests
+  - Location: `scripts/cicd/local-ci.sh`, `scripts/tests/smoke-test.sh`
+
+- **MVVM Architecture Refactoring**: Proper separation of concerns with presentation domain
   - Created dedicated presentation bucket for UI components
   - Improved code organization and maintainability
   - Better domain-based module structure
+  - Location: `src/presentation/`
 
 ### Fixed
 - **CI Pipeline Issues**: Resolved continuous integration failures
+  - Fixed clippy error using `is_multiple_of()` method for Rust 1.90+ compliance
+  - Added `-r` flag to read command in test-resize.sh (shellcheck SC2162)
+  - Updated smoke-test.sh grep patterns to case-insensitive for reliability
   - Fixed code formatting violations causing clippy failures
   - Resolved shellcheck warnings in test scripts
-  - Ensured all shell scripts pass linting validation
+
+- **Test Suite Configuration**: Included goose-metrics.toml for evaluation tests
+  - Added gitignore exception for `config/evals/evaluations/goose-metrics.toml`
+  - Force-added required file for test_all_metrics_files_load_successfully
+  - Maintains goose* pattern while allowing specific evaluation file
+  - Resolves macOS CI test failures
+
+- **NPM Package Installation**: Improved installation reliability
+  - Enhanced postinstall script timeout from 10s to 15s for large dependency trees
+  - Fixed smoke-test.sh path resolution (cd relative to script location)
+  - All 62 comprehensive tests now passing
 
 ### Technical
-- **Test Infrastructure**: Enhanced test script reliability
-  - Fixed function definition order in smoke-test.sh
-  - Added proper shellcheck disable comments for indirectly used functions
-  - Improved script maintainability and CI compliance
+- **Dependency Updates**:
+  - Bumped clap_complete from 4.5.55 to 4.5.58 (via Dependabot)
+  - Bumped actions/setup-node from v4 to v5 (via Dependabot)
+  - Scoped Dependabot to develop branch only
+
+- **Installation Tests**: New test suite validating cross-platform mechanics
+  - Added `tests/installation.test.ts` with 11 tests
+  - Validates launcher script symlink resolution
+  - Verifies binary placement and execution
+  - Location: `npm/terminal-jarvis/tests/installation.test.ts`
+
+- **Configuration Updates**:
+  - Updated .gitignore for binary download exclusions
+  - Launcher script committed for consistent package structure
+  - Download cache directory excluded
 
 ## [Unreleased]
 
@@ -178,24 +233,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Health score calculation based on objective indicators (repo active, community engaged, documented)
 - Scaffold for future automated data fetching: GitHub API, NPM API, documentation crawling
 - Backward compatibility with traditional score-based evaluations
-
-## [0.0.69] - 2025-09-27
-
-### Added
-- NPM package now bundles modular tool definitions from `config/tools/*.toml` so users can leverage the config system to install and launch tools without manual setup
-
-### Fixed
-- Eliminated menu hang by ensuring tool configs are available in npm installs; tool discovery no longer yields an empty list
-
-### Enhanced
-- Moved `build-binaries.js` into `npm/terminal-jarvis/scripts/` for consistency with other scripts
-- Build pipeline simplified: `prepack` runs a lean build that copies tool configs and syncs README; TypeScript compilation no longer required during pack
-
-### Technical
-- Removed `npm/terminal-jarvis/config/default.toml` from the npm package since runtime defaults come from code and per-tool TOMLs are now bundled
-- Added `copy-configs` script to populate `npm/terminal-jarvis/config/tools` during build
-- Updated packaging `files` list to include `scripts/` for postinstall and copy scripts
-
 
 ## [0.0.68] - 2025-09-17
 
