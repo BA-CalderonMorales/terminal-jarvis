@@ -25,23 +25,41 @@ function copyDirRecursive(src, dest, filterFn) {
 
 try {
     // Source directory: repo config/tools
-    const srcDir = resolve(__dirname, '..', '..', '..', 'config', 'tools');
+    const toolsSrcDir = resolve(__dirname, '..', '..', '..', 'config', 'tools');
     // Destination inside npm package: npm/terminal-jarvis/config/tools
-    const destDir = resolve(__dirname, '..', 'config', 'tools');
+    const toolsDestDir = resolve(__dirname, '..', 'config', 'tools');
 
     // Validate source exists
-    if (!existsSync(srcDir) || !statSync(srcDir).isDirectory()) {
-        console.warn('[WARN] Source tools config directory not found:', srcDir);
+    if (!existsSync(toolsSrcDir) || !statSync(toolsSrcDir).isDirectory()) {
+        console.warn('[WARN] Source tools config directory not found:', toolsSrcDir);
         process.exit(0); // don\'t fail build; just warn
     }
 
-    ensureDir(destDir);
+    ensureDir(toolsDestDir);
 
     // Copy only .toml files and keep folder structure flat
-    copyDirRecursive(srcDir, destDir, (p) => p.endsWith('.toml'));
+    copyDirRecursive(toolsSrcDir, toolsDestDir, (p) => p.endsWith('.toml'));
 
-    console.log('[OK] Tool configs copied to', destDir);
+    console.log('[OK] Tool configs copied to', toolsDestDir);
+
+    // Source directory: repo config/evals
+    const evalsSrcDir = resolve(__dirname, '..', '..', '..', 'config', 'evals');
+    // Destination inside npm package: npm/terminal-jarvis/config/evals
+    const evalsDestDir = resolve(__dirname, '..', 'config', 'evals');
+
+    // Validate source exists
+    if (!existsSync(evalsSrcDir) || !statSync(evalsSrcDir).isDirectory()) {
+        console.warn('[WARN] Source evals config directory not found:', evalsSrcDir);
+        process.exit(0); // don\'t fail build; just warn
+    }
+
+    ensureDir(evalsDestDir);
+
+    // Copy entire evals directory structure including evaluations subdirectory
+    copyDirRecursive(evalsSrcDir, evalsDestDir, (p) => p.endsWith('.toml'));
+
+    console.log('[OK] Evals configs copied to', evalsDestDir);
 } catch (err) {
-    console.error('[ERROR] Failed to copy tool configs:', err && err.message ? err.message : err);
+    console.error('[ERROR] Failed to copy configs:', err && err.message ? err.message : err);
     process.exit(1);
 }

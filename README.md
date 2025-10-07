@@ -6,7 +6,7 @@
 
 <div align="center">
 
-A unified command center for AI coding tools. Manage and run a suite of coding assistants from one beautiful terminal interface. See the full list in the [Supported AI Tools guide](https://ba-calderonmorales.github.io/my-life-as-a-dev/projects/active/terminal-jarvis/).
+A unified command center for AI coding tools. Manage and run a suite of coding assistants from one beautiful terminal interface. See the full list in the [Supported AI Tools guide](https://ba-calderonmorales.github.io/my-life-as-a-dev/projects/active/terminal-jarvis/quick_start/ai-tools/).
 
 </div>
 
