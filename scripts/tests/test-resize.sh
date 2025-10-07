@@ -27,7 +27,7 @@ echo "  ✓ Menu options remain centered and readable"
 echo "  ✓ No visual artifacts or text wrapping issues"
 echo "  ✓ Works seamlessly during menu navigation"
 echo ""
-read -p "Press Enter to start the test..."
+read -r -p "Press Enter to start the test..."
 echo ""
 
 cd "$PROJECT_ROOT"
