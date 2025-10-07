@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.0.70] - 2025-10-07
+
+### Fixed
+- **NPM Package Distribution**: Added missing evals configuration files
+  - Updated `copy-configs.js` to include `config/evals/` directory structure
+  - Fixed "No evaluations found" error in Evals & Comparisons menu
+  - NPM package now includes all evaluation metric files (claude, gemini, qwen, etc.)
+  - NPM package now includes criteria.toml and x-factor.toml configuration
+  - Location: `npm/terminal-jarvis/scripts/copy-configs.js`
+
 ## [0.0.69] - 2025-10-07
 
 ### Added
