@@ -1,13 +1,15 @@
 // CLI Logic Entry Point
 // This module coordinates all CLI business logic operations
 
+use crate::cli_logic::cli_logic_responsive_menu::create_themed_select;
 use crate::cli_logic::cli_logic_utilities::{apply_theme_to_multiselect, get_themed_render_config};
+use crate::cli_logic::cli_logic_welcome::display_welcome_screen;
 use crate::installation_arguments::InstallationManager;
 use crate::progress_utils::ProgressContext;
 use crate::theme::theme_global_config;
 use crate::tools::ToolManager;
 use anyhow::Result;
-use inquire::{Confirm, MultiSelect, Select, Text};
+use inquire::{Confirm, MultiSelect, Text};
 
 // Re-export all the handler functions
 pub use crate::cli_logic::cli_logic_config_management::*;
@@ -49,17 +51,17 @@ pub async fn handle_ai_tools_menu() -> Result<()> {
         options.push("Back to Main Menu".to_string());
         tool_mapping.push(None);
 
-        let selection = match Select::new("Select an AI tool to launch:", options.clone())
-            .with_render_config(get_themed_render_config())
-            .with_page_size(15)
-            .prompt()
-        {
-            Ok(selection) => selection,
-            Err(_) => {
-                // User interrupted (Ctrl+C) - return to main menu
-                return Ok(());
-            }
-        };
+        let selection =
+            match create_themed_select(&theme, "Select an AI tool to launch:", options.clone())
+                .with_page_size(15)
+                .prompt()
+            {
+                Ok(selection) => selection,
+                Err(_) => {
+                    // User interrupted (Ctrl+C) - return to main menu
+                    return Ok(());
+                }
+            };
 
         // Handle selection
         if selection.contains("Back to Main Menu") {
@@ -218,17 +220,17 @@ async fn handle_post_tool_exit(last_tool: &str, last_args: &[String]) -> Result<
             "4. Exit Terminal Jarvis".to_string(),
         ];
 
-        let exit_choice = match Select::new("What would you like to do next?", exit_options)
-            .with_render_config(get_themed_render_config())
-            .with_page_size(6)
-            .prompt()
-        {
-            Ok(choice) => choice,
-            Err(_) => {
-                // User interrupted - return to main menu by default
-                return Ok(());
-            }
-        };
+        let exit_choice =
+            match create_themed_select(&theme, "What would you like to do next?", exit_options)
+                .with_page_size(6)
+                .prompt()
+            {
+                Ok(choice) => choice,
+                Err(_) => {
+                    // User interrupted - return to main menu by default
+                    return Ok(());
+                }
+            };
 
         match exit_choice.as_str() {
             s if s.contains("Reopen ") => {
@@ -276,17 +278,14 @@ pub async fn handle_important_links() -> Result<()> {
             "Back to Main Menu".to_string(),
         ];
 
-        let selection = match Select::new("Choose a resource to view:", options)
-            .with_render_config(get_themed_render_config())
-            .with_page_size(10)
-            .prompt()
-        {
-            Ok(selection) => selection,
-            Err(_) => {
-                // User interrupted - return to main menu
-                return Ok(());
-            }
-        };
+        let selection =
+            match create_themed_select(&theme, "Choose a resource to view:", options).prompt() {
+                Ok(selection) => selection,
+                Err(_) => {
+                    // User interrupted - return to main menu
+                    return Ok(());
+                }
+            };
 
         display_link_information(&selection, &theme);
 
@@ -372,11 +371,7 @@ pub async fn handle_manage_tools_menu() -> Result<()> {
             "Back to Main Menu".to_string(),
         ];
 
-        let selection = match Select::new("Choose an option:", options)
-            .with_render_config(get_themed_render_config())
-            .with_page_size(10)
-            .prompt()
-        {
+        let selection = match create_themed_select(&theme, "Choose an option:", options).prompt() {
             Ok(selection) => selection,
             Err(_) => {
                 // User interrupted - return to main menu
@@ -427,39 +422,53 @@ async fn handle_theme_switch_menu() -> Result<()> {
     println!();
 
     let theme_options = vec![
-        "T.JARVIS".to_string(),
-        "Classic".to_string(),
-        "Matrix".to_string(),
+        "Default".to_string(),
+        "Minimal".to_string(),
+        "Terminal".to_string(),
     ];
 
-    let selected_theme = match Select::new("Choose a theme:", theme_options)
-        .with_render_config(get_themed_render_config())
-        .prompt()
-    {
-        Ok(theme) => theme,
-        Err(_) => {
-            // User interrupted - return to previous menu
-            return Ok(());
-        }
-    };
+    let theme = theme_global_config::current_theme();
+    let selected_theme =
+        match create_themed_select(&theme, "Choose a theme:", theme_options).prompt() {
+            Ok(theme) => theme,
+            Err(_) => {
+                // User interrupted - return to previous menu
+                return Ok(());
+            }
+        };
 
     // Apply the selected theme
     let theme_type = match selected_theme.as_str() {
-        "T.JARVIS" => crate::theme::ThemeType::TJarvis,
-        "Classic" => crate::theme::ThemeType::Classic,
-        "Matrix" => crate::theme::ThemeType::Matrix,
+        "Default" => crate::theme::ThemeType::TJarvis,
+        "Minimal" => crate::theme::ThemeType::Classic,
+        "Terminal" => crate::theme::ThemeType::Matrix,
         _ => crate::theme::ThemeType::TJarvis,
     };
 
     theme_global_config::set_theme(theme_type);
     let new_theme = theme_global_config::current_theme();
+
+    // Clear screen and redraw with new theme to show immediate visual update
+    print!("\x1b[2J\x1b[H");
+
+    // Display welcome screen with new theme so ASCII art and welcome text update immediately
+    display_welcome_screen();
+    println!();
+
     println!(
-        "\n{}",
+        "{}",
         new_theme.primary(&format!("Theme changed to: {}", selected_theme))
     );
-    println!("The new theme will be applied immediately.");
+    println!(
+        "{}",
+        new_theme.secondary("The new theme has been applied immediately.")
+    );
+    println!(
+        "{}",
+        new_theme.secondary("All menu text will now use the new theme colors.")
+    );
 
-    println!("\n{}", current_theme.accent("Press Enter to continue..."));
+    println!("\n{}", new_theme.accent("Press Enter to continue..."));
     let _ = std::io::stdin().read_line(&mut String::new());
 
     Ok(())
@@ -660,9 +669,8 @@ async fn handle_update_tools_menu() -> Result<()> {
     let mut options = installed_tools.clone();
     options.push("All Tools".to_string());
 
-    let selection = match Select::new("Select tools to update:", options)
-        .with_render_config(get_themed_render_config())
-        .prompt()
+    let theme = theme_global_config::current_theme();
+    let selection = match create_themed_select(&theme, "Select tools to update:", options).prompt()
     {
         Ok(selection) => selection,
         Err(_) => {
@@ -697,9 +705,12 @@ async fn handle_tool_info_menu() -> Result<()> {
         let mut options = tool_names.clone();
         options.push("Back to Settings Menu".to_string());
 
-        let selection = match Select::new("Select a tool for information:", options)
-            .with_render_config(get_themed_render_config())
-            .prompt()
+        let selection = match create_themed_select(
+            &theme,
+            "Select a tool for information:",
+            options,
+        )
+        .prompt()
         {
             Ok(selection) => selection,
             Err(_) => {

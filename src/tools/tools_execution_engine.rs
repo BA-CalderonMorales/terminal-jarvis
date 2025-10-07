@@ -14,7 +14,8 @@ use super::tools_process_management::{
 };
 use super::tools_startup_guidance::show_tool_startup_guidance;
 use crate::auth_manager::AuthManager;
-use inquire::{Select, Text};
+use crate::cli_logic::cli_logic_responsive_menu::create_themed_select;
+use inquire::Text;
 
 // Heuristic validators for API keys we handle
 fn looks_like_gemini_api_key(key: &str) -> bool {
@@ -431,14 +432,21 @@ pub async fn run_tool_once(display_name: &str, args: &[String]) -> Result<()> {
                 )
             );
             // Inline prompt (optional): pick provider and capture key for this session
-            let providers = vec!["OpenAI", "Anthropic", "Gemini", "Skip"];
-            if let Ok(choice) = Select::new(
+            let providers = vec![
+                "OpenAI".to_string(),
+                "Anthropic".to_string(),
+                "Gemini".to_string(),
+                "Skip".to_string(),
+            ];
+            let theme = crate::theme::theme_global_config::current_theme();
+            if let Ok(choice) = create_themed_select(
+                &theme,
                 "Select a provider to set an API key (or Skip):",
-                providers.clone(),
+                providers,
             )
             .prompt()
             {
-                match choice {
+                match choice.as_str() {
                     "OpenAI" => {
                         if let Ok(key) = Text::new("Enter OPENAI_API_KEY (leave blank to skip):")
                             .with_placeholder("skips if empty")

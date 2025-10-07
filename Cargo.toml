@@ -1,6 +1,6 @@
 [package]
 name = "terminal-jarvis"
-version = "0.0.68"
+version = "0.0.69"
 edition = "2021"
 description = "A thin Rust wrapper that provides a unified interface for managing and running AI coding tools"
 authors = ["BA-CalderonMorales"]
@@ -46,7 +46,37 @@ indicatif = "0.18.0"
 signal-hook = "0.3"
 libc = { version = "0.2", optional = false }
 slab = "0.4.11"
+crossterm = "0.28"
+unicode-width = "0.2"
+tempfile = "3.8"
+regex = "1.10"
+chrono = { version = "0.4.42", features = ["serde"] }
 
 [dev-dependencies]
 tokio-test = "0.4"
-tempfile = "3.8"
+
+# cargo-binstall support: download pre-built binaries from GitHub releases
+# Users can install with: cargo binstall terminal-jarvis
+[package.metadata.binstall]
+pkg-url = "{ repo }/releases/download/v{ version }/{ name }-{ target }{ archive-suffix }"
+bin-dir = "{ bin }{ binary-ext }"
+pkg-fmt = "tgz"
+
+# Platform-specific overrides for GitHub release naming
+[package.metadata.binstall.overrides.x86_64-apple-darwin]
+pkg-url = "{ repo }/releases/download/v{ version }/terminal-jarvis-mac.tar.gz"
+
+[package.metadata.binstall.overrides.aarch64-apple-darwin]
+pkg-url = "{ repo }/releases/download/v{ version }/terminal-jarvis-mac.tar.gz"
+
+[package.metadata.binstall.overrides.x86_64-unknown-linux-gnu]
+pkg-url = "{ repo }/releases/download/v{ version }/terminal-jarvis-linux.tar.gz"
+
+[package.metadata.binstall.overrides.aarch64-unknown-linux-gnu]
+pkg-url = "{ repo }/releases/download/v{ version }/terminal-jarvis-linux.tar.gz"
+
+[package.metadata.binstall.overrides.x86_64-pc-windows-msvc]
+pkg-url = "{ repo }/releases/download/v{ version }/terminal-jarvis-windows.tar.gz"
+
+[package.metadata.binstall.overrides.aarch64-pc-windows-msvc]
+pkg-url = "{ repo }/releases/download/v{ version }/terminal-jarvis-windows.tar.gz"

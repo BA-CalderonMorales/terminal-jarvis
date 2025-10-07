@@ -2,8 +2,237 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.0.69] - 2025-10-07
+
+### Added
+- **Weekly Repository Maintenance Automation**: Comprehensive GitHub Actions workflow system
+  - Issue health check with AI-powered summary generation
+  - README sync validation with automatic PR creation
+  - Weekly scheduled maintenance tasks (Mondays at 9 AM UTC)
+  - Custom composite actions for reusable workflows
+  - Location: `.github/workflows/weekly-maintenance.yml`, `.github/actions/weekly-maintenance/`
+
+### Enhanced
+- **Cross-Platform Installation System**: Seamless GitHub releases integration
+  - NPM postinstall script with retry logic (3 attempts, exponential backoff)
+  - Launcher script committed to repository for npx compatibility
+  - Cargo-binstall metadata for `cargo binstall terminal-jarvis` support
+  - Platform-specific URL overrides for all supported architectures
+  - All distribution methods (npm, cargo, homebrew) now pull from GitHub releases
+  - Location: `npm/terminal-jarvis/scripts/postinstall.js`, `Cargo.toml`
+
+- **Documentation Improvements**: External documentation site integration
+  - Migrated docs/ directory to external docs-as-code site
+  - Added direct clickable links to all documentation sections in README
+  - Single source of truth: https://ba-calderonmorales.github.io/my-life-as-a-dev/projects/active/terminal-jarvis/
+  - Clean separation between code repository and documentation
+  - Updated all references across AGENTS.md, CLAUDE.md, and copilot-instructions.md
+
+- **CI/CD Accuracy**: Updated validation to reflect all 10 supported tools
+  - Updated tool count from 7 to 10 throughout codebase
+  - Added Amp package validation to smoke tests
+  - Tool breakdown: 8 NPM tools (amp, claude, codex, crush, gemini, llxprt, opencode, qwen), 1 uv tool (aider), 1 curl tool (goose)
+  - Test count increased from 59 to 62 tests
+  - Location: `scripts/cicd/local-ci.sh`, `scripts/tests/smoke-test.sh`
+
+- **MVVM Architecture Refactoring**: Proper separation of concerns with presentation domain
+  - Created dedicated presentation bucket for UI components
+  - Improved code organization and maintainability
+  - Better domain-based module structure
+  - Location: `src/presentation/`
+
+### Fixed
+- **CI Pipeline Issues**: Resolved continuous integration failures
+  - Fixed clippy error using `is_multiple_of()` method for Rust 1.90+ compliance
+  - Added `-r` flag to read command in test-resize.sh (shellcheck SC2162)
+  - Updated smoke-test.sh grep patterns to case-insensitive for reliability
+  - Fixed code formatting violations causing clippy failures
+  - Resolved shellcheck warnings in test scripts
+
+- **Test Suite Configuration**: Included goose-metrics.toml for evaluation tests
+  - Added gitignore exception for `config/evals/evaluations/goose-metrics.toml`
+  - Force-added required file for test_all_metrics_files_load_successfully
+  - Maintains goose* pattern while allowing specific evaluation file
+  - Resolves macOS CI test failures
+
+- **NPM Package Installation**: Improved installation reliability
+  - Enhanced postinstall script timeout from 10s to 15s for large dependency trees
+  - Fixed smoke-test.sh path resolution (cd relative to script location)
+  - All 62 comprehensive tests now passing
+
+### Technical
+- **Dependency Updates**:
+  - Bumped clap_complete from 4.5.55 to 4.5.58 (via Dependabot)
+  - Bumped actions/setup-node from v4 to v5 (via Dependabot)
+  - Scoped Dependabot to develop branch only
+
+- **Installation Tests**: New test suite validating cross-platform mechanics
+  - Added `tests/installation.test.ts` with 11 tests
+  - Validates launcher script symlink resolution
+  - Verifies binary placement and execution
+  - Location: `npm/terminal-jarvis/tests/installation.test.ts`
+
+- **Configuration Updates**:
+  - Updated .gitignore for binary download exclusions
+  - Launcher script committed for consistent package structure
+  - Download cache directory excluded
+
+## [Unreleased]
+
+### Added - Benchmarks Framework (Phase 1)
+
+#### Core Infrastructure
+- **BenchmarkTestEnvironment**: Isolated test execution environments with automatic cleanup
+  - Temporary workspace creation with src/ directory structure
+  - Environment variable isolation for benchmark execution
+  - Automatic cleanup on drop (similar to AuthTestEnvironment pattern)
+  - Location: `src/evals/benchmarks/test_environment.rs`
+
+#### Scenario Management
+- **TOML-based Scenario Definitions**: Community-driven benchmark scenarios
+  - BenchmarkScenario, ScenarioMetadata, PromptConfig, ValidationConfig, ScoringConfig
+  - Example: `config/benchmarks/scenarios/code-completion/basic-001.toml`
+  - Location: `src/evals/benchmarks/scenario.rs`
+
+- **BenchmarkRegistry**: Centralized scenario management
+  - Recursive directory loading of .toml scenario files
+  - Query scenarios by ID, category, or difficulty
+  - Location: `src/evals/benchmarks/registry.rs`
+
+#### Results & JSON Bridge
+- **JSON-Exportable Results**: Language-agnostic result exchange
+  - BenchmarkResult with execution metadata and validation details
+  - Pretty-printed JSON export with automatic directory creation
+  - Filename format: `{benchmark_id}_{tool_name}_{timestamp}.json`
+  - Location: `src/evals/benchmarks/results.rs`
+
+- **TypeScript Validation Layer**: Dual testing approach
+  - Zod schemas matching Rust structs exactly
+  - loadBenchmarkResult() and validateBenchmarkResult() helpers
+  - 24 comprehensive validation tests (all passing)
+  - Location: `npm/terminal-jarvis/tests/helpers/benchmark-helpers.ts`
+
+#### Testing
+- **16 Rust Integration Tests**: TDD-driven implementation
+  - BenchmarkTestEnvironment: 4 tests (workspace, cleanup, env vars)
+  - Scenario loading: 5 tests (TOML parsing, registry, validation)
+  - JSON bridge: 7 tests (serialization, export, file creation)
+  - Location: `tests/benchmarks/`
+
+- **24 TypeScript E2E Tests**: Real process validation
+  - Schema validation, file loading, criteria matching
+  - Mock data generation and error handling
+  - Location: `npm/terminal-jarvis/tests/benchmarks/json-bridge.test.ts`
+
+#### Directory Structure
+- Created `config/benchmarks/scenarios/` for community scenarios
+- Created `config/benchmarks/validators/` for validation scripts
+- Created `config/benchmarks/suites/` for benchmark collections
+
+### Technical Details
+- Added `tempfile` dependency for isolated test environments
+- Leveraged existing `cli-testing-library` for E2E validation
+- Used `zod` for TypeScript schema validation
+- All implementations follow TDD principles (test first, then implement)
+- NO EMOJIS policy enforced (text-based indicators only)
+
+### Added - Benchmarks Framework (Phase 2)
+
+#### CLI Commands
+- **Benchmark List Command**: `terminal-jarvis benchmark list`
+  - Lists all available benchmark scenarios from registry
+  - Displays scenario metadata (ID, name, category, difficulty)
+  - Location: `src/cli_logic/cli_logic_benchmark_operations.rs`
+
+- **Benchmark Run Command**: `terminal-jarvis benchmark run --scenario <id> --tool <name>`
+  - Executes benchmarks against specified tools
+  - Optional `--export-json` flag for JSON result export
+  - Validates tool output against scenario criteria
+  - Location: `src/cli_logic/cli_logic_benchmark_operations.rs`
+
+- **Benchmark Validate Command**: `terminal-jarvis benchmark validate --scenario-file <path>`
+  - Validates TOML scenario file structure
+  - Ensures all required fields are present
+  - Location: `src/cli_logic/cli_logic_benchmark_operations.rs`
+
+#### Pattern Matching Validator
+- **Regex-Based Validation**: Pattern matching validator for output validation
+  - Supports multiple regex patterns from TOML scenarios
+  - Proper handling of TOML escape sequences
+  - Detailed validation results with pattern match status
+  - Location: `src/evals/benchmarks/validators/pattern_match.rs`
+
+#### Benchmark Runner
+- **Orchestration Engine**: Complete benchmark execution flow
+  - Loads scenarios from registry
+  - Spawns tool processes (mock in Phase 2, real in Phase 3)
+  - Captures stdout/stderr output
+  - Runs validators and calculates scores
+  - Creates structured BenchmarkResult
+  - Exports JSON with proper formatting
+  - Location: `src/evals/benchmarks/runner.rs` (280 lines)
+
+#### TypeScript E2E Tests
+- **7 Comprehensive E2E Tests**: Full integration testing via cli-testing-library
+  - Tests: "lists available benchmarks", "runs benchmark and exports JSON"
+  - Tests: "validates benchmark scenario file", "handles invalid scenario gracefully"
+  - Tests: "handles validation failures with detailed output"
+  - Tests: "exports JSON with correct schema and values"
+  - Tests: "runs benchmark with pattern matching validator"
+  - All tests execute real CLI commands in spawned processes
+  - Full JSON schema validation with Zod
+  - Proper temp directory management and cleanup
+  - Location: `npm/terminal-jarvis/tests/benchmarks/benchmark-e2e.test.ts` (333 lines)
+
+### Technical Details (Phase 2)
+- Pattern validator uses `regex` crate for pattern matching
+- BenchmarkRunner uses mock tool output for Phase 2 (real spawning in Phase 3)
+- CLI commands integrated with existing Clap command structure
+- All Phase 2 tests passing (185+ total: Rust + TypeScript)
+- Zero compilation warnings maintained
+- TDD workflow: tests written first, then implementation
+
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+## [0.0.70] - 2025-10-04
+
+### Added
+- **Evals & Comparisons Framework v2.0** — Metrics-based evaluation system for AI coding tools
+  - **Real-world verifiable metrics** instead of arbitrary scores:
+    - GitHub: Stars, forks, contributors, commit frequency, last commit date
+    - Package stats: Weekly downloads, total downloads, publish dates (NPM, PyPI, Crates.io)
+    - Community: Discord members, Twitter followers, Reddit subscribers
+    - Documentation: Section availability, last update date, multilingual support
+    - Platform support: OS matrix (macOS, Linux, Windows), architectures (x86_64, ARM64)
+    - Team transparency: Organization info, team size, public members, backing/funding
+    - Support metrics: Response times, issue close rates, support channels, SLAs
+  - **Decision-making framework** for researchers, companies, and hobbyists
+  - Multi-format export support (JSON, CSV, Markdown, HTML)
+  - Interactive CLI menu for viewing, comparing, and exporting evaluations
+  - Sample evaluation with real metrics for Claude (GitHub, NPM, Discord data)
+  - Future-ready scaffold for automated data fetching via APIs
+- New "Evals & Comparisons" menu option in main Terminal Jarvis interface
+- Comprehensive documentation: `docs/EVALS_METRICS_GUIDE.md`
+- Comprehensive test suite with 11 integration tests for Evals framework
+
+### Enhanced
+- Configuration system extended to support modular evaluation data in `config/evals/`
+- Domain-based architecture: new `src/evals/` module with focused submodules
+  - `evals_entry_point.rs` — Main EvalManager API
+  - `evals_criteria.rs` — Standard and custom criteria definitions
+  - `evals_data.rs` — Core data structures with metrics support
+  - `evals_export.rs` — Multi-format export engine
+  - `evals_scoring.rs` — Comparison, ranking, and statistical analysis
+  - `evals_metrics.rs` — Real-world metrics data structures and fetching scaffold
+- About screen now displays Terminal Jarvis version dynamically from Cargo.toml
+
+### Technical
+- Evaluation data stored as TOML files for easy community contributions
+- Metrics-first evaluation schema prioritizing objective, verifiable data
+- Health score calculation based on objective indicators (repo active, community engaged, documented)
+- Scaffold for future automated data fetching: GitHub API, NPM API, documentation crawling
+- Backward compatibility with traditional score-based evaluations
 
 ## [0.0.68] - 2025-09-17
 

@@ -1,0 +1,69 @@
+name: Weekly repository maintenance
+
+on:
+  schedule:
+    - cron: "0 9 * * MON"
+  workflow_dispatch:
+
+concurrency:
+  group: weekly-maintenance
+  cancel-in-progress: false
+
+jobs:
+  issue_health:
+    name: Review open issues
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      issues: read
+      models: read
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          ref: develop
+
+      - name: Run issue health check
+        id: health_check
+        uses: ./.github/actions/weekly-maintenance/issue_health
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          repository-name: ${{ github.repository }}
+
+      - name: Upload weekly issue report
+        uses: actions/upload-artifact@v4
+        with:
+          name: weekly-issue-report
+          path: ${{ steps.health_check.outputs.issue-summary }}
+
+  readme_sync:
+    name: Align README copies
+    needs: issue_health
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+      issues: read
+      actions: read
+    steps:
+      - name: Checkout develop branch
+        uses: actions/checkout@v4
+        with:
+          ref: develop
+          fetch-depth: 0
+
+      - name: Run README sync check
+        id: sync_check
+        uses: ./.github/actions/weekly-maintenance/readme_sync
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          create-pr: "true"
+          branch-name: "automation/readme-sync"
+
+      - name: Upload README diff artifact
+        if: steps.sync_check.outputs.changed == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: readme-diff
+          path: ${{ steps.sync_check.outputs.diff-path }}
+          if-no-files-found: ignore

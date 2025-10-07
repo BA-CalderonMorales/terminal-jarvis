@@ -1,0 +1,87 @@
+name: Issue Health Check
+description: Generate weekly issue summary with AI analysis
+inputs:
+  github-token:
+    description: GitHub token with issues:read and models:read permissions
+    required: true
+  repository-name:
+    description: Repository name in format owner/repo
+    required: true
+    default: ${{ github.repository }}
+outputs:
+  issue-summary:
+    description: Path to the generated weekly issue summary markdown file
+    value: ${{ steps.generate-report.outputs.summary-path }}
+  has-issues:
+    description: Whether any open issues were found
+    value: ${{ steps.analyze.outputs.has-issues }}
+
+runs:
+  using: composite
+  steps:
+  - name: Generate issue table
+    id: generate-table
+    shell: bash
+    env:
+      GH_TOKEN: ${{ inputs.github-token }}
+    run: |
+      set -euo pipefail
+      gh issue list --state open --json number,title,labels,createdAt,url --limit 30 > issues.json
+      jq -r '
+        def label_list: if (.labels | length) > 0 then (.labels | map(.name) | join(", ")) else "none" end;
+        ["| Issue | Labels | Opened |", "| --- | --- | --- |"] +
+        (map("| #" + (.number|tostring) + " [" + .title + "](" + .url + ") | " + label_list + " | " + (.createdAt[0:10])))
+        | .[]
+      ' issues.json > weekly_issue_table.md
+      {
+        echo "table<<'EOF'";
+        cat weekly_issue_table.md;
+        echo 'EOF';
+      } >> "$GITHUB_OUTPUT"
+
+  - name: Analyze issues
+    id: analyze
+    shell: bash
+    run: |
+      set -euo pipefail
+      issue_count=$(jq 'length' issues.json)
+      if [ "$issue_count" -gt 0 ]; then
+        echo "has-issues=true" >> "$GITHUB_OUTPUT"
+      else
+        echo "has-issues=false" >> "$GITHUB_OUTPUT"
+      fi
+
+  - name: Summarize with AI
+    id: ai-summary
+    uses: actions/ai-inference@v1
+    with:
+      prompt: |
+        You're preparing a concise weekly maintenance update for the repository ${{ inputs.repository-name }}.
+        Summarize the themes, blockers, or next actions across the current open issues (max 5 bullet points).
+        If there are no open issues, say so explicitly.
+        Open issues table:
+        ${{ steps.generate-table.outputs.table }}
+
+  - name: Generate report
+    id: generate-report
+    shell: bash
+    run: |
+      set -euo pipefail
+      DATE_UTC=$(date -u '+%Y-%m-%d')
+      cat <<EOF > weekly_issue_summary.md
+      # Weekly Issue Snapshot (${DATE_UTC})
+
+      ## Open issues (up to 30 entries)
+
+      ${{ steps.generate-table.outputs.table }}
+
+      ## AI summary
+
+      ${{ steps.ai-summary.outputs.response }}
+      EOF
+      echo "summary-path=weekly_issue_summary.md" >> "$GITHUB_OUTPUT"
+
+  - name: Cleanup temporary files
+    shell: bash
+    run: |
+      rm -f issues.json weekly_issue_table.md || true

@@ -42,11 +42,13 @@ impl TextFormatter {
     }
 
     /// Format text with logo colors without reset (for use with backgrounds)
+    #[allow(dead_code)]
     pub fn logo_no_reset(theme: &Theme, text: &str) -> String {
         format!("{}{}", theme.colors.logo, text)
     }
 
     /// Format text with secondary colors without reset (for use with backgrounds)  
+    #[allow(dead_code)]
     pub fn secondary_no_reset(theme: &Theme, text: &str) -> String {
         format!("{}{}", theme.colors.secondary_text, text)
     }
