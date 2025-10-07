@@ -179,6 +179,7 @@ crush.db
 .agents/
 goose/
 goose*
+!config/evals/evaluations/goose-metrics.toml
 
 terminal-jarvis-agents/
 
