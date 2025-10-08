@@ -127,3 +127,4 @@ cargo test                  # Must pass (if tests exist)
 **When in doubt, read AGENTS.md. When confident, verify against AGENTS.md.**
 - don't create docs unless i literally tell you to make them. ever. i know that takes up valuable tokens. so we need to use this wisely. ensure that our documentation-specialist keeps this in mind as well as our agents.md
 - leverage our agents whenever possible. if i tell you to not do it, go ahead and listen to me, but for most/general case, go ahead and leverage the agents at our disposal to help accomplish tasks in a more efficient manner.
+- remember when i say to push up v anything to first assume that we'll leverage the github actions workflow for doing this release, unless I specifically mention to leverage the ./scripts/cicd/local-cd.sh. Using the local script is a last resort.

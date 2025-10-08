@@ -1013,9 +1013,18 @@ We use a controlled deployment approach with programmatic version management:
 # Homebrew release creation integrated into CI/CD pipeline
 # Upload archives to GitHub releases manually
 
+# CRITICAL: Verify npm authentication BEFORE publishing
+npm whoami  # Must show your npm username, or run: npm login
+
 # Manual NPM publishing (due to 2FA)
 cd npm/terminal-jarvis && npm publish
-npm dist-tag add terminal-jarvis@X.X.X stable  # optional
+
+# Update distribution tags (requires npm login)
+npm dist-tag add terminal-jarvis@X.X.X beta
+npm dist-tag add terminal-jarvis@X.X.X stable
+
+# Verify tags were applied
+npm dist-tag ls terminal-jarvis
 ```
 
 **Key Benefits:**
@@ -1093,6 +1102,59 @@ npm dist-tag ls terminal-jarvis
 - Use `beta` tag for releases with new features that need user testing
 - A single version can have both tags if it serves both purposes
 - Always update tags after publishing a new version
+
+### NPM Authentication Requirements (CRITICAL)
+
+**MANDATORY**: You MUST be logged into npm locally before performing any npm operations (publishing, dist-tag management, etc.).
+
+**Symptom of Missing Authentication**:
+- 404 errors when trying to add dist-tags
+- "Authenticate your account" prompts that fail
+- Commands fail with authentication errors
+
+**Solution - One-Time Setup Per Environment**:
+
+```bash
+# Login to npm (required once per development environment)
+npm login
+
+# Follow the prompts:
+# 1. Enter your npm username
+# 2. Enter your npm password
+# 3. Enter your npm email
+# 4. Complete 2FA if enabled (one-time password from authenticator app)
+
+# Verify you're logged in
+npm whoami
+```
+
+**When to Run `npm login`**:
+- First time working with npm in a new development environment
+- After clearing npm cache or credentials
+- When switching npm accounts
+- After seeing authentication errors during npm operations
+
+**Post-Login Operations**:
+
+```bash
+# Now you can publish packages
+cd npm/terminal-jarvis && npm publish
+
+# Now you can manage distribution tags
+npm dist-tag add terminal-jarvis@X.X.X beta
+npm dist-tag add terminal-jarvis@X.X.X stable
+
+# Verify tags were updated
+npm dist-tag ls terminal-jarvis
+```
+
+**Why This Matters**:
+- **Prevents deployment failures**: Authentication must be established before tag updates
+- **Enables 2FA workflows**: Modern npm accounts require 2FA, which needs interactive login
+- **Avoids cryptic errors**: 404s and authentication failures are confusing without context
+- **One-time per environment**: Once logged in, credentials persist until cleared
+
+**IMPORTANT**: Add this to your deployment checklist - verify `npm whoami` returns your username before attempting any npm operations.
 
 ## Pre-Commit Checklist
 
@@ -1178,6 +1240,15 @@ git log -1 --name-only             # MUST include homebrew/Formula/terminal-jarv
 - [ ] Binary permissions and execution tested
 - [ ] Postinstall scripts validated
 - [ ] **Enhanced workflow tested**: `./scripts/cicd/local-ci.sh` passes validation
+
+### NPM Distribution (if publishing or updating tags):
+
+- [ ] **NPM authentication verified**: `npm whoami` returns your username
+- [ ] If not authenticated, run `npm login` and complete 2FA
+- [ ] NPM package published successfully (if new version)
+- [ ] Distribution tags updated: `npm dist-tag add terminal-jarvis@X.X.X beta`
+- [ ] Distribution tags updated: `npm dist-tag add terminal-jarvis@X.X.X stable`
+- [ ] Tags verified: `npm dist-tag ls terminal-jarvis` shows correct versions
 
 **Never commit without completing the full checklist!**
 
