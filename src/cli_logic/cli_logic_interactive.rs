@@ -38,6 +38,7 @@ pub async fn handle_interactive_mode() -> Result<()> {
             "Authentication".to_string(),
             "Important Links".to_string(),
             "Settings".to_string(),
+            "[VOICE] Voice Command".to_string(),
             "Exit".to_string(),
         ];
 
@@ -113,6 +114,48 @@ pub async fn handle_interactive_mode() -> Result<()> {
                 display_welcome_interface(&theme, npm_available).await?;
                 println!();
             }
+            s if s.contains("Voice Command") => {
+                // Handle voice input
+                if let Some(voice_selection) = handle_voice_input().await {
+                    // Process the voice command as if it were a menu selection
+                    print!("\x1b[2J\x1b[H");
+
+                    match voice_selection.as_str() {
+                        "AI CLI Tools" => {
+                            handle_ai_tools_menu().await?;
+                        }
+                        "Authentication" => {
+                            crate::cli_logic::handle_authentication_menu().await?;
+                        }
+                        "Settings" => {
+                            handle_manage_tools_menu().await?;
+                        }
+                        "Evals & Comparisons" => {
+                            if let Err(e) = crate::cli_logic::cli_logic_evals_operations::show_evals_menu() {
+                                eprintln!("Error in Evals menu: {}", e);
+                            }
+                        }
+                        "Important Links" => {
+                            handle_important_links().await?;
+                        }
+                        "Exit" => {
+                            print!("{}", theme.reset());
+                            print!("\x1b[2J\x1b[H");
+                            println!("Goodbye!");
+                            break;
+                        }
+                        _ => {
+                            println!("\n[UNKNOWN] Command not recognized. Press Enter to continue...");
+                            let _ = std::io::stdin().read_line(&mut String::new());
+                        }
+                    }
+
+                    print!("\x1b[2J\x1b[H");
+                    display_welcome_screen();
+                    display_welcome_interface(&theme, npm_available).await?;
+                    println!();
+                }
+            }
             s if s.contains("Exit") => {
                 print!("{}", theme.reset()); // Reset all formatting
                 print!("\x1b[2J\x1b[H"); // Clear screen
@@ -138,6 +181,13 @@ async fn display_welcome_interface(theme: &crate::theme::Theme, npm_available: b
         println!(); // Bottom spacing
     }
 
+    // Show voice command hint
+    println!(
+        "  {}",
+        theme.secondary("[TIP] Select 'Voice Command' and say: 'open ai tools', 'authentication', 'settings', or 'exit'")
+    );
+    println!(); // Bottom spacing
+
     Ok(())
 }
 
@@ -155,4 +205,83 @@ async fn handle_important_links() -> Result<()> {
 async fn handle_manage_tools_menu() -> Result<()> {
     // This will be implemented in a separate function
     crate::cli_logic::handle_manage_tools_menu().await
+}
+
+/// Handle voice input and return the menu selection
+async fn handle_voice_input() -> Option<String> {
+    use crate::voice::{VoiceCommand, VoiceCommandParser, VoiceInputProvider, VoiceProviderConfig, WhisperProvider};
+
+    // Create voice provider
+    let config = VoiceProviderConfig::default();
+    let provider = match WhisperProvider::new(config) {
+        Ok(p) => p,
+        Err(e) => {
+            println!("\n[ERROR] Voice provider setup failed: {}", e);
+            println!("\nPress Enter to continue...");
+            let _ = std::io::stdin().read_line(&mut String::new());
+            return None;
+        }
+    };
+
+    // Check if ready
+    if !provider.is_ready().await.unwrap_or(false) {
+        println!("\n[ERROR] Voice provider not ready.");
+        println!("\nPossible reasons:");
+        println!("  1. No microphone/audio device detected");
+        println!("  2. Missing recording tools:");
+        println!("     - Linux: sudo apt-get install alsa-utils");
+        println!("     - macOS: brew install sox");
+        println!("     - Windows: Install FFmpeg");
+        println!("\n[NOTE] Voice input requires a physical microphone.");
+        println!("       In cloud/container environments, test on local machine.");
+        println!("\nPress Enter to continue...");
+        let _ = std::io::stdin().read_line(&mut String::new());
+        return None;
+    }
+
+    // Listen for voice input
+    let result = match provider.listen().await {
+        Ok(r) => r,
+        Err(e) => {
+            println!("\n[ERROR] Voice recognition failed: {}", e);
+            println!("\nPress Enter to continue...");
+            let _ = std::io::stdin().read_line(&mut String::new());
+            return None;
+        }
+    };
+
+    // Parse command
+    let parser = VoiceCommandParser::new();
+    let command = match parser.parse(&result.text, result.confidence) {
+        Ok(c) => c,
+        Err(e) => {
+            println!("\n[ERROR] Command parsing failed: {}", e);
+            println!("\nPress Enter to continue...");
+            let _ = std::io::stdin().read_line(&mut String::new());
+            return None;
+        }
+    };
+
+    // Map command to menu selection
+    match command {
+        VoiceCommand::OpenAITools => Some("AI CLI Tools".to_string()),
+        VoiceCommand::OpenAuthentication => Some("Authentication".to_string()),
+        VoiceCommand::OpenSettings => Some("Settings".to_string()),
+        VoiceCommand::OpenEvals => Some("Evals & Comparisons".to_string()),
+        VoiceCommand::OpenLinks => Some("Important Links".to_string()),
+        VoiceCommand::Exit => Some("Exit".to_string()),
+        VoiceCommand::Unknown { raw_text } => {
+            println!("\n[UNKNOWN] Could not understand: \"{}\"", raw_text);
+            println!("Try saying: 'open ai tools', 'authentication', 'settings', or 'exit'");
+            println!("\nPress Enter to continue...");
+            let _ = std::io::stdin().read_line(&mut String::new());
+            None
+        }
+        _ => {
+            println!("\n[INFO] Command recognized but not applicable to main menu");
+            println!("\nPress Enter to continue...");
+            let _ = std::io::stdin().read_line(&mut String::new());
+            None
+        }
+    }
 }
