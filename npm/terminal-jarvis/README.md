@@ -16,6 +16,13 @@ A unified command center for AI coding tools. Manage and run a suite of coding a
 
 <div align="left">
 
+## Architecture Overview
+
+- Tokio-driven CLI boots the Clap-based `Cli` entrypoint and routes every subcommand into specialized handlers inside `cli_logic`, including the interactive shell.
+- Domain-focused modules (`cli_logic`, `tools`, `auth_manager`, `config`, `services`, `installation_arguments`, `progress_utils`, `theme`) expose façade entry points that coordinate session continuation, tool management, configuration, and UX helpers.
+- Supporting systems such as the `evals` framework, MVVM-oriented `presentation` layer, and `voice` package extend benchmarking, UI responsiveness, and future voice control capabilities.
+- Surrounding ecosystem folders (`config`, `npm/terminal-jarvis`, `homebrew`, `scripts`) deliver TOML-driven configuration, an npm wrapper, Homebrew assets, and automation that orchestrate multi-channel distribution around the Rust binary.
+
 ## Badges
 
 Distribution and project status at a glance: NPM and Crates.io versions/downloads, Homebrew availability, license, acknowledgements, and support. Click any badge for details.
