@@ -328,20 +328,49 @@ impl VoiceListenerFactory {
         Ok(listener)
     }
 
+    /// Create smart voice listener with native platform provider (Windows/macOS built-in)
+    pub async fn create_native_listener(config: VoiceProviderConfig) -> Result<SmartVoiceListener> {
+        let provider = super::voice_native_provider::NativeVoiceProvider::new(config)?;
+        let listener = SmartVoiceListener::new(Box::new(provider));
+        Ok(listener)
+    }
+
     /// Create listener with default configuration
-    /// Prefers local whisper if available (no API key required), falls back to OpenAI Whisper API
+    /// Priority: Native (Windows/macOS) → Local Whisper → Cloud API
     pub async fn create_default_listener() -> Result<SmartVoiceListener> {
         let config = VoiceProviderConfig::default();
 
-        // Try local whisper first if feature is enabled
+        // Try native platform voice first (Windows/macOS built-in)
+        if super::voice_native_provider::NativeVoiceProvider::is_supported() {
+            println!("[NATIVE VOICE] Using platform built-in speech recognition (no API keys)...");
+            match Self::create_native_listener(config.clone()).await {
+                Ok(listener) => {
+                    // Check if it's actually ready
+                    if listener.check_ready().await.unwrap_or(false) {
+                        println!("[SUCCESS] Native voice recognition ready.");
+                        return Ok(listener);
+                    } else {
+                        println!("[INFO] Native voice not configured properly.");
+                    }
+                }
+                Err(e) => {
+                    println!("[INFO] Native voice not available: {}", e);
+                }
+            }
+        }
+
+        // Try local whisper next if feature is enabled
         #[cfg(feature = "local-voice")]
         {
-            println!("[LOCAL VOICE] Using local whisper (no API key required)");
+            println!("[PRIVACY MODE] Attempting local SLM voice recognition (no API keys, no cloud)...");
             match Self::create_local_whisper_listener(config.clone()).await {
-                Ok(listener) => return Ok(listener),
+                Ok(listener) => {
+                    println!("[SUCCESS] Local voice recognition ready. Your speech stays on-device.");
+                    return Ok(listener);
+                }
                 Err(e) => {
-                    println!("[LOCAL VOICE] Failed to initialize: {}", e);
-                    println!("[LOCAL VOICE] Falling back to OpenAI Whisper API");
+                    println!("[INFO] Local voice not available: {}", e);
+                    println!("[FALLBACK] Attempting cloud-based voice recognition...");
                 }
             }
         }
