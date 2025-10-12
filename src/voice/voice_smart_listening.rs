@@ -82,22 +82,17 @@ impl VoiceFeedback {
     }
 
     /// Success message with checkmark-like indicator
-    fn show_success(&self, message: &str) {
-        println!(
-            "\n{}[SUCCESS] {} - {}",
-            self.theme.accent("[✓]"),
-            self.theme.primary(message),
-            self.theme.secondary("Operation completed")
-        );
+    fn show_success(&self, _message: &str) {
+        // Success is implicit - don't show verbose messages
+        // Command will be handled by the main system
     }
 
     /// Error message with warning indicator
     fn show_error(&self, message: &str) {
         println!(
-            "\n{}[ERROR] {} - {}",
-            self.theme.accent("[✗]"),
-            self.theme.primary(message),
-            self.theme.secondary("Please try again")
+            "\n{} {}",
+            self.theme.accent("Could not understand:"),
+            self.theme.primary(message)
         );
     }
 
@@ -196,37 +191,29 @@ impl SmartVoiceListener {
 
         match result {
             Ok(recognition) => {
-                // SECURITY: Validate transcribed text before processing
+                // Validate transcribed text before processing
                 let transcribed_text = &recognition.text;
-                if let Err(e) = self.security_manager.validate_input(transcribed_text, "voice_command") {
+                if let Err(_e) = self.security_manager.validate_input(transcribed_text, "voice_command") {
                     self.feedback.show(VoiceFeedbackType::Error(
-                        format!("Security validation failed: {}", e)
+                        "Could not validate voice input".to_string()
                     ));
-                    eprintln!("[SECURITY BLOCKED] Invalid voice input: {}", transcribed_text);
                     return Ok(None);
                 }
 
-                println!(
-                    "\n[TRANSCRIBED] \"{}\"",
-                    self.feedback.theme.primary(transcribed_text)
-                );
+                println!("Heard: \"{}\"", transcribed_text);
 
-                // Parse command with validation
+                // Parse command
                 match self.parser.parse(transcribed_text, recognition.confidence) {
                     Ok(command) => {
-                        // SECURITY: Log the successful command recognition
-                        println!("[SECURITY] Voice command validated and recognized: {:?}", command);
-                        
                         self.feedback.show(VoiceFeedbackType::Success(
                             format!("Command recognized: {:?}", command)
                         ));
                         Ok(Some(command))
                     }
-                    Err(e) => {
+                    Err(_e) => {
                         self.feedback.show(VoiceFeedbackType::Error(
-                            format!("Failed to parse command: {}", e)
+                            "Could not understand command".to_string()
                         ));
-                        eprintln!("[SECURITY] Voice command parsing failed: {}", e);
                         Ok(None)
                     }
                 }
@@ -235,7 +222,6 @@ impl SmartVoiceListener {
                 self.feedback.show(VoiceFeedbackType::Error(
                     format!("Voice recognition failed: {}", e)
                 ));
-                eprintln!("[SECURITY] Voice recognition system error: {}", e);
                 Ok(None)
             }
         }

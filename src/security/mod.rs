@@ -27,13 +27,16 @@ impl SecurityManager {
 
     /// Validate any external input before processing
     pub fn validate_input(&self, input: &str, context: &str) -> Result<bool, SecurityError> {
-        eprintln!("[SECURITY] Validating input: {} for context: {}", input, context);
+        // Only log security details when DEBUG_SECURITY env var is set
+        if std::env::var("DEBUG_SECURITY").is_ok() {
+            eprintln!("[SECURITY] Validating input: {} for context: {}", input, context);
+        }
         
         let is_valid = self.validator.validate_input(input, context)?;
         
         if !is_valid {
             eprintln!("[SECURITY BLOCKED] Input validation failed: {} for context: {}", input, context);
-        } else {
+        } else if std::env::var("DEBUG_SECURITY").is_ok() {
             eprintln!("[SECURITY] Input validation passed");
         }
         

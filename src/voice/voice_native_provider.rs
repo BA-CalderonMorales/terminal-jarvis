@@ -35,21 +35,55 @@ impl NativeVoiceProvider {
     async fn listen_windows_direct(&self) -> Result<String> {
         let duration_secs = self.config.max_duration.as_secs();
         
-        println!("\n[LISTENING] Speak now... ({}s max)", duration_secs);
+        println!("Listening... ({}s)", duration_secs);
         
-        // Use Windows Speech Recognition in real-time (no audio file needed)
+        // Use Windows Speech Recognition with better accuracy and fuzzy matching
         let ps_script = format!(
             r#"
 Add-Type -AssemblyName System.Speech
+
 $recognizer = New-Object System.Speech.Recognition.SpeechRecognitionEngine
 $recognizer.SetInputToDefaultAudioDevice()
+
+# Load dictation grammar for flexibility
 $recognizer.LoadGrammar((New-Object System.Speech.Recognition.DictationGrammar))
+
+# Set confidence threshold
+$recognizer.UpdateRecognizerSetting("CFGConfidenceRejectionThreshold", 30)
 
 $timeout = {}
 $result = $recognizer.Recognize([TimeSpan]::FromSeconds($timeout))
 
 if ($result) {{
-    $result.Text
+    # Get the recognized text
+    $text = $result.Text.ToLower().Trim()
+    
+    # Fuzzy match common misheard words - order matters, check most specific first
+    # "help" is commonly misheard as many words
+    $text = $text -replace "^he'll$|^hell$|^heel$|^who$|^hope$|^cope$|^cold$|^hold$|^told$|^help$", "help"
+    $text = $text -replace "^helps$|^he'll s$", "help"
+    
+    # Navigation commands
+    $text = $text -replace "^open\s+", "open "
+    $text = $text -replace "^opened\s+", "open "
+    $text = $text -replace "ai\s+tools|a\s+i\s+tools|8\s+tools", "AI tools"
+    $text = $text -replace "authentication|authentications", "authentication"
+    $text = $text -replace "settings|setting", "settings"
+    $text = $text -replace "eval|equals|evaluations", "evals"
+    
+    # Tool commands  
+    $text = $text -replace "^list\s+tools|^list\s+two", "list tools"
+    $text = $text -replace "^install\s+|^in\s+stall\s+", "install "
+    $text = $text -replace "^update\s+|^up\s+date\s+", "update "
+    $text = $text -replace "^remove\s+|^re\s+move\s+", "remove "
+    
+    # General commands
+    $text = $text -replace "^exit$|^exist$|^exits$", "exit"
+    $text = $text -replace "^quit$|^quick$|^quite$", "quit"  
+    $text = $text -replace "^back$|^bad$|^bat$|^bag$", "back"
+    $text = $text -replace "^commands$|^command$", "commands"
+    
+    $text
 }} else {{
     ""
 }}
@@ -89,8 +123,6 @@ impl VoiceInputProvider for NativeVoiceProvider {
             {
                 // Windows: Use direct speech recognition (no audio file)
                 let transcription = self.listen_windows_direct().await?;
-                
-                println!("[TRANSCRIBED] \"{}\"", transcription);
                 
                 return Ok(VoiceRecognitionResult {
                     text: transcription,
