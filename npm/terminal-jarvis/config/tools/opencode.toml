@@ -1,0 +1,40 @@
+# =============================================================================
+# OPENCODE - Open source AI coding agent
+# =============================================================================
+# Single Responsibility: Manages OpenCode tool configuration and settings
+
+[tool]
+display_name = "OpenCode"
+config_key = "opencode"
+description = "Terminal-based AI coding agent"
+homepage = "https://opencode.ai/"
+documentation = "https://docs.opencode.ai/"
+cli_command = "opencode"
+requires_npm = true
+requires_sudo = true
+status = "testing"
+
+[tool.install]
+command = "npm"
+args = ["install", "-g", "opencode-ai@latest"]
+verify_command = "opencode --version"
+post_install_message = "OpenCode installed successfully! Set OPENCODE_API_KEY to get started."
+
+[tool.update]
+command = "npm"
+args = ["update", "-g", "opencode-ai"]
+verify_command = "opencode --version"
+
+[tool.auth]
+env_vars = ["OPENCODE_API_KEY", "OPENAI_API_KEY"]
+setup_url = "https://platform.openai.com/api-keys"
+browser_auth = false
+auth_instructions = "Visit OpenAI Platform to generate your API key"
+
+[tool.features]
+supports_files = true
+supports_streaming = true
+supports_conversation = false
+max_context_tokens = 128000
+supported_languages = ["python", "javascript", "rust", "go", "java", "cpp", "typescript"]
+experimental = true

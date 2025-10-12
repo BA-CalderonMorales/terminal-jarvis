@@ -1,0 +1,24 @@
+# Basic Code Completion Benchmark
+# Category: Code Completion
+# Difficulty: Basic
+#
+# This benchmark tests the AI tool's ability to complete a simple Rust function.
+# The tool should add the function body that adds two numbers.
+
+[metadata]
+id = "code-completion-basic-001"
+name = "Basic Code Completion"
+category = "code-completion"
+version = "1.0.0"
+difficulty = "basic"
+
+[prompt]
+template = "Complete this function: fn add(a: i32, b: i32) -> i32 {"
+
+[validation]
+type = "pattern-match"
+expected_patterns = ["a \\+ b", "return"]
+
+[scoring]
+points_possible = 10
+pass_threshold = 0.75

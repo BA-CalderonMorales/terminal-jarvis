@@ -1,0 +1,58 @@
+# =============================================================================
+# TERMINAL JARVIS CONFIGURATION INDEX - Modular Configuration Manifest
+# =============================================================================
+# This file serves as the configuration manifest that references all modular TOML files
+# Following SOLID principles: Single Responsibility, Open/Closed, Interface Segregation
+# Dependency Inversion: Configuration abstractions separated from implementations
+
+# =============================================================================
+# CONFIGURATION MANIFEST - References to modular configuration files  
+# =============================================================================
+[config_manifest]
+format_version = "2.0.0"
+description = "Modular TOML configuration following SOLID principles"
+last_updated = "2025-09-13"
+
+# Configuration file locations (relative to this file)
+[config_manifest.files]
+metadata = "config/metadata.toml"
+user_preferences = "config/user-preferences.toml" 
+templates = "config/templates.toml"
+api = "config/api.toml"
+tools_directory = "config/tools/"
+
+# Supported tools (auto-discovered from tools/ directory)
+[config_manifest.tools]
+claude = "config/tools/claude.toml"
+gemini = "config/tools/gemini.toml"
+qwen = "config/tools/qwen.toml"
+opencode = "config/tools/opencode.toml"
+llxprt = "config/tools/llxprt.toml"
+codex = "config/tools/codex.toml"
+crush = "config/tools/crush.toml"
+
+# =============================================================================
+# CONFIGURATION LOADER SETTINGS - How to load and merge modular configs
+# =============================================================================
+[loader]
+# Loading behavior
+auto_discover_tools = true  # Automatically discover tools in tools/ directory
+validate_config_files = true  # Validate each TOML file before loading
+merge_strategy = "override"  # How user configs override defaults: override, merge, append
+
+# Error handling
+fail_on_missing_file = false  # Continue if optional config files are missing
+fail_on_invalid_toml = true   # Fail if TOML syntax is invalid
+log_config_errors = true     # Log configuration loading errors
+
+# Cache settings
+cache_parsed_configs = true  # Cache parsed configurations for performance
+cache_duration_minutes = 30  # How long to cache configurations
+
+# =============================================================================
+# BACKWARDS COMPATIBILITY - Support for legacy config.toml format
+# =============================================================================
+[backwards_compatibility]
+support_legacy_format = true  # Support loading old monolithic config.toml
+legacy_config_path = "config.toml.legacy"  # Path to legacy configuration file
+migration_mode = "warn"  # Options: ignore, warn, error, auto_migrate
