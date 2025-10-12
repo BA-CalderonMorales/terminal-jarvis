@@ -206,7 +206,9 @@ impl VoiceInputProvider for WhisperProvider {
                     let stderr_str = String::from_utf8_lossy(&output.stderr);
 
                     // If "no soundcards found" is in stdout or stderr, no devices available
-                    if stdout_str.contains("no soundcards found") || stderr_str.contains("no soundcards found") {
+                    if stdout_str.contains("no soundcards found")
+                        || stderr_str.contains("no soundcards found")
+                    {
                         return Ok(false);
                     }
 

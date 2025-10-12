@@ -31,17 +31,32 @@ pub enum VoiceCommand {
     /// Update a specific tool
     UpdateTool { tool_name: String },
 
+    /// Update all tools
+    UpdateAllTools,
+
     /// Check status of a tool
     CheckStatus { tool_name: String },
 
     /// List all available tools
     ListTools,
 
+    /// List installed tools
+    ListInstalledTools,
+
     /// Show help information
     ShowHelp,
 
-    /// Run a benchmark
-    RunBenchmark { benchmark_name: Option<String> },
+    /// Show voice commands help
+    ShowVoiceHelp,
+
+    /// Uninstall a specific tool
+    UninstallTool { tool_name: String },
+
+    /// Cancel current operation
+    Cancel,
+
+    /// Back to previous menu
+    GoBack,
 
     /// Unrecognized command - contains the raw text
     Unknown { raw_text: String },
@@ -106,6 +121,7 @@ impl VoiceCommandParser {
                     "show ai tools".to_string(),
                     "ai tools menu".to_string(),
                     "tools".to_string(),
+                    "main menu".to_string(),
                 ],
                 allow_partial: true,
                 min_confidence: 0.7,
@@ -117,6 +133,7 @@ impl VoiceCommandParser {
                     "show auth".to_string(),
                     "authentication".to_string(),
                     "login".to_string(),
+                    "setup auth".to_string(),
                 ],
                 allow_partial: true,
                 min_confidence: 0.7,
@@ -128,6 +145,32 @@ impl VoiceCommandParser {
                     "show settings".to_string(),
                     "settings".to_string(),
                     "preferences".to_string(),
+                    "configuration".to_string(),
+                ],
+                allow_partial: true,
+                min_confidence: 0.7,
+            },
+            VoiceCommandPattern {
+                command: "OpenEvals".to_string(),
+                patterns: vec![
+                    "open evals".to_string(),
+                    "show evals".to_string(),
+                    "evaluations".to_string(),
+                    "benchmarks".to_string(),
+                    "comparisons".to_string(),
+                ],
+                allow_partial: true,
+                min_confidence: 0.7,
+            },
+            VoiceCommandPattern {
+                command: "OpenLinks".to_string(),
+                patterns: vec![
+                    "open links".to_string(),
+                    "show links".to_string(),
+                    "important links".to_string(),
+                    "documentation".to_string(),
+                    "docs".to_string(),
+                    "help".to_string(),
                 ],
                 allow_partial: true,
                 min_confidence: 0.7,
@@ -139,6 +182,7 @@ impl VoiceCommandParser {
                     "quit".to_string(),
                     "close".to_string(),
                     "goodbye".to_string(),
+                    "terminate".to_string(),
                 ],
                 allow_partial: false,
                 min_confidence: 0.8,
@@ -149,6 +193,8 @@ impl VoiceCommandParser {
                     "list tools".to_string(),
                     "show all tools".to_string(),
                     "what tools are available".to_string(),
+                    "show tools".to_string(),
+                    "available tools".to_string(),
                 ],
                 allow_partial: true,
                 min_confidence: 0.7,
@@ -160,9 +206,58 @@ impl VoiceCommandParser {
                     "show help".to_string(),
                     "what can i do".to_string(),
                     "commands".to_string(),
+                    "voice commands".to_string(),
                 ],
                 allow_partial: true,
                 min_confidence: 0.7,
+            },
+            // Enhanced tool management commands
+            VoiceCommandPattern {
+                command: "InstallTool".to_string(),
+                patterns: vec![
+                    "install".to_string(),
+                    "add".to_string(),
+                    "get".to_string(),
+                    "setup".to_string(),
+                    "download".to_string(),
+                ],
+                allow_partial: false,
+                min_confidence: 0.8,
+            },
+            VoiceCommandPattern {
+                command: "UpdateTool".to_string(),
+                patterns: vec![
+                    "update".to_string(),
+                    "upgrade".to_string(),
+                    "refresh".to_string(),
+                    "upgrade all".to_string(),
+                    "update all".to_string(),
+                ],
+                allow_partial: false,
+                min_confidence: 0.8,
+            },
+            VoiceCommandPattern {
+                command: "CheckStatus".to_string(),
+                patterns: vec![
+                    "status".to_string(),
+                    "check status".to_string(),
+                    "is".to_string(),
+                    "show status of".to_string(),
+                    "check".to_string(),
+                ],
+                allow_partial: false,
+                min_confidence: 0.7,
+            },
+            VoiceCommandPattern {
+                command: "UninstallTool".to_string(),
+                patterns: vec![
+                    "uninstall".to_string(),
+                    "remove".to_string(),
+                    "delete".to_string(),
+                    "uninstall".to_string(),
+                ],
+                allow_partial: false,
+                min_confidence: 0.8,
             },
         ]
     }
@@ -203,6 +298,30 @@ impl VoiceCommandParser {
             return Ok(cmd);
         }
 
+        if let Some(cmd) = self.try_parse_uninstall_command(&normalized) {
+            return Ok(cmd);
+        }
+
+        if let Some(cmd) = self.try_parse_back_command(&normalized) {
+            return Ok(cmd);
+        }
+
+        if let Some(cmd) = self.try_parse_cancel_command(&normalized) {
+            return Ok(cmd);
+        }
+
+        // Check for "list installed tools" command
+        if self.matches_pattern(&normalized, "list installed tools", true) {
+            return Ok(VoiceCommand::ListInstalledTools);
+        }
+
+        // Check for "update all" or "upgrade all" command
+        if self.matches_pattern(&normalized, "update all", true)
+            || self.matches_pattern(&normalized, "upgrade all", true)
+        {
+            return Ok(VoiceCommand::UpdateAllTools);
+        }
+
         // No match found - return unknown
         Ok(VoiceCommand::Unknown {
             raw_text: text.to_string(),
@@ -233,14 +352,25 @@ impl VoiceCommandParser {
     }
 
     /// Create a command from a pattern match
-    fn create_command(&self, command_name: &str, _normalized: &str, _raw: &str) -> Result<VoiceCommand> {
+    fn create_command(
+        &self,
+        command_name: &str,
+        _normalized: &str,
+        _raw: &str,
+    ) -> Result<VoiceCommand> {
         match command_name {
             "OpenAITools" => Ok(VoiceCommand::OpenAITools),
             "OpenAuthentication" => Ok(VoiceCommand::OpenAuthentication),
             "OpenSettings" => Ok(VoiceCommand::OpenSettings),
+            "OpenEvals" => Ok(VoiceCommand::OpenEvals),
+            "OpenLinks" => Ok(VoiceCommand::OpenLinks),
             "Exit" => Ok(VoiceCommand::Exit),
             "ListTools" => Ok(VoiceCommand::ListTools),
             "ShowHelp" => Ok(VoiceCommand::ShowHelp),
+            "ShowVoiceHelp" => Ok(VoiceCommand::ShowVoiceHelp),
+            "InstallTool" => Ok(VoiceCommand::ListTools), // Let parameterized parsing handle the actual tool name
+            "UpdateTool" => Ok(VoiceCommand::ListTools), // Let parameterized parsing handle the actual tool name
+            "CheckStatus" => Ok(VoiceCommand::ListTools), // Let parameterized parsing handle the actual tool name
             _ => Err(anyhow!("Unknown command: {}", command_name)),
         }
     }
@@ -293,6 +423,44 @@ impl VoiceCommandParser {
         None
     }
 
+    /// Try to parse "uninstall <tool>" command
+    fn try_parse_uninstall_command(&self, text: &str) -> Option<VoiceCommand> {
+        let uninstall_patterns = ["uninstall ", "remove ", "delete "];
+
+        for pattern in &uninstall_patterns {
+            if let Some(tool_name) = text.strip_prefix(pattern) {
+                let tool_name = tool_name.trim().to_string();
+                if !tool_name.is_empty() {
+                    return Some(VoiceCommand::UninstallTool { tool_name });
+                }
+            }
+        }
+
+        None
+    }
+
+    /// Try to parse "back" or "main menu" command
+    fn try_parse_back_command(&self, text: &str) -> Option<VoiceCommand> {
+        let back_patterns = ["back", "main menu", "previous menu", "go back"];
+
+        for pattern in back_patterns {
+            if text.contains(pattern) {
+                return Some(VoiceCommand::GoBack);
+            }
+        }
+
+        None
+    }
+
+    /// Try to parse "cancel" command
+    fn try_parse_cancel_command(&self, text: &str) -> Option<VoiceCommand> {
+        if text.contains("cancel") || text.contains("abort") || text.contains("never mind") {
+            return Some(VoiceCommand::Cancel);
+        }
+
+        None
+    }
+
     /// Get all available command patterns for display/help
     #[allow(dead_code)]
     pub fn available_commands(&self) -> Vec<String> {
@@ -315,10 +483,38 @@ mod tests {
     }
 
     #[test]
+    fn test_parse_evals_command() {
+        let parser = VoiceCommandParser::new();
+        let result = parser.parse("open evals", 0.9).unwrap();
+        assert_eq!(result, VoiceCommand::OpenEvals);
+    }
+
+    #[test]
+    fn test_parse_links_command() {
+        let parser = VoiceCommandParser::new();
+        let result = parser.parse("show links", 0.9).unwrap();
+        assert_eq!(result, VoiceCommand::OpenLinks);
+    }
+
+    #[test]
     fn test_parse_exit_command() {
         let parser = VoiceCommandParser::new();
         let result = parser.parse("exit", 0.9).unwrap();
         assert_eq!(result, VoiceCommand::Exit);
+    }
+
+    #[test]
+    fn test_parse_back_command() {
+        let parser = VoiceCommandParser::new();
+        let result = parser.parse("go back to main menu", 0.9).unwrap();
+        assert_eq!(result, VoiceCommand::GoBack);
+    }
+
+    #[test]
+    fn test_parse_cancel_command() {
+        let parser = VoiceCommandParser::new();
+        let result = parser.parse("cancel that", 0.9).unwrap();
+        assert_eq!(result, VoiceCommand::Cancel);
     }
 
     #[test]
@@ -331,6 +527,32 @@ mod tests {
                 tool_name: "aider".to_string()
             }
         );
+    }
+
+    #[test]
+    fn test_parse_uninstall_command() {
+        let parser = VoiceCommandParser::new();
+        let result = parser.parse("remove gemini", 0.9).unwrap();
+        assert_eq!(
+            result,
+            VoiceCommand::UninstallTool {
+                tool_name: "gemini".to_string()
+            }
+        );
+    }
+
+    #[test]
+    fn test_parse_update_all_command() {
+        let parser = VoiceCommandParser::new();
+        let result = parser.parse("upgrade all", 0.9).unwrap();
+        assert_eq!(result, VoiceCommand::UpdateAllTools);
+    }
+
+    #[test]
+    fn test_parse_list_installed_command() {
+        let parser = VoiceCommandParser::new();
+        let result = parser.parse("list installed tools", 0.9).unwrap();
+        assert_eq!(result, VoiceCommand::ListInstalledTools);
     }
 
     #[test]

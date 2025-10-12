@@ -22,11 +22,7 @@ pub fn display_welcome_screen() {
     println!("{}", theme.primary(&format!("   │ ═ ═ │  {}", cwd)));
     println!(
         "{}",
-        theme.secondary("   │     │  ---------------------------------")
-    );
-    println!(
-        "{}",
-        theme.accent("   └─────┘  Tip: Check Important Links for docs")
+        theme.accent("   └─────┘  Type /help to see available commands")
     );
     println!();
 }
@@ -49,10 +45,9 @@ mod tests {
             "┌─────┐",
             "│ T.J │",
             "│ ═ ═ │",
-            "│     │",
             "└─────┘",
             "Terminal Jarvis",
-            "Tip: Check Important Links for docs",
+            "Type /help to see available commands",
         ];
 
         // If we can construct the elements, the art is valid
