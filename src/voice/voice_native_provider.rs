@@ -1,10 +1,10 @@
 // Native Platform Voice Provider Implementation
-// Uses platform-native speech recognition (no external dependencies)
+// Uses platform-native speech recognition with platform-specific implementations
 //
-// This provider shells out to native OS speech recognition tools:
-// - Windows: Windows Speech Recognition via PowerShell
-// - macOS: Built-in dictation
-// - Linux: Fallback to simple command matching (no speech-to-text)
+// This provider delegates to platform-specific modules:
+// - Windows: Windows Speech Recognition via PowerShell (src/voice/platforms/windows.rs)
+// - Linux: Audio capture + Whisper transcription (src/voice/platforms/linux.rs)
+// - macOS: Future implementation (currently uses fallback)
 
 use super::voice_provider::{
     VoiceInputProvider, VoiceMetadata, VoiceProviderConfig, VoiceRecognitionResult,
@@ -12,6 +12,16 @@ use super::voice_provider::{
 use anyhow::{anyhow, Result};
 use std::future::Future;
 use std::pin::Pin;
+
+// Import platform-specific modules
+#[cfg(target_os = "windows")]
+use super::platforms::windows;
+
+#[cfg(target_os = "linux")]
+use super::platforms::linux;
+
+// Dev environment support (always available for Codespaces detection)
+use super::platforms::dev;
 
 /// Native platform voice provider (no external dependencies)
 pub struct NativeVoiceProvider {
@@ -26,91 +36,126 @@ impl NativeVoiceProvider {
 
     /// Check if platform supports native voice recognition
     pub fn is_supported() -> bool {
-        // Windows and macOS have built-in speech recognition
-        cfg!(target_os = "windows") || cfg!(target_os = "macos")
+        // Windows and Linux have speech recognition support
+        // Dev environments (Codespaces) always supported with text-based simulation
+        // macOS can be added later
+        true // All platforms now supported (dev mode for Codespaces/containers)
     }
 
-    /// Listen for speech directly using Windows Speech Recognition (no audio file needed)
-    #[cfg(target_os = "windows")]
-    async fn listen_windows_direct(&self) -> Result<String> {
-        let duration_secs = self.config.max_duration.as_secs();
+    /// Listen for speech on Linux using audio capture + Whisper transcription
+    #[cfg(target_os = "linux")]
+    async fn listen_linux(&self) -> Result<String> {
+        // Create temp directory for audio file
+        let temp_dir = std::env::temp_dir();
+        let audio_path = temp_dir.join("terminal_jarvis_voice.wav");
         
-        println!("Listening... ({}s)", duration_secs);
+        // Capture audio using platform-specific Linux implementation
+        linux::capture_audio(self.config.max_duration, &audio_path).await?;
         
-        // Use Windows Speech Recognition with better accuracy and fuzzy matching
-        let ps_script = format!(
-            r#"
-Add-Type -AssemblyName System.Speech
+        // Transcribe the audio file using Whisper
+        // This will use whatever Whisper provider is available (API or local)
+        let transcription = self.transcribe_audio_file(&audio_path).await?;
+        
+        // Cleanup temp file
+        let _ = linux::cleanup_audio_file(&audio_path).await;
+        
+        Ok(transcription)
+    }
 
-$recognizer = New-Object System.Speech.Recognition.SpeechRecognitionEngine
-$recognizer.SetInputToDefaultAudioDevice()
+    /// Transcribe an audio file using available Whisper provider
+    #[cfg(target_os = "linux")]
+    async fn transcribe_audio_file(&self, audio_path: &std::path::PathBuf) -> Result<String> {
+        // Try to use OpenAI Whisper API if available
+        if let Ok(api_key) = std::env::var("OPENAI_API_KEY") {
+            if !api_key.is_empty() {
+                return self.transcribe_with_openai(audio_path).await;
+            }
+        }
+        
+        // Try local whisper if feature is enabled
+        #[cfg(feature = "local-voice")]
+        {
+            return self.transcribe_with_local_whisper(audio_path).await;
+        }
+        
+        #[cfg(not(feature = "local-voice"))]
+        {
+            Err(anyhow!(
+                "No transcription service available.\n\
+                 Options:\n\
+                 1. Set OPENAI_API_KEY environment variable for cloud transcription\n\
+                 2. Build with local-voice feature: cargo install terminal-jarvis --features local-voice"
+            ))
+        }
+    }
 
-# Load dictation grammar for flexibility
-$recognizer.LoadGrammar((New-Object System.Speech.Recognition.DictationGrammar))
-
-# Set confidence threshold
-$recognizer.UpdateRecognizerSetting("CFGConfidenceRejectionThreshold", 30)
-
-$timeout = {}
-$result = $recognizer.Recognize([TimeSpan]::FromSeconds($timeout))
-
-if ($result) {{
-    # Get the recognized text
-    $text = $result.Text.ToLower().Trim()
-    
-    # Fuzzy match common misheard words - order matters, check most specific first
-    # "help" is commonly misheard as many words
-    $text = $text -replace "^he'll$|^hell$|^heel$|^who$|^hope$|^cope$|^cold$|^hold$|^told$|^help$", "help"
-    $text = $text -replace "^helps$|^he'll s$", "help"
-    
-    # Navigation commands
-    $text = $text -replace "^open\s+", "open "
-    $text = $text -replace "^opened\s+", "open "
-    $text = $text -replace "ai\s+tools|a\s+i\s+tools|8\s+tools", "AI tools"
-    $text = $text -replace "authentication|authentications", "authentication"
-    $text = $text -replace "settings|setting", "settings"
-    $text = $text -replace "eval|equals|evaluations", "evals"
-    
-    # Tool commands  
-    $text = $text -replace "^list\s+tools|^list\s+two", "list tools"
-    $text = $text -replace "^install\s+|^in\s+stall\s+", "install "
-    $text = $text -replace "^update\s+|^up\s+date\s+", "update "
-    $text = $text -replace "^remove\s+|^re\s+move\s+", "remove "
-    
-    # General commands
-    $text = $text -replace "^exit$|^exist$|^exits$", "exit"
-    $text = $text -replace "^quit$|^quick$|^quite$", "quit"  
-    $text = $text -replace "^back$|^bad$|^bat$|^bag$", "back"
-    $text = $text -replace "^commands$|^command$", "commands"
-    
-    $text
-}} else {{
-    ""
-}}
-"#,
-            duration_secs
-        );
-
-        let output = tokio::process::Command::new("powershell")
-            .args(&["-NoProfile", "-Command", &ps_script])
-            .output()
-            .await
-            .map_err(|e| anyhow!("Failed to run Windows Speech Recognition: {}", e))?;
-
-        if !output.status.success() {
+    /// Transcribe audio using OpenAI Whisper API
+    #[cfg(target_os = "linux")]
+    async fn transcribe_with_openai(&self, audio_path: &std::path::PathBuf) -> Result<String> {
+        // Direct API call to OpenAI Whisper - simpler than using WhisperProvider
+        // which expects to handle its own audio recording
+        
+        // Read audio file
+        let audio_data = tokio::fs::read(audio_path).await?;
+        
+        // The WhisperProvider expects to handle its own recording, so we'll use a workaround
+        // by temporarily saving the audio and letting it process
+        // For now, we'll use a direct API call
+        
+        let client = reqwest::Client::new();
+        let api_key = std::env::var("OPENAI_API_KEY")?;
+        
+        let form = reqwest::multipart::Form::new()
+            .text("model", "whisper-1")
+            .part(
+                "file",
+                reqwest::multipart::Part::bytes(audio_data)
+                    .file_name("audio.wav")
+                    .mime_str("audio/wav")?,
+            );
+        
+        let response = client
+            .post("https://api.openai.com/v1/audio/transcriptions")
+            .header("Authorization", format!("Bearer {}", api_key))
+            .multipart(form)
+            .send()
+            .await?;
+        
+        if !response.status().is_success() {
             return Err(anyhow!(
-                "Windows Speech Recognition failed: {}",
-                String::from_utf8_lossy(&output.stderr)
+                "OpenAI Whisper API error: {}",
+                response.text().await?
             ));
         }
+        
+        let result: serde_json::Value = response.json().await?;
+        let text = result["text"]
+            .as_str()
+            .ok_or_else(|| anyhow!("No text in response"))?
+            .to_string();
+        
+        Ok(text)
+    }
 
-        let transcription = String::from_utf8_lossy(&output.stdout).trim().to_string();
-
-        if transcription.is_empty() {
-            return Err(anyhow!("No speech detected"));
-        }
-
-        Ok(transcription)
+    /// Transcribe audio using local Whisper model
+    #[cfg(all(target_os = "linux", feature = "local-voice"))]
+    async fn transcribe_with_local_whisper(&self, audio_path: &std::path::PathBuf) -> Result<String> {
+        // Use the LocalWhisperProvider for local transcription
+        let local_config = VoiceProviderConfig {
+            max_duration: self.config.max_duration,
+            language: self.config.language.clone(),
+        };
+        
+        let local_provider = super::voice_local_whisper_provider::LocalWhisperProvider::new(local_config).await?;
+        
+        // The LocalWhisperProvider will handle the transcription
+        // We'll need to pass the audio file path somehow - this is a simplified version
+        // In reality, we'd need to enhance LocalWhisperProvider to accept pre-recorded audio
+        
+        Err(anyhow!(
+            "Local whisper transcription from file not yet implemented.\n\
+             Please use OPENAI_API_KEY for now."
+        ))
     }
 }
 
@@ -119,10 +164,44 @@ impl VoiceInputProvider for NativeVoiceProvider {
         &self,
     ) -> Pin<Box<dyn Future<Output = Result<VoiceRecognitionResult>> + Send + '_>> {
         Box::pin(async move {
+            // FIRST: Check if we're in a dev environment (Codespaces, Docker, etc.)
+            if dev::is_dev_environment().await {
+                let transcription = dev::simulate_voice_input(self.config.max_duration).await?;
+                
+                return Ok(VoiceRecognitionResult {
+                    text: transcription,
+                    confidence: 1.0, // Text input is always "confident"
+                    duration: self.config.max_duration,
+                    metadata: Some(VoiceMetadata {
+                        language: Some(self.config.language.clone()),
+                        tokens_used: None,
+                        extra: std::collections::HashMap::new(),
+                    }),
+                });
+            }
+            
+            // Platform-specific implementations for environments with audio hardware
             #[cfg(target_os = "windows")]
             {
-                // Windows: Use direct speech recognition (no audio file)
-                let transcription = self.listen_windows_direct().await?;
+                // Windows: Use direct speech recognition via PowerShell (no audio file)
+                let transcription = windows::listen_windows_direct(self.config.max_duration).await?;
+                
+                return Ok(VoiceRecognitionResult {
+                    text: transcription,
+                    confidence: 0.8,
+                    duration: self.config.max_duration,
+                    metadata: Some(VoiceMetadata {
+                        language: Some(self.config.language.clone()),
+                        tokens_used: None,
+                        extra: std::collections::HashMap::new(),
+                    }),
+                });
+            }
+
+            #[cfg(target_os = "linux")]
+            {
+                // Linux: Capture audio and transcribe using Whisper
+                let transcription = self.listen_linux().await?;
                 
                 return Ok(VoiceRecognitionResult {
                     text: transcription,
@@ -138,24 +217,12 @@ impl VoiceInputProvider for NativeVoiceProvider {
 
             #[cfg(target_os = "macos")]
             {
-                // macOS doesn't have simple built-in CLI speech recognition
+                // macOS doesn't have simple built-in CLI speech recognition yet
                 return Err(anyhow!(
                     "macOS native speech recognition requires additional setup.\n\
                      Options:\n\
                      1. Use cloud API: Set OPENAI_API_KEY environment variable\n\
                      2. Build with local-voice feature: cargo install terminal-jarvis --features local-voice"
-                ));
-            }
-
-            #[cfg(target_os = "linux")]
-            {
-                // Linux doesn't have built-in speech recognition
-                return Err(anyhow!(
-                    "Linux does not have built-in speech recognition.\n\
-                     Options:\n\
-                     1. Use cloud API: Set OPENAI_API_KEY environment variable\n\
-                     2. Build with local-voice feature: cargo install terminal-jarvis --features local-voice\n\
-                     3. Install and use Vosk or other offline engines"
                 ));
             }
         })
@@ -168,30 +235,25 @@ impl VoiceInputProvider for NativeVoiceProvider {
                 return Ok(false);
             }
 
-            // Check if required tools are available
-            #[cfg(target_os = "windows")]
-            {
-                // Check for PowerShell (always available on Windows)
-                let ps_check = tokio::process::Command::new("powershell")
-                    .args(&["-NoProfile", "-Command", "exit 0"])
-                    .status()
-                    .await;
-                return Ok(ps_check.is_ok());
+            // FIRST: Check if we're in a dev environment (always ready with text input)
+            if dev::is_ready().await? {
+                return Ok(true);
             }
 
-            #[cfg(target_os = "macos")]
+            // Check if required tools are available using platform-specific checks
+            #[cfg(target_os = "windows")]
             {
-                // Check for rec command
-                let rec_check = tokio::process::Command::new("which")
-                    .arg("rec")
-                    .status()
-                    .await;
-                return Ok(rec_check.is_ok() && rec_check.unwrap().success());
+                return windows::is_ready().await;
             }
 
             #[cfg(target_os = "linux")]
             {
-                return Ok(false); // Linux not supported without external tools
+                return linux::is_ready().await;
+            }
+
+            #[cfg(target_os = "macos")]
+            {
+                return Ok(false); // macOS not yet implemented
             }
         })
     }
@@ -206,14 +268,14 @@ impl VoiceInputProvider for NativeVoiceProvider {
             "Windows Native Speech Recognition"
         }
 
-        #[cfg(target_os = "macos")]
-        {
-            "macOS Native Speech Recognition"
-        }
-
         #[cfg(target_os = "linux")]
         {
-            "Linux (Native Not Supported)"
+            "Linux Audio Capture + Whisper"
+        }
+
+        #[cfg(target_os = "macos")]
+        {
+            "macOS (Native Not Yet Supported)"
         }
     }
 }
