@@ -80,6 +80,32 @@ This document serves as the unified guideline for all AI coding assistants worki
 
 **This prevents broken Homebrew installations where Formula URLs don't match release assets.**
 
+## CRITICAL: NO DOCUMENTATION BEFORE VERIFICATION
+
+**ABSOLUTE REQUIREMENT**: Never write documentation, update README, or create user-facing guides until features are fully implemented AND tested.
+
+**Why This Matters**:
+- Prevents documenting broken features
+- Avoids misleading users with features that don't work
+- Ensures all documented features have been verified on target platforms
+- Maintains project credibility
+
+**Workflow**:
+1. **Build the feature** - Implement and get it compiling
+2. **Test the feature** - Verify it works on all supported platforms (Linux, macOS, Windows)
+3. **Validate edge cases** - Test error handling and failure scenarios
+4. **THEN document** - Only after verification, write user-facing documentation
+
+**Examples of "Documentation"** that require verification first:
+- README feature lists
+- User guides
+- Setup instructions
+- Command examples
+- API documentation
+- CHANGELOG entries (these go in AFTER features work)
+
+**Exception**: Internal development notes and TODO comments are fine during development.
+
 ## Communication & Reference Guidelines
 
 ### Reference Clarity Requirements (CRITICAL)

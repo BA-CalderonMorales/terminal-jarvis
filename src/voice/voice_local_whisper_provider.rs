@@ -69,10 +69,21 @@ impl LocalWhisperProvider {
         // SECURITY: NO AUTO-DOWNLOAD - Return error if no verified model found
         Err(anyhow!(
             "No verified whisper model found. Auto-download disabled for security.\n\
-             To use local voice:\n\
-             1. Manually download a trusted whisper model\n\
-             2. Place it in ./models/ directory with .verified extension\n\
-             3. Or use the Secure API provider instead"
+             \n\
+             To use on-device voice recognition (recommended for privacy):\n\
+             \n\
+             1. Download a Whisper model (one-time setup):\n\
+                - Tiny (fastest, 75 MB): https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-tiny.en.bin\n\
+                - Base (balanced, 142 MB): https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-base.en.bin\n\
+                - Small (best quality, 466 MB): https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-small.en.bin\n\
+             \n\
+             2. Place the model in one of these locations:\n\
+                - ./models/whisper-tiny.bin (or base/small)\n\
+                - ./config/whisper-model.bin.verified (with .verified for extra security)\n\
+             \n\
+             3. Models with .verified extension get additional security checks\n\
+             \n\
+             Alternative: Set OPENAI_API_KEY to use cloud-based voice recognition"
         ))
     }
 

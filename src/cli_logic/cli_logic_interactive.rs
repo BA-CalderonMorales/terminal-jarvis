@@ -204,15 +204,22 @@ async fn handle_voice_input() -> Option<String> {
     let listener = match VoiceListenerFactory::create_default_listener().await {
         Ok(l) => l,
         Err(e) => {
-            println!("\n[ERROR] Voice system not available: {}", e);
-            println!("\nSetup required for local voice recognition:");
-            println!("  1. Install audio recording tools:");
-            println!("     - Linux: sudo apt-get install alsa-utils");
-            println!("     - macOS: brew install sox");
-            println!("     - Windows: Install FFmpeg");
-            println!("  2. Ensure microphone access:");
-            println!("     - GitHub Codespaces: Enable audio forwarding in VS Code");
-            println!("     - Check with: arecord --list-devices (Linux)");
+            println!("\n[VOICE SETUP REQUIRED]");
+            println!("{}", e);
+            println!("\n[OPTION 1] Cloud API (Recommended - Easy Setup):");
+            println!("  Set OPENAI_API_KEY environment variable for cloud-based voice recognition.");
+            println!("  Configure in Terminal Jarvis authentication menu (/auth command).");
+            println!();
+            println!("[OPTION 2] Local Voice Recognition (Privacy-Focused):");
+            println!("  Terminal Jarvis supports on-device voice recognition using Small Language Models.");
+            println!("  This provides privacy, offline usage, and no API costs.");
+            println!();
+            println!("  Requirements:");
+            println!("  - Build Terminal Jarvis with: cargo install terminal-jarvis --features local-voice");
+            println!("  - Install LLVM/Clang for compilation (see terminal-jarvis.github.io for guide)");
+            println!("  - Download a Whisper model (ggml-tiny.en.bin from HuggingFace)");
+            println!("  - Install audio tools (alsa-utils/sox/ffmpeg)");
+            println!();
             return None;
         }
     };

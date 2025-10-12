@@ -41,7 +41,7 @@ pub fn run_tool_intercepting_sigint(mut cmd: Command) -> Result<std::process::Ex
         atomic::{AtomicBool, Ordering},
         Arc,
     };
-    let child_id = child.id();
+    let _child_id = child.id();
     let sigint_flag = Arc::new(AtomicBool::new(false));
     let _flag_handle =
         signal_hook::flag::register(signal_hook::consts::SIGINT, sigint_flag.clone())
@@ -54,7 +54,7 @@ pub fn run_tool_intercepting_sigint(mut cmd: Command) -> Result<std::process::Ex
             // Received Ctrl+C: terminate the child process only (keep parent alive)
             #[cfg(unix)]
             unsafe {
-                let _ = libc::kill(child_id as i32, libc::SIGTERM);
+                let _ = libc::kill(_child_id as i32, libc::SIGTERM);
             }
             // Fallback: ensure child is killed if still running
             let _ = child.kill();
