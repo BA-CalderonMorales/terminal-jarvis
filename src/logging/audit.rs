@@ -1,12 +1,12 @@
 // Audit Logging Module - Immutable Forensic Logging
 // Provides comprehensive logging for security analysis and compliance
 
+use anyhow::Result;
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 use std::fs::{File, OpenOptions};
 use std::io::Write;
 use std::path::PathBuf;
-use anyhow::Result;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct LogEntry {
@@ -49,17 +49,19 @@ impl AuditLogger {
     pub fn new() -> Result<Self> {
         let log_dir = PathBuf::from("./logs");
         std::fs::create_dir_all(&log_dir)?;
-        
-        let log_file_path = log_dir.join(format!("terminal-jarvis-audit-{}.log", 
-            chrono::Utc::now().format("%Y%m%d")));
-        
+
+        let log_file_path = log_dir.join(format!(
+            "terminal-jarvis-audit-{}.log",
+            chrono::Utc::now().format("%Y%m%d")
+        ));
+
         let log_file = OpenOptions::new()
             .create(true)
             .append(true)
             .open(&log_file_path)?;
-        
+
         let session_id = generate_session_id();
-        
+
         Ok(Self {
             log_file,
             session_id,
@@ -70,14 +72,19 @@ impl AuditLogger {
         let log_line = serde_json::to_string(&entry)?;
         writeln!(self.log_file, "{}", log_line)?;
         self.log_file.flush()?;
-        
+
         // Also log to stderr for immediate visibility
         eprintln!("[AUDIT] {}", log_line);
-        
+
         Ok(())
     }
 
-    pub fn log_security_event(&mut self, level: LogLevel, message: &str, context: serde_json::Value) -> Result<()> {
+    pub fn log_security_event(
+        &mut self,
+        level: LogLevel,
+        message: &str,
+        context: serde_json::Value,
+    ) -> Result<()> {
         let entry = LogEntry {
             timestamp: Utc::now(),
             level,
@@ -88,34 +95,56 @@ impl AuditLogger {
             session_id: self.session_id.clone(),
             request_id: generate_request_id(),
         };
-        
+
         self.log(entry)
     }
 
-    pub fn log_input_validation(&mut self, input: &str, context: &str, is_valid: bool, reason: Option<&str>) -> Result<()> {
+    pub fn log_input_validation(
+        &mut self,
+        input: &str,
+        context: &str,
+        is_valid: bool,
+        reason: Option<&str>,
+    ) -> Result<()> {
         let mut context_data = serde_json::Map::new();
-        context_data.insert("input".to_string(), serde_json::Value::String(input.to_string()));
-        context_data.insert("context".to_string(), serde_json::Value::String(context.to_string()));
+        context_data.insert(
+            "input".to_string(),
+            serde_json::Value::String(input.to_string()),
+        );
+        context_data.insert(
+            "context".to_string(),
+            serde_json::Value::String(context.to_string()),
+        );
         context_data.insert("is_valid".to_string(), serde_json::Value::Bool(is_valid));
-        
+
         if let Some(reason) = reason {
-            context_data.insert("reason".to_string(), serde_json::Value::String(reason.to_string()));
+            context_data.insert(
+                "reason".to_string(),
+                serde_json::Value::String(reason.to_string()),
+            );
         }
-        
-        let level = if is_valid { LogLevel::Info } else { LogLevel::Warning };
+
+        let level = if is_valid {
+            LogLevel::Info
+        } else {
+            LogLevel::Warning
+        };
         let message = if is_valid {
             format!("Input validation passed for context: {}", context)
         } else {
             format!("Input validation blocked for context: {}", context)
         };
-        
+
         self.log_security_event(level, &message, serde_json::Value::Object(context_data))
     }
 
     pub fn log_model_access_attempt(&mut self, model_name: &str) -> Result<()> {
         let mut context_data = serde_json::Map::new();
-        context_data.insert("model_name".to_string(), serde_json::Value::String(model_name.to_string()));
-        
+        context_data.insert(
+            "model_name".to_string(),
+            serde_json::Value::String(model_name.to_string()),
+        );
+
         self.log_security_event(
             LogLevel::Info,
             &format!("Model access attempt: {}", model_name),
@@ -125,8 +154,11 @@ impl AuditLogger {
 
     pub fn log_model_access_success(&mut self, model_name: &str) -> Result<()> {
         let mut context_data = serde_json::Map::new();
-        context_data.insert("model_name".to_string(), serde_json::Value::String(model_name.to_string()));
-        
+        context_data.insert(
+            "model_name".to_string(),
+            serde_json::Value::String(model_name.to_string()),
+        );
+
         self.log_security_event(
             LogLevel::Info,
             &format!("Model access successful: {}", model_name),
@@ -136,9 +168,15 @@ impl AuditLogger {
 
     pub fn log_model_access_blocked(&mut self, model_name: &str, reason: &str) -> Result<()> {
         let mut context_data = serde_json::Map::new();
-        context_data.insert("model_name".to_string(), serde_json::Value::String(model_name.to_string()));
-        context_data.insert("reason".to_string(), serde_json::Value::String(reason.to_string()));
-        
+        context_data.insert(
+            "model_name".to_string(),
+            serde_json::Value::String(model_name.to_string()),
+        );
+        context_data.insert(
+            "reason".to_string(),
+            serde_json::Value::String(reason.to_string()),
+        );
+
         self.log_security_event(
             LogLevel::Warning,
             &format!("Model access blocked: {}", model_name),
@@ -148,11 +186,19 @@ impl AuditLogger {
 
     pub fn log_command_execution_attempt(&mut self, command: &str, args: &[String]) -> Result<()> {
         let mut context_data = serde_json::Map::new();
-        context_data.insert("command".to_string(), serde_json::Value::String(command.to_string()));
-        context_data.insert("args".to_string(), serde_json::Value::Array(
-            args.iter().map(|arg| serde_json::Value::String(arg.clone())).collect()
-        ));
-        
+        context_data.insert(
+            "command".to_string(),
+            serde_json::Value::String(command.to_string()),
+        );
+        context_data.insert(
+            "args".to_string(),
+            serde_json::Value::Array(
+                args.iter()
+                    .map(|arg| serde_json::Value::String(arg.clone()))
+                    .collect(),
+            ),
+        );
+
         self.log_security_event(
             LogLevel::Info,
             &format!("Command execution attempt: {}", command),
@@ -162,11 +208,19 @@ impl AuditLogger {
 
     pub fn log_command_execution_blocked(&mut self, command: &str, args: &[String]) -> Result<()> {
         let mut context_data = serde_json::Map::new();
-        context_data.insert("command".to_string(), serde_json::Value::String(command.to_string()));
-        context_data.insert("args".to_string(), serde_json::Value::Array(
-            args.iter().map(|arg| serde_json::Value::String(arg.clone())).collect()
-        ));
-        
+        context_data.insert(
+            "command".to_string(),
+            serde_json::Value::String(command.to_string()),
+        );
+        context_data.insert(
+            "args".to_string(),
+            serde_json::Value::Array(
+                args.iter()
+                    .map(|arg| serde_json::Value::String(arg.clone()))
+                    .collect(),
+            ),
+        );
+
         self.log_security_event(
             LogLevel::Warning,
             &format!("Command execution blocked: {}", command),
@@ -176,9 +230,15 @@ impl AuditLogger {
 
     pub fn log_download_attempt(&mut self, url: &str, destination: &str) -> Result<()> {
         let mut context_data = serde_json::Map::new();
-        context_data.insert("url".to_string(), serde_json::Value::String(url.to_string()));
-        context_data.insert("destination".to_string(), serde_json::Value::String(destination.to_string()));
-        
+        context_data.insert(
+            "url".to_string(),
+            serde_json::Value::String(url.to_string()),
+        );
+        context_data.insert(
+            "destination".to_string(),
+            serde_json::Value::String(destination.to_string()),
+        );
+
         self.log_security_event(
             LogLevel::Info,
             &format!("Download attempt: {}", url),
@@ -188,9 +248,15 @@ impl AuditLogger {
 
     pub fn log_download_blocked(&mut self, url: &str, reason: &str) -> Result<()> {
         let mut context_data = serde_json::Map::new();
-        context_data.insert("url".to_string(), serde_json::Value::String(url.to_string()));
-        context_data.insert("reason".to_string(), serde_json::Value::String(reason.to_string()));
-        
+        context_data.insert(
+            "url".to_string(),
+            serde_json::Value::String(url.to_string()),
+        );
+        context_data.insert(
+            "reason".to_string(),
+            serde_json::Value::String(reason.to_string()),
+        );
+
         self.log_security_event(
             LogLevel::Warning,
             &format!("Download blocked: {}", url),
@@ -198,7 +264,11 @@ impl AuditLogger {
         )
     }
 
-    pub fn log_suspicious_activity(&mut self, activity: &str, details: serde_json::Value) -> Result<()> {
+    pub fn log_suspicious_activity(
+        &mut self,
+        activity: &str,
+        details: serde_json::Value,
+    ) -> Result<()> {
         self.log_security_event(
             LogLevel::Critical,
             &format!("Suspicious activity detected: {}", activity),
@@ -222,22 +292,28 @@ impl Default for AuditLogger {
 fn generate_session_id() -> String {
     use std::collections::hash_map::DefaultHasher;
     use std::hash::{Hash, Hasher};
-    
+
     let mut hasher = DefaultHasher::new();
     std::process::id().hash(&mut hasher);
-    chrono::Utc::now().timestamp_nanos_opt().unwrap_or(0).hash(&mut hasher);
-    
+    chrono::Utc::now()
+        .timestamp_nanos_opt()
+        .unwrap_or(0)
+        .hash(&mut hasher);
+
     format!("session_{}", hasher.finish())
 }
 
 fn generate_request_id() -> String {
     use std::collections::hash_map::DefaultHasher;
     use std::hash::{Hash, Hasher};
-    
+
     let mut hasher = DefaultHasher::new();
-    chrono::Utc::now().timestamp_nanos_opt().unwrap_or(0).hash(&mut hasher);
+    chrono::Utc::now()
+        .timestamp_nanos_opt()
+        .unwrap_or(0)
+        .hash(&mut hasher);
     rand::random::<u64>().hash(&mut hasher);
-    
+
     format!("req_{}", hasher.finish())
 }
 
@@ -257,7 +333,7 @@ mod tests {
             session_id: "test_session".to_string(),
             request_id: "test_request".to_string(),
         };
-        
+
         let serialized = serde_json::to_string(&entry);
         assert!(serialized.is_ok());
     }

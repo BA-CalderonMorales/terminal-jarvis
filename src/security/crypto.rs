@@ -3,7 +3,7 @@
 
 use anyhow::Result;
 use serde::{Deserialize, Serialize};
-use sha2::{Sha256, Sha512, Digest};
+use sha2::{Digest, Sha256, Sha512};
 
 #[derive(Debug, Clone, PartialEq)]
 pub enum SecurityErrorCode {
@@ -57,13 +57,13 @@ impl IntegrityVerifier {
     /// Calculate hash of file by path
     pub fn calculate_file_hash(&self, path: &std::path::Path) -> Result<String> {
         use std::io::Read;
-        
+
         let hash = match self.algorithm {
             HashAlgorithm::SHA256 => {
                 let mut hasher = Sha256::new();
                 let mut file = std::fs::File::open(path)?;
                 let mut buffer = [0; 8192];
-                
+
                 loop {
                     let bytes_read = file.read(&mut buffer)?;
                     if bytes_read == 0 {
@@ -71,14 +71,14 @@ impl IntegrityVerifier {
                     }
                     Digest::update(&mut hasher, &buffer[..bytes_read]);
                 }
-                
+
                 format!("{:x}", hasher.finalize())
             }
             HashAlgorithm::SHA512 => {
                 let mut hasher = Sha512::new();
                 let mut file = std::fs::File::open(path)?;
                 let mut buffer = [0; 8192];
-                
+
                 loop {
                     let bytes_read = file.read(&mut buffer)?;
                     if bytes_read == 0 {
@@ -86,7 +86,7 @@ impl IntegrityVerifier {
                     }
                     Digest::update(&mut hasher, &buffer[..bytes_read]);
                 }
-                
+
                 format!("{:x}", hasher.finalize())
             }
         };
@@ -208,10 +208,10 @@ mod tests {
     fn test_hash_calculation() {
         let verifier = IntegrityVerifier::new();
         let data = b"test data";
-        
+
         let hash1 = verifier.calculate_hash(data).unwrap();
         let hash2 = verifier.calculate_hash(data).unwrap();
-        
+
         assert_eq!(hash1, hash2);
         assert_eq!(hash1.len(), 64); // SHA256 hex length
     }
@@ -220,9 +220,9 @@ mod tests {
     fn test_hash_verification() {
         let verifier = IntegrityVerifier::new();
         let data = b"test data";
-        
+
         let hash = verifier.calculate_hash(data).unwrap();
-        
+
         assert!(verifier.verify_hash(data, &hash));
         assert!(!verifier.verify_hash(data, "wrong_hash"));
     }
@@ -230,10 +230,10 @@ mod tests {
     #[test]
     fn test_model_signature() {
         let signature = ModelSignature::new("test_model", "abc123", "public_key");
-        
+
         let serialized = signature.serialize().unwrap();
         let deserialized = ModelSignature::deserialize(&serialized).unwrap();
-        
+
         assert_eq!(signature.model_name, deserialized.model_name);
         assert_eq!(signature.hash, deserialized.hash);
     }
@@ -241,14 +241,14 @@ mod tests {
     #[test]
     fn test_certificate_store() {
         let mut store = CertificateStore::new();
-        
+
         assert_eq!(store.get_trusted_keys_count(), 0);
         assert!(!store.is_key_trusted("test_key"));
-        
+
         store.add_trusted_key("test_key".to_string());
         assert_eq!(store.get_trusted_keys_count(), 1);
         assert!(store.is_key_trusted("test_key"));
-        
+
         store.clear_trusted_keys();
         assert_eq!(store.get_trusted_keys_count(), 0);
     }

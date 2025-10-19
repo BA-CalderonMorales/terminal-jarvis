@@ -2,14 +2,12 @@
 // Implements defense-in-depth against supply chain attacks
 
 pub mod core;
-pub mod supply_chain;
 pub mod crypto;
+pub mod supply_chain;
 
-pub use core::{SecurityValidator, SecurityConfig, SecurityError};
-pub use supply_chain::{SecureModelLoader, ModelAllowlist};
-pub use crypto::{IntegrityVerifier};
-
-
+pub use core::{SecurityConfig, SecurityError, SecurityValidator};
+pub use crypto::IntegrityVerifier;
+pub use supply_chain::{ModelAllowlist, SecureModelLoader};
 
 /// Main security manager that coordinates all security components
 pub struct SecurityManager {
@@ -29,46 +27,68 @@ impl SecurityManager {
     pub fn validate_input(&self, input: &str, context: &str) -> Result<bool, SecurityError> {
         // Only log security details when DEBUG_SECURITY env var is set
         if std::env::var("DEBUG_SECURITY").is_ok() {
-            eprintln!("[SECURITY] Validating input: {} for context: {}", input, context);
+            eprintln!(
+                "[SECURITY] Validating input: {} for context: {}",
+                input, context
+            );
         }
-        
+
         let is_valid = self.validator.validate_input(input, context)?;
-        
+
         if !is_valid {
-            eprintln!("[SECURITY BLOCKED] Input validation failed: {} for context: {}", input, context);
+            eprintln!(
+                "[SECURITY BLOCKED] Input validation failed: {} for context: {}",
+                input, context
+            );
         } else if std::env::var("DEBUG_SECURITY").is_ok() {
             eprintln!("[SECURITY] Input validation passed");
         }
-        
+
         Ok(is_valid)
     }
 
     /// Securely load a model with full verification
-    pub async fn secure_load_model(&self, model_name: &str) -> Result<std::path::PathBuf, SecurityError> {
+    pub async fn secure_load_model(
+        &self,
+        model_name: &str,
+    ) -> Result<std::path::PathBuf, SecurityError> {
         eprintln!("[SECURITY] Model access attempt: {}", model_name);
-        
+
         let result = self.model_loader.load_model(model_name).await;
-        
+
         match &result {
             Ok(_) => eprintln!("[SECURITY] Model access successful: {}", model_name),
-            Err(e) => eprintln!("[SECURITY BLOCKED] Model access denied: {} - {}", model_name, e),
+            Err(e) => eprintln!(
+                "[SECURITY BLOCKED] Model access denied: {} - {}",
+                model_name, e
+            ),
         }
-        
+
         result
     }
 
     /// Check if a command execution is allowed
-    pub fn validate_command_execution(&self, command: &str, args: &[String]) -> Result<bool, SecurityError> {
-        eprintln!("[SECURITY] Command execution attempt: {} {:?}", command, args);
-        
+    pub fn validate_command_execution(
+        &self,
+        command: &str,
+        args: &[String],
+    ) -> Result<bool, SecurityError> {
+        eprintln!(
+            "[SECURITY] Command execution attempt: {} {:?}",
+            command, args
+        );
+
         let is_allowed = self.validator.validate_command(command, args)?;
-        
+
         if !is_allowed {
-            eprintln!("[SECURITY BLOCKED] Command execution denied: {} {:?}", command, args);
+            eprintln!(
+                "[SECURITY BLOCKED] Command execution denied: {} {:?}",
+                command, args
+            );
         } else {
             eprintln!("[SECURITY] Command execution allowed");
         }
-        
+
         Ok(is_allowed)
     }
 

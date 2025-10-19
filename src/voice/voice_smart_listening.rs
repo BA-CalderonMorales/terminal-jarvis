@@ -2,8 +2,8 @@
 // Provides wake word detection, animated indicators, and enhanced UX
 // SECURITY: All inputs validated and logged
 
+use super::voice_command::{VoiceCommand, VoiceCommandParser};
 use super::voice_provider::{VoiceInputProvider, VoiceProviderConfig};
-use super::voice_command::{VoiceCommandParser, VoiceCommand};
 use crate::security::SecurityManager;
 use anyhow::Result;
 use std::io::{self, Write};
@@ -65,10 +65,7 @@ impl VoiceFeedback {
         println!();
 
         // Simple static indicator for now (animation would need async support)
-        print!(
-            "{}[● LISTENING] Say a command... ",
-            self.theme.primary("")
-        );
+        print!("{}[● LISTENING] Say a command... ", self.theme.primary(""));
         io::stdout().flush().unwrap();
     }
 
@@ -116,27 +113,42 @@ impl VoiceFeedback {
 
     /// Show available voice commands help
     pub fn show_commands_help(&self) {
-        println!(
-            "\n{}[VOICE COMMANDS]\n",
-            self.theme.primary("=").repeat(50)
-        );
-        
+        println!("\n{}[VOICE COMMANDS]\n", self.theme.primary("=").repeat(50));
+
         let commands = vec![
             ("Navigation", "open ai tools", "Navigate to AI tools menu"),
-            ("Navigation", "open authentication", "Navigate to authentication"),
+            (
+                "Navigation",
+                "open authentication",
+                "Navigate to authentication",
+            ),
             ("Navigation", "open settings", "Navigate to settings"),
             ("Navigation", "open evals", "Navigate to benchmarks"),
             ("Navigation", "open links", "Navigate to documentation"),
-            ("Navigation", "back / main menu", "Navigate back or to main menu"),
-            
-            ("Tool Management", "install [tool]", "Install a specific tool"),
+            (
+                "Navigation",
+                "back / main menu",
+                "Navigate back or to main menu",
+            ),
+            (
+                "Tool Management",
+                "install [tool]",
+                "Install a specific tool",
+            ),
             ("Tool Management", "update [tool]", "Update a specific tool"),
             ("Tool Management", "status [tool]", "Check tool status"),
             ("Tool Management", "remove [tool]", "Uninstall a tool"),
             ("Tool Management", "list tools", "Show all available tools"),
-            ("Tool Management", "list installed tools", "Show installed tools only"),
-            ("Tool Management", "update all", "Update all installed tools"),
-            
+            (
+                "Tool Management",
+                "list installed tools",
+                "Show installed tools only",
+            ),
+            (
+                "Tool Management",
+                "update all",
+                "Update all installed tools",
+            ),
             ("General", "help / commands", "Show this help"),
             ("General", "cancel", "Cancel current operation"),
             ("General", "exit", "Exit the application"),
@@ -193,9 +205,12 @@ impl SmartVoiceListener {
             Ok(recognition) => {
                 // Validate transcribed text before processing
                 let transcribed_text = &recognition.text;
-                if let Err(_e) = self.security_manager.validate_input(transcribed_text, "voice_command") {
+                if let Err(_e) = self
+                    .security_manager
+                    .validate_input(transcribed_text, "voice_command")
+                {
                     self.feedback.show(VoiceFeedbackType::Error(
-                        "Could not validate voice input".to_string()
+                        "Could not validate voice input".to_string(),
                     ));
                     return Ok(None);
                 }
@@ -205,23 +220,25 @@ impl SmartVoiceListener {
                 // Parse command
                 match self.parser.parse(transcribed_text, recognition.confidence) {
                     Ok(command) => {
-                        self.feedback.show(VoiceFeedbackType::Success(
-                            format!("Command recognized: {:?}", command)
-                        ));
+                        self.feedback.show(VoiceFeedbackType::Success(format!(
+                            "Command recognized: {:?}",
+                            command
+                        )));
                         Ok(Some(command))
                     }
                     Err(_e) => {
                         self.feedback.show(VoiceFeedbackType::Error(
-                            "Could not understand command".to_string()
+                            "Could not understand command".to_string(),
                         ));
                         Ok(None)
                     }
                 }
             }
             Err(e) => {
-                self.feedback.show(VoiceFeedbackType::Error(
-                    format!("Voice recognition failed: {}", e)
-                ));
+                self.feedback.show(VoiceFeedbackType::Error(format!(
+                    "Voice recognition failed: {}",
+                    e
+                )));
                 Ok(None)
             }
         }
@@ -270,12 +287,16 @@ impl SmartVoiceListener {
         println!(
             "  {}: {}",
             self.feedback.theme.primary("Min Confidence:"),
-            self.feedback.theme.secondary(&format!("{:.1}", config.min_confidence))
+            self.feedback
+                .theme
+                .secondary(&format!("{:.1}", config.min_confidence))
         );
         println!(
             "  {}: {}",
             self.feedback.theme.primary("Max Duration:"),
-            self.feedback.theme.secondary(&format!("{:.0}s", config.max_duration.as_secs()))
+            self.feedback
+                .theme
+                .secondary(&format!("{:.0}s", config.max_duration.as_secs()))
         );
 
         // Ready status
@@ -300,7 +321,9 @@ pub struct VoiceListenerFactory;
 
 impl VoiceListenerFactory {
     /// Create smart voice listener with Whisper API provider
-    pub async fn create_whisper_listener(config: VoiceProviderConfig) -> Result<SmartVoiceListener> {
+    pub async fn create_whisper_listener(
+        config: VoiceProviderConfig,
+    ) -> Result<SmartVoiceListener> {
         let provider = super::voice_whisper_provider::WhisperProvider::new(config)?;
         let listener = SmartVoiceListener::new(Box::new(provider));
         Ok(listener)
@@ -308,8 +331,11 @@ impl VoiceListenerFactory {
 
     /// Create smart voice listener with local Whisper provider (no API key required)
     #[cfg(feature = "local-voice")]
-    pub async fn create_local_whisper_listener(config: VoiceProviderConfig) -> Result<SmartVoiceListener> {
-        let provider = super::voice_local_whisper_provider::LocalWhisperProvider::new(config).await?;
+    pub async fn create_local_whisper_listener(
+        config: VoiceProviderConfig,
+    ) -> Result<SmartVoiceListener> {
+        let provider =
+            super::voice_local_whisper_provider::LocalWhisperProvider::new(config).await?;
         let listener = SmartVoiceListener::new(Box::new(provider));
         Ok(listener)
     }
@@ -321,8 +347,16 @@ impl VoiceListenerFactory {
         Ok(listener)
     }
 
+    /// Create smart voice listener with Vosk provider (lightweight, offline, no API key)
+    #[cfg(feature = "vosk-voice")]
+    pub async fn create_vosk_listener(config: VoiceProviderConfig) -> Result<SmartVoiceListener> {
+        let provider = super::voice_vosk_provider::VoskProvider::new(config)?;
+        let listener = SmartVoiceListener::new(Box::new(provider));
+        Ok(listener)
+    }
+
     /// Create listener with default configuration
-    /// Priority: Native (Windows/macOS) → Local Whisper → Cloud API
+    /// Priority: Native (Windows/macOS) → Vosk (if enabled) → Local Whisper → Cloud API
     pub async fn create_default_listener() -> Result<SmartVoiceListener> {
         let config = VoiceProviderConfig::default();
 
@@ -345,13 +379,38 @@ impl VoiceListenerFactory {
             }
         }
 
+        // Try Vosk next if feature is enabled (lightweight, fast, offline)
+        #[cfg(feature = "vosk-voice")]
+        {
+            println!("[VOSK] Attempting lightweight offline voice recognition (50MB model)...");
+            match Self::create_vosk_listener(config.clone()).await {
+                Ok(listener) => {
+                    if listener.check_ready().await.unwrap_or(false) {
+                        println!(
+                            "[SUCCESS] Vosk voice recognition ready. Fast offline processing."
+                        );
+                        return Ok(listener);
+                    } else {
+                        println!("[INFO] Vosk model not found. See instructions to download.");
+                    }
+                }
+                Err(e) => {
+                    println!("[INFO] Vosk not available: {}", e);
+                }
+            }
+        }
+
         // Try local whisper next if feature is enabled
         #[cfg(feature = "local-voice")]
         {
-            println!("[PRIVACY MODE] Attempting local SLM voice recognition (no API keys, no cloud)...");
+            println!(
+                "[PRIVACY MODE] Attempting local SLM voice recognition (no API keys, no cloud)..."
+            );
             match Self::create_local_whisper_listener(config.clone()).await {
                 Ok(listener) => {
-                    println!("[SUCCESS] Local voice recognition ready. Your speech stays on-device.");
+                    println!(
+                        "[SUCCESS] Local voice recognition ready. Your speech stays on-device."
+                    );
                     return Ok(listener);
                 }
                 Err(e) => {

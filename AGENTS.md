@@ -2,1476 +2,870 @@
 
 **Single Source of Truth for All AI Coding Assistants**
 
-This document serves as the unified guideline for all AI coding assistants working on Terminal Jarvis, including GitHub Copilot, Claude, and any future AI tools. Both `.github/copilot-instructions.md` and `CLAUDE.md` reference this document to ensure consistency.
+---
+
+## CRITICAL RULES - READ FIRST
+
+| Rule | What | Why | When Violated |
+|------|------|-----|---------------|
+| **NO EMOJIS** | Zero emojis in code, commits, docs, output | Professional appearance, accessibility | Use "[INSTALLED]", "►", "•" instead |
+| **CHANGELOG FIRST** | Update CHANGELOG.md BEFORE deployment scripts | Prevents version confusion | Deployment fails or creates wrong version |
+| **Formula BEFORE Release** | Commit Homebrew Formula BEFORE GitHub release | URL matching for brew install | Broken Homebrew installations |
+| **Test-Driven Bugs** | Write failing test FIRST, then fix | Prevents regression | Bug may reappear later |
+| **Version Sync** | Update Cargo.toml, package.json, Formula together | Multi-platform consistency | Installation failures across platforms |
+| **NO Premature Docs** | Document ONLY after feature verified on all platforms | User trust, accuracy | False documentation, broken examples |
+| **Proactive Agents** | Invoke specialized agents immediately without asking | Quality, efficiency | Suboptimal work, longer sessions |
+| **Token Budget** | Lead max 1000, Agents max 750 tokens | Session longevity (12+ hours) | Session ends prematurely |
+| **Descriptive Headers** | "## Deployment Steps" not "Steps:" | Clear references | User confusion on "what's step 4?" |
+| **Git Full Paths** | Use `/usr/bin/git` not `git` | Avoid alias issues | Unexpected git behavior |
 
 ---
 
-## Quick Start for AI Assistants
+## QUICK START
 
-**If you're new here or need immediate guidance:**
-
-### Most Common User Requests & Where to Look
-
-| User Request | Section to Check | Key Info |
-|-------------|------------------|----------|
-| "Let's deploy" / "Run local-cd.sh" | [Deployment Commands Trigger](#deployment-commands-trigger---read-immediately) | Pre-flight checks, version management, deployment pipeline |
-| "Fix this bug" | [Test-Driven Bugfixes](#test-driven-bugfixes-mandatory) | Write failing test FIRST, then fix |
-| "Add new AI tool" | [Tool Configuration Consistency](#tool-configuration-consistency-critical-for-new-features) | Modular config system workflow |
-| "Refactor this file" | [Refactoring Best Practices](#refactoring-best-practices-critical) | Domain-based module extraction |
-| "Update version" | [Version Numbers Are Important](#version-numbers-are-important) | Synchronize ALL version files |
-| "Before I commit" | [Pre-Commit Checklist](#pre-commit-checklist) | Complete validation checklist |
-
-### Critical Rules to Remember
-
-1. **NO EMOJIS** - Professional text-based indicators only
-2. **CHANGELOG.md FIRST** - Always update before running deployment scripts
-3. **Homebrew Formula BEFORE Release** - Commit Formula changes before creating GitHub release
-4. **Test-Driven Bugfixes** - Write failing test first, implement fix second
-5. **Version Synchronization** - Update Cargo.toml, package.json, AND Homebrew Formula
-
-### Navigation Tips
-
-- Use Ctrl+F / Cmd+F to search for specific topics
-- Section headers are anchor links: `#section-name-in-lowercase-with-hyphens`
-- Critical sections marked with "CRITICAL" or "MANDATORY" in headers
+| User Says | Go To | Critical Info |
+|-----------|-------|---------------|
+| "Let's deploy" / "Run local-cd.sh" | [DEPLOYMENT](#deployment-guide) | Pre-flight checks, version sync, CHANGELOG first |
+| "Fix this bug" | [TEST-DRIVEN](#test-driven-bugfixes-mandatory) | Failing test first, then fix |
+| "Add new AI tool" | [TOOL CONFIG](#tool-configuration-consistency-critical) | config/tools/*.toml pattern |
+| "Refactor this file" | [REFACTORING](#refactoring-best-practices-critical) | Domain-based module extraction |
+| "Update version" | [VERSIONING](#version-management) | Sync Cargo.toml, package.json, Formula |
+| "Before I commit" | [PRE-COMMIT](#pre-commit-checklist) | Quality gates, version check, Formula |
+| "Maximize session" | [TOKEN BUDGET](#token-budget-management) | Lead orchestrator, parallel agents |
+| "Add voice command" | [VOICE](#voice-mode-development) | Update enum, parser, handler |
+| "Homebrew release" | [HOMEBREW](#homebrew-integration) | Archive → Formula → Commit → Release |
+| "NPM publish" | [NPM DIST](#npm-distribution) | `npm login`, tags, version sync |
 
 ---
 
-## CRITICAL NO-EMOJIS RULE
+## PROJECT OVERVIEW
 
-**ABSOLUTE REQUIREMENT**: NO EMOJIS anywhere in the codebase, commits, documentation, or any output.
+**Terminal Jarvis** = Unified command center for AI coding tools (claude-code, gemini-cli, qwen-code, opencode, llxprt, codex).
 
-**FORBIDDEN**: Any use of emojis in:
-- Commit messages
-- Code comments
-- Documentation files 
-- README content
-- GitHub releases
-- Terminal output
-- Log messages
-- Error messages
-- CLI interface elements
-- Menu options
-- Status indicators
-- ANY user-facing text
+**Core Innovation**: Session Continuation System (prevents auth workflow interruptions).
 
-**REASON**: Professional appearance and accessibility. Emojis create visual clutter and accessibility issues.
+**Distribution**: NPM, Cargo, Homebrew (follows Orhun Parmaksız NPM packaging pattern).
 
-**AI ASSISTANT REMINDER**: When improving CLI design, use professional text-based indicators like:
-- "[INSTALLED]" / "[AVAILABLE]" instead of checkmarks
-- "►" / "◄" / "•" for navigation instead of fancy symbols
-- Simple ASCII art and borders
-- Text-based status indicators
+**Current Version**: 0.0.48
 
-## CRITICAL DEPLOYMENT WARNING
-
-**THE #1 DEPLOYMENT FAILURE**: Homebrew Formula changes committed AFTER GitHub release creation.
-
-**NEVER DO THIS**:
-
-1. Create GitHub release first
-2. Then commit Homebrew Formula changes later
-
-**ALWAYS DO THIS**:
-
-1. Update and commit ALL changes (including Homebrew Formula)
-2. Push changes to GitHub
-3. THEN create GitHub release
-
-**This prevents broken Homebrew installations where Formula URLs don't match release assets.**
-
-## CRITICAL: NO DOCUMENTATION BEFORE VERIFICATION
-
-**ABSOLUTE REQUIREMENT**: Never write documentation, update README, or create user-facing guides until features are fully implemented AND tested.
-
-**Why This Matters**:
-- Prevents documenting broken features
-- Avoids misleading users with features that don't work
-- Ensures all documented features have been verified on target platforms
-- Maintains project credibility
-
-**Workflow**:
-1. **Build the feature** - Implement and get it compiling
-2. **Test the feature** - Verify it works on all supported platforms (Linux, macOS, Windows)
-3. **Validate edge cases** - Test error handling and failure scenarios
-4. **THEN document** - Only after verification, write user-facing documentation
-
-**Examples of "Documentation"** that require verification first:
-- README feature lists
-- User guides
-- Setup instructions
-- Command examples
-- API documentation
-- CHANGELOG entries (these go in AFTER features work)
-
-**Exception**: Internal development notes and TODO comments are fine during development.
-
-## Communication & Reference Guidelines
-
-### Reference Clarity Requirements (CRITICAL)
-
-**When providing numbered lists, steps, or procedures**:
-
-- ALWAYS use descriptive section headers: "## Deployment Steps" not just "Steps:"
-- Include context in references: "In the deployment workflow above, step 4 refers to..."
-- NEVER leave numbered references ambiguous
-
-**When user asks for clarification about numbered items**:
-
-- Quote the specific text being referenced
-- Provide full context of which section/workflow the number belongs to
-- Explain where that reference appeared in the conversation
-
-**ANTI-PATTERN to avoid**:
-
-```
-Steps:
-1. Do this
-2. Do that
-3. Another thing
-4. Final step <- User asks "what's step 4?" - ambiguous!
-```
-
-**CORRECT PATTERN**:
-
-```
-## Homebrew Release Workflow
-1. Update Formula version
-2. Commit all changes
-3. Create GitHub release
-4. Verify archive accessibility <- Clear context when referenced
-```
-
-**Response Requirements when user asks "what do you mean by step X"**:
-
-1. Acknowledge the ambiguity apologetically
-2. Quote the specific numbered list being referenced
-3. Explain which procedure/workflow it belongs to
-4. Provide the clear answer to their question
-
-## What This Project Does
-
-**Terminal Jarvis** is a unified command center for AI coding tools.
-
-**Core Purpose**: Thin Rust wrapper providing a package manager and runner for AI coding assistants (claude-code, gemini-cli, qwen-code, opencode, llxprt, codex).
-
-**Key Innovation**: **Session Continuation System** - Prevents users from being kicked out during authentication workflows. This is THE defining feature that makes Terminal Jarvis unique.
-
-**Distribution**: Follows Orhun Parmaksız's NPM packaging approach for Rust applications.
-
-**Installation Methods**: 
-- NPM: `npm install -g terminal-jarvis`
-- Cargo: `cargo install terminal-jarvis`
-- Homebrew: `brew tap ba-calderonmorales/terminal-jarvis && brew install terminal-jarvis`
-
-## Current Version & Key Features
-
-**Version**: 0.0.48
-**Major Features**:
-
-- **Multi-Platform Distribution** (v0.0.46+) - NPM, Crates.io, and Homebrew publishing
-- Session Continuation System (v0.0.44+) - Intelligent handling of authentication workflows
-- Enhanced Deployment Workflow (v0.0.45+) - Programmatic version management
-- 6 AI Tools Integration - claude, gemini, qwen, opencode, llxprt, codex
-- Infinite Loop Prevention (v0.0.45) - Smart detection of exit vs internal commands
-
-## Distribution Channels
-
-Terminal Jarvis is available through **three official distribution channels**:
-
-1. **NPM** (Node.js ecosystem): `npm install -g terminal-jarvis`
-2. **Crates.io** (Rust ecosystem): `cargo install terminal-jarvis`
-3. **Homebrew** (macOS/Linux package manager): `brew tap ba-calderonmorales/terminal-jarvis && brew install terminal-jarvis`
-
-## How The Code Is Organized
-
-The repository follows a domain-based modular architecture:
-
-**Rust Application** (`/src/`):
-
-- `main.rs` - Entry point that starts the CLI
-- `cli.rs` - Command definitions using clap (run, update, list, info, templates)
-- `cli_logic/` - Modular business logic domain:
-  - `cli_logic_entry_point.rs` - Main coordination and menu systems
-  - `cli_logic_interactive.rs` - Interactive T.JARVIS interface
-  - `cli_logic_tool_execution.rs` - Tool launching and execution
-  - `cli_logic_update_operations.rs` - Tool update operations using InstallationManager
-  - `cli_logic_info_operations.rs` - Tool information display
-  - `cli_logic_list_operations.rs` - Tool listing operations
-- `tools/` - Tool management domain:
-  - `tools_config.rs` - Modular configuration loader from config/tools/
-  - `tools_detection.rs` - Tool installation detection
-  - `tools_display.rs` - Unified tool information display system
-  - `tools_command_mapping.rs` - Command and installation mapping
-  - `tools_execution_engine.rs` - Tool execution with session continuation
-- `config/` - Configuration management domain
-- `services/` - External service integrations (NPM, GitHub)
-- `installation_arguments.rs` - Tool installation command management
-- `api/` - Future API framework (currently unused)
-
-**Configuration System** (`/config/`):
-
-- `config.toml` - Global Terminal Jarvis settings
-- `tools/` - Modular tool configuration directory:
-  - `claude.toml` - Anthropic Claude configuration
-  - `gemini.toml` - Google Gemini configuration
-  - `qwen.toml` - Qwen coding assistant configuration
-  - `opencode.toml`, `llxprt.toml`, `codex.toml`, `crush.toml` - Additional tools
-  - Each tool config contains: installation commands, authentication, features
-
-**NPM Package** (`/npm/terminal-jarvis/`):
-
-- `src/index.ts` - Simple TypeScript wrapper that calls the Rust binary
-- `package.json` - NPM package configuration
-- `biome.json` - Biome linting configuration (we use Biome, not ESLint)
-
-## DEPLOYMENT COMMANDS TRIGGER - READ IMMEDIATELY
-
-**When users say "Let's run local-cd.sh" or mention deployment:**
-
-## AI Assistant Deployment Guide
-
-### Standard Release Workflow
-
+**Installation**:
 ```bash
-# 1. Pre-flight checks (MANDATORY)
-git status                                    # Must show "working tree clean" 
-./scripts/cicd/local-cd.sh --check-versions  # Must show "All versions synchronized"
+npm install -g terminal-jarvis        # NPM
+cargo install terminal-jarvis         # Cargo  
+brew tap ba-calderonmorales/terminal-jarvis && brew install terminal-jarvis  # Homebrew
+```
 
-# 2. Update CHANGELOG.md with new version entry (REQUIRED FIRST)
-# Format: ## [X.X.X] - YYYY-MM-DD
+**Architecture**:
+- `/src/` - Rust application (domain-based modules: cli_logic/, tools/, config/, services/)
+- `/config/` - Global + modular tool configs (config/tools/*.toml)
+- `/npm/terminal-jarvis/` - TypeScript wrapper for NPM distribution
+- `/homebrew/` - Formula + release archives
+- `/scripts/cicd/` - Deployment automation (local-ci.sh, local-cd.sh)
 
-# 3. Execute deployment pipeline
+---
+
+## DEPLOYMENT GUIDE
+
+### When User Says "Let's Deploy"
+
+**Standard Workflow**:
+```bash
+# 1. Pre-flight (MANDATORY)
+git status                                    # Must be clean
+./scripts/cicd/local-cd.sh --check-versions  # Must pass
+
+# 2. Update CHANGELOG.md (REQUIRED FIRST)
+## [X.X.X] - YYYY-MM-DD
+### Added / Enhanced / Fixed / Technical
+
+# 3. Deploy
 ./scripts/cicd/local-ci.sh      # Validate (no commits)
 ./scripts/cicd/local-cd.sh      # Deploy (commits, tags, pushes)
 ```
 
-### Version Management Workflow
-
+**Version Update Workflow**:
 ```bash
-# 1. Determine version increment
-# Bug fixes/docs: 0.0.X+1 | New features: 0.X+1.0 | Breaking: X+1.0.0
-
-# 2. Update CHANGELOG.md entry for target version
-
-# 3. Synchronize all version files
-./scripts/cicd/local-cd.sh --update-version 0.0.48
-
-# 4. Verify synchronization and deploy
+# Determine increment: 0.0.X (fix) | 0.X.0 (feature) | X.0.0 (breaking)
+./scripts/cicd/local-cd.sh --update-version X.X.X
 ./scripts/cicd/local-cd.sh --check-versions
 ./scripts/cicd/local-ci.sh && ./scripts/cicd/local-cd.sh
 ```
 
-### Multi-Platform Distribution
-
+**Homebrew Release Workflow**:
 ```bash
 # 1. Complete standard deployment first
-
-# 2. Generate Homebrew release archives
+# 2. Generate archives
 ./scripts/utils/generate-homebrew-release.sh --stage
-git add homebrew/release/ && git commit -m "feat: Homebrew archives v0.0.48" && git push
+git add homebrew/release/ && git commit -m "feat: Homebrew archives vX.X.X" && git push
 
-# 3. Create GitHub release with assets
-gh release create v0.0.48 \
+# 3. Create GitHub release
+gh release create vX.X.X \
   homebrew/release/terminal-jarvis-mac.tar.gz \
   homebrew/release/terminal-jarvis-linux.tar.gz \
-  --title "Release v0.0.48" --notes "Release notes" --latest
+  --title "Release vX.X.X" --notes "..." --latest
 
-# 4. Verify Homebrew installation works
-curl -I https://github.com/BA-CalderonMorales/terminal-jarvis/releases/download/v0.0.48/terminal-jarvis-mac.tar.gz
+# 4. Verify
+curl -I https://github.com/BA-CalderonMorales/terminal-jarvis/releases/download/vX.X.X/terminal-jarvis-mac.tar.gz
 ```
-
-## Critical Deployment Requirements
-
-### Pre-Deployment Validation (NON-NEGOTIABLE)
-
-- [ ] **Working Tree Clean**: `git status` shows no uncommitted changes
-- [ ] **Version Sync**: `./scripts/cicd/local-cd.sh --check-versions` passes
-- [ ] **CHANGELOG.md Updated**: New version entry added BEFORE running scripts
-- [ ] **Homebrew Formula**: Version matches if manually edited
 
 ### Deployment Failure Prevention
 
-**Most Common Failures**:
-1. **Uncommitted changes** → Always check `git status` first
-2. **Version mismatches** → Always run `--check-versions` first
-3. **Missing changelog** → Always update CHANGELOG.md before scripts
-4. **Formula after release** → Always commit Formula before GitHub release
+| Failure | Prevention | Fix |
+|---------|-----------|-----|
+| Uncommitted changes | `git status` first | Commit or stash |
+| Version mismatch | `--check-versions` first | `--update-version X.X.X` |
+| Missing CHANGELOG | Update before scripts | Add entry manually |
+| Formula after release | Commit Formula before `gh release` | Delete release, fix, recreate |
+| NPM auth failure | `npm whoami` check | `npm login` |
 
-### Quick Recovery Commands
+---
 
-```bash
-# Fix version synchronization
-./scripts/cicd/local-cd.sh --update-version X.X.X
+## VERSION MANAGEMENT
 
-# Fix Homebrew Formula manually
-sed -i 's/version ".*"/version "X.X.X"/' homebrew/Formula/terminal-jarvis.rb
+**Semantic Versioning**: `MAJOR.MINOR.PATCH`
+- `0.0.X` - Bug fixes, docs, small improvements
+- `0.X.0` - New features (no breaking changes)
+- `X.0.0` - Breaking changes
 
-# Verify all changes committed
-git status && git log -1 --name-only
-```
+**CRITICAL**: Always update ALL THREE files simultaneously:
+1. `Cargo.toml`
+2. `npm/terminal-jarvis/package.json`
+3. `homebrew/Formula/terminal-jarvis.rb` ← COMMONLY FORGOTTEN
 
-## AI Assistant Development Guidelines
-
-### Working with AI Coding Assistants
-
-**AI coding assistants excel at**:
-- **Code generation**: Creating boilerplate and implementing well-defined patterns
-- **Test creation**: Writing comprehensive test suites with good coverage
-- **Documentation consistency**: Ensuring technical docs match implementation
-- **Incremental development**: Building features step-by-step with validation
-- **Systematic refactoring**: Breaking large files into focused domain modules
-- **Quality assurance**: Ensuring code passes `cargo clippy`, `cargo fmt`, and tests
-
-**Optimal AI assistant workflow**:
-1. **Clear specifications**: Provide detailed requirements for what you want to build
-2. **Pattern following**: Leverage existing project patterns for consistency
-3. **Test-driven development**: Write tests first, then implement features
-4. **Continuous validation**: Verify each step compiles and passes tests
-5. **Incremental validation**: Run `cargo check` after each major change
-6. **Quality gates**: Always verify `cargo clippy` and `cargo fmt` pass
-7. **Documentation sync**: Update docs when adding or changing features
-
-**AI assistant code generation strength**: Use AI assistants for implementing well-defined features, creating test suites, generating documentation that matches actual code behavior, and domain-based module extraction.
-
-### Proactive Specialized Agent Usage (MANDATORY)
-
-**CRITICAL REQUIREMENT**: AI assistants MUST proactively leverage specialized agents without waiting to be asked. This is mandatory behavior, not optional.
-
-**When to Pull in Specialized Agents Automatically**:
-
-- **Documentation work** → Immediately invoke @documentation-specialist
-  - Writing README files, API docs, user guides
-  - Updating CHANGELOG.md entries
-  - Creating technical specifications or architecture docs
-  - Any content that requires clear, professional technical writing
-
-- **Testing and QA** → Immediately invoke @qa-automation-engineer or @test-automation-expert
-  - Writing test suites (unit, integration, end-to-end)
-  - Setting up test infrastructure
-  - Creating test fixtures or mock data
-  - Implementing test-driven bugfixes (mandatory for all bugs)
-
-- **Code review** → Immediately invoke @code-reviewer
-  - Reviewing pull requests or commits
-  - Checking code quality before deployment
-  - Validating adherence to project standards
-  - Ensuring clippy/fmt compliance
-
-- **Security concerns** → Immediately invoke @security-specialist
-  - Reviewing authentication/authorization code
-  - Handling sensitive data or credentials
-  - Implementing security best practices
-  - API key management or encryption
-
-- **Infrastructure/DevOps** → Immediately invoke @infrastructure-expert or @devops-engineer
-  - CI/CD pipeline modifications
-  - Deployment script changes
-  - Docker/containerization work
-  - Build system configurations
-
-- **Architecture decisions** → Immediately invoke @software-architect or @api-architect
-  - Designing new system components
-  - Refactoring large modules
-  - Making structural decisions
-  - Planning domain-based separations
-
-- **Performance optimization** → Immediately invoke @performance-specialist
-  - Profiling code bottlenecks
-  - Optimizing algorithms or queries
-  - Reducing memory footprint
-  - Improving compilation times
-
-- **Frontend/UI work** → Immediately invoke @frontend-specialist or @ui-ux-designer
-  - CLI interface improvements
-  - Interactive menu design
-  - User experience enhancements
-  - Terminal output formatting
-
-**How to Leverage Agents**:
-
-```
-Example: User asks "Can you update the README with the new features?"
-
-CORRECT Response:
-"I'll bring in @documentation-specialist to ensure professional technical writing.
-
-@documentation-specialist, please help update the README with:
-- New Homebrew installation method
-- Updated feature list
-- Current version information
-"
-
-INCORRECT Response:
-[Starts editing README without involving documentation-specialist]
-```
-
-**Agent Attribution in Commits** (See CRITICAL section at top):
-
-When specialized agents contribute, they MUST be listed in commit messages:
-
-```bash
-# Single agent
-docs(readme): update installation methods - @documentation-specialist
-
-# Multiple agents
-feat(auth): implement OAuth flow - @security-specialist @software-engineering-expert
-
-# Complex feature
-refactor(cli): extract domain modules - @software-architect @code-reviewer @documentation-specialist
-```
-
-**Why This Matters**:
-
-- **Quality**: Specialized agents bring domain expertise that general assistants may lack
-- **Efficiency**: Right expert for the task means faster, better results
-- **Consistency**: Agents ensure adherence to project-specific standards
-- **Attribution**: Clear commit history shows which expertise contributed to changes
-
-**ABSOLUTE RULE**: Don't wait for permission. If the task matches an agent's expertise, invoke them immediately. This is a quality requirement, not a suggestion.
-
-### AI-Optimized Quality Checks
-
-```bash
-# AI-assisted development verification
-cargo check                          # Verify code compiles
-cargo test                          # Run full test suite
-cargo clippy --all-targets --all-features -- -D warnings  # Code quality
-cargo fmt --all                     # Code formatting
-
-# Integration testing
-cargo run -- list                   # Verify CLI works
-cargo run -- --help                 # Verify help text
-```
-
-## Version Numbers Are Important
-
-We use semantic versioning with **NO EMOJIS** and **NO DECORATIONS**. Just clean version numbers:
-
-- `0.0.1` - Bug fixes, docs, small improvements
-- `0.1.0` - New features that don't break existing functionality
-- `1.0.0` - Breaking changes that require users to update their code
-
-**CRITICAL VERSION SYNCHRONIZATION REQUIREMENT**:
-Always update **ALL THREE** version files simultaneously:
-
-- `Cargo.toml`
-- `npm/terminal-jarvis/package.json`
-- **`homebrew/Formula/terminal-jarvis.rb`** COMMONLY FORGOTTEN!
-
-**Homebrew Formula version MUST match exactly** - This is frequently overlooked and causes deployment failures.
-
-## CHANGELOG.md Management (CRITICAL)
-
-**ALWAYS update CHANGELOG.md BEFORE running deployment scripts** - This prevents version confusion and ensures proper feature attribution.
-
-### Changelog Structure Rules:
-
-```bash
+**CHANGELOG.md Structure**:
+```markdown
 ## [X.X.X] - YYYY-MM-DD
 ### Added
-- New features that users can see
+- New user-visible features
 ### Enhanced
-- Improvements to existing features  
+- Improvements to existing features
 ### Fixed
 - Bug fixes and corrections
 ### Technical
-- Internal changes (refactoring, tests)
+- Internal changes (refactoring, tests, infrastructure)
 ```
 
 **Rules**:
-1. **One Release = One Complete Feature Set**: Each version should represent a cohesive set of features completed together
-2. **Update CHANGELOG.md FIRST**: Before running `local-cd.sh`, always add the changelog entry for the version you're about to release
-3. **Match Actual Work Timeline**: Don't mix features from different development sessions into the same version entry
+- Update CHANGELOG.md BEFORE running deployment scripts
+- One release = one cohesive feature set
+- Match actual work timeline (don't mix unrelated features)
 
-## Quick Command Reference
+---
+
+## TOKEN BUDGET MANAGEMENT
+
+**OBJECTIVE**: Maximize session duration beyond 12 hours through intelligent orchestration.
+
+### Budget Caps
+
+| Agent Type | Model | Max Tokens | Responsibilities |
+|------------|-------|------------|------------------|
+| **Lead** | Sonnet 4.5 | 1000 | Planning, architecture, orchestration, integration, validation |
+| **Spawned** | Haiku Latest | 750 | File edits, docs, tests, refactoring, specialized tasks |
+
+### Lead Orchestrator Pattern
+
+**Phase 1: Planning (Lead - 1000 tokens)**
+1. Analyze request scope
+2. Break into discrete tasks
+3. Identify parallelization opportunities
+4. Select appropriate agents
+5. Define validation criteria
+
+**Phase 2: Delegation (Agents - 750 tokens each)**
+- Spawn agents in parallel for independent tasks
+- Sequential for dependencies
+- Focused context (only what's needed)
+- Clear success criteria
+
+**Phase 3: Integration (Lead - 1000 tokens)**
+- Collect results
+- Run quality checks (cargo check, clippy, fmt, test)
+- Coordinate commits
+- Update documentation
+
+### Token Conservation Techniques
+
+| Technique | Good | Bad |
+|-----------|------|-----|
+| **Delegation** | Lead plans, 5 agents implement | Lead implements everything |
+| **Parallelization** | 3 agents simultaneously | Sequential when independent |
+| **File reads** | Read specific file | Read entire directory tree |
+| **Validation** | cargo check after each agent | Accumulate, validate at end |
+| **Context** | "Update lines 45-60 in file X" | "Read file, understand, update" |
+
+**Target Metrics**:
+- Agent utilization: >80% (most work by agents)
+- Parallelization: >40% (many concurrent)
+- Session duration: >12 hours
+
+---
+
+## PROACTIVE AGENT USAGE (MANDATORY)
+
+**AI assistants MUST invoke specialized agents immediately without waiting to be asked.**
+
+| Scenario | Agent | When |
+|----------|-------|------|
+| Documentation | @documentation-specialist | README, CHANGELOG, API docs, guides |
+| Testing | @qa-automation-engineer, @test-automation-expert | Test suites, TDD, fixtures |
+| Code review | @code-reviewer | PR review, quality gates, clippy/fmt |
+| Security | @security-specialist | Auth, credentials, encryption, sensitive data |
+| Infrastructure | @infrastructure-expert, @devops-engineer | CI/CD, deployment scripts, Docker |
+| Architecture | @software-architect, @api-architect | System design, refactoring, structural decisions |
+| Performance | @performance-specialist | Profiling, optimization, bottlenecks |
+| Frontend/UI | @frontend-specialist, @ui-ux-designer | CLI interface, menus, UX |
+
+**Commit Attribution** (when agents contribute):
+```bash
+docs(readme): update installation - @documentation-specialist
+feat(auth): implement OAuth - @security-specialist @software-engineering-expert
+refactor(cli): extract domains - @software-architect @code-reviewer @documentation-specialist
+```
+
+---
+
+## CODE QUALITY STANDARDS
+
+### Quality Gates (MANDATORY before commits)
 
 ```bash
-# Version management
-./scripts/cicd/local-cd.sh --check-versions
-./scripts/cicd/local-cd.sh --update-version X.X.X
-
-# Deployment pipeline  
-./scripts/cicd/local-ci.sh && ./scripts/cicd/local-cd.sh
-
-# Homebrew release
-./scripts/utils/generate-homebrew-release.sh --stage
-gh release create vX.X.X homebrew/release/*.tar.gz --title "vX.X.X" --notes "..." --latest
+cargo check                                                  # Must compile
+cargo clippy --all-targets --all-features -- -D warnings    # Must pass
+cargo fmt --all                                              # Must be formatted
+cargo test                                                   # Must pass (if tests exist)
 ```
 
-### Version Bumping Guidelines:
-
-- **Feature completion**: When a major feature (like Homebrew integration) is complete, increment version
-- **Bug fixes only**: Use patch version increments (0.0.X)
-- **New major features**: Use minor version increments (0.X.0)
-- **Breaking changes**: Use major version increments (X.0.0)
-
-### Example Workflow:
-
-```bash
-# 1. FIRST: Update CHANGELOG.md with new version entry
-## [0.0.47] - 2025-08-09
-### Added
-- **Homebrew Integration**: Complete multi-platform distribution system
-- **Testing Infrastructure**: Comprehensive validation scripts
-
-# 2. THEN: Run deployment
-./scripts/cicd/local-cd.sh
-```
-
-### Common Pitfalls to Avoid:
-
-- **DON'T**: Put all work into one massive changelog entry
-- **DON'T**: Update changelog after running deployment (creates version confusion)
-- **DON'T**: Mix unrelated features from different development sessions
-- **DO**: Create changelog entries that reflect actual development timeline
-- **DO**: Keep changelog entries focused on user-visible improvements
-
-## How To Write Commit Messages
-
-Keep them simple and clear:
+### Commit Message Format
 
 ```
-fix: resolve clippy warnings in api module
-feat: add support for qwen-code tool
-break: change cli argument structure for templates command
-docs: update installation instructions
+<type>(<scope>): <description>
+
+Types: fix, feat, break, docs, style, refactor, test, chore
+Examples:
+  fix: resolve clippy warnings in api module
+  feat: add support for qwen-code tool
+  break: change cli argument structure for templates command
+  docs: update installation instructions
 ```
 
-Types to use: `fix`, `feat`, `break`, `docs`, `style`, `refactor`, `test`, `chore`
+### Rust Code Standards
 
-## Code Quality Rules
-
-**Rust Code:**
-
-- Must pass `cargo clippy --all-targets --all-features -- -D warnings`
-- Must be formatted with `cargo fmt --all`
 - Use `anyhow::Result` for error handling
 - Add doc comments for public functions
+- Keep files under 200 lines (extract domains if larger)
+- Follow domain-based module organization
+- No unwrap() or expect() in production code (use proper error handling)
 
-**TypeScript Code:**
+### TypeScript Code Standards
 
-- Use Biome for linting and formatting, NOT ESLint
+- Use Biome for linting/formatting (NOT ESLint)
 - Run `npm run lint` and `npm run format` before committing
+- Follow existing patterns in npm/terminal-jarvis/
 
-## Refactoring Best Practices (CRITICAL)
+---
 
-**OBJECTIVE**: Break large files (>200 lines) into focused domain modules while maintaining functionality.
+## PRE-COMMIT CHECKLIST
 
-### **Proven Architecture Pattern**
+### Version Consistency
 
-Based on successful cli_logic.rs refactoring (1,358 lines → 10 focused modules):
+- [ ] Cargo.toml version matches target release
+- [ ] npm/terminal-jarvis/package.json version matches
+- [ ] homebrew/Formula/terminal-jarvis.rb version matches
 
-**Domain-Based Folder Structure**:
+### Documentation
+
+- [ ] CHANGELOG.md updated with new version entry
+- [ ] README.md reflects new features (if user-facing)
+- [ ] Inline documentation updated for changed APIs
+
+### Quality Checks
+
+- [ ] `cargo check` passes
+- [ ] `cargo clippy --all-targets --all-features -- -D warnings` passes
+- [ ] `cargo fmt --all` applied
+- [ ] `cargo test` passes (all tests green)
+
+### Homebrew Integration (if updating version)
+
+- [ ] Homebrew Formula version synchronized
+- [ ] Formula committed BEFORE creating GitHub release
+- [ ] Release archives generated and staged
+
+### NPM Distribution (if publishing)
+
+- [ ] `npm whoami` confirms authenticated
+- [ ] `npm run lint` passes
+- [ ] `npm run format` applied
+- [ ] package.json version matches Cargo.toml
+
+---
+
+## TEST-DRIVEN BUGFIXES (MANDATORY)
+
+**ABSOLUTE REQUIREMENT**: ALL bug fixes must follow this workflow:
+
+1. **Write failing test** - Reproduce the bug with a test that fails
+2. **Verify test fails** - Run `cargo test` and confirm failure
+3. **Implement fix** - Make minimal changes to fix the bug
+4. **Verify test passes** - Run `cargo test` and confirm success
+5. **Run quality gates** - clippy, fmt, full test suite
+6. **Commit both** - Test and fix together in same commit
+
+**Example workflow**:
+```bash
+# 1. Create test that reproduces bug
+# tests/test_voice_windows.rs
+#[test]
+fn test_windows_powershell_escaping() {
+    let cmd = build_windows_command("test input");
+    assert_eq!(cmd, expected_escaped_command);  // This will fail
+}
+
+# 2. Verify failure
+cargo test test_windows_powershell_escaping  # Should fail
+
+# 3. Implement fix in src/voice/voice_native_provider.rs
+
+# 4. Verify success
+cargo test test_windows_powershell_escaping  # Should pass
+cargo test                                   # All tests pass
+
+# 5. Commit together
+git add tests/test_voice_windows.rs src/voice/voice_native_provider.rs
+git commit -m "fix(voice): resolve PowerShell escaping on Windows - @test-automation-expert"
+```
+
+---
+
+## REFACTORING BEST PRACTICES (CRITICAL)
+
+**OBJECTIVE**: Break large files (>200 lines) into focused domain modules.
+
+### Domain-Based Folder Structure
+
 ```
 src/
-  large_module.rs (684 lines) →
   large_module/
-    mod.rs                    # Re-exports + minimal coordination
-    large_module_domain1.rs   # Focused functionality
-    large_module_domain2.rs   # Focused functionality
-    large_module_domain3.rs   # Focused functionality
+    mod.rs              # Public interface, re-exports
+    domain_a.rs         # First domain (focused responsibility)
+    domain_b.rs         # Second domain (focused responsibility)
+    domain_c.rs         # Third domain (focused responsibility)
 ```
 
-**Naming Convention**: `{module}_domain_operations.rs` (e.g., `cli_logic_tool_execution.rs`)
+### Refactoring Workflow
 
-### **Dead Code Elimination Protocol**
+1. **Identify domains** - Group related functions/structs by responsibility
+2. **Create new files** - One file per domain
+3. **Move code** - Cut from old file, paste into new domain files
+4. **Update mod.rs** - Add `mod domain_a;` and `pub use domain_a::*;`
+5. **Fix imports** - Update `use` statements across codebase
+6. **Validate** - `cargo check` after each domain extraction
+7. **Quality gates** - clippy, fmt, tests
 
-**ABSOLUTE REQUIREMENT**: Zero tolerance for dead code warnings.
+### Example: cli_logic.rs Refactoring
 
-**Process**:
-1. **Identify**: Run `cargo check` to find unused function warnings
-2. **Verify**: Search codebase for actual usage with `grep -r "function_name("`
-3. **Remove**: Delete completely unused functions (prefer deletion over `#[allow(dead_code)]`)
-4. **Clean imports**: Remove unused `use` statements
-5. **Validate**: `cargo check` must show zero warnings
+**Before**: 1,358 lines in `cli_logic.rs`
 
-**Recent Success**: Eliminated 14 dead code warnings by removing 260+ lines of unused functions.
+**After**: 10 focused modules
+- `cli_logic/mod.rs` - Public interface (50 lines)
+- `cli_logic/cli_logic_entry_point.rs` - Main coordination (150 lines)
+- `cli_logic/cli_logic_interactive.rs` - Interactive interface (200 lines)
+- `cli_logic/cli_logic_tool_execution.rs` - Tool execution (120 lines)
+- `cli_logic/cli_logic_update_operations.rs` - Update logic (130 lines)
+- `cli_logic/cli_logic_info_operations.rs` - Info display (90 lines)
+- `cli_logic/cli_logic_list_operations.rs` - List operations (80 lines)
+- ...and more
 
-### **Refactoring Workflow**
+**Benefits**:
+- Each file has single, clear responsibility
+- Easy to navigate and understand
+- Easier to test in isolation
+- Reduced merge conflicts
+- Better code organization
 
-**MANDATORY STEPS**:
-1. **Before**: `cargo check` - baseline compilation
-2. **Plan**: Domain separation strategy
-3. **Implement**: Extract related functions into focused modules
-4. **Clean**: Remove dead code aggressively
-5. **Validate**: `cargo check` + `cargo clippy` + `cargo fmt` must all pass
-6. **Document**: Update REFACTOR.md with metrics
+---
 
-**Critical**: Never proceed to next refactoring until current one compiles cleanly.
+## TOOL CONFIGURATION CONSISTENCY (CRITICAL)
 
-### **Quality Gates**
+**OBJECTIVE**: All AI tools follow consistent modular configuration pattern.
 
-**Post-refactoring requirements**:
-- [ ] `cargo check` - zero warnings
-- [ ] `cargo clippy --all-targets --all-features -- -D warnings` - passes
-- [ ] `cargo fmt --all` - applied
-- [ ] REFACTOR.md updated with results
-- [ ] Total line reduction calculated and documented
+### Modular Tool Configuration System
 
-## File Sync Requirements
+**Location**: `/config/tools/<tool-name>.toml`
 
-The README.md needs to be the same in both the root directory and `npm/terminal-jarvis/`. Before publishing to NPM, always run:
+**Template**:
+```toml
+[tool]
+name = "Tool Name"
+command = "tool-command"
+description = "Brief description"
+category = "ai-coding-assistant"
+
+[installation]
+npm = "npm install -g package-name"
+cargo = "cargo install package-name"
+other = "curl -fsSL install-script.sh | sh"
+
+[authentication]
+required = true
+method = "api_key"
+env_var = "TOOL_API_KEY"
+instructions = "Get your API key from https://provider.com/keys"
+
+[features]
+supports_chat = true
+supports_code_generation = true
+supports_refactoring = true
+supports_testing = false
+
+[voice_commands]
+aliases = ["tool", "tool name", "tool cli"]
+activation_phrases = ["use tool", "switch to tool"]
+```
+
+### Adding New Tool Workflow
+
+1. **Create config file**: `/config/tools/newtool.toml`
+2. **Define tool metadata**: name, command, description
+3. **Specify installation**: npm, cargo, or custom script
+4. **Document authentication**: API keys, env vars, instructions
+5. **List features**: capabilities for UI display
+6. **Add voice commands**: aliases and activation phrases
+7. **Test detection**: `cargo run -- list` should show new tool
+8. **Test execution**: `cargo run -- run newtool` should work
+9. **Update CHANGELOG**: Add under `### Added`
+
+---
+
+## HOMEBREW INTEGRATION
+
+### Formula Structure
+
+**Location**: `homebrew/Formula/terminal-jarvis.rb`
+
+**Key components**:
+- Version must match Cargo.toml, package.json
+- URL points to GitHub release archive
+- SHA256 matches archive checksum
+- Install script copies binary to bin/
+
+### Release Archive Generation
 
 ```bash
+# Generate platform-specific archives
+./scripts/utils/generate-homebrew-release.sh --stage
+
+# Output:
+# homebrew/release/terminal-jarvis-mac.tar.gz
+# homebrew/release/terminal-jarvis-linux.tar.gz
+```
+
+### Complete Homebrew Release Workflow
+
+```bash
+# 1. Standard deployment (includes version updates, CHANGELOG, Formula)
+./scripts/cicd/local-ci.sh && ./scripts/cicd/local-cd.sh
+
+# 2. Generate release archives
+./scripts/utils/generate-homebrew-release.sh --stage
+
+# 3. Commit archives
+git add homebrew/release/
+git commit -m "feat: Homebrew release archives vX.X.X"
+git push
+
+# 4. Create GitHub release with archives
+gh release create vX.X.X \
+  homebrew/release/terminal-jarvis-mac.tar.gz \
+  homebrew/release/terminal-jarvis-linux.tar.gz \
+  --title "Release vX.X.X" \
+  --notes "Release notes from CHANGELOG.md" \
+  --latest
+
+# 5. Verify archive accessibility
+curl -I https://github.com/BA-CalderonMorales/terminal-jarvis/releases/download/vX.X.X/terminal-jarvis-mac.tar.gz
+
+# 6. Test installation
+brew uninstall terminal-jarvis
+brew install terminal-jarvis
+terminal-jarvis --version  # Should show vX.X.X
+```
+
+### Common Homebrew Pitfalls
+
+| Issue | Cause | Fix |
+|-------|-------|-----|
+| SHA256 mismatch | Formula SHA doesn't match archive | Regenerate archive or update Formula SHA |
+| Archive naming | Incorrect filename pattern | Use generate-homebrew-release.sh script |
+| Formula syntax error | Ruby syntax mistakes | Run `brew install --dry-run` to validate |
+| Binary permissions | Binary not executable | Ensure chmod +x in install script |
+| Cross-platform issue | macOS/Linux binary differences | Test on both platforms |
+| Formula after release | Committed Formula changes too late | Always commit Formula BEFORE `gh release` |
+
+---
+
+## NPM DISTRIBUTION
+
+### NPM Authentication
+
+```bash
+# Check authentication status
+npm whoami
+
+# Login if needed
+npm login
+
+# Verify credentials
+npm whoami  # Should show your username
+```
+
+### NPM Distribution Tags
+
+| Tag | Purpose | Command |
+|-----|---------|---------|
+| `latest` | Stable release (default) | `npm publish` or `npm publish --tag latest` |
+| `next` | Beta/preview release | `npm publish --tag next` |
+| `alpha` | Early development | `npm publish --tag alpha` |
+
+### NPM Publishing Workflow
+
+```bash
+# 1. Ensure authenticated
+npm whoami
+
+# 2. Update version (via deployment script)
+./scripts/cicd/local-cd.sh --update-version X.X.X
+
+# 3. Build TypeScript wrapper
 cd npm/terminal-jarvis
-npm run sync-readme
+npm run lint
+npm run format
+npm run build
+
+# 4. Publish (happens automatically via local-cd.sh)
+# Or manually: npm publish --tag latest
+
+# 5. Verify
+npm info terminal-jarvis
+npm install -g terminal-jarvis@X.X.X
+terminal-jarvis --version
 ```
 
-## What Not To Do
+---
 
-- No emojis anywhere (commits, code, documentation)
-- No vague commit messages like "fix stuff" or "update things"
-- No combining unrelated changes in one commit
-- No force pushing to main or develop branches
-- No `.unwrap()` without good error handling
-- No magic numbers - use named constants
-- **No shell scripts (.sh files) in tests/ directory** - Only Rust test files (.rs) belong in tests/
-- **All shell scripts organized in scripts/ directory structure**:
-  - `scripts/cicd/` - CI/CD automation (local-cd.sh, local-ci.sh)
-  - `scripts/tests/` - Testing and validation scripts  
-  - `scripts/utils/` - Utility scripts (generate-readme-tools.sh, etc.)
-- **No multi-line bash commands in terminal suggestions** - Always use single-line commands
-- **NO BUGFIXES WITHOUT FAILING TESTS** - Every bug must have a failing test written first
+## VOICE MODE DEVELOPMENT
 
-## Terminal Command Guidelines
+### Voice Architecture
 
-When suggesting terminal commands or using the `run_in_terminal` tool:
+- `src/voice/mod.rs` - Public interface
+- `src/voice/voice_command.rs` - Command enum definitions
+- `src/voice/voice_command_parser.rs` - Phrase parsing logic
+- `src/voice/voice_native_provider.rs` - Platform-specific capture
+- `src/voice/voice_local_whisper_provider.rs` - Local AI transcription
+- `src/voice/platforms/` - Platform-specific implementations
 
-- **ALWAYS use single-line commands** - Multi-line bash commands cause terminal input issues
-- Use `&&` to chain commands instead of separate lines
-- Use `;` for sequential execution when `&&` isn't appropriate
-- Wrap complex logic in parentheses if needed
-- Example: `cargo build --release && cd npm/terminal-jarvis && npm run build`
-- **NEVER** suggest commands like:
-  ```bash
-  if [ condition ]; then
-    command1
-    command2
-  fi
-  ```
-- **INSTEAD** use: `[ condition ] && command1 && command2`
+### Adding Voice Command
 
-## Tool Configuration Consistency (CRITICAL FOR NEW FEATURES)
-
-**When adding new AI coding tools**, use the modular configuration system to prevent integration issues:
-
-### New Tool Addition Process (STREAMLINED):
-
-1. **Create Tool Configuration File**:
-
-   - Create `config/tools/newtool.toml` with complete tool definition
-   - Follow existing tool config structure (see `config/tools/claude.toml` as reference)
-   - Include all required sections: `[tool]`, `[tool.install]`, `[tool.auth]`, `[tool.features]`
-
-2. **Update Command Mapping**:
-
-   - Add tool to `src/tools/tools_command_mapping.rs` in `get_command_mapping()` HashMap
-   - Example: `mapping.insert("newtool", "newtool-cli");`
-
-3. **No Legacy Config Updates Required**:
-
-   - The modular system automatically loads from `config/tools/` directory
-   - No need to update `terminal-jarvis.toml.example` or legacy config files
-   - InstallationManager automatically discovers new tool configurations
-
-4. **Test and Verify**:
-
-   - Test tool detection: `cargo run -- list`
-   - Test tool info display: `cargo run -- info newtool`
-   - Test installation: `cargo run -- install newtool`
-   - Verify configuration loading with unit tests
-
-### Tool Configuration File Structure:
-
-```toml
-# config/tools/newtool.toml
-[tool]
-display_name = "New Tool"
-config_key = "newtool-cli"
-description = "Description of the new tool"
-cli_command = "newtool"
-requires_npm = true
-requires_sudo = true
-status = "stable"
-
-[tool.install]
-command = "npm"
-args = ["install", "-g", "newtool-package"]
-verify_command = "newtool --version"
-post_install_message = "Tool installed successfully!"
-
-[tool.auth]
-env_vars = ["NEWTOOL_API_KEY"]
-setup_url = "https://tool-setup-url"
-browser_auth = false
-auth_instructions = "Visit setup URL to get API key"
-
-[tool.features]
-supports_files = true
-supports_streaming = true
-supports_conversation = true
-max_context_tokens = 32000
-supported_languages = ["python", "javascript", "rust"]
-```
-
-### Key Benefits of New System:
-
-- **Automatic Discovery**: Tools are automatically detected from `config/tools/` directory
-- **No Manual Mapping**: InstallationManager handles configuration loading
-- **Unified Display**: ToolDisplayFormatter provides consistent tool information display
-- **Easy Maintenance**: Each tool has its own configuration file
-- **Future-Proof**: Ready for database integration and dynamic tool loading
-
-### Why This Matters:
-
-- **Prevents runtime failures**: Missing mappings cause user-facing errors
-- **Maintains consistency**: All parts of the system stay synchronized
-- **Enables proper testing**: Tests catch mapping issues before release
-- **Improves user experience**: Users can update all tools without errors
-
-## Test-Driven Bugfixes (MANDATORY)
-
-**CRITICAL REQUIREMENT**: Every bugfix session MUST follow Test-Driven Development:
-
-### Bugfix Workflow (NON-NEGOTIABLE):
-
-1. **Write Failing Test FIRST**:
-
-   - Create a test that reproduces the exact bug behavior
-   - Test MUST fail initially (proving the bug exists)
-   - Use descriptive names: `test_bug_opencode_input_focus_on_fresh_install`
-   - Include detailed comments explaining the bug scenario
-
-2. **Test Placement**:
-
-   - **Integration tests**: `tests/` directory as `.rs` files
-   - **Unit tests**: `src/` files using `#[cfg(test)]` mod test blocks
-   - **NEVER** put shell scripts in `tests/` directory
-
-3. **Verify Failure**: Run `cargo test` to confirm the test fails for expected reasons
-
-4. **Implement Fix**: Make minimal code changes to make test pass
-
-5. **Verify Success**: Test passes, no regressions in existing tests
-
-6. **Commit Together**: Include both test and fix in same commit
-
-### Example Test Structure:
-
+**Workflow**:
+1. **Add enum variant** - `src/voice/voice_command.rs`
 ```rust
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn test_bug_opencode_input_focus_on_fresh_install() {
-        // Bug: opencode input box lacks focus on fresh installs
-        // User cannot type directly without manual focus intervention
-        // Expected: Input box should be automatically focused on startup
-
-        // Test implementation reproducing the bug
-        assert_eq!(expected_behavior, actual_behavior);
-    }
+pub enum VoiceCommand {
+    // ... existing variants
+    NewCommand,
 }
 ```
 
-### Why This Matters:
+2. **Add parsing patterns** - `src/voice/voice_command_parser.rs`
+```rust
+fn parse_command(text: &str) -> Option<VoiceCommand> {
+    if text.contains("new command") || text.contains("do thing") {
+        return Some(VoiceCommand::NewCommand);
+    }
+    // ... existing patterns
+}
+```
 
-- **Prevents regression**: Test ensures bug never returns
-- **Documents behavior**: Test serves as living documentation
-- **Validates fix**: Proves the fix actually works
-- **Quality assurance**: Maintains high code quality standards
+3. **Wire up handler** - `src/cli_logic/cli_logic_interactive.rs`
+```rust
+match voice_command {
+    VoiceCommand::NewCommand => {
+        // Implementation
+    },
+    // ... existing handlers
+}
+```
 
-**ABSOLUTE RULE**: No bugfix commits without accompanying failing test. This is enforced during code review.
+4. **Add tests** - `src/voice/tests/test_voice_commands.rs`
+```rust
+#[test]
+fn test_new_command_parsing() {
+    assert_eq!(
+        parse_command("execute new command"),
+        Some(VoiceCommand::NewCommand)
+    );
+}
+```
 
-## Homebrew Integration & Multi-Platform Distribution (v0.0.46+)
+### Voice Platform Support
 
-**Key Innovation**: Complete multi-platform distribution pipeline supporting NPM, Crates.io, and Homebrew.
+| Platform | Implementation | Audio Capture |
+|----------|----------------|---------------|
+| **Linux** | `platforms/linux.rs` | ALSA via `arecord` |
+| **macOS** | `platforms/darwin.rs` | Core Audio via `rec` |
+| **Windows** | `platforms/windows.rs` | PowerShell `SoundRecorder` |
+| **Development** | `platforms/dev.rs` | Mock input for testing |
 
-### Homebrew Publishing Workflow
+---
 
-**Based on Federico Terzi's approach**: https://federicoterzi.com/blog/how-to-publish-your-rust-project-on-homebrew/
+## COMMUNICATION GUIDELINES
 
-#### 1. **Release Archive Creation**
+### Reference Clarity (CRITICAL)
+
+**ALWAYS use descriptive headers**:
+- GOOD: "## Deployment Steps"
+- BAD: "Steps:"
+
+**ALWAYS include context in references**:
+- GOOD: "In the Homebrew release workflow above, step 3 refers to..."
+- BAD: "Step 3 means..."
+
+**When user asks "what's step 4?"**:
+1. Apologize for ambiguity
+2. Quote the specific numbered list being referenced
+3. Explain which workflow/section it belongs to
+4. Provide the clear answer
+
+---
+
+## DETAILED EXAMPLES
+
+### Example 1: Adding New Voice Command Feature
+
+```
+User Request: "Add voice command for updating all tools"
+
+Lead Planning (1000 tokens):
+- Analyze: Need to update voice_command.rs enum, parser, and handler
+- Breakdown:
+  * Task 1: Add UpdateAllTools variant to enum (sequential)
+  * Task 2: Add parsing patterns for "update all" phrases (sequential after Task 1)
+  * Task 3: Wire up handler to execute update operation (sequential after Task 2)
+  * Task 4: Add tests for new command (parallel with Task 3)
+- Parallelization: Tasks 1-3 sequential (dependencies), Task 4 parallel with Task 3
+
+Lead Delegation:
+  Agent 1 (750 tokens): Update voice_command.rs with new enum variant
+  [Wait for completion]
+  Agent 2 (750 tokens): Add parsing patterns to voice_command_parser.rs
+  [Wait for completion]
+  Agent 3 (750 tokens): Wire handler in cli_logic_interactive.rs
+  Agent 4 (750 tokens): Create tests in voice/tests/ (parallel with Agent 3)
+
+Lead Integration (1000 tokens):
+- cargo check (verify compilation)
+- cargo clippy (code quality)
+- cargo test (verify tests pass)
+- Update CHANGELOG.md with new feature
+- Prepare commit message
+```
+
+### Example 2: Refactoring Large Module
+
+```
+User Request: "Refactor voice/mod.rs (500 lines) into focused modules"
+
+Lead Planning (1000 tokens):
+- Analyze current structure: 3 domains identified
+  * Voice command parsing (150 lines)
+  * Audio capture logic (200 lines)
+  * Provider management (150 lines)
+- Breakdown:
+  * Task 1: Create voice/voice_parsing.rs, extract parsing
+  * Task 2: Create voice/voice_audio.rs, extract audio capture
+  * Task 3: Create voice/voice_providers.rs, extract provider logic
+  * Task 4: Update voice/mod.rs to re-export new modules
+  * Task 5: Update imports across codebase
+- Parallelization: Tasks 1-3 parallel, Task 4 after 1-3, Task 5 after Task 4
+
+Lead Delegation:
+  Agent 1 (750 tokens): Extract parsing domain to voice_parsing.rs
+  Agent 2 (750 tokens): Extract audio domain to voice_audio.rs (parallel)
+  Agent 3 (750 tokens): Extract provider domain to voice_providers.rs (parallel)
+
+  [After agents complete]
+
+  Agent 4 (750 tokens): Update voice/mod.rs with re-exports
+  Agent 5 (750 tokens): Fix imports in cli_logic_interactive.rs
+  Agent 6 (750 tokens): Fix imports in voice tests
+
+Lead Integration (1000 tokens):
+- cargo check --all-targets
+- cargo clippy --all-targets --all-features -- -D warnings
+- cargo fmt --all
+- Update REFACTOR.md with metrics (500 lines → 3 focused modules)
+- Prepare commit
+```
+
+### Example 3: Bug Fix with Test-Driven Development
+
+```
+User Request: "Fix: Voice input not capturing on Windows"
+
+Lead Planning (1000 tokens):
+- Analyze: Windows-specific audio capture issue
+- Root cause hypothesis: PowerShell command escaping problem
+- Breakdown:
+  * Task 1: Write failing test reproducing Windows bug
+  * Task 2: Fix PowerShell command construction in voice_native_provider.rs
+  * Task 3: Verify test passes on Windows
+- Parallelization: Task 1 first (TDD requirement), then Task 2, then Task 3
+
+Lead Delegation:
+  Agent 1 (750 tokens): Create failing test in voice/tests/test_windows_capture.rs
+
+  [After test created and verified to fail]
+
+  Agent 2 (750 tokens): Fix PowerShell escaping in voice_native_provider.rs
+
+  [After fix implemented]
+
+  Agent 3 (750 tokens): Run tests and verify Windows platform
+
+Lead Integration (1000 tokens):
+- cargo test --features windows (verify fix)
+- cargo clippy (no new warnings)
+- Update CHANGELOG.md with bug fix entry
+- Prepare commit with test + fix
+```
+
+---
+
+## SESSION CONTINUATION SYSTEM
+
+**Key Feature**: Prevents users from being kicked out during authentication workflows.
+
+**How It Works**:
+1. User launches AI tool (e.g., `terminal-jarvis run claude`)
+2. Tool requires authentication (redirects to browser)
+3. Traditional approach: User returns, session gone
+4. Terminal Jarvis: Session preserved, resumes automatically
+
+**Implementation**: `src/tools/tools_execution_engine.rs`
+- Detects authentication workflows
+- Maintains session state during external auth
+- Resumes execution after auth completion
+
+**Debugging Session Issues**:
+```bash
+# Check session state
+cargo run -- run <tool> --debug
+
+# View logs
+tail -f ~/.terminal-jarvis/logs/session.log
+
+# Reset session state
+rm -rf ~/.terminal-jarvis/sessions/
+```
+
+---
+
+## TECHNICAL NOTES
+
+### Rust Dependencies
+
+Key crates:
+- `clap` - CLI argument parsing
+- `tokio` - Async runtime
+- `serde` - Serialization/deserialization
+- `anyhow` - Error handling
+- `reqwest` - HTTP client
+- `toml` - Configuration parsing
+
+### NPM Packaging Approach
+
+Following Orhun Parmaksız pattern:
+1. Build Rust binary for target platform
+2. Package binary in NPM with TypeScript wrapper
+3. Wrapper calls binary via child_process
+4. Cross-platform support via platform-specific binaries
+
+### Multi-Platform Build
 
 ```bash
-# Create platform-specific archives for Homebrew
-# Homebrew release creation integrated into CI/CD pipeline
+# Build for current platform
+cargo build --release
+
+# Cross-compile (requires setup)
+cargo build --release --target x86_64-apple-darwin
+cargo build --release --target x86_64-unknown-linux-gnu
+cargo build --release --target x86_64-pc-windows-msvc
 ```
 
-This script:
+### Environment Variables
 
-- Builds release binaries for macOS and Linux
-- Creates .tar.gz archives with proper naming (`terminal-jarvis-{platform}.tar.gz`)
-- Calculates SHA256 checksums for Formula verification
-- Generates Formula template with multi-platform support
+| Variable | Purpose | Default |
+|----------|---------|---------|
+| `TERMINAL_JARVIS_CONFIG` | Config file path | `~/.terminal-jarvis/config.toml` |
+| `TERMINAL_JARVIS_LOG_LEVEL` | Logging verbosity | `info` |
+| `TERMINAL_JARVIS_SESSION_DIR` | Session state directory | `~/.terminal-jarvis/sessions/` |
 
-#### 2. **Formula Structure** (`homebrew/Formula/terminal-jarvis.rb`)
+---
 
-```ruby
-class TerminalJarvis < Formula
-  desc "A unified command center for AI coding tools"
-  homepage "https://github.com/BA-CalderonMorales/terminal-jarvis"
-  version "X.X.X"
-  license "MIT"
-
-  on_macos do
-    url "https://github.com/.../terminal-jarvis-macos.tar.gz"
-    sha256 "..."
-  end
-
-  on_linux do
-    url "https://github.com/.../terminal-jarvis-linux.tar.gz"
-    sha256 "..."
-  end
-
-  def install
-    bin.install "terminal-jarvis"
-  end
-
-  test do
-    system "#{bin}/terminal-jarvis", "--version"
-  end
-end
-```
-
-#### 3. **End-to-End Testing Protocol**
-
-**CRITICAL**: Always test Homebrew integration locally before deployment:
-
-```bash
-# 1. Test Formula validation
-# Homebrew formula testing integrated into CI/CD pipeline
-
-# 2. Create local tap for testing
-mkdir -p /tmp/homebrew-test-tap/Formula
-cp homebrew/Formula/terminal-jarvis.rb /tmp/homebrew-test-tap/Formula/
-cd /tmp/homebrew-test-tap && git init && git add . && git commit -m "Test"
-
-# 3. Add tap and test installation
-brew tap-new local/test && cp Formula/* $(brew --repository)/Library/Taps/local/homebrew-test/Formula/
-brew install local/test/terminal-jarvis
-
-# 4. Verify functionality
-terminal-jarvis --version
-terminal-jarvis --help
-brew test local/test/terminal-jarvis
-```
-
-#### 4. **GitHub Release Integration**
-
-Archives must be uploaded to GitHub releases:
-
-- `terminal-jarvis-macos.tar.gz`
-- `terminal-jarvis-linux.tar.gz`
-
-Formula URLs point to these release assets.
-
-### Multi-Platform Distribution Best Practices
-
-#### **Distribution Channel Separation**
-
-1. **NPM Users** - JavaScript/Node.js ecosystem
-2. **Crates.io Users** - Rust developers who prefer `cargo install`
-3. **Homebrew Users** - macOS/Linux users preferring system package managers
-
-#### **README Badge Organization**
-
-Group badges by distribution channel for clarity:
+## APPENDIX: ORIGINAL CHANGELOG EXAMPLE
 
 ```markdown
-<!-- NPM Distribution -->
-
-[![npm version](badge-url)](link) [![npm downloads](badge-url)](link)
-
-<!-- Crates.io Distribution -->
-
-[![Crates.io](badge-url)](link) [![Crates.io downloads](badge-url)](link)
-
-<!-- GitHub Stats -->
-
-[![GitHub release](badge-url)](link) [![GitHub stars](badge-url)](link)
-```
-
-#### **Version Synchronization Requirements**
-
-ALL distribution channels must maintain version synchronization:
-
-- `Cargo.toml` - Core Rust package version
-- `npm/terminal-jarvis/package.json` - NPM package version
-- `homebrew/Formula/terminal-jarvis.rb` - Homebrew Formula version
-- GitHub release tags - Must match exactly
-
-### Common Homebrew Integration Pitfalls
-
-#### **Archive Naming Issues**
-
-- **Problem**: Inconsistent archive naming breaks Formula URLs
-- **Solution**: Use standardized names: `terminal-jarvis-{macos|linux}.tar.gz`
-
-#### **SHA256 Mismatch**
-
-- **Problem**: Formula SHA256 doesn't match actual archive checksum
-- **Solution**: Always regenerate SHA256 after creating new archives
-
-#### **Formula Syntax Errors**
-
-- **Problem**: Ruby syntax errors prevent Formula loading
-- **Solution**: Use `# Homebrew formula testing integrated into CI/CD pipeline` for validation
-
-#### **Binary Permissions**
-
-- **Problem**: Extracted binary lacks execute permissions
-- **Solution**: Archives must preserve file permissions (`tar -czf` with proper flags)
-
-#### **Cross-Platform Issues**
-
-- **Problem**: Formula doesn't handle macOS vs Linux differences
-- **Solution**: Use `on_macos` and `on_linux` blocks for platform-specific handling
-
-### Homebrew Testing Without GitHub Repository
-
-**Local Testing Strategy** (when GitHub repo doesn't exist yet):
-
-1. **Create Local Tap Structure**:
-
-   ```bash
-   mkdir -p /tmp/homebrew-test-tap/Formula
-   cp homebrew/Formula/terminal-jarvis.rb /tmp/homebrew-test-tap/Formula/
-   cd /tmp/homebrew-test-tap && git init && git add . && git commit -m "Test"
-   ```
-
-2. **Serve Archives Locally**:
-
-   ```bash
-   cd homebrew/release && python3 -m http.server 8000
-   ```
-
-3. **Modify Formula for Testing**:
-
-   ```ruby
-   # Replace GitHub URLs with localhost for testing
-   url "http://localhost:8000/terminal-jarvis-linux.tar.gz"
-   ```
-
-4. **Install and Test**:
-   ```bash
-   brew tap local/test /tmp/homebrew-test-tap
-   brew install local/test/terminal-jarvis
-   ```
-
-This approach validates the complete installation workflow without requiring actual GitHub repository creation.
-
-## Session Continuation System (v0.0.44+)
-
-**Key Innovation**: Prevents users from being kicked out of AI tools during authentication workflows.
-
-### How It Works:
-
-1. **Smart Command Detection**: Distinguishes between internal commands and intentional exits
-
-   - **Internal commands trigger restart**: `/auth`, `/login`, `/config`, `/setup`
-   - **Exit commands terminate properly**: `/exit`, `/quit`, `/bye`
-   - **Quick completions return to menu**: Prevents false positive restarts
-
-2. **Session Flow**:
-
-   ```
-   User runs tool → Tool exits → Check last input → Decision:
-   ├── Internal command → Restart tool seamlessly
-   ├── Exit command → Return to Terminal Jarvis menu
-   └── Quick completion → Return to menu (prevent false positives)
-   ```
-
-3. **Infinite Loop Prevention (v0.0.45)**:
-   - **Problem**: Exit commands were incorrectly triggering session continuation
-   - **Solution**: Explicit exclusion of exit commands from restart logic
-   - **Result**: Exit commands now properly terminate and return to interface
-
-### Debugging Session Issues:
-
-```bash
-# Debug session continuation
-RUST_LOG=debug cargo run -- run claude
-
-# Test session continuation logic
-cargo test --lib tools -- session_continuation
-
-# Check command mapping
-cargo run -- list
-```
-
-**Code Location**: `src/tools.rs` → `should_continue_session()` function
-
-## Enhanced Deployment Workflow
-
-### Optimal CI/CD Process (v0.0.45+)
-
-We use a controlled deployment approach with programmatic version management:
-
-**Phase 1: Development & Validation**
-
-```bash
-# Check version synchronization
-./scripts/cicd/local-cd.sh --check-versions
-
-# Update version programmatically (if needed)
-./scripts/cicd/local-cd.sh --update-version X.X.X
-
-# Validate with CI (no commits/pushes)
-./scripts/cicd/local-ci.sh
-```
-
-**Phase 2: Documentation (MANDATORY)**
-
-- Update CHANGELOG.md with version entry and detailed changes
-- Review external documentation site: https://ba-calderonmorales.github.io/my-life-as-a-dev/projects/active/terminal-jarvis/
-- Update README.md to reflect any documentation changes
-
-**Phase 3: Deployment**
-
-```bash
-# Deploy changes (commit/tag/push)
-./scripts/cicd/local-cd.sh
-
-# Homebrew archives and Formula preparation
-# Homebrew release creation integrated into CI/CD pipeline
-# Upload archives to GitHub releases manually
-
-# CRITICAL: Verify npm authentication BEFORE publishing
-npm whoami  # Must show your npm username, or run: npm login
-
-# Manual NPM publishing (due to 2FA)
-cd npm/terminal-jarvis && npm publish
-
-# Update distribution tags (requires npm login)
-npm dist-tag add terminal-jarvis@X.X.X beta
-npm dist-tag add terminal-jarvis@X.X.X stable
-
-# Verify tags were applied
-npm dist-tag ls terminal-jarvis
-```
-
-**Key Benefits:**
-
-- **Controlled workflow**: Separate validation from deployment
-- **Programmatic version management**: No manual file editing
-- **Version synchronization**: Automated consistency across all files
-- **Multi-platform support**: Includes Homebrew archive creation
-- **Flexibility**: Choose between programmatic and one-shot approaches
-
-## How To Release
-
-**Recommended: Use Enhanced Deployment Workflow (see section above for details)**
-
-1. **FIRST: Update CHANGELOG.md** - Add entry for current version with clear change descriptions
-2. **MANDATORY: Review External Documentation** - Update documentation at https://ba-calderonmorales.github.io/my-life-as-a-dev/projects/active/terminal-jarvis/
-   - Update version references if version was bumped
-   - Verify new features/fixes are properly documented
-   - This is **NON-NEGOTIABLE** - no CHANGELOG.md updates without documentation review
-   - **ALSO MANDATORY: Review and update README.md** - Required when CHANGELOG.md is modified
-3. **THEN: Use Enhanced Workflow** - `./scripts/cicd/local-cd.sh --check-versions`, validation with `./scripts/cicd/local-ci.sh`, then deployment with `./scripts/cicd/local-cd.sh`
-
-**Legacy One-Shot: Use Local CI/CD Script**
-
-1. **Update CHANGELOG.md** - Add entry with clear change descriptions
-2. **Run automated script** - `./scripts/local-cicd.sh` (handles all steps below automatically)
-
-**Manual Release Process (if needed):**
-
-1. Update version numbers in both `Cargo.toml` and `npm/terminal-jarvis/package.json`
-2. Update version display in `npm/terminal-jarvis/src/index.ts`
-3. Update version display in `src/cli_logic.rs` (interactive mode version)
-4. **Update CHANGELOG.md with new version and changes** (CRITICAL - must be done first)
-5. **MANDATORY: Review and update external documentation** - https://ba-calderonmorales.github.io/my-life-as-a-dev/projects/active/terminal-jarvis/
-6. **MANDATORY: Review and update README.md** - Required when CHANGELOG.md is modified
-7. Update version references in README.md (root and NPM package will sync automatically)
-8. Run `npm run sync-readme` to sync the README
-9. Commit with clear message: `feat: add new feature X`
-10. Create tag: `git tag v0.0.6`
-11. Push to GitHub: `git push origin develop --tags`
-12. Publish to NPM: `cd npm/terminal-jarvis && npm publish`
-13. **Add Distribution Tags** (optional - choose one or both):
-    - For stable releases: `npm dist-tag add terminal-jarvis@X.X.X stable`
-    - For beta releases: `npm dist-tag add terminal-jarvis@X.X.X beta`
-
-**Note: The local-cicd.sh script automates steps 1-11 and includes additional quality checks.**
-
-## NPM Distribution Tags
-
-We use npm dist-tags to provide users with different release channels:
-
-- **latest** - Default npm tag for the most recently published version
-- **stable** - For production-ready, thoroughly tested versions
-- **beta** - For preview versions that may contain experimental features
-
-**Usage Examples:**
-
-```bash
-# Install latest version (default)
-npm install -g terminal-jarvis
-
-# Install stable version (recommended for production)
-npm install -g terminal-jarvis@stable
-
-# Install beta version (for testing new features)
-npm install -g terminal-jarvis@beta
-
-# Check current dist-tags
-npm dist-tag ls terminal-jarvis
-```
-
-**Best Practices:**
-
-- Use `stable` tag for releases that have been tested and are production-ready
-- Use `beta` tag for releases with new features that need user testing
-- A single version can have both tags if it serves both purposes
-- Always update tags after publishing a new version
-
-### NPM Authentication Requirements (CRITICAL)
-
-**MANDATORY**: You MUST be logged into npm locally before performing any npm operations (publishing, dist-tag management, etc.).
-
-**Symptom of Missing Authentication**:
-- 404 errors when trying to add dist-tags
-- "Authenticate your account" prompts that fail
-- Commands fail with authentication errors
-
-**Solution - One-Time Setup Per Environment**:
-
-```bash
-# Login to npm (required once per development environment)
-npm login
-
-# Follow the prompts:
-# 1. Enter your npm username
-# 2. Enter your npm password
-# 3. Enter your npm email
-# 4. Complete 2FA if enabled (one-time password from authenticator app)
-
-# Verify you're logged in
-npm whoami
-```
-
-**When to Run `npm login`**:
-- First time working with npm in a new development environment
-- After clearing npm cache or credentials
-- When switching npm accounts
-- After seeing authentication errors during npm operations
-
-**Post-Login Operations**:
-
-```bash
-# Now you can publish packages
-cd npm/terminal-jarvis && npm publish
-
-# Now you can manage distribution tags
-npm dist-tag add terminal-jarvis@X.X.X beta
-npm dist-tag add terminal-jarvis@X.X.X stable
-
-# Verify tags were updated
-npm dist-tag ls terminal-jarvis
-```
-
-**Why This Matters**:
-- **Prevents deployment failures**: Authentication must be established before tag updates
-- **Enables 2FA workflows**: Modern npm accounts require 2FA, which needs interactive login
-- **Avoids cryptic errors**: 404s and authentication failures are confusing without context
-- **One-time per environment**: Once logged in, credentials persist until cleared
-
-**IMPORTANT**: Add this to your deployment checklist - verify `npm whoami` returns your username before attempting any npm operations.
-
-## Pre-Commit Checklist
-
-**ALWAYS** verify these items before making any commit:
-
-### **CRITICAL: Homebrew Formula Deployment Order**
-
-**THE #1 DEPLOYMENT FAILURE**: Homebrew Formula changes not committed before GitHub release creation.
-
-**MANDATORY SEQUENCE** (NEVER deviate from this order):
-
-1. **FIRST**: Update and commit ALL changes (including Homebrew Formula)
-2. **SECOND**: Push changes to GitHub
-3. **THIRD**: Create GitHub release with archives
-4. **NEVER**: Create release first, then try to fix Formula later
-
-**VERIFICATION COMMANDS** (run BEFORE creating any GitHub release):
-
-```bash
-git status                          # MUST show "nothing to commit, working tree clean"
-git log -1 --name-only             # MUST include homebrew/Formula/terminal-jarvis.rb
-./scripts/cicd/local-cd.sh --check-versions  # MUST show "All versions are synchronized"
-```
-
-### Version Consistency Check:
-
-- [ ] **CHANGELOG.md updated FIRST** - MANDATORY before running local-cd.sh
-- [ ] Changelog entry matches actual development session work
-- [ ] Version increment appropriate for changes made
-- [ ] `Cargo.toml` version updated
-- [ ] `npm/terminal-jarvis/package.json` version updated
-- [ ] **CRITICAL: `homebrew/Formula/terminal-jarvis.rb` version updated** - COMMONLY FORGOTTEN!
-- [ ] `npm/terminal-jarvis/src/index.ts` version display updated
-- [ ] `npm/terminal-jarvis/package.json` postinstall script version updated
-- [ ] `src/cli_logic.rs` uses `env!("CARGO_PKG_VERSION")` (auto-updates)
-- [ ] `README.md` version references updated in note section
-- [ ] **Version synchronization verified**: `./scripts/cicd/local-cd.sh --check-versions` passes
-- [ ] **CRITICAL: Working tree clean BEFORE release**: `git status` shows "nothing to commit"
-
-### Documentation Updates:
-
-- [ ] **README.md Accuracy Review** - CRITICAL for user experience
-  - [ ] Core functionality descriptions are current and accurate
-  - [ ] No misleading information about features or capabilities
-  - [ ] Installation instructions reflect all distribution channels (NPM, Crates.io, Homebrew)
-  - [ ] Version references are consistent throughout
-  - [ ] Examples work with current version and feature set
-  - [ ] Package size information updated if binary changed
-  - [ ] Badge organization matches current distribution channels
-- [ ] Documentation files synchronized (npm/terminal-jarvis/README.md matches root)
-- [ ] All referenced features actually exist in current codebase
-
-### Quality Checks:
-
-- [ ] `cargo clippy --all-targets --all-features -- -D warnings` passes
-- [ ] `cargo fmt --all` applied
-- [ ] `cargo test` passes (if tests exist)
-- [ ] **Failing test added for bugfixes** - If this is a bugfix, verify failing test was created first
-- [ ] NPM package builds: `cd npm/terminal-jarvis && npm run build`
-
-### Tool Configuration Consistency (if adding new tools):
-
-- [ ] Tool configuration file created in `config/tools/newtool.toml`
-- [ ] Tool added to `src/tools/tools_command_mapping.rs` command mapping
-- [ ] Tool information displays correctly via unified ToolDisplayFormatter
-- [ ] Tool can be installed via InstallationManager
-- [ ] Documentation updated (README.md, tool descriptions)
-- [ ] Verification commands run successfully (`cargo run -- list`, `cargo run -- info newtool`)
-
-### Homebrew Integration (if updating version):
-
-- [ ] `homebrew/Formula/terminal-jarvis.rb` version updated
-- [ ] GitHub release created with version tag
-- [ ] Homebrew archives uploaded: `terminal-jarvis-macos.tar.gz`, `terminal-jarvis-linux.tar.gz`
-- [ ] SHA256 checksums verified in Formula match actual archives
-- [ ] **Homebrew Formula tested locally**: `# Homebrew formula testing integrated into CI/CD pipeline` passes
-- [ ] Multi-platform support verified (macOS and Linux archives)
-
-### Testing (Critical):
-
-- [ ] Local package testing in `/tmp` environment completed
-- [ ] NPX functionality verified (`npx terminal-jarvis` works)
-- [ ] Binary permissions and execution tested
-- [ ] Postinstall scripts validated
-- [ ] **Enhanced workflow tested**: `./scripts/cicd/local-ci.sh` passes validation
-
-### NPM Distribution (if publishing or updating tags):
-
-- [ ] **NPM authentication verified**: `npm whoami` returns your username
-- [ ] If not authenticated, run `npm login` and complete 2FA
-- [ ] NPM package published successfully (if new version)
-- [ ] Distribution tags updated: `npm dist-tag add terminal-jarvis@X.X.X beta`
-- [ ] Distribution tags updated: `npm dist-tag add terminal-jarvis@X.X.X stable`
-- [ ] Tags verified: `npm dist-tag ls terminal-jarvis` shows correct versions
-
-**Never commit without completing the full checklist!**
-
-## Optimal Development Environment
-
-This workspace is designed for optimal AI-assisted development with the following principles:
-
-### Controlled Deployment Workflow (Preferred)
-
-**Use the enhanced workflow instead of one-shot deployments:**
-
-1. **Version Management**: `./scripts/cicd/local-cd.sh --check-versions` and `--update-version`
-2. **Validation**: `./scripts/cicd/local-ci.sh` for safe testing without commits
-3. **Documentation**: Manual CHANGELOG.md and docs/ updates with quality review
-4. **Deployment**: `./scripts/cicd/local-cd.sh` for controlled Git operations
-5. **Publishing**: Manual NPM publishing with proper 2FA handling
-
-**Benefits:**
-
-- Better process control and visibility
-- Separation of concerns (CI vs CD)
-- Programmatic version management prevents human error
-- Quality gates at each phase
-- Flexibility to skip or repeat phases as needed
-
-### Session Continuation Excellence
-
-**Our session continuation system represents best-in-class UX:**
-
-- Users never get kicked out during authentication workflows
-- Intelligent command detection prevents false positives
-- Clean exit handling respects user intent
-- Comprehensive test coverage ensures reliability
-
-This creates **the optimal environment** for working with AI coding tools.
-
-## Local CD with Agent Mode
-
-When conducting local continuous deployment with agents, **ALWAYS** follow this enhanced workflow:
-
-### CRITICAL: Pre-CI/CD CHANGELOG.md Update
-
-**BEFORE running deployment scripts**, the CHANGELOG.md MUST be updated:
-
-1. **Update CHANGELOG.md FIRST** - Add entry for current version with clear change descriptions
-2. **Enhanced workflow checks for this** - Scripts will validate CHANGELOG.md is updated
-3. **Controlled approach preferred** - Use `./scripts/cicd/local-cd.sh --check-versions` then `./scripts/cicd/local-ci.sh` then `./scripts/cicd/local-cd.sh`
-
-**CHANGELOG.md Entry Format:**
-
-```markdown
-## [X.X.X] - YYYY-MM-DD
+## [0.0.47] - 2025-08-09
 
 ### Added
+- **Homebrew Integration**: Complete multi-platform distribution system
+  - Formula-based installation via `brew install terminal-jarvis`
+  - Automated release archive generation for macOS and Linux
+  - Platform-specific binary packaging with proper permissions
+  - SHA256 checksum validation for security
+  - GitHub Release integration for archive hosting
 
-- New feature descriptions
+- **Testing Infrastructure**: Comprehensive validation scripts
+  - Homebrew installation testing without requiring GitHub repository
+  - Platform-specific test coverage (macOS, Linux)
+  - Archive generation and SHA256 verification
+  - End-to-end Homebrew workflow validation
 
-### Fixed
-
-- Bug fixes and improvements
+- **Multi-Platform Distribution Documentation**
+  - Complete Homebrew publishing workflow guide
+  - Platform-specific installation instructions
+  - Testing protocols for release validation
+  - Common pitfalls and troubleshooting guide
 
 ### Enhanced
+- **Deployment Workflow**: Streamlined version management
+  - `--update-version` flag for synchronized version updates across all files
+  - `--check-versions` validation for Cargo.toml, package.json, and Homebrew Formula
+  - Improved error messaging for version mismatches
+  - Automated version synchronization in CI/CD pipeline
 
-- Improvements to existing features
+- **README Organization**: Improved clarity and navigation
+  - Multi-channel installation badges (NPM, Crates.io, Homebrew)
+  - Clear distribution channel separation
+  - Platform-specific installation instructions
+  - Enhanced feature list organization
+
+### Fixed
+- **Homebrew Formula Synchronization**: Version consistency across platforms
+  - Fixed issue where Formula version could drift from Cargo.toml
+  - Added validation checks to prevent deployment with mismatched versions
+  - Improved deployment script to update all version files atomically
+
+### Technical
+- **Refactoring**: Homebrew integration scripts
+  - Modular shell script architecture for release generation
+  - Improved error handling and validation
+  - Better logging and debug output
+  - Cross-platform compatibility improvements
 ```
 
-### Enhanced Agent Workflow Process:
+---
 
-**Phase 1: Version Management**
+**END OF AGENTS.MD**
 
-```bash
-# Check current version synchronization
-./scripts/cicd/local-cd.sh --check-versions
-
-# Update version programmatically if needed
-./scripts/cicd/local-cd.sh --update-version 0.0.X
-```
-
-**Phase 2: Validation**
-
-```bash
-# Validate all changes without deployment
-./scripts/cicd/local-ci.sh
-```
-
-**Phase 3: Documentation (MANDATORY)**
-
-1. **Update CHANGELOG.md** - Add detailed entry for current version
-2. **Review external documentation** - Update https://ba-calderonmorales.github.io/my-life-as-a-dev/projects/active/terminal-jarvis/
-3. **Update README.md** - Ensure consistency with changes
-
-**Phase 4: Deployment**
-
-```bash
-# Deploy with controlled workflow
-./scripts/cicd/local-cd.sh
-```
-
-**Why Enhanced Workflow Matters:**
-
-- **Controlled deployment**: Separate validation from deployment
-- **Version consistency**: Programmatic management prevents human error
-- **Quality assurance**: CI validation catches issues before deployment
-- **Documentation completeness**: Enforced CHANGELOG.md and external docs updates
-- **Flexibility**: Choose validation vs deployment vs combined approach
-
-**Agent Instructions:**
-
-- **ALWAYS use enhanced workflow** - Prefer controlled approach over one-shot deployments
-- **NEVER skip CHANGELOG.md update** - Required before any deployment
-- **USE programmatic version management** - `--update-version` instead of manual editing
-- **VALIDATE before deployment** - Always run `./scripts/cicd/local-ci.sh` first
-
-## Testing NPM Package Before Publishing
-
-**ALWAYS** test the NPM package locally before publishing to catch issues early:
-
-1. **Build and Pack the Package:**
-
-   ```bash
-   cd npm/terminal-jarvis
-   npm run build
-   npm pack
-   ```
-
-2. **Test Installation in Temporary Environment:**
-
-   ```bash
-   # Create clean test environment
-   cd /tmp
-   mkdir -p test-terminal-jarvis && cd test-terminal-jarvis
-   npm init -y
-
-   # Install from local tarball
-   npm install /path/to/terminal-jarvis-X.X.X.tgz
-
-   # Test the binary directly
-   npx terminal-jarvis --help
-   npx terminal-jarvis list
-
-   # Test multiple runs to verify NPX caching works
-   npx terminal-jarvis --help  # Should not re-download
-   ```
-
-3. **Verify Package Contents:**
-
-   ```bash
-   # Check what gets included in the package
-   npm pack --dry-run
-
-   # Verify binary permissions and functionality
-   ls -la node_modules/terminal-jarvis/bin/
-   ./node_modules/terminal-jarvis/bin/terminal-jarvis --help
-   ```
-
-4. **Test Different Installation Methods:**
-
-   ```bash
-   # Test global installation
-   npm install -g ./terminal-jarvis-X.X.X.tgz
-   terminal-jarvis --help
-
-   # Test npx from registry (after publishing)
-   npx terminal-jarvis@X.X.X --help
-   ```
-
-**Common Issues to Check:**
-
-- Binary has correct permissions (`chmod +x`)
-- Package.json bin entry points to correct file
-- Postinstall scripts have proper escaping
-- All required files included in `files` array
-- Version numbers are consistent across all files
-
-**Benefits of This Process:**
-
-- Catches binary execution issues before publishing
-- Verifies NPX caching behavior
-- Tests installation process end-to-end
-- Prevents publishing broken packages
-- Saves time debugging after publication
-
-**Package Size Considerations:**
-
-- Current package size is ~1.2MB compressed / ~2.9MB unpacked due to bundled Rust binary
-- This ensures immediate functionality without requiring Rust toolchain installation
-- Single generic binary works across platforms via NPM's bin configuration
-- **Future optimization opportunities:**
-  - Platform-specific packages to reduce download size further
-  - Binary compression techniques
-  - Splitting debug symbols
-  - On-demand binary downloading
-- Current approach prioritizes user experience over package size (optimized base case)
-
-## Technical Notes
-
-- The API modules (`api.rs`, `api_client.rs`, etc.) are framework code for future use
-- They have `#[allow(dead_code)]` attributes since they're not used yet
-- Configuration system uses TOML files for per-tool settings
-- NPM package is just a thin wrapper around the Rust binary
+Navigation: Use Ctrl+F to search | All headers are anchor links | Critical sections at top

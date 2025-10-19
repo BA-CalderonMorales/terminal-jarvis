@@ -15,7 +15,7 @@ use std::path::PathBuf;
 use std::pin::Pin;
 
 #[cfg(feature = "local-voice")]
-use crate::security::{SecurityManager, SecurityError};
+use crate::security::{SecurityError, SecurityManager};
 
 #[cfg(feature = "local-voice")]
 /// Local Whisper provider using whisper.cpp (SECURE VERSION)
@@ -48,8 +48,14 @@ impl LocalWhisperProvider {
     async fn get_verified_model_path() -> Result<PathBuf> {
         // SECURITY: Only use manually verified local models
         let possible_paths = vec![
-            // Check common secure locations first
+            // Prefer whisper-tiny.en (recommended, 75 MB)
+            PathBuf::from("./models/ggml-tiny.en.bin"),
+            PathBuf::from("./models/whisper-tiny.en.bin"),
             PathBuf::from("./models/ggml-tiny.en.bin.verified"),
+            // Fallback to base model (142 MB)
+            PathBuf::from("./models/ggml-base.en.bin"),
+            PathBuf::from("./models/whisper-base.en.bin"),
+            // Legacy paths
             PathBuf::from("./config/whisper-model.bin.verified"),
             PathBuf::from("./models/whisper-tiny.bin"),
         ];
@@ -61,7 +67,10 @@ impl LocalWhisperProvider {
                     println!("[SECURITY] Using verified local model: {}", path.display());
                     return Ok(path.clone());
                 } else {
-                    eprintln!("[SECURITY WARNING] Model failed integrity check: {}", path.display());
+                    eprintln!(
+                        "[SECURITY WARNING] Model failed integrity check: {}",
+                        path.display()
+                    );
                 }
             }
         }
@@ -70,39 +79,67 @@ impl LocalWhisperProvider {
         Err(anyhow!(
             "No verified whisper model found. Auto-download disabled for security.\n\
              \n\
-             To use on-device voice recognition (recommended for privacy):\n\
+             [RECOMMENDED] OpenAI Whisper Tiny (100% open source, no API key):\n\
              \n\
-             1. Download a Whisper model (one-time setup):\n\
-                - Tiny (fastest, 75 MB): https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-tiny.en.bin\n\
-                - Base (balanced, 142 MB): https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-base.en.bin\n\
-                - Small (best quality, 466 MB): https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-small.en.bin\n\
+             Download the OpenAI Whisper Tiny model (one-time, 75 MB):\n\
              \n\
-             2. Place the model in one of these locations:\n\
-                - ./models/whisper-tiny.bin (or base/small)\n\
-                - ./config/whisper-model.bin.verified (with .verified for extra security)\n\
+             curl -L -o ./models/ggml-tiny.en.bin \\\n\
+               https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-tiny.en.bin\n\
              \n\
-             3. Models with .verified extension get additional security checks\n\
+             This model is:\n\
+             - MIT Licensed (truly open source)\n\
+             - From OpenAI (verified, trusted creators)\n\
+             - 75 MB download (lightweight)\n\
+             - Fully offline after download (no API key ever)\n\
+             - Most popular ASR on HuggingFace\n\
              \n\
-             Alternative: Set OPENAI_API_KEY to use cloud-based voice recognition"
+             Alternative models (if you need better accuracy):\n\
+             - Base (142 MB): https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-base.en.bin\n\
+             - Small (466 MB): https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-small.en.bin\n\
+             \n\
+             Supported locations:\n\
+             - ./models/ggml-tiny.en.bin (recommended)\n\
+             - ./models/whisper-tiny.en.bin\n\
+             - ./models/ggml-base.en.bin (better accuracy)\n\
+             \n\
+             For extra security, rename to .verified:\n\
+             - ./models/ggml-tiny.en.bin.verified\n\
+             \n\
+             [INFO] No cloud API needed - this runs 100% offline on your device"
         ))
     }
 
     /// Verify model file integrity before use
     fn verify_model_integrity(path: &PathBuf) -> Result<bool> {
         // Basic safety checks
-        let metadata = std::fs::metadata(path)
-            .map_err(|_| anyhow!("Cannot read model metadata"))?;
+        let metadata =
+            std::fs::metadata(path).map_err(|_| anyhow!("Cannot read model metadata"))?;
 
-        // Check reasonable size (10MB - 1GB for whisper models)
-        if metadata.len() < 10_000_000 || metadata.len() > 1_000_000_000 {
-            eprintln!("[SECURITY] Model size unreasonable: {} bytes", metadata.len());
+        // Check reasonable size for whisper models:
+        // - tiny: 75 MB
+        // - base: 142 MB
+        // - small: 466 MB
+        // - medium: 1.5 GB
+        // Allow range: 50 MB - 2 GB
+        let min_size = 50_000_000; // 50 MB
+        let max_size = 2_000_000_000; // 2 GB
+
+        if metadata.len() < min_size || metadata.len() > max_size {
+            eprintln!(
+                "[SECURITY] Model size unreasonable: {} bytes (expected 50MB-2GB for Whisper models)",
+                metadata.len()
+            );
             return Ok(false);
         }
+
+        // Log model size for transparency
+        let size_mb = metadata.len() / 1_000_000;
+        println!("[SECURITY] Model size: {} MB", size_mb);
 
         // Check file extension for .verified models
         if let Some(extension) = path.extension() {
             if extension == "verified" {
-                println!("[SECURITY] Model has .verified extension - good sign");
+                println!("[SECURITY] Model has .verified extension - extra security enabled");
             }
         }
 
@@ -153,18 +190,17 @@ impl LocalWhisperProvider {
 
         // SECURITY: Use hardcoded, safe recording commands only
         let recording_command = self.get_safe_recording_command(&audio_file, duration_secs);
-        
+
         // SECURITY: Validate the recording command components
         let command_parts: Vec<String> = recording_command
             .split_whitespace()
             .map(|s| s.to_string())
             .collect();
-        
+
         if let Some(base_cmd) = command_parts.first() {
-            self.security_manager.validate_command_execution(
-                base_cmd, 
-                &command_parts[1..]
-            ).map_err(|e| anyhow!("Security validation failed: {}", e))?;
+            self.security_manager
+                .validate_command_execution(base_cmd, &command_parts[1..])
+                .map_err(|e| anyhow!("Security validation failed: {}", e))?;
         } else {
             return Err(anyhow!("Invalid recording command generated"));
         }
@@ -223,24 +259,29 @@ impl LocalWhisperProvider {
             params.set_print_realtime(false);
             params.set_print_timestamps(false);
 
-            let mut state = ctx.create_state()
+            let mut state = ctx
+                .create_state()
                 .map_err(|e| anyhow!("Failed to create whisper state: {}", e))?;
 
-            state.full(params, &audio_data)
+            state
+                .full(params, &audio_data)
                 .map_err(|e| anyhow!("Transcription failed: {}", e))?;
 
-            let num_segments = state.full_n_segments()
+            let num_segments = state
+                .full_n_segments()
                 .map_err(|e| anyhow!("Failed to get segments: {}", e))?;
 
             let mut text = String::new();
             for i in 0..num_segments {
-                let segment = state.full_get_segment_text(i)
+                let segment = state
+                    .full_get_segment_text(i)
                     .map_err(|e| anyhow!("Failed to get segment text: {}", e))?;
                 text.push_str(&segment);
             }
 
             Ok::<String, anyhow::Error>(text.trim().to_string())
-        }).await??;
+        })
+        .await??;
 
         println!("[TRANSCRIBED] \"{}\"", transcription);
 
@@ -338,7 +379,7 @@ impl VoiceInputProvider for LocalWhisperProvider {
     }
 
     fn provider_name(&self) -> &str {
-        "Local Whisper (whisper.cpp)"
+        "OpenAI Whisper Tiny (Local, No API Key)"
     }
 
     fn estimated_tokens_per_second(&self) -> Option<u64> {
