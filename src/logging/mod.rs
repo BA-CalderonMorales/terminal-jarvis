@@ -4,5 +4,5 @@
 pub mod audit;
 pub mod security;
 
-pub use audit::{AuditLogger, LogEntry, LogLevel, LogCategory};
-pub use security::{SecurityLogger, SecurityEvent};
+pub use audit::{AuditLogger, LogCategory, LogEntry, LogLevel};
+pub use security::{SecurityEvent, SecurityLogger};

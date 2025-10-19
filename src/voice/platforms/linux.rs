@@ -12,24 +12,24 @@ use tokio::fs;
 /// Capture audio on Linux using available audio tools
 pub async fn capture_audio(duration: Duration, output_path: &PathBuf) -> Result<()> {
     let duration_secs = duration.as_secs();
-    
+
     println!("Listening... ({}s)", duration_secs);
-    
+
     // Try arecord (ALSA) first - most common on Linux
     if is_command_available("arecord").await {
         return capture_with_arecord(duration_secs, output_path).await;
     }
-    
+
     // Try parecord (PulseAudio) as fallback
     if is_command_available("parecord").await {
         return capture_with_parecord(duration_secs, output_path).await;
     }
-    
+
     // Try ffmpeg as another fallback
     if is_command_available("ffmpeg").await {
         return capture_with_ffmpeg(duration_secs, output_path).await;
     }
-    
+
     Err(anyhow!(
         "No audio capture tool found on Linux.\n\
          Please install one of the following:\n\
@@ -43,10 +43,14 @@ pub async fn capture_audio(duration: Duration, output_path: &PathBuf) -> Result<
 async fn capture_with_arecord(duration_secs: u64, output_path: &PathBuf) -> Result<()> {
     let output = tokio::process::Command::new("arecord")
         .args(&[
-            "-f", "S16_LE",           // 16-bit signed little-endian
-            "-c", "1",                // Mono
-            "-r", "16000",            // 16kHz sample rate (good for speech)
-            "-d", &duration_secs.to_string(),
+            "-f",
+            "S16_LE", // 16-bit signed little-endian
+            "-c",
+            "1", // Mono
+            "-r",
+            "16000", // 16kHz sample rate (good for speech)
+            "-d",
+            &duration_secs.to_string(),
             output_path.to_str().unwrap(),
         ])
         .output()
@@ -94,12 +98,17 @@ async fn capture_with_parecord(duration_secs: u64, output_path: &PathBuf) -> Res
 async fn capture_with_ffmpeg(duration_secs: u64, output_path: &PathBuf) -> Result<()> {
     let output = tokio::process::Command::new("ffmpeg")
         .args(&[
-            "-f", "pulse",            // Use PulseAudio
-            "-i", "default",          // Default audio input
-            "-t", &duration_secs.to_string(),
-            "-ar", "16000",           // 16kHz sample rate
-            "-ac", "1",               // Mono
-            "-y",                     // Overwrite output file
+            "-f",
+            "pulse", // Use PulseAudio
+            "-i",
+            "default", // Default audio input
+            "-t",
+            &duration_secs.to_string(),
+            "-ar",
+            "16000", // 16kHz sample rate
+            "-ac",
+            "1",  // Mono
+            "-y", // Overwrite output file
             output_path.to_str().unwrap(),
         ])
         .output()

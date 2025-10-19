@@ -10,9 +10,9 @@ use std::time::Duration;
 /// Listen for speech directly using Windows Speech Recognition (no audio file needed)
 pub async fn listen_windows_direct(duration: Duration) -> Result<String> {
     let duration_secs = duration.as_secs();
-    
+
     println!("Listening... ({}s)", duration_secs);
-    
+
     // Use Windows Speech Recognition with better accuracy and fuzzy matching
     let ps_script = format!(
         r#"

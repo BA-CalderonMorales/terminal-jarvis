@@ -198,7 +198,7 @@ async fn handle_manage_tools_menu() -> Result<()> {
 
 /// Handle voice input with smart listening and professional feedback
 async fn handle_voice_input() -> Option<String> {
-    use crate::voice::{VoiceListenerFactory, VoiceCommand};
+    use crate::voice::{VoiceCommand, VoiceListenerFactory};
 
     // Try to create voice listener
     let listener = match VoiceListenerFactory::create_default_listener().await {
@@ -207,7 +207,9 @@ async fn handle_voice_input() -> Option<String> {
             println!("\n[VOICE SETUP REQUIRED]");
             println!("{}", e);
             println!("\n[OPTION 1] Cloud API (Recommended - Easy Setup):");
-            println!("  Set OPENAI_API_KEY environment variable for cloud-based voice recognition.");
+            println!(
+                "  Set OPENAI_API_KEY environment variable for cloud-based voice recognition."
+            );
             println!("  Configure in Terminal Jarvis authentication menu (/auth command).");
             println!();
             println!("[OPTION 2] Local Voice Recognition (Privacy-Focused):");
@@ -216,7 +218,9 @@ async fn handle_voice_input() -> Option<String> {
             println!();
             println!("  Requirements:");
             println!("  - Build Terminal Jarvis with: cargo install terminal-jarvis --features local-voice");
-            println!("  - Install LLVM/Clang for compilation (see terminal-jarvis.github.io for guide)");
+            println!(
+                "  - Install LLVM/Clang for compilation (see terminal-jarvis.github.io for guide)"
+            );
             println!("  - Download a Whisper model (ggml-tiny.en.bin from HuggingFace)");
             println!("  - Install audio tools (alsa-utils/sox/ffmpeg)");
             println!();
@@ -235,45 +239,45 @@ async fn handle_voice_input() -> Option<String> {
     };
 
     if is_ready {
-            // System ready, listen for command
-            match listener.listen_for_command().await {
-                Ok(Some(command)) => {
-                    // Map voice command to menu selection
-                    match command {
-                        VoiceCommand::OpenAITools => Some("AI CLI Tools".to_string()),
-                        VoiceCommand::OpenAuthentication => Some("Authentication".to_string()),
-                        VoiceCommand::OpenSettings => Some("Settings".to_string()),
-                        VoiceCommand::OpenEvals => Some("Evals & Comparisons".to_string()),
-                        VoiceCommand::OpenLinks => Some("Important Links".to_string()),
-                        VoiceCommand::Exit => Some("Exit".to_string()),
-                        VoiceCommand::ShowHelp | VoiceCommand::ShowVoiceHelp => {
-                            // Show voice commands help
-                            let feedback = crate::voice::VoiceFeedback::new();
-                            feedback.show_commands_help();
-                            None
-                        }
-                        VoiceCommand::Cancel | VoiceCommand::GoBack => None,
-                        VoiceCommand::Unknown { raw_text } => {
-                            println!("\n[UNKNOWN] Could not understand: '{}'", raw_text);
-                            println!("Say 'help' or 'commands' to see available voice commands.");
-                            None
-                        }
-                        _ => {
-                            println!("\n[INFO] That command is not available in this menu.");
-                            println!("Try: 'open ai tools', 'open settings', 'open authentication'");
-                            None
-                        }
+        // System ready, listen for command
+        match listener.listen_for_command().await {
+            Ok(Some(command)) => {
+                // Map voice command to menu selection
+                match command {
+                    VoiceCommand::OpenAITools => Some("AI CLI Tools".to_string()),
+                    VoiceCommand::OpenAuthentication => Some("Authentication".to_string()),
+                    VoiceCommand::OpenSettings => Some("Settings".to_string()),
+                    VoiceCommand::OpenEvals => Some("Evals & Comparisons".to_string()),
+                    VoiceCommand::OpenLinks => Some("Important Links".to_string()),
+                    VoiceCommand::Exit => Some("Exit".to_string()),
+                    VoiceCommand::ShowHelp | VoiceCommand::ShowVoiceHelp => {
+                        // Show voice commands help
+                        let feedback = crate::voice::VoiceFeedback::new();
+                        feedback.show_commands_help();
+                        None
+                    }
+                    VoiceCommand::Cancel | VoiceCommand::GoBack => None,
+                    VoiceCommand::Unknown { raw_text } => {
+                        println!("\n[UNKNOWN] Could not understand: '{}'", raw_text);
+                        println!("Say 'help' or 'commands' to see available voice commands.");
+                        None
+                    }
+                    _ => {
+                        println!("\n[INFO] That command is not available in this menu.");
+                        println!("Try: 'open ai tools', 'open settings', 'open authentication'");
+                        None
                     }
                 }
-                Ok(None) => {
-                    println!("\n[INFO] No command recognized. Try again.");
-                    None
-                }
-                Err(e) => {
-                    println!("\n[ERROR] Voice recognition failed: {}", e);
-                    None
-                }
             }
+            Ok(None) => {
+                println!("\n[INFO] No command recognized. Try again.");
+                None
+            }
+            Err(e) => {
+                println!("\n[ERROR] Voice recognition failed: {}", e);
+                None
+            }
+        }
     } else {
         println!("\n[!][WARNING] Voice provider not ready");
         println!("[i][INFO] Possible reasons:");

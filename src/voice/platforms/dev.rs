@@ -15,17 +15,17 @@ pub async fn is_dev_environment() -> bool {
     if std::env::var("CODESPACES").is_ok() {
         return true;
     }
-    
+
     // Check for other cloud development environments
     if std::env::var("GITPOD_WORKSPACE_ID").is_ok() {
         return true;
     }
-    
+
     // Check if running in Docker/container without audio
     if is_container_without_audio().await {
         return true;
     }
-    
+
     false
 }
 
@@ -37,11 +37,11 @@ async fn is_container_without_audio() -> bool {
             .ok()
             .map(|s| s.contains("docker") || s.contains("lxc"))
             .unwrap_or(false);
-    
+
     if !in_container {
         return false;
     }
-    
+
     // Check if audio devices are available on Linux
     #[cfg(target_os = "linux")]
     {
@@ -51,10 +51,10 @@ async fn is_container_without_audio() -> bool {
                 .ok()
                 .map(|content| !content.trim().is_empty() && !content.contains("no soundcards"))
                 .unwrap_or(false);
-        
+
         return !has_sound_cards;
     }
-    
+
     #[cfg(not(target_os = "linux"))]
     {
         // On other platforms in containers, assume no audio
@@ -68,24 +68,24 @@ pub async fn simulate_voice_input(_duration: Duration) -> Result<String> {
     println!("\n[DEV MODE] Voice simulation active (no audio hardware detected)");
     println!("[DEV MODE] GitHub Codespaces detected - using text-based input");
     println!();
-    
+
     // Prompt for text input instead of voice
     print!("Enter voice command (text): ");
     io::stdout().flush()?;
-    
+
     let mut input = String::new();
     io::stdin().read_line(&mut input)?;
-    
+
     let command = input.trim().to_string();
-    
+
     if command.is_empty() {
         return Err(anyhow!("No input provided"));
     }
-    
+
     // Simulate processing delay
     println!("[DEV MODE] Simulating transcription...");
     tokio::time::sleep(tokio::time::Duration::from_millis(500)).await;
-    
+
     Ok(command)
 }
 
@@ -103,11 +103,11 @@ mod tests {
     async fn test_codespaces_detection() {
         // Save original env
         let original = std::env::var("CODESPACES").ok();
-        
+
         // Test with CODESPACES set
         std::env::set_var("CODESPACES", "true");
         assert!(is_dev_environment().await);
-        
+
         // Restore original env
         if let Some(val) = original {
             std::env::set_var("CODESPACES", val);
@@ -120,11 +120,11 @@ mod tests {
     async fn test_gitpod_detection() {
         // Save original env
         let original = std::env::var("GITPOD_WORKSPACE_ID").ok();
-        
+
         // Test with GITPOD set
         std::env::set_var("GITPOD_WORKSPACE_ID", "test-workspace");
         assert!(is_dev_environment().await);
-        
+
         // Restore original env
         if let Some(val) = original {
             std::env::set_var("GITPOD_WORKSPACE_ID", val);

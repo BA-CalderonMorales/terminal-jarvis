@@ -1,10 +1,10 @@
 // Security Logging Module - Specialized Security Event Logging
 // Provides focused logging for security events and monitoring
 
+use anyhow::Result;
+use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
-use chrono::{DateTime, Utc};
-use anyhow::Result;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct SecurityEvent {
@@ -263,17 +263,17 @@ impl SecurityLogger {
 
     fn write_to_file(&self, event: &SecurityEvent, path: &std::path::Path) -> Result<()> {
         use std::io::Write;
-        
+
         std::fs::create_dir_all(path.parent().unwrap())?;
-        
+
         let mut file = std::fs::OpenOptions::new()
             .create(true)
             .append(true)
             .open(path)?;
-        
+
         let line = serde_json::to_string(event)?;
         writeln!(file, "{}", line)?;
-        
+
         Ok(())
     }
 
@@ -286,7 +286,7 @@ impl SecurityLogger {
         };
 
         let status = if event.blocked { "BLOCKED" } else { "ALLOWED" };
-        
+
         eprintln!(
             "{} [SECURITY] {} {} - {} ({})",
             event.timestamp.format("%Y-%m-%d %H:%M:%S UTC"),
@@ -303,27 +303,30 @@ impl SecurityLogger {
         } else {
             0
         };
-        
+
         &self.events[start..]
     }
 
     pub fn get_events_by_type(&self, event_type: &SecurityEventType) -> Vec<&SecurityEvent> {
-        self.events.iter()
-            .filter(|event| std::mem::discriminant(&event.event_type) == std::mem::discriminant(event_type))
+        self.events
+            .iter()
+            .filter(|event| {
+                std::mem::discriminant(&event.event_type) == std::mem::discriminant(event_type)
+            })
             .collect()
     }
 
     pub fn get_security_status(&self) -> serde_json::Value {
         let total_events = self.events.len();
         let blocked_events = self.events.iter().filter(|e| e.blocked).count();
-        
+
         let mut type_counts = HashMap::new();
         let mut severity_counts = HashMap::new();
 
         for event in &self.events {
             let type_key = format!("{:?}", event.event_type);
             let severity_key = format!("{:?}", event.severity);
-            
+
             *type_counts.entry(type_key).or_insert(0) += 1;
             *severity_counts.entry(severity_key).or_insert(0) += 1;
         }
@@ -376,11 +379,11 @@ mod tests {
     #[test]
     fn test_security_logger() {
         let mut logger = SecurityLogger::new();
-        
+
         logger.log_validation_attempt("test_input", "test_context");
-        
+
         assert_eq!(logger.events.len(), 1);
-        
+
         let events = logger.get_recent_events(10);
         assert_eq!(events.len(), 1);
     }

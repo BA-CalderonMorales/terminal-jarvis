@@ -3,8 +3,8 @@
 
 use anyhow::Result;
 use regex::Regex;
-use std::collections::HashSet;
 use serde::{Deserialize, Serialize};
+use std::collections::HashSet;
 
 #[derive(Debug, Clone)]
 pub struct SecurityError {
@@ -51,7 +51,6 @@ impl Default for SecurityConfig {
                 "su".to_string(),
                 "chmod".to_string(),
                 "chown".to_string(),
-                
                 // Network/download commands
                 "wget".to_string(),
                 "curl".to_string(),
@@ -61,11 +60,9 @@ impl Default for SecurityConfig {
                 "scp".to_string(),
                 "rsync".to_string(),
                 "git".to_string(),
-                
                 // Container/orchestration
                 "docker".to_string(),
                 "kubectl".to_string(),
-                
                 // Browser protocols - CRITICAL for ecosystem security
                 "chrome://".to_string(),
                 "chrome-extension://".to_string(),
@@ -84,7 +81,6 @@ impl Default for SecurityConfig {
                 "tor://".to_string(),
                 "chromium://".to_string(),
                 "ms-browser-extension://".to_string(),
-                
                 // Internal app protocols
                 "app://".to_string(),
                 "application://".to_string(),
@@ -93,7 +89,6 @@ impl Default for SecurityConfig {
                 "mailto:".to_string(),
                 "tel:".to_string(),
                 "sms:".to_string(),
-                
                 // System commands
                 ";".to_string(),
                 "&&".to_string(),
@@ -110,13 +105,11 @@ impl Default for SecurityConfig {
                 "sh".to_string(),
                 "zsh".to_string(),
                 "fish".to_string(),
-                
                 // Windows specific
                 "powershell://".to_string(),
                 "ms-settings:".to_string(),
                 "windows:".to_string(),
                 "microsoft-edge:".to_string(),
-                
                 // Browser configuration keywords (attacks you observed)
                 "default-search".to_string(),
                 "search-engine".to_string(),
@@ -154,15 +147,13 @@ impl SecurityValidator {
     }
 
     pub fn with_config(config: SecurityConfig) -> Self {
-        let blocked_patterns: Vec<Regex> = config.blocked_keywords
+        let blocked_patterns: Vec<Regex> = config
+            .blocked_keywords
             .iter()
             .filter_map(|keyword| Regex::new(&format!(r"(?i){}", regex::escape(keyword))).ok())
             .collect();
 
-        let command_allowlist: HashSet<String> = config.allowed_commands
-            .iter()
-            .cloned()
-            .collect();
+        let command_allowlist: HashSet<String> = config.allowed_commands.iter().cloned().collect();
 
         Self {
             config,
@@ -176,7 +167,11 @@ impl SecurityValidator {
         // Length check
         if input.len() > self.config.max_input_length {
             return Err(SecurityError {
-                message: format!("Input length {} exceeds maximum {}", input.len(), self.config.max_input_length),
+                message: format!(
+                    "Input length {} exceeds maximum {}",
+                    input.len(),
+                    self.config.max_input_length
+                ),
                 code: SecurityErrorCode::LengthExceeded,
             });
         }
@@ -246,7 +241,9 @@ impl SecurityValidator {
         }
 
         // Check if path starts with allowed base paths
-        let is_allowed = self.config.allowed_paths
+        let is_allowed = self
+            .config
+            .allowed_paths
             .iter()
             .any(|allowed_path| path.starts_with(allowed_path));
 
@@ -268,21 +265,18 @@ impl SecurityValidator {
             r"(?i)\$\(.*\)",
             r"`.*`",
             r"(?i)\b(eval|exec|system)\s*\(",
-            
             // Browser and URL hijacking patterns - CRITICAL for all users
-            r"(?i)[a-z_-]*://",                    // ANY protocol (block all, only allow http/https in specific context)
-            r"(?i)\b(open|start|xdg-open)\s+",     // Cross-platform command to open URLs
+            r"(?i)[a-z_-]*://", // ANY protocol (block all, only allow http/https in specific context)
+            r"(?i)\b(open|start|xdg-open)\s+", // Cross-platform command to open URLs
             r"(?i)\b(browser|chrome|firefox|edge|safari|opera|brave|vivaldi|tor)\s+", // Browser commands
             r"(?i)\b(window\.open|location\.href|document\.location)", // JavaScript browser APIs
-            r"(?i)\b(navigate|redirect|goto|visit)\s+",  // Navigation keywords
-            
+            r"(?i)\b(navigate|redirect|goto|visit)\s+",                // Navigation keywords
             // System-level browser automation
             r"(?i)\b(selenium|webdriver|playwright|puppeteer)\s+", // Browser automation tools
-            r"(?i)\b(automation|script|macro)\s+",         // General automation
-            
+            r"(?i)\b(automation|script|macro)\s+",                 // General automation
             // Cross-platform executable detection
             r"(?i)\.(exe|bat|cmd|ps1|sh|zsh|fish|bash)$", // Executable files
-            r"(?i)\b(run|execute|launch|start)\s+",        // Execution verbs
+            r"(?i)\b(run|execute|launch|start)\s+",       // Execution verbs
         ];
 
         for pattern in dangerous_patterns {
@@ -306,7 +300,7 @@ impl SecurityValidator {
     fn validate_model_name_input(&self, input: &str) -> Result<bool, SecurityError> {
         // Only allow alphanumeric, hyphens, underscores, and dots in model names
         let model_pattern = Regex::new(r"^[a-zA-Z0-9._-]+$").unwrap();
-        
+
         if !model_pattern.is_match(input) {
             return Err(SecurityError {
                 message: "Model name contains invalid characters".to_string(),
@@ -328,18 +322,30 @@ impl SecurityValidator {
 
         // Block ALL internal/special URLs - CRITICAL for ecosystem security
         let blocked_domains = vec![
-            "localhost", "127.0.0.1", "0.0.0.0", "::1",       // Local addresses
-            "192.168.", "10.", "172.16.", "169.254.",        // Private networks
-            "chrome.google.com",                         // Chrome extension store
-            "addons.mozilla.org",                        // Firefox extension store
-            "microsoftedge.microsoft.com",               // Edge extension store
-            "chrome://", "edge://", "firefox://", "about:", // Internal protocols
+            "localhost",
+            "127.0.0.1",
+            "0.0.0.0",
+            "::1", // Local addresses
+            "192.168.",
+            "10.",
+            "172.16.",
+            "169.254.",                    // Private networks
+            "chrome.google.com",           // Chrome extension store
+            "addons.mozilla.org",          // Firefox extension store
+            "microsoftedge.microsoft.com", // Edge extension store
+            "chrome://",
+            "edge://",
+            "firefox://",
+            "about:", // Internal protocols
         ];
 
         for blocked in &blocked_domains {
             if input.contains(blocked) {
                 return Err(SecurityError {
-                    message: format!("Blocked URL contains dangerous domain/protocol: {}", blocked),
+                    message: format!(
+                        "Blocked URL contains dangerous domain/protocol: {}",
+                        blocked
+                    ),
                     code: SecurityErrorCode::InvalidInput,
                 });
             }
@@ -349,9 +355,9 @@ impl SecurityValidator {
         let suspicious_patterns = vec![
             r"(?i)(extension|addon|theme|plugin).*\.(com|org|net)",
             r"(?i)(malware|phishing|exploit|inject).*\.(com|org|net)",
-            r"(?i)(bit\.ly|tinyurl|t\.co|short\.io)",            // URL shorteners (often malicious)
-            r"(?i)(pastebin|gist).*\.(com|io)",                  // Code sharing (potential malware delivery)
-            r"(?i)\.tk$|\.ml$|\.ga$",                           // Suspicious TLDs
+            r"(?i)(bit\.ly|tinyurl|t\.co|short\.io)", // URL shorteners (often malicious)
+            r"(?i)(pastebin|gist).*\.(com|io)",       // Code sharing (potential malware delivery)
+            r"(?i)\.tk$|\.ml$|\.ga$",                 // Suspicious TLDs
         ];
 
         for pattern in suspicious_patterns {
@@ -401,12 +407,12 @@ mod browser_protection_tests {
     #[test]
     fn test_chrome_attacks_blocked() {
         let validator = SecurityValidator::new();
-        
+
         // The exact attacks you observed
         let attacks = vec![
             "chrome://settings/searchEngines",
             "chrome://extensions",
-            "edge://settings", 
+            "edge://settings",
             "firefox://about:config",
             "default-search",
         ];
@@ -427,21 +433,23 @@ mod tests {
     #[test]
     fn test_blocked_keywords() {
         let validator = SecurityValidator::new();
-        
+
         // Should block dangerous commands
         assert!(validator.validate_input("rm -rf /", "command").is_err());
         assert!(validator.validate_input("sudo ls", "command").is_err());
-        assert!(validator.validate_input("curl http://evil.com", "command").is_err());
+        assert!(validator
+            .validate_input("curl http://evil.com", "command")
+            .is_err());
     }
 
     #[test]
     fn test_allowed_commands() {
         let validator = SecurityValidator::new();
-        
+
         // Should allow safe commands
         assert!(validator.validate_command("help", &[]).is_ok());
         assert!(validator.validate_command("status", &[]).is_ok());
-        
+
         // Should block unallowed commands
         assert!(validator.validate_command("rm", &[]).is_err());
     }
@@ -449,22 +457,30 @@ mod tests {
     #[test]
     fn test_path_validation() {
         let validator = SecurityValidator::new();
-        
+
         // Should block path traversal
-        assert!(validator.validate_input("../../../etc/passwd", "path").is_err());
+        assert!(validator
+            .validate_input("../../../etc/passwd", "path")
+            .is_err());
         assert!(validator.validate_input("~/.ssh/id_rsa", "path").is_err());
     }
 
     #[test]
     fn test_model_name_validation() {
         let validator = SecurityValidator::new();
-        
+
         // Should allow valid model names
         assert!(validator.validate_input("model-v1.0", "model_name").is_ok());
-        assert!(validator.validate_input("whisper_tiny", "model_name").is_ok());
-        
+        assert!(validator
+            .validate_input("whisper_tiny", "model_name")
+            .is_ok());
+
         // Should block invalid model names
-        assert!(validator.validate_input("model;rm -rf /", "model_name").is_err());
-        assert!(validator.validate_input("../../../malicious", "model_name").is_err());
+        assert!(validator
+            .validate_input("model;rm -rf /", "model_name")
+            .is_err());
+        assert!(validator
+            .validate_input("../../../malicious", "model_name")
+            .is_err());
     }
 }

@@ -8,23 +8,31 @@
 // Platform-specific implementations are in src/voice/platforms/
 
 mod voice_command;
+mod voice_native_provider;
 mod voice_provider;
 mod voice_smart_listening;
 mod voice_whisper_provider;
-mod voice_native_provider;
 
 #[cfg(feature = "local-voice")]
 mod voice_local_whisper_provider;
+
+#[cfg(feature = "vosk-voice")]
+mod voice_vosk_provider;
 
 // Platform-specific implementations
 mod platforms;
 
 // Re-export public interfaces
 pub use voice_command::{VoiceCommand, VoiceCommandParser};
-pub use voice_provider::{VoiceInputProvider, VoiceProviderConfig, VoiceRecognitionResult};
-pub use voice_smart_listening::{SmartVoiceListener, VoiceFeedback, VoiceFeedbackType, VoiceListenerFactory};
-pub use voice_whisper_provider::WhisperProvider;
 pub use voice_native_provider::NativeVoiceProvider;
+pub use voice_provider::{VoiceInputProvider, VoiceProviderConfig, VoiceRecognitionResult};
+pub use voice_smart_listening::{
+    SmartVoiceListener, VoiceFeedback, VoiceFeedbackType, VoiceListenerFactory,
+};
+pub use voice_whisper_provider::WhisperProvider;
 
 #[cfg(feature = "local-voice")]
 pub use voice_local_whisper_provider::LocalWhisperProvider;
+
+#[cfg(feature = "vosk-voice")]
+pub use voice_vosk_provider::VoskProvider;
