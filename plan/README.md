@@ -4,12 +4,26 @@ This folder contains phased development plans for future agent sessions. Each ph
 
 ## Quick Navigation
 
+### Tactical Phases (Current Sprint)
+
 | Phase | Focus | Status |
 |-------|-------|--------|
 | [Phase 1](phase-1-ux-streamlining.md) | UX Streamlining | COMPLETED |
 | [Phase 2](phase-2-voice-feature.md) | Voice Feature | DEFERRED |
 | [Phase 3](phase-3-testing-quality.md) | Testing & Quality | PENDING |
 | [Phase 4](phase-4-distribution.md) | Distribution & Release | PENDING |
+
+### Strategic Phases (Product Vision)
+
+| Phase | Focus | Status |
+|-------|-------|--------|
+| [Phase 5](phase-5-first-run-magic.md) | First-Run Experience | PENDING |
+| [Phase 6](phase-6-release-automation.md) | Release Automation | PENDING |
+| [Phase 7](phase-7-navigation-hardening.md) | Navigation Hardening | PENDING |
+| [Phase 8](phase-8-credential-intelligence.md) | Credential Intelligence | PENDING |
+| [Phase 9](phase-9-ecosystem-growth.md) | Ecosystem Growth | PENDING |
+
+See [STRATEGIC-ROADMAP.md](STRATEGIC-ROADMAP.md) for the product vision and guiding principles.
 
 ## Current State (2025-12-11)
 
