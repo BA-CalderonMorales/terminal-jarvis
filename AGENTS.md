@@ -325,6 +325,26 @@ Examples:
 - Run `npm run lint` and `npm run format` before committing
 - Follow existing patterns in npm/terminal-jarvis/
 
+### Test Structure
+
+| Location | Technology | Purpose | Command |
+|----------|------------|---------|---------|
+| `tests/` | Rust | Unit and integration tests | `cargo test` |
+| `e2e/` | TypeScript (Vitest + cli-testing-library) | End-to-end CLI tests | `cd e2e && npm test` |
+
+**E2E Test Setup:**
+```bash
+cd e2e
+npm install
+npm test          # Run all E2E tests
+npm test -- --watch  # Watch mode
+```
+
+**Key E2E Test Files:**
+- `e2e/helpers.ts` - CLI rendering and spawn utilities
+- `e2e/helpers/` - ANSI parsing, layout validation, width simulation
+- `e2e/*.test.ts` - Test suites (help, version, installation, themes, etc.)
+
 ---
 
 ## PRE-COMMIT CHECKLIST
@@ -346,7 +366,8 @@ Examples:
 - [ ] `cargo check` passes
 - [ ] `cargo clippy --all-targets --all-features -- -D warnings` passes
 - [ ] `cargo fmt --all` applied
-- [ ] `cargo test` passes (all tests green)
+- [ ] `cargo test` passes (all Rust tests green)
+- [ ] E2E tests pass (if modified): `cd e2e && npm test`
 
 ### Homebrew Integration (if updating version)
 
