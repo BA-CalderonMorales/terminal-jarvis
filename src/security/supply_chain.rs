@@ -101,19 +101,19 @@ impl SecureModelLoader {
         }
 
         // STEP 3: Download is BLOCKED - no auto-downloads allowed
-        return Err(SecurityError {
+        Err(SecurityError {
             message: format!(
                 "Auto-download disabled. Model '{}' must be manually verified and placed in cache.",
                 model_name
             ),
             code: SecurityErrorCode::BlockedKeyword,
-        });
+        })
     }
 
     /// Verify a cached model file
     fn verify_cached_model(
         &self,
-        path: &PathBuf,
+        path: &std::path::Path,
         expected_info: &ModelInfo,
     ) -> Result<bool, SecurityError> {
         // Check file size
@@ -133,17 +133,17 @@ impl SecureModelLoader {
         }
 
         // Verify signature (if implemented)
-        if !expected_info.signature.is_empty() {
-            if !self.verify_signature(path, &expected_info.signature)? {
-                return Ok(false);
-            }
+        if !expected_info.signature.is_empty()
+            && !self.verify_signature(path, &expected_info.signature)?
+        {
+            return Ok(false);
         }
 
         Ok(true)
     }
 
     /// Calculate SHA-256 hash of file
-    fn calculate_file_hash(&self, path: &PathBuf) -> Result<String, SecurityError> {
+    fn calculate_file_hash(&self, path: &std::path::Path) -> Result<String, SecurityError> {
         use sha2::{Digest, Sha256};
 
         let mut file = std::fs::File::open(path).map_err(|_| SecurityError {
@@ -172,7 +172,11 @@ impl SecureModelLoader {
     }
 
     /// Verify digital signature of model file
-    fn verify_signature(&self, _path: &PathBuf, _signature: &str) -> Result<bool, SecurityError> {
+    fn verify_signature(
+        &self,
+        _path: &std::path::Path,
+        _signature: &str,
+    ) -> Result<bool, SecurityError> {
         // Placeholder for signature verification
         // In production, this would use proper cryptographic verification
         Ok(true)
@@ -181,7 +185,7 @@ impl SecureModelLoader {
     /// Manually add a verified model to cache
     pub fn add_verified_model(
         &self,
-        source_path: &PathBuf,
+        source_path: &std::path::Path,
         model_name: &str,
         expected_info: ModelInfo,
     ) -> Result<(), SecurityError> {

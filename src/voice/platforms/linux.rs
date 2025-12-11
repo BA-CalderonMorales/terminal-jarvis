@@ -5,12 +5,11 @@
 // by capturing audio and transcribing it using available Whisper providers.
 
 use anyhow::{anyhow, Result};
-use std::path::PathBuf;
 use std::time::Duration;
 use tokio::fs;
 
 /// Capture audio on Linux using available audio tools
-pub async fn capture_audio(duration: Duration, output_path: &PathBuf) -> Result<()> {
+pub async fn capture_audio(duration: Duration, output_path: &std::path::Path) -> Result<()> {
     let duration_secs = duration.as_secs();
 
     println!("Listening... ({}s)", duration_secs);
@@ -40,9 +39,9 @@ pub async fn capture_audio(duration: Duration, output_path: &PathBuf) -> Result<
 }
 
 /// Capture audio using arecord (ALSA)
-async fn capture_with_arecord(duration_secs: u64, output_path: &PathBuf) -> Result<()> {
+async fn capture_with_arecord(duration_secs: u64, output_path: &std::path::Path) -> Result<()> {
     let output = tokio::process::Command::new("arecord")
-        .args(&[
+        .args([
             "-f",
             "S16_LE", // 16-bit signed little-endian
             "-c",
@@ -68,10 +67,10 @@ async fn capture_with_arecord(duration_secs: u64, output_path: &PathBuf) -> Resu
 }
 
 /// Capture audio using parecord (PulseAudio)
-async fn capture_with_parecord(duration_secs: u64, output_path: &PathBuf) -> Result<()> {
+async fn capture_with_parecord(duration_secs: u64, output_path: &std::path::Path) -> Result<()> {
     // parecord doesn't have a built-in duration limit, so we'll use timeout
     let output = tokio::process::Command::new("timeout")
-        .args(&[
+        .args([
             &format!("{}s", duration_secs),
             "parecord",
             "--format=s16le",
@@ -95,9 +94,9 @@ async fn capture_with_parecord(duration_secs: u64, output_path: &PathBuf) -> Res
 }
 
 /// Capture audio using ffmpeg
-async fn capture_with_ffmpeg(duration_secs: u64, output_path: &PathBuf) -> Result<()> {
+async fn capture_with_ffmpeg(duration_secs: u64, output_path: &std::path::Path) -> Result<()> {
     let output = tokio::process::Command::new("ffmpeg")
-        .args(&[
+        .args([
             "-f",
             "pulse", // Use PulseAudio
             "-i",
@@ -144,7 +143,7 @@ pub async fn is_ready() -> Result<bool> {
 }
 
 /// Cleanup temporary audio file
-pub async fn cleanup_audio_file(path: &PathBuf) -> Result<()> {
+pub async fn cleanup_audio_file(path: &std::path::Path) -> Result<()> {
     if path.exists() {
         fs::remove_file(path).await?;
     }

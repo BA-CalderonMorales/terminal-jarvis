@@ -30,6 +30,12 @@ pub struct VoiceFeedback {
     theme: crate::theme::Theme,
 }
 
+impl Default for VoiceFeedback {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl VoiceFeedback {
     pub fn new() -> Self {
         let theme = crate::theme::theme_global_config::current_theme();

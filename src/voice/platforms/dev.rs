@@ -52,7 +52,7 @@ async fn is_container_without_audio() -> bool {
                 .map(|content| !content.trim().is_empty() && !content.contains("no soundcards"))
                 .unwrap_or(false);
 
-        return !has_sound_cards;
+        !has_sound_cards
     }
 
     #[cfg(not(target_os = "linux"))]
