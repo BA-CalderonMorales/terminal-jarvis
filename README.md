@@ -18,10 +18,109 @@ A unified command center for AI coding tools. Manage and run a suite of coding a
 
 ## Architecture Overview
 
-- Tokio-driven CLI boots the Clap-based `Cli` entrypoint and routes every subcommand into specialized handlers inside `cli_logic`, including the interactive shell.
-- Domain-focused modules (`cli_logic`, `tools`, `auth_manager`, `config`, `services`, `installation_arguments`, `progress_utils`, `theme`) expose façade entry points that coordinate session continuation, tool management, configuration, and UX helpers.
-- Supporting systems such as the `evals` framework, MVVM-oriented `presentation` layer, and `voice` package extend benchmarking, UI responsiveness, and future voice control capabilities.
-- Surrounding ecosystem folders (`config`, `npm/terminal-jarvis`, `homebrew`, `scripts`) deliver TOML-driven configuration, an npm wrapper, Homebrew assets, and automation that orchestrate multi-channel distribution around the Rust binary.
+The project follows a **domain-based modular architecture** designed for maintainability, extensibility, and clear separation of concerns.
+
+<details>
+<summary><strong>Click to expand full project structure</strong></summary>
+
+```
+src/
+├── main.rs                    # Entry point - minimal code, delegates to CLI
+├── lib.rs                     # Library entry point for module organization
+├── cli.rs                     # Clean, expressive CLI interface definitions
+├── installation_arguments.rs  # Installation commands and NPM validation
+├── progress_utils.rs          # Theme-integrated messaging and progress indicators
+│
+├── cli_logic/                 # Business logic domain (9 focused modules)
+│   ├── mod.rs                 # Module coordination and re-exports
+│   ├── cli_logic_entry_point.rs        # Main CLI logic entry point
+│   ├── cli_logic_interactive.rs        # Interactive T.JARVIS interface
+│   ├── cli_logic_tool_execution.rs     # Tool execution workflows
+│   ├── cli_logic_update_operations.rs  # Tool update management
+│   ├── cli_logic_list_operations.rs    # Tool listing operations
+│   ├── cli_logic_info_operations.rs    # Tool information display
+│   ├── cli_logic_config_management.rs  # Configuration management
+│   ├── cli_logic_template_operations.rs # Template system operations
+│   └── cli_logic_utilities.rs          # Shared utility functions
+│
+├── auth_manager/              # Authentication domain (5 focused modules)
+│   ├── mod.rs                 # Module coordination and re-exports
+│   ├── auth_entry_point.rs            # Authentication system entry point
+│   ├── auth_environment_detection.rs  # Environment detection logic
+│   ├── auth_environment_setup.rs      # Environment configuration
+│   ├── auth_api_key_management.rs     # API key handling
+│   └── auth_warning_system.rs         # Browser prevention warnings
+│
+├── config/                    # Configuration domain (5 focused modules)
+│   ├── mod.rs                 # Module coordination and re-exports
+│   ├── config_entry_point.rs          # Configuration system entry point
+│   ├── config_structures.rs           # TOML configuration structures
+│   ├── config_file_operations.rs      # File I/O operations
+│   ├── config_manager.rs              # Configuration management logic
+│   └── config_version_cache.rs        # Version caching system
+│
+├── services/                  # External integrations domain (5 focused modules)
+│   ├── mod.rs                 # Module coordination and re-exports
+│   ├── services_entry_point.rs        # Service layer entry point
+│   ├── services_package_operations.rs # Package management operations
+│   ├── services_npm_operations.rs     # NPM-specific operations
+│   ├── services_github_integration.rs # GitHub CLI integration
+│   └── services_tool_configuration.rs # Tool configuration mapping
+│
+├── theme/                     # UI theming domain (7 focused modules)
+│   ├── mod.rs                 # Module coordination and re-exports
+│   ├── theme_entry_point.rs           # Theme system entry point
+│   ├── theme_definitions.rs           # Theme color definitions
+│   ├── theme_config.rs                # Theme configuration management
+│   ├── theme_global_config.rs         # Global theme state
+│   ├── theme_background_layout.rs     # Background and layout styling
+│   ├── theme_text_formatting.rs       # Text formatting utilities
+│   └── theme_utilities.rs             # Theme utility functions
+│
+├── tools/                     # Tool management domain (6 focused modules)
+│   ├── mod.rs                 # Module coordination and re-exports
+│   ├── tools_entry_point.rs           # Tool system entry point
+│   ├── tools_detection.rs             # Tool detection and verification
+│   ├── tools_command_mapping.rs       # Command-to-tool mapping
+│   ├── tools_execution_engine.rs      # Tool execution engine
+│   ├── tools_process_management.rs    # Process lifecycle management
+│   └── tools_startup_guidance.rs      # Tool startup guidance system
+│
+└── api/                       # API framework domain (4 focused modules)
+    ├── mod.rs                 # Module coordination and re-exports
+    ├── api_base.rs            # Base API route configurations
+    ├── api_client.rs          # HTTP client abstraction layer
+    └── api_tool_operations.rs # API tool operation endpoints
+
+config/
+├── tools/                     # Modular tool configurations
+│   ├── claude.toml            # Anthropic Claude
+│   ├── gemini.toml            # Google Gemini
+│   ├── qwen.toml              # Qwen coding assistant
+│   ├── opencode.toml, llxprt.toml, codex.toml
+│   ├── crush.toml, goose.toml, amp.toml, aider.toml
+└── config.toml                # Global settings
+
+npm/terminal-jarvis/           # NPM distribution wrapper
+homebrew/                      # Homebrew Formula + release archives
+scripts/cicd/                  # Deployment automation
+```
+
+</details>
+
+### Design Principles
+
+1. **Domain-Driven Design**: Each module represents a distinct business domain
+2. **Single Responsibility**: Modules handle one aspect of functionality
+3. **Clear Dependencies**: Explicit imports, minimal coupling
+4. **Testability**: Pure functions, dependency injection patterns
+5. **Maintainability**: Small, focused files (~200-300 lines each)
+
+### Key Innovation: Session Continuation System
+
+Terminal Jarvis's defining feature is the **Session Continuation System** that prevents users from being kicked out during authentication workflows. When a tool requires browser-based auth, Terminal Jarvis maintains your session state and resumes seamlessly.
+
+For complete technical documentation, see the [Architecture Guide](https://ba-calderonmorales.github.io/my-life-as-a-dev/projects/active/terminal-jarvis/details/architecture/).
 
 ## Badges
 

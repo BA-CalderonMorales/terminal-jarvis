@@ -38,15 +38,78 @@
 
 ---
 
+## PREFERRED TOOLING
+
+**Use these tools instead of defaults:**
+
+| Instead of | Use | Why |
+|-----------|-----|-----|
+| `grep` | `rg` (ripgrep) | Faster, respects .gitignore, better defaults |
+| `pip` | `uv` | 10-100x faster Python package management |
+| `find` + `grep` | `rg --files \| rg pattern` | Single tool, much faster |
+
+**Common patterns:**
+```bash
+rg "pattern" --type rust          # Search in Rust files
+rg "function_name" -C 3           # Search with context
+rg --files | rg "config"          # Find files by name
+uv pip install package-name       # Python packages
+```
+
+---
+
+## TOKEN EFFICIENCY
+
+**DO NOT create documentation files unless explicitly requested.**
+
+**DO leverage specialized agents proactively** - they bring expertise without wasting tokens.
+
+**DO use concise responses** - skip verbose explanations when action is clear.
+
+---
+
+## BRANCHING AND MERGE STRATEGY (CRITICAL)
+
+**NEVER commit directly to main or develop** - Always use feature branches.
+
+### Branch Flow
+
+```
+feature/*, bugfix/*, security/*, pipeline/*
+                    |
+                    v
+                develop
+                    |
+                    v
+                  main
+```
+
+### Branch Naming
+
+| Prefix | Use Case | Example |
+|--------|----------|--------|
+| `feature/` | New functionality | `feature/add-aider-support` |
+| `bugfix/` | Bug fixes | `bugfix/auth-flow-codex` |
+| `security/` | Security patches | `security/api-key-exposure` |
+| `pipeline/` | CI/CD changes | `pipeline/update-gh-actions` |
+
+### Merge Rules
+
+**Contributors:** `feature/* -> develop` (via PR)
+
+**Admin Release:** `develop -> main` (direct merge after PR reviews complete)
+
+---
+
 ## PROJECT OVERVIEW
 
-**Terminal Jarvis** = Unified command center for AI coding tools (claude-code, gemini-cli, qwen-code, opencode, llxprt, codex).
+**Terminal Jarvis** = Unified command center for AI coding tools (claude-code, gemini-cli, qwen-code, opencode, llxprt, codex, goose, amp, aider, crush).
 
 **Core Innovation**: Session Continuation System (prevents auth workflow interruptions).
 
-**Distribution**: NPM, Cargo, Homebrew (follows Orhun Parmaksız NPM packaging pattern).
+**Distribution**: NPM, Cargo, Homebrew (follows Orhun Parmaksiz NPM packaging pattern).
 
-**Current Version**: 0.0.48
+**Current Version**: 0.0.70
 
 **Installation**:
 ```bash
