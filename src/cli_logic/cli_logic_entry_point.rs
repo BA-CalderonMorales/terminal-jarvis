@@ -1,6 +1,7 @@
 // CLI Logic Entry Point
 // This module coordinates all CLI business logic operations
 
+use crate::auth_manager::AuthManager;
 use crate::cli_logic::cli_logic_responsive_menu::create_themed_select;
 use crate::cli_logic::cli_logic_utilities::{apply_theme_to_multiselect, get_themed_render_config};
 use crate::cli_logic::cli_logic_welcome::display_welcome_screen;
@@ -198,7 +199,7 @@ async fn launch_tool_with_progress(tool_name: &str, args: &[String]) -> Result<(
 }
 
 /// Handle user choice after tool exit
-/// Adds an option to immediately reopen the last tool with the same arguments
+/// Adds options to reopen, switch tools, manage credentials, uninstall, or exit
 async fn handle_post_tool_exit(last_tool: &str, last_args: &[String]) -> Result<()> {
     fn initial_case(s: &str) -> String {
         let mut chars = s.chars();
@@ -217,7 +218,9 @@ async fn handle_post_tool_exit(last_tool: &str, last_args: &[String]) -> Result<
             format!("1. Reopen {}", tool_display),
             "2. Back to Main Menu".to_string(),
             "3. Switch to Another AI Tool".to_string(),
-            "4. Exit Terminal Jarvis".to_string(),
+            format!("4. Re-enter API Key for {}", tool_display),
+            format!("5. Uninstall {}", tool_display),
+            "6. Exit Terminal Jarvis".to_string(),
         ];
 
         let exit_choice =
@@ -246,6 +249,28 @@ async fn handle_post_tool_exit(last_tool: &str, last_args: &[String]) -> Result<
                 // Stay in AI tools menu for context switching - this will continue the loop in handle_ai_tools_menu
                 return Ok(());
             }
+            s if s.contains("Re-enter API Key") => {
+                // Clear existing credentials for this tool, then prompt for new key
+                if let Err(e) = AuthManager::delete_tool_credentials(last_tool, &[]) {
+                    println!("{}", theme.accent(&format!("Note: {}", e)));
+                }
+                println!(
+                    "{}",
+                    theme.secondary(&format!(
+                        "Cleared credentials for {}. They will be requested on next launch.",
+                        tool_display
+                    ))
+                );
+                // Brief pause to let user read the message
+                tokio::time::sleep(tokio::time::Duration::from_millis(1500)).await;
+                continue;
+            }
+            s if s.contains("Uninstall ") => {
+                // Attempt to uninstall the tool
+                handle_uninstall_tool(last_tool, &tool_display, &theme).await;
+                // Return to main menu after uninstall
+                return Ok(());
+            }
             s if s.contains("Exit Terminal Jarvis") => {
                 // Exit completely - break out of everything
                 println!("{}", theme.accent("Goodbye!"));
@@ -257,6 +282,77 @@ async fn handle_post_tool_exit(last_tool: &str, last_args: &[String]) -> Result<
             }
         }
     }
+}
+
+/// Handle tool uninstallation with appropriate package manager
+async fn handle_uninstall_tool(tool: &str, tool_display: &str, theme: &crate::theme::Theme) {
+    // Determine uninstall command based on tool's install method
+    let uninstall_cmd = match tool {
+        "claude" => Some(("npm", vec!["uninstall", "-g", "@anthropic-ai/claude-code"])),
+        "gemini" => Some(("npm", vec!["uninstall", "-g", "@anthropic-ai/gemini-cli"])),
+        "qwen" => Some(("npm", vec!["uninstall", "-g", "@anthropic-ai/qwen-code"])),
+        "opencode" => Some(("npm", vec!["uninstall", "-g", "opencode-ai"])),
+        "codex" => Some(("npm", vec!["uninstall", "-g", "@openai/codex"])),
+        "aider" => Some(("pip", vec!["uninstall", "-y", "aider-chat"])),
+        "goose" => Some(("pip", vec!["uninstall", "-y", "goose-ai"])),
+        "amp" => Some(("cargo", vec!["uninstall", "amp"])),
+        "crush" => Some(("cargo", vec!["uninstall", "crush"])),
+        "llxprt" => Some(("cargo", vec!["uninstall", "llxprt"])),
+        _ => None,
+    };
+
+    if let Some((cmd, args)) = uninstall_cmd {
+        // Confirm before uninstalling
+        if let Ok(confirmed) = Confirm::new(&format!("Uninstall {}?", tool_display))
+            .with_default(false)
+            .prompt()
+        {
+            if confirmed {
+                println!(
+                    "{}",
+                    theme.secondary(&format!("Uninstalling {}...", tool_display))
+                );
+                let result = std::process::Command::new(cmd).args(&args).status();
+                match result {
+                    Ok(status) if status.success() => {
+                        println!(
+                            "{}",
+                            theme.primary(&format!("{} has been uninstalled.", tool_display))
+                        );
+                        // Also clear credentials
+                        let _ = AuthManager::delete_tool_credentials(tool, &[]);
+                    }
+                    Ok(_) => {
+                        println!(
+                            "{}",
+                            theme.accent(&format!(
+                                "Uninstall may have failed. Try manually: {} {}",
+                                cmd,
+                                args.join(" ")
+                            ))
+                        );
+                    }
+                    Err(e) => {
+                        println!(
+                            "{}",
+                            theme.accent(&format!("Could not run uninstall command: {}", e))
+                        );
+                    }
+                }
+            }
+        }
+    } else {
+        println!(
+            "{}",
+            theme.accent(&format!(
+                "Uninstall command not configured for {}. Check the tool's documentation.",
+                tool_display
+            ))
+        );
+    }
+
+    // Brief pause to let user read the message
+    tokio::time::sleep(tokio::time::Duration::from_millis(1500)).await;
 }
 
 /// Handle the important links menu

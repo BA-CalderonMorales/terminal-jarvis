@@ -206,7 +206,7 @@ impl VoiceInputProvider for NativeVoiceProvider {
                 // Linux: Capture audio and transcribe using Whisper
                 let transcription = self.listen_linux().await?;
 
-                return Ok(VoiceRecognitionResult {
+                Ok(VoiceRecognitionResult {
                     text: transcription,
                     confidence: 0.8,
                     duration: self.config.max_duration,
@@ -215,7 +215,7 @@ impl VoiceInputProvider for NativeVoiceProvider {
                         tokens_used: None,
                         extra: std::collections::HashMap::new(),
                     }),
-                });
+                })
             }
 
             #[cfg(target_os = "macos")]
@@ -246,17 +246,17 @@ impl VoiceInputProvider for NativeVoiceProvider {
             // Check if required tools are available using platform-specific checks
             #[cfg(target_os = "windows")]
             {
-                return windows::is_ready().await;
+                windows::is_ready().await
             }
 
             #[cfg(target_os = "linux")]
             {
-                return linux::is_ready().await;
+                linux::is_ready().await
             }
 
             #[cfg(target_os = "macos")]
             {
-                return Ok(false); // macOS not yet implemented
+                Ok(false) // macOS not yet implemented
             }
         })
     }

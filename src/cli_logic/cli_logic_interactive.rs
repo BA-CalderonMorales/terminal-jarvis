@@ -92,52 +92,6 @@ pub async fn handle_interactive_mode() -> Result<()> {
                 println!("Goodbye!");
                 break;
             }
-            "/voice" => {
-                // Handle voice input
-                if let Some(voice_selection) = handle_voice_input().await {
-                    // Process the voice command as if it were a menu selection
-                    match voice_selection.as_str() {
-                        "AI CLI Tools" => {
-                            print!("\x1b[2J\x1b[H");
-                            handle_ai_tools_menu().await?;
-                        }
-                        "Authentication" => {
-                            print!("\x1b[2J\x1b[H");
-                            crate::cli_logic::handle_authentication_menu().await?;
-                        }
-                        "Settings" => {
-                            print!("\x1b[2J\x1b[H");
-                            handle_manage_tools_menu().await?;
-                        }
-                        "Evals & Comparisons" => {
-                            print!("\x1b[2J\x1b[H");
-                            if let Err(e) =
-                                crate::cli_logic::cli_logic_evals_operations::show_evals_menu()
-                            {
-                                eprintln!("Error in Evals menu: {}", e);
-                            }
-                        }
-                        "Important Links" => {
-                            print!("\x1b[2J\x1b[H");
-                            handle_important_links().await?;
-                        }
-                        "Exit" => {
-                            print!("{}", theme.reset());
-                            print!("\x1b[2J\x1b[H");
-                            println!("Goodbye!");
-                            break;
-                        }
-                        _ => {
-                            println!("\n[UNKNOWN] Voice command not recognized");
-                        }
-                    }
-
-                    print!("\x1b[2J\x1b[H");
-                    display_welcome_screen();
-                    display_welcome_interface(&theme, npm_available).await?;
-                    display_available_commands(&theme);
-                }
-            }
             "/help" => {
                 display_available_commands(&theme);
             }
@@ -175,7 +129,6 @@ fn display_available_commands(theme: &crate::theme::Theme) {
     println!("  {}   - Authentication", theme.secondary("/auth"));
     println!("  {}  - Important Links", theme.secondary("/links"));
     println!("  {}  - Settings", theme.secondary("/settings"));
-    println!("  {}  - Voice Commands", theme.secondary("/voice"));
     println!("  {}   - Show this help", theme.secondary("/help"));
     println!("  {}   - Exit Terminal Jarvis", theme.secondary("/exit"));
 }
@@ -194,102 +147,4 @@ async fn handle_important_links() -> Result<()> {
 async fn handle_manage_tools_menu() -> Result<()> {
     // This will be implemented in a separate function
     crate::cli_logic::handle_manage_tools_menu().await
-}
-
-/// Handle voice input with smart listening and professional feedback
-async fn handle_voice_input() -> Option<String> {
-    use crate::voice::{VoiceCommand, VoiceListenerFactory};
-
-    // Try to create voice listener
-    let listener = match VoiceListenerFactory::create_default_listener().await {
-        Ok(l) => l,
-        Err(e) => {
-            println!("\n[VOICE SETUP REQUIRED]");
-            println!("{}", e);
-            println!("\n[OPTION 1] Cloud API (Recommended - Easy Setup):");
-            println!(
-                "  Set OPENAI_API_KEY environment variable for cloud-based voice recognition."
-            );
-            println!("  Configure in Terminal Jarvis authentication menu (/auth command).");
-            println!();
-            println!("[OPTION 2] Local Voice Recognition (Privacy-Focused):");
-            println!("  Terminal Jarvis supports on-device voice recognition using Small Language Models.");
-            println!("  This provides privacy, offline usage, and no API costs.");
-            println!();
-            println!("  Requirements:");
-            println!("  - Build Terminal Jarvis with: cargo install terminal-jarvis --features local-voice");
-            println!(
-                "  - Install LLVM/Clang for compilation (see terminal-jarvis.github.io for guide)"
-            );
-            println!("  - Download a Whisper model (ggml-tiny.en.bin from HuggingFace)");
-            println!("  - Install audio tools (alsa-utils/sox/ffmpeg)");
-            println!();
-            return None;
-        }
-    };
-
-    // Check if system is ready
-    let is_ready = match listener.check_ready().await {
-        Ok(ready) => ready,
-        Err(e) => {
-            println!("\n[!][WARNING] Voice provider not ready");
-            println!("[i][INFO] Error: {}", e);
-            return None;
-        }
-    };
-
-    if is_ready {
-        // System ready, listen for command
-        match listener.listen_for_command().await {
-            Ok(Some(command)) => {
-                // Map voice command to menu selection
-                match command {
-                    VoiceCommand::OpenAITools => Some("AI CLI Tools".to_string()),
-                    VoiceCommand::OpenAuthentication => Some("Authentication".to_string()),
-                    VoiceCommand::OpenSettings => Some("Settings".to_string()),
-                    VoiceCommand::OpenEvals => Some("Evals & Comparisons".to_string()),
-                    VoiceCommand::OpenLinks => Some("Important Links".to_string()),
-                    VoiceCommand::Exit => Some("Exit".to_string()),
-                    VoiceCommand::ShowHelp | VoiceCommand::ShowVoiceHelp => {
-                        // Show voice commands help
-                        let feedback = crate::voice::VoiceFeedback::new();
-                        feedback.show_commands_help();
-                        None
-                    }
-                    VoiceCommand::Cancel | VoiceCommand::GoBack => None,
-                    VoiceCommand::Unknown { raw_text } => {
-                        println!("\n[UNKNOWN] Could not understand: '{}'", raw_text);
-                        println!("Say 'help' or 'commands' to see available voice commands.");
-                        None
-                    }
-                    _ => {
-                        println!("\n[INFO] That command is not available in this menu.");
-                        println!("Try: 'open ai tools', 'open settings', 'open authentication'");
-                        None
-                    }
-                }
-            }
-            Ok(None) => {
-                println!("\n[INFO] No command recognized. Try again.");
-                None
-            }
-            Err(e) => {
-                println!("\n[ERROR] Voice recognition failed: {}", e);
-                None
-            }
-        }
-    } else {
-        println!("\n[!][WARNING] Voice provider not ready");
-        println!("[i][INFO] Possible reasons:");
-        println!("1. No microphone detected");
-        println!("   • For GitHub Codespaces: Enable audio forwarding in VS Code settings");
-        println!("   • Run: arecord --list-devices to check available audio devices");
-        println!("2. Missing recording tools (required for local voice recognition):");
-        println!("   • Linux: sudo apt-get install alsa-utils");
-        println!("   • macOS: brew install sox");
-        println!("   • Windows: Install FFmpeg");
-        println!("3. Model not downloaded yet");
-        println!("   • The whisper model (~75MB) will download automatically on first use");
-        None
-    }
 }
