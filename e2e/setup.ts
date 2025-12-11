@@ -1,8 +1,5 @@
 import { expect } from 'vitest';
-import * as matchers from 'cli-testing-library/vitest';
-
-// Extend Vitest's expect with cli-testing-library matchers
-expect.extend(matchers);
+import 'cli-testing-library/extend-expect';
 
 // Global test configuration
 process.env.CI = 'true'; // Ensure non-interactive mode for tests

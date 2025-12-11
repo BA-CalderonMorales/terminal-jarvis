@@ -9,9 +9,12 @@
         "test:coverage": "vitest run --coverage"
     },
     "devDependencies": {
+        "@vitest/coverage-v8": "^4.0.15",
         "cli-testing-library": "^2.0.2",
+        "string-width": "^7.2.0",
+        "strip-ansi": "^7.1.0",
         "typescript": "^5.8.3",
-        "vitest": "^2.0.0",
-        "@vitest/coverage-v8": "^2.0.0"
+        "vitest": "^4.0.15",
+        "zod": "^3.24.0"
     }
 }

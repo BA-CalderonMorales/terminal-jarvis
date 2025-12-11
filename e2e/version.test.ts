@@ -11,7 +11,7 @@ describe('terminal-jarvis --version', () => {
   });
 
   test('version matches package.json', async () => {
-    const packageJson = require('../package.json');
+    const packageJson = require('../npm/terminal-jarvis/package.json');
     const expectedVersion = sanitizeVersion(packageJson.version);
 
     const instance = await render(getBinaryPath(), ['--version']);
