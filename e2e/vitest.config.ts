@@ -5,23 +5,22 @@ export default defineConfig({
   test: {
     globals: true,
     environment: 'node',
-    setupFiles: ['./tests/setup.ts'],
+    setupFiles: ['./setup.ts'],
     testTimeout: 30000, // 30s timeout for CLI tests
     hookTimeout: 30000,
     teardownTimeout: 10000,
-    include: ['tests/**/*.test.ts'],
-    exclude: ['node_modules', 'dist', 'lib'],
+    include: ['**/*.test.ts'],
+    exclude: ['node_modules'],
     coverage: {
       provider: 'v8',
       reporter: ['text', 'json', 'html'],
-      include: ['src/**/*.ts'],
-      exclude: ['tests/**', 'scripts/**'],
+      include: ['**/*.ts'],
+      exclude: ['**/*.test.ts', 'setup.ts'],
     },
   },
   resolve: {
     alias: {
-      '@': resolve(__dirname, './src'),
-      '@tests': resolve(__dirname, './tests'),
+      '@e2e': resolve(__dirname, '.'),
     },
   },
 });

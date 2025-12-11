@@ -22,11 +22,11 @@ export interface PackageTestContext {
  */
 export function createPackageTestEnvironment(): PackageTestContext {
   // Get version from package.json
-  const packageJson = require("../package.json");
+  const packageJson = require("../npm/terminal-jarvis/package.json");
   const version = packageJson.version;
 
   // Verify local binary exists
-  const localBinary = resolve(__dirname, "../../../target/release/terminal-jarvis");
+  const localBinary = resolve(__dirname, "../target/release/terminal-jarvis");
   if (!existsSync(localBinary)) {
     throw new Error(`Local binary not found at ${localBinary}. Run "cargo build --release" first.`);
   }
@@ -35,7 +35,7 @@ export function createPackageTestEnvironment(): PackageTestContext {
   const testDir = mkdtempSync(join(tmpdir(), "jarvis-test-"));
 
   // Build the package tarball
-  const projectRoot = resolve(__dirname, "..");
+  const projectRoot = resolve(__dirname, "../npm/terminal-jarvis");
 
   // Run npm pack in the project root
   execSync("npm pack", {
@@ -106,7 +106,7 @@ export function createPackageTestEnvironment(): PackageTestContext {
  * Gets the path to the compiled Rust binary for testing
  */
 export function getBinaryPath(): string {
-  const binaryPath = resolve(__dirname, "../../../target/release/terminal-jarvis");
+  const binaryPath = resolve(__dirname, "../target/release/terminal-jarvis");
 
   if (!existsSync(binaryPath)) {
     throw new Error(`Binary not found at ${binaryPath}. Run "cargo build --release" first.`);

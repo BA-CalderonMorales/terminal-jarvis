@@ -122,6 +122,18 @@ src/
     ├── api_client.rs          # HTTP client abstraction layer
     └── api_tool_operations.rs # API tool operation endpoints
 
+tests/                         # Rust integration tests (cargo test)
+e2e/                           # TypeScript E2E tests (cli-testing-library + Vitest)
+├── *.test.ts                  # E2E test suites
+├── helpers.ts                 # CLI test utilities
+├── helpers/                   # Advanced test utilities
+│   ├── ansi-utils.ts          # ANSI escape code parsing
+│   ├── layout-validators.ts   # Terminal layout validation
+│   ├── width-simulation.ts    # Responsive width testing
+│   └── benchmark-helpers.ts   # Benchmark result validation
+├── vitest.config.ts           # Test runner configuration
+└── package.json               # E2E test dependencies
+
 config/
 ├── tools/                     # Modular tool configurations
 │   ├── claude.toml            # Anthropic Claude
@@ -145,6 +157,19 @@ scripts/cicd/                  # Deployment automation
 3. **Clear Dependencies**: Explicit imports, minimal coupling
 4. **Testability**: Pure functions, dependency injection patterns
 5. **Maintainability**: Small, focused files (~200-300 lines each)
+
+### Testing Strategy
+
+| Location | Technology | Purpose |
+|----------|------------|---------|
+| `tests/` | Rust (`cargo test`) | Unit and integration tests for Rust code |
+| `e2e/` | TypeScript (Vitest + cli-testing-library) | End-to-end CLI behavior tests |
+
+**Run tests:**
+```bash
+cargo test                     # Rust tests
+cd e2e && npm test             # E2E tests (requires npm install first)
+```
 
 ### Key Goal: Session Continuation System
 
