@@ -16,6 +16,36 @@ A unified command center for AI coding tools. Manage and run a suite of coding a
 
 <div align="left">
 
+## Badges
+
+Distribution and project status at a glance: NPM and Crates.io versions/downloads, Homebrew availability, license, acknowledgements, and support. Click any badge for details.
+
+</div>
+
+<p align="center">
+    <a href="https://www.npmjs.com/package/terminal-jarvis"><img src="https://img.shields.io/npm/v/terminal-jarvis/stable.svg?label=NPM%20Stable&color=green&logo=npm&style=for-the-badge" alt="NPM Stable"></a>
+    <a href="https://www.npmjs.com/package/terminal-jarvis"><img src="https://img.shields.io/npm/v/terminal-jarvis/beta.svg?label=NPM%20Beta&color=orange&logo=npm&style=for-the-badge" alt="NPM Beta"></a>
+    <a href="https://www.npmjs.com/package/terminal-jarvis"><img src="https://img.shields.io/npm/v/terminal-jarvis.svg?logo=npm&label=NPM%20Version&style=for-the-badge" alt="NPM Version"></a>
+    <a href="https://www.npmjs.com/package/terminal-jarvis"><img src="https://img.shields.io/npm/dm/terminal-jarvis.svg?logo=npm&label=NPM%20Downloads&style=for-the-badge" alt="NPM Downloads"></a>
+</p>
+
+<p align="center">
+    <a href="https://crates.io/crates/terminal-jarvis"><img src="https://img.shields.io/crates/v/terminal-jarvis.svg?logo=rust&label=Crates.io%20Version&style=for-the-badge" alt="Crates.io Version"></a>
+    <a href="https://crates.io/crates/terminal-jarvis"><img src="https://img.shields.io/crates/d/terminal-jarvis.svg?logo=rust&label=Crates.io%20Downloads&style=for-the-badge" alt="Crates.io Downloads"></a>
+</p>
+
+<p align="center">
+    <a href="https://github.com/BA-CalderonMorales/homebrew-terminal-jarvis"><img src="https://img.shields.io/badge/Homebrew-Available-blue.svg?logo=homebrew&style=for-the-badge" alt="Homebrew"></a>
+</p>
+
+<p align="center">
+    <a href="https://opensource.org/licenses/MIT"><img src="https://img.shields.io/badge/License-MIT-yellow.svg?style=for-the-badge" alt="License: MIT"></a>
+    <a href="https://github.com/Piebald-AI/awesome-gemini-cli"><img src="https://img.shields.io/badge/Mentioned%20in-awesome-6f42c1?style=for-the-badge" alt="Mentioned in Awesome Gemini CLI"></a>
+    <a href="https://www.buymeacoffee.com/brandoncalderonmorales"><img src="https://img.shields.io/badge/Buy%20Me%20a%20Coffee-orange.svg?style=for-the-badge" alt="Buy Me a Coffee"></a>
+</p>
+
+</div>
+
 ## Architecture Overview
 
 The project follows a **domain-based modular architecture** designed for maintainability, extensibility, and clear separation of concerns.
@@ -116,41 +146,14 @@ scripts/cicd/                  # Deployment automation
 4. **Testability**: Pure functions, dependency injection patterns
 5. **Maintainability**: Small, focused files (~200-300 lines each)
 
-### Key Innovation: Session Continuation System
+### Key Goal: Session Continuation System
 
-Terminal Jarvis's defining feature is the **Session Continuation System** that prevents users from being kicked out during authentication workflows. When a tool requires browser-based auth, Terminal Jarvis maintains your session state and resumes seamlessly.
+Terminal Jarvis aims to provide a **Session Continuation System** that prevents users from being kicked out during authentication workflows. When a tool requires browser-based auth, Terminal Jarvis will maintain your session state and resume seamlessly.
+
+> [!NOTE]
+> **Work in Progress**: This feature is under active development. Current behavior may require manual re-authentication in some scenarios. See [#27](https://github.com/BA-CalderonMorales/terminal-jarvis/issues/27) for status.
 
 For complete technical documentation, see the [Architecture Guide](https://ba-calderonmorales.github.io/my-life-as-a-dev/projects/active/terminal-jarvis/details/architecture/).
-
-## Badges
-
-Distribution and project status at a glance: NPM and Crates.io versions/downloads, Homebrew availability, license, acknowledgements, and support. Click any badge for details.
-
-</div>
-
-<p align="center">
-    <a href="https://www.npmjs.com/package/terminal-jarvis"><img src="https://img.shields.io/npm/v/terminal-jarvis/stable.svg?label=NPM%20Stable&color=green&logo=npm&style=for-the-badge" alt="NPM Stable"></a>
-    <a href="https://www.npmjs.com/package/terminal-jarvis"><img src="https://img.shields.io/npm/v/terminal-jarvis/beta.svg?label=NPM%20Beta&color=orange&logo=npm&style=for-the-badge" alt="NPM Beta"></a>
-    <a href="https://www.npmjs.com/package/terminal-jarvis"><img src="https://img.shields.io/npm/v/terminal-jarvis.svg?logo=npm&label=NPM%20Version&style=for-the-badge" alt="NPM Version"></a>
-    <a href="https://www.npmjs.com/package/terminal-jarvis"><img src="https://img.shields.io/npm/dm/terminal-jarvis.svg?logo=npm&label=NPM%20Downloads&style=for-the-badge" alt="NPM Downloads"></a>
-</p>
-
-<p align="center">
-    <a href="https://crates.io/crates/terminal-jarvis"><img src="https://img.shields.io/crates/v/terminal-jarvis.svg?logo=rust&label=Crates.io%20Version&style=for-the-badge" alt="Crates.io Version"></a>
-    <a href="https://crates.io/crates/terminal-jarvis"><img src="https://img.shields.io/crates/d/terminal-jarvis.svg?logo=rust&label=Crates.io%20Downloads&style=for-the-badge" alt="Crates.io Downloads"></a>
-</p>
-
-<p align="center">
-    <a href="https://github.com/BA-CalderonMorales/homebrew-terminal-jarvis"><img src="https://img.shields.io/badge/Homebrew-Available-blue.svg?logo=homebrew&style=for-the-badge" alt="Homebrew"></a>
-</p>
-
-<p align="center">
-    <a href="https://opensource.org/licenses/MIT"><img src="https://img.shields.io/badge/License-MIT-yellow.svg?style=for-the-badge" alt="License: MIT"></a>
-    <a href="https://github.com/Piebald-AI/awesome-gemini-cli"><img src="https://img.shields.io/badge/Mentioned%20in-awesome-6f42c1?style=for-the-badge" alt="Mentioned in Awesome Gemini CLI"></a>
-    <a href="https://www.buymeacoffee.com/brandoncalderonmorales"><img src="https://img.shields.io/badge/Buy%20Me%20a%20Coffee-orange.svg?style=for-the-badge" alt="Buy Me a Coffee"></a>
-</p>
-
-</div>
 
 ## Demo
 
