@@ -91,7 +91,7 @@ jobs:
         run: ./scripts/utils/generate-homebrew-release.sh --stage
 
       - name: Upload platform binaries
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: binaries-${{ matrix.platform }}
           path: |

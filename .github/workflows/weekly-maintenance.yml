@@ -31,7 +31,7 @@ jobs:
           repository-name: ${{ github.repository }}
 
       - name: Upload weekly issue report
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: weekly-issue-report
           path: ${{ steps.health_check.outputs.issue-summary }}
@@ -62,7 +62,7 @@ jobs:
 
       - name: Upload README diff artifact
         if: steps.sync_check.outputs.changed == 'true'
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: readme-diff
           path: ${{ steps.sync_check.outputs.diff-path }}
