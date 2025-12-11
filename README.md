@@ -245,6 +245,33 @@ Terminal Jarvis provides a unified interface for multiple AI coding tools includ
 > [!CAUTION]
 > **Known Issues**: [View current limitations and workarounds](https://ba-calderonmorales.github.io/my-life-as-a-dev/projects/active/terminal-jarvis/details/limitations/)
 
+## Beta Experiments
+
+Features under exploration that are **not enabled by default**. These require explicit feature flags and may have stability issues.
+
+### Voice Control (Deferred)
+
+Terminal Jarvis includes experimental voice recognition using OpenAI's Whisper model for 100% offline voice commands.
+
+**Status**: Deferred until core CLI stability is achieved. The voice module exists in the codebase (`src/voice/`) but is behind a feature flag.
+
+**What it aims to do**:
+- Hands-free tool switching ("switch to claude", "run gemini")
+- Voice-activated commands without leaving the terminal
+- 100% offline processing - no API keys, no data leaves your device
+
+**Why it's deferred**:
+- Core CLI tool execution needs to be seamless first (see [#26](https://github.com/BA-CalderonMorales/terminal-jarvis/issues/26))
+- Authentication flows need stabilization (see [#27](https://github.com/BA-CalderonMorales/terminal-jarvis/issues/27))
+- Adding complexity before fundamentals are solid creates maintenance burden
+
+**To experiment** (not recommended for production):
+```bash
+cargo build --release --features local-voice
+```
+
+Voice will be revisited once the core experience is polished and stable.
+
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
