@@ -6,17 +6,15 @@ export default defineConfig({
     globals: true,
     environment: 'node',
     setupFiles: ['./setup.ts'],
-    testTimeout: 30000, // 30s timeout for CLI tests
+    testTimeout: 30000,
     hookTimeout: 30000,
     teardownTimeout: 10000,
-    include: ['**/*.test.ts'],
+    include: [
+      'index.test.ts',
+      'flows/**/*.test.ts',
+      'menus/**/*.test.ts',
+    ],
     exclude: ['node_modules'],
-    coverage: {
-      provider: 'v8',
-      reporter: ['text', 'json', 'html'],
-      include: ['**/*.ts'],
-      exclude: ['**/*.test.ts', 'setup.ts'],
-    },
   },
   resolve: {
     alias: {
