@@ -32,8 +32,7 @@
 | "Update version" | [VERSIONING](#version-management) | Sync Cargo.toml, package.json, Formula |
 | "Before I commit" | [PRE-COMMIT](#pre-commit-checklist) | Quality gates, version check, Formula |
 | "Maximize session" | [TOKEN BUDGET](#token-budget-management) | Lead orchestrator, parallel agents |
-| "Add voice command" | [VOICE](#voice-mode-development) | Update enum, parser, handler |
-| "Homebrew release" | [HOMEBREW](#homebrew-integration) | Archive → Formula → Commit → Release |
+| "Homebrew release" | [HOMEBREW](#homebrew-integration) | Archive -> Formula -> Commit -> Release |
 | "NPM publish" | [NPM DIST](#npm-distribution) | `npm login`, tags, version sync |
 
 ---
@@ -378,25 +377,25 @@ Examples:
 **Example workflow**:
 ```bash
 # 1. Create test that reproduces bug
-# tests/test_voice_windows.rs
+# tests/cli_integration_tests.rs
 #[test]
-fn test_windows_powershell_escaping() {
-    let cmd = build_windows_command("test input");
-    assert_eq!(cmd, expected_escaped_command);  // This will fail
+fn test_tool_launch_single_enter() {
+    let output = launch_tool("claude");
+    assert!(output.prompts_count <= 1);  // This will fail if 3 prompts
 }
 
 # 2. Verify failure
-cargo test test_windows_powershell_escaping  # Should fail
+cargo test test_tool_launch_single_enter  # Should fail
 
-# 3. Implement fix in src/voice/voice_native_provider.rs
+# 3. Implement fix in src/cli_logic/cli_logic_tool_execution.rs
 
 # 4. Verify success
-cargo test test_windows_powershell_escaping  # Should pass
-cargo test                                   # All tests pass
+cargo test test_tool_launch_single_enter  # Should pass
+cargo test                                # All tests pass
 
 # 5. Commit together
-git add tests/test_voice_windows.rs src/voice/voice_native_provider.rs
-git commit -m "fix(voice): resolve PowerShell escaping on Windows - @test-automation-expert"
+git add tests/cli_integration_tests.rs src/cli_logic/cli_logic_tool_execution.rs
+git commit -m "fix(cli): streamline tool launch flow - @test-automation-expert"
 ```
 
 ---
@@ -481,10 +480,6 @@ supports_chat = true
 supports_code_generation = true
 supports_refactoring = true
 supports_testing = false
-
-[voice_commands]
-aliases = ["tool", "tool name", "tool cli"]
-activation_phrases = ["use tool", "switch to tool"]
 ```
 
 ### Adding New Tool Workflow
@@ -494,10 +489,9 @@ activation_phrases = ["use tool", "switch to tool"]
 3. **Specify installation**: npm, cargo, or custom script
 4. **Document authentication**: API keys, env vars, instructions
 5. **List features**: capabilities for UI display
-6. **Add voice commands**: aliases and activation phrases
-7. **Test detection**: `cargo run -- list` should show new tool
-8. **Test execution**: `cargo run -- run newtool` should work
-9. **Update CHANGELOG**: Add under `### Added`
+6. **Test detection**: `cargo run -- list` should show new tool
+7. **Test execution**: `cargo run -- run newtool` should work
+8. **Update CHANGELOG**: Add under `### Added`
 
 ---
 
@@ -617,70 +611,6 @@ terminal-jarvis --version
 
 ---
 
-## VOICE MODE DEVELOPMENT
-
-### Voice Architecture
-
-- `src/voice/mod.rs` - Public interface
-- `src/voice/voice_command.rs` - Command enum definitions
-- `src/voice/voice_command_parser.rs` - Phrase parsing logic
-- `src/voice/voice_native_provider.rs` - Platform-specific capture
-- `src/voice/voice_local_whisper_provider.rs` - Local AI transcription
-- `src/voice/platforms/` - Platform-specific implementations
-
-### Adding Voice Command
-
-**Workflow**:
-1. **Add enum variant** - `src/voice/voice_command.rs`
-```rust
-pub enum VoiceCommand {
-    // ... existing variants
-    NewCommand,
-}
-```
-
-2. **Add parsing patterns** - `src/voice/voice_command_parser.rs`
-```rust
-fn parse_command(text: &str) -> Option<VoiceCommand> {
-    if text.contains("new command") || text.contains("do thing") {
-        return Some(VoiceCommand::NewCommand);
-    }
-    // ... existing patterns
-}
-```
-
-3. **Wire up handler** - `src/cli_logic/cli_logic_interactive.rs`
-```rust
-match voice_command {
-    VoiceCommand::NewCommand => {
-        // Implementation
-    },
-    // ... existing handlers
-}
-```
-
-4. **Add tests** - `src/voice/tests/test_voice_commands.rs`
-```rust
-#[test]
-fn test_new_command_parsing() {
-    assert_eq!(
-        parse_command("execute new command"),
-        Some(VoiceCommand::NewCommand)
-    );
-}
-```
-
-### Voice Platform Support
-
-| Platform | Implementation | Audio Capture |
-|----------|----------------|---------------|
-| **Linux** | `platforms/linux.rs` | ALSA via `arecord` |
-| **macOS** | `platforms/darwin.rs` | Core Audio via `rec` |
-| **Windows** | `platforms/windows.rs` | PowerShell `SoundRecorder` |
-| **Development** | `platforms/dev.rs` | Mock input for testing |
-
----
-
 ## COMMUNICATION GUIDELINES
 
 ### Reference Clarity (CRITICAL)
@@ -703,103 +633,92 @@ fn test_new_command_parsing() {
 
 ## DETAILED EXAMPLES
 
-### Example 1: Adding New Voice Command Feature
+### Example 1: Adding New AI Tool Integration
 
 ```
-User Request: "Add voice command for updating all tools"
+User Request: "Add support for new-ai-tool CLI"
 
 Lead Planning (1000 tokens):
-- Analyze: Need to update voice_command.rs enum, parser, and handler
+- Analyze: Need config file, command mapping, detection
 - Breakdown:
-  * Task 1: Add UpdateAllTools variant to enum (sequential)
-  * Task 2: Add parsing patterns for "update all" phrases (sequential after Task 1)
-  * Task 3: Wire up handler to execute update operation (sequential after Task 2)
-  * Task 4: Add tests for new command (parallel with Task 3)
-- Parallelization: Tasks 1-3 sequential (dependencies), Task 4 parallel with Task 3
+  * Task 1: Create config/tools/newtool.toml (sequential)
+  * Task 2: Add to tools_command_mapping.rs (sequential after Task 1)
+  * Task 3: Test detection and execution (sequential after Task 2)
+  * Task 4: Update CHANGELOG.md (parallel with Task 3)
+- Parallelization: Tasks 1-3 sequential (dependencies), Task 4 parallel
 
 Lead Delegation:
-  Agent 1 (750 tokens): Update voice_command.rs with new enum variant
+  Agent 1 (750 tokens): Create config/tools/newtool.toml
   [Wait for completion]
-  Agent 2 (750 tokens): Add parsing patterns to voice_command_parser.rs
+  Agent 2 (750 tokens): Add command mapping entry
   [Wait for completion]
-  Agent 3 (750 tokens): Wire handler in cli_logic_interactive.rs
-  Agent 4 (750 tokens): Create tests in voice/tests/ (parallel with Agent 3)
+  Agent 3 (750 tokens): Test with cargo run -- list && cargo run -- info newtool
+  Agent 4 (750 tokens): Update CHANGELOG.md (parallel with Agent 3)
 
 Lead Integration (1000 tokens):
 - cargo check (verify compilation)
-- cargo clippy (code quality)
 - cargo test (verify tests pass)
-- Update CHANGELOG.md with new feature
+- Manual test: cargo run -- list
 - Prepare commit message
 ```
 
 ### Example 2: Refactoring Large Module
 
 ```
-User Request: "Refactor voice/mod.rs (500 lines) into focused modules"
+User Request: "Refactor cli_logic.rs (800 lines) into focused modules"
 
 Lead Planning (1000 tokens):
-- Analyze current structure: 3 domains identified
-  * Voice command parsing (150 lines)
-  * Audio capture logic (200 lines)
-  * Provider management (150 lines)
+- Analyze current structure: 4 domains identified
+  * Tool execution (200 lines)
+  * List operations (150 lines)
+  * Update operations (200 lines)
+  * Interactive menu (250 lines)
 - Breakdown:
-  * Task 1: Create voice/voice_parsing.rs, extract parsing
-  * Task 2: Create voice/voice_audio.rs, extract audio capture
-  * Task 3: Create voice/voice_providers.rs, extract provider logic
-  * Task 4: Update voice/mod.rs to re-export new modules
-  * Task 5: Update imports across codebase
-- Parallelization: Tasks 1-3 parallel, Task 4 after 1-3, Task 5 after Task 4
+  * Task 1: Create cli_logic/cli_logic_tool_execution.rs
+  * Task 2: Create cli_logic/cli_logic_list_operations.rs
+  * Task 3: Create cli_logic/cli_logic_update_operations.rs
+  * Task 4: Create cli_logic/cli_logic_interactive.rs
+  * Task 5: Update cli_logic/mod.rs to re-export
+- Parallelization: Tasks 1-4 parallel, Task 5 after all complete
 
 Lead Delegation:
-  Agent 1 (750 tokens): Extract parsing domain to voice_parsing.rs
-  Agent 2 (750 tokens): Extract audio domain to voice_audio.rs (parallel)
-  Agent 3 (750 tokens): Extract provider domain to voice_providers.rs (parallel)
-
+  Agent 1-4 (750 tokens each): Extract each domain in parallel
   [After agents complete]
-
-  Agent 4 (750 tokens): Update voice/mod.rs with re-exports
-  Agent 5 (750 tokens): Fix imports in cli_logic_interactive.rs
-  Agent 6 (750 tokens): Fix imports in voice tests
+  Agent 5 (750 tokens): Update mod.rs with re-exports
 
 Lead Integration (1000 tokens):
 - cargo check --all-targets
 - cargo clippy --all-targets --all-features -- -D warnings
 - cargo fmt --all
-- Update REFACTOR.md with metrics (500 lines → 3 focused modules)
 - Prepare commit
 ```
 
 ### Example 3: Bug Fix with Test-Driven Development
 
 ```
-User Request: "Fix: Voice input not capturing on Windows"
+User Request: "Fix: Tool launches require too many Enter presses"
 
 Lead Planning (1000 tokens):
-- Analyze: Windows-specific audio capture issue
-- Root cause hypothesis: PowerShell command escaping problem
+- Analyze: UX friction in tool launch flow
+- Root cause hypothesis: Unnecessary confirmation prompts
 - Breakdown:
-  * Task 1: Write failing test reproducing Windows bug
-  * Task 2: Fix PowerShell command construction in voice_native_provider.rs
-  * Task 3: Verify test passes on Windows
-- Parallelization: Task 1 first (TDD requirement), then Task 2, then Task 3
+  * Task 1: Write test capturing current behavior
+  * Task 2: Identify and remove unnecessary prompts in cli_logic_tool_execution.rs
+  * Task 3: Verify streamlined flow
+- Parallelization: Sequential (TDD requirement)
 
 Lead Delegation:
-  Agent 1 (750 tokens): Create failing test in voice/tests/test_windows_capture.rs
-
-  [After test created and verified to fail]
-
-  Agent 2 (750 tokens): Fix PowerShell escaping in voice_native_provider.rs
-
+  Agent 1 (750 tokens): Create test for tool launch flow
+  [After test documents current behavior]
+  Agent 2 (750 tokens): Streamline prompts in tool execution
   [After fix implemented]
-
-  Agent 3 (750 tokens): Run tests and verify Windows platform
+  Agent 3 (750 tokens): Verify improved UX
 
 Lead Integration (1000 tokens):
-- cargo test --features windows (verify fix)
-- cargo clippy (no new warnings)
-- Update CHANGELOG.md with bug fix entry
-- Prepare commit with test + fix
+- cargo test (verify fix)
+- Manual test: cargo run, select tool, count prompts
+- Update CHANGELOG.md with UX improvement
+- Prepare commit
 ```
 
 ---
