@@ -130,7 +130,7 @@ impl VoskProvider {
     }
 
     /// Validate that the model directory has the required structure
-    fn validate_model_structure(model_path: &PathBuf) -> Result<bool> {
+    fn validate_model_structure(model_path: &std::path::Path) -> Result<bool> {
         // Check for required files
         let required_files = vec![
             model_path.join("am/final.mdl"),
@@ -218,12 +218,12 @@ impl VoskProvider {
     }
 
     /// Transcribe audio file using Vosk
-    async fn transcribe_audio(&self, audio_path: &PathBuf) -> Result<VoiceRecognitionResult> {
+    async fn transcribe_audio(&self, audio_path: &std::path::Path) -> Result<VoiceRecognitionResult> {
         println!("[VOSK PROCESSING] Transcribing audio...");
 
         // Spawn blocking task for Vosk processing (CPU-intensive)
         let model_path = self.model_path.clone();
-        let audio_path = audio_path.clone();
+        let audio_path = audio_path.to_path_buf();
         let config_language = self.config.language.clone();
         let max_duration = self.config.max_duration;
 
@@ -249,8 +249,8 @@ impl VoskProvider {
 
     /// Blocking transcription using Vosk (runs in separate thread)
     fn transcribe_blocking(
-        model_path: &PathBuf,
-        audio_path: &PathBuf,
+        model_path: &std::path::Path,
+        audio_path: &std::path::Path,
     ) -> Result<TranscriptionResult> {
         use vosk::{Model, Recognizer};
 
@@ -283,7 +283,7 @@ impl VoskProvider {
         // Process audio in chunks (4000 samples = 0.25 seconds at 16kHz)
         let chunk_size = 4000;
         for chunk in samples.chunks(chunk_size) {
-            recognizer.accept_waveform(chunk);
+            let _ = recognizer.accept_waveform(chunk);
         }
 
         // Get final result
@@ -361,7 +361,7 @@ impl VoiceInputProvider for VoskProvider {
             // Check if audio recording tools are available
             #[cfg(target_os = "linux")]
             {
-                return super::platforms::linux::is_ready().await;
+                super::platforms::linux::is_ready().await
             }
 
             #[cfg(target_os = "windows")]
@@ -424,8 +424,7 @@ mod tests {
     #[test]
     fn test_is_model_available() {
         // Test that the check doesn't panic
-        let available = VoskProvider::is_model_available();
-        // Just verify it returns a boolean
-        assert!(available || !available);
+        let _available = VoskProvider::is_model_available();
+        // Just verify it returns a boolean (if it compiles and runs, it works)
     }
 }

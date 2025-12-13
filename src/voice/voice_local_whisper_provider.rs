@@ -15,7 +15,7 @@ use std::path::PathBuf;
 use std::pin::Pin;
 
 #[cfg(feature = "local-voice")]
-use crate::security::{SecurityError, SecurityManager};
+use crate::security::SecurityManager;
 
 #[cfg(feature = "local-voice")]
 /// Local Whisper provider using whisper.cpp (SECURE VERSION)
@@ -148,7 +148,7 @@ impl LocalWhisperProvider {
     }
 
     /// Generate safe recording commands (hardcoded, validated)
-    fn get_safe_recording_command(&self, audio_file: &PathBuf, duration_secs: u64) -> String {
+    fn get_safe_recording_command(&self, audio_file: &std::path::Path, duration_secs: u64) -> String {
         // SECURITY: Only use hardcoded, validated commands
         #[cfg(target_os = "linux")]
         {
@@ -237,11 +237,14 @@ impl LocalWhisperProvider {
 
     /// Transcribe audio using local whisper model
     async fn transcribe_audio(&self, audio_path: &PathBuf) -> Result<VoiceRecognitionResult> {
-        use whisper_rs::{FullParams, SamplingStrategy, WhisperContext};
+        use whisper_rs::{FullParams, SamplingStrategy, WhisperContext, WhisperContextParameters};
 
-        // Load the model
-        let ctx = WhisperContext::new(&self.model_path.to_string_lossy())
-            .map_err(|e| anyhow!("Failed to load whisper model: {}", e))?;
+        // Load the model using new_with_params API (whisper-rs 0.15+)
+        let ctx = WhisperContext::new_with_params(
+            &self.model_path.to_string_lossy(),
+            WhisperContextParameters::default(),
+        )
+        .map_err(|e| anyhow!("Failed to load whisper model: {}", e))?;
 
         // Read and convert audio
         let audio_data = Self::load_audio_file(audio_path)?;
@@ -267,16 +270,17 @@ impl LocalWhisperProvider {
                 .full(params, &audio_data)
                 .map_err(|e| anyhow!("Transcription failed: {}", e))?;
 
-            let num_segments = state
-                .full_n_segments()
-                .map_err(|e| anyhow!("Failed to get segments: {}", e))?;
+            // whisper-rs 0.15+ API: full_n_segments() returns i32 directly
+            let num_segments = state.full_n_segments();
 
             let mut text = String::new();
             for i in 0..num_segments {
-                let segment = state
-                    .full_get_segment_text(i)
-                    .map_err(|e| anyhow!("Failed to get segment text: {}", e))?;
-                text.push_str(&segment);
+                // whisper-rs 0.15+ API: use get_segment() which returns a WhisperSegment
+                if let Some(segment) = state.get_segment(i) {
+                    if let Ok(segment_text) = segment.to_str_lossy() {
+                        text.push_str(&segment_text);
+                    }
+                }
             }
 
             Ok::<String, anyhow::Error>(text.trim().to_string())

@@ -141,16 +141,19 @@ impl NativeVoiceProvider {
     #[cfg(all(target_os = "linux", feature = "local-voice"))]
     async fn transcribe_with_local_whisper(
         &self,
-        audio_path: &std::path::PathBuf,
+        _audio_path: &std::path::PathBuf,
     ) -> Result<String> {
         // Use the LocalWhisperProvider for local transcription
-        let local_config = VoiceProviderConfig {
+        let _local_config = VoiceProviderConfig {
             max_duration: self.config.max_duration,
             language: self.config.language.clone(),
+            min_confidence: self.config.min_confidence,
+            continuous_mode: self.config.continuous_mode,
+            wake_word: self.config.wake_word.clone(),
         };
 
-        let local_provider =
-            super::voice_local_whisper_provider::LocalWhisperProvider::new(local_config).await?;
+        let _local_provider =
+            super::voice_local_whisper_provider::LocalWhisperProvider::new(_local_config).await?;
 
         // The LocalWhisperProvider will handle the transcription
         // We'll need to pass the audio file path somehow - this is a simplified version
