@@ -138,27 +138,16 @@ impl NativeVoiceProvider {
     }
 
     /// Transcribe audio using local Whisper model
+    /// TODO: This is a placeholder - LocalWhisperProvider needs to be enhanced to accept
+    /// pre-recorded audio files. Currently it only supports live recording.
     #[cfg(all(target_os = "linux", feature = "local-voice"))]
     async fn transcribe_with_local_whisper(
         &self,
         _audio_path: &std::path::PathBuf,
     ) -> Result<String> {
-        // Use the LocalWhisperProvider for local transcription
-        let _local_config = VoiceProviderConfig {
-            max_duration: self.config.max_duration,
-            language: self.config.language.clone(),
-            min_confidence: self.config.min_confidence,
-            continuous_mode: self.config.continuous_mode,
-            wake_word: self.config.wake_word.clone(),
-        };
-
-        let _local_provider =
-            super::voice_local_whisper_provider::LocalWhisperProvider::new(_local_config).await?;
-
-        // The LocalWhisperProvider will handle the transcription
-        // We'll need to pass the audio file path somehow - this is a simplified version
-        // In reality, we'd need to enhance LocalWhisperProvider to accept pre-recorded audio
-
+        // TODO: Implement audio file transcription support in LocalWhisperProvider
+        // The provider currently records audio internally, but we need to pass
+        // the pre-recorded audio file from NativeVoiceProvider's Linux audio capture.
         Err(anyhow!(
             "Local whisper transcription from file not yet implemented.\n\
              Please use OPENAI_API_KEY for now."

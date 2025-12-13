@@ -276,6 +276,8 @@ impl LocalWhisperProvider {
             let mut text = String::new();
             for i in 0..num_segments {
                 // whisper-rs 0.15+ API: use get_segment() which returns a WhisperSegment
+                // Note: We use nested if-let because to_str_lossy() returns a Cow<str>
+                // that references the segment, so we can't use and_then here
                 if let Some(segment) = state.get_segment(i) {
                     if let Ok(segment_text) = segment.to_str_lossy() {
                         text.push_str(&segment_text);
