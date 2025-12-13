@@ -12,3 +12,6 @@ pub mod tools_startup_guidance;
 
 // Re-export main public functions for backward compatibility
 pub use tools_entry_point::*;
+
+// Re-export session continuation function for testing
+pub use tools_execution_engine::should_continue_session;

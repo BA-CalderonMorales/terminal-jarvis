@@ -63,7 +63,8 @@ pub async fn run_tool(display_name: &str, args: &[String]) -> Result<()> {
 }
 
 /// Check if a tool should continue its session after completing
-fn should_continue_session(
+/// Made pub for integration testing purposes
+pub fn should_continue_session(
     _display_name: &str,
     args: &[String],
     _execution_time: std::time::Duration,
