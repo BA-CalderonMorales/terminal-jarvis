@@ -131,6 +131,31 @@ impl ToolsRepository {
         self.base.count().await
     }
 
+    /// Find tool by display name
+    pub async fn find_by_display_name(&self, name: &str) -> Result<Option<Tool>> {
+        let sql = QueryBuilder::select(&TOOLS_TABLE)
+            .where_eq("display_name")
+            .build();
+
+        let tools = self.query_tools(&sql, [name]).await?;
+        Ok(tools.into_iter().next())
+    }
+
+    /// Set tool enabled status
+    pub async fn set_enabled(&self, id: &str, enabled: bool) -> Result<()> {
+        let sql = QueryBuilder::update(&TOOLS_TABLE)
+            .set("enabled", true)
+            .where_eq("id")
+            .build();
+
+        self.base
+            .db()
+            .execute(&sql, libsql::params![enabled as i32, id])
+            .await?;
+
+        Ok(())
+    }
+
     // =========================================================================
     // Tool Install Operations
     // =========================================================================

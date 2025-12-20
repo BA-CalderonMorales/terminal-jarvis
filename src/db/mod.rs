@@ -10,6 +10,7 @@
 //
 // - preferences/    # User preferences domain
 // - tools/          # Tool configurations domain
+// - migration/      # TOML-to-DB migration utilities
 // - credentials/    # Encrypted credentials domain (future)
 // - sessions/       # Session tracking domain (future)
 //
@@ -21,6 +22,7 @@
 // - Clear domain boundaries
 
 pub mod core;
+pub mod migration;
 pub mod preferences;
 pub mod tools;
 
@@ -32,4 +34,7 @@ pub use core::schema::{Column, ColumnType, Table, SCHEMA};
 
 // Re-export domain repositories
 pub use preferences::PreferencesRepository;
-pub use tools::ToolsRepository;
+pub use tools::{Tool, ToolsRepository};
+
+// Re-export migration utilities
+pub use migration::{ImportResult, ImportStats, TomlImporter};
