@@ -3,6 +3,7 @@ pub mod auth_manager;
 pub mod cli;
 pub mod cli_logic;
 pub mod config;
+pub mod db;
 pub mod evals;
 pub mod installation_arguments;
 pub mod logging;

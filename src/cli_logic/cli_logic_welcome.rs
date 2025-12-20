@@ -1,6 +1,7 @@
 // CLI Logic Welcome Screen
 // Displays ASCII art banner and system info on startup
 
+use crate::cli_logic::cli_logic_first_run::get_tool_status_line;
 use crate::theme::theme_global_config;
 use std::env;
 
@@ -14,12 +15,19 @@ pub fn display_welcome_screen() {
         .map(|p| p.display().to_string())
         .unwrap_or_else(|_| String::from("unknown"));
 
+    // Get tool status for display
+    let tool_status = get_tool_status_line();
+
     // T.JARVIS Bot ASCII art - professional boxy design with horizontal layout
     // Designed to work at any terminal width
     println!();
     println!("{}", theme.primary("   ┌─────┐  Terminal Jarvis"));
     println!("{}", theme.primary(&format!("   │ T.J │  v{}", version)));
-    println!("{}", theme.primary(&format!("   │ ═ ═ │  {}", cwd)));
+    println!(
+        "{}",
+        theme.secondary(&format!("   │ ═ ═ │  {}", tool_status))
+    );
+    println!("{}", theme.secondary(&format!("   │     │  {}", cwd)));
     println!(
         "{}",
         theme.accent("   └─────┘  Type /help to see available commands")

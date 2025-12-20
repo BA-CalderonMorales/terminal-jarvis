@@ -82,6 +82,9 @@ pub async fn handle_run_tool(tool: &str, args: &[String]) -> Result<()> {
     tokio::time::sleep(tokio::time::Duration::from_millis(400)).await;
     startup_progress.finish_success(&format!("Starting {tool}"));
 
+    // Save last-used tool for quick access
+    let _ = crate::cli_logic::cli_logic_first_run::save_last_used_tool(tool);
+
     // Special handling for opencode - ensure clean terminal state
     if tool == "opencode" {
         prepare_opencode_terminal_state().await?;

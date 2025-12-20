@@ -26,6 +26,14 @@ The AI CLI tool ecosystem is fragmenting. Developers are juggling claude-code, g
 | [Phase 7](phase-7-navigation-hardening.md) | Navigation Hardening | Power-user efficiency |
 | [Phase 8](phase-8-credential-intelligence.md) | Credential Intelligence | Smart API key management |
 | [Phase 9](phase-9-ecosystem-growth.md) | Ecosystem Growth | Community contributions |
+| [Phase 10](phase-10-modern-architecture.md) | **Modern Architecture** | Turso DB + Cloud Voice |
+
+## Architecture Evolution
+
+**Current State**: TOML files + whisper-rs (C++ dependency)
+**Target State**: libSQL/Turso + Cloud Voice APIs
+
+This simplifies builds, enables cloud sync, and removes C++ compilation requirements.
 
 ## Guiding Principles
 

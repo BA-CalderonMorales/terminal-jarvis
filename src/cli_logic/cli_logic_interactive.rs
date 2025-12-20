@@ -1,3 +1,4 @@
+use crate::cli_logic::cli_logic_first_run::{is_first_run, run_first_time_wizard};
 use crate::cli_logic::cli_logic_welcome::display_welcome_screen;
 use crate::installation_arguments::InstallationManager;
 use crate::theme::theme_global_config;
@@ -11,6 +12,11 @@ pub async fn handle_interactive_mode() -> Result<()> {
 
     // Export saved credentials at session start so tools inherit API keys
     let _ = crate::auth_manager::AuthManager::export_saved_env_vars();
+
+    // Run first-time wizard if this is a new installation
+    if is_first_run() {
+        run_first_time_wizard().await?;
+    }
 
     // Check NPM availability upfront
     let npm_available = InstallationManager::check_npm_available();
