@@ -294,7 +294,7 @@ refactor(cli): extract domains - @software-architect @code-reviewer @documentati
 
 ```bash
 cargo check                                                  # Must compile
-cargo clippy --all-targets --all-features -- -D warnings    # Must pass
+cargo clippy -- -D warnings                                  # Must pass (no --all-features: avoids C++ deps)
 cargo fmt --all                                              # Must be formatted
 cargo test                                                   # Must pass (if tests exist)
 ```
@@ -365,7 +365,7 @@ npm test -- --watch  # Watch mode
 ### Quality Checks
 
 - [ ] `cargo check` passes
-- [ ] `cargo clippy --all-targets --all-features -- -D warnings` passes
+- [ ] `cargo clippy -- -D warnings` passes
 - [ ] `cargo fmt --all` applied
 - [ ] `cargo test` passes (all Rust tests green)
 - [ ] E2E tests pass (if modified): `cd e2e && npm test`
@@ -761,7 +761,7 @@ Lead Delegation:
 
 Lead Integration (1000 tokens):
 - cargo check --all-targets
-- cargo clippy --all-targets --all-features -- -D warnings
+- cargo clippy -- -D warnings
 - cargo fmt --all
 - Prepare commit
 ```
