@@ -121,7 +121,6 @@ impl VoiceCommandParser {
                     "show ai tools".to_string(),
                     "ai tools menu".to_string(),
                     "tools".to_string(),
-                    "main menu".to_string(),
                 ],
                 allow_partial: true,
                 min_confidence: 0.7,
@@ -272,20 +271,32 @@ impl VoiceCommandParser {
     pub fn parse(&self, text: &str, confidence: f32) -> Result<VoiceCommand> {
         let normalized = self.normalize_text(text);
 
-        // Try to match against known patterns
-        for pattern in &self.patterns {
-            if confidence < pattern.min_confidence {
-                continue;
-            }
+        // Check for specific multi-word commands FIRST (before general patterns)
+        // These are more specific and should take priority
 
-            for phrase in &pattern.patterns {
-                if self.matches_pattern(&normalized, phrase, pattern.allow_partial) {
-                    return self.create_command(&pattern.command, &normalized, text);
-                }
-            }
+        // Check for "list installed tools" command
+        if normalized.contains("list installed")
+            || normalized.contains("installed tools")
+            || normalized.contains("show installed")
+        {
+            return Ok(VoiceCommand::ListInstalledTools);
         }
 
-        // Check for parameterized commands
+        // Check for "update all" or "upgrade all" command
+        if normalized.contains("update all") || normalized.contains("upgrade all") {
+            return Ok(VoiceCommand::UpdateAllTools);
+        }
+
+        // Check for back/navigation commands
+        if let Some(cmd) = self.try_parse_back_command(&normalized) {
+            return Ok(cmd);
+        }
+
+        if let Some(cmd) = self.try_parse_cancel_command(&normalized) {
+            return Ok(cmd);
+        }
+
+        // Check for parameterized commands (install/update/status with tool names)
         if let Some(cmd) = self.try_parse_install_command(&normalized) {
             return Ok(cmd);
         }
@@ -302,24 +313,17 @@ impl VoiceCommandParser {
             return Ok(cmd);
         }
 
-        if let Some(cmd) = self.try_parse_back_command(&normalized) {
-            return Ok(cmd);
-        }
+        // Now try to match against general patterns
+        for pattern in &self.patterns {
+            if confidence < pattern.min_confidence {
+                continue;
+            }
 
-        if let Some(cmd) = self.try_parse_cancel_command(&normalized) {
-            return Ok(cmd);
-        }
-
-        // Check for "list installed tools" command
-        if self.matches_pattern(&normalized, "list installed tools", true) {
-            return Ok(VoiceCommand::ListInstalledTools);
-        }
-
-        // Check for "update all" or "upgrade all" command
-        if self.matches_pattern(&normalized, "update all", true)
-            || self.matches_pattern(&normalized, "upgrade all", true)
-        {
-            return Ok(VoiceCommand::UpdateAllTools);
+            for phrase in &pattern.patterns {
+                if self.matches_pattern(&normalized, phrase, pattern.allow_partial) {
+                    return self.create_command(&pattern.command, &normalized, text);
+                }
+            }
         }
 
         // No match found - return unknown

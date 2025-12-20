@@ -55,6 +55,36 @@ impl DatabaseManager {
         Self::init().await
     }
 
+    /// Create an in-memory database for testing
+    #[cfg(test)]
+    pub async fn new_in_memory() -> Result<Self> {
+        use std::sync::atomic::{AtomicU64, Ordering};
+        use std::time::{SystemTime, UNIX_EPOCH};
+
+        // Use unique temp files for each test to avoid conflicts
+        // Include timestamp and counter to ensure uniqueness across runs
+        static COUNTER: AtomicU64 = AtomicU64::new(0);
+        let id = COUNTER.fetch_add(1, Ordering::SeqCst);
+        let timestamp = SystemTime::now()
+            .duration_since(UNIX_EPOCH)
+            .unwrap()
+            .as_nanos();
+        let temp_path = std::env::temp_dir()
+            .join(format!("terminal_jarvis_test_{}_{}.db", timestamp, id));
+
+        // Clean up any existing file from previous runs
+        let _ = std::fs::remove_file(&temp_path);
+
+        let db = Builder::new_local(temp_path).build().await?;
+        Ok(Self { db })
+    }
+
+    /// Run migrations on the database
+    #[cfg(test)]
+    pub async fn run_migrations(&self) -> Result<()> {
+        super::migrations::run_migrations_on_connection(self).await
+    }
+
     /// Get a connection to the database
     pub async fn connection(&self) -> Result<Connection> {
         Ok(self.db.connect()?)
