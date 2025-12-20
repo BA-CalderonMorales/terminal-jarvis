@@ -94,6 +94,12 @@ impl Cli {
                 }
             },
 
+            Some(Commands::Db { action }) => match action {
+                DbCommands::Import => cli_logic::handle_db_import().await,
+                DbCommands::Status => cli_logic::handle_db_status().await,
+                DbCommands::Reset { force } => cli_logic::handle_db_reset(force).await,
+            },
+
             // (Duplicate Auth handler removed; handled above)
             None => cli_logic::handle_interactive_mode().await,
         }
@@ -161,6 +167,12 @@ pub enum Commands {
     Benchmark {
         #[command(subcommand)]
         action: BenchmarkCommands,
+    },
+
+    /// Database management commands
+    Db {
+        #[command(subcommand)]
+        action: DbCommands,
     },
 }
 
@@ -258,5 +270,21 @@ pub enum BenchmarkCommands {
         /// Path to the scenario TOML file
         #[arg(long)]
         scenario_file: PathBuf,
+    },
+}
+
+#[derive(Subcommand)]
+pub enum DbCommands {
+    /// Import tool configurations from TOML files into database
+    Import,
+
+    /// Show database status and statistics
+    Status,
+
+    /// Reset database (WARNING: deletes all data)
+    Reset {
+        /// Confirm reset without prompting
+        #[arg(long)]
+        force: bool,
     },
 }

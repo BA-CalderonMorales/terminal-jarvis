@@ -117,10 +117,7 @@ pub async fn handle_db_status() -> Result<()> {
             );
         }
     } else {
-        println!(
-            "  {}",
-            theme.accent("Could not determine database path.")
-        );
+        println!("  {}", theme.accent("Could not determine database path."));
     }
 
     println!();
@@ -168,11 +165,86 @@ pub async fn handle_db_reset(force: bool) -> Result<()> {
             theme.secondary("Run 'terminal-jarvis db import' to reimport tool configurations.")
         );
     } else {
-        println!(
-            "{}",
-            theme.accent("Could not determine database path.")
-        );
+        println!("{}", theme.accent("Could not determine database path."));
     }
 
     Ok(())
+}
+
+/// Handle interactive database menu (for /db command)
+pub async fn handle_db_menu() -> Result<()> {
+    use crate::cli_logic::cli_logic_responsive_menu::create_themed_select;
+
+    loop {
+        let theme = theme_global_config::current_theme();
+
+        print!("\x1b[2J\x1b[H"); // Clear screen
+
+        println!("{}\n", theme.primary("Database Management"));
+
+        // Check database status
+        let has_db = DatabaseManager::get_db_path()
+            .map(|p| p.exists())
+            .unwrap_or(false);
+
+        let tool_count = if has_db {
+            if let Ok(db) = DatabaseManager::init().await {
+                let repo = crate::db::ToolsRepository::new(db);
+                repo.count().await.unwrap_or(0)
+            } else {
+                0
+            }
+        } else {
+            0
+        };
+
+        println!(
+            "  {} {}",
+            theme.secondary("Status:"),
+            if has_db {
+                format!("{} tools in database", tool_count)
+            } else {
+                "Not initialized".to_string()
+            }
+        );
+        println!();
+
+        let options = vec![
+            "Import TOML Configs".to_string(),
+            "View Database Status".to_string(),
+            "Reset Database".to_string(),
+            "Back to Main Menu".to_string(),
+        ];
+
+        let selection = match create_themed_select(&theme, "Select an action:", options.clone())
+            .with_page_size(10)
+            .prompt()
+        {
+            Ok(s) => s,
+            Err(_) => return Ok(()),
+        };
+
+        match selection.as_str() {
+            "Import TOML Configs" => {
+                handle_db_import().await?;
+                println!("\nPress Enter to continue...");
+                let mut input = String::new();
+                io::stdin().read_line(&mut input)?;
+            }
+            "View Database Status" => {
+                handle_db_status().await?;
+                println!("\nPress Enter to continue...");
+                let mut input = String::new();
+                io::stdin().read_line(&mut input)?;
+            }
+            "Reset Database" => {
+                handle_db_reset(false).await?;
+                println!("\nPress Enter to continue...");
+                let mut input = String::new();
+                io::stdin().read_line(&mut input)?;
+            }
+            "Back to Main Menu" => return Ok(()),
+            _ => {}
+        }
+    }
 }
