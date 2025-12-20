@@ -4,8 +4,11 @@
 // - Import TOML configurations
 // - Show database status
 // - Reset database
+// - Credential management
 
-use crate::db::{DatabaseManager, TomlImporter};
+use crate::db::{
+    Credential, CredentialsRepository, DatabaseManager, TomlImporter, ToolsRepository,
+};
 use crate::theme::theme_global_config;
 use anyhow::Result;
 use std::io::{self, Write};
@@ -25,15 +28,15 @@ pub async fn handle_db_import() -> Result<()> {
     println!("{}", theme.secondary("Initializing database..."));
     let db = DatabaseManager::init().await?;
 
-    // Create importer and run
+    // Create importer and run tool configs
     println!(
         "{}",
         theme.secondary("Scanning config/tools/ for TOML files...")
     );
-    let importer = TomlImporter::new(db).await?;
+    let importer = TomlImporter::new(db.clone()).await?;
     let stats = importer.import_all().await?;
 
-    // Display results
+    // Display tool import results
     println!();
     for result in &stats.results {
         let status = if result.success {
@@ -46,6 +49,21 @@ pub async fn handle_db_import() -> Result<()> {
 
     println!();
     println!("{}", theme.primary(&stats.summary()));
+
+    // Also import credentials if any exist
+    println!();
+    println!("{}", theme.secondary("Checking for saved credentials..."));
+    let creds_repo = CredentialsRepository::new(db);
+    let creds_stats = creds_repo.import_from_toml().await?;
+
+    if creds_stats.imported > 0 {
+        println!("  {} {}", theme.accent("[OK]"), creds_stats.summary());
+    } else {
+        println!(
+            "  {}",
+            theme.secondary("No saved credentials found to import")
+        );
+    }
 
     if stats.all_success() && stats.imported > 0 {
         println!();
@@ -78,7 +96,7 @@ pub async fn handle_db_status() -> Result<()> {
             // Initialize and get stats
             let db = DatabaseManager::init().await?;
             let tools_repo = crate::db::ToolsRepository::new(db.clone());
-            let prefs_repo = crate::db::PreferencesRepository::new(db);
+            let prefs_repo = crate::db::PreferencesRepository::new(db.clone());
 
             let tool_count = tools_repo.count().await?;
             let tools = tools_repo.find_all().await?;
@@ -109,6 +127,22 @@ pub async fn handle_db_status() -> Result<()> {
                 println!();
                 println!("  {}", theme.primary("Preferences:"));
                 println!("    {} {}", theme.secondary("Last used:"), last_tool);
+            }
+
+            // Show credentials summary
+            let creds_repo = CredentialsRepository::new(db);
+            let all_creds = creds_repo.get_all_as_map().await?;
+            if !all_creds.is_empty() {
+                println!();
+                println!("  {}", theme.primary("Stored Credentials:"));
+                for (tool_id, vars) in all_creds.iter() {
+                    println!(
+                        "    {} {} ({} keys)",
+                        theme.accent("[+]"),
+                        tool_id,
+                        vars.len()
+                    );
+                }
             }
         } else {
             println!(
@@ -212,6 +246,7 @@ pub async fn handle_db_menu() -> Result<()> {
         let options = vec![
             "Import TOML Configs".to_string(),
             "View Database Status".to_string(),
+            "Manage Credentials".to_string(),
             "Reset Database".to_string(),
             "Back to Main Menu".to_string(),
         ];
@@ -237,6 +272,9 @@ pub async fn handle_db_menu() -> Result<()> {
                 let mut input = String::new();
                 io::stdin().read_line(&mut input)?;
             }
+            "Manage Credentials" => {
+                handle_credentials_menu().await?;
+            }
             "Reset Database" => {
                 handle_db_reset(false).await?;
                 println!("\nPress Enter to continue...");
@@ -244,6 +282,208 @@ pub async fn handle_db_menu() -> Result<()> {
                 io::stdin().read_line(&mut input)?;
             }
             "Back to Main Menu" => return Ok(()),
+            _ => {}
+        }
+    }
+}
+
+/// Handle credentials management menu
+pub async fn handle_credentials_menu() -> Result<()> {
+    use crate::cli_logic::cli_logic_responsive_menu::create_themed_select;
+    use inquire::Text;
+
+    loop {
+        let theme = theme_global_config::current_theme();
+
+        print!("\x1b[2J\x1b[H"); // Clear screen
+
+        println!("{}\n", theme.primary("Credential Management"));
+
+        // Get current credentials
+        let db = DatabaseManager::init().await?;
+        let creds_repo = CredentialsRepository::new(db.clone());
+        let tools_repo = ToolsRepository::new(db);
+        let all_creds = creds_repo.get_all_as_map().await?;
+        let all_tools = tools_repo.find_all().await?;
+
+        // Show configured tools
+        println!("  {}", theme.secondary("Configured tools:"));
+        if all_creds.is_empty() {
+            println!("    {}", theme.secondary("(none)"));
+        } else {
+            for (tool_id, vars) in &all_creds {
+                let var_names: Vec<&str> = vars.keys().map(|s| s.as_str()).collect();
+                println!(
+                    "    {} {} - {}",
+                    theme.accent("[+]"),
+                    tool_id,
+                    var_names.join(", ")
+                );
+            }
+        }
+        println!();
+
+        // Show tools without credentials
+        let unconfigured: Vec<_> = all_tools
+            .iter()
+            .filter(|t| !all_creds.contains_key(&t.id))
+            .collect();
+
+        if !unconfigured.is_empty() {
+            println!("  {}", theme.secondary("Tools without credentials:"));
+            for tool in unconfigured.iter().take(5) {
+                println!("    {} {}", theme.secondary("[-]"), tool.display_name);
+            }
+            if unconfigured.len() > 5 {
+                println!("    ... and {} more", unconfigured.len() - 5);
+            }
+            println!();
+        }
+
+        let options = vec![
+            "Add/Update Credential".to_string(),
+            "View Credentials".to_string(),
+            "Remove Credential".to_string(),
+            "Import from TOML".to_string(),
+            "Back".to_string(),
+        ];
+
+        let selection = match create_themed_select(&theme, "Select an action:", options.clone())
+            .with_page_size(10)
+            .prompt()
+        {
+            Ok(s) => s,
+            Err(_) => return Ok(()),
+        };
+
+        match selection.as_str() {
+            "Add/Update Credential" => {
+                // Select tool
+                let mut tool_options: Vec<String> = all_tools
+                    .iter()
+                    .map(|t| format!("{} ({})", t.display_name, t.id))
+                    .collect();
+                tool_options.push("Cancel".to_string());
+
+                let tool_selection =
+                    match create_themed_select(&theme, "Select tool:", tool_options.clone())
+                        .with_page_size(12)
+                        .prompt()
+                    {
+                        Ok(s) => s,
+                        Err(_) => continue,
+                    };
+
+                if tool_selection == "Cancel" {
+                    continue;
+                }
+
+                // Extract tool id from selection
+                let tool_id = tool_selection
+                    .split('(')
+                    .next_back()
+                    .and_then(|s| s.strip_suffix(')'))
+                    .unwrap_or(&tool_selection);
+
+                // Get env var name
+                let env_var = match Text::new(
+                    "Environment variable name (e.g., ANTHROPIC_API_KEY):",
+                )
+                .prompt()
+                {
+                    Ok(v) if !v.is_empty() => v,
+                    _ => continue,
+                };
+
+                // Get value (masked input)
+                let value = match Text::new(&format!("Value for {}:", env_var)).prompt() {
+                    Ok(v) if !v.is_empty() => v,
+                    _ => continue,
+                };
+
+                // Save to database
+                let cred = Credential::builder(tool_id, &env_var).value(&value).build();
+
+                let db = DatabaseManager::init().await?;
+                let creds_repo = CredentialsRepository::new(db);
+                creds_repo.save(&cred).await?;
+
+                println!("\n{}", theme.accent("Credential saved!"));
+                println!("\nPress Enter to continue...");
+                let mut input = String::new();
+                io::stdin().read_line(&mut input)?;
+            }
+            "View Credentials" => {
+                println!();
+                if all_creds.is_empty() {
+                    println!("{}", theme.secondary("No credentials stored."));
+                } else {
+                    for (tool_id, vars) in &all_creds {
+                        println!("  {} {}:", theme.primary("[Tool]"), tool_id);
+                        for (env_var, value) in vars {
+                            // Mask the value
+                            let masked = if value.len() > 8 {
+                                format!("{}...{}", &value[..4], &value[value.len() - 4..])
+                            } else {
+                                "****".to_string()
+                            };
+                            println!("    {} = {}", env_var, masked);
+                        }
+                    }
+                }
+                println!("\nPress Enter to continue...");
+                let mut input = String::new();
+                io::stdin().read_line(&mut input)?;
+            }
+            "Remove Credential" => {
+                if all_creds.is_empty() {
+                    println!("\n{}", theme.secondary("No credentials to remove."));
+                } else {
+                    // Build list of tool/var pairs
+                    let mut remove_options: Vec<String> = Vec::new();
+                    for (tool_id, vars) in &all_creds {
+                        for env_var in vars.keys() {
+                            remove_options.push(format!("{} / {}", tool_id, env_var));
+                        }
+                    }
+                    remove_options.push("Cancel".to_string());
+
+                    let remove_selection = match create_themed_select(
+                        &theme,
+                        "Select credential to remove:",
+                        remove_options,
+                    )
+                    .with_page_size(12)
+                    .prompt()
+                    {
+                        Ok(s) => s,
+                        Err(_) => continue,
+                    };
+
+                    if remove_selection != "Cancel" {
+                        let parts: Vec<&str> = remove_selection.split(" / ").collect();
+                        if parts.len() == 2 {
+                            let db = DatabaseManager::init().await?;
+                            let creds_repo = CredentialsRepository::new(db);
+                            creds_repo.delete(parts[0], parts[1]).await?;
+                            println!("\n{}", theme.accent("Credential removed!"));
+                        }
+                    }
+                }
+                println!("\nPress Enter to continue...");
+                let mut input = String::new();
+                io::stdin().read_line(&mut input)?;
+            }
+            "Import from TOML" => {
+                let db = DatabaseManager::init().await?;
+                let creds_repo = CredentialsRepository::new(db);
+                let stats = creds_repo.import_from_toml().await?;
+                println!("\n{}", theme.primary(&stats.summary()));
+                println!("\nPress Enter to continue...");
+                let mut input = String::new();
+                io::stdin().read_line(&mut input)?;
+            }
+            "Back" => return Ok(()),
             _ => {}
         }
     }
