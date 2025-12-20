@@ -44,7 +44,7 @@ pub async fn handle_interactive_mode() -> Result<()> {
     print!("\x1b[2J\x1b[H");
     display_welcome_screen();
 
-    // Show additional interface info
+    // Show additional interface info (minimal - no command list to reduce cognitive load)
     display_welcome_interface(&theme, npm_available).await?;
 
     loop {
@@ -176,12 +176,11 @@ async fn execute_command(
     Ok(false)
 }
 
-/// Refresh screen after submenu returns
+/// Refresh screen after submenu returns - minimal, same as startup
 async fn refresh_screen(theme: &crate::theme::Theme, npm_available: bool) -> Result<()> {
     print!("\x1b[2J\x1b[H");
     display_welcome_screen();
     display_welcome_interface(theme, npm_available).await?;
-    display_available_commands(theme);
     Ok(())
 }
 
@@ -197,66 +196,152 @@ async fn display_welcome_interface(theme: &crate::theme::Theme, npm_available: b
     Ok(())
 }
 
-/// Display available slash commands
+/// Display available slash commands - styled per theme
 fn display_available_commands(theme: &crate::theme::Theme) {
     println!();
-    println!("{}", theme.accent("Available Commands:"));
-    println!(
-        "  {} {} - AI CLI Tools",
-        theme.secondary("/tools"),
-        theme.secondary("(/t)")
-    );
-    println!(
-        "  {} {} - Evals & Comparisons",
-        theme.secondary("/evals"),
-        theme.secondary("(/e)")
-    );
-    println!(
-        "  {}  {} - Authentication",
-        theme.secondary("/auth"),
-        theme.secondary("(/a)")
-    );
-    println!(
-        "  {} {} - Important Links",
-        theme.secondary("/links"),
-        theme.secondary("(/l)")
-    );
-    println!(
-        "  {} {} - Settings",
-        theme.secondary("/settings"),
-        theme.secondary("(/s)")
-    );
-    println!("  {}    - Database Management", theme.secondary("/db"));
-    println!("  {} - Change UI Theme", theme.secondary("/theme"));
-    println!(
-        "  {}  {} - Show this help",
-        theme.secondary("/help"),
-        theme.secondary("(/h)")
-    );
-    println!(
-        "  {}  {} - Exit",
-        theme.secondary("/exit"),
-        theme.secondary("(/q)")
-    );
-    println!();
-    println!(
-        "{}",
-        theme.secondary("Tip: Type / then Tab for autocomplete, arrows to navigate")
-    );
+
+    match theme.name {
+        "Minimal" => {
+            // Ultra-minimal: no colors, just aligned text
+            println!("Commands:");
+            println!("  /tools, /t    AI CLI Tools");
+            println!("  /evals, /e    Evals & Comparisons");
+            println!("  /auth, /a     Authentication");
+            println!("  /links, /l    Important Links");
+            println!("  /settings, /s Settings");
+            println!("  /db           Database Management");
+            println!("  /theme        Change UI Theme");
+            println!("  /help, /h     Show this help");
+            println!("  /exit, /q     Exit");
+            println!();
+            println!("{}", theme.accent(":: Tab to autocomplete"));
+        }
+        "Terminal" => {
+            // Hacker aesthetic: brackets, monospace feel
+            println!("{}", theme.primary("[COMMAND LIST]"));
+            println!(
+                "{}",
+                theme.secondary("+-----------+--------------------------------+")
+            );
+            println!(
+                "{} {} {}",
+                theme.accent("|"),
+                theme.primary("/tools    "),
+                theme.secondary("| Launch AI coding assistants    |")
+            );
+            println!(
+                "{} {} {}",
+                theme.accent("|"),
+                theme.primary("/evals    "),
+                theme.secondary("| Tool evaluations & benchmarks  |")
+            );
+            println!(
+                "{} {} {}",
+                theme.accent("|"),
+                theme.primary("/auth     "),
+                theme.secondary("| Manage API credentials         |")
+            );
+            println!(
+                "{} {} {}",
+                theme.accent("|"),
+                theme.primary("/links    "),
+                theme.secondary("| Documentation & resources      |")
+            );
+            println!(
+                "{} {} {}",
+                theme.accent("|"),
+                theme.primary("/settings "),
+                theme.secondary("| Install/update/configure       |")
+            );
+            println!(
+                "{} {} {}",
+                theme.accent("|"),
+                theme.primary("/db       "),
+                theme.secondary("| Database operations            |")
+            );
+            println!(
+                "{} {} {}",
+                theme.accent("|"),
+                theme.primary("/theme    "),
+                theme.secondary("| Switch visual theme            |")
+            );
+            println!(
+                "{} {} {}",
+                theme.accent("|"),
+                theme.primary("/help     "),
+                theme.secondary("| Display this command list      |")
+            );
+            println!(
+                "{} {} {}",
+                theme.accent("|"),
+                theme.primary("/exit     "),
+                theme.secondary("| Terminate session              |")
+            );
+            println!(
+                "{}",
+                theme.secondary("+-----------+--------------------------------+")
+            );
+            println!(
+                "{}",
+                theme.accent("$ Tab for autocomplete, arrows to navigate")
+            );
+        }
+        _ => {
+            // Default TJarvis: Modern with colors and symbols
+            println!("{}", theme.accent("Available Commands:"));
+            println!(
+                "  {} {} - AI CLI Tools",
+                theme.secondary("/tools"),
+                theme.secondary("(/t)")
+            );
+            println!(
+                "  {} {} - Evals & Comparisons",
+                theme.secondary("/evals"),
+                theme.secondary("(/e)")
+            );
+            println!(
+                "  {}  {} - Authentication",
+                theme.secondary("/auth"),
+                theme.secondary("(/a)")
+            );
+            println!(
+                "  {} {} - Important Links",
+                theme.secondary("/links"),
+                theme.secondary("(/l)")
+            );
+            println!(
+                "  {} {} - Settings",
+                theme.secondary("/settings"),
+                theme.secondary("(/s)")
+            );
+            println!("  {}    - Database Management", theme.secondary("/db"));
+            println!("  {} - Change UI Theme", theme.secondary("/theme"));
+            println!(
+                "  {}  {} - Show this help",
+                theme.secondary("/help"),
+                theme.secondary("(/h)")
+            );
+            println!(
+                "  {}  {} - Exit",
+                theme.secondary("/exit"),
+                theme.secondary("(/q)")
+            );
+            println!();
+            println!(
+                "{}",
+                theme.secondary("Tip: Type / then Tab for autocomplete, arrows to navigate")
+            );
+        }
+    }
 }
 
 /// Handle theme selection menu
 async fn handle_theme_selection() -> Result<()> {
+    use crate::cli_logic::themed_components::themed_select;
     use crate::db::core::connection::DatabaseManager;
     use crate::theme::{theme_global_config::ThemeConfig, theme_persistence};
-    use inquire::Select;
 
-    let theme = theme_global_config::current_theme();
     let current_type = theme_global_config::current_theme_type();
-
-    println!();
-    println!("{}", theme.accent("Theme Selection"));
-    println!();
 
     // Build options with current indicator
     let themes = ThemeConfig::available_themes();
@@ -271,7 +356,7 @@ async fn handle_theme_selection() -> Result<()> {
         })
         .collect();
 
-    let selection = Select::new("Select a theme:", options.clone()).prompt();
+    let selection = themed_select("Select a theme:", options.clone()).prompt();
 
     match selection {
         Ok(selected) => {
@@ -299,6 +384,7 @@ async fn handle_theme_selection() -> Result<()> {
             }
         }
         Err(_) => {
+            let theme = theme_global_config::current_theme();
             println!("{}", theme.secondary("Theme selection cancelled"));
         }
     }
