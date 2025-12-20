@@ -1,6 +1,7 @@
 // CLI Logic First-Run Experience
 // Handles first-run detection, tool discovery, and onboarding wizard
 
+use crate::db::{DatabaseManager, PreferencesRepository, TomlImporter};
 use crate::theme::theme_global_config;
 use crate::tools::ToolManager;
 use anyhow::Result;
@@ -93,6 +94,15 @@ pub async fn run_first_time_wizard() -> Result<()> {
     let detection = detect_tools();
     display_detected_tools(&detection);
 
+    // Initialize database and import tool configs in background
+    println!();
+    println!("   {}", theme.secondary("Setting up database..."));
+    if let Err(e) = initialize_database().await {
+        println!("   {} Database setup failed: {}", theme.accent("[!]"), e);
+    } else {
+        println!("   {} Configuration database ready", theme.accent("[OK]"));
+    }
+
     print!("\n   Press Enter to continue...");
     io::stdout().flush()?;
     input.clear();
@@ -182,6 +192,27 @@ pub fn get_tool_status_line() -> String {
     format!("Tools: {}", tools_str)
 }
 
+/// Initialize the database during first run
+async fn initialize_database() -> Result<()> {
+    // Initialize database (creates schema)
+    let db = DatabaseManager::init().await?;
+
+    // Import TOML tool configurations
+    let importer = TomlImporter::new(db.clone()).await?;
+    let stats = importer.import_all().await?;
+
+    // Store first-run timestamp in preferences
+    let prefs_repo = PreferencesRepository::new(db);
+    prefs_repo
+        .set("first_run_completed", &chrono::Utc::now().to_rfc3339())
+        .await?;
+    prefs_repo
+        .set("tools_imported", &stats.imported.to_string())
+        .await?;
+
+    Ok(())
+}
+
 // --- Last-Used Tool Tracking ---
 
 /// Get the path to the preferences file
@@ -189,8 +220,10 @@ fn get_preferences_path() -> Option<PathBuf> {
     get_config_dir().map(|d| d.join("preferences.json"))
 }
 
-/// Save the last-used tool
+/// Save the last-used tool (hybrid: database + file fallback)
 pub fn save_last_used_tool(tool: &str) -> Result<()> {
+    // Try database first (async context required)
+    // Fall back to file-based for sync context
     if let Some(prefs_path) = get_preferences_path() {
         if let Some(parent) = prefs_path.parent() {
             fs::create_dir_all(parent)?;
@@ -204,8 +237,20 @@ pub fn save_last_used_tool(tool: &str) -> Result<()> {
     Ok(())
 }
 
-/// Get the last-used tool
+/// Save the last-used tool to database (async version)
+pub async fn save_last_used_tool_async(tool: &str) -> Result<()> {
+    let db = DatabaseManager::init().await?;
+    let prefs_repo = PreferencesRepository::new(db);
+    prefs_repo.set_last_used_tool(tool).await?;
+
+    // Also save to file for backwards compatibility
+    let _ = save_last_used_tool(tool);
+    Ok(())
+}
+
+/// Get the last-used tool (hybrid: database + file fallback)
 pub fn get_last_used_tool() -> Option<String> {
+    // Try file-based first (sync context)
     let prefs_path = get_preferences_path()?;
     let content = fs::read_to_string(&prefs_path).ok()?;
     let prefs: serde_json::Value = serde_json::from_str(&content).ok()?;
@@ -213,6 +258,13 @@ pub fn get_last_used_tool() -> Option<String> {
         .get("last_used_tool")
         .and_then(|v| v.as_str())
         .map(|s| s.to_string())
+}
+
+/// Get the last-used tool from database (async version)
+pub async fn get_last_used_tool_async() -> Option<String> {
+    let db = DatabaseManager::init().await.ok()?;
+    let prefs_repo = PreferencesRepository::new(db);
+    prefs_repo.get_last_used_tool().await.ok().flatten()
 }
 
 #[cfg(test)]
