@@ -17,10 +17,16 @@ struct Migration {
 }
 
 /// All migrations in order
-const MIGRATIONS: &[Migration] = &[Migration {
-    version: 1,
-    name: "initial_schema",
-}];
+const MIGRATIONS: &[Migration] = &[
+    Migration {
+        version: 1,
+        name: "initial_schema",
+    },
+    Migration {
+        version: 2,
+        name: "credentials_unique_constraint",
+    },
+];
 
 /// Run all pending migrations
 pub async fn run_migrations(db: &Arc<DatabaseManager>) -> Result<()> {
@@ -64,6 +70,7 @@ async fn get_current_version(db: &Arc<DatabaseManager>) -> Result<i32> {
 async fn apply_migration(db: &Arc<DatabaseManager>, migration: &Migration) -> Result<()> {
     match migration.version {
         1 => migrate_v1_initial_schema(db).await?,
+        2 => migrate_v2_credentials_unique(db).await?,
         _ => {
             return Err(anyhow::anyhow!(
                 "Unknown migration version: {}",
@@ -94,6 +101,38 @@ async fn migrate_v1_initial_schema(db: &Arc<DatabaseManager>) -> Result<()> {
         let ddl = table.create_table_sql();
         db.execute(&ddl, ()).await?;
     }
+
+    Ok(())
+}
+
+/// Migration v2: Add unique constraint to credentials table
+async fn migrate_v2_credentials_unique(db: &Arc<DatabaseManager>) -> Result<()> {
+    // SQLite doesn't support ALTER TABLE ADD CONSTRAINT directly
+    // So we recreate the table with proper constraints
+
+    // 1. Create new table with unique constraint
+    let create_new = "CREATE TABLE IF NOT EXISTS credentials_new (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        tool_id TEXT NOT NULL,
+        env_var TEXT NOT NULL,
+        encrypted_value TEXT,
+        updated_at TEXT DEFAULT CURRENT_TIMESTAMP,
+        UNIQUE(tool_id, env_var)
+    )";
+    db.execute(create_new, ()).await?;
+
+    // 2. Copy data (ignore duplicates)
+    let copy_data = "INSERT OR IGNORE INTO credentials_new 
+        (tool_id, env_var, encrypted_value, updated_at)
+        SELECT tool_id, env_var, encrypted_value, updated_at FROM credentials";
+    db.execute(copy_data, ()).await?;
+
+    // 3. Drop old table
+    db.execute("DROP TABLE IF EXISTS credentials", ()).await?;
+
+    // 4. Rename new table
+    db.execute("ALTER TABLE credentials_new RENAME TO credentials", ())
+        .await?;
 
     Ok(())
 }

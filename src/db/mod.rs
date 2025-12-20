@@ -10,8 +10,8 @@
 //
 // - preferences/    # User preferences domain
 // - tools/          # Tool configurations domain
+// - credentials/    # Secure credential storage
 // - migration/      # TOML-to-DB migration utilities
-// - credentials/    # Encrypted credentials domain (future)
 // - sessions/       # Session tracking domain (future)
 //
 // Benefits:
@@ -22,6 +22,7 @@
 // - Clear domain boundaries
 
 pub mod core;
+pub mod credentials;
 pub mod migration;
 pub mod preferences;
 pub mod tools;
@@ -33,6 +34,7 @@ pub use core::repository::BaseRepository;
 pub use core::schema::{Column, ColumnType, Table, SCHEMA};
 
 // Re-export domain repositories
+pub use credentials::{Credential, CredentialsRepository};
 pub use preferences::PreferencesRepository;
 pub use tools::{Tool, ToolsRepository};
 
