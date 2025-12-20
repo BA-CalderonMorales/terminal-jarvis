@@ -92,6 +92,14 @@ pub async fn handle_interactive_mode() -> Result<()> {
                 display_welcome_interface(&theme, npm_available).await?;
                 display_available_commands(&theme);
             }
+            "/db" => {
+                print!("\x1b[2J\x1b[H");
+                crate::cli_logic::handle_db_menu().await?;
+                print!("\x1b[2J\x1b[H");
+                display_welcome_screen();
+                display_welcome_interface(&theme, npm_available).await?;
+                display_available_commands(&theme);
+            }
             "/exit" | "/quit" => {
                 print!("{}", theme.reset());
                 print!("\x1b[2J\x1b[H");
@@ -135,6 +143,7 @@ fn display_available_commands(theme: &crate::theme::Theme) {
     println!("  {}   - Authentication", theme.secondary("/auth"));
     println!("  {}  - Important Links", theme.secondary("/links"));
     println!("  {}  - Settings", theme.secondary("/settings"));
+    println!("  {}     - Database Management", theme.secondary("/db"));
     println!("  {}   - Show this help", theme.secondary("/help"));
     println!("  {}   - Exit Terminal Jarvis", theme.secondary("/exit"));
 }
