@@ -7,53 +7,150 @@
 // - Confirm dialogs
 //
 // Design principles:
-// 1. Clean, minimalistic appearance
-// 2. Consistent color usage across all components
-// 3. Theme-aware: colors adapt to TJarvis/Classic/Matrix themes
+// 1. Each theme has a DRAMATICALLY different visual identity
+// 2. TJarvis: Modern professional with cyan accents and Unicode symbols
+// 3. Classic: Ultra-minimal, monochrome, ASCII-only, understated
+// 4. Matrix: Hacker aesthetic with green, bold symbols, terminal feel
 
 use crate::theme::{theme_global_config, Theme};
 use inquire::ui::{Attributes, Color as InquireColor, RenderConfig, StyleSheet, Styled};
 use inquire::{Confirm, MultiSelect, Select, Text};
 
-/// Color palette derived from theme
-/// Maps semantic colors (primary, accent, muted) to inquire colors
-struct ThemePalette {
+/// Visual style elements that differ per theme
+/// Each theme has distinct symbols, prefixes, and styling approach
+struct ThemeStyle {
+    // Colors
     primary: InquireColor,
     accent: InquireColor,
     muted: InquireColor,
     highlight: InquireColor,
+    // Symbols and prefixes - these make themes visually distinct
+    prompt_prefix: &'static str,
+    answered_prefix: &'static str,
+    selected_prefix: &'static str,
+    scroll_up: &'static str,
+    scroll_down: &'static str,
+    autocomplete_prefix: &'static str,
+    // Styling attributes
+    use_bold_selection: bool,
+    use_italic_help: bool,
 }
 
-impl ThemePalette {
-    /// Create palette from theme name
+impl ThemeStyle {
+    /// Create style from theme name - each theme is dramatically different
     fn from_theme(theme: &Theme) -> Self {
         match theme.name {
             "Default" => Self {
-                // TJarvis: Cyan-based professional look
+                // TJarvis: Modern professional - cyan with Unicode symbols
                 primary: InquireColor::LightCyan,
                 accent: InquireColor::DarkCyan,
                 muted: InquireColor::DarkGrey,
                 highlight: InquireColor::White,
+                // Modern Unicode symbols
+                prompt_prefix: "?",
+                answered_prefix: "✓",
+                selected_prefix: "▶",
+                scroll_up: "↑",
+                scroll_down: "↓",
+                autocomplete_prefix: "›",
+                use_bold_selection: true,
+                use_italic_help: false,
             },
             "Minimal" => Self {
-                // Classic: Clean gray/white minimal aesthetic
-                primary: InquireColor::White,
-                accent: InquireColor::DarkCyan,
+                // Classic: Ultra-minimal - grayscale, ASCII only, understated
+                primary: InquireColor::Grey,
+                accent: InquireColor::White,
                 muted: InquireColor::DarkGrey,
-                highlight: InquireColor::LightCyan,
+                highlight: InquireColor::White,
+                // Simple ASCII - no Unicode
+                prompt_prefix: "::",
+                answered_prefix: "*",
+                selected_prefix: ">",
+                scroll_up: "^",
+                scroll_down: "v",
+                autocomplete_prefix: "-",
+                use_bold_selection: false, // No bold - ultra minimal
+                use_italic_help: true,     // Italic help for subtle distinction
             },
             "Terminal" => Self {
-                // Matrix: Green terminal hacker aesthetic
+                // Matrix: Hacker terminal - green, bold, dramatic
                 primary: InquireColor::LightGreen,
                 accent: InquireColor::DarkGreen,
                 muted: InquireColor::DarkGrey,
-                highlight: InquireColor::White,
+                highlight: InquireColor::LightGreen,
+                // Terminal/hacker symbols
+                prompt_prefix: "$",
+                answered_prefix: "[OK]",
+                selected_prefix: ">>",
+                scroll_up: "[^]",
+                scroll_down: "[v]",
+                autocomplete_prefix: "$",
+                use_bold_selection: true,
+                use_italic_help: false,
             },
             _ => Self {
                 primary: InquireColor::LightCyan,
                 accent: InquireColor::DarkCyan,
                 muted: InquireColor::DarkGrey,
                 highlight: InquireColor::White,
+                prompt_prefix: "?",
+                answered_prefix: "✓",
+                selected_prefix: "▶",
+                scroll_up: "↑",
+                scroll_down: "↓",
+                autocomplete_prefix: "›",
+                use_bold_selection: true,
+                use_italic_help: false,
+            },
+        }
+    }
+
+    /// Create style directly from theme name - useful for testing
+    #[cfg(test)]
+    fn from_theme_name(name: &str) -> Self {
+        match name {
+            "Default" => Self::from_theme(&crate::theme::theme_global_config::current_theme()),
+            "Minimal" => Self {
+                primary: InquireColor::Grey,
+                accent: InquireColor::White,
+                muted: InquireColor::DarkGrey,
+                highlight: InquireColor::White,
+                prompt_prefix: "::",
+                answered_prefix: "*",
+                selected_prefix: ">",
+                scroll_up: "^",
+                scroll_down: "v",
+                autocomplete_prefix: "-",
+                use_bold_selection: false,
+                use_italic_help: true,
+            },
+            "Terminal" => Self {
+                primary: InquireColor::LightGreen,
+                accent: InquireColor::DarkGreen,
+                muted: InquireColor::DarkGrey,
+                highlight: InquireColor::LightGreen,
+                prompt_prefix: "$",
+                answered_prefix: "[OK]",
+                selected_prefix: ">>",
+                scroll_up: "[^]",
+                scroll_down: "[v]",
+                autocomplete_prefix: "$",
+                use_bold_selection: true,
+                use_italic_help: false,
+            },
+            _ => Self {
+                primary: InquireColor::LightCyan,
+                accent: InquireColor::DarkCyan,
+                muted: InquireColor::DarkGrey,
+                highlight: InquireColor::White,
+                prompt_prefix: "?",
+                answered_prefix: "✓",
+                selected_prefix: "▶",
+                scroll_up: "↑",
+                scroll_down: "↓",
+                autocomplete_prefix: "›",
+                use_bold_selection: true,
+                use_italic_help: false,
             },
         }
     }
@@ -62,53 +159,77 @@ impl ThemePalette {
 /// Create a unified RenderConfig for inquire components
 /// This is the single source of truth for menu styling
 fn create_render_config(theme: &Theme) -> RenderConfig<'static> {
-    let palette = ThemePalette::from_theme(theme);
+    let style = ThemeStyle::from_theme(theme);
+
+    // Build selected option style based on theme preferences
+    let selected_style = if style.use_bold_selection {
+        StyleSheet::new()
+            .with_fg(style.highlight)
+            .with_attr(Attributes::BOLD)
+    } else {
+        StyleSheet::new().with_fg(style.highlight)
+    };
+
+    // Build help message style
+    let help_style = if style.use_italic_help {
+        StyleSheet::new()
+            .with_fg(style.muted)
+            .with_attr(Attributes::ITALIC)
+    } else {
+        StyleSheet::new().with_fg(style.muted)
+    };
 
     RenderConfig::default()
-        // Prompt styling
-        .with_prompt_prefix(Styled::new("?").with_fg(palette.accent))
-        .with_answered_prompt_prefix(Styled::new("✓").with_fg(palette.accent))
-        // Option styling - clean and readable
-        .with_option(StyleSheet::new().with_fg(palette.primary))
-        // Highlighted option - bold with marker
-        .with_highlighted_option_prefix(Styled::new("▶").with_fg(palette.accent))
-        .with_selected_option(Some(
-            StyleSheet::new()
-                .with_fg(palette.highlight)
-                .with_attr(Attributes::BOLD),
-        ))
+        // Prompt styling - distinct per theme
+        .with_prompt_prefix(Styled::new(style.prompt_prefix).with_fg(style.accent))
+        .with_answered_prompt_prefix(Styled::new(style.answered_prefix).with_fg(style.accent))
+        // Option styling
+        .with_option(StyleSheet::new().with_fg(style.primary))
+        // Highlighted option - distinct marker per theme
+        .with_highlighted_option_prefix(Styled::new(style.selected_prefix).with_fg(style.accent))
+        .with_selected_option(Some(selected_style))
         // Input styling
-        .with_text_input(StyleSheet::new().with_fg(palette.primary))
-        .with_default_value(StyleSheet::new().with_fg(palette.muted))
+        .with_text_input(StyleSheet::new().with_fg(style.primary))
+        .with_default_value(StyleSheet::new().with_fg(style.muted))
         // Help and hints
-        .with_help_message(StyleSheet::new().with_fg(palette.muted))
-        // Scroll indicators
-        .with_scroll_up_prefix(Styled::new("↑").with_fg(palette.muted))
-        .with_scroll_down_prefix(Styled::new("↓").with_fg(palette.muted))
+        .with_help_message(help_style)
+        // Scroll indicators - distinct per theme
+        .with_scroll_up_prefix(Styled::new(style.scroll_up).with_fg(style.muted))
+        .with_scroll_down_prefix(Styled::new(style.scroll_down).with_fg(style.muted))
 }
 
 /// Create a RenderConfig optimized for autocomplete suggestions
-/// Uses muted colors for the suggestion list to reduce visual noise
 fn create_autocomplete_config(theme: &Theme) -> RenderConfig<'static> {
-    let palette = ThemePalette::from_theme(theme);
+    let style = ThemeStyle::from_theme(theme);
+
+    // Build help style
+    let help_style = if style.use_italic_help {
+        StyleSheet::new()
+            .with_fg(style.muted)
+            .with_attr(Attributes::ITALIC)
+    } else {
+        StyleSheet::new().with_fg(style.muted)
+    };
 
     RenderConfig::default()
-        // Minimal prompt - just a chevron
-        .with_prompt_prefix(Styled::new(">").with_fg(palette.accent))
-        .with_answered_prompt_prefix(Styled::new(">").with_fg(palette.accent))
-        // Text input is primary color (what user types)
-        .with_text_input(StyleSheet::new().with_fg(palette.primary))
-        // Suggestions are muted (background hints)
-        .with_option(StyleSheet::new().with_fg(palette.muted))
-        .with_default_value(StyleSheet::new().with_fg(palette.muted))
-        // Selected suggestion pops with accent
-        .with_highlighted_option_prefix(Styled::new(">").with_fg(palette.accent))
-        .with_selected_option(Some(StyleSheet::new().with_fg(palette.accent)))
-        // Minimal help
-        .with_help_message(StyleSheet::new().with_fg(palette.muted))
+        // Theme-specific prompt
+        .with_prompt_prefix(Styled::new(style.autocomplete_prefix).with_fg(style.accent))
+        .with_answered_prompt_prefix(Styled::new(style.autocomplete_prefix).with_fg(style.accent))
+        // Text input is primary color
+        .with_text_input(StyleSheet::new().with_fg(style.primary))
+        // Suggestions are muted
+        .with_option(StyleSheet::new().with_fg(style.muted))
+        .with_default_value(StyleSheet::new().with_fg(style.muted))
+        // Selected suggestion
+        .with_highlighted_option_prefix(
+            Styled::new(style.autocomplete_prefix).with_fg(style.accent),
+        )
+        .with_selected_option(Some(StyleSheet::new().with_fg(style.accent)))
+        // Help
+        .with_help_message(help_style)
         // Scroll indicators
-        .with_scroll_up_prefix(Styled::new("↑").with_fg(palette.muted))
-        .with_scroll_down_prefix(Styled::new("↓").with_fg(palette.muted))
+        .with_scroll_up_prefix(Styled::new(style.scroll_up).with_fg(style.muted))
+        .with_scroll_down_prefix(Styled::new(style.scroll_down).with_fg(style.muted))
 }
 
 // =============================================================================
@@ -212,11 +333,37 @@ mod tests {
     use crate::theme::theme_global_config;
 
     #[test]
-    fn test_theme_palette_default() {
+    fn test_theme_style_default() {
         let theme = theme_global_config::current_theme();
-        let palette = ThemePalette::from_theme(&theme);
-        // Default theme should use cyan-based colors
-        assert!(matches!(palette.primary, InquireColor::LightCyan));
+        let style = ThemeStyle::from_theme(&theme);
+        // Default theme should use cyan-based colors and Unicode symbols
+        assert!(matches!(style.primary, InquireColor::LightCyan));
+        assert_eq!(style.prompt_prefix, "?");
+        assert_eq!(style.selected_prefix, "▶");
+    }
+
+    #[test]
+    fn test_theme_styles_are_distinct() {
+        // Verify that each theme has distinct visual elements
+        // Create styles directly from theme names for testing
+        let default_style = ThemeStyle::from_theme_name("Default");
+        let minimal_style = ThemeStyle::from_theme_name("Minimal");
+        let terminal_style = ThemeStyle::from_theme_name("Terminal");
+
+        // Each theme should have different selection prefixes
+        assert_ne!(default_style.selected_prefix, minimal_style.selected_prefix);
+        assert_ne!(
+            minimal_style.selected_prefix,
+            terminal_style.selected_prefix
+        );
+        assert_ne!(
+            default_style.selected_prefix,
+            terminal_style.selected_prefix
+        );
+
+        // Each theme should have different prompt prefixes
+        assert_ne!(default_style.prompt_prefix, minimal_style.prompt_prefix);
+        assert_ne!(minimal_style.prompt_prefix, terminal_style.prompt_prefix);
     }
 
     #[test]

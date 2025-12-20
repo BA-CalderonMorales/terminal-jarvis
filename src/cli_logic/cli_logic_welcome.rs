@@ -1,11 +1,12 @@
 // CLI Logic Welcome Screen
 // Displays ASCII art banner and system info on startup
+// Each theme has a distinctly different visual style
 
 use crate::cli_logic::cli_logic_first_run::get_tool_status_line;
 use crate::theme::theme_global_config;
 use std::env;
 
-/// Display the welcome screen with ASCII art banner and system information
+/// Display the welcome screen with theme-specific ASCII art banner
 pub fn display_welcome_screen() {
     let theme = theme_global_config::current_theme();
     let version = env!("CARGO_PKG_VERSION");
@@ -18,21 +19,76 @@ pub fn display_welcome_screen() {
     // Get tool status for display
     let tool_status = get_tool_status_line();
 
-    // T.JARVIS Bot ASCII art - professional boxy design with horizontal layout
-    // Designed to work at any terminal width
     println!();
-    println!("{}", theme.primary("   ┌─────┐  Terminal Jarvis"));
-    println!("{}", theme.primary(&format!("   │ T.J │  v{}", version)));
-    println!(
-        "{}",
-        theme.secondary(&format!("   │ ═ ═ │  {}", tool_status))
-    );
-    println!("{}", theme.secondary(&format!("   │     │  {}", cwd)));
-    println!(
-        "{}",
-        theme.accent("   └─────┘  Type /help to see available commands")
-    );
+
+    // Theme-specific welcome screens
+    match theme.name {
+        "Minimal" => {
+            // Classic/Minimal: Ultra-clean, no box, just text
+            println!("{}", theme.primary("Terminal Jarvis"));
+            println!("{}", theme.secondary(&format!("v{}", version)));
+            println!("{}", theme.secondary(&tool_status));
+            println!("{}", theme.secondary(&cwd));
+            println!("{}", theme.accent(":: /help for commands"));
+        }
+        "Terminal" => {
+            // Matrix/Terminal: Hacker aesthetic with ASCII box
+            println!("{}", theme.primary("+-------[ TERMINAL JARVIS ]-------+"));
+            println!(
+                "{}",
+                theme.primary(&format!("|  VERSION: {}               |", version))
+            );
+            println!(
+                "{}",
+                theme.secondary(&format!(
+                    "|  STATUS: {}  |",
+                    truncate_status(&tool_status, 20)
+                ))
+            );
+            println!(
+                "{}",
+                theme.secondary(&format!("|  PATH: {}  |", truncate_path(&cwd, 22)))
+            );
+            println!("{}", theme.accent("+---------------------------------+"));
+            println!("{}", theme.accent("$ Type /help for command list"));
+        }
+        _ => {
+            // Default/TJarvis: Modern with Unicode box
+            println!("{}", theme.primary("   ┌─────┐  Terminal Jarvis"));
+            println!("{}", theme.primary(&format!("   │ T.J │  v{}", version)));
+            println!(
+                "{}",
+                theme.secondary(&format!("   │ ═ ═ │  {}", tool_status))
+            );
+            println!("{}", theme.secondary(&format!("   │     │  {}", cwd)));
+            println!(
+                "{}",
+                theme.accent("   └─────┘  Type /help to see available commands")
+            );
+        }
+    }
+
     println!();
+}
+
+/// Truncate tool status for terminal theme box
+fn truncate_status(status: &str, max_len: usize) -> String {
+    if status.len() <= max_len {
+        format!("{:width$}", status, width = max_len)
+    } else {
+        format!("{}...", &status[..max_len - 3])
+    }
+}
+
+/// Truncate path for terminal theme box
+fn truncate_path(path: &str, max_len: usize) -> String {
+    if path.len() <= max_len {
+        format!("{:width$}", path, width = max_len)
+    } else {
+        // Show end of path (most relevant)
+        let truncated = &path[path.len() - (max_len - 3)..];
+        format!("...{}", truncated)
+    }
 }
 
 #[cfg(test)]
@@ -46,22 +102,29 @@ mod tests {
     }
 
     #[test]
-    fn test_welcome_screen_contains_ascii_art() {
-        // Verify the ASCII art structure is present
-        // This is a smoke test to catch accidental modifications
-        let art_elements = vec![
-            "┌─────┐",
-            "│ T.J │",
-            "│ ═ ═ │",
-            "└─────┘",
-            "Terminal Jarvis",
-            "Type /help to see available commands",
-        ];
+    fn test_truncate_status_short() {
+        let result = truncate_status("hello", 10);
+        assert_eq!(result.len(), 10);
+        assert!(result.starts_with("hello"));
+    }
 
-        // If we can construct the elements, the art is valid
-        for element in art_elements {
-            assert!(!element.is_empty());
-        }
+    #[test]
+    fn test_truncate_status_long() {
+        let result = truncate_status("this is a very long status", 10);
+        assert!(result.ends_with("..."));
+        assert!(result.len() <= 10);
+    }
+
+    #[test]
+    fn test_truncate_path_short() {
+        let result = truncate_path("/home/user", 20);
+        assert_eq!(result.len(), 20);
+    }
+
+    #[test]
+    fn test_truncate_path_long() {
+        let result = truncate_path("/very/long/path/to/some/directory", 15);
+        assert!(result.starts_with("..."));
     }
 
     #[test]
