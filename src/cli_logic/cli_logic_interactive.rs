@@ -1,7 +1,7 @@
 use crate::cli_logic::cli_logic_autocomplete::{get_autocomplete, SlashCommandSuggester};
 use crate::cli_logic::cli_logic_first_run::{is_first_run, run_first_time_wizard};
-use crate::cli_logic::cli_logic_utilities::get_autocomplete_render_config;
 use crate::cli_logic::cli_logic_welcome::display_welcome_screen;
+use crate::cli_logic::themed_components::get_autocomplete_config;
 use crate::db::core::connection::DatabaseManager;
 use crate::installation_arguments::InstallationManager;
 use crate::theme::{theme_global_config, theme_persistence, ThemeType};
@@ -54,7 +54,7 @@ pub async fn handle_interactive_mode() -> Result<()> {
         // Use inquire with autocomplete for slash command input
         let input = Text::new(">")
             .with_autocomplete(SlashCommandSuggester)
-            .with_render_config(get_autocomplete_render_config())
+            .with_render_config(get_autocomplete_config())
             .with_help_message("Type / for commands, Tab to autocomplete")
             .prompt();
 
