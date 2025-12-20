@@ -6,6 +6,7 @@
 // - Reset database
 // - Credential management
 
+use crate::cli_logic::themed_components::{themed_select_with, themed_text};
 use crate::db::{
     Credential, CredentialsRepository, DatabaseManager, TomlImporter, ToolsRepository,
 };
@@ -207,8 +208,6 @@ pub async fn handle_db_reset(force: bool) -> Result<()> {
 
 /// Handle interactive database menu (for /db command)
 pub async fn handle_db_menu() -> Result<()> {
-    use crate::cli_logic::cli_logic_responsive_menu::create_themed_select;
-
     loop {
         let theme = theme_global_config::current_theme();
 
@@ -251,7 +250,7 @@ pub async fn handle_db_menu() -> Result<()> {
             "Back to Main Menu".to_string(),
         ];
 
-        let selection = match create_themed_select(&theme, "Select an action:", options.clone())
+        let selection = match themed_select_with(&theme, "Select an action:", options.clone())
             .with_page_size(10)
             .prompt()
         {
@@ -289,9 +288,6 @@ pub async fn handle_db_menu() -> Result<()> {
 
 /// Handle credentials management menu
 pub async fn handle_credentials_menu() -> Result<()> {
-    use crate::cli_logic::cli_logic_responsive_menu::create_themed_select;
-    use inquire::Text;
-
     loop {
         let theme = theme_global_config::current_theme();
 
@@ -348,7 +344,7 @@ pub async fn handle_credentials_menu() -> Result<()> {
             "Back".to_string(),
         ];
 
-        let selection = match create_themed_select(&theme, "Select an action:", options.clone())
+        let selection = match themed_select_with(&theme, "Select an action:", options.clone())
             .with_page_size(10)
             .prompt()
         {
@@ -366,7 +362,7 @@ pub async fn handle_credentials_menu() -> Result<()> {
                 tool_options.push("Cancel".to_string());
 
                 let tool_selection =
-                    match create_themed_select(&theme, "Select tool:", tool_options.clone())
+                    match themed_select_with(&theme, "Select tool:", tool_options.clone())
                         .with_page_size(12)
                         .prompt()
                     {
@@ -386,17 +382,16 @@ pub async fn handle_credentials_menu() -> Result<()> {
                     .unwrap_or(&tool_selection);
 
                 // Get env var name
-                let env_var = match Text::new(
-                    "Environment variable name (e.g., ANTHROPIC_API_KEY):",
-                )
-                .prompt()
-                {
-                    Ok(v) if !v.is_empty() => v,
-                    _ => continue,
-                };
+                let env_var =
+                    match themed_text("Environment variable name (e.g., ANTHROPIC_API_KEY):")
+                        .prompt()
+                    {
+                        Ok(v) if !v.is_empty() => v,
+                        _ => continue,
+                    };
 
                 // Get value (masked input)
-                let value = match Text::new(&format!("Value for {}:", env_var)).prompt() {
+                let value = match themed_text(&format!("Value for {}:", env_var)).prompt() {
                     Ok(v) if !v.is_empty() => v,
                     _ => continue,
                 };
@@ -448,7 +443,7 @@ pub async fn handle_credentials_menu() -> Result<()> {
                     }
                     remove_options.push("Cancel".to_string());
 
-                    let remove_selection = match create_themed_select(
+                    let remove_selection = match themed_select_with(
                         &theme,
                         "Select credential to remove:",
                         remove_options,

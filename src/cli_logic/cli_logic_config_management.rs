@@ -1,9 +1,8 @@
-use crate::cli_logic::cli_logic_utilities::get_themed_render_config;
+use crate::cli_logic::themed_components::themed_confirm;
 use crate::config::{Config, ConfigManager};
 use crate::progress_utils::ProgressUtils;
 use crate::services::PackageService;
 use anyhow::{anyhow, Result};
-use inquire::Confirm;
 
 /// Handle resetting configuration to defaults
 pub async fn handle_config_reset() -> Result<()> {
@@ -16,8 +15,7 @@ pub async fn handle_config_reset() -> Result<()> {
     };
 
     if config_path.exists() {
-        let confirm = match Confirm::new("Are you sure you want to reset configuration to defaults? This will delete your current config file.")
-      .with_render_config(get_themed_render_config())
+        let confirm = match themed_confirm("Are you sure you want to reset configuration to defaults? This will delete your current config file.")
       .with_default(false)
       .prompt() {
         Ok(result) => result,

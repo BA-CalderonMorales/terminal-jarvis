@@ -2,15 +2,15 @@
 // This module coordinates all CLI business logic operations
 
 use crate::auth_manager::AuthManager;
-use crate::cli_logic::cli_logic_responsive_menu::create_themed_select;
-use crate::cli_logic::cli_logic_utilities::{apply_theme_to_multiselect, get_themed_render_config};
 use crate::cli_logic::cli_logic_welcome::display_welcome_screen;
+use crate::cli_logic::themed_components::{
+    themed_confirm, themed_multiselect, themed_select_with, themed_text,
+};
 use crate::installation_arguments::InstallationManager;
 use crate::progress_utils::ProgressContext;
 use crate::theme::theme_global_config;
 use crate::tools::ToolManager;
 use anyhow::Result;
-use inquire::{Confirm, MultiSelect, Text};
 
 // Re-export all the handler functions
 pub use crate::cli_logic::cli_logic_config_management::*;
@@ -53,7 +53,7 @@ pub async fn handle_ai_tools_menu() -> Result<()> {
         tool_mapping.push(None);
 
         let selection =
-            match create_themed_select(&theme, "Select an AI tool to launch:", options.clone())
+            match themed_select_with(&theme, "Select an AI tool to launch:", options.clone())
                 .with_page_size(15)
                 .prompt()
             {
@@ -82,12 +82,11 @@ async fn handle_tool_launch(tool_name: &str) -> Result<()> {
     let tool_info = tools.get(tool_name).unwrap();
 
     if !tool_info.is_installed {
-        let should_install = match Confirm::new(&format!(
+        let should_install = match themed_confirm(&format!(
             "{} '{}' is not installed. Install it now?",
             theme.accent("Tool"),
             tool_name
         ))
-        .with_render_config(get_themed_render_config())
         .with_default(true)
         .prompt()
         {
@@ -111,9 +110,8 @@ async fn handle_tool_launch(tool_name: &str) -> Result<()> {
         }
     }
 
-    let args_input = match Text::new(&format!(
-        "{}Enter arguments for {tool_name} (or press Enter for default):",
-        theme.primary("")
+    let args_input = match themed_text(&format!(
+        "Enter arguments for {tool_name} (or press Enter for default):"
     ))
     .with_default("")
     .prompt()
@@ -224,7 +222,7 @@ async fn handle_post_tool_exit(last_tool: &str, last_args: &[String]) -> Result<
         ];
 
         let exit_choice =
-            match create_themed_select(&theme, "What would you like to do next?", exit_options)
+            match themed_select_with(&theme, "What would you like to do next?", exit_options)
                 .with_page_size(6)
                 .prompt()
             {
@@ -303,7 +301,7 @@ async fn handle_uninstall_tool(tool: &str, tool_display: &str, theme: &crate::th
 
     if let Some((cmd, args)) = uninstall_cmd {
         // Confirm before uninstalling
-        if let Ok(confirmed) = Confirm::new(&format!("Uninstall {}?", tool_display))
+        if let Ok(confirmed) = themed_confirm(&format!("Uninstall {}?", tool_display))
             .with_default(false)
             .prompt()
         {
@@ -375,7 +373,7 @@ pub async fn handle_important_links() -> Result<()> {
         ];
 
         let selection =
-            match create_themed_select(&theme, "Choose a resource to view:", options).prompt() {
+            match themed_select_with(&theme, "Choose a resource to view:", options).prompt() {
                 Ok(selection) => selection,
                 Err(_) => {
                     // User interrupted - return to main menu
@@ -467,7 +465,7 @@ pub async fn handle_manage_tools_menu() -> Result<()> {
             "Back to Main Menu".to_string(),
         ];
 
-        let selection = match create_themed_select(&theme, "Choose an option:", options).prompt() {
+        let selection = match themed_select_with(&theme, "Choose an option:", options).prompt() {
             Ok(selection) => selection,
             Err(_) => {
                 // User interrupted - return to main menu
@@ -524,14 +522,14 @@ async fn handle_theme_switch_menu() -> Result<()> {
     ];
 
     let theme = theme_global_config::current_theme();
-    let selected_theme =
-        match create_themed_select(&theme, "Choose a theme:", theme_options).prompt() {
-            Ok(theme) => theme,
-            Err(_) => {
-                // User interrupted - return to previous menu
-                return Ok(());
-            }
-        };
+    let selected_theme = match themed_select_with(&theme, "Choose a theme:", theme_options).prompt()
+    {
+        Ok(theme) => theme,
+        Err(_) => {
+            // User interrupted - return to previous menu
+            return Ok(());
+        }
+    };
 
     // Apply the selected theme
     let theme_type = match selected_theme.as_str() {
@@ -603,45 +601,43 @@ async fn handle_install_tools_menu() -> Result<()> {
             .output()
             .map(|o| o.status.success())
             .unwrap_or(false);
-        if apt_exists {
-            use inquire::Confirm;
-            if Confirm::new("Install curl now using apt-get?")
+        if apt_exists
+            && themed_confirm("Install curl now using apt-get?")
                 .with_default(false)
                 .prompt()
                 .unwrap_or(false)
-            {
-                let sudo_available = std::process::Command::new("which")
-                    .arg("sudo")
-                    .output()
-                    .map(|o| o.status.success())
-                    .unwrap_or(false);
-                use tokio::process::Command as AsyncCommand;
-                let mut install = if sudo_available {
-                    let mut c = AsyncCommand::new("sudo");
-                    c.arg("apt-get");
-                    c
-                } else {
-                    AsyncCommand::new("apt-get")
-                };
-                let _ = install
-                    .args(["update"]) // update first (best effort)
-                    .status()
-                    .await;
-                let mut install = if sudo_available {
-                    let mut c = AsyncCommand::new("sudo");
-                    c.arg("apt-get");
-                    c
-                } else {
-                    AsyncCommand::new("apt-get")
-                };
-                let status = install
-                    .args(["install", "-y", "curl"]) // non-interactive
-                    .status()
-                    .await;
-                match status {
-                    Ok(s) if s.success() => ProgressUtils::success_message("curl installed."),
-                    _ => ProgressUtils::error_message("Failed to install curl with apt-get."),
-                }
+        {
+            let sudo_available = std::process::Command::new("which")
+                .arg("sudo")
+                .output()
+                .map(|o| o.status.success())
+                .unwrap_or(false);
+            use tokio::process::Command as AsyncCommand;
+            let mut install = if sudo_available {
+                let mut c = AsyncCommand::new("sudo");
+                c.arg("apt-get");
+                c
+            } else {
+                AsyncCommand::new("apt-get")
+            };
+            let _ = install
+                .args(["update"]) // update first (best effort)
+                .status()
+                .await;
+            let mut install = if sudo_available {
+                let mut c = AsyncCommand::new("sudo");
+                c.arg("apt-get");
+                c
+            } else {
+                AsyncCommand::new("apt-get")
+            };
+            let status = install
+                .args(["install", "-y", "curl"]) // non-interactive
+                .status()
+                .await;
+            match status {
+                Ok(s) if s.success() => ProgressUtils::success_message("curl installed."),
+                _ => ProgressUtils::error_message("Failed to install curl with apt-get."),
             }
         }
     }
@@ -657,45 +653,43 @@ async fn handle_install_tools_menu() -> Result<()> {
             "Some tools (e.g., Aider) use uv for installation. Install uv: https://docs.astral.sh/uv/getting-started/installation/",
         );
         // Offer to install uv automatically if curl is available
-        if InstallationManager::check_curl_available() {
-            use inquire::Confirm;
-            if Confirm::new("Install uv now via official script?")
+        if InstallationManager::check_curl_available()
+            && themed_confirm("Install uv now via official script?")
                 .with_default(false)
                 .prompt()
                 .unwrap_or(false)
-            {
-                // Download and run uv installer: curl -LsSf https://astral.sh/uv/install.sh | sh
-                use tokio::process::Command as AsyncCommand;
-                let url = "https://astral.sh/uv/install.sh";
-                let curl_output = AsyncCommand::new("curl")
-                    .args(["-LsSf", url])
-                    .output()
-                    .await;
-                match curl_output {
-                    Ok(out) if out.status.success() => {
-                        let mut sh = AsyncCommand::new("sh");
-                        sh.stdin(std::process::Stdio::piped());
-                        sh.stdout(std::process::Stdio::null());
-                        sh.stderr(std::process::Stdio::null());
-                        if let Ok(mut child) = sh.spawn() {
-                            if let Some(stdin) = child.stdin.as_mut() {
-                                use tokio::io::AsyncWriteExt;
-                                let _ = stdin.write_all(&out.stdout).await;
-                            }
-                            let _ = child.wait().await;
+        {
+            // Download and run uv installer: curl -LsSf https://astral.sh/uv/install.sh | sh
+            use tokio::process::Command as AsyncCommand;
+            let url = "https://astral.sh/uv/install.sh";
+            let curl_output = AsyncCommand::new("curl")
+                .args(["-LsSf", url])
+                .output()
+                .await;
+            match curl_output {
+                Ok(out) if out.status.success() => {
+                    let mut sh = AsyncCommand::new("sh");
+                    sh.stdin(std::process::Stdio::piped());
+                    sh.stdout(std::process::Stdio::null());
+                    sh.stderr(std::process::Stdio::null());
+                    if let Ok(mut child) = sh.spawn() {
+                        if let Some(stdin) = child.stdin.as_mut() {
+                            use tokio::io::AsyncWriteExt;
+                            let _ = stdin.write_all(&out.stdout).await;
                         }
-                        // Re-check availability
-                        if InstallationManager::check_uv_available() {
-                            ProgressUtils::success_message("uv installed successfully. You may need to restart your shell for PATH updates.");
-                        } else {
-                            ProgressUtils::warning_message("uv installation finished but not detected on PATH yet. Try restarting your terminal.");
-                        }
+                        let _ = child.wait().await;
                     }
-                    _ => {
-                        ProgressUtils::error_message(
-                            "Failed to download uv installer. See docs link above.",
-                        );
+                    // Re-check availability
+                    if InstallationManager::check_uv_available() {
+                        ProgressUtils::success_message("uv installed successfully. You may need to restart your shell for PATH updates.");
+                    } else {
+                        ProgressUtils::warning_message("uv installation finished but not detected on PATH yet. Try restarting your terminal.");
                     }
+                }
+                _ => {
+                    ProgressUtils::error_message(
+                        "Failed to download uv installer. See docs link above.",
+                    );
                 }
             }
         }
@@ -720,18 +714,14 @@ async fn handle_install_tools_menu() -> Result<()> {
         uninstalled_tools.len()
     ));
 
-    let tools_to_install = match apply_theme_to_multiselect(MultiSelect::new(
-        "Select tools to install:",
-        uninstalled_tools,
-    ))
-    .prompt()
-    {
-        Ok(tools) => tools,
-        Err(_) => {
-            // User interrupted - return to previous menu
-            return Ok(());
-        }
-    };
+    let tools_to_install =
+        match themed_multiselect("Select tools to install:", uninstalled_tools).prompt() {
+            Ok(tools) => tools,
+            Err(_) => {
+                // User interrupted - return to previous menu
+                return Ok(());
+            }
+        };
 
     println!();
     for tool in tools_to_install {
@@ -766,8 +756,7 @@ async fn handle_update_tools_menu() -> Result<()> {
     options.push("All Tools".to_string());
 
     let theme = theme_global_config::current_theme();
-    let selection = match create_themed_select(&theme, "Select tools to update:", options).prompt()
-    {
+    let selection = match themed_select_with(&theme, "Select tools to update:", options).prompt() {
         Ok(selection) => selection,
         Err(_) => {
             // User interrupted - return to previous menu
@@ -801,19 +790,14 @@ async fn handle_tool_info_menu() -> Result<()> {
         let mut options = tool_names.clone();
         options.push("Back to Settings Menu".to_string());
 
-        let selection = match create_themed_select(
-            &theme,
-            "Select a tool for information:",
-            options,
-        )
-        .prompt()
-        {
-            Ok(selection) => selection,
-            Err(_) => {
-                // User interrupted - return to previous menu
-                return Ok(());
-            }
-        };
+        let selection =
+            match themed_select_with(&theme, "Select a tool for information:", options).prompt() {
+                Ok(selection) => selection,
+                Err(_) => {
+                    // User interrupted - return to previous menu
+                    return Ok(());
+                }
+            };
 
         // Handle selection
         if selection.contains("Back to Settings Menu") {
