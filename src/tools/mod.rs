@@ -3,6 +3,7 @@
 
 pub mod tools_command_mapping;
 pub mod tools_config;
+pub mod tools_db_bridge;
 pub mod tools_detection;
 pub mod tools_display;
 pub mod tools_entry_point;
@@ -11,4 +12,5 @@ pub mod tools_process_management;
 pub mod tools_startup_guidance;
 
 // Re-export main public functions for backward compatibility
+pub use tools_db_bridge::DbToolManager;
 pub use tools_entry_point::*;
