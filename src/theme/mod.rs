@@ -9,6 +9,7 @@ mod theme_config;
 mod theme_definitions;
 mod theme_entry_point;
 pub mod theme_global_config;
+pub mod theme_persistence;
 mod theme_text_formatting;
 mod theme_utilities; // Export for global theme management
 

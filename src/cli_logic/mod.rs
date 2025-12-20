@@ -2,6 +2,7 @@
 // Each module handles a specific area of CLI business logic
 
 pub mod cli_logic_auth_operations;
+pub mod cli_logic_autocomplete;
 pub mod cli_logic_benchmark_operations;
 pub mod cli_logic_config_management;
 pub mod cli_logic_db_operations;

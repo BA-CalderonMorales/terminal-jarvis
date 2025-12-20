@@ -30,6 +30,17 @@ const MIGRATIONS: &[Migration] = &[
 
 /// Run all pending migrations
 pub async fn run_migrations(db: &Arc<DatabaseManager>) -> Result<()> {
+    run_migrations_internal(db.as_ref()).await
+}
+
+/// Run migrations on a connection (for testing with non-Arc managers)
+#[cfg(test)]
+pub async fn run_migrations_on_connection(db: &DatabaseManager) -> Result<()> {
+    run_migrations_internal(db).await
+}
+
+/// Internal implementation that works with &DatabaseManager
+async fn run_migrations_internal(db: &DatabaseManager) -> Result<()> {
     // First, ensure migrations table exists (bootstrap)
     let migrations_ddl = MIGRATIONS_TABLE.create_table_sql();
     db.execute(&migrations_ddl, ()).await?;
@@ -48,7 +59,7 @@ pub async fn run_migrations(db: &Arc<DatabaseManager>) -> Result<()> {
 }
 
 /// Get the current schema version
-async fn get_current_version(db: &Arc<DatabaseManager>) -> Result<i32> {
+async fn get_current_version(db: &DatabaseManager) -> Result<i32> {
     // Use QueryBuilder for SELECT MAX
     let sql = QueryBuilder::select(&MIGRATIONS_TABLE)
         .columns(&["version"])
@@ -67,7 +78,7 @@ async fn get_current_version(db: &Arc<DatabaseManager>) -> Result<i32> {
 }
 
 /// Apply a specific migration
-async fn apply_migration(db: &Arc<DatabaseManager>, migration: &Migration) -> Result<()> {
+async fn apply_migration(db: &DatabaseManager, migration: &Migration) -> Result<()> {
     match migration.version {
         1 => migrate_v1_initial_schema(db).await?,
         2 => migrate_v2_credentials_unique(db).await?,
@@ -91,7 +102,7 @@ async fn apply_migration(db: &Arc<DatabaseManager>, migration: &Migration) -> Re
 }
 
 /// Migration v1: Create all initial tables from schema definitions
-async fn migrate_v1_initial_schema(db: &Arc<DatabaseManager>) -> Result<()> {
+async fn migrate_v1_initial_schema(db: &DatabaseManager) -> Result<()> {
     // Create all tables defined in SCHEMA (except migrations table, already exists)
     for table in SCHEMA.tables {
         if table.name == "schema_migrations" {
@@ -106,7 +117,7 @@ async fn migrate_v1_initial_schema(db: &Arc<DatabaseManager>) -> Result<()> {
 }
 
 /// Migration v2: Add unique constraint to credentials table
-async fn migrate_v2_credentials_unique(db: &Arc<DatabaseManager>) -> Result<()> {
+async fn migrate_v2_credentials_unique(db: &DatabaseManager) -> Result<()> {
     // SQLite doesn't support ALTER TABLE ADD CONSTRAINT directly
     // So we recreate the table with proper constraints
 
