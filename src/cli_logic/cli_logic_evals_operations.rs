@@ -85,7 +85,7 @@ fn view_all_evaluations() -> Result<()> {
         b.overall_score
             .unwrap_or(0.0)
             .partial_cmp(&a.overall_score.unwrap_or(0.0))
-            .unwrap()
+            .unwrap_or(std::cmp::Ordering::Equal)
     });
 
     for eval in evaluations {
