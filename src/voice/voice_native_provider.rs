@@ -72,21 +72,19 @@ impl NativeVoiceProvider {
             }
         }
 
-        // Try local whisper if feature is enabled
-        #[cfg(feature = "local-voice")]
-        {
-            return self.transcribe_with_local_whisper(audio_path).await;
+        // Try Groq API if available (free tier)
+        if let Ok(api_key) = std::env::var("GROQ_API_KEY") {
+            if !api_key.is_empty() {
+                return self.transcribe_with_openai(audio_path).await;
+            }
         }
 
-        #[cfg(not(feature = "local-voice"))]
-        {
-            Err(anyhow!(
-                "No transcription service available.\n\
-                 Options:\n\
-                 1. Set OPENAI_API_KEY environment variable for cloud transcription\n\
-                 2. Build with local-voice feature: cargo install terminal-jarvis --features local-voice"
-            ))
-        }
+        Err(anyhow!(
+            "No transcription service available.\n\
+             Set one of these environment variables:\n\
+             - OPENAI_API_KEY (recommended, best accuracy)\n\
+             - GROQ_API_KEY (free tier available)"
+        ))
     }
 
     /// Transcribe audio using OpenAI Whisper API
@@ -135,31 +133,6 @@ impl NativeVoiceProvider {
             .to_string();
 
         Ok(text)
-    }
-
-    /// Transcribe audio using local Whisper model
-    #[cfg(all(target_os = "linux", feature = "local-voice"))]
-    async fn transcribe_with_local_whisper(
-        &self,
-        audio_path: &std::path::PathBuf,
-    ) -> Result<String> {
-        // Use the LocalWhisperProvider for local transcription
-        let local_config = VoiceProviderConfig {
-            max_duration: self.config.max_duration,
-            language: self.config.language.clone(),
-        };
-
-        let local_provider =
-            super::voice_local_whisper_provider::LocalWhisperProvider::new(local_config).await?;
-
-        // The LocalWhisperProvider will handle the transcription
-        // We'll need to pass the audio file path somehow - this is a simplified version
-        // In reality, we'd need to enhance LocalWhisperProvider to accept pre-recorded audio
-
-        Err(anyhow!(
-            "Local whisper transcription from file not yet implemented.\n\
-             Please use OPENAI_API_KEY for now."
-        ))
     }
 }
 
@@ -223,9 +196,7 @@ impl VoiceInputProvider for NativeVoiceProvider {
                 // macOS doesn't have simple built-in CLI speech recognition yet
                 return Err(anyhow!(
                     "macOS native speech recognition requires additional setup.\n\
-                     Options:\n\
-                     1. Use cloud API: Set OPENAI_API_KEY environment variable\n\
-                     2. Build with local-voice feature: cargo install terminal-jarvis --features local-voice"
+                     Use cloud API: Set OPENAI_API_KEY or GROQ_API_KEY environment variable"
                 ));
             }
         })

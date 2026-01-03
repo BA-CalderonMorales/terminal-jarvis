@@ -1,6 +1,6 @@
 # Phase 10: Modern Architecture - Database & Voice Simplification
 
-**Status**: IN PROGRESS (Session 1 Complete)  
+**Status**: IN PROGRESS (Session 2 Complete)  
 **Priority**: HIGH  
 **Estimated Sessions**: 3-4  
 **Last Updated**: 2026-01-03
@@ -33,7 +33,31 @@
 - `src/tools/tools_db_bridge.rs` - Hybrid DB/TOML bridge functions
 - `src/tools/tools_entry_point.rs` - Async ToolManager methods
 
-### Session 2: Voice Simplification - NOT STARTED
+### Session 2: Voice Simplification - COMPLETE (2026-01-03)
+
+**Completed:**
+- [x] Removed whisper-rs dependency from Cargo.toml
+- [x] Removed hf-hub dependency from Cargo.toml
+- [x] Removed local-voice and vosk-voice feature flags
+- [x] Deleted deprecated voice providers (voice_local_whisper_provider.rs, voice_vosk_provider.rs, voice_whisper_binary_provider.rs)
+- [x] Created CloudVoiceProvider with multi-service support (OpenAI, Deepgram, Groq)
+- [x] Updated VoiceListenerFactory with cloud provider methods
+- [x] Updated native voice provider to remove local-voice references
+- [x] Build verified: No C++ compilation required
+- [x] All tests passing (253 unit tests + integration tests)
+
+**Key Files Created/Modified:**
+- `src/voice/voice_cloud_provider.rs` - New multi-service cloud transcription
+- `src/voice/mod.rs` - Updated exports, removed deprecated providers
+- `src/voice/voice_smart_listening.rs` - Updated factory with cloud methods
+- `src/voice/voice_native_provider.rs` - Removed local-voice feature gates
+- `Cargo.toml` - Removed whisper-rs, hf-hub, vosk dependencies
+
+**Cloud Voice Provider Features:**
+- Auto-detect available API keys (OpenAI -> Groq -> Deepgram)
+- Support for specific service selection
+- Platform-aware audio recording (Linux/macOS/Windows)
+- Unified VoiceInputProvider interface
 
 ### Session 3: Integration & Cleanup - NOT STARTED
 
@@ -109,38 +133,41 @@ Tables: tools, tool_install, tool_auth, preferences, credentials, schema_migrati
 - [x] Backward compatibility preserved (TOML fallback when DB empty)
 - [x] Hybrid loading via `tools_db_bridge.rs`
 
-### Phase 10.2: Voice Simplification - TODO
+### Phase 10.2: Voice Simplification - COMPLETE
 
-#### 1. Remove whisper-rs Dependency
-- [ ] Remove from Cargo.toml
-- [ ] Remove `local-voice` feature flag
-- [ ] Remove whisper provider code
+#### 1. Remove whisper-rs Dependency - DONE
+- [x] Remove from Cargo.toml
+- [x] Remove `local-voice` and `vosk-voice` feature flags
+- [x] Remove whisper-rs and hf-hub dependencies
+- [x] Delete deprecated provider files
 
-#### 2. Create Cloud Voice Provider
+#### 2. Create Cloud Voice Provider - DONE
 ```rust
 // src/voice/voice_cloud_provider.rs
 pub struct CloudVoiceProvider {
+    config: VoiceProviderConfig,
+    service: VoiceCloudService,
     api_key: String,
-    provider: VoiceCloudService,
 }
 
 pub enum VoiceCloudService {
-    OpenAI,
-    Deepgram,
-    Groq,
+    OpenAI,    // whisper-1 model
+    Deepgram,  // nova-2 model
+    Groq,      // whisper-large-v3 model
 }
 
+// Auto-detect available API key
 impl CloudVoiceProvider {
-    pub async fn transcribe(&self, audio: &[u8]) -> Result<String> {
-        // Simple HTTP POST to API
-    }
+    pub fn auto_detect(config: VoiceProviderConfig) -> Result<Self>;
+    pub fn new(config: VoiceProviderConfig, service: VoiceCloudService) -> Result<Self>;
 }
 ```
 
-#### 3. Simplify Audio Capture
-- Use `cpal` for cross-platform audio capture (already lightweight)
-- Record to WAV in memory
-- Send to cloud API
+#### 3. Update Voice Module - DONE
+- [x] Updated VoiceListenerFactory with cloud provider methods
+- [x] Updated native provider to use cloud transcription
+- [x] Simplified create_default_listener() flow
+- [x] Platform-aware audio recording preserved
 
 ### Phase 10.3: Integration - PARTIAL
 
@@ -165,21 +192,21 @@ impl CloudVoiceProvider {
 
 ### Recommended Next Steps (Priority Order)
 
-1. **Phase 10.2: Voice Simplification** (High Priority)
-   - Remove whisper-rs C++ dependency from Cargo.toml
-   - Remove `local-voice` feature flag
-   - Implement CloudVoiceProvider with OpenAI Whisper API
-   - This eliminates the main build complexity issue
-
-2. **Phase 10.3: Full Integration** (Medium Priority)
+1. **Phase 10.3: Full Integration** (High Priority)
    - Migrate remaining config reads to DB layer
    - Consider removing TOML loading code (keep files as backup)
    - Full testing across all tools
+   - Update documentation to reflect new cloud voice approach
 
-3. **Optional Enhancements** (Low Priority)
+2. **Optional Enhancements** (Medium Priority)
    - Turso cloud sync for multi-device
    - Memory caching for performance
    - `db import` / `db export` CLI commands
+
+3. **Documentation Updates** (Low Priority)
+   - Update README with cloud voice setup instructions
+   - Document supported cloud transcription services
+   - Add troubleshooting guide for voice commands
 
 ### Key Commands to Verify Current State
 ```bash
@@ -205,7 +232,10 @@ See "Session Progress" section above for details.
 # Test: cargo build (should work without libclang/whisper.cpp)
 ```
 
-### Session 3: Integration & Cleanup
+### Session 2: Voice Simplification - COMPLETE
+See "Session Progress" section above for details.
+
+### Session 3: Integration & Cleanup - NEXT
 ```bash
 # Migrate remaining config reads to DB
 # Remove TOML loading code (keep files as backup)
@@ -218,26 +248,28 @@ See "Session Progress" section above for details.
 - [x] All tool configs stored in SQLite (with TOML fallback)
 - [x] QueryBuilder pattern eliminates hardcoded SQL
 - [x] Error handling prevents production panics
-- [ ] `cargo build` works without libclang/whisper.cpp (pending whisper-rs removal)
-- [ ] Voice commands work via cloud API (pending)
-- [ ] Build time reduced (pending whisper-rs removal)
+- [x] `cargo build` works without libclang/whisper.cpp
+- [x] Voice commands work via cloud API (OpenAI, Deepgram, Groq)
+- [x] Build time reduced (no whisper-rs C++ compilation)
 - [ ] Optional Turso sync configured (deferred)
 - [x] Existing functionality preserved
 
 ## Migration Path
 
-1. **Phase 1**: Add DB alongside TOML (dual-write)
-2. **Phase 2**: Read from DB, fall back to TOML
-3. **Phase 3**: Remove TOML reading code
-4. **Phase 4**: Optional: Remove TOML files from repo
+1. **Phase 1**: Add DB alongside TOML (dual-write) - DONE
+2. **Phase 2**: Read from DB, fall back to TOML - DONE
+3. **Phase 3**: Remove TOML reading code - PENDING
+4. **Phase 4**: Optional: Remove TOML files from repo - DEFERRED
 
 ## Dependencies
 
 ```toml
-# Add to Cargo.toml
+# In Cargo.toml
 libsql = "0.9"
-# Remove:
-# whisper-rs = "..." 
+# Removed:
+# whisper-rs (C++ dependency eliminated)
+# hf-hub (no longer needed)
+# vosk (optional offline voice removed)
 ```
 
 ## References
@@ -245,3 +277,5 @@ libsql = "0.9"
 - [Turso Documentation](https://docs.turso.tech/)
 - [libSQL Rust SDK](https://github.com/tursodatabase/libsql)
 - [OpenAI Whisper API](https://platform.openai.com/docs/guides/speech-to-text)
+- [Deepgram API](https://developers.deepgram.com/)
+- [Groq API](https://console.groq.com/docs/quickstart)

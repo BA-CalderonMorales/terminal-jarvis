@@ -335,13 +335,19 @@ impl VoiceListenerFactory {
         Ok(listener)
     }
 
-    /// Create smart voice listener with local Whisper provider (no API key required)
-    #[cfg(feature = "local-voice")]
-    pub async fn create_local_whisper_listener(
+    /// Create smart voice listener with cloud provider (auto-detect service)
+    pub async fn create_cloud_listener(config: VoiceProviderConfig) -> Result<SmartVoiceListener> {
+        let provider = super::voice_cloud_provider::CloudVoiceProvider::auto_detect(config)?;
+        let listener = SmartVoiceListener::new(Box::new(provider));
+        Ok(listener)
+    }
+
+    /// Create smart voice listener with specific cloud service
+    pub async fn create_cloud_listener_with_service(
         config: VoiceProviderConfig,
+        service: super::voice_cloud_provider::VoiceCloudService,
     ) -> Result<SmartVoiceListener> {
-        let provider =
-            super::voice_local_whisper_provider::LocalWhisperProvider::new(config).await?;
+        let provider = super::voice_cloud_provider::CloudVoiceProvider::new(config, service)?;
         let listener = SmartVoiceListener::new(Box::new(provider));
         Ok(listener)
     }
@@ -353,16 +359,8 @@ impl VoiceListenerFactory {
         Ok(listener)
     }
 
-    /// Create smart voice listener with Vosk provider (lightweight, offline, no API key)
-    #[cfg(feature = "vosk-voice")]
-    pub async fn create_vosk_listener(config: VoiceProviderConfig) -> Result<SmartVoiceListener> {
-        let provider = super::voice_vosk_provider::VoskProvider::new(config)?;
-        let listener = SmartVoiceListener::new(Box::new(provider));
-        Ok(listener)
-    }
-
     /// Create listener with default configuration
-    /// Priority: Native (Windows/macOS) → Vosk (if enabled) → Local Whisper → Cloud API
+    /// Priority: Native (Windows/macOS) -> Cloud API (OpenAI/Groq/Deepgram)
     pub async fn create_default_listener() -> Result<SmartVoiceListener> {
         let config = VoiceProviderConfig::default();
 
@@ -385,48 +383,23 @@ impl VoiceListenerFactory {
             }
         }
 
-        // Try Vosk next if feature is enabled (lightweight, fast, offline)
-        #[cfg(feature = "vosk-voice")]
-        {
-            println!("[VOSK] Attempting lightweight offline voice recognition (50MB model)...");
-            match Self::create_vosk_listener(config.clone()).await {
-                Ok(listener) => {
-                    if listener.check_ready().await.unwrap_or(false) {
-                        println!(
-                            "[SUCCESS] Vosk voice recognition ready. Fast offline processing."
-                        );
-                        return Ok(listener);
-                    } else {
-                        println!("[INFO] Vosk model not found. See instructions to download.");
-                    }
-                }
-                Err(e) => {
-                    println!("[INFO] Vosk not available: {}", e);
-                }
-            }
-        }
-
-        // Try local whisper next if feature is enabled
-        #[cfg(feature = "local-voice")]
-        {
-            println!(
-                "[PRIVACY MODE] Attempting local SLM voice recognition (no API keys, no cloud)..."
-            );
-            match Self::create_local_whisper_listener(config.clone()).await {
-                Ok(listener) => {
-                    println!(
-                        "[SUCCESS] Local voice recognition ready. Your speech stays on-device."
-                    );
+        // Try cloud voice providers (auto-detect: OpenAI -> Groq -> Deepgram)
+        println!("[CLOUD VOICE] Attempting cloud-based voice recognition...");
+        match Self::create_cloud_listener(config.clone()).await {
+            Ok(listener) => {
+                if listener.check_ready().await.unwrap_or(false) {
+                    println!("[SUCCESS] Cloud voice recognition ready.");
                     return Ok(listener);
+                } else {
+                    println!("[INFO] Cloud voice not ready (check audio device).");
                 }
-                Err(e) => {
-                    println!("[INFO] Local voice not available: {}", e);
-                    println!("[FALLBACK] Attempting cloud-based voice recognition...");
-                }
+            }
+            Err(e) => {
+                println!("[INFO] Cloud voice not available: {}", e);
             }
         }
 
-        // Fall back to OpenAI Whisper API
+        // Final fallback to OpenAI Whisper API specifically
         Self::create_whisper_listener(config).await
     }
 }
