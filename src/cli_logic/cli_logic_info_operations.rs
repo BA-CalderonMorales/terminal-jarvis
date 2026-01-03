@@ -12,7 +12,8 @@ use anyhow::{anyhow, Result};
 
 /// Handle displaying detailed information about a specific tool
 pub async fn handle_tool_info(tool: &str) -> Result<()> {
-    let tools = ToolManager::get_available_tools();
+    // Use async version that checks database first
+    let tools = ToolManager::get_available_tools_async().await;
     let install_commands = InstallationManager::get_install_commands();
 
     let tool_info = tools

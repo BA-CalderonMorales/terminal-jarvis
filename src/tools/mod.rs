@@ -12,5 +12,8 @@ pub mod tools_process_management;
 pub mod tools_startup_guidance;
 
 // Re-export main public functions for backward compatibility
-pub use tools_db_bridge::DbToolManager;
+pub use tools_db_bridge::{
+    get_available_tools_hybrid, get_cli_command_hybrid, get_tool_hybrid, is_db_initialized,
+    DbToolManager,
+};
 pub use tools_entry_point::*;
