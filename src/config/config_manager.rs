@@ -1,7 +1,10 @@
 // Configuration Manager - File and cache management operations
 //
-// This module provides the ConfigManager struct for handling configuration
-// file operations and version cache persistence with cleanup functionality.
+// MIGRATION NOTE: This module currently uses TOML for version cache persistence.
+// Future enhancement: migrate version cache to PreferencesRepository in src/db/preferences/
+//
+// Current state: TOML-based caching (works, but isolated from DB)
+// Target state: Database-backed caching (unified with other preferences)
 
 use crate::config::config_version_cache::VersionCache;
 use anyhow::Result;

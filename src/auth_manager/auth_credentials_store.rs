@@ -1,7 +1,15 @@
 // Authentication Credentials Store - Persisted API key management
 //
-// Stores per-tool environment variables (API keys, tokens) in user's config dir
-// at ~/.config/terminal-jarvis/credentials.toml. Provides load/save helpers.
+// CURRENT: Uses TOML file storage at ~/.config/terminal-jarvis/credentials.toml
+//
+// MIGRATION NOTE: Database-backed credentials storage is available via
+// CredentialsRepository in src/db/credentials/. For async contexts, prefer
+// using the repository directly. This module provides sync compatibility.
+//
+// The TOML storage is kept as the primary sync storage because:
+// 1. Many auth flows are synchronous
+// 2. Nested tokio runtimes panic ("Cannot start a runtime from within a runtime")
+// 3. Simple file-based storage is reliable and debuggable
 
 use anyhow::{anyhow, Result};
 use serde::{Deserialize, Serialize};
