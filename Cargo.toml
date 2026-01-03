@@ -59,18 +59,11 @@ rand = "0.9.2"
 # Database (Turso/libSQL for modern config storage)
 libsql = "0.9"
 
-# Local voice recognition (no API key required) - DEPRECATED, use cloud voice
-whisper-rs = { version = "0.15.1", optional = true }
-hf-hub = { version = "0.4.3", optional = true, features = ["tokio"] }
-
-# Vosk voice recognition (lightweight, offline, no API key required) - DEPRECATED
-vosk = { version = "0.3.1", optional = true }
+# Async trait for voice providers
 async-trait = "0.1.89"
 
 [features]
 default = []
-local-voice = ["whisper-rs", "hf-hub"]
-vosk-voice = ["vosk"]
 
 [dev-dependencies]
 tokio-test = "0.4.4"
