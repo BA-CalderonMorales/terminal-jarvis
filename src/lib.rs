@@ -4,6 +4,7 @@ pub mod cli;
 pub mod cli_logic;
 pub mod config;
 pub mod db;
+pub mod error;
 pub mod evals;
 pub mod installation_arguments;
 pub mod logging;

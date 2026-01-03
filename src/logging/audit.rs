@@ -285,7 +285,28 @@ impl AuditLogger {
 
 impl Default for AuditLogger {
     fn default() -> Self {
-        Self::new().expect("Failed to create audit logger")
+        Self::new().unwrap_or_else(|e| {
+            eprintln!("[Warning] Failed to initialize audit logger: {}", e);
+            // Create a fallback logger that writes to /dev/null (or NUL on Windows)
+            #[cfg(unix)]
+            let null_path = "/dev/null";
+            #[cfg(windows)]
+            let null_path = "NUL";
+
+            let log_file = std::fs::OpenOptions::new()
+                .write(true)
+                .open(null_path)
+                .unwrap_or_else(|_| {
+                    // Last resort: create a temp file
+                    std::fs::File::create(std::env::temp_dir().join("jarvis-audit-fallback.log"))
+                        .expect("Cannot create any log file - system may be read-only")
+                });
+
+            Self {
+                log_file,
+                session_id: "fallback".to_string(),
+            }
+        })
     }
 }
 

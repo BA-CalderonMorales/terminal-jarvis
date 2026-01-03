@@ -79,7 +79,17 @@ pub async fn handle_ai_tools_menu() -> Result<()> {
 async fn handle_tool_launch(tool_name: &str) -> Result<()> {
     let theme = theme_global_config::current_theme();
     let tools = ToolManager::get_available_tools();
-    let tool_info = tools.get(tool_name).unwrap();
+    let tool_info = match tools.get(tool_name) {
+        Some(info) => info,
+        None => {
+            println!(
+                "\n{}: Tool '{}' not found in available tools",
+                theme.accent("Error"),
+                tool_name
+            );
+            return Ok(());
+        }
+    };
 
     if !tool_info.is_installed {
         let should_install = match themed_confirm(&format!(

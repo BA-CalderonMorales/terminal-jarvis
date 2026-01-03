@@ -264,7 +264,9 @@ impl SecurityLogger {
     fn write_to_file(&self, event: &SecurityEvent, path: &std::path::Path) -> Result<()> {
         use std::io::Write;
 
-        std::fs::create_dir_all(path.parent().unwrap())?;
+        if let Some(parent) = path.parent() {
+            std::fs::create_dir_all(parent)?;
+        }
 
         let mut file = std::fs::OpenOptions::new()
             .create(true)
