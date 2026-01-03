@@ -126,6 +126,21 @@ impl QueryBuilder {
         builder
     }
 
+    /// Start a COUNT query (SELECT COUNT(*))
+    pub fn count(table: &Table) -> Self {
+        Self {
+            query_type: QueryType::Select,
+            table_name: table.name.to_string(),
+            columns: vec!["COUNT(*)".to_string()],
+            where_clauses: Vec::new(),
+            order_by: Vec::new(),
+            limit: None,
+            offset: None,
+            values: Vec::new(),
+            on_conflict: None,
+        }
+    }
+
     // =========================================================================
     // Builder methods
     // =========================================================================
@@ -207,8 +222,17 @@ impl QueryBuilder {
         self
     }
 
-    /// Add ON CONFLICT clause for UPSERT
-    pub fn on_conflict_update(mut self, conflict_column: &str, update_columns: &[&str]) -> Self {
+    /// Add ON CONFLICT clause for UPSERT with single conflict column
+    pub fn on_conflict_update(self, conflict_column: &str, update_columns: &[&str]) -> Self {
+        self.on_conflict_update_composite(&[conflict_column], update_columns)
+    }
+
+    /// Add ON CONFLICT clause for UPSERT with composite key (multiple conflict columns)
+    pub fn on_conflict_update_composite(
+        mut self,
+        conflict_columns: &[&str],
+        update_columns: &[&str],
+    ) -> Self {
         let updates: Vec<String> = update_columns
             .iter()
             .map(|c| format!("{} = excluded.{}", c, c))
@@ -216,15 +240,23 @@ impl QueryBuilder {
 
         self.on_conflict = Some(format!(
             "ON CONFLICT({}) DO UPDATE SET {}",
-            conflict_column,
+            conflict_columns.join(", "),
             updates.join(", ")
         ));
         self
     }
 
-    /// Add ON CONFLICT DO NOTHING
-    pub fn on_conflict_ignore(mut self, conflict_column: &str) -> Self {
-        self.on_conflict = Some(format!("ON CONFLICT({}) DO NOTHING", conflict_column));
+    /// Add ON CONFLICT DO NOTHING with single column
+    pub fn on_conflict_ignore(self, conflict_column: &str) -> Self {
+        self.on_conflict_ignore_composite(&[conflict_column])
+    }
+
+    /// Add ON CONFLICT DO NOTHING with composite key
+    pub fn on_conflict_ignore_composite(mut self, conflict_columns: &[&str]) -> Self {
+        self.on_conflict = Some(format!(
+            "ON CONFLICT({}) DO NOTHING",
+            conflict_columns.join(", ")
+        ));
         self
     }
 
