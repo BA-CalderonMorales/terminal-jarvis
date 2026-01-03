@@ -35,17 +35,18 @@ pub async fn handle_ai_tools_menu() -> Result<()> {
         let loading_progress = ProgressContext::new("Loading AI tools status");
         tokio::time::sleep(tokio::time::Duration::from_millis(300)).await;
 
-        let tools = ToolManager::get_available_tools();
+        // Use async version that checks database first, falls back to TOML
+        let tools = ToolManager::get_available_tools_async().await;
 
         loading_progress.finish_success("AI tools status loaded");
 
         // Build clean tool list
         let mut options = Vec::new();
-        let mut tool_mapping = Vec::new();
+        let mut tool_mapping: Vec<Option<String>> = Vec::new();
 
         for (tool_name, _tool_info) in tools.iter() {
             options.push(tool_name.to_string());
-            tool_mapping.push(Some(*tool_name));
+            tool_mapping.push(Some(tool_name.clone()));
         }
 
         // Add back option
@@ -78,7 +79,9 @@ pub async fn handle_ai_tools_menu() -> Result<()> {
 /// Handle launching a specific tool with argument input
 async fn handle_tool_launch(tool_name: &str) -> Result<()> {
     let theme = theme_global_config::current_theme();
-    let tools = ToolManager::get_available_tools();
+
+    // Use async version that checks database first
+    let tools = ToolManager::get_available_tools_async().await;
     let tool_info = match tools.get(tool_name) {
         Some(info) => info,
         None => {

@@ -6,20 +6,20 @@
 use crate::presentation::models::Tool;
 use crate::presentation::view_models::ToolListViewModel;
 use crate::tools::tools_config::get_tool_config_loader;
-use crate::tools::tools_detection::get_available_tools;
+use crate::tools::ToolManager;
 use anyhow::Result;
 
 /// Handle listing all available AI coding tools with their status
 pub async fn handle_list_tools() -> Result<()> {
-    // Get tools from the new model system
+    // Get tools using async version that checks database first
     let config_loader = get_tool_config_loader();
-    let available_tools = get_available_tools();
+    let available_tools = ToolManager::get_available_tools_async().await;
 
     let mut tools = Vec::new();
-    for (tool_name, tool_info) in available_tools {
+    for (tool_name, tool_info) in &available_tools {
         if let Some(tool_def) = config_loader.get_tool_definition(tool_name) {
             let tool =
-                Tool::from_tool_definition(tool_name.to_string(), tool_def, tool_info.is_installed);
+                Tool::from_tool_definition(tool_name.clone(), tool_def, tool_info.is_installed);
             tools.push(tool);
         }
     }

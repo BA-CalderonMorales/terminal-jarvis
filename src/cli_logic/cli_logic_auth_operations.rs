@@ -145,8 +145,9 @@ pub async fn handle_auth_set(tool: &str) -> Result<()> {
 
 async fn pick_tool_name() -> Result<Option<String>> {
     let theme = theme_global_config::current_theme();
-    let tools_map = ToolManager::get_available_tools();
-    let mut options: Vec<String> = tools_map.keys().map(|s| s.to_string()).collect();
+    // Use async version that checks database first
+    let tools_map = ToolManager::get_available_tools_async().await;
+    let mut options: Vec<String> = tools_map.keys().cloned().collect();
     options.sort();
     match themed_select_with(&theme, "Select a tool:", options.clone()).prompt() {
         Ok(choice) => Ok(Some(choice)),
