@@ -1,8 +1,43 @@
 # Phase 10: Modern Architecture - Database & Voice Simplification
 
-**Status**: PENDING  
+**Status**: IN PROGRESS (Session 1 Complete)  
 **Priority**: HIGH  
-**Estimated Sessions**: 3-4
+**Estimated Sessions**: 3-4  
+**Last Updated**: 2026-01-03
+
+## Session Progress
+
+### Session 1: Database Foundation - COMPLETE (2026-01-03)
+
+**Commits:**
+- `ca842ff` - feat(error): add centralized error module and remove production unwrap calls
+- `229cc5d` - feat(db): wire ToolManager to use database with TOML fallback
+- `3240857` - refactor(db): eliminate hardcoded SQL strings in repository.rs
+
+**Completed:**
+- [x] libsql dependency added (0.9)
+- [x] Database schema created (`src/db/schema.rs`)
+- [x] QueryBuilder pattern implemented (`src/db/core/query_builder.rs`)
+- [x] Repository pattern established (`src/db/core/repository.rs`)
+- [x] ToolsRepository, CredentialsRepository, PreferencesRepository created
+- [x] TomlImporter for TOML-to-DB migration
+- [x] DatabaseManager with connection pooling
+- [x] Hybrid tool loading (DB first, TOML fallback)
+- [x] `cargo run -- db status` command working
+- [x] Error module for graceful error handling (`src/error/`)
+- [x] All hardcoded CRUD SQL eliminated (QueryBuilder only)
+
+**Key Files Created/Modified:**
+- `src/db/` - Full database module structure
+- `src/error/` - Centralized error handling
+- `src/tools/tools_db_bridge.rs` - Hybrid DB/TOML bridge functions
+- `src/tools/tools_entry_point.rs` - Async ToolManager methods
+
+### Session 2: Voice Simplification - NOT STARTED
+
+### Session 3: Integration & Cleanup - NOT STARTED
+
+---
 
 ## The Problem
 
@@ -49,80 +84,32 @@ Cloud: turso.io sync (optional, for multi-device)
 
 ## Tasks
 
-### Phase 10.1: Database Foundation
+### Phase 10.1: Database Foundation - COMPLETE
 
-#### 1. Add libSQL Dependency
+#### 1. Add libSQL Dependency - DONE
 ```toml
 [dependencies]
 libsql = "0.9"
 ```
 
-#### 2. Create Database Schema
-```sql
--- Tools configuration
-CREATE TABLE tools (
-    id TEXT PRIMARY KEY,
-    display_name TEXT NOT NULL,
-    cli_command TEXT NOT NULL,
-    description TEXT,
-    homepage TEXT,
-    documentation TEXT,
-    requires_npm BOOLEAN DEFAULT FALSE,
-    requires_sudo BOOLEAN DEFAULT FALSE,
-    status TEXT DEFAULT 'stable',
-    enabled BOOLEAN DEFAULT TRUE,
-    auto_update BOOLEAN DEFAULT TRUE,
-    created_at TEXT DEFAULT CURRENT_TIMESTAMP,
-    updated_at TEXT DEFAULT CURRENT_TIMESTAMP
-);
+#### 2. Create Database Schema - DONE
+Schema implemented in `src/db/schema.rs` with QueryBuilder pattern.
+Tables: tools, tool_install, tool_auth, preferences, credentials, schema_migrations
 
--- Tool installation commands
-CREATE TABLE tool_install (
-    tool_id TEXT PRIMARY KEY REFERENCES tools(id),
-    command TEXT NOT NULL,
-    args TEXT, -- JSON array
-    verify_command TEXT,
-    post_install_message TEXT
-);
-
--- Tool authentication
-CREATE TABLE tool_auth (
-    tool_id TEXT PRIMARY KEY REFERENCES tools(id),
-    env_vars TEXT, -- JSON array
-    setup_url TEXT,
-    browser_auth BOOLEAN DEFAULT FALSE,
-    auth_instructions TEXT
-);
-
--- User preferences
-CREATE TABLE preferences (
-    key TEXT PRIMARY KEY,
-    value TEXT,
-    updated_at TEXT DEFAULT CURRENT_TIMESTAMP
-);
-
--- Credentials (encrypted)
-CREATE TABLE credentials (
-    tool_id TEXT PRIMARY KEY,
-    env_var TEXT NOT NULL,
-    encrypted_value TEXT,
-    updated_at TEXT DEFAULT CURRENT_TIMESTAMP
-);
-```
-
-#### 3. Create Database Manager
+#### 3. Create Database Manager - DONE
 - `src/db/mod.rs` - Database module entry point
-- `src/db/db_connection.rs` - Connection management
-- `src/db/db_migrations.rs` - Schema migrations
-- `src/db/db_tools.rs` - Tool CRUD operations
-- `src/db/db_preferences.rs` - Preferences CRUD
+- `src/db/core/connection.rs` - Connection management (DatabaseManager)
+- `src/db/core/migrations.rs` - Schema migrations with versioning
+- `src/db/tools/repository.rs` - Tool CRUD operations (ToolsRepository)
+- `src/db/preferences/repository.rs` - Preferences CRUD (PreferencesRepository)
+- `src/db/credentials/repository.rs` - Credentials CRUD (CredentialsRepository)
 
-#### 4. Migration from TOML
-- [ ] Write migration script to import existing TOML configs
-- [ ] Preserve backward compatibility during transition
-- [ ] Add `--use-db` flag for testing
+#### 4. Migration from TOML - DONE
+- [x] TomlImporter script imports existing TOML configs
+- [x] Backward compatibility preserved (TOML fallback when DB empty)
+- [x] Hybrid loading via `tools_db_bridge.rs`
 
-### Phase 10.2: Voice Simplification
+### Phase 10.2: Voice Simplification - TODO
 
 #### 1. Remove whisper-rs Dependency
 - [ ] Remove from Cargo.toml
@@ -155,51 +142,72 @@ impl CloudVoiceProvider {
 - Record to WAV in memory
 - Send to cloud API
 
-### Phase 10.3: Integration
+### Phase 10.3: Integration - PARTIAL
 
-#### 1. Update Config Manager
-- [ ] Make ConfigManager use database as primary source
-- [ ] Fall back to TOML for read-only scenarios
-- [ ] Update all config reads to use new DB layer
+#### 1. Update Config Manager - PARTIAL
+- [x] ConfigManager can use database as source
+- [x] TOML fallback for read-only scenarios preserved
+- [ ] Full config reads migration to DB layer (pending)
 
-#### 2. Update Tool Manager
-- [ ] Query tools from database
-- [ ] Cache hot paths in memory
+#### 2. Update Tool Manager - DONE
+- [x] Query tools from database via ToolsRepository
+- [x] Hybrid lookup in tools_db_bridge.rs
+- [ ] Memory caching for hot paths (optional, not critical)
 
-#### 3. Cloud Sync (Optional)
+#### 3. Cloud Sync (Optional) - NOT STARTED
 - [ ] Add Turso remote URL configuration
 - [ ] Implement sync on startup/shutdown
 - [ ] Handle offline-first scenarios
 
+---
+
+## Next Session Pickup Guide
+
+### Recommended Next Steps (Priority Order)
+
+1. **Phase 10.2: Voice Simplification** (High Priority)
+   - Remove whisper-rs C++ dependency from Cargo.toml
+   - Remove `local-voice` feature flag
+   - Implement CloudVoiceProvider with OpenAI Whisper API
+   - This eliminates the main build complexity issue
+
+2. **Phase 10.3: Full Integration** (Medium Priority)
+   - Migrate remaining config reads to DB layer
+   - Consider removing TOML loading code (keep files as backup)
+   - Full testing across all tools
+
+3. **Optional Enhancements** (Low Priority)
+   - Turso cloud sync for multi-device
+   - Memory caching for performance
+   - `db import` / `db export` CLI commands
+
+### Key Commands to Verify Current State
+```bash
+cargo run -- db status          # Check database initialization
+cargo run -- list               # Verify tools load from DB/TOML
+cargo check && cargo clippy -- -D warnings  # Quality gates
+```
+
+---
+
 ## Agent Instructions
 
-### Session 1: Database Foundation
+### Session 1: Database Foundation - COMPLETE
+See "Session Progress" section above for details.
+
+### Session 2: Voice Simplification - NEXT
 ```bash
-# Add libsql dependency
-cargo add libsql
-
-# Create database module structure
-mkdir -p src/db
-
-# Start with connection and migrations
+# Remove whisper-rs from Cargo.toml
+# Remove local-voice feature flag
+# Create src/voice/voice_cloud_provider.rs
+# Implement OpenAI Whisper API transcription
+# Update voice module to use CloudVoiceProvider
+# Test: cargo build (should work without libclang/whisper.cpp)
 ```
 
-### Session 2: Tool Migration
+### Session 3: Integration & Cleanup
 ```bash
-# Write TOML-to-DB migration
-# Update ToolManager to use DB
-# Test with --use-db flag
-```
-
-### Session 3: Voice Simplification
-```bash
-# Remove whisper-rs
-# Implement cloud provider
-# Update voice module
-```
-
-### Session 4: Integration & Cleanup
-```bash
+# Migrate remaining config reads to DB
 # Remove TOML loading code (keep files as backup)
 # Full testing
 # Documentation update
@@ -207,12 +215,14 @@ mkdir -p src/db
 
 ## Success Criteria
 
-- [ ] `cargo build` works without libclang/whisper.cpp
-- [ ] All tool configs stored in SQLite
-- [ ] Voice commands work via cloud API
-- [ ] Build time reduced (no C++ compilation)
-- [ ] Optional Turso sync configured
-- [ ] Existing functionality preserved
+- [x] All tool configs stored in SQLite (with TOML fallback)
+- [x] QueryBuilder pattern eliminates hardcoded SQL
+- [x] Error handling prevents production panics
+- [ ] `cargo build` works without libclang/whisper.cpp (pending whisper-rs removal)
+- [ ] Voice commands work via cloud API (pending)
+- [ ] Build time reduced (pending whisper-rs removal)
+- [ ] Optional Turso sync configured (deferred)
+- [x] Existing functionality preserved
 
 ## Migration Path
 
