@@ -29,19 +29,22 @@ impl CredentialsRepository {
     /// Save or update a credential
     pub async fn save(&self, cred: &Credential) -> Result<()> {
         // Use upsert with tool_id + env_var as composite key
-        let sql = "INSERT INTO credentials (tool_id, env_var, encrypted_value, updated_at) 
-                   VALUES (?1, ?2, ?3, CURRENT_TIMESTAMP)
-                   ON CONFLICT(tool_id, env_var) DO UPDATE SET
-                   encrypted_value = excluded.encrypted_value,
-                   updated_at = CURRENT_TIMESTAMP";
+        let sql = QueryBuilder::insert(&CREDENTIALS_TABLE)
+            .columns(&["tool_id", "env_var", "encrypted_value", "updated_at"])
+            .on_conflict_update_composite(
+                &["tool_id", "env_var"],
+                &["encrypted_value", "updated_at"],
+            )
+            .build();
 
         self.db
             .execute(
-                sql,
+                &sql,
                 libsql::params![
                     cred.tool_id.clone(),
                     cred.env_var.clone(),
                     cred.encrypted_value.clone(),
+                    chrono::Utc::now().to_rfc3339(),
                 ],
             )
             .await?;
@@ -138,8 +141,8 @@ impl CredentialsRepository {
 
     /// Clear all credentials
     pub async fn clear_all(&self) -> Result<u64> {
-        let sql = "DELETE FROM credentials";
-        let affected = self.db.execute(sql, ()).await?;
+        let sql = QueryBuilder::delete(&CREDENTIALS_TABLE).build();
+        let affected = self.db.execute(&sql, ()).await?;
         Ok(affected)
     }
 
@@ -166,8 +169,10 @@ impl CredentialsRepository {
 
     /// Count credentials for a tool
     pub async fn count_for_tool(&self, tool_id: &str) -> Result<i64> {
-        let sql = "SELECT COUNT(*) FROM credentials WHERE tool_id = ?1";
-        let mut rows = self.db.query(sql, [tool_id]).await?;
+        let sql = QueryBuilder::count(&CREDENTIALS_TABLE)
+            .where_eq("tool_id")
+            .build();
+        let mut rows = self.db.query(&sql, [tool_id]).await?;
 
         if let Some(row) = rows.next().await? {
             Ok(row.get(0)?)

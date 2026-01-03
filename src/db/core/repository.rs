@@ -4,6 +4,7 @@
 // Encapsulates data access logic and provides type-safe operations.
 
 use super::connection::DatabaseManager;
+use super::query_builder::QueryBuilder;
 use super::schema::Table;
 use anyhow::Result;
 use std::sync::Arc;
@@ -54,7 +55,7 @@ impl RepositoryHelper {
 
     /// Execute a count query
     pub async fn count(&self, table: &Table) -> Result<i64> {
-        let sql = format!("SELECT COUNT(*) FROM {}", table.name);
+        let sql = QueryBuilder::count(table).build();
         let mut rows = self.db.query(&sql, ()).await?;
 
         if let Some(row) = rows.next().await? {
@@ -67,10 +68,11 @@ impl RepositoryHelper {
 
     /// Check if a record exists
     pub async fn exists(&self, table: &Table, id_column: &str, id: &str) -> Result<bool> {
-        let sql = format!(
-            "SELECT 1 FROM {} WHERE {} = ? LIMIT 1",
-            table.name, id_column
-        );
+        let sql = QueryBuilder::select(table)
+            .columns(&["1"])
+            .where_eq(id_column)
+            .limit(1)
+            .build();
         let mut rows = self.db.query(&sql, [id]).await?;
         Ok(rows.next().await?.is_some())
     }
@@ -100,7 +102,7 @@ impl BaseRepository {
 
     /// Execute a count query
     pub async fn count(&self) -> Result<i64> {
-        let sql = format!("SELECT COUNT(*) FROM {}", self.table.name);
+        let sql = QueryBuilder::count(self.table).build();
         let mut rows = self.db.query(&sql, ()).await?;
 
         if let Some(row) = rows.next().await? {
@@ -118,10 +120,11 @@ impl BaseRepository {
             .primary_key()
             .ok_or_else(|| anyhow::anyhow!("Table {} has no primary key", self.table.name))?;
 
-        let sql = format!(
-            "SELECT 1 FROM {} WHERE {} = ? LIMIT 1",
-            self.table.name, pk.name
-        );
+        let sql = QueryBuilder::select(self.table)
+            .columns(&["1"])
+            .where_eq(pk.name)
+            .limit(1)
+            .build();
         let mut rows = self.db.query(&sql, [id]).await?;
         Ok(rows.next().await?.is_some())
     }
@@ -133,7 +136,7 @@ impl BaseRepository {
             .primary_key()
             .ok_or_else(|| anyhow::anyhow!("Table {} has no primary key", self.table.name))?;
 
-        let sql = format!("DELETE FROM {} WHERE {} = ?", self.table.name, pk.name);
+        let sql = QueryBuilder::delete(self.table).where_eq(pk.name).build();
         let affected = self.db.execute(&sql, [id]).await?;
         Ok(affected > 0)
     }
