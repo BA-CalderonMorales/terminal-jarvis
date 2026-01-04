@@ -274,8 +274,9 @@ mod tests {
     #[test]
     fn test_detect_tools_returns_valid_result() {
         let result = detect_tools();
-        // Result should have both vectors (may be empty but not None)
-        assert!(result.installed.len() + result.available.len() >= 0);
+        // Result should have both vectors (may be empty)
+        // Just verify detect_tools() runs without panic
+        let _ = result.installed.len() + result.available.len();
     }
 
     #[test]

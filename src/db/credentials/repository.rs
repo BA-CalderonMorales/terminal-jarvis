@@ -280,14 +280,20 @@ mod tests {
 
     #[test]
     fn test_import_stats() {
-        let mut stats = ImportCredentialsStats::default();
-        stats.imported = 5;
-        stats.errors = 0;
+        let stats = ImportCredentialsStats {
+            imported: 5,
+            errors: 0,
+            error_messages: Vec::new(),
+        };
 
         assert_eq!(stats.summary(), "Imported 5 credentials");
 
-        stats.errors = 2;
-        assert!(stats.summary().contains("errors"));
+        let stats_with_errors = ImportCredentialsStats {
+            imported: 5,
+            errors: 2,
+            error_messages: vec!["error1".to_string(), "error2".to_string()],
+        };
+        assert!(stats_with_errors.summary().contains("errors"));
     }
 
     #[tokio::test]

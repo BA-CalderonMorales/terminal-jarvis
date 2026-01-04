@@ -173,6 +173,7 @@ mod tests {
     use super::*;
 
     #[test]
+    #[allow(clippy::const_is_empty)]
     fn test_preference_keys_accessible() {
         // Verify keys are accessible through the module
         assert!(!PreferenceKeys::LAST_USED_TOOL.is_empty());

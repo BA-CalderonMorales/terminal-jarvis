@@ -136,8 +136,8 @@ mod tests {
     #[tokio::test]
     async fn test_dev_ready() {
         // Dev environment should always be ready
-        let ready = is_ready().await.unwrap();
+        let result = is_ready().await;
         // Result depends on actual environment, so just check it doesn't error
-        assert!(ready || !ready); // Always true, just testing it runs
+        assert!(result.is_ok());
     }
 }
