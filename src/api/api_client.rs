@@ -30,7 +30,10 @@ impl ApiClient {
         let client = ClientBuilder::new()
             .timeout(Duration::from_secs(config.timeout_seconds))
             .build()
-            .expect("Failed to create HTTP client");
+            .unwrap_or_else(|_| {
+                // Fallback to default client if custom config fails
+                reqwest::Client::new()
+            });
 
         Self { client, config }
     }
@@ -39,7 +42,10 @@ impl ApiClient {
         let client = ClientBuilder::new()
             .timeout(Duration::from_secs(config.timeout_seconds))
             .build()
-            .expect("Failed to create HTTP client");
+            .unwrap_or_else(|_| {
+                // Fallback to default client if custom config fails
+                reqwest::Client::new()
+            });
 
         Self { client, config }
     }

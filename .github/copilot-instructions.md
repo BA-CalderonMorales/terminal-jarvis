@@ -97,7 +97,6 @@ cargo test                  # Must pass (if tests exist)
 1. **Primary updates go to AGENTS.md** - This is the single source of truth
 2. **Update reference links here** - Ensure copilot-instructions.md points to correct AGENTS.md sections
 3. **Keep this file minimal** - Only quick access links and Copilot-specific optimization tips
-4. **Consistency check** - `CLAUDE.md` should also reference AGENTS.md
 
 ---
 

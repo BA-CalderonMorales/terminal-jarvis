@@ -1,7 +1,14 @@
 // Configuration File Operations - File loading, saving, and merging logic
 //
-// This module handles the loading and saving of configuration files,
-// including configuration merging and path resolution logic.
+// DEPRECATED: This module provides TOML-based configuration loading.
+// The primary source is now the database (via src/db/).
+//
+// This TOML loader is kept as a FALLBACK for:
+// 1. Initial import of configs into the database
+// 2. Environments where the database hasn't been initialized
+// 3. User-level config overrides (terminal-jarvis.toml)
+//
+// For new code, prefer using database repositories.
 
 use crate::config::config_structures::{Config, ToolConfig};
 use anyhow::Result;

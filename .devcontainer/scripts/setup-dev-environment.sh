@@ -1,6 +1,13 @@
 #!/bin/bash
 set -e
 
+# Set locale variables to prevent warnings
+export LANG=en_US.UTF-8
+export LC_ALL=en_US.UTF-8
+export LC_CTYPE=en_US.UTF-8
+export LC_COLLATE=en_US.UTF-8
+export LC_MESSAGES=en_US.UTF-8
+
 echo "Setting up Terminal Jarvis development environment..."
 
 # Install Node.js version 20 using NodeSource repository
@@ -46,8 +53,13 @@ rustup component add clippy rustfmt || echo "Clippy and rustfmt already installe
 
 # Set up shell environment
 echo "Setting up shell environment..."
-# shellcheck disable=SC2016  # Write literal $HOME and $PATH for expansion at shell startup
+# shellcheck disable=SC2016  # Write literal $HOME, $PATH, and locale vars for expansion at shell startup
 echo 'export PATH="$HOME/.cargo/bin:$PATH"' >> ~/.bashrc
+echo 'export LANG=en_US.UTF-8' >> ~/.bashrc
+echo 'export LC_ALL=en_US.UTF-8' >> ~/.bashrc
+echo 'export LC_CTYPE=en_US.UTF-8' >> ~/.bashrc
+echo 'export LC_COLLATE=en_US.UTF-8' >> ~/.bashrc
+echo 'export LC_MESSAGES=en_US.UTF-8' >> ~/.bashrc
 
 # Ensure uv is available in PATH
 if [ -f "$HOME/.cargo/bin/uv" ]; then

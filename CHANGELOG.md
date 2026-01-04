@@ -2,6 +2,37 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.0.71] - 2026-01-04
+
+### Added
+- **Verification Feedback Loop System**: AI-optimized quality assurance pipeline
+  - `scripts/verify/verify-change.sh` - Main entry point for complete change verification
+  - `scripts/verify/verify-build.sh` - Compilation checks
+  - `scripts/verify/verify-quality.sh` - Clippy + formatting validation
+  - `scripts/verify/verify-tests.sh` - Unit and E2E test execution
+  - `scripts/verify/verify-cli.sh` - CLI smoke tests
+  - Quick mode (`--quick`) for faster iteration during development
+  - Based on Claude Code creator's tip: "Give Claude a way to verify its work - it will 2-3x the quality"
+
+- **Modular AI Agent Skills System**: `.github/skills/` directory structure
+  - 12 reusable skills: verification, deployment, versioning, testing, refactoring, database, tool-config, homebrew, npm, code-quality, git-workflow, token-budget
+  - Each skill contains focused SKILL.md with instructions for that domain
+  - Skills loaded on-demand by AI agents for efficient context usage
+  - Follows GitHub's recommended `.github/skills/` pattern for AI coding assistants
+
+### Enhanced
+- **AGENTS.md Streamlined**: Reduced from 974 lines to ~150 lines
+  - Core rules and quick start table retained in main file
+  - Detailed instructions moved to modular skills
+  - Skills directory serves as index with on-demand loading
+  - Improved navigation with direct skill links
+
+### Technical
+- **Repository Organization**: Separated planning from production code
+  - Strategic roadmap moved to dedicated `plan/strategic-roadmap` branch
+  - Production code (develop/main) no longer contains planning artifacts
+  - Reference: `git checkout plan/strategic-roadmap` for planning docs
+
 ## [0.0.70] - 2025-10-07
 
 ### Fixed

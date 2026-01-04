@@ -1,6 +1,6 @@
 {
   "name": "terminal-jarvis",
-  "version": "0.0.70",
+  "version": "0.0.71",
   "description": "AI Coding Tools Wrapper - Unified interface for claude-code, gemini-cli, qwen-code, opencode, llxprt, codex, crush, goose, amp, and aider",
   "bin": {
     "terminal-jarvis": "bin/terminal-jarvis"
@@ -60,7 +60,7 @@
     "@types/node": "^24.7.0",
     "@vitest/ui": "^3.2.4",
     "cli-testing-library": "^3.0.1",
-    "string-width": "^5.1.2",
+    "string-width": "^8.1.0",
     "typescript": "^5.9.2",
     "vitest": "^3.2.4",
     "zod": "^4.1.11"

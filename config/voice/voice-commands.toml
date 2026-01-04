@@ -1,0 +1,120 @@
+# Voice Command Configuration
+# Define custom voice command patterns for Terminal Jarvis
+#
+# This file allows you to customize how voice commands are recognized
+# and mapped to application actions.
+
+[settings]
+# Minimum confidence threshold for accepting voice recognition (0.0 to 1.0)
+min_confidence = 0.7
+
+# Enable fuzzy matching for command patterns
+fuzzy_matching = true
+
+# Maximum duration for voice recording (seconds)
+max_duration = 30
+
+# Language code for voice recognition
+language = "en-US"
+
+# Wake word for activation (optional)
+# wake_word = "jarvis"
+
+# Command Patterns
+# Each command can have multiple trigger phrases
+
+[[commands]]
+command = "OpenAITools"
+patterns = [
+    "open ai tools",
+    "show ai tools",
+    "ai tools menu",
+    "tools"
+]
+allow_partial = true
+min_confidence = 0.7
+
+[[commands]]
+command = "OpenAuthentication"
+patterns = [
+    "open authentication",
+    "show auth",
+    "authentication",
+    "login"
+]
+allow_partial = true
+min_confidence = 0.7
+
+[[commands]]
+command = "OpenSettings"
+patterns = [
+    "open settings",
+    "show settings",
+    "settings",
+    "preferences"
+]
+allow_partial = true
+min_confidence = 0.7
+
+[[commands]]
+command = "OpenEvals"
+patterns = [
+    "open evals",
+    "show evals",
+    "evaluations",
+    "benchmarks"
+]
+allow_partial = true
+min_confidence = 0.7
+
+[[commands]]
+command = "OpenLinks"
+patterns = [
+    "open links",
+    "important links",
+    "show links"
+]
+allow_partial = true
+min_confidence = 0.7
+
+[[commands]]
+command = "Exit"
+patterns = [
+    "exit",
+    "quit",
+    "close",
+    "goodbye"
+]
+allow_partial = false
+min_confidence = 0.8
+
+[[commands]]
+command = "ListTools"
+patterns = [
+    "list tools",
+    "show all tools",
+    "what tools are available",
+    "available tools"
+]
+allow_partial = true
+min_confidence = 0.7
+
+[[commands]]
+command = "ShowHelp"
+patterns = [
+    "help",
+    "show help",
+    "what can i do",
+    "commands",
+    "voice commands"
+]
+allow_partial = true
+min_confidence = 0.7
+
+# Parameterized Commands
+# These are handled by pattern matching in code (e.g., "install <tool>")
+# The parser automatically recognizes patterns like:
+# - "install <tool_name>"
+# - "update <tool_name>"
+# - "check <tool_name>"
+# - "status <tool_name>"

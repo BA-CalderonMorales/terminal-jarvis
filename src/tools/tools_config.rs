@@ -1,5 +1,16 @@
 // Tools Configuration Domain
-// Handles loading tool configurations from modular config files and user preferences
+//
+// DEPRECATED: This module provides TOML-based tool configuration loading.
+// The primary source is now the database (via ToolsRepository in src/db/tools/).
+//
+// This TOML loader is kept as a FALLBACK for:
+// 1. Initial import of tool configs into the database
+// 2. Environments where the database hasn't been initialized
+// 3. Development/testing scenarios
+//
+// For new code, prefer using:
+// - ToolManager::get_available_tools_async() (database-backed)
+// - get_tool_hybrid() from tools_db_bridge.rs
 
 use anyhow::{anyhow, Result};
 use serde::{Deserialize, Serialize};
