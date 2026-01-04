@@ -88,7 +88,41 @@ npm run test:gemini-auth
 ## Status
 
 - [x] QA environment created
-- [ ] Document all auth flows
-- [ ] Test Codex OAuth
-- [ ] Test Gemini auth
+- [x] Auth patterns documented
+- [ ] ⏸️ Test Codex OAuth - **BLOCKED by Issue #24**
+- [ ] ⏸️ Test Gemini auth - **BLOCKED by Issue #24**
 - [ ] Decision on each tool
+
+## QA Test Results (2026-01-04)
+
+### ⚠️ TESTING BLOCKED
+
+Auth flow testing cannot proceed due to Issue #24 (GLIBC compatibility).
+The binary fails to execute on Ubuntu 22.04/Debian 12, preventing auth testing.
+
+**Must fix Issue #24 first.**
+
+### Auth Pattern Matrix (Documented)
+
+| Tool | Primary Key | Complexity | OAuth |
+|------|-------------|------------|-------|
+| claude | `ANTHROPIC_API_KEY` | Simple | No |
+| codex | `OPENAI_API_KEY` | Complex | Sometimes |
+| gemini | `GEMINI_API_KEY` / `GOOGLE_API_KEY` | Complex | Fallback |
+| aider | `OPENAI_API_KEY` | Simple | No |
+| goose | Multiple | Complex | Provider-dependent |
+| qwen | `DASHSCOPE_API_KEY` | Simple | No |
+
+### Tools by Auth Complexity
+
+**Simple (API Key only):**
+- claude, aider, qwen, llxprt, opencode
+
+**Complex (Multiple options/OAuth):**
+- codex, gemini, goose
+
+### Next Steps
+
+1. Fix Issue #24 (GLIBC)
+2. Re-run auth tests
+3. Make decision on complex auth tools

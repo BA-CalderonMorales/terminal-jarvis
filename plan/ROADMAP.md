@@ -55,9 +55,35 @@ Every release must pass:
 
 ## Success Metrics
 
-| Metric | Current | Target |
-|--------|---------|--------|
-| Install time | 30-60s | <15s |
-| Steps to launch | 4-5 | 1-2 |
-| GLIBC minimum | 2.39 | 2.17 |
-| Binary size | ~17MB | <10MB |
+| Metric | Current (Measured) | Target | Status |
+|--------|-------------------|--------|--------|
+| Install time (npm) | **31s** | <15s | ❌ 2x over target |
+| Binary download | **227ms** | <10s | ✅ Fast |
+| Steps to launch | **3-5** | 1-2 | ❌ Too many |
+| GLIBC minimum | **2.39** | 2.17 | ❌ Critical blocker |
+| Binary size | **17MB** (6MB compressed) | <10MB | ⚠️ Close |
+
+## QA Test Results (2026-01-04)
+
+### Issue #24: GLIBC Compatibility ❌ CRITICAL
+- **Tested on:** Ubuntu 22.04 (GLIBC 2.35), Debian 12 (GLIBC 2.36)
+- **Result:** Binary requires GLIBC 2.39, **fails to execute** on both
+- **Impact:** Blocks all other testing and usage on most Linux distros
+- **Priority:** P0 - Must fix before any other work
+
+### Issue #23: Download Speed ⚠️ PARTIAL
+- **NPM install:** 31s (target <15s) - bottleneck is npm overhead, not download
+- **Binary download:** 227ms for 5.9MB - actually fast!
+- **NPX cold start:** >30s timeout
+- **Finding:** Problem is npm/npx overhead, not network speed
+
+### Issue #26: UX Steps ❌ CONFIRMED  
+- **Default flow (no API key):** 5 steps
+- **Default flow (with API key):** 3 steps
+- **Direct launch (`tj claude`):** 1 step (ideal, but not obvious)
+- **Recommendation:** Add `--quick` mode, remember last tool
+
+### Issue #27: Auth Flows ⏸️ BLOCKED
+- **Status:** Cannot test - blocked by Issue #24 (GLIBC)
+- **Documented:** Auth patterns for all tools mapped out
+- **Next:** Retest after Issue #24 is fixed

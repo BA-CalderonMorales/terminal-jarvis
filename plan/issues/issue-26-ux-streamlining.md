@@ -107,7 +107,33 @@ npm run test:first-run
 ## Status
 
 - [x] QA environment created
+- [x] **QA TESTING COMPLETE (2026-01-04)**
 - [ ] Remove unnecessary Enter prompts
 - [ ] Conditional auth advisory
 - [ ] Add --quick flag
 - [ ] Direct tool invocation
+
+## QA Test Results
+
+### Step Count Analysis
+
+| Scenario | Steps | Enter Presses | Target |
+|----------|-------|---------------|--------|
+| Default (no API key) | **5** | 3 | 1-2 ❌ |
+| Default (with API key) | **3** | 2 | 1-2 ⚠️ |
+| Direct launch (`tj claude`) | **1** | 0 | 1-2 ✅ |
+| Proposed quick mode | **2** | 1 | 1-2 ✅ |
+
+### Recommendations from Testing
+
+1. **Skip arguments prompt** if using defaults
+2. **Only show auth advisory** when API key is missing AND required
+3. **Remember last-used tool** and offer as quick option
+4. **Add `--quick` flag** for minimal prompts
+5. **Support direct invocation:** `npx terminal-jarvis claude`
+
+### Current vs Target
+
+- Current average: **4-5 steps**
+- Target: **1-2 steps**
+- Gap: 2-3 steps need to be eliminated
