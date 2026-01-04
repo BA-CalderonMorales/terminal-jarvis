@@ -8,6 +8,7 @@ static GLOBAL_THEME_CONFIG: OnceLock<Mutex<ThemeConfig>> = OnceLock::new();
 /// Configuration for theme management
 pub struct ThemeConfig {
     current_theme: Theme,
+    current_theme_type: ThemeType,
 }
 
 impl ThemeConfig {
@@ -15,14 +16,15 @@ impl ThemeConfig {
     pub fn new() -> Self {
         Self {
             current_theme: Theme::get(ThemeType::TJarvis),
+            current_theme_type: ThemeType::TJarvis,
         }
     }
 
     /// Create theme config with specified theme
-    #[allow(dead_code)]
     pub fn with_theme(theme_type: ThemeType) -> Self {
         Self {
             current_theme: Theme::get(theme_type),
+            current_theme_type: theme_type,
         }
     }
 
@@ -31,21 +33,18 @@ impl ThemeConfig {
         &self.current_theme
     }
 
-    /// Set a new theme
-    #[allow(dead_code)]
-    pub fn set_theme(&mut self, theme_type: ThemeType) {
-        self.current_theme = Theme::get(theme_type);
+    /// Get the current theme type
+    pub fn current_type(&self) -> ThemeType {
+        self.current_theme_type
     }
 
-    /// Load theme from configuration file (future enhancement)
-    pub fn load_from_config() -> Result<Self> {
-        // For now, return default theme
-        // In the future, this could read from terminal-jarvis.toml
-        Ok(Self::new())
+    /// Set a new theme
+    pub fn set_theme(&mut self, theme_type: ThemeType) {
+        self.current_theme = Theme::get(theme_type);
+        self.current_theme_type = theme_type;
     }
 
     /// Get available theme options
-    #[allow(dead_code)]
     pub fn available_themes() -> Vec<(&'static str, ThemeType)> {
         vec![
             ("Default", ThemeType::TJarvis),
@@ -57,10 +56,7 @@ impl ThemeConfig {
     /// Validate if theme is supported
     #[allow(dead_code)]
     pub fn is_valid_theme(name: &str) -> bool {
-        matches!(
-            name.to_lowercase().as_str(),
-            "t.jarvis" | "tjarvis" | "classic" | "matrix"
-        )
+        name.parse::<ThemeType>().is_ok()
     }
 }
 
@@ -70,9 +66,14 @@ impl Default for ThemeConfig {
     }
 }
 
-/// Initialize the global theme configuration
+/// Initialize the global theme configuration with default theme
 pub fn initialize_theme_config() -> Result<()> {
-    let config = ThemeConfig::load_from_config()?;
+    initialize_theme_config_with(ThemeType::TJarvis)
+}
+
+/// Initialize the global theme configuration with a specific theme
+pub fn initialize_theme_config_with(theme_type: ThemeType) -> Result<()> {
+    let config = ThemeConfig::with_theme(theme_type);
     let _ = GLOBAL_THEME_CONFIG.set(Mutex::new(config));
     Ok(())
 }
@@ -96,4 +97,13 @@ pub fn current_theme() -> Theme {
         .lock()
         .map(|config| config.current().clone())
         .unwrap_or_else(|_| Theme::get(ThemeType::TJarvis))
+}
+
+/// Get the current theme type
+pub fn current_theme_type() -> ThemeType {
+    GLOBAL_THEME_CONFIG
+        .get_or_init(|| Mutex::new(ThemeConfig::new()))
+        .lock()
+        .map(|config| config.current_type())
+        .unwrap_or(ThemeType::TJarvis)
 }

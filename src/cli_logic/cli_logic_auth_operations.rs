@@ -1,8 +1,9 @@
 use anyhow::{anyhow, Result};
-use inquire::{Confirm, Text};
 use std::collections::HashMap;
 
-use crate::cli_logic::cli_logic_responsive_menu::create_themed_select;
+use crate::cli_logic::themed_components::{
+    themed_confirm, themed_multiselect, themed_select_with, themed_text,
+};
 
 use crate::auth_manager::AuthManager;
 use crate::theme::theme_global_config;
@@ -22,7 +23,7 @@ pub async fn handle_authentication_menu() -> Result<()> {
         ];
 
         let selection =
-            match create_themed_select(&theme, "Choose an action:", options.clone()).prompt() {
+            match themed_select_with(&theme, "Choose an action:", options.clone()).prompt() {
                 Ok(s) => s,
                 Err(_) => return Ok(()),
             };
@@ -109,7 +110,7 @@ pub async fn handle_auth_set(tool: &str) -> Result<()> {
         } else {
             var.to_string()
         };
-        if let Ok(input) = Text::new(&prompt)
+        if let Ok(input) = themed_text(&prompt)
             .with_placeholder("leave blank to skip")
             .prompt()
         {
@@ -125,7 +126,7 @@ pub async fn handle_auth_set(tool: &str) -> Result<()> {
         return Ok(());
     }
 
-    if Confirm::new("Save credentials to Terminal Jarvis config?")
+    if themed_confirm("Save credentials to Terminal Jarvis config?")
         .with_default(true)
         .prompt()
         .unwrap_or(true)
@@ -144,10 +145,11 @@ pub async fn handle_auth_set(tool: &str) -> Result<()> {
 
 async fn pick_tool_name() -> Result<Option<String>> {
     let theme = theme_global_config::current_theme();
-    let tools_map = ToolManager::get_available_tools();
-    let mut options: Vec<String> = tools_map.keys().map(|s| s.to_string()).collect();
+    // Use async version that checks database first
+    let tools_map = ToolManager::get_available_tools_async().await;
+    let mut options: Vec<String> = tools_map.keys().cloned().collect();
     options.sort();
-    match create_themed_select(&theme, "Select a tool:", options.clone()).prompt() {
+    match themed_select_with(&theme, "Select a tool:", options.clone()).prompt() {
         Ok(choice) => Ok(Some(choice)),
         Err(_) => Ok(None),
     }
@@ -162,7 +164,7 @@ async fn handle_auth_remove_menu() -> Result<()> {
         "Back".to_string(),
     ];
     let choice =
-        create_themed_select(&theme, "Choose a removal option:", options.clone()).prompt()?;
+        themed_select_with(&theme, "Choose a removal option:", options.clone()).prompt()?;
 
     match choice.as_str() {
         "Remove credentials for one tool" => {
@@ -174,7 +176,7 @@ async fn handle_auth_remove_menu() -> Result<()> {
             handle_remove_for_multiple_tools().await?;
         }
         "Clear ALL credentials" => {
-            if Confirm::new("This will remove all saved credentials. Are you sure?")
+            if themed_confirm("This will remove all saved credentials. Are you sure?")
                 .with_default(false)
                 .prompt()
                 .unwrap_or(false)
@@ -191,7 +193,6 @@ async fn handle_auth_remove_menu() -> Result<()> {
 }
 
 async fn handle_remove_for_tool(tool: &str) -> Result<()> {
-    use inquire::MultiSelect;
     let theme = theme_global_config::current_theme();
     let existing = AuthManager::get_tool_credentials(tool)?;
     if existing.is_empty() {
@@ -201,8 +202,7 @@ async fn handle_remove_for_tool(tool: &str) -> Result<()> {
         return Ok(());
     }
     let keys: Vec<String> = existing.keys().cloned().collect();
-    let selections = MultiSelect::new("Select keys to remove (space to toggle):", keys.clone())
-        .with_render_config(crate::cli_logic::cli_logic_utilities::get_themed_render_config())
+    let selections = themed_multiselect("Select keys to remove (space to toggle):", keys.clone())
         .with_page_size(10)
         .prompt()?;
     if selections.is_empty() {
@@ -213,7 +213,7 @@ async fn handle_remove_for_tool(tool: &str) -> Result<()> {
     } else {
         format!("Remove {} selected key(s) for {}?", selections.len(), tool)
     };
-    if Confirm::new(&confirm_msg)
+    if themed_confirm(&confirm_msg)
         .with_default(false)
         .prompt()
         .unwrap_or(false)
@@ -227,7 +227,6 @@ async fn handle_remove_for_tool(tool: &str) -> Result<()> {
 }
 
 async fn handle_remove_for_multiple_tools() -> Result<()> {
-    use inquire::MultiSelect;
     let theme = theme_global_config::current_theme();
     // Build a list of tools that currently have credentials
     let loader = get_tool_config_loader();
@@ -246,17 +245,16 @@ async fn handle_remove_for_multiple_tools() -> Result<()> {
         let _ = std::io::stdin().read_line(&mut String::new());
         return Ok(());
     }
-    let selected_tools = MultiSelect::new(
+    let selected_tools = themed_multiselect(
         "Select tools to remove credentials for:",
         tools_with_creds.clone(),
     )
-    .with_render_config(crate::cli_logic::cli_logic_utilities::get_themed_render_config())
     .with_page_size(12)
     .prompt()?;
     if selected_tools.is_empty() {
         return Ok(());
     }
-    if Confirm::new(&format!(
+    if themed_confirm(&format!(
         "Remove ALL saved credentials for {} tool(s)?",
         selected_tools.len()
     ))

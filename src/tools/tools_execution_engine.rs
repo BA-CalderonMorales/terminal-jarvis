@@ -15,7 +15,7 @@ use super::tools_process_management::{
 use super::tools_startup_guidance::show_tool_startup_guidance;
 use crate::auth_manager::AuthManager;
 use crate::cli_logic::cli_logic_responsive_menu::create_themed_select;
-use inquire::Text;
+use inquire::{Password, Text};
 
 // Heuristic validators for API keys we handle
 fn looks_like_gemini_api_key(key: &str) -> bool {
@@ -126,11 +126,8 @@ pub async fn run_tool_once(display_name: &str, args: &[String]) -> Result<()> {
     }
     AuthManager::warn_if_browser_likely(display_name)?;
 
-    // Provide T.JARVIS-themed guidance before tool startup
+    // Provide minimal guidance before tool startup (only shows tips if API keys missing)
     show_tool_startup_guidance(display_name)?;
-
-    // Pause for confirmation before launching the external CLI tool (interactive only)
-    pause_for_enter_if_interactive();
 
     // Special terminal preparation for opencode to ensure proper input focus
     if display_name == "opencode" {
@@ -226,8 +223,8 @@ pub async fn run_tool_once(display_name: &str, args: &[String]) -> Result<()> {
                         .accent("OpenRouter API keys: https://openrouter.ai/settings/keys")
                 );
                 // Lightweight inline prompt; user can press Enter to skip
-                if let Ok(input) = Text::new("Enter an API key for Aider (recommended: OPENROUTER_API_KEY). Leave blank to skip:")
-                .with_placeholder("skips if empty")
+                if let Ok(input) = Password::new("Enter an API key for Aider (recommended: OPENROUTER_API_KEY). Leave blank to skip:")
+                .without_confirmation()
                 .prompt()
             {
                 let trimmed = input.trim().to_string();
@@ -626,14 +623,4 @@ pub async fn run_tool_once(display_name: &str, args: &[String]) -> Result<()> {
     }
 
     Ok(())
-}
-
-/// Prompt the user to press Enter before launching the tool, only if running in an interactive TTY.
-fn pause_for_enter_if_interactive() {
-    if std::io::stdin().is_terminal() {
-        let theme = crate::theme::theme_global_config::current_theme();
-        println!("\n{}", theme.accent("Press Enter to continue..."));
-        let _ = std::io::stdin().read_line(&mut String::new());
-        let _ = std::io::stdout().flush();
-    }
 }

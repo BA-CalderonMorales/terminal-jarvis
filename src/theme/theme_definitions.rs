@@ -25,13 +25,34 @@ pub struct Theme {
 }
 
 /// Available themes for Terminal Jarvis
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum ThemeType {
     TJarvis,
-    #[allow(dead_code)]
     Classic,
-    #[allow(dead_code)]
     Matrix,
+}
+
+impl fmt::Display for ThemeType {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            ThemeType::TJarvis => write!(f, "tjarvis"),
+            ThemeType::Classic => write!(f, "classic"),
+            ThemeType::Matrix => write!(f, "matrix"),
+        }
+    }
+}
+
+impl std::str::FromStr for ThemeType {
+    type Err = String;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        match s.to_lowercase().as_str() {
+            "tjarvis" | "t.jarvis" | "default" => Ok(ThemeType::TJarvis),
+            "classic" | "minimal" => Ok(ThemeType::Classic),
+            "matrix" | "terminal" => Ok(ThemeType::Matrix),
+            _ => Err(format!("Unknown theme: {}", s)),
+        }
+    }
 }
 
 impl fmt::Display for Theme {

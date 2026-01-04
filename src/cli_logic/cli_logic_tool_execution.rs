@@ -1,9 +1,8 @@
-use crate::cli_logic::cli_logic_utilities::get_themed_render_config;
+use crate::cli_logic::themed_components::themed_confirm;
 use crate::installation_arguments::InstallationManager;
 use crate::progress_utils::{ProgressContext, ProgressUtils};
 use crate::tools::ToolManager;
 use anyhow::{anyhow, Result};
-use inquire::Confirm;
 use tokio::process::Command as AsyncCommand;
 
 /// Handle running a specific AI coding tool with arguments
@@ -46,8 +45,7 @@ pub async fn handle_run_tool(tool: &str, args: &[String]) -> Result<()> {
     if !ToolManager::check_tool_installed(cli_command) {
         check_progress.finish_error(&format!("Tool '{tool}' is not installed"));
 
-        let should_install = match Confirm::new(&format!("Install '{tool}' now?"))
-            .with_render_config(get_themed_render_config())
+        let should_install = match themed_confirm(&format!("Install '{tool}' now?"))
             .with_default(true)
             .prompt()
         {
@@ -81,6 +79,9 @@ pub async fn handle_run_tool(tool: &str, args: &[String]) -> Result<()> {
     // Add a brief delay to show startup progress
     tokio::time::sleep(tokio::time::Duration::from_millis(400)).await;
     startup_progress.finish_success(&format!("Starting {tool}"));
+
+    // Save last-used tool for quick access
+    let _ = crate::cli_logic::cli_logic_first_run::save_last_used_tool(tool);
 
     // Special handling for opencode - ensure clean terminal state
     if tool == "opencode" {
