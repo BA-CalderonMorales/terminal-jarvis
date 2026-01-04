@@ -194,10 +194,10 @@ impl VoiceInputProvider for NativeVoiceProvider {
             #[cfg(target_os = "macos")]
             {
                 // macOS doesn't have simple built-in CLI speech recognition yet
-                return Err(anyhow!(
+                Err(anyhow!(
                     "macOS native speech recognition requires additional setup.\n\
                      Use cloud API: Set OPENAI_API_KEY or GROQ_API_KEY environment variable"
-                ));
+                ))
             }
         })
     }

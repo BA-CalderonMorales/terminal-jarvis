@@ -419,8 +419,8 @@ mod tests {
     fn test_wake_word_normalization() {
         let config = VoiceProviderConfig::default();
         let provider = crate::voice::WhisperProvider::new(config);
-        if provider.is_ok() {
-            let listener = SmartVoiceListener::new(Box::new(provider.unwrap()));
+        if let Ok(p) = provider {
+            let listener = SmartVoiceListener::new(Box::new(p));
             assert_eq!(listener.wake_word, "jarvis");
         }
     }
