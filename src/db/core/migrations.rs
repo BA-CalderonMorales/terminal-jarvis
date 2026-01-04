@@ -163,7 +163,9 @@ mod tests {
     use super::*;
 
     #[test]
+    #[allow(clippy::const_is_empty)]
     fn test_migrations_defined() {
+        // MIGRATIONS is a compile-time constant, verify it has entries
         assert!(!MIGRATIONS.is_empty());
         assert_eq!(MIGRATIONS[0].version, 1);
     }

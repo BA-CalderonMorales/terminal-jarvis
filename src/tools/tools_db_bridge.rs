@@ -205,6 +205,6 @@ mod tests {
     fn test_db_tool_manager_struct() {
         // Just verify the struct and its methods compile
         // Actual database tests are in tools/repository.rs
-        assert!(true);
+        // This test exists to ensure the module compiles correctly
     }
 }
