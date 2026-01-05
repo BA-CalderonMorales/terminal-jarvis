@@ -86,12 +86,12 @@ terminal-jarvis/
 │   └── verify/                    # Verification feedback loop
 │
 ├── .github/                       # GitHub integrations
-│   └── skills/                    # AI agent skills (14 modules)
+│   └── skills/                    # AI agent skills (15 modules)
 │       ├── verification/          # Quality verification
 │       ├── release-checklist/     # Pre-release automation
+│       ├── qa-testing/            # Minimal QA branch testing
 │       ├── deployment/            # Release workflows
-│       ├── testing/               # TDD practices
-│       └── ...                    # 10 more skills
+│       └── ...                    # 11 more skills
 │
 ├── tests/                         # Rust tests (cargo test)
 ├── e2e/                           # E2E tests (TypeScript/Vitest)

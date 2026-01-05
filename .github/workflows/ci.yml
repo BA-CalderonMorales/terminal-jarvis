@@ -4,9 +4,19 @@ on:
 
   push:
     branches: [ "main", "develop", "feat/*", "bug/*", "security/*", "hotfix/*" ]
+    paths-ignore:
+      - '**.md'
+      - '.github/skills/**'
+      - '.github/copilot-instructions.md'
+      - 'LICENSE'
 
   pull_request:
     branches: [ "main", "develop", "feat/*", "bug/*", "security/*", "hotfix/*" ]
+    paths-ignore:
+      - '**.md'
+      - '.github/skills/**'
+      - '.github/copilot-instructions.md'
+      - 'LICENSE'
 
 env:
   CARGO_TERM_COLOR: always
