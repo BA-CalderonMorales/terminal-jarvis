@@ -29,7 +29,7 @@ name = "terminal_jarvis"
 path = "src/lib.rs"
 
 [dependencies]
-clap = { version = "4.5.50", features = ["derive", "env", "wrap_help"] }
+clap = { version = "4.5.54", features = ["derive", "env", "wrap_help"] }
 clap_complete = "4.5.58"
 tokio = { version = "1.47.1", features = ["full"] }
 # Use rustls for TLS to enable static linking with musl (Issue #24 - GLIBC independence)
