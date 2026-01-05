@@ -19,11 +19,13 @@ print_error() { echo -e "${RED}[ERROR]${NC} $1"; }
 print_step() { echo -e "${BLUE}[STEP]${NC} $1"; }
 
 # Platform targets
+# Note: Using musl targets for Linux to avoid GLIBC version dependencies (Issue #24)
+# musl produces fully static binaries that work on any Linux distribution
 TARGETS=(
     "x86_64-apple-darwin:macos-intel"
     "aarch64-apple-darwin:macos-arm"
-    "x86_64-unknown-linux-gnu:linux-x64"
-    "aarch64-unknown-linux-gnu:linux-arm64"
+    "x86_64-unknown-linux-musl:linux-x64"
+    "aarch64-unknown-linux-musl:linux-arm64"
 )
 
 # Script directory and project root
@@ -143,6 +145,7 @@ CURRENT_ARCH=$(uname -m)
 print_info "Current platform: $CURRENT_OS ($CURRENT_ARCH)"
 
 # Map current architecture to Rust target
+# Use musl for Linux to avoid GLIBC dependency issues
 case "$CURRENT_OS-$CURRENT_ARCH" in
     "Darwin-arm64")
         CURRENT_TARGET="aarch64-apple-darwin"
@@ -151,10 +154,10 @@ case "$CURRENT_OS-$CURRENT_ARCH" in
         CURRENT_TARGET="x86_64-apple-darwin"
         ;;
     "Linux-x86_64")
-        CURRENT_TARGET="x86_64-unknown-linux-gnu"
+        CURRENT_TARGET="x86_64-unknown-linux-musl"
         ;;
     "Linux-aarch64")
-        CURRENT_TARGET="aarch64-unknown-linux-gnu"
+        CURRENT_TARGET="aarch64-unknown-linux-musl"
         ;;
     *)
         print_warning "Unknown platform combination: $CURRENT_OS-$CURRENT_ARCH"
