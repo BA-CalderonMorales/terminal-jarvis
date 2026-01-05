@@ -8,7 +8,7 @@
  - Verify installation
 
  Version Hint (used by CI for consistency checks):
- Terminal Jarvis v0.0.72
+ Terminal Jarvis v0.0.73
 */
 
 const fs = require('fs');
