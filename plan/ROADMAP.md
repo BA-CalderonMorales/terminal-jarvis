@@ -4,18 +4,23 @@
 
 Make terminal-jarvis the simplest, fastest way to access AI coding tools.
 
-## Priorities (v0.0.72+)
+## Priorities (v0.0.73+)
 
 ### P0: Critical Fixes
 
-1. **GLIBC Compatibility (Issue #24)**
+1. **NVM npm Path (Issue #37)** ✅ FIXED in v0.0.73
+   - Removed sudo for npm global installs
+   - Show stderr for error visibility
+   - All npm tools: requires_sudo = false
+
+2. **GLIBC Compatibility (Issue #24)** ✅ FIXED in v0.0.72
    - Build with musl for static linking
    - Provide multiple binary variants
    - Auto-detect and download correct binary
 
-2. **Download Speed (Issue #23)**
-   - Optimize binary size
-   - Consider lazy loading
+3. **Download Speed (Issue #23)** ✅ FIXED in v0.0.72
+   - Added progress display
+   - Increased timeout to 60s
    - CDN for faster downloads
 
 ### P1: UX Improvements
@@ -88,17 +93,30 @@ Every release must pass:
 - **Status:** Can now test after Issue #24 is verified fixed
 - **Next:** Create auth-flows QA branch after #24 confirmed
 
+## v0.0.73 Fixes Applied (2026-01-05)
+
+### Issue #37: NVM npm Path Fix ✅ FIXED
+- **Problem:** Tool installation fails silently when npm is installed via NVM
+- **Root cause:** `sudo npm install -g` fails because NVM installs npm in user's home directory, not in sudo's PATH
+- **Fix 1:** Removed sudo for npm global installs - NVM already sets proper permissions
+- **Fix 2:** Changed stderr from `Stdio::null()` to `Stdio::inherit()` to show errors
+- **Fix 3:** Updated all 16 npm tool configs to set `requires_sudo = false`
+- **Verification:** Test in `qa/v0.0.73-nvm-fix-minimal` Codespace
+
+### Docs: README Updates ✅
+- **Change:** Full-width images (width="100%") for promo image and gif
+- **Change:** Restored Awesome badge to badge row
+
 ## QA Verification Needed
 
-Test these Codespace branches to confirm fixes:
+Test this Codespace branch to confirm v0.0.73 fixes:
 
-1. **Create Codespace on `qa/v0.0.72-glibc-minimal`**
-   - Run `test-glibc.sh`
-   - Confirm binary works on Debian 12 (GLIBC 2.36)
+1. **Create Codespace on `qa/v0.0.73-nvm-fix-minimal`**
+   - Run `test-qa.sh`
+   - Confirm npm tool installation shows output (not silent)
+   - Confirm no "sudo: npm: command not found" errors
 
-2. **Create Codespace on `qa/v0.0.72-fresh-install-minimal`**
-   - Run `test-fresh-install.sh`
-   - Confirm progress display and UX improvements
+Old v0.0.72 QA branches have been cleaned up.
 
 ## Previous Test Results (2026-01-04)
 
