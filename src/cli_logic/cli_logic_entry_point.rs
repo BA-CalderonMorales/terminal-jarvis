@@ -3,9 +3,7 @@
 
 use crate::auth_manager::AuthManager;
 use crate::cli_logic::cli_logic_welcome::display_welcome_screen;
-use crate::cli_logic::themed_components::{
-    themed_confirm, themed_multiselect, themed_select_with, themed_text,
-};
+use crate::cli_logic::themed_components::{themed_confirm, themed_multiselect, themed_select_with};
 use crate::installation_arguments::InstallationManager;
 use crate::progress_utils::ProgressContext;
 use crate::theme::theme_global_config;
@@ -76,7 +74,8 @@ pub async fn handle_ai_tools_menu() -> Result<()> {
     }
 }
 
-/// Handle launching a specific tool with argument input
+/// Handle launching a specific tool - streamlined for fewer Enter presses
+/// Per Issue #26: Skip args prompt for most cases, launch immediately
 async fn handle_tool_launch(tool_name: &str) -> Result<()> {
     let theme = theme_global_config::current_theme();
 
@@ -123,30 +122,10 @@ async fn handle_tool_launch(tool_name: &str) -> Result<()> {
         }
     }
 
-    let args_input = match themed_text(&format!(
-        "Enter arguments for {tool_name} (or press Enter for default):"
-    ))
-    .with_default("")
-    .prompt()
-    {
-        Ok(input) => input,
-        Err(_) => {
-            // User interrupted - go back to main menu
-            println!("\n{}", theme.accent("Operation cancelled"));
-            return Ok(());
-        }
-    };
-
-    let args: Vec<String> = if args_input.trim().is_empty() {
-        vec![]
-    } else {
-        shell_words::split(&args_input).unwrap_or_else(|_| {
-            args_input
-                .split_whitespace()
-                .map(|s| s.to_string())
-                .collect()
-        })
-    };
+    // Issue #26 Fix: Skip args prompt - launch immediately with defaults
+    // Most users just want to start the tool quickly without extra prompts
+    // Args can be passed via CLI: `terminal-jarvis run claude -- <args>`
+    let args: Vec<String> = vec![];
 
     // Always launch the tool and show post-tool menu regardless of success/failure
     let _result = launch_tool_with_progress(tool_name, &args).await;

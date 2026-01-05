@@ -65,7 +65,7 @@ All detailed instructions are organized as modular, reusable skills in [.github/
 
 **Distribution**: NPM, Cargo, Homebrew
 
-**Current Version**: 0.0.71
+**Current Version**: 0.0.72
 
 ### Installation
 

@@ -254,3 +254,25 @@ async fn prepare_opencode_terminal_state() -> Result<()> {
 
     Ok(())
 }
+
+/// Quick launch mode: immediately launch the last-used tool without prompts
+/// This implements Issue #26's goal of minimal steps to launch
+pub async fn handle_quick_launch() -> Result<()> {
+    use crate::cli_logic::cli_logic_first_run::{get_last_used_tool, get_last_used_tool_async};
+
+    // Try database first (async), fall back to file-based
+    let last_tool = get_last_used_tool_async().await.or_else(get_last_used_tool);
+
+    match last_tool {
+        Some(tool) => {
+            ProgressUtils::info_message(&format!("Quick launch: {}", tool));
+            handle_run_tool(&tool, &[]).await
+        }
+        None => {
+            ProgressUtils::warning_message("No last-used tool found");
+            println!("  Use 'terminal-jarvis <tool>' to launch a tool directly");
+            println!("  Available tools: claude, gemini, qwen, opencode, codex, aider, amp, goose, crush, llxprt");
+            Ok(())
+        }
+    }
+}
