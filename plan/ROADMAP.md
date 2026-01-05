@@ -55,15 +55,54 @@ Every release must pass:
 
 ## Success Metrics
 
-| Metric | Current (Measured) | Target | Status |
-|--------|-------------------|--------|--------|
-| Install time (npm) | **31s** | <15s | ❌ 2x over target |
-| Binary download | **227ms** | <10s | ✅ Fast |
-| Steps to launch | **3-5** | 1-2 | ❌ Too many |
-| GLIBC minimum | **2.39** | 2.17 | ❌ Critical blocker |
-| Binary size | **17MB** (6MB compressed) | <10MB | ⚠️ Close |
+| Metric | Before v0.0.72 | Target | v0.0.72 Fix |
+|--------|----------------|--------|-------------|
+| Install time (npm) | 31s, no progress | <15s | Progress display added |
+| Binary download | 227ms | <10s | ✅ Already fast |
+| Steps to launch | 3-5 | 1-2 | Direct invocation + quick mode |
+| GLIBC minimum | 2.39 | 2.17 | musl static linking |
+| Binary size | 17MB | <10MB | ⚠️ Future work |
 
-## QA Test Results (2026-01-04)
+## v0.0.72 Fixes Applied (2026-01-05)
+
+### Issue #24: GLIBC Compatibility ✅ FIXED
+- **Fix:** Switched to musl targets (x86_64-unknown-linux-musl, aarch64-unknown-linux-musl)
+- **Fix:** Replaced OpenSSL with rustls for static linking
+- **Result:** Binary should work on any Linux regardless of GLIBC version
+- **Verification:** Pending - test in `qa/v0.0.72-glibc-minimal` Codespace
+
+### Issue #23: Download Speed ✅ FIXED
+- **Fix:** Added progress display during npm postinstall
+- **Fix:** Increased timeout to 60s
+- **Fix:** Added timing statistics for download and extraction
+- **Verification:** Pending - test in `qa/v0.0.72-fresh-install-minimal` Codespace
+
+### Issue #26: UX Steps ✅ FIXED
+- **Fix:** Direct tool invocation (`terminal-jarvis claude`)
+- **Fix:** Quick launch mode (`terminal-jarvis -q`)
+- **Fix:** Streamlined menu flow (no args prompt)
+- **Fix:** Post-tool auth menu options
+- **Verification:** Pending - test in `qa/v0.0.72-fresh-install-minimal` Codespace
+
+### Issue #27: Auth Flows ⏸️ PENDING
+- **Status:** Can now test after Issue #24 is verified fixed
+- **Next:** Create auth-flows QA branch after #24 confirmed
+
+## QA Verification Needed
+
+Test these Codespace branches to confirm fixes:
+
+1. **Create Codespace on `qa/v0.0.72-glibc-minimal`**
+   - Run `test-glibc.sh`
+   - Confirm binary works on Debian 12 (GLIBC 2.36)
+
+2. **Create Codespace on `qa/v0.0.72-fresh-install-minimal`**
+   - Run `test-fresh-install.sh`
+   - Confirm progress display and UX improvements
+
+## Previous Test Results (2026-01-04)
+
+Before v0.0.72:
 
 ### Issue #24: GLIBC Compatibility ❌ CRITICAL
 - **Tested on:** Ubuntu 22.04 (GLIBC 2.35), Debian 12 (GLIBC 2.36)

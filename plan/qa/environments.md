@@ -1,103 +1,96 @@
 # QA Testing Environments
 
-## Branch Structure
+## Current QA Branches (v0.0.72)
 
 ```
-qa/env-debian-bookworm     # GLIBC testing
-qa/env-fresh-install       # UX and speed testing  
-qa/env-auth-flows          # Auth flow testing
+qa/v0.0.72-glibc-minimal         # GLIBC compatibility (Issue #24)
+qa/v0.0.72-fresh-install-minimal # Download speed & UX (Issues #23, #26)
 ```
 
-## Environment: Debian Bookworm
+**Note**: These are orphan branches containing only `.devcontainer/` and `README.md` for clean testing.
 
-**Branch:** `qa/env-debian-bookworm`
+## Environment: GLIBC Compatibility
 
-**Purpose:** Test GLIBC 2.39 compatibility issue (#24)
+**Branch:** `qa/v0.0.72-glibc-minimal`
+
+**Purpose:** Verify Issue #24 fix (musl static linking)
 
 **Base Image:** `mcr.microsoft.com/devcontainers/base:debian-12`
 
-**GLIBC Version:** 2.36 (older than required 2.39)
+**GLIBC Version:** 2.36 (older than previously required 2.39)
 
-**Tests:**
-- `npm run test:glibc` - Full GLIBC compatibility suite
-- Binary symbol analysis
-- Installation failure capture
+**Test Command:**
+```bash
+test-glibc.sh
+```
 
-**Expected Results:**
-- npm install: FAIL (GLIBC mismatch)
-- Binary execution: FAIL (GLIBC mismatch)
-- Documents exact error for fixing
+**What It Tests:**
+- npm install succeeds on older GLIBC
+- Binary is statically linked
+- CLI commands work
 
-## Environment: Fresh Install
+## Environment: Fresh Install & UX
 
-**Branch:** `qa/env-fresh-install`
+**Branch:** `qa/v0.0.72-fresh-install-minimal`
 
-**Purpose:** Test download speed (#23) and UX steps (#26)
-
-**Base Image:** `mcr.microsoft.com/devcontainers/base:ubuntu-22.04`
-
-**Clean State:**
-- No terminal-jarvis installed
-- No cached packages
-- No API keys set
-
-**Tests:**
-- `npm run test:download-speed` - Measure install times
-- `npm run test:first-run` - Count interaction steps
-- `npm run test:steps` - Analyze user journey
-
-**Metrics Collected:**
-- Download time (npm, binary)
-- Steps to launch tool
-- Prompts displayed
-
-## Environment: Auth Flows
-
-**Branch:** `qa/env-auth-flows`
-
-**Purpose:** Test authentication issues (#27)
+**Purpose:** Verify Issues #23 (speed) and #26 (UX) fixes
 
 **Base Image:** `mcr.microsoft.com/devcontainers/base:ubuntu-22.04`
 
-**Features:**
-- Browser available for OAuth
-- Mock API key testing
-- Auth state inspection
+**Test Command:**
+```bash
+test-fresh-install.sh
+```
 
-**Tests:**
-- `npm run test:codex-auth` - OpenAI Codex flow
-- `npm run test:gemini-auth` - Google Gemini flow
-- `npm run test:claude-auth` - Anthropic Claude flow
+**What It Tests:**
+- Progress display during install
+- Install timing
+- Direct invocation works (`terminal-jarvis claude`)
+- Clean menu rendering
 
-**Scenarios:**
-1. No API key set
-2. Invalid API key
-3. Expired token
-4. OAuth flow completion
+## How to Test
 
-## Test Results Summary (2026-01-04)
+### Via GitHub Codespace (Recommended)
 
-All three QA environments have been tested. Results:
+1. Go to https://github.com/BA-CalderonMorales/terminal-jarvis
+2. Switch to a QA branch (e.g., `qa/v0.0.72-glibc-minimal`)
+3. Click "Code" → "Codespaces" → "Create codespace on qa/v0.0.72-glibc-minimal"
+4. Wait for environment to build
+5. Run the test script shown in terminal
 
-| Environment | Branch | Issues Tested | Result |
-|-------------|--------|---------------|--------|
-| Debian Bookworm | `qa/env-debian-bookworm` | #24 | ❌ GLIBC 2.39 blocks execution |
-| Fresh Install | `qa/env-fresh-install` | #23, #24, #26 | ⚠️ Multiple issues confirmed |
-| Auth Flows | `qa/env-auth-flows` | #27 | ⏸️ Blocked by #24 |
+### Via Docker (Local)
 
-### Key Findings
+```bash
+git checkout qa/v0.0.72-glibc-minimal
+docker build -t qa-glibc .devcontainer/
+docker run -it qa-glibc bash
+test-glibc.sh
+```
 
-1. **Issue #24 is the critical blocker** - Binary requires GLIBC 2.39
-2. **Issue #23 partially confirmed** - NPM overhead is the bottleneck, not downloads
-3. **Issue #26 confirmed** - 3-5 steps instead of target 1-2
-4. **Issue #27 blocked** - Cannot test auth without working binary
+## Previous Test Results (2026-01-04)
 
-### Priority Order
+Before v0.0.72 fixes:
 
-1. **P0: Fix Issue #24** (GLIBC) - Nothing else works until this is fixed
-2. **P1: Fix Issue #26** (UX steps) - Quick wins available
-3. **P1: Fix Issue #23** (Speed) - Focus on npm overhead, not binary size
-4. **P2: Fix Issue #27** (Auth) - Retest after #24 is fixed
+| Issue | Problem | Status |
+|-------|---------|--------|
+| #24 | Binary required GLIBC 2.39 | ❌ BLOCKED all testing |
+| #23 | No progress during download | ❌ Poor UX |
+| #26 | 4-5 steps to launch tool | ❌ Too many steps |
+
+## v0.0.72 Fixes Applied
+
+| Issue | Fix |
+|-------|-----|
+| #24 | Switched to musl static linking (x86_64-unknown-linux-musl) |
+| #23 | Added progress display, timing stats in postinstall.js |
+| #26 | Direct invocation, quick launch mode, streamlined menus |
+
+## Pending Verification
+
+Test these QA branches in fresh Codespaces to confirm fixes work:
+
+- [ ] `qa/v0.0.72-glibc-minimal` - Confirm binary works on Debian 12
+- [ ] `qa/v0.0.72-fresh-install-minimal` - Confirm progress and UX improvements
 
 ## Using an Environment
 
