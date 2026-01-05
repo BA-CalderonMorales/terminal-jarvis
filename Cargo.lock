@@ -2543,7 +2543,7 @@ dependencies = [
 
 [[package]]
 name = "terminal-jarvis"
-version = "0.0.71"
+version = "0.0.72"
 dependencies = [
  "anyhow",
  "async-trait",

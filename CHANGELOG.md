@@ -2,6 +2,37 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.0.72] - 2026-01-04
+
+### Added
+- **Direct Tool Invocation**: Launch tools without subcommands (Issue #26)
+  - `terminal-jarvis claude` instead of `terminal-jarvis run claude`
+  - Supports all 10 tools: claude, gemini, qwen, opencode, codex, aider, amp, goose, crush, llxprt
+  - Pass arguments directly: `terminal-jarvis claude -- --help`
+
+- **Quick Launch Mode**: Single command to launch last-used tool
+  - `terminal-jarvis -q` or `terminal-jarvis --quick`
+  - Remembers and instantly launches your most recently used tool
+  - Zero prompts, immediate tool startup
+
+### Changed
+- **Streamlined Tool Launch Flow** (Issue #26): Reduced steps from 4 to 1
+  - Removed arguments prompt when launching from interactive menu
+  - Tools now launch immediately after selection
+  - Arguments can still be passed via CLI: `terminal-jarvis run claude -- <args>`
+  - Auth warnings only shown when API key is actually missing (already conditional)
+
+### Fixed
+- **Invalid Command Handling**: Invalid tool names now show helpful error instead of hanging
+  - `terminal-jarvis invalidcmd` now exits with error message listing available tools
+  - Prevents CLI from falling through to interactive mode on typos
+
+### Technical
+- Updated `cli_logic_entry_point.rs`: Removed interactive args prompt for faster launch
+- Added `handle_quick_launch()` in `cli_logic_tool_execution.rs`
+- Extended CLI parser with `--quick` flag and positional tool argument
+- Location: `src/cli.rs`, `src/cli_logic/cli_logic_entry_point.rs`, `src/cli_logic/cli_logic_tool_execution.rs`
+
 ## [0.0.71] - 2026-01-04
 
 ### Added
