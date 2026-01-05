@@ -30,11 +30,12 @@ jobs:
 
           - os: macos-latest  
             target: aarch64-apple-darwin
-            cross_target: x86_64-unknown-linux-gnu
+            cross_target: x86_64-unknown-linux-musl
 
+          # Use musl for static linking - avoids GLIBC version dependency (Issue #24)
           - os: ubuntu-latest
-            target: x86_64-unknown-linux-gnu
-            cross_target: aarch64-unknown-linux-gnu
+            target: x86_64-unknown-linux-musl
+            cross_target: aarch64-unknown-linux-musl
  
     steps:
     - uses: actions/checkout@v5
@@ -43,6 +44,13 @@ jobs:
       uses: dtolnay/rust-toolchain@stable
       with:
         targets: ${{ matrix.target }},${{ matrix.cross_target }}
+
+    - name: Install musl tools (Linux)
+      if: runner.os == 'Linux'
+      run: |
+        # Install musl for static linking (Issue #24 - GLIBC independence)
+        sudo apt-get update
+        sudo apt-get install -y musl-tools musl-dev
  
     - name: Test multi-platform build system
       run: |
