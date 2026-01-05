@@ -229,12 +229,10 @@ async fn handle_post_tool_exit(last_tool: &str, last_args: &[String]) -> Result<
 
         // Enhanced exit options for faster context switching (numbered)
         let tool_display = initial_case(last_tool);
-        
+
         // Build options dynamically based on tool capabilities
-        let mut exit_options = vec![
-            format!("1. Reopen {}", tool_display),
-        ];
-        
+        let mut exit_options = vec![format!("1. Reopen {}", tool_display)];
+
         // Add login option if tool supports CLI login
         let has_login = get_login_command(last_tool).is_some();
         if has_login {
@@ -272,22 +270,34 @@ async fn handle_post_tool_exit(last_tool: &str, last_args: &[String]) -> Result<
                 continue;
             }
             // Handle all auth-related actions: Login, Configure, Authenticate, Setup
-            s if s.contains("Login to ") || s.contains("Configure ") || s.contains("Authenticate ") || s.contains("Setup ") => {
+            s if s.contains("Login to ")
+                || s.contains("Configure ")
+                || s.contains("Authenticate ")
+                || s.contains("Setup ") =>
+            {
                 // Run the tool's login/auth command
                 if let Some((cmd, args)) = get_login_command(last_tool) {
-                    println!("\n{}", theme.accent(&format!("Running {} {}...", cmd, args.join(" "))));
-                    let status = std::process::Command::new(cmd)
-                        .args(&args)
-                        .status();
+                    println!(
+                        "\n{}",
+                        theme.accent(&format!("Running {} {}...", cmd, args.join(" ")))
+                    );
+                    let status = std::process::Command::new(cmd).args(&args).status();
                     match status {
                         Ok(exit_status) if exit_status.success() => {
-                            println!("{}", theme.accent(&format!("{} authentication completed!", tool_display)));
+                            println!(
+                                "{}",
+                                theme
+                                    .accent(&format!("{} authentication completed!", tool_display))
+                            );
                         }
                         Ok(_) => {
                             println!("{}", theme.accent("Auth process exited. You may need to complete setup in your browser or set environment variables."));
                         }
                         Err(e) => {
-                            println!("{}", theme.accent(&format!("Failed to run auth command: {}", e)));
+                            println!(
+                                "{}",
+                                theme.accent(&format!("Failed to run auth command: {}", e))
+                            );
                         }
                     }
                     // Brief pause then show menu again

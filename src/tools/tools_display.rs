@@ -130,10 +130,7 @@ impl ToolDisplayFormatter {
             }
 
             if !has_any_key && !auth.setup_url.is_empty() {
-                println!(
-                    "{}",
-                    theme.accent(&format!("  Setup: {}", auth.setup_url))
-                );
+                println!("{}", theme.accent(&format!("  Setup: {}", auth.setup_url)));
             }
         }
     }
