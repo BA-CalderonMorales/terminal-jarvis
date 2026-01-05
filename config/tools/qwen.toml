@@ -11,7 +11,7 @@ homepage = "https://qwenlm.github.io/"
 documentation = "https://github.com/QwenLM/Qwen"
 cli_command = "qwen"
 requires_npm = true
-requires_sudo = true
+requires_sudo = false
 status = "stable"
 
 [tool.install]
