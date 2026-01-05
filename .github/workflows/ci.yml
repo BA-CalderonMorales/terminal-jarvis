@@ -38,7 +38,7 @@ jobs:
             cross_target: aarch64-unknown-linux-musl
  
     steps:
-    - uses: actions/checkout@v5
+    - uses: actions/checkout@v6
  
     - name: Install Rust
       uses: dtolnay/rust-toolchain@stable
@@ -91,7 +91,7 @@ jobs:
             os: ubuntu-latest
             node: 20
     steps:
-    - uses: actions/checkout@v5
+    - uses: actions/checkout@v6
 
     # Rust code quality + tests
     - name: Install Rust toolchain
@@ -173,7 +173,7 @@ jobs:
     # Allow PRs to surface SBOM findings without blocking; block on main by required checks
     continue-on-error: ${{ github.event_name == 'pull_request' && matrix.tool == 'sbom-scan' }}
     steps:
-    - uses: actions/checkout@v5
+    - uses: actions/checkout@v6
 
     # cargo-audit
     - name: Install Rust (cargo-audit)
