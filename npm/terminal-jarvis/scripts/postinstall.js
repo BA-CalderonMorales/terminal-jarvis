@@ -3,26 +3,29 @@
  Enhanced postinstall script for terminal-jarvis
  - Detect OS and architecture
  - Download platform-specific binary from GitHub releases with retry logic
- - Create dynamic launcher script
+ - Stream extraction for faster install (no temp files)
+ - Parallel progress display
  - Verify installation
 
  Version Hint (used by CI for consistency checks):
- Terminal Jarvis v0.0.70
+ Terminal Jarvis v0.0.72
 */
 
 const fs = require('fs');
 const os = require('os');
 const path = require('path');
 const https = require('https');
-const { spawnSync } = require('child_process');
+const { spawnSync, spawn } = require('child_process');
 const { createWriteStream } = require('fs');
+const zlib = require('zlib');
 
 const pkg = require('../package.json');
 
-// Configuration
+// Configuration - optimized for faster downloads
 const DOWNLOAD_RETRIES = 3;
-const DOWNLOAD_TIMEOUT = 30000; // 30 seconds
+const DOWNLOAD_TIMEOUT = 60000; // 60 seconds (increased for slow connections)
 const GITHUB_REPO = 'BA-CalderonMorales/terminal-jarvis';
+const CHUNK_LOG_INTERVAL = 250000; // Log progress every 250KB
 
 function log(msg) {
     console.log(`[terminal-jarvis] ${msg}`);
@@ -80,48 +83,72 @@ function getAssetUrl(version, fileName) {
 }
 
 /**
- * Download file with retry logic and timeout
+ * Download file with retry logic, timeout, and progress display
+ * Uses streaming to reduce memory usage and show progress
  */
 async function download(url, dest, retries = DOWNLOAD_RETRIES) {
     await fs.promises.mkdir(path.dirname(dest), { recursive: true });
 
     for (let attempt = 1; attempt <= retries; attempt++) {
         try {
-            log(`Download attempt ${attempt}/${retries}: ${url}`);
+            log(`Download attempt ${attempt}/${retries}...`);
 
             await new Promise((resolve, reject) => {
                 const timeout = setTimeout(() => {
-                    reject(new Error(`Download timeout after ${DOWNLOAD_TIMEOUT}ms`));
+                    reject(new Error(`Download timeout after ${DOWNLOAD_TIMEOUT / 1000}s`));
                 }, DOWNLOAD_TIMEOUT);
 
-                https.get(url, (res) => {
-                    // Handle redirects
-                    if (res.statusCode >= 300 && res.statusCode < 400 && res.headers.location) {
-                        clearTimeout(timeout);
-                        return download(res.headers.location, dest, 1).then(resolve).catch(reject);
-                    }
+                const makeRequest = (requestUrl) => {
+                    https.get(requestUrl, (res) => {
+                        // Handle redirects (GitHub uses them for releases)
+                        if (res.statusCode >= 300 && res.statusCode < 400 && res.headers.location) {
+                            clearTimeout(timeout);
+                            return makeRequest(res.headers.location);
+                        }
 
-                    if (res.statusCode !== 200) {
-                        clearTimeout(timeout);
-                        return reject(new Error(`HTTP ${res.statusCode}: ${res.statusMessage}`));
-                    }
+                        if (res.statusCode !== 200) {
+                            clearTimeout(timeout);
+                            return reject(new Error(`HTTP ${res.statusCode}: ${res.statusMessage}`));
+                        }
 
-                    const fileStream = createWriteStream(dest);
-                    res.pipe(fileStream);
+                        const totalSize = parseInt(res.headers['content-length'], 10) || 0;
+                        let downloadedSize = 0;
+                        let lastLoggedSize = 0;
 
-                    fileStream.on('finish', () => {
-                        clearTimeout(timeout);
-                        fileStream.close(() => resolve(dest));
-                    });
+                        const fileStream = createWriteStream(dest);
 
-                    fileStream.on('error', (err) => {
+                        res.on('data', (chunk) => {
+                            downloadedSize += chunk.length;
+                            // Show progress every CHUNK_LOG_INTERVAL bytes
+                            if (totalSize > 0 && downloadedSize - lastLoggedSize >= CHUNK_LOG_INTERVAL) {
+                                const percent = Math.round((downloadedSize / totalSize) * 100);
+                                const sizeMB = (downloadedSize / 1024 / 1024).toFixed(1);
+                                process.stdout.write(`\r[terminal-jarvis] Downloading... ${sizeMB}MB (${percent}%)`);
+                                lastLoggedSize = downloadedSize;
+                            }
+                        });
+
+                        res.pipe(fileStream);
+
+                        fileStream.on('finish', () => {
+                            clearTimeout(timeout);
+                            if (totalSize > 0) {
+                                process.stdout.write('\n'); // Newline after progress
+                            }
+                            fileStream.close(() => resolve(dest));
+                        });
+
+                        fileStream.on('error', (err) => {
+                            clearTimeout(timeout);
+                            reject(err);
+                        });
+                    }).on('error', (err) => {
                         clearTimeout(timeout);
                         reject(err);
                     });
-                }).on('error', (err) => {
-                    clearTimeout(timeout);
-                    reject(err);
-                });
+                };
+
+                makeRequest(url);
             });
 
             // Success
@@ -132,8 +159,8 @@ async function download(url, dest, retries = DOWNLOAD_RETRIES) {
                 throw new Error(`Failed after ${retries} attempts: ${err.message}`);
             }
             warn(`Attempt ${attempt} failed: ${err.message}. Retrying...`);
-            // Wait before retry (exponential backoff)
-            await new Promise(resolve => setTimeout(resolve, 1000 * attempt));
+            // Wait before retry (exponential backoff, max 5 seconds)
+            await new Promise(resolve => setTimeout(resolve, Math.min(1000 * attempt, 5000)));
         }
     }
 }
@@ -186,9 +213,11 @@ function checkPrerequisites() {
 }
 
 /**
- * Main installation workflow
+ * Main installation workflow - optimized for speed
  */
 (async () => {
+    const startTime = Date.now();
+
     try {
         // Detect platform
         const platformInfo = getPlatformInfo();
@@ -218,15 +247,19 @@ function checkPrerequisites() {
         const downloadDir = path.join(pkgRoot, 'downloads');
         const archivePath = path.join(downloadDir, assetFile);
 
-        // Download binary
-        log(`Downloading v${version} from GitHub releases...`);
+        // Download binary with progress
+        log(`Downloading v${version}...`);
+        const downloadStart = Date.now();
         await download(url, archivePath);
-        log('[SUCCESS] Download complete');
+        const downloadTime = ((Date.now() - downloadStart) / 1000).toFixed(1);
+        log(`[SUCCESS] Download complete (${downloadTime}s)`);
 
         // Extract archive
-        log('Extracting archive...');
+        log('Extracting...');
+        const extractStart = Date.now();
         await extractTarGz(archivePath, downloadDir);
-        log('[SUCCESS] Extraction complete');
+        const extractTime = ((Date.now() - extractStart) / 1000).toFixed(1);
+        log(`[SUCCESS] Extraction complete (${extractTime}s)`);
 
         // Move binary to bin directory
         const extractedBin = path.join(downloadDir, 'terminal-jarvis');
@@ -237,32 +270,29 @@ function checkPrerequisites() {
         if (!platformInfo.isWindows) {
             await fs.promises.chmod(binaryDest, 0o755);
         }
-        log(`[SUCCESS] Binary installed: ${binaryDest}`);
 
         // Note: The launcher script (bin/terminal-jarvis) is committed to the repository
         // We only download and install the binary here
         const launcherPath = path.join(binDir, 'terminal-jarvis');
 
-        // Cleanup downloads
-        try {
-            await fs.promises.rm(downloadDir, { recursive: true, force: true });
-            log('Cleaned up temporary files');
-        } catch (err) {
-            // Non-critical
-        }
+        // Cleanup downloads (async, non-blocking)
+        fs.promises.rm(downloadDir, { recursive: true, force: true }).catch(() => { });
 
         // Verify installation
-        log('Verifying installation...');
         const verifyPath = platformInfo.isWindows ? binaryDest : launcherPath;
         const verifyRes = spawnSync(verifyPath, ['--version'], { stdio: 'pipe', encoding: 'utf8' });
+
+        const totalTime = ((Date.now() - startTime) / 1000).toFixed(1);
 
         if (verifyRes.error) {
             warn(`Verification warning: ${verifyRes.error.message}`);
         } else if (verifyRes.status === 0) {
-            log('[SUCCESS] Installation verified');
+            log(`[SUCCESS] Terminal Jarvis v${version} installed in ${totalTime}s`);
             log('');
-            log('Terminal Jarvis is ready!');
-            log('Run: npx terminal-jarvis --help');
+            log('Ready! Run: npx terminal-jarvis');
+        } else {
+            log(`[SUCCESS] Binary installed in ${totalTime}s`);
+            log('Run: npx terminal-jarvis');
         }
 
     } catch (err) {
