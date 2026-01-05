@@ -282,8 +282,9 @@ impl ProgressContext {
     pub fn finish_success(&self, message: &str) {
         ProgressUtils::finish_with_success(&self.spinner, message);
 
-        // Clear the line after showing success message
+        // Clear the line after showing success message and flush
         print!("\x1b[2K\r");
+        std::io::Write::flush(&mut std::io::stdout()).unwrap_or_default();
     }
 
     pub fn finish_error(&self, message: &str) {
@@ -300,7 +301,7 @@ impl Drop for ProgressContext {
 
         // Ensure cursor is visible and terminal is clean
         print!("\x1b[?25h"); // Show cursor
-
         print!("\x1b[2K\r"); // Clear current line
+        std::io::Write::flush(&mut std::io::stdout()).unwrap_or_default();
     }
 }
