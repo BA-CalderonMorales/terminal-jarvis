@@ -13,6 +13,19 @@ use std::path::PathBuf;
 pub struct Cli {
     #[command(subcommand)]
     pub command: Option<Commands>,
+
+    /// Quick mode: skip all prompts, launch last-used tool immediately
+    #[arg(short = 'q', long = "quick", global = true)]
+    pub quick: bool,
+
+    /// Direct tool launch (e.g., `terminal-jarvis claude`)
+    /// Supported: claude, gemini, qwen, opencode, codex, aider, amp, goose, crush, llxprt
+    #[arg(value_name = "TOOL")]
+    pub tool: Option<String>,
+
+    /// Arguments to pass to the directly launched tool
+    #[arg(trailing_var_arg = true, allow_hyphen_values = true)]
+    pub tool_args: Vec<String>,
 }
 
 impl Default for Cli {
@@ -26,7 +39,43 @@ impl Cli {
         Self::parse()
     }
 
+    /// Check if a string is a valid tool name for direct invocation
+    fn is_valid_tool(name: &str) -> bool {
+        matches!(
+            name.to_lowercase().as_str(),
+            "claude"
+                | "gemini"
+                | "qwen"
+                | "opencode"
+                | "codex"
+                | "aider"
+                | "amp"
+                | "goose"
+                | "crush"
+                | "llxprt"
+        )
+    }
+
     pub async fn run(self) -> anyhow::Result<()> {
+        // Handle quick mode: launch last-used tool immediately
+        if self.quick && self.command.is_none() && self.tool.is_none() {
+            return cli_logic::handle_quick_launch().await;
+        }
+
+        // Handle direct tool invocation: `terminal-jarvis claude`
+        if let Some(ref tool_name) = self.tool {
+            if Self::is_valid_tool(tool_name) {
+                return cli_logic::handle_run_tool(tool_name, &self.tool_args).await;
+            }
+            // Invalid tool name - show error and exit (don't fall through to interactive mode)
+            eprintln!("error: '{}' is not a valid tool or command", tool_name);
+            eprintln!();
+            eprintln!("Available tools: claude, gemini, qwen, opencode, codex, aider, amp, goose, crush, llxprt");
+            eprintln!();
+            eprintln!("For more information, try '--help'");
+            std::process::exit(1);
+        }
+
         match self.command {
             Some(Commands::Run { tool, args }) => cli_logic::handle_run_tool(&tool, &args).await,
 

@@ -2,6 +2,61 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.0.72] - 2026-01-05
+
+### Added
+- **Direct Tool Invocation**: Launch tools without subcommands (Issue #26)
+  - `terminal-jarvis claude` instead of `terminal-jarvis run claude`
+  - Supports all 10 tools: claude, gemini, qwen, opencode, codex, aider, amp, goose, crush, llxprt
+  - Pass arguments directly: `terminal-jarvis claude -- --help`
+
+- **Quick Launch Mode**: Single command to launch last-used tool
+  - `terminal-jarvis -q` or `terminal-jarvis --quick`
+  - Remembers and instantly launches your most recently used tool
+  - Zero prompts, immediate tool startup
+
+- **Post-Tool Auth Menu Options**: Context-aware login commands after tool exit
+  - Each tool now shows its specific auth command (e.g., `amp login`, `goose configure`)
+  - Simplifies re-authentication workflow without leaving Terminal Jarvis
+
+### Changed
+- **Streamlined Tool Launch Flow** (Issue #26): Reduced steps from 4 to 1
+  - Removed arguments prompt when launching from interactive menu
+  - Tools now launch immediately after selection
+  - Arguments can still be passed via CLI: `terminal-jarvis run claude -- <args>`
+  - Auth warnings only shown when API key is actually missing
+
+### Fixed
+- **Invalid Command Handling**: Invalid tool names now show helpful error instead of hanging
+  - `terminal-jarvis invalidcmd` now exits with error message listing available tools
+  - Prevents CLI from falling through to interactive mode on typos
+
+- **Menu Rendering Artifacts** (Issue #26): Fixed duplicate display and visual glitches
+  - Simplified RenderConfig in themed_components.rs
+  - Removed unused ThemeStyle fields causing interference
+  - Clean menu transitions without ghost text
+
+- **NPM Download Performance** (Issue #23): Optimized postinstall binary download
+  - Added progress percentage display during download
+  - Increased timeout from 30s to 60s for slower connections
+  - Added timing statistics for download and extraction phases
+  - Chunk-based progress reporting every 512KB
+
+- **GLIBC Dependency Removed** (Issue #24): Static linking via musl
+  - Linux binaries now use `x86_64-unknown-linux-musl` and `aarch64-unknown-linux-musl`
+  - Replaced OpenSSL with rustls for TLS (enables static linking)
+  - Binaries work on any Linux distribution regardless of glibc version
+  - Updated CI/CD workflows and build scripts for musl targets
+
+### Technical
+- Updated `cli_logic_entry_point.rs`: Removed interactive args prompt, added login commands
+- Added `handle_quick_launch()` in `cli_logic_tool_execution.rs`
+- Extended CLI parser with `--quick` flag and positional tool argument
+- Simplified `themed_components.rs` RenderConfig for cleaner menu display
+- `npm/terminal-jarvis/scripts/postinstall.js`: Progress display and timing stats
+- `Cargo.toml`: Switched reqwest to rustls-tls feature
+- Updated `.github/workflows/ci.yml` and `cd-multiplatform.yml` for musl targets
+
 ## [0.0.71] - 2026-01-04
 
 ### Added

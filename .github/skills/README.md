@@ -8,6 +8,7 @@ This directory contains reusable AI agent skills that enhance the capabilities o
 |-------|-------------|-------------|
 | [verification](verification/) | Quality verification feedback loop | Before commits, after changes |
 | [deployment](deployment/) | Deployment workflows and CI/CD | Releasing new versions |
+| [release-checklist](release-checklist/) | Pre-release automation and hardening | Before tagging versions |
 | [versioning](versioning/) | Version management across platforms | Updating version numbers |
 | [testing](testing/) | Test-driven development practices | Bug fixes, new features |
 | [refactoring](refactoring/) | Code refactoring patterns | Large file extraction |

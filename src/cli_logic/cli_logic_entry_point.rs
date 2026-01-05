@@ -3,9 +3,7 @@
 
 use crate::auth_manager::AuthManager;
 use crate::cli_logic::cli_logic_welcome::display_welcome_screen;
-use crate::cli_logic::themed_components::{
-    themed_confirm, themed_multiselect, themed_select_with, themed_text,
-};
+use crate::cli_logic::themed_components::{themed_confirm, themed_multiselect, themed_select_with};
 use crate::installation_arguments::InstallationManager;
 use crate::progress_utils::ProgressContext;
 use crate::theme::theme_global_config;
@@ -27,18 +25,14 @@ pub async fn handle_ai_tools_menu() -> Result<()> {
         // Get fresh theme on each iteration to support theme switching
         let theme = theme_global_config::current_theme();
 
-        print!("\x1b[2J\x1b[H"); // Clear screen
+        // Clear screen completely and reset terminal state
+        print!("\x1b[2J\x1b[H\x1b[?25h");
+        std::io::Write::flush(&mut std::io::stdout()).unwrap_or_default();
 
         println!("{}\n", theme.primary("AI CLI Tools"));
 
-        // Show loading indicator
-        let loading_progress = ProgressContext::new("Loading AI tools status");
-        tokio::time::sleep(tokio::time::Duration::from_millis(300)).await;
-
-        // Use async version that checks database first, falls back to TOML
+        // Load tools without progress indicator (fixes rendering artifacts)
         let tools = ToolManager::get_available_tools_async().await;
-
-        loading_progress.finish_success("AI tools status loaded");
 
         // Build clean tool list
         let mut options = Vec::new();
@@ -55,7 +49,6 @@ pub async fn handle_ai_tools_menu() -> Result<()> {
 
         let selection =
             match themed_select_with(&theme, "Select an AI tool to launch:", options.clone())
-                .with_page_size(15)
                 .prompt()
             {
                 Ok(selection) => selection,
@@ -76,7 +69,8 @@ pub async fn handle_ai_tools_menu() -> Result<()> {
     }
 }
 
-/// Handle launching a specific tool with argument input
+/// Handle launching a specific tool - streamlined for fewer Enter presses
+/// Per Issue #26: Skip args prompt for most cases, launch immediately
 async fn handle_tool_launch(tool_name: &str) -> Result<()> {
     let theme = theme_global_config::current_theme();
 
@@ -123,30 +117,10 @@ async fn handle_tool_launch(tool_name: &str) -> Result<()> {
         }
     }
 
-    let args_input = match themed_text(&format!(
-        "Enter arguments for {tool_name} (or press Enter for default):"
-    ))
-    .with_default("")
-    .prompt()
-    {
-        Ok(input) => input,
-        Err(_) => {
-            // User interrupted - go back to main menu
-            println!("\n{}", theme.accent("Operation cancelled"));
-            return Ok(());
-        }
-    };
-
-    let args: Vec<String> = if args_input.trim().is_empty() {
-        vec![]
-    } else {
-        shell_words::split(&args_input).unwrap_or_else(|_| {
-            args_input
-                .split_whitespace()
-                .map(|s| s.to_string())
-                .collect()
-        })
-    };
+    // Issue #26 Fix: Skip args prompt - launch immediately with defaults
+    // Most users just want to start the tool quickly without extra prompts
+    // Args can be passed via CLI: `terminal-jarvis run claude -- <args>`
+    let args: Vec<String> = vec![];
 
     // Always launch the tool and show post-tool menu regardless of success/failure
     let _result = launch_tool_with_progress(tool_name, &args).await;
@@ -220,23 +194,66 @@ async fn handle_post_tool_exit(last_tool: &str, last_args: &[String]) -> Result<
         }
     }
 
+    // Check if tool has a CLI login command
+    fn get_login_command(tool: &str) -> Option<(&'static str, Vec<&'static str>)> {
+        match tool {
+            // Tools with dedicated login commands
+            "amp" => Some(("amp", vec!["login"])),
+            "codex" => Some(("codex", vec!["login"])),
+            "crush" => Some(("crush", vec!["login"])),
+            "opencode" => Some(("opencode", vec!["auth"])),
+            // Tools with configure commands for auth
+            "goose" => Some(("goose", vec!["configure"])),
+            // Tools that use browser-based OAuth or API keys
+            "claude" => Some(("claude", vec!["--help"])), // Claude uses browser OAuth
+            "gemini" => Some(("gemini", vec!["--help"])), // Gemini uses browser OAuth
+            "qwen" => Some(("qwen", vec!["--help"])),     // Qwen shows auth options
+            "aider" => Some(("aider", vec!["--help"])),   // Aider uses env vars
+            "llxprt" => Some(("llxprt", vec!["--help"])), // llxprt uses profiles
+            _ => None,
+        }
+    }
+
+    // Get human-readable action name for the login command
+    fn get_login_action_name(tool: &str) -> &'static str {
+        match tool {
+            "amp" | "codex" | "crush" => "Login to",
+            "goose" => "Configure",
+            "opencode" => "Authenticate",
+            _ => "Setup",
+        }
+    }
+
     loop {
         let theme = theme_global_config::current_theme();
 
         // Enhanced exit options for faster context switching (numbered)
         let tool_display = initial_case(last_tool);
-        let exit_options = vec![
-            format!("1. Reopen {}", tool_display),
-            "2. Back to Main Menu".to_string(),
-            "3. Switch to Another AI Tool".to_string(),
-            format!("4. Re-enter API Key for {}", tool_display),
-            format!("5. Uninstall {}", tool_display),
-            "6. Exit Terminal Jarvis".to_string(),
-        ];
+
+        // Build options dynamically based on tool capabilities
+        let mut exit_options = vec![format!("1. Reopen {}", tool_display)];
+
+        // Add login option if tool supports CLI login
+        let has_login = get_login_command(last_tool).is_some();
+        if has_login {
+            let action = get_login_action_name(last_tool);
+            exit_options.push(format!("2. {} {}", action, tool_display));
+            exit_options.push("3. Back to Main Menu".to_string());
+            exit_options.push("4. Switch to Another AI Tool".to_string());
+            exit_options.push(format!("5. Re-enter API Key for {}", tool_display));
+            exit_options.push(format!("6. Uninstall {}", tool_display));
+            exit_options.push("7. Exit Terminal Jarvis".to_string());
+        } else {
+            exit_options.push("2. Back to Main Menu".to_string());
+            exit_options.push("3. Switch to Another AI Tool".to_string());
+            exit_options.push(format!("4. Re-enter API Key for {}", tool_display));
+            exit_options.push(format!("5. Uninstall {}", tool_display));
+            exit_options.push("6. Exit Terminal Jarvis".to_string());
+        }
 
         let exit_choice =
             match themed_select_with(&theme, "What would you like to do next?", exit_options)
-                .with_page_size(6)
+                .with_page_size(7)
                 .prompt()
             {
                 Ok(choice) => choice,
@@ -250,6 +267,42 @@ async fn handle_post_tool_exit(last_tool: &str, last_args: &[String]) -> Result<
             s if s.contains("Reopen ") => {
                 // Relaunch the same tool with the same args, then show this menu again
                 let _ = launch_tool_with_progress(last_tool, last_args).await;
+                continue;
+            }
+            // Handle all auth-related actions: Login, Configure, Authenticate, Setup
+            s if s.contains("Login to ")
+                || s.contains("Configure ")
+                || s.contains("Authenticate ")
+                || s.contains("Setup ") =>
+            {
+                // Run the tool's login/auth command
+                if let Some((cmd, args)) = get_login_command(last_tool) {
+                    println!(
+                        "\n{}",
+                        theme.accent(&format!("Running {} {}...", cmd, args.join(" ")))
+                    );
+                    let status = std::process::Command::new(cmd).args(&args).status();
+                    match status {
+                        Ok(exit_status) if exit_status.success() => {
+                            println!(
+                                "{}",
+                                theme
+                                    .accent(&format!("{} authentication completed!", tool_display))
+                            );
+                        }
+                        Ok(_) => {
+                            println!("{}", theme.accent("Auth process exited. You may need to complete setup in your browser or set environment variables."));
+                        }
+                        Err(e) => {
+                            println!(
+                                "{}",
+                                theme.accent(&format!("Failed to run auth command: {}", e))
+                            );
+                        }
+                    }
+                    // Brief pause then show menu again
+                    tokio::time::sleep(tokio::time::Duration::from_millis(1000)).await;
+                }
                 continue;
             }
             s if s.contains("Back to Main Menu") => {
