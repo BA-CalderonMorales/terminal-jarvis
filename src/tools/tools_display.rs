@@ -95,9 +95,47 @@ impl ToolDisplayFormatter {
             println!("NPM Required: {}", npm_status);
         }
 
+        // Show authentication info
+        Self::display_auth_info(tool_name);
+
         println!();
         println!("{}", theme.primary("==================================="));
         println!();
+    }
+
+    /// Display authentication information for a tool
+    fn display_auth_info(tool_name: &str) {
+        use crate::tools::tools_config::get_tool_config_loader;
+
+        let theme = theme_global_config::current_theme();
+        let loader = get_tool_config_loader();
+
+        if let Some(auth) = loader.get_auth_info(&tool_name.to_string()) {
+            println!();
+            println!("{}", theme.secondary("Authentication:"));
+
+            // Check which env vars are set
+            let mut has_any_key = false;
+            for var in &auth.env_vars {
+                let is_set = std::env::var(var).is_ok();
+                if is_set {
+                    has_any_key = true;
+                }
+                let status = if is_set {
+                    theme.primary("[SET]")
+                } else {
+                    theme.accent("[NOT SET]")
+                };
+                println!("  {} {}", var, status);
+            }
+
+            if !has_any_key && !auth.setup_url.is_empty() {
+                println!(
+                    "{}",
+                    theme.accent(&format!("  Setup: {}", auth.setup_url))
+                );
+            }
+        }
     }
 
     /// Compact format for list views
