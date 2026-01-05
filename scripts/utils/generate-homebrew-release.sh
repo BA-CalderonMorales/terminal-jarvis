@@ -21,9 +21,9 @@ print_step() { echo -e "${BLUE}[STEP]${NC} $1"; }
 # Platform targets for cross-compilation
 MACOS_TARGET="x86_64-apple-darwin"
 MACOS_ARM_TARGET="aarch64-apple-darwin"
-LINUX_TARGET="x86_64-unknown-linux-gnu"
+LINUX_TARGET="x86_64-unknown-linux-musl"
 # shellcheck disable=SC2034
-LINUX_ARM_TARGET="aarch64-unknown-linux-gnu"
+LINUX_ARM_TARGET="aarch64-unknown-linux-musl"
 
 # Script directory and project root
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -90,8 +90,8 @@ build_for_target() {
         case "$current_os-$current_arch" in
             "Darwin-arm64") current_target="aarch64-apple-darwin" ;;
             "Darwin-x86_64") current_target="x86_64-apple-darwin" ;;
-            "Linux-x86_64") current_target="x86_64-unknown-linux-gnu" ;;
-            "Linux-aarch64") current_target="aarch64-unknown-linux-gnu" ;;
+            "Linux-x86_64") current_target="x86_64-unknown-linux-musl" ;;
+            "Linux-aarch64") current_target="aarch64-unknown-linux-musl" ;;
         esac
         
         if [[ "$target" != "$current_target" ]]; then

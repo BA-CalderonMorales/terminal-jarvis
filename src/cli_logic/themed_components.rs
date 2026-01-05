@@ -23,16 +23,13 @@ struct ThemeStyle {
     primary: InquireColor,
     accent: InquireColor,
     muted: InquireColor,
-    highlight: InquireColor,
     // Symbols and prefixes - these make themes visually distinct
     prompt_prefix: &'static str,
-    answered_prefix: &'static str,
     selected_prefix: &'static str,
     scroll_up: &'static str,
     scroll_down: &'static str,
     autocomplete_prefix: &'static str,
     // Styling attributes
-    use_bold_selection: bool,
     use_italic_help: bool,
 }
 
@@ -45,15 +42,12 @@ impl ThemeStyle {
                 primary: InquireColor::LightCyan,
                 accent: InquireColor::DarkCyan,
                 muted: InquireColor::DarkGrey,
-                highlight: InquireColor::White,
                 // Modern Unicode symbols
                 prompt_prefix: "?",
-                answered_prefix: "✓",
                 selected_prefix: "▶",
                 scroll_up: "↑",
                 scroll_down: "↓",
                 autocomplete_prefix: "›",
-                use_bold_selection: true,
                 use_italic_help: false,
             },
             "Minimal" => Self {
@@ -61,45 +55,36 @@ impl ThemeStyle {
                 primary: InquireColor::Grey,
                 accent: InquireColor::White,
                 muted: InquireColor::DarkGrey,
-                highlight: InquireColor::White,
                 // Simple ASCII - no Unicode
                 prompt_prefix: "::",
-                answered_prefix: "*",
                 selected_prefix: ">",
                 scroll_up: "^",
                 scroll_down: "v",
                 autocomplete_prefix: "-",
-                use_bold_selection: false, // No bold - ultra minimal
-                use_italic_help: true,     // Italic help for subtle distinction
+                use_italic_help: true, // Italic help for subtle distinction
             },
             "Terminal" => Self {
                 // Matrix: Hacker terminal - green, bold, dramatic
                 primary: InquireColor::LightGreen,
                 accent: InquireColor::DarkGreen,
                 muted: InquireColor::DarkGrey,
-                highlight: InquireColor::LightGreen,
                 // Terminal/hacker symbols
                 prompt_prefix: "$",
-                answered_prefix: "[OK]",
                 selected_prefix: ">>",
                 scroll_up: "[^]",
                 scroll_down: "[v]",
                 autocomplete_prefix: "$",
-                use_bold_selection: true,
                 use_italic_help: false,
             },
             _ => Self {
                 primary: InquireColor::LightCyan,
                 accent: InquireColor::DarkCyan,
                 muted: InquireColor::DarkGrey,
-                highlight: InquireColor::White,
                 prompt_prefix: "?",
-                answered_prefix: "✓",
                 selected_prefix: "▶",
                 scroll_up: "↑",
                 scroll_down: "↓",
                 autocomplete_prefix: "›",
-                use_bold_selection: true,
                 use_italic_help: false,
             },
         }
@@ -114,42 +99,33 @@ impl ThemeStyle {
                 primary: InquireColor::Grey,
                 accent: InquireColor::White,
                 muted: InquireColor::DarkGrey,
-                highlight: InquireColor::White,
                 prompt_prefix: "::",
-                answered_prefix: "*",
                 selected_prefix: ">",
                 scroll_up: "^",
                 scroll_down: "v",
                 autocomplete_prefix: "-",
-                use_bold_selection: false,
                 use_italic_help: true,
             },
             "Terminal" => Self {
                 primary: InquireColor::LightGreen,
                 accent: InquireColor::DarkGreen,
                 muted: InquireColor::DarkGrey,
-                highlight: InquireColor::LightGreen,
                 prompt_prefix: "$",
-                answered_prefix: "[OK]",
                 selected_prefix: ">>",
                 scroll_up: "[^]",
                 scroll_down: "[v]",
                 autocomplete_prefix: "$",
-                use_bold_selection: true,
                 use_italic_help: false,
             },
             _ => Self {
                 primary: InquireColor::LightCyan,
                 accent: InquireColor::DarkCyan,
                 muted: InquireColor::DarkGrey,
-                highlight: InquireColor::White,
                 prompt_prefix: "?",
-                answered_prefix: "✓",
                 selected_prefix: "▶",
                 scroll_up: "↑",
                 scroll_down: "↓",
                 autocomplete_prefix: "›",
-                use_bold_selection: true,
                 use_italic_help: false,
             },
         }
@@ -161,39 +137,10 @@ impl ThemeStyle {
 fn create_render_config(theme: &Theme) -> RenderConfig<'static> {
     let style = ThemeStyle::from_theme(theme);
 
-    // Build selected option style based on theme preferences
-    let selected_style = if style.use_bold_selection {
-        StyleSheet::new()
-            .with_fg(style.highlight)
-            .with_attr(Attributes::BOLD)
-    } else {
-        StyleSheet::new().with_fg(style.highlight)
-    };
-
-    // Build help message style
-    let help_style = if style.use_italic_help {
-        StyleSheet::new()
-            .with_fg(style.muted)
-            .with_attr(Attributes::ITALIC)
-    } else {
-        StyleSheet::new().with_fg(style.muted)
-    };
-
+    // Use a minimal render config to avoid terminal rendering issues
     RenderConfig::default()
-        // Prompt styling - distinct per theme
         .with_prompt_prefix(Styled::new(style.prompt_prefix).with_fg(style.accent))
-        .with_answered_prompt_prefix(Styled::new(style.answered_prefix).with_fg(style.accent))
-        // Option styling
-        .with_option(StyleSheet::new().with_fg(style.primary))
-        // Highlighted option - distinct marker per theme
         .with_highlighted_option_prefix(Styled::new(style.selected_prefix).with_fg(style.accent))
-        .with_selected_option(Some(selected_style))
-        // Input styling
-        .with_text_input(StyleSheet::new().with_fg(style.primary))
-        .with_default_value(StyleSheet::new().with_fg(style.muted))
-        // Help and hints
-        .with_help_message(help_style)
-        // Scroll indicators - distinct per theme
         .with_scroll_up_prefix(Styled::new(style.scroll_up).with_fg(style.muted))
         .with_scroll_down_prefix(Styled::new(style.scroll_down).with_fg(style.muted))
 }
@@ -249,7 +196,6 @@ pub fn themed_select<'a>(prompt: &'a str, options: Vec<String>) -> Select<'a, St
     Select::new(prompt, options)
         .with_render_config(create_render_config(&theme))
         .with_page_size(10)
-        .with_vim_mode(true)
 }
 
 /// Create a themed Select menu with explicit theme
@@ -263,7 +209,6 @@ pub fn themed_select_with<'a>(
     Select::new(prompt, options)
         .with_render_config(create_render_config(theme))
         .with_page_size(10)
-        .with_vim_mode(true)
 }
 
 /// Create a themed MultiSelect menu
@@ -282,7 +227,6 @@ pub fn themed_multiselect<'a, T: std::fmt::Display>(
     MultiSelect::new(prompt, options)
         .with_render_config(create_render_config(&theme))
         .with_page_size(10)
-        .with_vim_mode(true)
 }
 
 /// Create a themed Confirm dialog
