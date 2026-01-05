@@ -110,7 +110,7 @@ impl ToolDisplayFormatter {
         let theme = theme_global_config::current_theme();
         let loader = get_tool_config_loader();
 
-        if let Some(auth) = loader.get_auth_info(&tool_name.to_string()) {
+        if let Some(auth) = loader.get_auth_info(tool_name) {
             println!();
             println!("{}", theme.secondary("Authentication:"));
 
