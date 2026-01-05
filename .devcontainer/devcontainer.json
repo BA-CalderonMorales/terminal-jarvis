@@ -1,0 +1,24 @@
+{
+    "name": "QA: NVM Fix - v0.0.73",
+    "image": "mcr.microsoft.com/devcontainers/base:ubuntu-22.04",
+    "features": {
+        "ghcr.io/devcontainers/features/node:1": {
+            "version": "20",
+            "nodeGypDependencies": false
+        }
+    },
+    "containerEnv": {
+        "QA_TEST": "nvm-fix",
+        "QA_VERSION": "0.0.73",
+        "QA_ISSUES": "37"
+    },
+    "postCreateCommand": "chmod +x /workspaces/terminal-jarvis/test-qa.sh && ln -sf /workspaces/terminal-jarvis/test-qa.sh /usr/local/bin/test-qa.sh && echo 'QA environment ready. Run: test-qa.sh'",
+    "customizations": {
+        "vscode": {
+            "extensions": [
+                "GitHub.copilot",
+                "GitHub.copilot-chat"
+            ]
+        }
+    }
+}
