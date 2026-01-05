@@ -11,7 +11,7 @@ homepage = "https://charm.sh/crush"
 documentation = "https://github.com/charmbracelet/crush"
 cli_command = "crush"
 requires_npm = true
-requires_sudo = true
+requires_sudo = false
 status = "new"
 
 [tool.install]
@@ -36,7 +36,16 @@ supports_files = true
 supports_streaming = true
 supports_conversation = true
 max_context_tokens = 64000
-supported_languages = ["python", "javascript", "rust", "go", "java", "cpp", "typescript", "lua"]
+supported_languages = [
+    "python",
+    "javascript",
+    "rust",
+    "go",
+    "java",
+    "cpp",
+    "typescript",
+    "lua",
+]
 lsp_integration = true
 charm_ecosystem = true
 new_tool = true

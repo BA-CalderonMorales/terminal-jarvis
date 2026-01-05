@@ -11,7 +11,7 @@ homepage = "https://openai.com/codex"
 documentation = "https://platform.openai.com/docs/guides/code"
 cli_command = "codex"
 requires_npm = true
-requires_sudo = true
+requires_sudo = false
 status = "testing"
 
 [tool.install]
@@ -36,6 +36,17 @@ supports_files = true
 supports_streaming = false
 supports_conversation = false
 max_context_tokens = 8000
-supported_languages = ["python", "javascript", "rust", "go", "java", "cpp", "typescript", "php", "ruby", "swift"]
+supported_languages = [
+    "python",
+    "javascript",
+    "rust",
+    "go",
+    "java",
+    "cpp",
+    "typescript",
+    "php",
+    "ruby",
+    "swift",
+]
 experimental = true
 legacy_model = true

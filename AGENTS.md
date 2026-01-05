@@ -24,6 +24,7 @@
 |-----------|-------|---------------|
 | "Let's deploy" | [deployment](.github/skills/deployment/) | `./scripts/cicd/local-cd.sh` |
 | "Harden release" | [release-checklist](.github/skills/release-checklist/) | Pre-release verification |
+| "Test in Codespace" | [qa-testing](.github/skills/qa-testing/) | Create minimal QA branch |
 | "Fix this bug" | [testing](.github/skills/testing/) | Write failing test first |
 | "Add new AI tool" | [tool-config](.github/skills/tool-config/) | Create `config/tools/<name>.toml` |
 | "Refactor this file" | [refactoring](.github/skills/refactoring/) | Domain-based extraction |
@@ -44,6 +45,7 @@ All detailed instructions are organized as modular, reusable skills in [.github/
 | [verification](.github/skills/verification/) | Quality verification feedback loop |
 | [deployment](.github/skills/deployment/) | Deployment workflows and CI/CD |
 | [release-checklist](.github/skills/release-checklist/) | Pre-release automation and hardening |
+| [qa-testing](.github/skills/qa-testing/) | Minimal QA branch creation and testing |
 | [versioning](.github/skills/versioning/) | Version management across platforms |
 | [testing](.github/skills/testing/) | Test-driven development practices |
 | [refactoring](.github/skills/refactoring/) | Code refactoring patterns |
@@ -67,7 +69,7 @@ All detailed instructions are organized as modular, reusable skills in [.github/
 
 **Distribution**: NPM, Cargo, Homebrew
 
-**Current Version**: 0.0.72
+**Current Version**: 0.0.73
 
 ### Installation
 

@@ -11,7 +11,7 @@ homepage = "https://opencode.ai/"
 documentation = "https://docs.opencode.ai/"
 cli_command = "opencode"
 requires_npm = true
-requires_sudo = true
+requires_sudo = false
 status = "testing"
 
 [tool.install]
@@ -36,5 +36,13 @@ supports_files = true
 supports_streaming = true
 supports_conversation = false
 max_context_tokens = 128000
-supported_languages = ["python", "javascript", "rust", "go", "java", "cpp", "typescript"]
+supported_languages = [
+    "python",
+    "javascript",
+    "rust",
+    "go",
+    "java",
+    "cpp",
+    "typescript",
+]
 experimental = true
