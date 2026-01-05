@@ -2,6 +2,26 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.0.73] - 2026-01-05
+
+### Fixed
+- **NVM NPM Path Compatibility** (Issue #37): Tool installation now works with NVM-managed npm
+  - Removed sudo usage for npm global installs (NVM sets up permissions correctly)
+  - sudo cannot find npm when installed via NVM (`/usr/local/share/nvm/...` not in sudo PATH)
+  - Error messages now shown to users instead of being silently swallowed
+  - Updated all npm-based tools to set `requires_sudo = false`: claude, gemini, opencode, codex, qwen, amp, crush, llxprt
+  - Affects all devcontainers, Codespaces, and NVM-based development environments
+
+### Changed
+- **README Images**: Promo image and demo gif now display at full width for better visibility
+- **Awesome Badge Restored**: "Mentioned in Awesome" badge linking to awesome-gemini-cli repo
+
+### Technical
+- `cli_logic_tool_execution.rs`: Removed sudo for npm global installs, show stderr for error visibility
+- `config/tools/*.toml`: Set `requires_sudo = false` for all npm-based tools
+- `npm/terminal-jarvis/config/tools/*.toml`: Synchronized npm package configs
+- Added `tests/npm_nvm_installation_tests.rs`: Test coverage for NVM compatibility (5 tests)
+
 ## [0.0.72] - 2026-01-05
 
 ### Added
@@ -27,13 +47,6 @@ All notable changes to this project will be documented in this file.
   - Auth warnings only shown when API key is actually missing
 
 ### Fixed
-- **NVM NPM Path Compatibility** (Issue #37): Tool installation now works with NVM-managed npm
-  - Removed sudo usage for npm global installs (NVM sets up permissions correctly)
-  - sudo cannot find npm when installed via NVM (`/usr/local/share/nvm/...` not in sudo PATH)
-  - Error messages now shown to users instead of being silently swallowed
-  - Updated all npm-based tools to set `requires_sudo = false`: claude, gemini, opencode, codex, qwen, amp, crush, llxprt
-  - Affects all devcontainers, Codespaces, and NVM-based development environments
-
 - **Invalid Command Handling**: Invalid tool names now show helpful error instead of hanging
   - `terminal-jarvis invalidcmd` now exits with error message listing available tools
   - Prevents CLI from falling through to interactive mode on typos
@@ -56,10 +69,6 @@ All notable changes to this project will be documented in this file.
   - Updated CI/CD workflows and build scripts for musl targets
 
 ### Technical
-- `cli_logic_tool_execution.rs`: Removed sudo for npm global installs, show stderr for error visibility
-- `config/tools/*.toml`: Set `requires_sudo = false` for all npm-based tools
-- `npm/terminal-jarvis/config/tools/*.toml`: Synchronized npm package configs
-- Added `tests/npm_nvm_installation_tests.rs`: Test coverage for NVM compatibility
 - Updated `cli_logic_entry_point.rs`: Removed interactive args prompt, added login commands
 - Added `handle_quick_launch()` in `cli_logic_tool_execution.rs`
 - Extended CLI parser with `--quick` flag and positional tool argument
