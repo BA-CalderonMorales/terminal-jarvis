@@ -11,7 +11,7 @@ homepage = "https://llxprt.dev/"
 documentation = "https://docs.llxprt.dev/"
 cli_command = "llxprt"
 requires_npm = true
-requires_sudo = true
+requires_sudo = false
 status = "testing"
 
 [tool.install]

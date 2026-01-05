@@ -11,7 +11,7 @@ homepage = "https://ai.google.dev/"
 documentation = "https://ai.google.dev/docs"
 cli_command = "gemini"
 requires_npm = true
-requires_sudo = true
+requires_sudo = false
 status = "stable"
 
 [tool.install]

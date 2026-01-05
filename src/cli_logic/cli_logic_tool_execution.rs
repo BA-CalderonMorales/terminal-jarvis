@@ -182,30 +182,18 @@ pub async fn handle_install_tool(tool: &str) -> Result<()> {
         }
         child.wait().await?
     } else if install_cmd.requires_npm && install_cmd.args.contains(&"-g".to_string()) {
-        // For NPM global installs, use sudo if available to handle permission issues
-        let sudo_available = std::process::Command::new("which")
-            .arg("sudo")
-            .output()
-            .map(|output| output.status.success())
-            .unwrap_or(false);
-
-        if sudo_available {
-            let mut sudo_cmd = AsyncCommand::new("sudo");
-            sudo_cmd.arg(&install_cmd.command);
-            sudo_cmd.args(&install_cmd.args);
-            sudo_cmd.stdout(std::process::Stdio::null());
-            sudo_cmd.stderr(std::process::Stdio::null());
-            sudo_cmd.status().await?
-        } else {
-            // Fallback to regular command if sudo isn't available
-            cmd.stdout(std::process::Stdio::null());
-            cmd.stderr(std::process::Stdio::null());
-            cmd.status().await?
-        }
-    } else {
-        // Regular command execution (npm, uv, cargo, etc.)
+        // Issue #37: DO NOT use sudo for NPM global installs
+        // When npm is installed via NVM, it's not in sudo's PATH, causing silent failures.
+        // NVM sets up permissions correctly so sudo is not needed for global installs.
+        // Show stderr so users can see any error messages for debugging.
         cmd.stdout(std::process::Stdio::null());
-        cmd.stderr(std::process::Stdio::null());
+        cmd.stderr(std::process::Stdio::inherit()); // Show errors to user
+        cmd.status().await?
+    } else {
+        // Regular command execution (uv, cargo, etc.)
+        // Show stderr so users can see any error messages for debugging
+        cmd.stdout(std::process::Stdio::null());
+        cmd.stderr(std::process::Stdio::inherit()); // Show errors to user
         cmd.status().await?
     };
 
