@@ -157,7 +157,10 @@ impl TomlImporter {
         }
 
         // Try relative to current directory first
-        let mut paths = vec![PathBuf::from("config/tools"), PathBuf::from("./config/tools")];
+        let mut paths = vec![
+            PathBuf::from("config/tools"),
+            PathBuf::from("./config/tools"),
+        ];
 
         // Try from executable location and its parent (npm package layout: bin/../config/tools)
         if let Ok(exe) = std::env::current_exe() {
