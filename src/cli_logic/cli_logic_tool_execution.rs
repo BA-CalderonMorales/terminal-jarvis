@@ -3,7 +3,127 @@ use crate::installation_arguments::InstallationManager;
 use crate::progress_utils::{ProgressContext, ProgressUtils};
 use crate::tools::ToolManager;
 use anyhow::{anyhow, Result};
+use dirs::home_dir;
+use std::env::{join_paths, split_paths};
+use std::ffi::OsString;
+use std::fs;
+use std::path::{Path, PathBuf};
+use std::process::Command as StdCommand;
 use tokio::process::Command as AsyncCommand;
+
+fn resolve_npm_prefix(detected_prefix: Option<PathBuf>, home_dir: &Path) -> PathBuf {
+    if let Some(prefix) = detected_prefix {
+        if prefix.starts_with(home_dir) {
+            return prefix;
+        }
+    }
+
+    home_dir.join(".npm-global")
+}
+
+fn detect_npm_prefix() -> Option<PathBuf> {
+    if let Ok(override_prefix) = std::env::var("TERMINAL_JARVIS_NPM_PREFIX_OVERRIDE") {
+        return Some(PathBuf::from(override_prefix));
+    }
+
+    if let Ok(prefix) = std::env::var("NPM_CONFIG_PREFIX") {
+        return Some(PathBuf::from(prefix));
+    }
+
+    let output = match StdCommand::new("npm")
+        .args(["config", "get", "prefix"])
+        .output()
+    {
+        Ok(output) => output,
+        Err(err) => {
+            eprintln!("Warning: failed to read npm prefix: {}", err);
+            return None;
+        }
+    };
+
+    if !output.status.success() {
+        eprintln!(
+            "Warning: npm config get prefix exited with status {}",
+            output.status
+        );
+        return None;
+    }
+
+    let prefix_lossy = String::from_utf8_lossy(&output.stdout);
+    let prefix_trimmed = prefix_lossy.trim();
+    if prefix_trimmed.is_empty() {
+        None
+    } else {
+        Some(PathBuf::from(prefix_trimmed))
+    }
+}
+
+fn fallback_path_from_exe() -> OsString {
+    if let Ok(exe_path) = std::env::current_exe() {
+        if let Some(dir) = exe_path.parent() {
+            if let Ok(joined) = join_paths([dir]) {
+                return joined;
+            }
+        }
+    }
+
+    #[cfg(windows)]
+    {
+        join_paths(["C:\\Windows\\System32", "C:\\Windows"]).unwrap_or_else(|_| OsString::new())
+    }
+
+    #[cfg(not(windows))]
+    {
+        join_paths(["/usr/local/bin", "/usr/bin", "/bin"]).unwrap_or_else(|_| OsString::new())
+    }
+}
+
+fn configure_npm_prefix_env() -> Result<(PathBuf, OsString)> {
+    let home_dir = home_dir().ok_or_else(|| anyhow!("Unable to determine home directory"))?;
+    let detected_prefix = detect_npm_prefix();
+    let prefix = resolve_npm_prefix(detected_prefix, &home_dir);
+    let bin_dir = prefix.join("bin");
+
+    if prefix.starts_with(&home_dir) {
+        if let Err(err) = fs::create_dir_all(&bin_dir) {
+            eprintln!(
+                "Warning: unable to prepare npm prefix directory {}: {}",
+                bin_dir.display(),
+                err
+            );
+            return Err(anyhow!(
+                "Failed to create npm prefix directory {}",
+                bin_dir.display()
+            ));
+        }
+    }
+
+    let (path_os, path_initially_missing) = match std::env::var_os("PATH") {
+        Some(val) => (val, false),
+        None => (fallback_path_from_exe(), true),
+    };
+    let current_paths: Vec<PathBuf> = split_paths(&path_os).collect();
+    let mut final_path = path_os;
+    if !current_paths.iter().any(|p| p == &bin_dir) {
+        let mut updated_paths = Vec::with_capacity(current_paths.len() + 1);
+        updated_paths.push(bin_dir.clone());
+        updated_paths.extend(current_paths);
+        if let Ok(joined) = join_paths(&updated_paths) {
+            std::env::set_var("PATH", &joined);
+            final_path = joined;
+        } else {
+            eprintln!(
+                "Warning: unable to update PATH to include {}",
+                bin_dir.display()
+            );
+        }
+    } else if path_initially_missing {
+        std::env::set_var("PATH", &final_path);
+    }
+
+    std::env::set_var("NPM_CONFIG_PREFIX", &prefix);
+    Ok((prefix, final_path))
+}
 
 /// Handle running a specific AI coding tool with arguments
 pub async fn handle_run_tool(tool: &str, args: &[String]) -> Result<()> {
@@ -96,6 +216,8 @@ pub async fn handle_install_tool(tool: &str) -> Result<()> {
     let install_cmd = InstallationManager::get_install_command(tool)
         .ok_or_else(|| anyhow!("Tool '{}' not found in installation registry", tool))?;
 
+    let mut npm_prefix: Option<(PathBuf, OsString)> = None;
+
     // Check dependencies based on installation method
     if install_cmd.requires_npm {
         let npm_check = ProgressContext::new("Checking NPM availability");
@@ -110,6 +232,7 @@ pub async fn handle_install_tool(tool: &str) -> Result<()> {
         }
 
         npm_check.finish_success("NPM is available");
+        npm_prefix = Some(configure_npm_prefix_env()?);
     }
 
     if install_cmd.command == "curl" {
@@ -157,6 +280,10 @@ pub async fn handle_install_tool(tool: &str) -> Result<()> {
 
     let mut cmd = AsyncCommand::new(&install_cmd.command);
     cmd.args(&install_cmd.args);
+    if let Some((prefix, path)) = &npm_prefix {
+        cmd.env("NPM_CONFIG_PREFIX", prefix);
+        cmd.env("PATH", path);
+    }
 
     // Handle special installation types
     let status = if let Some(pipe_to) = &install_cmd.pipe_to {
@@ -262,5 +389,27 @@ pub async fn handle_quick_launch() -> Result<()> {
             println!("  Available tools: claude, gemini, qwen, opencode, codex, aider, amp, goose, crush, llxprt");
             Ok(())
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::resolve_npm_prefix;
+    use std::path::PathBuf;
+
+    #[test]
+    fn resolve_npm_prefix_keeps_home_prefix() {
+        let home_dir = PathBuf::from("/home/user");
+        let prefix = PathBuf::from("/home/user/.nvm");
+        let resolved = resolve_npm_prefix(Some(prefix.clone()), &home_dir);
+        assert_eq!(resolved, prefix);
+    }
+
+    #[test]
+    fn resolve_npm_prefix_falls_back_for_system_prefix() {
+        let home_dir = PathBuf::from("/home/user");
+        let prefix = PathBuf::from("/usr/local");
+        let resolved = resolve_npm_prefix(Some(prefix), &home_dir);
+        assert_eq!(resolved, home_dir.join(".npm-global"));
     }
 }
