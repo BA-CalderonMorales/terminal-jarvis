@@ -148,6 +148,11 @@ impl TomlImporter {
             let override_path = PathBuf::from(&override_dir);
             if override_path.exists() && override_path.is_dir() {
                 return Ok(override_path);
+            } else {
+                eprintln!(
+                    "Warning: TERMINAL_JARVIS_CONFIG_DIR='{}' is not a valid directory",
+                    override_dir
+                );
             }
         }
 
@@ -158,7 +163,6 @@ impl TomlImporter {
         if let Ok(exe) = std::env::current_exe() {
             if let Some(parent) = exe.parent() {
                 paths.push(parent.join("config/tools"));
-                paths.push(parent.join("../config/tools"));
                 if let Some(grandparent) = parent.parent() {
                     paths.push(grandparent.join("config/tools"));
                 }

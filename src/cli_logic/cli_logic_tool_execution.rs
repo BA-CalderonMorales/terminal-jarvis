@@ -3,6 +3,9 @@ use crate::installation_arguments::InstallationManager;
 use crate::progress_utils::{ProgressContext, ProgressUtils};
 use crate::tools::ToolManager;
 use anyhow::{anyhow, Result};
+use dirs::home_dir;
+use std::env::{join_paths, split_paths};
+use std::ffi::OsString;
 use std::fs;
 use std::path::{Path, PathBuf};
 use std::process::Command as StdCommand;
@@ -27,46 +30,99 @@ fn detect_npm_prefix() -> Option<PathBuf> {
         return Some(PathBuf::from(prefix));
     }
 
-    let output = StdCommand::new("npm")
+    let output = match StdCommand::new("npm")
         .args(["config", "get", "prefix"])
         .output()
-        .ok()?;
+    {
+        Ok(output) => output,
+        Err(err) => {
+            eprintln!("Warning: failed to read npm prefix: {}", err);
+            return None;
+        }
+    };
 
     if !output.status.success() {
+        eprintln!(
+            "Warning: npm config get prefix exited with status {}",
+            output.status
+        );
         return None;
     }
 
-    let prefix_str = String::from_utf8_lossy(&output.stdout).trim().to_string();
-    if prefix_str.is_empty() {
+    let prefix_lossy = String::from_utf8_lossy(&output.stdout);
+    let prefix_trimmed = prefix_lossy.trim();
+    if prefix_trimmed.is_empty() {
         None
     } else {
-        Some(PathBuf::from(prefix_str))
+        Some(PathBuf::from(prefix_trimmed))
     }
 }
 
-fn configure_npm_prefix_env() -> Option<PathBuf> {
-    let home_dir = dirs::home_dir()?;
+fn fallback_path_from_exe() -> OsString {
+    if let Ok(exe_path) = std::env::current_exe() {
+        if let Some(dir) = exe_path.parent() {
+            if let Ok(joined) = join_paths([dir]) {
+                return joined;
+            }
+        }
+    }
+
+    #[cfg(windows)]
+    {
+        join_paths(["C:\\Windows\\System32", "C:\\Windows"]).unwrap_or_else(|_| OsString::new())
+    }
+
+    #[cfg(not(windows))]
+    {
+        join_paths(["/usr/local/bin", "/usr/bin", "/bin"]).unwrap_or_else(|_| OsString::new())
+    }
+}
+
+fn configure_npm_prefix_env() -> Result<(PathBuf, OsString)> {
+    let home_dir = home_dir().ok_or_else(|| anyhow!("Unable to determine home directory"))?;
     let detected_prefix = detect_npm_prefix();
     let prefix = resolve_npm_prefix(detected_prefix, &home_dir);
     let bin_dir = prefix.join("bin");
 
-    if prefix.starts_with(&home_dir) && fs::create_dir_all(&bin_dir).is_err() {
-        return None;
+    if prefix.starts_with(&home_dir) {
+        if let Err(err) = fs::create_dir_all(&bin_dir) {
+            eprintln!(
+                "Warning: unable to prepare npm prefix directory {}: {}",
+                bin_dir.display(),
+                err
+            );
+            return Err(anyhow!(
+                "Failed to create npm prefix directory {}",
+                bin_dir.display()
+            ));
+        }
     }
 
-    let mut path_value = std::env::var("PATH").unwrap_or_default();
-    let bin_str = bin_dir.to_string_lossy().to_string();
-    if !path_value.split(':').any(|p| p == bin_str) {
-        if path_value.is_empty() {
-            path_value = bin_str.clone();
+    let (path_os, path_initially_missing) = match std::env::var_os("PATH") {
+        Some(val) => (val, false),
+        None => (fallback_path_from_exe(), true),
+    };
+    let current_paths: Vec<PathBuf> = split_paths(&path_os).collect();
+    let mut final_path = path_os;
+    if !current_paths.iter().any(|p| p == &bin_dir) {
+        let mut updated_paths = Vec::with_capacity(current_paths.len() + 1);
+        updated_paths.push(bin_dir.clone());
+        updated_paths.extend(current_paths);
+        if let Ok(joined) = join_paths(&updated_paths) {
+            std::env::set_var("PATH", &joined);
+            final_path = joined;
         } else {
-            path_value = format!("{bin_str}:{path_value}");
+            eprintln!(
+                "Warning: unable to update PATH to include {}",
+                bin_dir.display()
+            );
         }
-        std::env::set_var("PATH", &path_value);
+    } else if path_initially_missing {
+        std::env::set_var("PATH", &final_path);
     }
 
     std::env::set_var("NPM_CONFIG_PREFIX", &prefix);
-    Some(prefix)
+    Ok((prefix, final_path))
 }
 
 /// Handle running a specific AI coding tool with arguments
@@ -160,7 +216,7 @@ pub async fn handle_install_tool(tool: &str) -> Result<()> {
     let install_cmd = InstallationManager::get_install_command(tool)
         .ok_or_else(|| anyhow!("Tool '{}' not found in installation registry", tool))?;
 
-    let mut npm_prefix: Option<PathBuf> = None;
+    let mut npm_prefix: Option<(PathBuf, OsString)> = None;
 
     // Check dependencies based on installation method
     if install_cmd.requires_npm {
@@ -176,7 +232,7 @@ pub async fn handle_install_tool(tool: &str) -> Result<()> {
         }
 
         npm_check.finish_success("NPM is available");
-        npm_prefix = configure_npm_prefix_env();
+        npm_prefix = Some(configure_npm_prefix_env()?);
     }
 
     if install_cmd.command == "curl" {
@@ -224,11 +280,9 @@ pub async fn handle_install_tool(tool: &str) -> Result<()> {
 
     let mut cmd = AsyncCommand::new(&install_cmd.command);
     cmd.args(&install_cmd.args);
-    if let Some(prefix) = &npm_prefix {
+    if let Some((prefix, path)) = &npm_prefix {
         cmd.env("NPM_CONFIG_PREFIX", prefix);
-        if let Ok(path) = std::env::var("PATH") {
-            cmd.env("PATH", path);
-        }
+        cmd.env("PATH", path);
     }
 
     // Handle special installation types
