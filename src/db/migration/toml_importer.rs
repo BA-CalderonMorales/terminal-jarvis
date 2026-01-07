@@ -143,16 +143,27 @@ impl TomlImporter {
 
     /// Find the config/tools directory
     fn find_config_dir() -> Result<PathBuf> {
+        // Allow environment override for packaged/bundled installs
+        if let Ok(override_dir) = std::env::var("TERMINAL_JARVIS_CONFIG_DIR") {
+            let override_path = PathBuf::from(&override_dir);
+            if override_path.exists() && override_path.is_dir() {
+                return Ok(override_path);
+            }
+        }
+
         // Try relative to current directory first
-        let paths = vec![
-            PathBuf::from("config/tools"),
-            PathBuf::from("./config/tools"),
-            // Try from executable location
-            std::env::current_exe()
-                .ok()
-                .and_then(|p| p.parent().map(|p| p.join("config/tools")))
-                .unwrap_or_default(),
-        ];
+        let mut paths = vec![PathBuf::from("config/tools"), PathBuf::from("./config/tools")];
+
+        // Try from executable location and its parent (npm package layout: bin/../config/tools)
+        if let Ok(exe) = std::env::current_exe() {
+            if let Some(parent) = exe.parent() {
+                paths.push(parent.join("config/tools"));
+                paths.push(parent.join("../config/tools"));
+                if let Some(grandparent) = parent.parent() {
+                    paths.push(grandparent.join("config/tools"));
+                }
+            }
+        }
 
         for path in paths {
             if path.exists() && path.is_dir() {
@@ -313,6 +324,7 @@ impl TomlImporter {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use tempfile::TempDir;
 
     #[test]
     fn test_import_stats_summary() {
@@ -342,5 +354,18 @@ requires_npm = false
         assert_eq!(config.tool.display_name, "Test Tool");
         assert_eq!(config.tool.cli_command, "test-cmd");
         assert!(!config.tool.requires_npm);
+    }
+
+    #[test]
+    fn test_find_config_dir_respects_env_override() {
+        let temp_dir = TempDir::new().unwrap();
+        let tools_dir = temp_dir.path().join("config").join("tools");
+        std::fs::create_dir_all(&tools_dir).unwrap();
+
+        std::env::set_var("TERMINAL_JARVIS_CONFIG_DIR", &tools_dir);
+        let found = TomlImporter::find_config_dir().unwrap();
+        std::env::remove_var("TERMINAL_JARVIS_CONFIG_DIR");
+
+        assert_eq!(found, tools_dir);
     }
 }
