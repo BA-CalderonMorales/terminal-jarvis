@@ -261,7 +261,7 @@ pub async fn handle_install_tool(tool: &str) -> Result<()> {
             let mut args_with_prefix = install_cmd.args.clone();
             args_with_prefix.extend(["--prefix".to_string(), user_prefix.display().to_string()]);
 
-            ProgressUtils::info_message(&format!(
+            progress.info_inline(&format!(
                 "Installing to user directory: {}",
                 user_prefix.display()
             ));
