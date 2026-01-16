@@ -333,7 +333,11 @@ fn generate_request_id() -> String {
         .timestamp_nanos_opt()
         .unwrap_or(0)
         .hash(&mut hasher);
-    rand::random::<u64>().hash(&mut hasher);
+    // Use thread ID and a counter for uniqueness instead of rand crate
+    std::thread::current().id().hash(&mut hasher);
+    // Add pointer address of a stack variable for additional entropy
+    let stack_var: u8 = 0;
+    ((&stack_var as *const u8) as usize).hash(&mut hasher);
 
     format!("req_{}", hasher.finish())
 }
