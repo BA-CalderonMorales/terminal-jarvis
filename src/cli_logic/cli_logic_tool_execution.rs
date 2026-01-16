@@ -3,7 +3,70 @@ use crate::installation_arguments::InstallationManager;
 use crate::progress_utils::{ProgressContext, ProgressUtils};
 use crate::tools::ToolManager;
 use anyhow::{anyhow, Result};
+use std::path::{Path, PathBuf};
 use tokio::process::Command as AsyncCommand;
+
+/// Check if the npm global prefix directory is writable by the current user.
+/// Returns true for NVM users or when npm is configured with user-writable paths.
+fn is_npm_global_writable() -> bool {
+    let output = std::process::Command::new("npm")
+        .args(["prefix", "-g"])
+        .output();
+
+    let Ok(out) = output else { return false };
+    if !out.status.success() {
+        return false;
+    }
+
+    let prefix = PathBuf::from(String::from_utf8_lossy(&out.stdout).trim());
+    let node_modules = prefix.join("lib").join("node_modules");
+    let lib_dir = prefix.join("lib");
+
+    // Check writable directory in order of preference: node_modules > lib > prefix
+    if node_modules.exists() {
+        is_directory_writable(&node_modules)
+    } else if lib_dir.exists() {
+        is_directory_writable(&lib_dir)
+    } else {
+        is_directory_writable(&prefix)
+    }
+}
+
+/// Check if a directory is writable by the current user using Unix permissions.
+fn is_directory_writable(path: &Path) -> bool {
+    use std::os::unix::fs::MetadataExt;
+
+    let Ok(metadata) = std::fs::metadata(path) else {
+        return false;
+    };
+
+    let mode = metadata.mode();
+    let uid = unsafe { libc::getuid() };
+    let gid = unsafe { libc::getgid() };
+    let file_uid = metadata.uid();
+    let file_gid = metadata.gid();
+
+    let is_owner_writable = uid == file_uid && (mode & 0o200) != 0;
+    let is_group_writable = gid == file_gid && (mode & 0o020) != 0;
+    let is_other_writable = (mode & 0o002) != 0;
+
+    is_owner_writable || is_group_writable || is_other_writable
+}
+
+/// Get the user-local npm prefix directory for global installs.
+/// Uses ~/.local/share/npm-global following XDG conventions.
+fn get_user_npm_prefix() -> PathBuf {
+    dirs::home_dir()
+        .unwrap_or_else(|| PathBuf::from("."))
+        .join(".local/share/npm-global")
+}
+
+/// Ensure the user npm prefix directory exists and return the prefix path.
+fn ensure_user_npm_prefix() -> Result<PathBuf> {
+    let prefix = get_user_npm_prefix();
+    std::fs::create_dir_all(prefix.join("bin"))?;
+    Ok(prefix)
+}
 
 /// Handle running a specific AI coding tool with arguments
 pub async fn handle_run_tool(tool: &str, args: &[String]) -> Result<()> {
@@ -158,6 +221,9 @@ pub async fn handle_install_tool(tool: &str) -> Result<()> {
     let mut cmd = AsyncCommand::new(&install_cmd.command);
     cmd.args(&install_cmd.args);
 
+    // Track if we installed to user directory (for PATH guidance)
+    let mut used_user_prefix: Option<PathBuf> = None;
+
     // Handle special installation types
     let status = if let Some(pipe_to) = &install_cmd.pipe_to {
         // Handle curl-based installations that pipe to bash (e.g., goose)
@@ -182,13 +248,40 @@ pub async fn handle_install_tool(tool: &str) -> Result<()> {
         }
         child.wait().await?
     } else if install_cmd.requires_npm && install_cmd.args.contains(&"-g".to_string()) {
-        // Issue #37: DO NOT use sudo for NPM global installs
-        // When npm is installed via NVM, it's not in sudo's PATH, causing silent failures.
-        // NVM sets up permissions correctly so sudo is not needed for global installs.
-        // Show stderr so users can see any error messages for debugging.
-        cmd.stdout(std::process::Stdio::null());
-        cmd.stderr(std::process::Stdio::inherit()); // Show errors to user
-        cmd.status().await?
+        // Issue #37 & #39: Handle NPM global installs without sudo
+        // NVM users have writable npm prefix; system npm users need user-local prefix
+        let is_writable = is_npm_global_writable();
+
+        if !is_writable {
+            let user_prefix = ensure_user_npm_prefix()?;
+            let user_bin = user_prefix.join("bin");
+
+            used_user_prefix = Some(user_prefix.clone());
+
+            let mut args_with_prefix = install_cmd.args.clone();
+            args_with_prefix.extend(["--prefix".to_string(), user_prefix.display().to_string()]);
+
+            ProgressUtils::info_message(&format!(
+                "Installing to user directory: {}",
+                user_prefix.display()
+            ));
+
+            let current_path = std::env::var("PATH").unwrap_or_default();
+            let new_path = format!("{}:{}", user_bin.display(), current_path);
+
+            let mut user_cmd = AsyncCommand::new(&install_cmd.command);
+            user_cmd.args(&args_with_prefix);
+            user_cmd.stdout(std::process::Stdio::null());
+            user_cmd.stderr(std::process::Stdio::inherit());
+            user_cmd.env("PATH", &new_path);
+
+            std::env::set_var("PATH", &new_path);
+            user_cmd.status().await?
+        } else {
+            cmd.stdout(std::process::Stdio::null());
+            cmd.stderr(std::process::Stdio::inherit());
+            cmd.status().await?
+        }
     } else {
         // Regular command execution (uv, cargo, etc.)
         // Show stderr so users can see any error messages for debugging
@@ -210,11 +303,27 @@ pub async fn handle_install_tool(tool: &str) -> Result<()> {
         let cli_command = ToolManager::get_cli_command(tool);
         if ToolManager::check_tool_installed(cli_command) {
             verify_progress.finish_success(&format!("{tool} is ready to use"));
+
+            // Provide PATH guidance for user-prefix installations
+            if let Some(prefix) = &used_user_prefix {
+                let bin_path = prefix.join("bin").to_string_lossy().to_string();
+                ProgressUtils::info_message(
+                    "To use this tool in future sessions, add to your shell profile:",
+                );
+                println!("  export PATH=\"{}:$PATH\"", bin_path);
+            }
         } else {
             verify_progress.finish_error(&format!("{tool} installation could not be verified"));
 
-            // For opencode, provide additional guidance
-            if tool == "opencode" {
+            // Provide PATH guidance based on installation type
+            if let Some(prefix) = &used_user_prefix {
+                let bin_path = prefix.join("bin").to_string_lossy().to_string();
+                ProgressUtils::warning_message(
+                    "Tool installed but not found in PATH. Add to your shell profile:",
+                );
+                println!("  export PATH=\"{}:$PATH\"", bin_path);
+                ProgressUtils::info_message("Then restart your terminal or run: source ~/.bashrc");
+            } else if tool == "opencode" {
                 ProgressUtils::warning_message(
                     "OpenCode requires shell environment refresh to update PATH",
                 );
