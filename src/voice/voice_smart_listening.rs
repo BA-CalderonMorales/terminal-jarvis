@@ -221,14 +221,13 @@ impl SmartVoiceListener {
                     return Ok(None);
                 }
 
-                println!("Heard: \"{}\"", transcribed_text);
+                println!("Heard: \"{transcribed_text}\"");
 
                 // Parse command
                 match self.parser.parse(transcribed_text, recognition.confidence) {
                     Ok(command) => {
                         self.feedback.show(VoiceFeedbackType::Success(format!(
-                            "Command recognized: {:?}",
-                            command
+                            "Command recognized: {command:?}"
                         )));
                         Ok(Some(command))
                     }
@@ -242,8 +241,7 @@ impl SmartVoiceListener {
             }
             Err(e) => {
                 self.feedback.show(VoiceFeedbackType::Error(format!(
-                    "Voice recognition failed: {}",
-                    e
+                    "Voice recognition failed: {e}"
                 )));
                 Ok(None)
             }
@@ -378,7 +376,7 @@ impl VoiceListenerFactory {
                     }
                 }
                 Err(e) => {
-                    println!("[INFO] Native voice not available: {}", e);
+                    println!("[INFO] Native voice not available: {e}");
                 }
             }
         }
@@ -395,7 +393,7 @@ impl VoiceListenerFactory {
                 }
             }
             Err(e) => {
-                println!("[INFO] Cloud voice not available: {}", e);
+                println!("[INFO] Cloud voice not available: {e}");
             }
         }
 

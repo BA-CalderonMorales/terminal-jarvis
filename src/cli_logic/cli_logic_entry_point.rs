@@ -106,10 +106,7 @@ async fn handle_tool_launch(tool_name: &str) -> Result<()> {
         };
 
         if should_install {
-            println!(
-                "\n{}",
-                theme.accent(&format!("Installing {}...", tool_name))
-            );
+            println!("\n{}", theme.accent(&format!("Installing {tool_name}...")));
             handle_install_tool(tool_name).await?;
             println!("{}", theme.accent("Installation complete!\n"));
         } else {
@@ -161,7 +158,7 @@ async fn launch_tool_with_progress(tool_name: &str, args: &[String]) -> Result<(
         Ok(_) => {
             println!(
                 "\n{}",
-                theme.accent(&format!("{} completed successfully!", tool_name))
+                theme.accent(&format!("{tool_name} completed successfully!"))
             );
         }
         Err(e) => {
@@ -174,7 +171,7 @@ async fn launch_tool_with_progress(tool_name: &str, args: &[String]) -> Result<(
             } else {
                 eprintln!(
                     "\n{}",
-                    theme.accent(&format!("Error running {}: {}", tool_name, e))
+                    theme.accent(&format!("Error running {tool_name}: {e}"))
                 );
             }
         }
@@ -237,17 +234,17 @@ async fn handle_post_tool_exit(last_tool: &str, last_args: &[String]) -> Result<
         let has_login = get_login_command(last_tool).is_some();
         if has_login {
             let action = get_login_action_name(last_tool);
-            exit_options.push(format!("2. {} {}", action, tool_display));
+            exit_options.push(format!("2. {action} {tool_display}"));
             exit_options.push("3. Back to Main Menu".to_string());
             exit_options.push("4. Switch to Another AI Tool".to_string());
-            exit_options.push(format!("5. Re-enter API Key for {}", tool_display));
-            exit_options.push(format!("6. Uninstall {}", tool_display));
+            exit_options.push(format!("5. Re-enter API Key for {tool_display}"));
+            exit_options.push(format!("6. Uninstall {tool_display}"));
             exit_options.push("7. Exit Terminal Jarvis".to_string());
         } else {
             exit_options.push("2. Back to Main Menu".to_string());
             exit_options.push("3. Switch to Another AI Tool".to_string());
-            exit_options.push(format!("4. Re-enter API Key for {}", tool_display));
-            exit_options.push(format!("5. Uninstall {}", tool_display));
+            exit_options.push(format!("4. Re-enter API Key for {tool_display}"));
+            exit_options.push(format!("5. Uninstall {tool_display}"));
             exit_options.push("6. Exit Terminal Jarvis".to_string());
         }
 
@@ -286,8 +283,7 @@ async fn handle_post_tool_exit(last_tool: &str, last_args: &[String]) -> Result<
                         Ok(exit_status) if exit_status.success() => {
                             println!(
                                 "{}",
-                                theme
-                                    .accent(&format!("{} authentication completed!", tool_display))
+                                theme.accent(&format!("{tool_display} authentication completed!"))
                             );
                         }
                         Ok(_) => {
@@ -296,7 +292,7 @@ async fn handle_post_tool_exit(last_tool: &str, last_args: &[String]) -> Result<
                         Err(e) => {
                             println!(
                                 "{}",
-                                theme.accent(&format!("Failed to run auth command: {}", e))
+                                theme.accent(&format!("Failed to run auth command: {e}"))
                             );
                         }
                     }
@@ -316,13 +312,12 @@ async fn handle_post_tool_exit(last_tool: &str, last_args: &[String]) -> Result<
             s if s.contains("Re-enter API Key") => {
                 // Clear existing credentials for this tool, then prompt for new key
                 if let Err(e) = AuthManager::delete_tool_credentials(last_tool, &[]) {
-                    println!("{}", theme.accent(&format!("Note: {}", e)));
+                    println!("{}", theme.accent(&format!("Note: {e}")));
                 }
                 println!(
                     "{}",
                     theme.secondary(&format!(
-                        "Cleared credentials for {}. They will be requested on next launch.",
-                        tool_display
+                        "Cleared credentials for {tool_display}. They will be requested on next launch."
                     ))
                 );
                 // Brief pause to let user read the message
@@ -367,21 +362,21 @@ async fn handle_uninstall_tool(tool: &str, tool_display: &str, theme: &crate::th
 
     if let Some((cmd, args)) = uninstall_cmd {
         // Confirm before uninstalling
-        if let Ok(confirmed) = themed_confirm(&format!("Uninstall {}?", tool_display))
+        if let Ok(confirmed) = themed_confirm(&format!("Uninstall {tool_display}?"))
             .with_default(false)
             .prompt()
         {
             if confirmed {
                 println!(
                     "{}",
-                    theme.secondary(&format!("Uninstalling {}...", tool_display))
+                    theme.secondary(&format!("Uninstalling {tool_display}..."))
                 );
                 let result = std::process::Command::new(cmd).args(&args).status();
                 match result {
                     Ok(status) if status.success() => {
                         println!(
                             "{}",
-                            theme.primary(&format!("{} has been uninstalled.", tool_display))
+                            theme.primary(&format!("{tool_display} has been uninstalled."))
                         );
                         // Also clear credentials
                         let _ = AuthManager::delete_tool_credentials(tool, &[]);
@@ -399,7 +394,7 @@ async fn handle_uninstall_tool(tool: &str, tool_display: &str, theme: &crate::th
                     Err(e) => {
                         println!(
                             "{}",
-                            theme.accent(&format!("Could not run uninstall command: {}", e))
+                            theme.accent(&format!("Could not run uninstall command: {e}"))
                         );
                     }
                 }
@@ -409,8 +404,7 @@ async fn handle_uninstall_tool(tool: &str, tool_display: &str, theme: &crate::th
         println!(
             "{}",
             theme.accent(&format!(
-                "Uninstall command not configured for {}. Check the tool's documentation.",
-                tool_display
+                "Uninstall command not configured for {tool_display}. Check the tool's documentation."
             ))
         );
     }
@@ -617,7 +611,7 @@ async fn handle_theme_switch_menu() -> Result<()> {
 
     println!(
         "{}",
-        new_theme.primary(&format!("Theme changed to: {}", selected_theme))
+        new_theme.primary(&format!("Theme changed to: {selected_theme}"))
     );
     println!(
         "{}",

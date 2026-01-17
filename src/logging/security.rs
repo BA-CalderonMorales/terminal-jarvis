@@ -86,7 +86,7 @@ impl SecurityLogger {
             timestamp: Utc::now(),
             event_type: SecurityEventType::InputValidationFailed,
             severity: SecuritySeverity::Low,
-            description: format!("Input validation attempt for context: {}", context),
+            description: format!("Input validation attempt for context: {context}"),
             source: "security_validator".to_string(),
             context: serde_json::json!({
                 "input": input,
@@ -105,7 +105,7 @@ impl SecurityLogger {
             timestamp: Utc::now(),
             event_type: SecurityEventType::InputValidationFailed,
             severity: SecuritySeverity::Medium,
-            description: format!("Blocked input for context: {}", context),
+            description: format!("Blocked input for context: {context}"),
             source: "security_validator".to_string(),
             context: serde_json::json!({
                 "input": input,
@@ -124,7 +124,7 @@ impl SecurityLogger {
             timestamp: Utc::now(),
             event_type: SecurityEventType::ModelAccessAttempt,
             severity: SecuritySeverity::Low,
-            description: format!("Model access attempt: {}", model_name),
+            description: format!("Model access attempt: {model_name}"),
             source: "secure_model_loader".to_string(),
             context: serde_json::json!({
                 "model_name": model_name
@@ -141,7 +141,7 @@ impl SecurityLogger {
             timestamp: Utc::now(),
             event_type: SecurityEventType::ModelAccessAttempt,
             severity: SecuritySeverity::Low,
-            description: format!("Model access successful: {}", model_name),
+            description: format!("Model access successful: {model_name}"),
             source: "secure_model_loader".to_string(),
             context: serde_json::json!({
                 "model_name": model_name,
@@ -159,7 +159,7 @@ impl SecurityLogger {
             timestamp: Utc::now(),
             event_type: SecurityEventType::ModelAccessBlocked,
             severity: SecuritySeverity::High,
-            description: format!("Model access blocked: {} - {}", model_name, reason),
+            description: format!("Model access blocked: {model_name} - {reason}"),
             source: "secure_model_loader".to_string(),
             context: serde_json::json!({
                 "model_name": model_name,
@@ -177,7 +177,7 @@ impl SecurityLogger {
             timestamp: Utc::now(),
             event_type: SecurityEventType::CommandExecutionAttempt,
             severity: SecuritySeverity::Low,
-            description: format!("Command execution attempt: {}", command),
+            description: format!("Command execution attempt: {command}"),
             source: "security_validator".to_string(),
             context: serde_json::json!({
                 "command": command,
@@ -196,7 +196,7 @@ impl SecurityLogger {
             timestamp: Utc::now(),
             event_type: SecurityEventType::CommandExecutionBlocked,
             severity: SecuritySeverity::High,
-            description: format!("Command execution blocked: {}", command),
+            description: format!("Command execution blocked: {command}"),
             source: "security_validator".to_string(),
             context: serde_json::json!({
                 "command": command,
@@ -215,7 +215,7 @@ impl SecurityLogger {
             timestamp: Utc::now(),
             event_type: SecurityEventType::DownloadAttempt,
             severity: SecuritySeverity::Medium,
-            description: format!("Download attempt: {}", url),
+            description: format!("Download attempt: {url}"),
             source: "supply_chain_security".to_string(),
             context: serde_json::json!({
                 "url": url,
@@ -233,7 +233,7 @@ impl SecurityLogger {
             timestamp: Utc::now(),
             event_type: SecurityEventType::DownloadBlocked,
             severity: SecuritySeverity::Critical,
-            description: format!("Download blocked: {} - {}", url, reason),
+            description: format!("Download blocked: {url} - {reason}"),
             source: "supply_chain_security".to_string(),
             context: serde_json::json!({
                 "url": url,
@@ -251,7 +251,7 @@ impl SecurityLogger {
             timestamp: Utc::now(),
             event_type: SecurityEventType::SuspiciousActivity,
             severity: SecuritySeverity::Critical,
-            description: format!("Suspicious activity detected: {}", activity),
+            description: format!("Suspicious activity detected: {activity}"),
             source: "security_monitor".to_string(),
             context: details,
             blocked: true,
@@ -274,7 +274,7 @@ impl SecurityLogger {
             .open(path)?;
 
         let line = serde_json::to_string(event)?;
-        writeln!(file, "{}", line)?;
+        writeln!(file, "{line}")?;
 
         Ok(())
     }

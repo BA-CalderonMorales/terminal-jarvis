@@ -71,7 +71,7 @@ impl PatternMatchValidator {
             }
 
             test_results.push(TestCaseResult {
-                test_name: format!("pattern_{}", i),
+                test_name: format!("pattern_{i}"),
                 passed: matched,
                 expected: pattern.clone(),
                 actual: if matched {

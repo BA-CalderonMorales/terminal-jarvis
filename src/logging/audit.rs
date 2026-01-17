@@ -70,11 +70,11 @@ impl AuditLogger {
 
     pub fn log(&mut self, entry: LogEntry) -> Result<()> {
         let log_line = serde_json::to_string(&entry)?;
-        writeln!(self.log_file, "{}", log_line)?;
+        writeln!(self.log_file, "{log_line}")?;
         self.log_file.flush()?;
 
         // Also log to stderr for immediate visibility
-        eprintln!("[AUDIT] {}", log_line);
+        eprintln!("[AUDIT] {log_line}");
 
         Ok(())
     }
@@ -130,9 +130,9 @@ impl AuditLogger {
             LogLevel::Warning
         };
         let message = if is_valid {
-            format!("Input validation passed for context: {}", context)
+            format!("Input validation passed for context: {context}")
         } else {
-            format!("Input validation blocked for context: {}", context)
+            format!("Input validation blocked for context: {context}")
         };
 
         self.log_security_event(level, &message, serde_json::Value::Object(context_data))
@@ -147,7 +147,7 @@ impl AuditLogger {
 
         self.log_security_event(
             LogLevel::Info,
-            &format!("Model access attempt: {}", model_name),
+            &format!("Model access attempt: {model_name}"),
             serde_json::Value::Object(context_data),
         )
     }
@@ -161,7 +161,7 @@ impl AuditLogger {
 
         self.log_security_event(
             LogLevel::Info,
-            &format!("Model access successful: {}", model_name),
+            &format!("Model access successful: {model_name}"),
             serde_json::Value::Object(context_data),
         )
     }
@@ -179,7 +179,7 @@ impl AuditLogger {
 
         self.log_security_event(
             LogLevel::Warning,
-            &format!("Model access blocked: {}", model_name),
+            &format!("Model access blocked: {model_name}"),
             serde_json::Value::Object(context_data),
         )
     }
@@ -201,7 +201,7 @@ impl AuditLogger {
 
         self.log_security_event(
             LogLevel::Info,
-            &format!("Command execution attempt: {}", command),
+            &format!("Command execution attempt: {command}"),
             serde_json::Value::Object(context_data),
         )
     }
@@ -223,7 +223,7 @@ impl AuditLogger {
 
         self.log_security_event(
             LogLevel::Warning,
-            &format!("Command execution blocked: {}", command),
+            &format!("Command execution blocked: {command}"),
             serde_json::Value::Object(context_data),
         )
     }
@@ -241,7 +241,7 @@ impl AuditLogger {
 
         self.log_security_event(
             LogLevel::Info,
-            &format!("Download attempt: {}", url),
+            &format!("Download attempt: {url}"),
             serde_json::Value::Object(context_data),
         )
     }
@@ -259,7 +259,7 @@ impl AuditLogger {
 
         self.log_security_event(
             LogLevel::Warning,
-            &format!("Download blocked: {}", url),
+            &format!("Download blocked: {url}"),
             serde_json::Value::Object(context_data),
         )
     }
@@ -271,7 +271,7 @@ impl AuditLogger {
     ) -> Result<()> {
         self.log_security_event(
             LogLevel::Critical,
-            &format!("Suspicious activity detected: {}", activity),
+            &format!("Suspicious activity detected: {activity}"),
             details,
         )
     }
@@ -286,7 +286,7 @@ impl AuditLogger {
 impl Default for AuditLogger {
     fn default() -> Self {
         Self::new().unwrap_or_else(|e| {
-            eprintln!("[Warning] Failed to initialize audit logger: {}", e);
+            eprintln!("[Warning] Failed to initialize audit logger: {e}");
             // Create a fallback logger that writes to /dev/null (or NUL on Windows)
             #[cfg(unix)]
             let null_path = "/dev/null";

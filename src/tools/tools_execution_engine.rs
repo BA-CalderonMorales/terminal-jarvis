@@ -109,9 +109,7 @@ pub async fn run_tool_once(display_name: &str, args: &[String]) -> Result<()> {
 
     if !check_tool_installed(cli_command) {
         return Err(anyhow::anyhow!(
-            "Tool '{}' is not installed. Use 'terminal-jarvis install {}' to install it.",
-            display_name,
-            display_name
+            "Tool '{display_name}' is not installed. Use 'terminal-jarvis install {display_name}' to install it."
         ));
     }
 
@@ -568,12 +566,12 @@ pub async fn run_tool_once(display_name: &str, args: &[String]) -> Result<()> {
     } else if display_name == "goose" {
         // Use direct status() to avoid interfering with Goose's own signal handling/provider subprocesses
         cmd.status()
-            .map_err(|e| anyhow::anyhow!("Failed to execute {}: {}", cli_command, e))?
+            .map_err(|e| anyhow::anyhow!("Failed to execute {cli_command}: {e}"))?
     } else {
         // Use direct status() for tools to ensure proper signal handling
         // This allows Ctrl+C and other signals to work properly and exit gracefully
         cmd.status()
-            .map_err(|e| anyhow::anyhow!("Failed to execute {}: {}", cli_command, e))?
+            .map_err(|e| anyhow::anyhow!("Failed to execute {cli_command}: {e}"))?
     };
 
     // Restore environment after tool execution
@@ -587,10 +585,7 @@ pub async fn run_tool_once(display_name: &str, args: &[String]) -> Result<()> {
                 .code()
                 .map(|c| c.to_string())
                 .unwrap_or_else(|| "signal".to_string());
-            println!(
-                "\nAider session ended (exit: {}). Returning to Terminal Jarvis...",
-                exit_code
-            );
+            println!("\nAider session ended (exit: {exit_code}). Returning to Terminal Jarvis...");
             return Ok(());
         } else if display_name == "goose" {
             // If Goose fails with no args, it's commonly due to missing provider configuration.

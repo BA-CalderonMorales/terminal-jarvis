@@ -108,7 +108,7 @@ impl ApiClient {
                 .text()
                 .await
                 .unwrap_or_else(|_| "Unknown error".to_string());
-            return Err(anyhow!("HTTP {} error: {}", status, error_text));
+            return Err(anyhow!("HTTP {status} error: {error_text}"));
         }
 
         let json = response.json::<T>().await?;

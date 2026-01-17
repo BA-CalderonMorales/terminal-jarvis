@@ -34,7 +34,7 @@ pub fn run_tool_intercepting_sigint(mut cmd: Command) -> Result<std::process::Ex
     // Spawn child
     let mut child = cmd
         .spawn()
-        .map_err(|e| anyhow::anyhow!("Failed to spawn process: {}", e))?;
+        .map_err(|e| anyhow::anyhow!("Failed to spawn process: {e}"))?;
 
     // Set up Ctrl+C (SIGINT) handler to forward termination to child and not kill parent
     use std::sync::{
@@ -45,7 +45,7 @@ pub fn run_tool_intercepting_sigint(mut cmd: Command) -> Result<std::process::Ex
     let sigint_flag = Arc::new(AtomicBool::new(false));
     let _flag_handle =
         signal_hook::flag::register(signal_hook::consts::SIGINT, sigint_flag.clone())
-            .map_err(|e| anyhow::anyhow!("Failed to register SIGINT handler: {}", e))?;
+            .map_err(|e| anyhow::anyhow!("Failed to register SIGINT handler: {e}"))?;
 
     // Wait loop: either child exits, or we get Ctrl+C signal
     loop {
@@ -60,7 +60,7 @@ pub fn run_tool_intercepting_sigint(mut cmd: Command) -> Result<std::process::Ex
             let _ = child.kill();
             let status = child
                 .wait()
-                .map_err(|e| anyhow::anyhow!("Failed to wait after SIGINT: {}", e))?;
+                .map_err(|e| anyhow::anyhow!("Failed to wait after SIGINT: {e}"))?;
             return Ok(status);
         }
 
@@ -74,7 +74,7 @@ pub fn run_tool_intercepting_sigint(mut cmd: Command) -> Result<std::process::Ex
             Err(e) => {
                 // On error, ensure child is terminated and return error
                 let _ = child.kill();
-                return Err(anyhow::anyhow!("Failed to wait on child: {}", e));
+                return Err(anyhow::anyhow!("Failed to wait on child: {e}"));
             }
         }
     }

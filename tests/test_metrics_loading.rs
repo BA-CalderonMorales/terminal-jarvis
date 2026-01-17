@@ -36,8 +36,7 @@ fn test_load_all_metrics_files() {
             // As of this test, 9/10 tools have metrics (qwen does not)
             assert!(
                 tools_with_metrics >= 9,
-                "Expected at least 9 tools with metrics, found: {}",
-                tools_with_metrics
+                "Expected at least 9 tools with metrics, found: {tools_with_metrics}"
             );
 
             println!(
@@ -47,7 +46,7 @@ fn test_load_all_metrics_files() {
             println!("[SUCCESS] All TOML files parsed successfully without errors!");
         }
         Err(e) => {
-            panic!("Failed to load evaluations: {}", e);
+            panic!("Failed to load evaluations: {e}");
         }
     }
 }

@@ -126,7 +126,7 @@ async fn execute_command(
         "/evals" => {
             print!("\x1b[2J\x1b[H");
             if let Err(e) = crate::cli_logic::cli_logic_evals_operations::show_evals_menu() {
-                eprintln!("Error in Evals menu: {}", e);
+                eprintln!("Error in Evals menu: {e}");
             }
             refresh_screen(theme, npm_available).await?;
         }
@@ -349,7 +349,7 @@ async fn handle_theme_selection() -> Result<()> {
         .iter()
         .map(|(name, t)| {
             if *t == current_type {
-                format!("{} [current]", name)
+                format!("{name} [current]")
             } else {
                 name.to_string()
             }
@@ -370,7 +370,7 @@ async fn handle_theme_selection() -> Result<()> {
                 if let Ok(db) = DatabaseManager::init().await {
                     if let Err(e) = theme_persistence::save_theme_preference(db, *theme_type).await
                     {
-                        eprintln!("Warning: Could not save theme preference: {}", e);
+                        eprintln!("Warning: Could not save theme preference: {e}");
                     }
                 }
 

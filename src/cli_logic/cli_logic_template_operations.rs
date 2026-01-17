@@ -18,7 +18,7 @@ pub async fn handle_templates_create(name: &str) -> Result<()> {
     let github_service = GitHubService::new()?;
     let theme = theme_global_config::current_theme();
 
-    println!("{}", theme.primary(&format!("Creating template: {}", name)));
+    println!("{}", theme.primary(&format!("Creating template: {name}")));
     github_service.create_template(name).await
 }
 
@@ -40,7 +40,7 @@ pub async fn handle_templates_apply(name: &str) -> Result<()> {
     let github_service = GitHubService::new()?;
     let theme = theme_global_config::current_theme();
 
-    println!("{}", theme.primary(&format!("Applying template: {}", name)));
+    println!("{}", theme.primary(&format!("Applying template: {name}")));
     github_service.apply_template(name).await
 }
 

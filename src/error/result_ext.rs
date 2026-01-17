@@ -35,7 +35,7 @@ impl<T> ResultExt<T> for Option<T> {
         self.ok_or_else(|| {
             JarvisError::new(
                 JarvisErrorKind::Internal,
-                format!("{} '{}' not found", resource_type, resource_name),
+                format!("{resource_type} '{resource_name}' not found"),
             )
             .for_resource(resource_name)
         })

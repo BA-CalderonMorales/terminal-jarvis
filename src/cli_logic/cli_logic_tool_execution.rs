@@ -72,26 +72,26 @@ fn ensure_user_npm_prefix() -> Result<PathBuf> {
 pub async fn handle_run_tool(tool: &str, args: &[String]) -> Result<()> {
     // Get install command to check dependencies
     let install_cmd = InstallationManager::get_install_command(tool)
-        .ok_or_else(|| anyhow!("Tool {} not found in configuration", tool))?;
+        .ok_or_else(|| anyhow!("Tool {tool} not found in configuration"))?;
 
     // Check appropriate dependencies based on installation method
     if install_cmd.requires_npm && !InstallationManager::check_npm_available() {
         ProgressUtils::warning_message("Node.js runtime environment not detected");
-        println!("  Tool {} requires NPM but it's not available.", tool);
+        println!("  Tool {tool} requires NPM but it's not available.");
         println!("  Please install Node.js to continue: https://nodejs.org/");
         return Err(anyhow!("Node.js runtime required"));
     }
 
     if install_cmd.command == "curl" && !InstallationManager::check_curl_available() {
         ProgressUtils::warning_message("curl not found");
-        println!("  Tool {} requires curl but it's not available.", tool);
+        println!("  Tool {tool} requires curl but it's not available.");
         println!("  Please install curl to continue.");
         return Err(anyhow!("curl required"));
     }
 
     if install_cmd.command == "uv" && !InstallationManager::check_uv_available() {
         ProgressUtils::warning_message("uv not found");
-        println!("  Tool {} requires uv but it's not available.", tool);
+        println!("  Tool {tool} requires uv but it's not available.");
         println!(
             "  Please install uv from https://docs.astral.sh/uv/getting-started/installation/"
         );
@@ -123,7 +123,7 @@ pub async fn handle_run_tool(tool: &str, args: &[String]) -> Result<()> {
             handle_install_tool(tool).await?;
             ProgressUtils::success_message("Installation complete!");
         } else {
-            return Err(anyhow!("Tool '{}' is required but not installed", tool));
+            return Err(anyhow!("Tool '{tool}' is required but not installed"));
         }
     } else {
         check_progress.finish_success(&format!("{tool} is available"));
@@ -157,7 +157,7 @@ pub async fn handle_run_tool(tool: &str, args: &[String]) -> Result<()> {
 /// Handle installing a specific AI coding tool
 pub async fn handle_install_tool(tool: &str) -> Result<()> {
     let install_cmd = InstallationManager::get_install_command(tool)
-        .ok_or_else(|| anyhow!("Tool '{}' not found in installation registry", tool))?;
+        .ok_or_else(|| anyhow!("Tool '{tool}' not found in installation registry"))?;
 
     // Check dependencies based on installation method
     if install_cmd.requires_npm {
@@ -167,8 +167,7 @@ pub async fn handle_install_tool(tool: &str) -> Result<()> {
             npm_check.finish_error("Node.js ecosystem not detected");
             println!("  Please install Node.js and NPM first: https://nodejs.org/");
             return Err(anyhow!(
-                "NPM is required to install {} but is not available",
-                tool
+                "NPM is required to install {tool} but is not available"
             ));
         }
 
@@ -182,8 +181,7 @@ pub async fn handle_install_tool(tool: &str) -> Result<()> {
             curl_check.finish_error("curl not found");
             println!("  Please install curl first (usually available by default on most systems)");
             return Err(anyhow!(
-                "curl is required to install {} but is not available",
-                tool
+                "curl is required to install {tool} but is not available"
             ));
         }
 
@@ -197,8 +195,7 @@ pub async fn handle_install_tool(tool: &str) -> Result<()> {
             uv_check.finish_error("uv not found");
             println!("  Please install uv first: https://docs.astral.sh/uv/getting-started/installation/");
             return Err(anyhow!(
-                "uv is required to install {} but is not available",
-                tool
+                "uv is required to install {tool} but is not available"
             ));
         }
 
@@ -310,7 +307,7 @@ pub async fn handle_install_tool(tool: &str) -> Result<()> {
                 ProgressUtils::info_message(
                     "To use this tool in future sessions, add to your shell profile:",
                 );
-                println!("  export PATH=\"{}:$PATH\"", bin_path);
+                println!("  export PATH=\"{bin_path}:$PATH\"");
             }
         } else {
             verify_progress.finish_error(&format!("{tool} installation could not be verified"));
@@ -321,7 +318,7 @@ pub async fn handle_install_tool(tool: &str) -> Result<()> {
                 ProgressUtils::warning_message(
                     "Tool installed but not found in PATH. Add to your shell profile:",
                 );
-                println!("  export PATH=\"{}:$PATH\"", bin_path);
+                println!("  export PATH=\"{bin_path}:$PATH\"");
                 ProgressUtils::info_message("Then restart your terminal or run: source ~/.bashrc");
             } else if tool == "opencode" {
                 ProgressUtils::warning_message(
@@ -336,7 +333,7 @@ pub async fn handle_install_tool(tool: &str) -> Result<()> {
         Ok(())
     } else {
         progress.finish_error(&format!("Failed to install {tool}"));
-        Err(anyhow!("Failed to install {}", tool))
+        Err(anyhow!("Failed to install {tool}"))
     }
 }
 
@@ -362,7 +359,7 @@ pub async fn handle_quick_launch() -> Result<()> {
 
     match last_tool {
         Some(tool) => {
-            ProgressUtils::info_message(&format!("Quick launch: {}", tool));
+            ProgressUtils::info_message(&format!("Quick launch: {tool}"));
             handle_run_tool(&tool, &[]).await
         }
         None => {

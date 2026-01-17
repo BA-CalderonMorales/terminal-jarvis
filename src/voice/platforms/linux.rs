@@ -12,7 +12,7 @@ use tokio::fs;
 pub async fn capture_audio(duration: Duration, output_path: &std::path::Path) -> Result<()> {
     let duration_secs = duration.as_secs();
 
-    println!("Listening... ({}s)", duration_secs);
+    println!("Listening... ({duration_secs}s)");
 
     // Try arecord (ALSA) first - most common on Linux
     if is_command_available("arecord").await {
@@ -54,7 +54,7 @@ async fn capture_with_arecord(duration_secs: u64, output_path: &std::path::Path)
         ])
         .output()
         .await
-        .map_err(|e| anyhow!("Failed to run arecord: {}", e))?;
+        .map_err(|e| anyhow!("Failed to run arecord: {e}"))?;
 
     if !output.status.success() {
         return Err(anyhow!(
@@ -71,7 +71,7 @@ async fn capture_with_parecord(duration_secs: u64, output_path: &std::path::Path
     // parecord doesn't have a built-in duration limit, so we'll use timeout
     let output = tokio::process::Command::new("timeout")
         .args([
-            &format!("{}s", duration_secs),
+            &format!("{duration_secs}s"),
             "parecord",
             "--format=s16le",
             "--rate=16000",
@@ -80,7 +80,7 @@ async fn capture_with_parecord(duration_secs: u64, output_path: &std::path::Path
         ])
         .output()
         .await
-        .map_err(|e| anyhow!("Failed to run parecord: {}", e))?;
+        .map_err(|e| anyhow!("Failed to run parecord: {e}"))?;
 
     // timeout returns 124 when it times out (expected behavior)
     if !output.status.success() && output.status.code() != Some(124) {
@@ -112,7 +112,7 @@ async fn capture_with_ffmpeg(duration_secs: u64, output_path: &std::path::Path) 
         ])
         .output()
         .await
-        .map_err(|e| anyhow!("Failed to run ffmpeg: {}", e))?;
+        .map_err(|e| anyhow!("Failed to run ffmpeg: {e}"))?;
 
     if !output.status.success() {
         return Err(anyhow!(

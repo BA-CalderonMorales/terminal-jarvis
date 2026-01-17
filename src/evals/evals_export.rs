@@ -93,7 +93,7 @@ impl ExportManager {
         };
 
         fs::write(&output_path, content)
-            .context(format!("Failed to write export to {:?}", output_path))?;
+            .context(format!("Failed to write export to {output_path:?}"))?;
 
         Ok(output_path)
     }
@@ -116,7 +116,7 @@ impl ExportManager {
         let year_days = days % 365;
         let month = (year_days / 30).min(11) + 1;
         let day = (year_days % 30) + 1;
-        let default_filename = format!("comparison_{:04}{:02}{:02}", years, month, day);
+        let default_filename = format!("comparison_{years:04}{month:02}{day:02}");
         let filename = filename.unwrap_or(&default_filename);
         let output_path = self
             .output_dir
@@ -130,8 +130,7 @@ impl ExportManager {
         };
 
         fs::write(&output_path, content).context(format!(
-            "Failed to write comparison export to {:?}",
-            output_path
+            "Failed to write comparison export to {output_path:?}"
         ))?;
 
         Ok(output_path)
@@ -195,7 +194,7 @@ impl ExportManager {
         // Header
         csv.push_str("Tool,Version,Overall Score");
         for category_id in &categories {
-            csv.push_str(&format!(",{}", category_id));
+            csv.push_str(&format!(",{category_id}"));
         }
         csv.push('\n');
 
@@ -203,7 +202,7 @@ impl ExportManager {
         for eval in evaluations {
             let overall = eval
                 .overall_score
-                .map(|s| format!("{:.2}", s))
+                .map(|s| format!("{s:.2}"))
                 .unwrap_or_else(|| "N/A".to_string());
 
             csv.push_str(&format!(
@@ -216,9 +215,9 @@ impl ExportManager {
                     .categories
                     .get(category_id)
                     .and_then(|c| c.score)
-                    .map(|s| format!("{:.2}", s))
+                    .map(|s| format!("{s:.2}"))
                     .unwrap_or_else(|| "N/A".to_string());
-                csv.push_str(&format!(",\"{}\"", score));
+                csv.push_str(&format!(",\"{score}\""));
             }
             csv.push('\n');
         }
@@ -246,7 +245,7 @@ impl ExportManager {
         md.push_str(&format!("- **Date**: {}\n", evaluation.evaluation_date));
         md.push_str(&format!("- **Evaluator**: {}\n", evaluation.evaluator));
         if let Some(score) = evaluation.overall_score {
-            md.push_str(&format!("- **Overall Score**: {:.2}/10\n", score));
+            md.push_str(&format!("- **Overall Score**: {score:.2}/10\n"));
         }
         md.push('\n');
 
@@ -277,7 +276,7 @@ impl ExportManager {
             if !category.strengths.is_empty() {
                 md.push_str("**Strengths**:\n");
                 for strength in &category.strengths {
-                    md.push_str(&format!("- {}\n", strength));
+                    md.push_str(&format!("- {strength}\n"));
                 }
                 md.push('\n');
             }
@@ -285,7 +284,7 @@ impl ExportManager {
             if !category.weaknesses.is_empty() {
                 md.push_str("**Weaknesses**:\n");
                 for weakness in &category.weaknesses {
-                    md.push_str(&format!("- {}\n", weakness));
+                    md.push_str(&format!("- {weakness}\n"));
                 }
                 md.push('\n');
             }
@@ -293,7 +292,7 @@ impl ExportManager {
             if !category.findings.is_empty() {
                 md.push_str("**Findings**:\n");
                 for finding in &category.findings {
-                    md.push_str(&format!("- {}\n", finding));
+                    md.push_str(&format!("- {finding}\n"));
                 }
                 md.push('\n');
             }
@@ -301,7 +300,7 @@ impl ExportManager {
             if !category.evidence.is_empty() {
                 md.push_str("**Evidence**:\n");
                 for evidence in &category.evidence {
-                    md.push_str(&format!("- {}\n", evidence));
+                    md.push_str(&format!("- {evidence}\n"));
                 }
                 md.push('\n');
             }
@@ -311,7 +310,7 @@ impl ExportManager {
         if !evaluation.notes.is_empty() {
             md.push_str("## Additional Notes\n\n");
             for note in &evaluation.notes {
-                md.push_str(&format!("- {}\n", note));
+                md.push_str(&format!("- {note}\n"));
             }
             md.push('\n');
         }
@@ -338,8 +337,7 @@ impl ExportManager {
         let minutes = (now % 3600) / 60;
         let seconds = now % 60;
         md.push_str(&format!(
-            "**Generated**: {:04}-{:02}-{:02} {:02}:{:02}:{:02} UTC\n\n",
-            years, month, day, hours, minutes, seconds
+            "**Generated**: {years:04}-{month:02}-{day:02} {hours:02}:{minutes:02}:{seconds:02} UTC\n\n"
         ));
 
         // Collect all categories
@@ -362,7 +360,7 @@ impl ExportManager {
         for eval in evaluations {
             let score = eval
                 .overall_score
-                .map(|s| format!("{:.2}/10", s))
+                .map(|s| format!("{s:.2}/10"))
                 .unwrap_or_else(|| "N/A".to_string());
             let rating = eval
                 .overall_score
@@ -377,7 +375,7 @@ impl ExportManager {
 
         // Category comparison tables
         for (category_id, category_name) in &categories {
-            md.push_str(&format!("## {}\n\n", category_name));
+            md.push_str(&format!("## {category_name}\n\n"));
             md.push_str("| Tool | Score | Rating | Key Findings |\n");
             md.push_str("|------|-------|--------|---------------|\n");
 
@@ -385,7 +383,7 @@ impl ExportManager {
                 if let Some(category) = eval.categories.get(category_id) {
                     let score = category
                         .score
-                        .map(|s| format!("{:.2}/10", s))
+                        .map(|s| format!("{s:.2}/10"))
                         .unwrap_or_else(|| "N/A".to_string());
                     let findings = if !category.findings.is_empty() {
                         category.findings[0].clone()
@@ -450,8 +448,7 @@ impl ExportManager {
         ));
         if let Some(score) = evaluation.overall_score {
             html.push_str(&format!(
-                "<p><strong>Overall Score:</strong> {:.2}/10</p>\n",
-                score
+                "<p><strong>Overall Score:</strong> {score:.2}/10</p>\n"
             ));
         }
         html.push_str("</div>\n");
@@ -491,7 +488,7 @@ impl ExportManager {
             if !category.strengths.is_empty() {
                 html.push_str("<h4>Strengths</h4><ul>\n");
                 for strength in &category.strengths {
-                    html.push_str(&format!("<li>{}</li>\n", strength));
+                    html.push_str(&format!("<li>{strength}</li>\n"));
                 }
                 html.push_str("</ul>\n");
             }
@@ -499,7 +496,7 @@ impl ExportManager {
             if !category.weaknesses.is_empty() {
                 html.push_str("<h4>Weaknesses</h4><ul>\n");
                 for weakness in &category.weaknesses {
-                    html.push_str(&format!("<li>{}</li>\n", weakness));
+                    html.push_str(&format!("<li>{weakness}</li>\n"));
                 }
                 html.push_str("</ul>\n");
             }
@@ -537,8 +534,7 @@ impl ExportManager {
         let minutes = (now % 3600) / 60;
         let seconds = now % 60;
         html.push_str(&format!(
-            "<p class=\"date\">Generated: {:04}-{:02}-{:02} {:02}:{:02}:{:02} UTC</p>\n",
-            years, month, day, hours, minutes, seconds
+            "<p class=\"date\">Generated: {years:04}-{month:02}-{day:02} {hours:02}:{minutes:02}:{seconds:02} UTC</p>\n"
         ));
 
         // Overall scores table
@@ -550,7 +546,7 @@ impl ExportManager {
         for eval in evaluations {
             let score = eval
                 .overall_score
-                .map(|s| format!("{:.2}/10", s))
+                .map(|s| format!("{s:.2}/10"))
                 .unwrap_or_else(|| "N/A".to_string());
             let rating = eval
                 .overall_score

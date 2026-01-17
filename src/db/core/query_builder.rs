@@ -235,7 +235,7 @@ impl QueryBuilder {
     ) -> Self {
         let updates: Vec<String> = update_columns
             .iter()
-            .map(|c| format!("{} = excluded.{}", c, c))
+            .map(|c| format!("{c} = excluded.{c}"))
             .collect();
 
         self.on_conflict = Some(format!(
@@ -318,7 +318,7 @@ impl QueryBuilder {
         .unwrap();
 
         if let Some(ref on_conflict) = self.on_conflict {
-            write!(sql, " {}", on_conflict).unwrap();
+            write!(sql, " {on_conflict}").unwrap();
         }
 
         sql
@@ -326,7 +326,7 @@ impl QueryBuilder {
 
     fn build_update(&self) -> String {
         let mut sql = String::new();
-        let sets: Vec<String> = self.columns.iter().map(|c| format!("{} = ?", c)).collect();
+        let sets: Vec<String> = self.columns.iter().map(|c| format!("{c} = ?")).collect();
 
         write!(sql, "UPDATE {} SET {}", self.table_name, sets.join(", ")).unwrap();
 
@@ -393,11 +393,11 @@ impl QueryBuilder {
 
     fn append_limit_offset(&self, sql: &mut String) {
         if let Some(limit) = self.limit {
-            write!(sql, " LIMIT {}", limit).unwrap();
+            write!(sql, " LIMIT {limit}").unwrap();
         }
 
         if let Some(offset) = self.offset {
-            write!(sql, " OFFSET {}", offset).unwrap();
+            write!(sql, " OFFSET {offset}").unwrap();
         }
     }
 }
