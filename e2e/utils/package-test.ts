@@ -1,4 +1,4 @@
-import { execSync } from 'node:child_process';
+import { execFileSync, execSync } from 'node:child_process';
 import { existsSync, mkdtempSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
@@ -36,7 +36,7 @@ export function createPackageTestEnvironment(): PackageTestContext {
     }
 
     execSync('npm init -y', { cwd: testDir, stdio: 'pipe' });
-    execSync(`npm install ${packagePath}`, { cwd: testDir, stdio: 'pipe' });
+    execFileSync('npm', ['install', packagePath], { cwd: testDir, stdio: 'pipe' });
 
     // Copy local binary to installed package
     const installedBinDir = join(testDir, 'node_modules/terminal-jarvis/bin');
