@@ -62,7 +62,7 @@
     "cli-testing-library": "^3.0.1",
     "string-width": "^8.1.0",
     "typescript": "^5.9.2",
-    "vitest": "^3.2.4",
+    "vitest": "^4.0.17",
     "zod": "^4.1.11"
   },
   "engines": {
