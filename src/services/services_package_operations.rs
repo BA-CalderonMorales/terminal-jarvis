@@ -35,18 +35,18 @@ impl PackageOperationsManager {
         let tool_config = config
             .tools
             .get(tool_name)
-            .ok_or_else(|| anyhow!("Tool '{}' not found in configuration", tool_name))?;
+            .ok_or_else(|| anyhow!("Tool '{tool_name}' not found in configuration"))?;
 
         if !tool_config.enabled {
-            return Err(anyhow!("Tool '{}' is disabled", tool_name));
+            return Err(anyhow!("Tool '{tool_name}' is disabled"));
         }
 
         let install_command = tool_config
             .install_command
             .as_ref()
-            .ok_or_else(|| anyhow!("No install command configured for tool '{}'", tool_name))?;
+            .ok_or_else(|| anyhow!("No install command configured for tool '{tool_name}'"))?;
 
-        println!("Installing {}...", tool_name);
+        println!("Installing {tool_name}...");
 
         let spinner = ProgressUtils::spinner("Installing");
 
@@ -54,16 +54,16 @@ impl PackageOperationsManager {
 
         ProgressUtils::finish_with_success(
             &spinner,
-            &format!("{} installed successfully", tool_name),
+            &format!("{tool_name} installed successfully"),
         );
 
         match result {
             Ok(_) => {
-                println!("✓ {} installed successfully", tool_name);
+                println!("✓ {tool_name} installed successfully");
                 Ok(())
             }
             Err(e) => {
-                println!("✗ Failed to install {}: {}", tool_name, e);
+                println!("✗ Failed to install {tool_name}: {e}");
                 Err(e)
             }
         }
@@ -75,16 +75,16 @@ impl PackageOperationsManager {
         let tool_config = config
             .tools
             .get(tool_name)
-            .ok_or_else(|| anyhow!("Tool '{}' not found in configuration", tool_name))?;
+            .ok_or_else(|| anyhow!("Tool '{tool_name}' not found in configuration"))?;
 
         if !tool_config.enabled {
-            return Err(anyhow!("Tool '{}' is disabled", tool_name));
+            return Err(anyhow!("Tool '{tool_name}' is disabled"));
         }
 
         let update_command = tool_config
             .update_command
             .as_ref()
-            .ok_or_else(|| anyhow!("No update command configured for tool '{}'", tool_name))?;
+            .ok_or_else(|| anyhow!("No update command configured for tool '{tool_name}'"))?;
 
         // Avoid printing per-tool updating lines here; the caller is responsible for
         // concise, non-overlapping progress output when running concurrently.
@@ -98,7 +98,7 @@ impl PackageOperationsManager {
         if result.is_ok() {
             ProgressUtils::finish_with_success(
                 &spinner,
-                &format!("{} updated successfully", tool_name),
+                &format!("{tool_name} updated successfully"),
             );
         } else {
             spinner.finish_with_message("Update failed");
@@ -106,11 +106,11 @@ impl PackageOperationsManager {
 
         match result {
             Ok(_) => {
-                println!("✓ {} updated successfully", tool_name);
+                println!("✓ {tool_name} updated successfully");
                 Ok(())
             }
             Err(e) => {
-                println!("✗ Failed to update {}: {}", tool_name, e);
+                println!("✗ Failed to update {tool_name}: {e}");
                 Err(e)
             }
         }
@@ -160,8 +160,8 @@ impl PackageOperationsManager {
             }
             _ => {
                 // Try with common suffixes
-                fallbacks.push(format!("{}-cli", tool_name));
-                fallbacks.push(format!("{}-code", tool_name));
+                fallbacks.push(format!("{tool_name}-cli"));
+                fallbacks.push(format!("{tool_name}-code"));
             }
         }
 
@@ -202,7 +202,7 @@ impl PackageOperationsManager {
             .await?;
 
         if !status.success() {
-            return Err(anyhow!("Failed to install npm package: {}", package));
+            return Err(anyhow!("Failed to install npm package: {package}"));
         }
 
         Ok(())
@@ -219,7 +219,7 @@ impl PackageOperationsManager {
             .await?;
 
         if !status.success() {
-            return Err(anyhow!("Failed to install cargo package: {}", package));
+            return Err(anyhow!("Failed to install cargo package: {package}"));
         }
 
         Ok(())
@@ -239,15 +239,12 @@ impl PackageOperationsManager {
         match check_status {
             Ok(status) if !status.success() => {
                 return Err(anyhow!(
-                    "Package '{}' not found in npm registry. This might be a configuration error.",
-                    package
+                    "Package '{package}' not found in npm registry. This might be a configuration error."
                 ));
             }
             Err(e) => {
                 return Err(anyhow!(
-                    "Failed to check npm package '{}': {}. Is npm installed and working?",
-                    package,
-                    e
+                    "Failed to check npm package '{package}': {e}. Is npm installed and working?"
                 ));
             }
             _ => {} // Package exists, continue with update
@@ -307,7 +304,7 @@ impl PackageOperationsManager {
             .await?;
 
         if !status.success() {
-            return Err(anyhow!("Failed to install pip package: {}", package));
+            return Err(anyhow!("Failed to install pip package: {package}"));
         }
 
         Ok(())
@@ -322,7 +319,7 @@ impl PackageOperationsManager {
             .await?;
 
         if !status.success() {
-            return Err(anyhow!("Failed to update pip package: {}", package));
+            return Err(anyhow!("Failed to update pip package: {package}"));
         }
 
         Ok(())

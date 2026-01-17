@@ -46,9 +46,9 @@ pub async fn handle_authentication_menu() -> Result<()> {
                 for tool in all_tools {
                     if let Ok(vars) = AuthManager::get_tool_credentials(&tool) {
                         if !vars.is_empty() {
-                            println!("- {}:", tool);
+                            println!("- {tool}:");
                             for (k, _v) in vars.iter() {
-                                println!("    {} = ***", k);
+                                println!("    {k} = ***");
                             }
                         }
                     }
@@ -66,20 +66,20 @@ pub async fn handle_auth_help(tool: &str) -> Result<()> {
     let loader = get_tool_config_loader();
     let key = tool.to_string();
     if let Some(auth) = loader.get_auth_info(&key) {
-        println!("\n{}", theme.secondary(&format!("Auth help for {}:", tool)));
+        println!("\n{}", theme.secondary(&format!("Auth help for {tool}:")));
         println!("  Required env vars: {}", auth.env_vars.join(", "));
         if !auth.setup_url.is_empty() {
             println!("  Setup URL: {}", auth.setup_url);
         }
         if let Some(instr) = &auth.auth_instructions {
-            println!("  Instructions: {}", instr);
+            println!("  Instructions: {instr}");
         }
         println!(
             "  Browser-based auth: {}",
             if auth.browser_auth { "yes" } else { "no" }
         );
     } else {
-        println!("No auth info found for {}", tool);
+        println!("No auth info found for {tool}");
     }
     Ok(())
 }
@@ -90,11 +90,11 @@ pub async fn handle_auth_set(tool: &str) -> Result<()> {
     let key = tool.to_string();
     let auth = loader
         .get_auth_info(&key)
-        .ok_or_else(|| anyhow!("Unknown tool '{}'", tool))?;
+        .ok_or_else(|| anyhow!("Unknown tool '{tool}'"))?;
 
     println!(
         "\n{}",
-        theme.secondary(&format!("Set credentials for {}:", tool))
+        theme.secondary(&format!("Set credentials for {tool}:"))
     );
     println!("  You can enter values for any of these env vars. Leave blank to skip.");
 
@@ -106,7 +106,7 @@ pub async fn handle_auth_set(tool: &str) -> Result<()> {
                 .and_then(|m| m.get(var).cloned())
         });
         let prompt = if existing.is_some() {
-            format!("{} (current set, hit Enter to keep)", var)
+            format!("{var} (current set, hit Enter to keep)")
         } else {
             var.to_string()
         };
@@ -209,7 +209,7 @@ async fn handle_remove_for_tool(tool: &str) -> Result<()> {
         return Ok(());
     }
     let confirm_msg = if selections.len() == keys.len() {
-        format!("Remove ALL credentials for {}?", tool)
+        format!("Remove ALL credentials for {tool}?")
     } else {
         format!("Remove {} selected key(s) for {}?", selections.len(), tool)
     };

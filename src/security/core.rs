@@ -209,7 +209,7 @@ impl SecurityValidator {
         // Check if command is in allowlist
         if !self.command_allowlist.contains(command) {
             return Err(SecurityError {
-                message: format!("Command '{}' not in allowlist", command),
+                message: format!("Command '{command}' not in allowlist"),
                 code: SecurityErrorCode::UnallowedCommand,
             });
         }
@@ -249,7 +249,7 @@ impl SecurityValidator {
 
         if !is_allowed {
             return Err(SecurityError {
-                message: format!("Path '{}' not in allowed paths", path),
+                message: format!("Path '{path}' not in allowed paths"),
                 code: SecurityErrorCode::PathTraversal,
             });
         }
@@ -283,7 +283,7 @@ impl SecurityValidator {
             if let Ok(regex) = Regex::new(pattern) {
                 if regex.is_match(input) {
                     return Err(SecurityError {
-                        message: format!("Browser/System injection pattern blocked: {}", pattern),
+                        message: format!("Browser/System injection pattern blocked: {pattern}"),
                         code: SecurityErrorCode::InjectionAttempt,
                     });
                 }
@@ -342,10 +342,7 @@ impl SecurityValidator {
         for blocked in &blocked_domains {
             if input.contains(blocked) {
                 return Err(SecurityError {
-                    message: format!(
-                        "Blocked URL contains dangerous domain/protocol: {}",
-                        blocked
-                    ),
+                    message: format!("Blocked URL contains dangerous domain/protocol: {blocked}"),
                     code: SecurityErrorCode::InvalidInput,
                 });
             }
@@ -364,7 +361,7 @@ impl SecurityValidator {
             if let Ok(regex) = Regex::new(pattern) {
                 if regex.is_match(input) {
                     return Err(SecurityError {
-                        message: format!("Suspicious URL pattern blocked: {}", pattern),
+                        message: format!("Suspicious URL pattern blocked: {pattern}"),
                         code: SecurityErrorCode::InvalidInput,
                     });
                 }
@@ -418,10 +415,10 @@ mod browser_protection_tests {
         ];
 
         for attack in &attacks {
-            println!("Testing attack: {}", attack);
+            println!("Testing attack: {attack}");
             let result = validator.validate_input(attack, "command");
-            assert!(result.is_err(), "Attack should be blocked: {}", attack);
-            println!("✅ BLOCKED: {}", attack);
+            assert!(result.is_err(), "Attack should be blocked: {attack}");
+            println!("✅ BLOCKED: {attack}");
         }
     }
 }

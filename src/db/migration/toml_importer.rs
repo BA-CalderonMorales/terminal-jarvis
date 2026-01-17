@@ -194,7 +194,7 @@ impl TomlImporter {
                     stats.results.push(ImportResult {
                         tool_id,
                         success: false,
-                        message: format!("Error: {}", e),
+                        message: format!("Error: {e}"),
                     });
                 }
             }

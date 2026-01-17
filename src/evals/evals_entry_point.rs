@@ -73,7 +73,7 @@ impl EvalManager {
                         self.evaluations.insert(eval.tool_name.clone(), eval);
                     }
                     Err(e) => {
-                        eprintln!("Warning: Failed to load evaluation from {:?}: {}", path, e);
+                        eprintln!("Warning: Failed to load evaluation from {path:?}: {e}");
                     }
                 }
             }
@@ -85,10 +85,10 @@ impl EvalManager {
     /// Load a single evaluation from a TOML file
     fn load_evaluation_file(&self, path: &Path) -> Result<ToolEvaluation> {
         let content = std::fs::read_to_string(path)
-            .context(format!("Failed to read evaluation file: {:?}", path))?;
+            .context(format!("Failed to read evaluation file: {path:?}"))?;
 
         let eval: ToolEvaluation = toml::from_str(&content)
-            .context(format!("Failed to parse evaluation TOML: {:?}", path))?;
+            .context(format!("Failed to parse evaluation TOML: {path:?}"))?;
 
         Ok(eval)
     }
@@ -136,7 +136,7 @@ impl EvalManager {
         let evaluation = self
             .evaluations
             .get(tool_name)
-            .context(format!("No evaluation found for tool: {}", tool_name))?;
+            .context(format!("No evaluation found for tool: {tool_name}"))?;
 
         self.export_manager
             .export_tool_evaluation(evaluation, format, filename)
@@ -262,7 +262,7 @@ impl EvalManager {
                     issues.push(ValidationIssue {
                         tool_name: tool_name.clone(),
                         severity: IssueSeverity::Warning,
-                        message: format!("Category '{}' has no score", category_id),
+                        message: format!("Category '{category_id}' has no score"),
                     });
                 }
             }

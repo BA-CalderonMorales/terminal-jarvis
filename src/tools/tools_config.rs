@@ -101,12 +101,12 @@ impl ToolConfigLoader {
 
         // Auto-discover tools from config/tools/ directory
         if let Err(e) = loader.load_builtin_tools() {
-            eprintln!("Warning: Failed to load tool configurations: {}", e);
+            eprintln!("Warning: Failed to load tool configurations: {e}");
         }
 
         // Load user preferences if available
         if let Err(e) = loader.load_user_preferences() {
-            eprintln!("Warning: Failed to load user preferences: {}", e);
+            eprintln!("Warning: Failed to load user preferences: {e}");
         }
 
         loader

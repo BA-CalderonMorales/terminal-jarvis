@@ -375,7 +375,7 @@ impl VoiceCommandParser {
             "InstallTool" => Ok(VoiceCommand::ListTools), // Let parameterized parsing handle the actual tool name
             "UpdateTool" => Ok(VoiceCommand::ListTools), // Let parameterized parsing handle the actual tool name
             "CheckStatus" => Ok(VoiceCommand::ListTools), // Let parameterized parsing handle the actual tool name
-            _ => Err(anyhow!("Unknown command: {}", command_name)),
+            _ => Err(anyhow!("Unknown command: {command_name}")),
         }
     }
 

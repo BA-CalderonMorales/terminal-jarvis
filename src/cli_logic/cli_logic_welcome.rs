@@ -26,7 +26,7 @@ pub fn display_welcome_screen() {
         "Minimal" => {
             // Classic/Minimal: Ultra-clean, no box, just text
             println!("{}", theme.primary("Terminal Jarvis"));
-            println!("{}", theme.secondary(&format!("v{}", version)));
+            println!("{}", theme.secondary(&format!("v{version}")));
             println!("{}", theme.secondary(&tool_status));
             println!("{}", theme.secondary(&cwd));
             println!("{}", theme.accent(":: /help for commands"));
@@ -36,7 +36,7 @@ pub fn display_welcome_screen() {
             println!("{}", theme.primary("+-------[ TERMINAL JARVIS ]-------+"));
             println!(
                 "{}",
-                theme.primary(&format!("|  VERSION: {}               |", version))
+                theme.primary(&format!("|  VERSION: {version}               |"))
             );
             println!(
                 "{}",
@@ -55,12 +55,9 @@ pub fn display_welcome_screen() {
         _ => {
             // Default/TJarvis: Modern with Unicode box
             println!("{}", theme.primary("   ┌─────┐  Terminal Jarvis"));
-            println!("{}", theme.primary(&format!("   │ T.J │  v{}", version)));
-            println!(
-                "{}",
-                theme.secondary(&format!("   │ ═ ═ │  {}", tool_status))
-            );
-            println!("{}", theme.secondary(&format!("   │     │  {}", cwd)));
+            println!("{}", theme.primary(&format!("   │ T.J │  v{version}")));
+            println!("{}", theme.secondary(&format!("   │ ═ ═ │  {tool_status}")));
+            println!("{}", theme.secondary(&format!("   │     │  {cwd}")));
             println!(
                 "{}",
                 theme.accent("   └─────┘  Type /help to see available commands")
@@ -74,7 +71,7 @@ pub fn display_welcome_screen() {
 /// Truncate tool status for terminal theme box
 fn truncate_status(status: &str, max_len: usize) -> String {
     if status.len() <= max_len {
-        format!("{:width$}", status, width = max_len)
+        format!("{status:max_len$}")
     } else {
         format!("{}...", &status[..max_len - 3])
     }
@@ -83,11 +80,11 @@ fn truncate_status(status: &str, max_len: usize) -> String {
 /// Truncate path for terminal theme box
 fn truncate_path(path: &str, max_len: usize) -> String {
     if path.len() <= max_len {
-        format!("{:width$}", path, width = max_len)
+        format!("{path:max_len$}")
     } else {
         // Show end of path (most relevant)
         let truncated = &path[path.len() - (max_len - 3)..];
-        format!("...{}", truncated)
+        format!("...{truncated}")
     }
 }
 

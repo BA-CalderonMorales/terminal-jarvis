@@ -235,7 +235,7 @@ pub async fn handle_db_menu() -> Result<()> {
             "  {} {}",
             theme.secondary("Status:"),
             if has_db {
-                format!("{} tools in database", tool_count)
+                format!("{tool_count} tools in database")
             } else {
                 "Not initialized".to_string()
             }
@@ -391,7 +391,7 @@ pub async fn handle_credentials_menu() -> Result<()> {
                     };
 
                 // Get value (masked input)
-                let value = match themed_text(&format!("Value for {}:", env_var)).prompt() {
+                let value = match themed_text(&format!("Value for {env_var}:")).prompt() {
                     Ok(v) if !v.is_empty() => v,
                     _ => continue,
                 };
@@ -422,7 +422,7 @@ pub async fn handle_credentials_menu() -> Result<()> {
                             } else {
                                 "****".to_string()
                             };
-                            println!("    {} = {}", env_var, masked);
+                            println!("    {env_var} = {masked}");
                         }
                     }
                 }
@@ -438,7 +438,7 @@ pub async fn handle_credentials_menu() -> Result<()> {
                     let mut remove_options: Vec<String> = Vec::new();
                     for (tool_id, vars) in &all_creds {
                         for env_var in vars.keys() {
-                            remove_options.push(format!("{} / {}", tool_id, env_var));
+                            remove_options.push(format!("{tool_id} / {env_var}"));
                         }
                     }
                     remove_options.push("Cancel".to_string());

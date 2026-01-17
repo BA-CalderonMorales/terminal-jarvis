@@ -52,7 +52,7 @@ async fn update_all_packages() -> Result<()> {
 
     let total = tools.len();
 
-    println!("\nUpdating {} tools concurrently...", total);
+    println!("\nUpdating {total} tools concurrently...");
 
     // Compute fixed column widths for consistent alignment
     let idx_width = total.to_string().len().max(2); // width for the left index
@@ -89,9 +89,9 @@ async fn update_all_packages() -> Result<()> {
             name = name_width
         );
         // Move up, clear line, write, move back down
-        print!("\x1b[{}A", lines_up);
-        print!("\r\x1b[2K{}", line_text);
-        print!("\x1b[{}B\r", lines_up);
+        print!("\x1b[{lines_up}A");
+        print!("\r\x1b[2K{line_text}");
+        print!("\x1b[{lines_up}B\r");
         let _ = io::stdout().flush();
     };
 
@@ -127,7 +127,7 @@ async fn update_all_packages() -> Result<()> {
             }
             Err(e) => {
                 fail_count += 1;
-                let msg = truncate(&format!("join error: {}", e), 80);
+                let msg = truncate(&format!("join error: {e}"), 80);
                 // We cannot map to a specific line, so append failure list only
                 failures.push(("<task>".to_string(), msg));
             }
@@ -135,11 +135,11 @@ async fn update_all_packages() -> Result<()> {
     }
 
     // Compact final status
-    println!("\nUpdate complete: {} OK, {} FAIL", ok_count, fail_count);
+    println!("\nUpdate complete: {ok_count} OK, {fail_count} FAIL");
     if !failures.is_empty() {
         println!("Failures:");
         for (tool, msg) in failures {
-            println!("- {}: {}", tool, msg);
+            println!("- {tool}: {msg}");
         }
     }
     // Ensure we end on a clean new line and flush, so follow-up prompts work reliably
@@ -163,7 +163,7 @@ async fn update_tool_using_install_manager(tool_name: &str) -> Result<()> {
 
     let install_info = install_commands
         .get(tool_name)
-        .ok_or_else(|| anyhow!("Tool '{}' not found in configuration", tool_name))?;
+        .ok_or_else(|| anyhow!("Tool '{tool_name}' not found in configuration"))?;
 
     // Convert install command to update command
     let update_command =

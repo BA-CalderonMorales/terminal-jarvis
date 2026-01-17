@@ -144,7 +144,7 @@ impl JarvisError {
     pub fn tool_not_found(tool_name: &str) -> Self {
         Self::new(
             JarvisErrorKind::Tool,
-            format!("Tool '{}' not found", tool_name),
+            format!("Tool '{tool_name}' not found"),
         )
         .for_resource(tool_name)
         .suggest("Run 'terminal-jarvis list' to see available tools")
@@ -154,12 +154,11 @@ impl JarvisError {
     pub fn tool_not_installed(tool_name: &str) -> Self {
         Self::new(
             JarvisErrorKind::Tool,
-            format!("Tool '{}' is not installed", tool_name),
+            format!("Tool '{tool_name}' is not installed"),
         )
         .for_resource(tool_name)
         .suggest(format!(
-            "Run 'terminal-jarvis run {}' to install it",
-            tool_name
+            "Run 'terminal-jarvis run {tool_name}' to install it"
         ))
     }
 
@@ -167,7 +166,7 @@ impl JarvisError {
     pub fn installation_failed(tool_name: &str, reason: &str) -> Self {
         Self::new(
             JarvisErrorKind::Installation,
-            format!("Failed to install '{}': {}", tool_name, reason),
+            format!("Failed to install '{tool_name}': {reason}"),
         )
         .for_resource(tool_name)
         .during("tool installation")
@@ -177,7 +176,7 @@ impl JarvisError {
     pub fn config_not_found(path: &str) -> Self {
         Self::new(
             JarvisErrorKind::Config,
-            format!("Configuration file not found: {}", path),
+            format!("Configuration file not found: {path}"),
         )
         .for_resource(path)
     }
@@ -201,15 +200,15 @@ impl fmt::Display for JarvisError {
 
         // Add context if available
         if let Some(ref op) = self.context.operation {
-            write!(f, " (during: {})", op)?;
+            write!(f, " (during: {op})")?;
         }
         if let Some(ref res) = self.context.resource {
-            write!(f, " (resource: {})", res)?;
+            write!(f, " (resource: {res})")?;
         }
 
         // Add suggestion on a new line if available
         if let Some(ref sug) = self.context.suggestion {
-            write!(f, "\n  Suggestion: {}", sug)?;
+            write!(f, "\n  Suggestion: {sug}")?;
         }
 
         Ok(())
@@ -262,7 +261,7 @@ mod tests {
             .for_resource("config.toml")
             .suggest("Check the config file syntax");
 
-        let display = format!("{}", err);
+        let display = format!("{err}");
         assert!(display.contains("Failed to parse"));
         assert!(display.contains("loading configuration"));
         assert!(display.contains("config.toml"));

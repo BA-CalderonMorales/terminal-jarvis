@@ -18,10 +18,10 @@ pub async fn handle_tool_info(tool: &str) -> Result<()> {
 
     let tool_info = tools
         .get(tool)
-        .ok_or_else(|| anyhow!("Tool '{}' not found", tool))?;
+        .ok_or_else(|| anyhow!("Tool '{tool}' not found"))?;
     let install_info = install_commands
         .get(tool)
-        .ok_or_else(|| anyhow!("Installation info for '{}' not found", tool))?;
+        .ok_or_else(|| anyhow!("Installation info for '{tool}' not found"))?;
 
     ToolDisplayFormatter::display_tool_info(
         tool,

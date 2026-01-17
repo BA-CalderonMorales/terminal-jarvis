@@ -220,7 +220,7 @@ impl CredentialsRepository {
                         stats.errors += 1;
                         stats
                             .error_messages
-                            .push(format!("{}/{}: {}", tool_id, env_var, e));
+                            .push(format!("{tool_id}/{env_var}: {e}"));
                     }
                 }
             }

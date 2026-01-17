@@ -42,7 +42,7 @@ impl WhisperProvider {
         let audio_file = self.temp_dir.join("voice_input.wav");
         let duration_secs = self.config.max_duration.as_secs();
 
-        println!("\n[LISTENING] Speak now... ({}s max)", duration_secs);
+        println!("\n[LISTENING] Speak now... ({duration_secs}s max)");
 
         // Detect platform and use appropriate recording tool
         #[cfg(target_os = "linux")]
@@ -74,12 +74,11 @@ impl WhisperProvider {
             .await
             .map_err(|e| {
                 anyhow!(
-                    "Failed to record audio: {}\n\
+                    "Failed to record audio: {e}\n\
                      Make sure recording tools are installed:\n\
                      - Linux: 'sudo apt-get install alsa-utils'\n\
                      - macOS: 'brew install sox'\n\
-                     - Windows: Install FFmpeg",
-                    e
+                     - Windows: Install FFmpeg"
                 )
             })?;
 
@@ -122,7 +121,7 @@ impl WhisperProvider {
 
         if !response.status().is_success() {
             let error_text = response.text().await?;
-            return Err(anyhow!("Whisper API error: {}", error_text));
+            return Err(anyhow!("Whisper API error: {error_text}"));
         }
 
         let result: WhisperResponse = response.json().await?;

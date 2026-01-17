@@ -70,7 +70,7 @@ impl DatabaseManager {
             .unwrap()
             .as_nanos();
         let temp_path =
-            std::env::temp_dir().join(format!("terminal_jarvis_test_{}_{}.db", timestamp, id));
+            std::env::temp_dir().join(format!("terminal_jarvis_test_{timestamp}_{id}.db"));
 
         // Clean up any existing file from previous runs
         let _ = std::fs::remove_file(&temp_path);

@@ -23,14 +23,10 @@ impl ScoringEngine {
         let hours = (now % 86400) / 3600;
         let minutes = (now % 3600) / 60;
         let seconds = now % 60;
-        let comparison_id = format!(
-            "comparison_{:04}{:02}{:02}_{:02}{:02}{:02}",
-            years, month, day, hours, minutes, seconds
-        );
-        let comparison_date = format!(
-            "{:04}-{:02}-{:02} {:02}:{:02}:{:02} UTC",
-            years, month, day, hours, minutes, seconds
-        );
+        let comparison_id =
+            format!("comparison_{years:04}{month:02}{day:02}_{hours:02}{minutes:02}{seconds:02}");
+        let comparison_date =
+            format!("{years:04}-{month:02}-{day:02} {hours:02}:{minutes:02}:{seconds:02} UTC");
 
         let tools_compared: Vec<String> = evaluations
             .iter()
