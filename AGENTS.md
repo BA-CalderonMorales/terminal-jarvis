@@ -63,7 +63,7 @@ All detailed instructions are organized as modular, reusable skills in [.github/
 
 ## PROJECT OVERVIEW
 
-**Terminal Jarvis** = Unified command center for AI coding tools (claude-code, gemini-cli, qwen-code, opencode, llxprt, codex, goose, amp, aider, crush).
+**Terminal Jarvis** = Unified command center for AI coding tools (claude-code, gemini-cli, qwen-code, opencode, llxprt, codex, goose, amp, aider, crush, copilot-cli).
 
 **Core Innovation**: Session Continuation System (prevents auth workflow interruptions).
 
