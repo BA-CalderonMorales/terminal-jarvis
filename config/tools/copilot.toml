@@ -1,0 +1,60 @@
+# =============================================================================
+# COPILOT - GitHub Copilot CLI
+# =============================================================================
+# Single Responsibility: Manages GitHub Copilot CLI tool configuration and settings
+# Open/Closed Principle: Self-contained tool definition, extensible without modification
+
+[tool]
+display_name = "Copilot"
+config_key = "copilot"
+description = "GitHub Copilot CLI - AI pair programming directly in your terminal"
+homepage = "https://github.com/features/copilot/cli"
+documentation = "https://docs.github.com/en/copilot/how-tos/use-copilot-agents/use-copilot-cli"
+cli_command = "copilot"
+requires_npm = true
+requires_sudo = false
+status = "stable"
+
+[tool.install]
+command = "npm"
+args = ["install", "-g", "@github/copilot"]
+verify_command = "copilot --version"
+post_install_message = "GitHub Copilot CLI installed successfully! Run 'copilot' and use /login to authenticate with GitHub."
+
+[tool.update]
+command = "npm"
+args = ["update", "-g", "@github/copilot"]
+verify_command = "copilot --version"
+
+[tool.auth]
+env_vars = ["GITHUB_TOKEN", "GH_TOKEN"]
+setup_url = "https://github.com/settings/tokens"
+browser_auth = true
+auth_instructions = "Use '/login' command in Copilot CLI, or set GITHUB_TOKEN/GH_TOKEN, or authenticate via GitHub CLI (gh)"
+
+[tool.features]
+supports_files = true
+supports_streaming = true
+supports_conversation = true
+max_context_tokens = 128000
+supported_languages = [
+    "python",
+    "javascript",
+    "rust",
+    "go",
+    "java",
+    "cpp",
+    "typescript",
+    "html",
+    "css",
+    "bash",
+    "shell",
+    "sql",
+    "yaml",
+    "json",
+    "ruby",
+    "php",
+    "swift",
+    "kotlin",
+    "csharp",
+]
