@@ -133,7 +133,9 @@ fn test_copilot_features() {
         "Should support Python"
     );
     assert!(
-        features.supported_languages.contains(&"javascript".to_string()),
+        features
+            .supported_languages
+            .contains(&"javascript".to_string()),
         "Should support JavaScript"
     );
     assert!(
@@ -156,8 +158,8 @@ fn test_eleven_tools_total() {
 
     // Verify all expected tools are present
     let expected_tools = vec![
-        "claude", "gemini", "qwen", "opencode", "llxprt",
-        "codex", "crush", "goose", "amp", "aider", "copilot"
+        "claude", "gemini", "qwen", "opencode", "llxprt", "codex", "crush", "goose", "amp",
+        "aider", "copilot",
     ];
 
     for tool in expected_tools {
