@@ -46,7 +46,7 @@ dirs = "6.0.0"
 inquire = "0.9.1"
 terminal_size = "0.4.3"
 indicatif = "0.18.3"
-signal-hook = "0.3.18"
+signal-hook = "0.4.1"
 libc = { version = "0.2.177", optional = false }
 unicode-width = "0.2.2"
 tempfile = "3.23.0"
