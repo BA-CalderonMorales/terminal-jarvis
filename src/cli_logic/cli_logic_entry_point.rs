@@ -66,10 +66,7 @@ pub async fn handle_ai_tools_menu() -> Result<()> {
                 // Handle errors gracefully - don't crash the menu
                 if let Err(e) = handle_tool_launch(tool_name).await {
                     eprintln!("\n{}", theme.accent(&format!("Error: {e}")));
-                    println!(
-                        "{}",
-                        theme.secondary("Press Enter to return to menu...")
-                    );
+                    println!("{}", theme.secondary("Press Enter to return to menu..."));
                     let _ = std::io::stdin().read_line(&mut String::new());
                 }
             }

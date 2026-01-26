@@ -93,7 +93,9 @@ fn extract_install_error_summary(stderr: &str) -> Option<String> {
                 return Some(format!("Node.js version incompatible: {clean_line}"));
             }
         }
-        return Some("Node.js version is incompatible with this package. Try updating Node.js.".to_string());
+        return Some(
+            "Node.js version is incompatible with this package. Try updating Node.js.".to_string(),
+        );
     }
 
     // Check for package not found

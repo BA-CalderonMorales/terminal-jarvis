@@ -113,7 +113,8 @@ impl InstallationManager {
         let required = format!("v{min_major}.0.0+");
         match Self::get_node_version() {
             Some((major, _, _)) => {
-                let current = Self::get_node_version_string().unwrap_or_else(|| "unknown".to_string());
+                let current =
+                    Self::get_node_version_string().unwrap_or_else(|| "unknown".to_string());
                 (major >= min_major, current, required)
             }
             None => (false, "unknown".to_string(), required),
