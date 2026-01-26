@@ -215,6 +215,10 @@ update_all_versions() {
     log_info_if_enabled "  • Updating npm/terminal-jarvis/package.json"
     sed -i "s/\"version\": \".*\"/\"version\": \"$new_version\"/" npm/terminal-jarvis/package.json
     
+    # Update package-lock.json to match new version
+    log_info_if_enabled "  • Updating npm/terminal-jarvis/package-lock.json"
+    cd npm/terminal-jarvis && npm install --package-lock-only --silent && cd ../..
+    
     # Update version display in TypeScript in showFallbackMessage function
     log_info_if_enabled "  • Updating npm/terminal-jarvis/src/index.ts"
     sed -i "s/console.log(\"Terminal Jarvis v[0-9]\+\.[0-9]\+\.[0-9]\+\");/console.log(\"Terminal Jarvis v$new_version\");/g" npm/terminal-jarvis/src/index.ts
@@ -740,6 +744,14 @@ fi
 
 cd npm/terminal-jarvis && npm run build && cd ../..
 
+# Ensure Cargo.lock is up-to-date after any Rust changes
+echo -e "${BLUE}→ Ensuring Cargo.lock is up-to-date...${RESET}"
+cargo check --quiet 2>/dev/null || log_warn "Cargo check encountered issues (continuing)"
+
+# Ensure package-lock.json is up-to-date after npm build
+echo -e "${BLUE}→ Ensuring package-lock.json is up-to-date...${RESET}"
+cd npm/terminal-jarvis && npm install --package-lock-only --silent && cd ../..
+
 echo ""
 
 # Git Operations
@@ -748,11 +760,16 @@ log_section "Step 3: Git Operations"
 if [ "${SKIP_GIT_OPERATIONS:-false}" != "true" ]; then
     echo -e "${BLUE}→ Committing changes...${RESET}"
     
-    # Ensure Cargo.lock is updated and included
-    echo -e "${BLUE}  → Updating Cargo.lock...${RESET}"
-    cargo check --quiet 2>/dev/null || log_warn "Cargo check encountered issues (continuing)"
+    # Explicitly stage lock files to ensure they're included
+    echo -e "${BLUE}  → Staging Cargo.lock...${RESET}"
+    git add Cargo.lock 2>/dev/null || log_warn "Cargo.lock not found (continuing)"
     
+    echo -e "${BLUE}  → Staging npm/terminal-jarvis/package-lock.json...${RESET}"
+    git add npm/terminal-jarvis/package-lock.json 2>/dev/null || log_warn "package-lock.json not found (continuing)"
+    
+    echo -e "${BLUE}  → Staging all other changes...${RESET}"
     git add .
+    
     git commit -m "version: bump to v${NEW_VERSION} with futuristic UX improvements"
     git tag "v${NEW_VERSION}"
     
