@@ -40,6 +40,7 @@ pub fn get_available_tools() -> BTreeMap<&'static str, ToolInfo> {
                 "goose" => "goose",
                 "amp" => "amp",
                 "aider" => "aider",
+                "copilot" => "copilot",
                 _ => continue, // Skip unknown tools
             };
 

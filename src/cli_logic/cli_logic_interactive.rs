@@ -204,133 +204,83 @@ fn display_available_commands(theme: &crate::theme::Theme) {
         "Minimal" => {
             // Ultra-minimal: no colors, just aligned text
             println!("Commands:");
-            println!("  /tools, /t    AI CLI Tools");
-            println!("  /evals, /e    Evals & Comparisons");
-            println!("  /auth, /a     Authentication");
-            println!("  /links, /l    Important Links");
-            println!("  /settings, /s Settings");
-            println!("  /db           Database Management");
-            println!("  /theme        Change UI Theme");
-            println!("  /help, /h     Show this help");
-            println!("  /exit, /q     Exit");
+            println!("  /tools     AI CLI Tools");
+            println!("  /evals     Evals & Comparisons");
+            println!("  /auth      Authentication");
+            println!("  /links     Important Links");
+            println!("  /settings  Settings");
+            println!("  /db        Database Management");
+            println!("  /theme     Change UI Theme");
+            println!("  /help      Show this help");
+            println!("  /exit      Exit");
             println!();
-            println!("{}", theme.accent(":: Tab to autocomplete"));
+            println!("Tab to autocomplete");
         }
         "Terminal" => {
-            // Hacker aesthetic: brackets, monospace feel
-            println!("{}", theme.primary("[COMMAND LIST]"));
+            // Hacker aesthetic: clean table format
+            println!("{}", theme.primary("[COMMANDS]"));
             println!(
-                "{}",
-                theme.secondary("+-----------+--------------------------------+")
+                "  {} {}",
+                theme.accent("/tools"),
+                theme.secondary("Launch AI coding assistants")
             );
             println!(
-                "{} {} {}",
-                theme.accent("|"),
-                theme.primary("/tools    "),
-                theme.secondary("| Launch AI coding assistants    |")
+                "  {} {}",
+                theme.accent("/evals"),
+                theme.secondary("Tool evaluations & benchmarks")
             );
             println!(
-                "{} {} {}",
-                theme.accent("|"),
-                theme.primary("/evals    "),
-                theme.secondary("| Tool evaluations & benchmarks  |")
+                "  {} {}",
+                theme.accent("/auth"),
+                theme.secondary("Manage API credentials")
             );
             println!(
-                "{} {} {}",
-                theme.accent("|"),
-                theme.primary("/auth     "),
-                theme.secondary("| Manage API credentials         |")
+                "  {} {}",
+                theme.accent("/links"),
+                theme.secondary("Documentation & resources")
             );
             println!(
-                "{} {} {}",
-                theme.accent("|"),
-                theme.primary("/links    "),
-                theme.secondary("| Documentation & resources      |")
+                "  {} {}",
+                theme.accent("/settings"),
+                theme.secondary("Install/update/configure")
             );
             println!(
-                "{} {} {}",
-                theme.accent("|"),
-                theme.primary("/settings "),
-                theme.secondary("| Install/update/configure       |")
+                "  {} {}",
+                theme.accent("/db"),
+                theme.secondary("Database operations")
             );
             println!(
-                "{} {} {}",
-                theme.accent("|"),
-                theme.primary("/db       "),
-                theme.secondary("| Database operations            |")
+                "  {} {}",
+                theme.accent("/theme"),
+                theme.secondary("Switch visual theme")
             );
             println!(
-                "{} {} {}",
-                theme.accent("|"),
-                theme.primary("/theme    "),
-                theme.secondary("| Switch visual theme            |")
+                "  {} {}",
+                theme.accent("/help"),
+                theme.secondary("Display this command list")
             );
             println!(
-                "{} {} {}",
-                theme.accent("|"),
-                theme.primary("/help     "),
-                theme.secondary("| Display this command list      |")
-            );
-            println!(
-                "{} {} {}",
-                theme.accent("|"),
-                theme.primary("/exit     "),
-                theme.secondary("| Terminate session              |")
-            );
-            println!(
-                "{}",
-                theme.secondary("+-----------+--------------------------------+")
-            );
-            println!(
-                "{}",
-                theme.accent("$ Tab for autocomplete, arrows to navigate")
-            );
-        }
-        _ => {
-            // Default TJarvis: Modern with colors and symbols
-            println!("{}", theme.accent("Available Commands:"));
-            println!(
-                "  {} {} - AI CLI Tools",
-                theme.secondary("/tools"),
-                theme.secondary("(/t)")
-            );
-            println!(
-                "  {} {} - Evals & Comparisons",
-                theme.secondary("/evals"),
-                theme.secondary("(/e)")
-            );
-            println!(
-                "  {}  {} - Authentication",
-                theme.secondary("/auth"),
-                theme.secondary("(/a)")
-            );
-            println!(
-                "  {} {} - Important Links",
-                theme.secondary("/links"),
-                theme.secondary("(/l)")
-            );
-            println!(
-                "  {} {} - Settings",
-                theme.secondary("/settings"),
-                theme.secondary("(/s)")
-            );
-            println!("  {}    - Database Management", theme.secondary("/db"));
-            println!("  {} - Change UI Theme", theme.secondary("/theme"));
-            println!(
-                "  {}  {} - Show this help",
-                theme.secondary("/help"),
-                theme.secondary("(/h)")
-            );
-            println!(
-                "  {}  {} - Exit",
-                theme.secondary("/exit"),
-                theme.secondary("(/q)")
+                "  {} {}",
+                theme.accent("/exit"),
+                theme.secondary("Terminate session")
             );
             println!();
-            println!(
-                "{}",
-                theme.secondary("Tip: Type / then Tab for autocomplete, arrows to navigate")
-            );
+            println!("{}", theme.secondary("Tab to autocomplete"));
+        }
+        _ => {
+            // Default TJarvis: Clean, modern layout
+            println!("{}", theme.accent("Commands:"));
+            println!("  {} - AI CLI Tools", theme.secondary("/tools"));
+            println!("  {} - Evals & Comparisons", theme.secondary("/evals"));
+            println!("  {} - Authentication", theme.secondary("/auth"));
+            println!("  {} - Important Links", theme.secondary("/links"));
+            println!("  {} - Settings", theme.secondary("/settings"));
+            println!("  {} - Database Management", theme.secondary("/db"));
+            println!("  {} - Change UI Theme", theme.secondary("/theme"));
+            println!("  {} - Show this help", theme.secondary("/help"));
+            println!("  {} - Exit", theme.secondary("/exit"));
+            println!();
+            println!("{}", theme.secondary("Tab to autocomplete"));
         }
     }
 }
