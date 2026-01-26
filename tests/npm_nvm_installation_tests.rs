@@ -14,7 +14,7 @@ use terminal_jarvis::installation_arguments::InstallationManager;
 #[test]
 fn test_npm_tools_do_not_require_sudo() {
     let npm_tools = [
-        "claude", "gemini", "opencode", "qwen", "codex", "amp", "crush", "llxprt",
+        "claude", "gemini", "opencode", "qwen", "codex", "amp", "crush", "llxprt", "copilot",
     ];
 
     for tool in npm_tools {
