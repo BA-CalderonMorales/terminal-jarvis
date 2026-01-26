@@ -14,32 +14,32 @@ pub struct CommandDef {
     pub aliases: &'static [&'static str],
 }
 
-/// Static command definitions
+/// Static command definitions - full names only, no single-letter aliases
 pub static COMMANDS: &[CommandDef] = &[
     CommandDef {
         command: "/tools",
         description: "AI CLI Tools",
-        aliases: &["/t"],
+        aliases: &[],
     },
     CommandDef {
         command: "/evals",
         description: "Evals & Comparisons",
-        aliases: &["/e"],
+        aliases: &[],
     },
     CommandDef {
         command: "/auth",
         description: "Authentication",
-        aliases: &["/a"],
+        aliases: &[],
     },
     CommandDef {
         command: "/links",
         description: "Important Links",
-        aliases: &["/l"],
+        aliases: &[],
     },
     CommandDef {
         command: "/settings",
         description: "Settings",
-        aliases: &["/s"],
+        aliases: &[],
     },
     CommandDef {
         command: "/db",
@@ -54,12 +54,12 @@ pub static COMMANDS: &[CommandDef] = &[
     CommandDef {
         command: "/help",
         description: "Show help",
-        aliases: &["/h", "/?"],
+        aliases: &[],
     },
     CommandDef {
         command: "/exit",
-        description: "Exit Terminal Jarvis",
-        aliases: &["/quit", "/q"],
+        description: "Exit",
+        aliases: &["/quit"],
     },
 ];
 
@@ -287,7 +287,7 @@ mod tests {
     fn test_basic_suggestions() {
         let mut ac = CommandAutocomplete::new();
 
-        let suggestions = ac.suggest("/t");
+        let suggestions = ac.suggest("/to");
         assert!(!suggestions.is_empty());
         assert!(suggestions.iter().any(|s| s.command == "/tools"));
     }
@@ -306,9 +306,10 @@ mod tests {
     fn test_alias_resolution() {
         let ac = CommandAutocomplete::new();
 
-        assert_eq!(ac.resolve_command("/t"), Some("/tools"));
-        assert_eq!(ac.resolve_command("/q"), Some("/exit"));
-        assert_eq!(ac.resolve_command("/h"), Some("/help"));
+        // Only /quit is kept as an alias for /exit
+        assert_eq!(ac.resolve_command("/quit"), Some("/exit"));
+        assert_eq!(ac.resolve_command("/tools"), Some("/tools"));
+        assert_eq!(ac.resolve_command("/help"), Some("/help"));
     }
 
     #[test]
@@ -337,7 +338,8 @@ mod tests {
         let ac = CommandAutocomplete::new();
 
         assert!(ac.is_valid_command("/tools"));
-        assert!(ac.is_valid_command("/t")); // Alias
+        assert!(ac.is_valid_command("/quit")); // Only remaining alias
+        assert!(!ac.is_valid_command("/t")); // No longer an alias
         assert!(!ac.is_valid_command("/invalid"));
     }
 

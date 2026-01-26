@@ -63,7 +63,15 @@ pub async fn handle_ai_tools_menu() -> Result<()> {
             return Ok(());
         } else if let Some(index) = options.iter().position(|opt| opt == &selection) {
             if let Some(Some(tool_name)) = tool_mapping.get(index) {
-                handle_tool_launch(tool_name).await?;
+                // Handle errors gracefully - don't crash the menu
+                if let Err(e) = handle_tool_launch(tool_name).await {
+                    eprintln!("\n{}", theme.accent(&format!("Error: {e}")));
+                    println!(
+                        "{}",
+                        theme.secondary("Press Enter to return to menu...")
+                    );
+                    let _ = std::io::stdin().read_line(&mut String::new());
+                }
             }
         }
     }
@@ -107,8 +115,22 @@ async fn handle_tool_launch(tool_name: &str) -> Result<()> {
 
         if should_install {
             println!("\n{}", theme.accent(&format!("Installing {tool_name}...")));
-            handle_install_tool(tool_name).await?;
-            println!("{}", theme.accent("Installation complete!\n"));
+            match handle_install_tool(tool_name).await {
+                Ok(_) => {
+                    println!("{}", theme.accent("Installation complete!\n"));
+                }
+                Err(e) => {
+                    // Show error gracefully and return to menu instead of crashing
+                    println!("\n{}", theme.accent(&format!("Installation failed: {e}")));
+                    println!(
+                        "{}",
+                        theme.secondary("You can try again or check the requirements.")
+                    );
+                    println!("\n{}", theme.secondary("Press Enter to continue..."));
+                    let _ = std::io::stdin().read_line(&mut String::new());
+                    return Ok(());
+                }
+            }
         } else {
             return Ok(());
         }

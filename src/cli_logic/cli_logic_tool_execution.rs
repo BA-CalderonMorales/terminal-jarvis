@@ -68,6 +68,57 @@ fn ensure_user_npm_prefix() -> Result<PathBuf> {
     Ok(prefix)
 }
 
+/// Extract a clean, user-friendly error summary from verbose installation output.
+/// Filters out npm's verbose noise and returns actionable error messages.
+fn extract_install_error_summary(stderr: &str) -> Option<String> {
+    // Look for common error patterns and extract the key message
+    let lines: Vec<&str> = stderr.lines().collect();
+
+    // Check for permission errors
+    if stderr.contains("EACCES") || stderr.contains("permission denied") {
+        return Some("Permission denied. Try running with appropriate permissions or use a user-local installation.".to_string());
+    }
+
+    // Check for network errors
+    if stderr.contains("ENOTFOUND") || stderr.contains("network") || stderr.contains("ETIMEDOUT") {
+        return Some("Network error. Check your internet connection and try again.".to_string());
+    }
+
+    // Check for Node version compatibility issues
+    if stderr.contains("engine") && stderr.contains("node") {
+        // Try to extract the specific version requirement
+        for line in &lines {
+            if line.contains("engine") || line.contains("node@") {
+                let clean_line = line.trim().trim_start_matches("npm ERR! ");
+                return Some(format!("Node.js version incompatible: {clean_line}"));
+            }
+        }
+        return Some("Node.js version is incompatible with this package. Try updating Node.js.".to_string());
+    }
+
+    // Check for package not found
+    if stderr.contains("404") || stderr.contains("not found") {
+        return Some("Package not found. Verify the package name is correct.".to_string());
+    }
+
+    // Generic fallback - find first meaningful error line
+    for line in &lines {
+        let trimmed = line.trim();
+        if trimmed.starts_with("npm ERR!") && !trimmed.contains("A complete log") {
+            let msg = trimmed.trim_start_matches("npm ERR!").trim();
+            if !msg.is_empty() && msg.len() > 5 {
+                return Some(msg.to_string());
+            }
+        }
+        // Also check for uv/pip errors
+        if trimmed.starts_with("error:") {
+            return Some(trimmed.to_string());
+        }
+    }
+
+    None
+}
+
 /// Handle running a specific AI coding tool with arguments
 pub async fn handle_run_tool(tool: &str, args: &[String]) -> Result<()> {
     // Get install command to check dependencies
@@ -75,11 +126,18 @@ pub async fn handle_run_tool(tool: &str, args: &[String]) -> Result<()> {
         .ok_or_else(|| anyhow!("Tool {tool} not found in configuration"))?;
 
     // Check appropriate dependencies based on installation method
-    if install_cmd.requires_npm && !InstallationManager::check_npm_available() {
-        ProgressUtils::warning_message("Node.js runtime environment not detected");
-        println!("  Tool {tool} requires NPM but it's not available.");
-        println!("  Please install Node.js to continue: https://nodejs.org/");
-        return Err(anyhow!("Node.js runtime required"));
+    if install_cmd.requires_npm {
+        if !InstallationManager::check_npm_available() {
+            ProgressUtils::warning_message("Node.js runtime environment not detected");
+            println!("  Tool {tool} requires NPM but it's not available.");
+            println!("  Please install Node.js to continue: https://nodejs.org/");
+            return Err(anyhow!("Node.js runtime required"));
+        }
+        // Check Node.js version compatibility
+        if let Err(version_error) = InstallationManager::check_node_version_compatible() {
+            ProgressUtils::warning_message(&version_error);
+            return Err(anyhow!("{version_error}"));
+        }
     }
 
     if install_cmd.command == "curl" && !InstallationManager::check_curl_available() {
@@ -161,17 +219,24 @@ pub async fn handle_install_tool(tool: &str) -> Result<()> {
 
     // Check dependencies based on installation method
     if install_cmd.requires_npm {
-        let npm_check = ProgressContext::new("Checking NPM availability");
+        let npm_check = ProgressContext::new("Checking Node.js environment");
 
         if !InstallationManager::check_npm_available() {
-            npm_check.finish_error("Node.js ecosystem not detected");
+            npm_check.finish_error("Node.js not detected");
             println!("  Please install Node.js and NPM first: https://nodejs.org/");
             return Err(anyhow!(
                 "NPM is required to install {tool} but is not available"
             ));
         }
 
-        npm_check.finish_success("NPM is available");
+        // Check Node.js version compatibility
+        if let Err(version_error) = InstallationManager::check_node_version_compatible() {
+            npm_check.finish_error("Node.js version incompatible");
+            ProgressUtils::warning_message(&version_error);
+            return Err(anyhow!("{version_error}"));
+        }
+
+        npm_check.finish_success("Node.js environment ready");
     }
 
     if install_cmd.command == "curl" {
@@ -221,6 +286,9 @@ pub async fn handle_install_tool(tool: &str) -> Result<()> {
     // Track if we installed to user directory (for PATH guidance)
     let mut used_user_prefix: Option<PathBuf> = None;
 
+    // Track stderr output for error reporting
+    let captured_stderr: Option<Vec<u8>>;
+
     // Handle special installation types
     let status = if let Some(pipe_to) = &install_cmd.pipe_to {
         // Handle curl-based installations that pipe to bash (e.g., goose)
@@ -236,14 +304,16 @@ pub async fn handle_install_tool(tool: &str) -> Result<()> {
         let mut bash_cmd = AsyncCommand::new(pipe_to);
         bash_cmd.stdin(std::process::Stdio::piped());
         bash_cmd.stdout(std::process::Stdio::null());
-        bash_cmd.stderr(std::process::Stdio::null());
+        bash_cmd.stderr(std::process::Stdio::piped());
 
         let mut child = bash_cmd.spawn()?;
         if let Some(stdin) = child.stdin.as_mut() {
             use tokio::io::AsyncWriteExt;
             stdin.write_all(&curl_output.stdout).await?;
         }
-        child.wait().await?
+        let output = child.wait_with_output().await?;
+        captured_stderr = Some(output.stderr);
+        output.status
     } else if install_cmd.requires_npm && install_cmd.args.contains(&"-g".to_string()) {
         // Issue #37 & #39: Handle NPM global installs without sudo
         // NVM users have writable npm prefix; system npm users need user-local prefix
@@ -269,22 +339,28 @@ pub async fn handle_install_tool(tool: &str) -> Result<()> {
             let mut user_cmd = AsyncCommand::new(&install_cmd.command);
             user_cmd.args(&args_with_prefix);
             user_cmd.stdout(std::process::Stdio::null());
-            user_cmd.stderr(std::process::Stdio::inherit());
+            user_cmd.stderr(std::process::Stdio::piped());
             user_cmd.env("PATH", &new_path);
 
             std::env::set_var("PATH", &new_path);
-            user_cmd.status().await?
+            let output = user_cmd.output().await?;
+            captured_stderr = Some(output.stderr);
+            output.status
         } else {
             cmd.stdout(std::process::Stdio::null());
-            cmd.stderr(std::process::Stdio::inherit());
-            cmd.status().await?
+            cmd.stderr(std::process::Stdio::piped());
+            let output = cmd.output().await?;
+            captured_stderr = Some(output.stderr);
+            output.status
         }
     } else {
         // Regular command execution (uv, cargo, etc.)
-        // Show stderr so users can see any error messages for debugging
+        // Capture stderr so we only show it on failure
         cmd.stdout(std::process::Stdio::null());
-        cmd.stderr(std::process::Stdio::inherit()); // Show errors to user
-        cmd.status().await?
+        cmd.stderr(std::process::Stdio::piped());
+        let output = cmd.output().await?;
+        captured_stderr = Some(output.stderr);
+        output.status
     };
 
     if status.success() {
@@ -333,6 +409,15 @@ pub async fn handle_install_tool(tool: &str) -> Result<()> {
         Ok(())
     } else {
         progress.finish_error(&format!("Failed to install {tool}"));
+
+        // Extract and show a clean error message from captured stderr
+        if let Some(stderr_bytes) = captured_stderr {
+            let stderr_str = String::from_utf8_lossy(&stderr_bytes);
+            if let Some(error_summary) = extract_install_error_summary(&stderr_str) {
+                ProgressUtils::warning_message(&error_summary);
+            }
+        }
+
         Err(anyhow!("Failed to install {tool}"))
     }
 }
