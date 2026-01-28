@@ -18,11 +18,37 @@
 
 ---
 
+## DEPLOYMENT WORKFLOW
+
+**CI/CD Pipeline Flow:**
+
+1. **Develop locally** - Make changes, run `./scripts/cicd/local-ci.sh`
+2. **Push to develop** - Triggers GitHub Actions CI
+3. **CI validates** - Build, tests, clippy, formatting
+4. **CD auto-deploys** - Once CI passes, CD handles release automatically
+
+**Do NOT run `local-cd.sh` for full deployment** - GitHub Actions CD pipeline handles:
+- Tag creation
+- Binary builds for all platforms
+- crates.io publishing
+- GitHub release creation
+- NPM coordination
+
+**Version updates only:**
+```bash
+./scripts/cicd/local-cd.sh --update-version X.X.X
+git add -A && git commit -m "chore(release): prepare vX.X.X"
+git push origin develop
+# Then wait for CI/CD pipeline
+```
+
+---
+
 ## QUICK START
 
 | User Says | Skill | Quick Command |
 |-----------|-------|---------------|
-| "Let's deploy" | [deployment](.github/skills/deployment/) | `./scripts/cicd/local-cd.sh` |
+| "Let's deploy" | [deployment](.github/skills/deployment/) | Push to develop, CI/CD handles it |
 | "Harden release" | [release-checklist](.github/skills/release-checklist/) | Pre-release verification |
 | "Test in Codespace" | [qa-testing](.github/skills/qa-testing/) | Create minimal QA branch |
 | "Fix this bug" | [testing](.github/skills/testing/) | Write failing test first |
@@ -63,13 +89,13 @@ All detailed instructions are organized as modular, reusable skills in [.github/
 
 ## PROJECT OVERVIEW
 
-**Terminal Jarvis** = Unified command center for AI coding tools (claude-code, gemini-cli, qwen-code, opencode, llxprt, codex, goose, amp, aider, crush).
+**Terminal Jarvis** = Unified command center for AI coding tools (claude-code, gemini-cli, qwen-code, opencode, llxprt, codex, goose, amp, aider, crush, copilot-cli).
 
 **Core Innovation**: Session Continuation System (prevents auth workflow interruptions).
 
 **Distribution**: NPM, Cargo, Homebrew
 
-**Current Version**: 0.0.73
+**Current Version**: 0.0.75
 
 ### Installation
 

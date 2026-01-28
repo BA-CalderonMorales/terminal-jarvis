@@ -49,7 +49,7 @@ impl Menu {
             output.push_str(&format!("{}. {}", index + 1, item.label));
 
             if let Some(desc) = &item.description {
-                output.push_str(&format!(" - {}", desc));
+                output.push_str(&format!(" - {desc}"));
             }
 
             output.push('\n');

@@ -171,12 +171,11 @@ impl CloudVoiceProvider {
             .await
             .map_err(|e| {
                 anyhow!(
-                    "Failed to record audio: {}\n\
+                    "Failed to record audio: {e}\n\
                      Make sure recording tools are installed:\n\
                      - Linux: 'sudo apt-get install alsa-utils'\n\
                      - macOS: 'brew install sox'\n\
-                     - Windows: Install FFmpeg",
-                    e
+                     - Windows: Install FFmpeg"
                 )
             })?;
 
@@ -252,7 +251,7 @@ impl CloudVoiceProvider {
 
         if !response.status().is_success() {
             let error_text = response.text().await?;
-            return Err(anyhow!("Deepgram API error: {}", error_text));
+            return Err(anyhow!("Deepgram API error: {error_text}"));
         }
 
         let result: DeepgramResponse = response.json().await?;
@@ -302,7 +301,7 @@ impl CloudVoiceProvider {
 
         if !response.status().is_success() {
             let error_text = response.text().await?;
-            return Err(anyhow!("Groq API error: {}", error_text));
+            return Err(anyhow!("Groq API error: {error_text}"));
         }
 
         let result: OpenAIResponse = response.json().await?;

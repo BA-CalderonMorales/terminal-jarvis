@@ -279,6 +279,20 @@ impl ProgressContext {
         self.spinner.set_message(message.to_string());
     }
 
+    /// Updates the spinner message with an inline info message.
+    ///
+    /// Use this instead of `ProgressUtils::info_message()` when a progress
+    /// operation is active to keep all status updates on the same line.
+    /// The message will update the spinner line in-place rather than
+    /// printing a new line.
+    ///
+    /// # Arguments
+    ///
+    /// * `message` - The info message to display inline with the spinner
+    pub fn info_inline(&self, message: &str) {
+        self.spinner.set_message(message.to_string());
+    }
+
     pub fn finish_success(&self, message: &str) {
         ProgressUtils::finish_with_success(&self.spinner, message);
 

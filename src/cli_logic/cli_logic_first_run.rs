@@ -110,7 +110,7 @@ pub async fn run_first_time_wizard() -> Result<()> {
 
     // Mark as initialized before entering main interface
     if let Err(e) = mark_initialized() {
-        eprintln!("Warning: Could not save initialization state: {}", e);
+        eprintln!("Warning: Could not save initialization state: {e}");
     }
 
     Ok(())
@@ -189,7 +189,7 @@ pub fn get_tool_status_line() -> String {
         )
     };
 
-    format!("Tools: {}", tools_str)
+    format!("Tools: {tools_str}")
 }
 
 /// Initialize the database during first run

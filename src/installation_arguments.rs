@@ -63,6 +63,88 @@ impl InstallationManager {
             .unwrap_or(false)
     }
 
+    /// Get the current Node.js version as a tuple (major, minor, patch)
+    /// Returns None if Node.js is not installed or version cannot be parsed
+    pub fn get_node_version() -> Option<(u32, u32, u32)> {
+        let output = std::process::Command::new("node")
+            .arg("--version")
+            .output()
+            .ok()?;
+
+        if !output.status.success() {
+            return None;
+        }
+
+        let version_str = String::from_utf8_lossy(&output.stdout);
+        let version = version_str.trim().trim_start_matches('v');
+        let parts: Vec<&str> = version.split('.').collect();
+
+        if parts.len() >= 3 {
+            let major = parts[0].parse().ok()?;
+            let minor = parts[1].parse().ok()?;
+            let patch = parts[2].parse().ok()?;
+            Some((major, minor, patch))
+        } else if parts.len() >= 2 {
+            let major = parts[0].parse().ok()?;
+            let minor = parts[1].parse().ok()?;
+            Some((major, minor, 0))
+        } else {
+            None
+        }
+    }
+
+    /// Get Node.js version as a human-readable string
+    pub fn get_node_version_string() -> Option<String> {
+        let output = std::process::Command::new("node")
+            .arg("--version")
+            .output()
+            .ok()?;
+
+        if output.status.success() {
+            Some(String::from_utf8_lossy(&output.stdout).trim().to_string())
+        } else {
+            None
+        }
+    }
+
+    /// Check if Node.js version meets minimum requirement
+    /// Returns (meets_requirement, current_version_string, required_version_string)
+    pub fn check_node_version_requirement(min_major: u32) -> (bool, String, String) {
+        let required = format!("v{min_major}.0.0+");
+        match Self::get_node_version() {
+            Some((major, _, _)) => {
+                let current =
+                    Self::get_node_version_string().unwrap_or_else(|| "unknown".to_string());
+                (major >= min_major, current, required)
+            }
+            None => (false, "unknown".to_string(), required),
+        }
+    }
+
+    /// Check if the current Node.js version is compatible with modern npm packages
+    /// Most modern tools require Node.js 18 or higher
+    pub fn check_node_version_compatible() -> Result<(), String> {
+        const MIN_NODE_VERSION: u32 = 18;
+
+        match Self::get_node_version() {
+            Some((major, _, _)) if major >= MIN_NODE_VERSION => Ok(()),
+            Some((major, minor, patch)) => {
+                Err(format!(
+                    "Node.js v{major}.{minor}.{patch} is too old. Most AI tools require Node.js {MIN_NODE_VERSION}+. \
+                    Please upgrade: https://nodejs.org/"
+                ))
+            }
+            None => {
+                if Self::check_npm_available() {
+                    // npm available but can't get node version - unusual but not blocking
+                    Ok(())
+                } else {
+                    Err("Node.js is not installed. Please install from: https://nodejs.org/".to_string())
+                }
+            }
+        }
+    }
+
     /// Checks if curl is available on the system
     ///
     /// Executes `curl --version` to verify curl installation and accessibility.

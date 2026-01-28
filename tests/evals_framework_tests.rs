@@ -227,7 +227,7 @@ fn test_all_metrics_files_load_successfully() {
 
     for file_path in evaluation_files {
         let toml_content = std::fs::read_to_string(file_path)
-            .unwrap_or_else(|_| panic!("Failed to read {}", file_path));
+            .unwrap_or_else(|_| panic!("Failed to read {file_path}"));
 
         let result: Result<ToolEvaluation, toml::de::Error> = toml::from_str(&toml_content);
 
@@ -242,8 +242,7 @@ fn test_all_metrics_files_load_successfully() {
         // Files can have either metrics or categories or both
         assert!(
             evaluation.metrics.is_some() || !evaluation.categories.is_empty(),
-            "Evaluation should have either metrics or categories in {}",
-            file_path
+            "Evaluation should have either metrics or categories in {file_path}"
         );
     }
 }
@@ -269,8 +268,7 @@ fn test_metrics_only_evaluations_are_valid() {
     // There should be no errors for metrics-only evaluations
     assert!(
         errors.is_empty(),
-        "Metrics-only evaluations should not trigger validation errors. Found: {:?}",
-        errors
+        "Metrics-only evaluations should not trigger validation errors. Found: {errors:?}"
     );
 }
 

@@ -21,9 +21,9 @@ fn create_test_tool(name: &str, installed: bool) -> Tool {
 
     let mut tool = Tool::new(
         name.to_string(),
-        format!("{} Tool", name),
-        format!("A test tool for {}", name),
-        format!("{}-cli", name),
+        format!("{name} Tool"),
+        format!("A test tool for {name}"),
+        format!("{name}-cli"),
         config,
         false,
         true, // is_available

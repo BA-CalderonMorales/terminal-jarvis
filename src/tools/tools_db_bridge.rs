@@ -17,7 +17,7 @@ use std::collections::BTreeMap;
 
 use super::tools_command_mapping::get_command_mapping;
 use super::tools_config::get_tool_config_loader;
-use super::tools_detection::{check_tool_installed, ToolInfo};
+use super::tools_detection::{check_tool_installed, infer_package_manager, ToolInfo};
 
 /// Database-backed tool manager
 ///
@@ -92,6 +92,7 @@ impl DbToolManager {
 
         for tool in tools {
             let is_installed = check_tool_installed(&tool.cli_command);
+            let package_manager = infer_package_manager(&tool.id);
             result.insert(
                 tool.id.clone(),
                 ToolInfo {
@@ -99,6 +100,7 @@ impl DbToolManager {
                     // This is acceptable since tools are long-lived
                     command: Box::leak(tool.cli_command.clone().into_boxed_str()),
                     is_installed,
+                    package_manager,
                 },
             );
         }
@@ -138,11 +140,13 @@ fn get_available_tools_from_toml() -> BTreeMap<String, ToolInfo> {
     for tool_name in tool_names {
         if let Some(cli_command) = mapping.get(tool_name.as_str()) {
             let is_installed = check_tool_installed(cli_command);
+            let package_manager = infer_package_manager(&tool_name);
             tools.insert(
                 tool_name.clone(),
                 ToolInfo {
                     command: cli_command,
                     is_installed,
+                    package_manager,
                 },
             );
         }

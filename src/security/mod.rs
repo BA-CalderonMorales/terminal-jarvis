@@ -27,19 +27,13 @@ impl SecurityManager {
     pub fn validate_input(&self, input: &str, context: &str) -> Result<bool, SecurityError> {
         // Only log security details when DEBUG_SECURITY env var is set
         if std::env::var("DEBUG_SECURITY").is_ok() {
-            eprintln!(
-                "[SECURITY] Validating input: {} for context: {}",
-                input, context
-            );
+            eprintln!("[SECURITY] Validating input: {input} for context: {context}");
         }
 
         let is_valid = self.validator.validate_input(input, context)?;
 
         if !is_valid {
-            eprintln!(
-                "[SECURITY BLOCKED] Input validation failed: {} for context: {}",
-                input, context
-            );
+            eprintln!("[SECURITY BLOCKED] Input validation failed: {input} for context: {context}");
         } else if std::env::var("DEBUG_SECURITY").is_ok() {
             eprintln!("[SECURITY] Input validation passed");
         }
@@ -52,16 +46,13 @@ impl SecurityManager {
         &self,
         model_name: &str,
     ) -> Result<std::path::PathBuf, SecurityError> {
-        eprintln!("[SECURITY] Model access attempt: {}", model_name);
+        eprintln!("[SECURITY] Model access attempt: {model_name}");
 
         let result = self.model_loader.load_model(model_name).await;
 
         match &result {
-            Ok(_) => eprintln!("[SECURITY] Model access successful: {}", model_name),
-            Err(e) => eprintln!(
-                "[SECURITY BLOCKED] Model access denied: {} - {}",
-                model_name, e
-            ),
+            Ok(_) => eprintln!("[SECURITY] Model access successful: {model_name}"),
+            Err(e) => eprintln!("[SECURITY BLOCKED] Model access denied: {model_name} - {e}"),
         }
 
         result
@@ -73,18 +64,12 @@ impl SecurityManager {
         command: &str,
         args: &[String],
     ) -> Result<bool, SecurityError> {
-        eprintln!(
-            "[SECURITY] Command execution attempt: {} {:?}",
-            command, args
-        );
+        eprintln!("[SECURITY] Command execution attempt: {command} {args:?}");
 
         let is_allowed = self.validator.validate_command(command, args)?;
 
         if !is_allowed {
-            eprintln!(
-                "[SECURITY BLOCKED] Command execution denied: {} {:?}",
-                command, args
-            );
+            eprintln!("[SECURITY BLOCKED] Command execution denied: {command} {args:?}");
         } else {
             eprintln!("[SECURITY] Command execution allowed");
         }

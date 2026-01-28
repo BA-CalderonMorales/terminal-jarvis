@@ -45,8 +45,8 @@ pub async fn handle_benchmark_run(
     use crate::evals::benchmarks::BenchmarkRunner;
 
     println!("\n=== RUNNING BENCHMARK ===\n");
-    println!("  Scenario: {}", scenario_id);
-    println!("  Tool: {}", tool_name);
+    println!("  Scenario: {scenario_id}");
+    println!("  Tool: {tool_name}");
 
     if let Some(export_path) = export_json {
         println!("  Export JSON: {}", export_path.display());
@@ -60,7 +60,7 @@ pub async fn handle_benchmark_run(
 
     let scenario = registry
         .get_scenario(scenario_id)
-        .ok_or_else(|| anyhow::anyhow!("Scenario not found: {}", scenario_id))?;
+        .ok_or_else(|| anyhow::anyhow!("Scenario not found: {scenario_id}"))?;
 
     println!("[INFO] Loaded scenario: {}", scenario.metadata.name);
     println!("       Category: {}", scenario.metadata.category);
@@ -154,7 +154,7 @@ pub async fn handle_benchmark_validate(scenario_file: &PathBuf) -> Result<()> {
     if !warnings.is_empty() {
         println!("[WARNING] Validation issues found:");
         for warning in warnings {
-            println!("  - {}", warning);
+            println!("  - {warning}");
         }
         println!();
     }

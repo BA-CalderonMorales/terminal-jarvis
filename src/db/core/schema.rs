@@ -98,11 +98,11 @@ impl Column {
         }
 
         if let Some(default) = self.default {
-            ddl.push_str(&format!(" DEFAULT {}", default));
+            ddl.push_str(&format!(" DEFAULT {default}"));
         }
 
         if let Some((ref_table, ref_col)) = self.references {
-            ddl.push_str(&format!(" REFERENCES {}({})", ref_table, ref_col));
+            ddl.push_str(&format!(" REFERENCES {ref_table}({ref_col})"));
         }
 
         ddl

@@ -2,6 +2,45 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.0.75] - 2026-01-28
+
+### Added
+- **Package Manager Requirement Hints**: Tool selection menu now shows what each tool requires
+  - Visual indicators next to each tool (e.g., `[npm]`, `[uv]`, `[cargo]`, `[curl]`)
+  - Warning banner when required package managers are missing
+  - Clear installation URLs provided for missing requirements
+
+### Fixed
+- **Installation Prerequisites Check** (Issue #39): Prevents confusing permission errors
+  - Checks package manager availability before attempting tool installation
+  - Provides actionable guidance instead of cryptic EACCES errors
+  - Users now see "Cannot install 'aider': uv is not available" with install instructions
+
+### Technical
+- Added `PackageManager` enum with `Npm`, `Uv`, `Cargo`, `Curl`, `Unknown` variants
+- New methods: `label()`, `is_available()`, `install_hint()` on PackageManager
+- Added `infer_package_manager()` function to detect PM from tool config
+- Extended `ToolInfo` struct with `package_manager` field
+- New display utilities: `format_menu_item()`, `get_missing_requirements()`
+
+## [0.0.74] - 2026-01-16
+
+### Fixed
+- **Security Vulnerabilities**: Addressed 3 security issues detected by CodeQL and Grype
+  - Fixed shell command injection in e2e/utils/package-test.ts by using execFileSync instead of execSync with string interpolation (Issue #6)
+  - Updated vitest to 4.0.17 to pull vite 7.3.1, fixing path traversal vulnerability GHSA-93m4-6634-74q7 (Issue #4)
+  - Documented libsql-sqlite3-parser vulnerability GHSA-8m95-fffc-h4c5 in audit.toml (Issue #7, no upstream fix available yet)
+- **CI Pipeline**: Updated cargo-audit ignore list to include RUSTSEC-2025-0141 (bincode via libsql)
+- **NPM Installation**: Handle EACCES permission error for system npm users (Issue #39)
+
+### Added
+- **Progress Context Enhancement**: Added `info_inline` method to ProgressContext for inline spinner updates
+
+### Technical
+- Removed 5 unused Rust crate dependencies for cleaner dependency tree
+- Updated e2e test dependencies (@vitest/coverage-v8, vitest) to latest versions
+- Added audit.toml to track known vulnerabilities waiting for upstream fixes
+
 ## [0.0.73] - 2026-01-05
 
 ### Fixed

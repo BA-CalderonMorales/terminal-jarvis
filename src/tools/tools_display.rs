@@ -13,6 +13,7 @@
 
 use crate::installation_arguments::{InstallCommand, InstallationManager};
 use crate::theme::theme_global_config;
+use crate::tools::tools_detection::PackageManager;
 use crate::tools::ToolInfo;
 
 /// Display modes for tool information
@@ -65,7 +66,7 @@ impl ToolDisplayFormatter {
         println!();
         println!(
             "{}",
-            theme.primary(&format!("=== Tool Information: {} ===", tool_name))
+            theme.primary(&format!("=== Tool Information: {tool_name} ==="))
         );
         println!();
 
@@ -79,7 +80,7 @@ impl ToolDisplayFormatter {
         );
 
         let status_text = Self::format_installation_status(tool_info.is_installed);
-        println!("Status: {}", status_text);
+        println!("Status: {status_text}");
 
         println!(
             "{}",
@@ -92,7 +93,7 @@ impl ToolDisplayFormatter {
 
         if install_info.requires_npm {
             let npm_status = Self::format_npm_status();
-            println!("NPM Required: {}", npm_status);
+            println!("NPM Required: {npm_status}");
         }
 
         // Show authentication info
@@ -126,7 +127,7 @@ impl ToolDisplayFormatter {
                 } else {
                     theme.accent("[NOT SET]")
                 };
-                println!("  {} {}", var, status);
+                println!("  {var} {status}");
             }
 
             if !has_any_key && !auth.setup_url.is_empty() {
@@ -144,7 +145,7 @@ impl ToolDisplayFormatter {
         };
 
         println!(" {} - {}", tool_name, install_info.description);
-        println!("  Status: {}", status_text);
+        println!("  Status: {status_text}");
         println!("  Command: {}", tool_info.command);
         if install_info.requires_npm {
             println!("  Requires: NPM");
@@ -188,5 +189,53 @@ impl ToolDisplayFormatter {
             );
             println!("  Most AI tools are distributed via NPM. Install from: https://nodejs.org/");
         }
+    }
+
+    /// Format a tool name with requirement hint for menu display
+    ///
+    /// Returns a formatted string like "claude [npm]" or "aider [uv]"
+    /// with visual indicators if the required package manager is missing.
+    pub fn format_menu_item(tool_name: &str, tool_info: &ToolInfo) -> String {
+        let label = tool_info.package_manager.label();
+        if label.is_empty() {
+            return tool_name.to_string();
+        }
+
+        let is_available = tool_info.package_manager.is_available();
+        let hint = if is_available {
+            format!("[{}]", label)
+        } else {
+            format!("[{} ⚠]", label)
+        };
+
+        // Pad tool name to align hints
+        let padded_name = format!("{:<10}", tool_name);
+        format!("{} {}", padded_name, hint)
+    }
+
+    /// Get a summary of missing package managers for the tool set
+    pub fn get_missing_requirements(tools: &[(String, ToolInfo)]) -> Vec<(PackageManager, String)> {
+        let all_package_managers = [
+            PackageManager::Npm,
+            PackageManager::Uv,
+            PackageManager::Cargo,
+            PackageManager::Curl,
+        ];
+
+        all_package_managers
+            .into_iter()
+            .filter(|pm| {
+                let is_needed = tools.iter().any(|(_, t)| t.package_manager == *pm);
+                is_needed && !pm.is_available()
+            })
+            .map(|pm| {
+                let msg = format!(
+                    "{} required for some tools. {}",
+                    pm.label(),
+                    pm.install_hint()
+                );
+                (pm, msg)
+            })
+            .collect()
     }
 }
