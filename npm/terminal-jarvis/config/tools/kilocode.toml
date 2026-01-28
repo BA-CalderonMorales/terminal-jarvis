@@ -1,0 +1,37 @@
+# =============================================================================
+# KILOCODE - Open Source AI Agent
+# =============================================================================
+
+[tool]
+display_name = "Kilocode"
+config_key = "kilocode"
+description = "Open-source AI coding agent"
+homepage = "https://kilo.ai"
+documentation = "https://kilo.ai/docs"
+cli_command = "kilocode"
+requires_npm = true
+requires_sudo = false
+status = "beta"
+
+[tool.install]
+command = "npm"
+args = ["install", "-g", "@kilocode/cli"]
+verify_command = "kilocode --version"
+post_install_message = "Kilocode installed!"
+
+[tool.update]
+command = "npm"
+args = ["update", "-g", "@kilocode/cli"]
+verify_command = "kilocode --version"
+
+[tool.auth]
+env_vars = ["KILO_API_KEY"]
+setup_url = "https://kilo.ai/settings"
+browser_auth = false
+auth_instructions = "Run 'kilocode auth' or set KILO_API_KEY."
+
+[tool.features]
+supports_files = true
+supports_streaming = true
+supports_conversation = true
+supported_languages = ["all"]

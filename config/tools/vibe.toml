@@ -1,0 +1,39 @@
+# =============================================================================
+# MISTRAL VIBE - Mistral AI CLI
+# =============================================================================
+# Single Responsibility: Manages Mistral Vibe CLI tool configuration and settings
+
+[tool]
+display_name = "Mistral Vibe"
+config_key = "vibe"
+description = "Minimal CLI coding agent by Mistral AI"
+homepage = "https://mistral.ai/vibe"
+documentation = "https://docs.mistral.ai/mistral-vibe/introduction"
+cli_command = "vibe"
+requires_npm = false
+requires_sudo = false
+status = "beta"
+
+[tool.install]
+command = "curl"
+args = ["-LsSf", "https://mistral.ai/vibe/install.sh"]
+pipe_to = "sh"
+verify_command = "vibe --version"
+post_install_message = "Mistral Vibe installed! Configure with 'vibe auth'."
+
+[tool.update]
+command = "vibe"
+args = ["update"]
+verify_command = "vibe --version"
+
+[tool.auth]
+env_vars = ["MISTRAL_API_KEY"]
+setup_url = "https://console.mistral.ai/"
+browser_auth = false
+auth_instructions = "Run 'vibe auth' or set MISTRAL_API_KEY."
+
+[tool.features]
+supports_files = true
+supports_streaming = true
+supports_conversation = true
+supported_languages = ["python", "javascript", "rust", "go", "java", "cpp"]

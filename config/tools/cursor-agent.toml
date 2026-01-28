@@ -1,0 +1,37 @@
+# =============================================================================
+# CURSOR AGENT - Cursor AI CLI
+# =============================================================================
+
+[tool]
+display_name = "Cursor Agent"
+config_key = "cursor-agent"
+description = "AI agent replicating Cursor's capabilities in the CLI"
+homepage = "https://github.com/civai-technologies/cursor-agent"
+documentation = "https://github.com/civai-technologies/cursor-agent"
+cli_command = "cursor-agent"
+requires_npm = false
+requires_sudo = false
+status = "experimental"
+
+[tool.install]
+command = "pip"
+args = ["install", "cursor-agent-tools"]
+verify_command = "cursor-agent --help"
+post_install_message = "Cursor Agent installed! Requires Python."
+
+[tool.update]
+command = "pip"
+args = ["install", "--upgrade", "cursor-agent-tools"]
+verify_command = "cursor-agent --help"
+
+[tool.auth]
+env_vars = ["OPENAI_API_KEY", "ANTHROPIC_API_KEY"]
+setup_url = ""
+browser_auth = false
+auth_instructions = "Set OPENAI_API_KEY or ANTHROPIC_API_KEY environment variables."
+
+[tool.features]
+supports_files = true
+supports_streaming = true
+supports_conversation = true
+supported_languages = ["python", "javascript", "all"]

@@ -1,0 +1,37 @@
+# =============================================================================
+# LETTA - Memory-First Agent
+# =============================================================================
+
+[tool]
+display_name = "Letta"
+config_key = "letta"
+description = "Memory-first coding agent"
+homepage = "https://letta.com"
+documentation = "https://docs.letta.com"
+cli_command = "letta"
+requires_npm = true
+requires_sudo = false
+status = "experimental"
+
+[tool.install]
+command = "npm"
+args = ["install", "-g", "@letta-ai/letta-code"]
+verify_command = "letta --version"
+post_install_message = "Letta installed!"
+
+[tool.update]
+command = "npm"
+args = ["update", "-g", "@letta-ai/letta-code"]
+verify_command = "letta --version"
+
+[tool.auth]
+env_vars = ["LETTA_API_KEY"]
+setup_url = "https://letta.com"
+browser_auth = true
+auth_instructions = "Run 'letta login' to authenticate."
+
+[tool.features]
+supports_files = true
+supports_streaming = true
+supports_conversation = true
+supported_languages = ["all"]

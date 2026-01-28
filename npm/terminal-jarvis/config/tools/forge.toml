@@ -1,0 +1,37 @@
+# =============================================================================
+# FORGE - AI Terminal Environment
+# =============================================================================
+
+[tool]
+display_name = "Forge"
+config_key = "forge"
+description = "AI-Enhanced Terminal Development Environment"
+homepage = "https://forgecode.dev"
+documentation = "https://forgecode.dev/docs"
+cli_command = "forge"
+requires_npm = true
+requires_sudo = false
+status = "beta"
+
+[tool.install]
+command = "npm"
+args = ["install", "-g", "forgecode"]
+verify_command = "forge --version"
+post_install_message = "Forge installed! Run 'forge' to start."
+
+[tool.update]
+command = "npm"
+args = ["update", "-g", "forgecode"]
+verify_command = "forge --version"
+
+[tool.auth]
+env_vars = ["FORGE_API_KEY"]
+setup_url = "https://forgecode.dev"
+browser_auth = true
+auth_instructions = "Run 'forge login' to authenticate."
+
+[tool.features]
+supports_files = true
+supports_streaming = true
+supports_conversation = true
+supported_languages = ["all"]

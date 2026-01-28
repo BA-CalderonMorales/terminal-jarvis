@@ -1,0 +1,38 @@
+# =============================================================================
+# DROID - Factory AI CLI
+# =============================================================================
+
+[tool]
+display_name = "Droid"
+config_key = "droid"
+description = "Factory AI's Droid - Automated coding engineer"
+homepage = "https://app.factory.ai"
+documentation = "https://toolstud-io.github.io/LlmBrains/agents/droid/"
+cli_command = "droid"
+requires_npm = false
+requires_sudo = false
+status = "beta"
+
+[tool.install]
+command = "curl"
+args = ["-fsSL", "https://app.factory.ai/cli"]
+pipe_to = "sh"
+verify_command = "droid --version"
+post_install_message = "Droid installed successfully!"
+
+[tool.update]
+command = "droid"
+args = ["update"]
+verify_command = "droid --version"
+
+[tool.auth]
+env_vars = ["FACTORY_API_KEY"]
+setup_url = "https://app.factory.ai/"
+browser_auth = true
+auth_instructions = "Run 'droid login' to authenticate."
+
+[tool.features]
+supports_files = true
+supports_streaming = true
+supports_conversation = true
+supported_languages = ["python", "javascript", "typescript", "rust", "go"]
