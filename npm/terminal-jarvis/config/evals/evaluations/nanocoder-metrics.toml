@@ -1,0 +1,80 @@
+# Ollama Evaluation - Metrics-Based Assessment
+tool_name = "ollama"
+tool_display_name = "Ollama"
+summary = "Get up and running with large language models locally."
+
+[metrics.github]
+repo_url = "https://github.com/ollama/ollama"
+stars = 50000
+forks = 3000
+open_issues = 500
+last_commit_date = "2024-01-01"
+commit_frequency = "Daily"
+contributors = 100
+license = "MIT"
+created_date = "2023-01-01"
+archived = false
+
+[metrics.package]
+package_name = "ollama"
+registry = "Brew"
+weekly_downloads = 10000
+total_downloads = 500000
+latest_version = "0.1.20"
+last_publish_date = "2024-01-01"
+version_count = 50
+
+[metrics.community]
+discord_members = 10000
+twitter_followers = 20000
+twitter_url = "https://twitter.com/ollama"
+reddit_subscribers = 5000
+reddit_url = "https://reddit.com/r/ollama"
+active_discussions = true
+
+[metrics.documentation]
+docs_url = "https://ollama.com"
+has_readme = true
+has_contributing_guide = true
+has_examples = true
+docs_freshness = "< 1 week"
+api_docs_quality = "Excellent"
+
+[metrics.platform]
+supported_os = ["macOS", "Linux", "Windows"]
+supported_languages = ["Go"]
+architectures = ["x86_64", "ARM64"]
+requires_docker = false
+docker_support = true
+ci_cd_setup = true
+cloud_deployment_guides = true
+web_based = false
+mobile_support = false
+cloud_only = false
+
+[metrics.team]
+doxxed_team = true
+organization_name = "Ollama"
+organization_url = "https://ollama.com"
+team_size = "Medium (6-20)"
+public_team = true
+company_funding = "VC Funded"
+backed_by = ["VC"]
+funding_disclosed = true
+public_roadmap = true
+security_audits = true
+security_policy = true
+responsible_disclosure = true
+
+[metrics.support]
+avg_issue_response_time = "< 24 hours"
+avg_pr_review_time = "< 3 days"
+avg_issue_close_time = "< 1 week"
+open_vs_closed_ratio = 0.1
+active_maintainers = 10
+has_paid_support = false
+commercial_support = false
+community_support = "Discord"
+support_channels = ["Discord", "GitHub Issues"]
+sla_available = false
+uptime_percentage = 99.9

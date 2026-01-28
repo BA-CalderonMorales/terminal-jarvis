@@ -8,7 +8,7 @@ use std::path::PathBuf;
 #[command(about = "A thin Rust wrapper for managing and running AI coding tools")]
 #[command(version = env!("CARGO_PKG_VERSION"))]
 #[command(
-    long_about = "Terminal Jarvis provides a unified interface for managing multiple AI coding tools like claude-code, gemini-cli, qwen-code, opencode, aider, amp, and goose."
+    long_about = "Terminal Jarvis provides a unified interface for managing multiple AI coding tools like claude-code, gemini-cli, qwen-code, opencode, aider, amp, goose, ollama, vibe, droid, forge, and many more."
 )]
 pub struct Cli {
     #[command(subcommand)]
@@ -53,6 +53,18 @@ impl Cli {
                 | "goose"
                 | "crush"
                 | "llxprt"
+                | "ollama"
+                | "vibe"
+                | "droid"
+                | "forge"
+                | "cursor-agent"
+                | "jules"
+                | "kilocode"
+                | "letta"
+                | "nanocoder"
+                | "pi"
+                | "code"
+                | "eca"
         )
     }
 
@@ -70,7 +82,7 @@ impl Cli {
             // Invalid tool name - show error and exit (don't fall through to interactive mode)
             eprintln!("error: '{tool_name}' is not a valid tool or command");
             eprintln!();
-            eprintln!("Available tools: claude, gemini, qwen, opencode, codex, aider, amp, goose, crush, llxprt");
+            eprintln!("Available tools: claude, gemini, qwen, opencode, codex, aider, amp, goose, crush, llxprt, ollama, vibe, droid, forge, cursor-agent, jules, kilocode, letta, nanocoder, pi, code, eca");
             eprintln!();
             eprintln!("For more information, try '--help'");
             std::process::exit(1);
@@ -160,7 +172,7 @@ impl Cli {
 pub enum Commands {
     /// Run a specific AI coding tool
     Run {
-        /// The tool to run (claude, gemini, qwen, opencode, llxprt, codex, aider, amp, goose, crush)
+        /// The tool to run (claude, gemini, qwen, opencode, llxprt, codex, aider, amp, goose, crush, ollama, vibe, droid, forge...)
         tool: String,
         /// Arguments to pass to the tool
         #[arg(trailing_var_arg = true, allow_hyphen_values = true)]

@@ -77,8 +77,29 @@ pub fn infer_package_manager(tool_name: &str) -> PackageManager {
 
 /// Known tool names for static string mapping
 const KNOWN_TOOLS: &[&str] = &[
-    "aider", "amp", "claude", "codex", "copilot", "crush", "gemini", "goose", "llxprt", "opencode",
+    "aider",
+    "amp",
+    "claude",
+    "codex",
+    "copilot",
+    "crush",
+    "gemini",
+    "goose",
+    "llxprt",
+    "opencode",
     "qwen",
+    "ollama",
+    "vibe",
+    "droid",
+    "forge",
+    "cursor-agent",
+    "jules",
+    "kilocode",
+    "letta",
+    "nanocoder",
+    "pi",
+    "code",
+    "eca",
 ];
 
 /// Get all available tools with their installation status and command
