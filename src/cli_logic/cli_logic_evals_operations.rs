@@ -125,7 +125,7 @@ fn view_all_evaluations() -> Result<()> {
             // Community
             if let Some(community) = &metrics.community {
                 if let Some(discord) = community.discord_members {
-                    println!("  Community: {} Discord members", discord);
+                    println!("  Community: {discord} Discord members");
                 }
             }
 
@@ -144,7 +144,7 @@ fn view_all_evaluations() -> Result<()> {
                 }
                 println!("{}", features.join(", "));
                 if let Some(last_update) = &docs.last_docs_update {
-                    println!("    Last updated: {}", last_update);
+                    println!("    Last updated: {last_update}");
                 }
             }
 
@@ -349,7 +349,7 @@ fn view_tool_details_interactive() -> Result<()> {
                     pkg.latest_version.as_deref().unwrap_or("Unknown")
                 );
                 if let Some(last_publish) = &pkg.last_publish_date {
-                    println!("    Last Published: {}", last_publish);
+                    println!("    Last Published: {last_publish}");
                 }
             }
 
@@ -358,13 +358,13 @@ fn view_tool_details_interactive() -> Result<()> {
                 println!();
                 println!("  Community:");
                 if let Some(discord) = community.discord_members {
-                    println!("    Discord Members: {}", discord);
+                    println!("    Discord Members: {discord}");
                 }
                 if let Some(twitter) = community.twitter_followers {
-                    println!("    Twitter Followers: {}", twitter);
+                    println!("    Twitter Followers: {twitter}");
                 }
                 if let Some(reddit) = community.reddit_subscribers {
-                    println!("    Reddit Subscribers: {}", reddit);
+                    println!("    Reddit Subscribers: {reddit}");
                 }
             }
 
@@ -428,8 +428,8 @@ fn view_tool_details_interactive() -> Result<()> {
         }
 
         if let Some(score) = evaluation.overall_score {
-            let score_str = format!("{:.2}/10", score);
-            println!("  Overall Score: {}", score_str);
+            let score_str = format!("{score:.2}/10");
+            println!("  Overall Score: {score_str}");
         }
 
         println!();
@@ -441,7 +441,7 @@ fn view_tool_details_interactive() -> Result<()> {
 
         for (_category_id, category) in categories {
             let score_str = if let Some(score) = category.score {
-                format!("{:.1}/10", score)
+                format!("{score:.1}/10")
             } else {
                 "N/A".to_string()
             };
@@ -594,7 +594,7 @@ fn show_coverage_report() -> Result<()> {
     if !coverage.missing_evaluations.is_empty() {
         println!("\n  Missing Evaluations:");
         for tool in &coverage.missing_evaluations {
-            println!("    - {}", tool);
+            println!("    - {tool}");
         }
     } else {
         println!("\n  [COMPLETE] All integrated tools have been evaluated!");
@@ -645,10 +645,7 @@ fn validate_evaluations() -> Result<()> {
         println!("  {} {}: {}", severity_str, issue.tool_name, issue.message);
     }
 
-    println!(
-        "\n  Summary: {} errors, {} warnings, {} info",
-        errors, warnings, info
-    );
+    println!("\n  Summary: {errors} errors, {warnings} warnings, {info} info");
 
     Ok(())
 }
@@ -690,7 +687,7 @@ fn show_about() -> Result<()> {
 
     println!("\n  Version:");
     println!("  Terminal Jarvis v{}", env!("CARGO_PKG_VERSION"));
-    println!("  Evals Framework v{}", EVALS_VERSION);
+    println!("  Evals Framework v{EVALS_VERSION}");
 
     println!("\n  New in v0.0.70:");
     println!("  - Real-world verifiable metrics (GitHub stars, forks, community size)");

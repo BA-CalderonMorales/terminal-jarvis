@@ -648,7 +648,7 @@ mod responsive_display_tests {
         #[test]
         fn test_display_config_debug() {
             let config = create_test_config(80);
-            let debug_str = format!("{:?}", config);
+            let debug_str = format!("{config:?}");
 
             assert!(debug_str.contains("DisplayConfig"));
             assert!(debug_str.contains("term_width"));

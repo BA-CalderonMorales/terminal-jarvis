@@ -50,7 +50,7 @@ impl std::str::FromStr for ThemeType {
             "tjarvis" | "t.jarvis" | "default" => Ok(ThemeType::TJarvis),
             "classic" | "minimal" => Ok(ThemeType::Classic),
             "matrix" | "terminal" => Ok(ThemeType::Matrix),
-            _ => Err(format!("Unknown theme: {}", s)),
+            _ => Err(format!("Unknown theme: {s}")),
         }
     }
 }
@@ -80,7 +80,7 @@ mod tests {
             },
         };
 
-        assert_eq!(format!("{}", theme), "Test Theme");
+        assert_eq!(format!("{theme}"), "Test Theme");
     }
 
     #[test]

@@ -37,6 +37,7 @@ pub fn get_command_mapping() -> HashMap<&'static str, &'static str> {
     mapping.insert("goose", "goose"); // Block Goose CLI installs as 'goose'
     mapping.insert("amp", "amp"); // Sourcegraph Amp installs as 'amp'
     mapping.insert("aider", "aider"); // Aider installs as 'aider'
+    mapping.insert("copilot", "copilot"); // GitHub Copilot CLI installs as 'copilot'
     mapping
 }
 

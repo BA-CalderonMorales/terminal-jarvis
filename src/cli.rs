@@ -68,7 +68,7 @@ impl Cli {
                 return cli_logic::handle_run_tool(tool_name, &self.tool_args).await;
             }
             // Invalid tool name - show error and exit (don't fall through to interactive mode)
-            eprintln!("error: '{}' is not a valid tool or command", tool_name);
+            eprintln!("error: '{tool_name}' is not a valid tool or command");
             eprintln!();
             eprintln!("Available tools: claude, gemini, qwen, opencode, codex, aider, amp, goose, crush, llxprt");
             eprintln!();

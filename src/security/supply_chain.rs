@@ -85,12 +85,12 @@ impl SecureModelLoader {
             self.allowlist
                 .get_model_info(model_name)
                 .ok_or_else(|| SecurityError {
-                    message: format!("Model '{}' not in allowlist", model_name),
+                    message: format!("Model '{model_name}' not in allowlist"),
                     code: SecurityErrorCode::BlockedKeyword,
                 })?;
 
         // STEP 2: Check if model already cached and verified
-        let cached_path = self.cache_dir.join(format!("{}.verified", model_name));
+        let cached_path = self.cache_dir.join(format!("{model_name}.verified"));
         if cached_path.exists() {
             if self.verify_cached_model(&cached_path, model_info)? {
                 return Ok(cached_path);
@@ -103,8 +103,7 @@ impl SecureModelLoader {
         // STEP 3: Download is BLOCKED - no auto-downloads allowed
         Err(SecurityError {
             message: format!(
-                "Auto-download disabled. Model '{}' must be manually verified and placed in cache.",
-                model_name
+                "Auto-download disabled. Model '{model_name}' must be manually verified and placed in cache."
             ),
             code: SecurityErrorCode::BlockedKeyword,
         })
@@ -198,7 +197,7 @@ impl SecureModelLoader {
         }
 
         // Move to cache with .verified suffix
-        let cached_path = self.cache_dir.join(format!("{}.verified", model_name));
+        let cached_path = self.cache_dir.join(format!("{model_name}.verified"));
         std::fs::copy(source_path, &cached_path).map_err(|_| SecurityError {
             message: "Failed to copy model to cache".to_string(),
             code: SecurityErrorCode::InjectionAttempt,

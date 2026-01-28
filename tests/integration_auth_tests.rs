@@ -71,8 +71,7 @@ mod integration_tests {
         // Accept either the legacy echo override or the new safe no-op 'true'
         assert!(
             browser_cmd == "true" || browser_cmd.starts_with("echo "),
-            "Unexpected BROWSER override: {}",
-            browser_cmd
+            "Unexpected BROWSER override: {browser_cmd}"
         );
 
         println!("✅ No-browser environment setup successful");

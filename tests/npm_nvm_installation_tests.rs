@@ -14,7 +14,7 @@ use terminal_jarvis::installation_arguments::InstallationManager;
 #[test]
 fn test_npm_tools_do_not_require_sudo() {
     let npm_tools = [
-        "claude", "gemini", "opencode", "qwen", "codex", "amp", "crush", "llxprt",
+        "claude", "gemini", "opencode", "qwen", "codex", "amp", "crush", "llxprt", "copilot",
     ];
 
     for tool in npm_tools {
@@ -22,11 +22,10 @@ fn test_npm_tools_do_not_require_sudo() {
             if cmd.requires_npm {
                 assert!(
                     !cmd.requires_sudo,
-                    "Tool '{}' requires npm but also requires_sudo=true. \
+                    "Tool '{tool}' requires npm but also requires_sudo=true. \
                     NPM global installs via NVM do not need sudo and using sudo \
                     breaks installation because npm is not in sudo's PATH. \
-                    Set requires_sudo = false in config/tools/{}.toml",
-                    tool, tool
+                    Set requires_sudo = false in config/tools/{tool}.toml"
                 );
             }
         }
@@ -58,16 +57,14 @@ fn test_npm_install_command_structure() {
     for tool in npm_tools {
         if let Some(cmd) = InstallationManager::get_install_command(tool) {
             if cmd.requires_npm {
-                assert_eq!(cmd.command, "npm", "Tool '{}' should use npm command", tool);
+                assert_eq!(cmd.command, "npm", "Tool '{tool}' should use npm command");
                 assert!(
                     cmd.args.contains(&"install".to_string()),
-                    "Tool '{}' npm command should include 'install' arg",
-                    tool
+                    "Tool '{tool}' npm command should include 'install' arg"
                 );
                 assert!(
                     cmd.args.contains(&"-g".to_string()),
-                    "Tool '{}' npm command should include '-g' for global install",
-                    tool
+                    "Tool '{tool}' npm command should include '-g' for global install"
                 );
             }
         }
@@ -88,8 +85,7 @@ fn test_all_tools_have_valid_configs() {
         let cmd = InstallationManager::get_install_command(&tool);
         assert!(
             cmd.is_some(),
-            "Tool '{}' should have a valid install command",
-            tool
+            "Tool '{tool}' should have a valid install command"
         );
     }
 }

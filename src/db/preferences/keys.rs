@@ -49,7 +49,7 @@ mod tests {
         // Check no duplicates
         let mut seen = std::collections::HashSet::new();
         for key in keys {
-            assert!(seen.insert(key), "Duplicate key: {}", key);
+            assert!(seen.insert(key), "Duplicate key: {key}");
         }
     }
 }

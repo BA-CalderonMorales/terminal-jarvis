@@ -54,7 +54,7 @@ impl ToolEvaluation {
         let year_days = days % 365;
         let month = (year_days / 30).min(11) + 1;
         let day = (year_days % 30) + 1;
-        let evaluation_date = format!("{:04}-{:02}-{:02}", years, month, day);
+        let evaluation_date = format!("{years:04}-{month:02}-{day:02}");
 
         Self {
             tool_name,

@@ -216,7 +216,7 @@ fn test_json_output_format_demonstration() {
 
     // Print to verify format (visible with --nocapture)
     println!("Generated JSON:");
-    println!("{}", json);
+    println!("{json}");
 
     // Verify it's valid JSON and contains all required fields
     let parsed: serde_json::Value = serde_json::from_str(&json).expect("Invalid JSON");

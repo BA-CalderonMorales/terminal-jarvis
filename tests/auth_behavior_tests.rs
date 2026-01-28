@@ -354,7 +354,7 @@ mod tests {
                 Command::new("npx")
                     .args(["@google/gemini-cli", "--help"])
                     .output()
-                    .map_err(|e| anyhow::anyhow!("Failed to run gemini CLI: {}", e))
+                    .map_err(|e| anyhow::anyhow!("Failed to run gemini CLI: {e}"))
             }
         }
     }
@@ -370,7 +370,7 @@ mod tests {
                 Command::new("npx")
                     .args(["@qwen-code/qwen-code", "--help"])
                     .output()
-                    .map_err(|e| anyhow::anyhow!("Failed to run qwen-code CLI: {}", e))
+                    .map_err(|e| anyhow::anyhow!("Failed to run qwen-code CLI: {e}"))
             }
         }
     }
