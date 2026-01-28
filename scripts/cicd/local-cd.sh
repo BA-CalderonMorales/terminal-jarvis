@@ -408,7 +408,7 @@ EOL
     
     echo -e "${BLUE}  • Committing changes to homebrew-terminal-jarvis${RESET}"
     git add Formula/terminal-jarvis.rb README.md
-    git commit -m "feat: update Terminal Jarvis to v${new_version}
+    git commit -m "feat: update Terminal Jarvis to ${new_version}
 
 - Updated Formula to version ${new_version}
 - Updated download URLs to point to v${new_version} release
