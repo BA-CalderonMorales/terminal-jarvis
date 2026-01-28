@@ -1,0 +1,38 @@
+# =============================================================================
+# ECA - Editor Code Assistant
+# =============================================================================
+
+[tool]
+display_name = "ECA"
+config_key = "eca"
+description = "Editor Code Assistant"
+homepage = "https://eca.dev"
+documentation = "https://eca.dev/docs"
+cli_command = "eca"
+requires_npm = false
+requires_sudo = false
+status = "beta"
+
+[tool.install]
+command = "curl"
+args = ["-s", "https://raw.githubusercontent.com/editor-code-assistant/eca/master/install"]
+pipe_to = "bash"
+verify_command = "eca --version"
+post_install_message = "ECA installed!"
+
+[tool.update]
+command = "eca"
+args = ["upgrade"]
+verify_command = "eca --version"
+
+[tool.auth]
+env_vars = ["ECA_API_KEY"]
+setup_url = "https://eca.dev"
+browser_auth = true
+auth_instructions = "Run 'eca auth' to authenticate."
+
+[tool.features]
+supports_files = true
+supports_streaming = true
+supports_conversation = true
+supported_languages = ["all"]

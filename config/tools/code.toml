@@ -1,0 +1,37 @@
+# =============================================================================
+# CODE - Codex Fork
+# =============================================================================
+
+[tool]
+display_name = "Code"
+config_key = "code"
+description = "Fork of Codex AI - multi-provider coding agent"
+homepage = "https://github.com/just-every/code"
+documentation = "https://github.com/just-every/code"
+cli_command = "code"
+requires_npm = true
+requires_sudo = false
+status = "experimental"
+
+[tool.install]
+command = "npm"
+args = ["install", "-g", "@just-every/code"]
+verify_command = "code --version"
+post_install_message = "Code installed! If 'code' conflicts with VS Code, check alias."
+
+[tool.update]
+command = "npm"
+args = ["update", "-g", "@just-every/code"]
+verify_command = "code --version"
+
+[tool.auth]
+env_vars = ["OPENAI_API_KEY"]
+setup_url = ""
+browser_auth = false
+auth_instructions = "Set OPENAI_API_KEY."
+
+[tool.features]
+supports_files = true
+supports_streaming = true
+supports_conversation = true
+supported_languages = ["all"]
