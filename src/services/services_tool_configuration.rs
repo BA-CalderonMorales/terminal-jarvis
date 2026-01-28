@@ -28,6 +28,19 @@ impl ToolConfigurationManager {
         mapping.insert("llxprt", "llxprt-code");
         mapping.insert("codex", "codex");
         mapping.insert("crush", "crush");
+        // New tools
+        mapping.insert("ollama", "ollama");
+        mapping.insert("vibe", "vibe");
+        mapping.insert("droid", "droid");
+        mapping.insert("forge", "forge");
+        mapping.insert("cursor-agent", "cursor-agent");
+        mapping.insert("jules", "jules");
+        mapping.insert("kilocode", "kilocode");
+        mapping.insert("letta", "letta");
+        mapping.insert("nanocoder", "nanocoder");
+        mapping.insert("pi", "pi");
+        mapping.insert("code", "code");
+        mapping.insert("eca", "eca");
         mapping
     }
 

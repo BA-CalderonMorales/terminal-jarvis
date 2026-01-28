@@ -58,6 +58,61 @@ pub fn show_tool_startup_guidance(display_name: &str) -> Result<()> {
                 );
             }
         }
+        "vibe" => {
+            if std::env::var("MISTRAL_API_KEY").is_err() {
+                println!(
+                    "{}",
+                    theme.secondary("Tip: Set MISTRAL_API_KEY for Mistral Vibe access")
+                );
+            }
+        }
+        "droid" => {
+            if std::env::var("FACTORY_API_KEY").is_err() {
+                println!(
+                    "{}",
+                    theme.secondary("Tip: Set FACTORY_API_KEY for Droid access")
+                );
+            }
+        }
+        "forge" => {
+            if std::env::var("FORGE_API_KEY").is_err() {
+                println!(
+                    "{}",
+                    theme.secondary("Tip: Set FORGE_API_KEY for Forge access")
+                );
+            }
+        }
+        "kilocode" => {
+            if std::env::var("KILO_API_KEY").is_err() {
+                println!(
+                    "{}",
+                    theme.secondary("Tip: Set KILO_API_KEY for Kilocode access")
+                );
+            }
+        }
+        "letta" => {
+            if std::env::var("LETTA_API_KEY").is_err() {
+                println!(
+                    "{}",
+                    theme.secondary("Tip: Set LETTA_API_KEY for Letta access")
+                );
+            }
+        }
+        "eca" => {
+            if std::env::var("ECA_API_KEY").is_err() {
+                println!("{}", theme.secondary("Tip: Set ECA_API_KEY for ECA access"));
+            }
+        }
+        "cursor-agent" | "pi" => {
+            if std::env::var("OPENAI_API_KEY").is_err()
+                && std::env::var("ANTHROPIC_API_KEY").is_err()
+            {
+                println!(
+                    "{}",
+                    theme.secondary("Tip: Set OPENAI_API_KEY or ANTHROPIC_API_KEY")
+                );
+            }
+        }
         // Tools that don't need API keys - no guidance needed
         _ => {}
     }

@@ -30,6 +30,18 @@ opencode = "config/tools/opencode.toml"
 llxprt = "config/tools/llxprt.toml"
 codex = "config/tools/codex.toml"
 crush = "config/tools/crush.toml"
+ollama = "config/tools/ollama.toml"
+vibe = "config/tools/vibe.toml"
+droid = "config/tools/droid.toml"
+forge = "config/tools/forge.toml"
+cursor-agent = "config/tools/cursor-agent.toml"
+jules = "config/tools/jules.toml"
+kilocode = "config/tools/kilocode.toml"
+letta = "config/tools/letta.toml"
+nanocoder = "config/tools/nanocoder.toml"
+pi = "config/tools/pi.toml"
+code = "config/tools/code.toml"
+eca = "config/tools/eca.toml"
 
 # =============================================================================
 # CONFIGURATION LOADER SETTINGS - How to load and merge modular configs
