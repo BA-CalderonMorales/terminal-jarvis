@@ -13,6 +13,7 @@
 
 use crate::installation_arguments::{InstallCommand, InstallationManager};
 use crate::theme::theme_global_config;
+use crate::tools::tools_detection::PackageManager;
 use crate::tools::ToolInfo;
 
 /// Display modes for tool information
@@ -188,5 +189,53 @@ impl ToolDisplayFormatter {
             );
             println!("  Most AI tools are distributed via NPM. Install from: https://nodejs.org/");
         }
+    }
+
+    /// Format a tool name with requirement hint for menu display
+    ///
+    /// Returns a formatted string like "claude [npm]" or "aider [uv]"
+    /// with visual indicators if the required package manager is missing.
+    pub fn format_menu_item(tool_name: &str, tool_info: &ToolInfo) -> String {
+        let label = tool_info.package_manager.label();
+        if label.is_empty() {
+            return tool_name.to_string();
+        }
+
+        let is_available = tool_info.package_manager.is_available();
+        let hint = if is_available {
+            format!("[{}]", label)
+        } else {
+            format!("[{} ⚠]", label)
+        };
+
+        // Pad tool name to align hints
+        let padded_name = format!("{:<10}", tool_name);
+        format!("{} {}", padded_name, hint)
+    }
+
+    /// Get a summary of missing package managers for the tool set
+    pub fn get_missing_requirements(tools: &[(String, ToolInfo)]) -> Vec<(PackageManager, String)> {
+        let all_package_managers = [
+            PackageManager::Npm,
+            PackageManager::Uv,
+            PackageManager::Cargo,
+            PackageManager::Curl,
+        ];
+
+        all_package_managers
+            .into_iter()
+            .filter(|pm| {
+                let is_needed = tools.iter().any(|(_, t)| t.package_manager == *pm);
+                is_needed && !pm.is_available()
+            })
+            .map(|pm| {
+                let msg = format!(
+                    "{} required for some tools. {}",
+                    pm.label(),
+                    pm.install_hint()
+                );
+                (pm, msg)
+            })
+            .collect()
     }
 }

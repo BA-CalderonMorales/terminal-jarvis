@@ -7,6 +7,7 @@ use crate::cli_logic::themed_components::{themed_confirm, themed_multiselect, th
 use crate::installation_arguments::InstallationManager;
 use crate::progress_utils::ProgressContext;
 use crate::theme::theme_global_config;
+use crate::tools::tools_display::ToolDisplayFormatter;
 use crate::tools::ToolManager;
 use anyhow::Result;
 
@@ -34,12 +35,23 @@ pub async fn handle_ai_tools_menu() -> Result<()> {
         // Load tools without progress indicator (fixes rendering artifacts)
         let tools = ToolManager::get_available_tools_async().await;
 
-        // Build clean tool list
+        // Check for missing requirements and show advisory
+        let tools_vec: Vec<_> = tools.iter().map(|(n, t)| (n.clone(), t.clone())).collect();
+        let missing = ToolDisplayFormatter::get_missing_requirements(&tools_vec);
+        if !missing.is_empty() {
+            for (_, msg) in &missing {
+                println!("{}", theme.accent(&format!("  ⚠ {}", msg)));
+            }
+            println!();
+        }
+
+        // Build tool list with requirement hints
         let mut options = Vec::new();
         let mut tool_mapping: Vec<Option<String>> = Vec::new();
 
-        for (tool_name, _tool_info) in tools.iter() {
-            options.push(tool_name.to_string());
+        for (tool_name, tool_info) in tools.iter() {
+            let formatted = ToolDisplayFormatter::format_menu_item(tool_name, tool_info);
+            options.push(formatted);
             tool_mapping.push(Some(tool_name.clone()));
         }
 
@@ -58,7 +70,7 @@ pub async fn handle_ai_tools_menu() -> Result<()> {
                 }
             };
 
-        // Handle selection
+        // Handle selection - extract tool name from formatted option
         if selection.contains("Back to Main Menu") {
             return Ok(());
         } else if let Some(index) = options.iter().position(|opt| opt == &selection) {
@@ -94,6 +106,24 @@ async fn handle_tool_launch(tool_name: &str) -> Result<()> {
     };
 
     if !tool_info.is_installed {
+        // Check if required package manager is available before prompting install
+        if !tool_info.package_manager.is_available() {
+            let pm_label = tool_info.package_manager.label();
+            let install_hint = tool_info.package_manager.install_hint();
+
+            println!(
+                "\n{}",
+                theme.accent(&format!(
+                    "Cannot install '{}': {} is not available on your system.",
+                    tool_name, pm_label
+                ))
+            );
+            println!("{}", theme.secondary(install_hint));
+            println!("\n{}", theme.secondary("Press Enter to continue..."));
+            let _ = std::io::stdin().read_line(&mut String::new());
+            return Ok(());
+        }
+
         let should_install = match themed_confirm(&format!(
             "{} '{}' is not installed. Install it now?",
             theme.accent("Tool"),
@@ -199,47 +229,37 @@ async fn launch_tool_with_progress(tool_name: &str, args: &[String]) -> Result<(
     Ok(())
 }
 
+/// Capitalize the first letter of a string
+fn initial_case(s: &str) -> String {
+    let mut chars = s.chars();
+    match chars.next() {
+        Some(first) => first.to_uppercase().collect::<String>() + chars.as_str(),
+        None => String::new(),
+    }
+}
+
+/// Get tool auth configuration: (command, args, action_label)
+fn get_tool_auth_config(
+    tool: &str,
+) -> Option<(&'static str, &'static [&'static str], &'static str)> {
+    match tool {
+        "amp" => Some(("amp", &["login"], "Login to")),
+        "codex" => Some(("codex", &["login"], "Login to")),
+        "crush" => Some(("crush", &["login"], "Login to")),
+        "opencode" => Some(("opencode", &["auth"], "Authenticate")),
+        "goose" => Some(("goose", &["configure"], "Configure")),
+        "claude" => Some(("claude", &["--help"], "Setup")),
+        "gemini" => Some(("gemini", &["--help"], "Setup")),
+        "qwen" => Some(("qwen", &["--help"], "Setup")),
+        "aider" => Some(("aider", &["--help"], "Setup")),
+        "llxprt" => Some(("llxprt", &["--help"], "Setup")),
+        _ => None,
+    }
+}
+
 /// Handle user choice after tool exit
 /// Adds options to reopen, switch tools, manage credentials, uninstall, or exit
 async fn handle_post_tool_exit(last_tool: &str, last_args: &[String]) -> Result<()> {
-    fn initial_case(s: &str) -> String {
-        let mut chars = s.chars();
-        match chars.next() {
-            Some(first) => first.to_uppercase().collect::<String>() + chars.as_str(),
-            None => String::new(),
-        }
-    }
-
-    // Check if tool has a CLI login command
-    fn get_login_command(tool: &str) -> Option<(&'static str, Vec<&'static str>)> {
-        match tool {
-            // Tools with dedicated login commands
-            "amp" => Some(("amp", vec!["login"])),
-            "codex" => Some(("codex", vec!["login"])),
-            "crush" => Some(("crush", vec!["login"])),
-            "opencode" => Some(("opencode", vec!["auth"])),
-            // Tools with configure commands for auth
-            "goose" => Some(("goose", vec!["configure"])),
-            // Tools that use browser-based OAuth or API keys
-            "claude" => Some(("claude", vec!["--help"])), // Claude uses browser OAuth
-            "gemini" => Some(("gemini", vec!["--help"])), // Gemini uses browser OAuth
-            "qwen" => Some(("qwen", vec!["--help"])),     // Qwen shows auth options
-            "aider" => Some(("aider", vec!["--help"])),   // Aider uses env vars
-            "llxprt" => Some(("llxprt", vec!["--help"])), // llxprt uses profiles
-            _ => None,
-        }
-    }
-
-    // Get human-readable action name for the login command
-    fn get_login_action_name(tool: &str) -> &'static str {
-        match tool {
-            "amp" | "codex" | "crush" => "Login to",
-            "goose" => "Configure",
-            "opencode" => "Authenticate",
-            _ => "Setup",
-        }
-    }
-
     loop {
         let theme = theme_global_config::current_theme();
 
@@ -248,11 +268,10 @@ async fn handle_post_tool_exit(last_tool: &str, last_args: &[String]) -> Result<
 
         // Build options dynamically based on tool capabilities
         let mut exit_options = vec![format!("1. Reopen {}", tool_display)];
+        let auth_config = get_tool_auth_config(last_tool);
 
         // Add login option if tool supports CLI login
-        let has_login = get_login_command(last_tool).is_some();
-        if has_login {
-            let action = get_login_action_name(last_tool);
+        if let Some((_, _, action)) = auth_config {
             exit_options.push(format!("2. {action} {tool_display}"));
             exit_options.push("3. Back to Main Menu".to_string());
             exit_options.push("4. Switch to Another AI Tool".to_string());
@@ -292,12 +311,12 @@ async fn handle_post_tool_exit(last_tool: &str, last_args: &[String]) -> Result<
                 || s.contains("Setup ") =>
             {
                 // Run the tool's login/auth command
-                if let Some((cmd, args)) = get_login_command(last_tool) {
+                if let Some((cmd, args, _)) = get_tool_auth_config(last_tool) {
                     println!(
                         "\n{}",
                         theme.accent(&format!("Running {} {}...", cmd, args.join(" ")))
                     );
-                    let status = std::process::Command::new(cmd).args(&args).status();
+                    let status = std::process::Command::new(cmd).args(args).status();
                     match status {
                         Ok(exit_status) if exit_status.success() => {
                             println!(
@@ -362,70 +381,79 @@ async fn handle_post_tool_exit(last_tool: &str, last_args: &[String]) -> Result<
     }
 }
 
+/// Get uninstall command configuration for a tool
+fn get_uninstall_config(tool: &str) -> Option<(&'static str, &'static [&'static str])> {
+    match tool {
+        "claude" => Some(("npm", &["uninstall", "-g", "@anthropic-ai/claude-code"])),
+        "gemini" => Some(("npm", &["uninstall", "-g", "@anthropic-ai/gemini-cli"])),
+        "qwen" => Some(("npm", &["uninstall", "-g", "@anthropic-ai/qwen-code"])),
+        "opencode" => Some(("npm", &["uninstall", "-g", "opencode-ai"])),
+        "codex" => Some(("npm", &["uninstall", "-g", "@openai/codex"])),
+        "aider" => Some(("pip", &["uninstall", "-y", "aider-chat"])),
+        "goose" => Some(("pip", &["uninstall", "-y", "goose-ai"])),
+        "amp" => Some(("cargo", &["uninstall", "amp"])),
+        "crush" => Some(("cargo", &["uninstall", "crush"])),
+        "llxprt" => Some(("cargo", &["uninstall", "llxprt"])),
+        _ => None,
+    }
+}
+
 /// Handle tool uninstallation with appropriate package manager
 async fn handle_uninstall_tool(tool: &str, tool_display: &str, theme: &crate::theme::Theme) {
-    // Determine uninstall command based on tool's install method
-    let uninstall_cmd = match tool {
-        "claude" => Some(("npm", vec!["uninstall", "-g", "@anthropic-ai/claude-code"])),
-        "gemini" => Some(("npm", vec!["uninstall", "-g", "@anthropic-ai/gemini-cli"])),
-        "qwen" => Some(("npm", vec!["uninstall", "-g", "@anthropic-ai/qwen-code"])),
-        "opencode" => Some(("npm", vec!["uninstall", "-g", "opencode-ai"])),
-        "codex" => Some(("npm", vec!["uninstall", "-g", "@openai/codex"])),
-        "aider" => Some(("pip", vec!["uninstall", "-y", "aider-chat"])),
-        "goose" => Some(("pip", vec!["uninstall", "-y", "goose-ai"])),
-        "amp" => Some(("cargo", vec!["uninstall", "amp"])),
-        "crush" => Some(("cargo", vec!["uninstall", "crush"])),
-        "llxprt" => Some(("cargo", vec!["uninstall", "llxprt"])),
-        _ => None,
-    };
-
-    if let Some((cmd, args)) = uninstall_cmd {
-        // Confirm before uninstalling
-        if let Ok(confirmed) = themed_confirm(&format!("Uninstall {tool_display}?"))
-            .with_default(false)
-            .prompt()
-        {
-            if confirmed {
-                println!(
-                    "{}",
-                    theme.secondary(&format!("Uninstalling {tool_display}..."))
-                );
-                let result = std::process::Command::new(cmd).args(&args).status();
-                match result {
-                    Ok(status) if status.success() => {
-                        println!(
-                            "{}",
-                            theme.primary(&format!("{tool_display} has been uninstalled."))
-                        );
-                        // Also clear credentials
-                        let _ = AuthManager::delete_tool_credentials(tool, &[]);
-                    }
-                    Ok(_) => {
-                        println!(
-                            "{}",
-                            theme.accent(&format!(
-                                "Uninstall may have failed. Try manually: {} {}",
-                                cmd,
-                                args.join(" ")
-                            ))
-                        );
-                    }
-                    Err(e) => {
-                        println!(
-                            "{}",
-                            theme.accent(&format!("Could not run uninstall command: {e}"))
-                        );
-                    }
-                }
-            }
-        }
-    } else {
+    let Some((cmd, args)) = get_uninstall_config(tool) else {
         println!(
             "{}",
             theme.accent(&format!(
                 "Uninstall command not configured for {tool_display}. Check the tool's documentation."
             ))
         );
+        tokio::time::sleep(tokio::time::Duration::from_millis(1500)).await;
+        return;
+    };
+
+    // Confirm before uninstalling
+    let Ok(confirmed) = themed_confirm(&format!("Uninstall {tool_display}?"))
+        .with_default(false)
+        .prompt()
+    else {
+        return;
+    };
+
+    if !confirmed {
+        return;
+    }
+
+    println!(
+        "{}",
+        theme.secondary(&format!("Uninstalling {tool_display}..."))
+    );
+
+    let result = std::process::Command::new(cmd).args(args).status();
+    match result {
+        Ok(status) if status.success() => {
+            println!(
+                "{}",
+                theme.primary(&format!("{tool_display} has been uninstalled."))
+            );
+            // Also clear credentials
+            let _ = AuthManager::delete_tool_credentials(tool, &[]);
+        }
+        Ok(_) => {
+            println!(
+                "{}",
+                theme.accent(&format!(
+                    "Uninstall may have failed. Try manually: {} {}",
+                    cmd,
+                    args.join(" ")
+                ))
+            );
+        }
+        Err(e) => {
+            println!(
+                "{}",
+                theme.accent(&format!("Could not run uninstall command: {e}"))
+            );
+        }
     }
 
     // Brief pause to let user read the message

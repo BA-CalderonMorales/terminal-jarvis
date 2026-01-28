@@ -7,51 +7,107 @@ use std::process::Command;
 use super::tools_command_mapping::get_command_mapping;
 use super::tools_config::get_tool_config_loader;
 
+/// Package manager or runtime required to install/run a tool
+#[derive(Clone, Debug, PartialEq)]
+pub enum PackageManager {
+    Npm,
+    Uv,
+    Cargo,
+    Curl,
+    Unknown,
+}
+
+impl PackageManager {
+    /// Get a short label for display in menus
+    pub fn label(&self) -> &'static str {
+        match self {
+            Self::Npm => "npm",
+            Self::Uv => "uv",
+            Self::Cargo => "cargo",
+            Self::Curl => "curl",
+            Self::Unknown => "",
+        }
+    }
+
+    /// Check if this package manager is available on the system
+    pub fn is_available(&self) -> bool {
+        match self {
+            Self::Npm => check_tool_installed("npm"),
+            Self::Uv => check_tool_installed("uv"),
+            Self::Cargo => check_tool_installed("cargo"),
+            Self::Curl => check_tool_installed("curl"),
+            Self::Unknown => true,
+        }
+    }
+
+    /// Get installation hint for users who need this package manager
+    pub fn install_hint(&self) -> &'static str {
+        match self {
+            Self::Npm => "Install Node.js from: https://nodejs.org/",
+            Self::Uv => "Install uv from: https://docs.astral.sh/uv/",
+            Self::Cargo => "Install Rust from: https://rustup.rs/",
+            Self::Curl => "Install curl via your system package manager",
+            Self::Unknown => "Check tool documentation for requirements",
+        }
+    }
+}
+
 #[derive(Clone, Debug)]
 pub struct ToolInfo {
     pub command: &'static str,
     pub is_installed: bool,
+    pub package_manager: PackageManager,
 }
+
+/// Infer package manager from install command
+pub fn infer_package_manager(tool_name: &str) -> PackageManager {
+    let config_loader = get_tool_config_loader();
+    let Some(install_cmd) = config_loader.get_install_command(tool_name) else {
+        return PackageManager::Unknown;
+    };
+
+    match install_cmd.command.as_str() {
+        "npm" => PackageManager::Npm,
+        "uv" => PackageManager::Uv,
+        "cargo" => PackageManager::Cargo,
+        "curl" => PackageManager::Curl,
+        _ => PackageManager::Unknown,
+    }
+}
+
+/// Known tool names for static string mapping
+const KNOWN_TOOLS: &[&str] = &[
+    "aider", "amp", "claude", "codex", "copilot", "crush", "gemini", "goose", "llxprt", "opencode",
+    "qwen",
+];
 
 /// Get all available tools with their installation status and command
 pub fn get_available_tools() -> BTreeMap<&'static str, ToolInfo> {
     let mut tools = BTreeMap::new();
     let mapping = get_command_mapping();
     let config_loader = get_tool_config_loader();
-
-    // Get all tools from configuration (dynamic approach)
     let tool_names = config_loader.get_tool_names();
 
-    // Insert tools with installation status
     for tool_name in tool_names {
-        if let Some(cli_command) = mapping.get(tool_name.as_str()) {
-            let is_installed = check_tool_installed(cli_command);
+        let Some(cli_command) = mapping.get(tool_name.as_str()) else {
+            continue;
+        };
 
-            // We need to use &'static str for the BTreeMap, so we'll use a different approach
-            // For now, let's create a mapping that includes the new tools
-            let static_name = match tool_name.as_str() {
-                "claude" => "claude",
-                "gemini" => "gemini",
-                "qwen" => "qwen",
-                "opencode" => "opencode",
-                "llxprt" => "llxprt",
-                "codex" => "codex",
-                "crush" => "crush",
-                "goose" => "goose",
-                "amp" => "amp",
-                "aider" => "aider",
-                "copilot" => "copilot",
-                _ => continue, // Skip unknown tools
-            };
+        let Some(static_name) = KNOWN_TOOLS.iter().find(|&&name| name == tool_name) else {
+            continue;
+        };
 
-            tools.insert(
-                static_name,
-                ToolInfo {
-                    command: cli_command,
-                    is_installed,
-                },
-            );
-        }
+        let is_installed = check_tool_installed(cli_command);
+        let package_manager = infer_package_manager(&tool_name);
+
+        tools.insert(
+            *static_name,
+            ToolInfo {
+                command: cli_command,
+                is_installed,
+                package_manager,
+            },
+        );
     }
 
     tools
