@@ -2,6 +2,27 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.0.75] - 2026-01-28
+
+### Added
+- **Package Manager Requirement Hints**: Tool selection menu now shows what each tool requires
+  - Visual indicators next to each tool (e.g., `[npm]`, `[uv]`, `[cargo]`, `[curl]`)
+  - Warning banner when required package managers are missing
+  - Clear installation URLs provided for missing requirements
+
+### Fixed
+- **Installation Prerequisites Check** (Issue #39): Prevents confusing permission errors
+  - Checks package manager availability before attempting tool installation
+  - Provides actionable guidance instead of cryptic EACCES errors
+  - Users now see "Cannot install 'aider': uv is not available" with install instructions
+
+### Technical
+- Added `PackageManager` enum with `Npm`, `Uv`, `Cargo`, `Curl`, `Unknown` variants
+- New methods: `label()`, `is_available()`, `install_hint()` on PackageManager
+- Added `infer_package_manager()` function to detect PM from tool config
+- Extended `ToolInfo` struct with `package_manager` field
+- New display utilities: `format_menu_item()`, `get_missing_requirements()`
+
 ## [0.0.74] - 2026-01-16
 
 ### Fixed
