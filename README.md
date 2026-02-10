@@ -50,14 +50,14 @@ brew tap ba-calderonmorales/terminal-jarvis && brew install terminal-jarvis  # H
 
 ## Documentation
 
-Full guides at **[Terminal Jarvis Docs](https://ba-calderonmorales.github.io/my-life-as-a-dev/projects/active/terminal-jarvis/)**
+Full guides at **[Terminal Jarvis Docs](https://ba-calderonmorales.github.io/my-life-as-a-dev/latest/projects/active/terminal-jarvis/)**
 
 | Guide | Description |
 |:------|:------------|
-| [Installation](https://ba-calderonmorales.github.io/my-life-as-a-dev/projects/active/terminal-jarvis/quick_start/installation/) | Step-by-step platform setup for NPM, Cargo, and Homebrew with troubleshooting tips for common issues. |
-| [AI Tools](https://ba-calderonmorales.github.io/my-life-as-a-dev/projects/active/terminal-jarvis/quick_start/ai-tools/) | Detailed overview of all 11 supported AI coding assistants including authentication requirements and capabilities. |
-| [Configuration](https://ba-calderonmorales.github.io/my-life-as-a-dev/projects/active/terminal-jarvis/quick_start/configuration/) | Customize themes, keybindings, default tools, and environment variables to match your workflow. |
-| [Architecture](https://ba-calderonmorales.github.io/my-life-as-a-dev/projects/active/terminal-jarvis/details/architecture/) | Technical deep-dive into the Rust codebase, module organization, and design decisions. |
+| [Installation](https://ba-calderonmorales.github.io/my-life-as-a-dev/latest/projects/active/terminal-jarvis/quick_start/installation/) | Step-by-step platform setup for NPM, Cargo, and Homebrew with troubleshooting tips for common issues. |
+| [AI Tools](https://ba-calderonmorales.github.io/my-life-as-a-dev/latest/projects/active/terminal-jarvis/quick_start/ai-tools/) | Detailed overview of all 11 supported AI coding assistants including authentication requirements and capabilities. |
+| [Configuration](https://ba-calderonmorales.github.io/my-life-as-a-dev/latest/projects/active/terminal-jarvis/quick_start/configuration/) | Customize themes, keybindings, default tools, and environment variables to match your workflow. |
+| [Architecture](https://ba-calderonmorales.github.io/my-life-as-a-dev/latest/projects/active/terminal-jarvis/details/architecture/) | Technical deep-dive into the Rust codebase, module organization, and design decisions. |
 
 ## Project Structure
 
@@ -151,7 +151,7 @@ MIT - see [LICENSE](LICENSE)
 
 <div align="center">
 
-**[Documentation](https://ba-calderonmorales.github.io/my-life-as-a-dev/projects/active/terminal-jarvis/)** |
+**[Documentation](https://ba-calderonmorales.github.io/my-life-as-a-dev/latest/projects/active/terminal-jarvis/)** |
 **[Issues](https://github.com/BA-CalderonMorales/terminal-jarvis/issues)** |
 **[Changelog](CHANGELOG.md)**
 
