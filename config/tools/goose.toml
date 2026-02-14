@@ -40,6 +40,8 @@ env_vars = [
 setup_url = "https://block.github.io/goose/docs/getting-started/providers"
 browser_auth = true
 auth_instructions = "Run 'goose configure' to set up your preferred AI provider (Tetrate, OpenRouter, or manual API key configuration)"
+auth_mode = "any"
+cli_auth_command = "goose configure"
 
 [tool.features]
 supports_files = true

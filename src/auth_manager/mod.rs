@@ -9,6 +9,7 @@ pub mod auth_credentials_store;
 mod auth_entry_point;
 mod auth_environment_detection;
 mod auth_environment_setup;
+pub mod auth_preflight;
 mod auth_warning_system;
 
 // Re-export main interface

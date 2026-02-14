@@ -29,6 +29,11 @@ env_vars = ["OPENAI_API_KEY", "ANTHROPIC_API_KEY"]
 setup_url = ""
 browser_auth = false
 auth_instructions = "Set OPENAI_API_KEY or ANTHROPIC_API_KEY environment variables."
+auth_mode = "any"
+providers = [
+    {name = "OpenAI", env_var = "OPENAI_API_KEY", key_hint = "sk-*", setup_url = "https://platform.openai.com/api-keys"},
+    {name = "Anthropic", env_var = "ANTHROPIC_API_KEY", key_hint = "sk-ant-*", setup_url = "https://console.anthropic.com/"},
+]
 
 [tool.features]
 supports_files = true

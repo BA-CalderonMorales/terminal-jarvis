@@ -27,10 +27,18 @@ args = ["update"]
 verify_command = "vibe --version"
 
 [tool.auth]
-env_vars = ["MISTRAL_API_KEY"]
+env_vars = ["MISTRAL_API_KEY", "ANTHROPIC_API_KEY", "OPENAI_API_KEY"]
 setup_url = "https://console.mistral.ai/"
 browser_auth = false
-auth_instructions = "Run 'vibe auth' or set MISTRAL_API_KEY."
+auth_instructions = "Run 'vibe auth' or set an API key for your preferred provider"
+auth_mode = "any"
+default_env_var = "MISTRAL_API_KEY"
+cli_auth_command = "vibe auth"
+providers = [
+    {name = "Mistral", env_var = "MISTRAL_API_KEY", setup_url = "https://console.mistral.ai/"},
+    {name = "Anthropic", env_var = "ANTHROPIC_API_KEY", key_hint = "sk-ant-*", setup_url = "https://console.anthropic.com/"},
+    {name = "OpenAI", env_var = "OPENAI_API_KEY", key_hint = "sk-*", setup_url = "https://platform.openai.com/api-keys"},
+]
 
 [tool.features]
 supports_files = true
