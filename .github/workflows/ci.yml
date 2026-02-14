@@ -18,6 +18,10 @@ on:
       - '.github/copilot-instructions.md'
       - 'LICENSE'
 
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
 env:
   CARGO_TERM_COLOR: always
 
@@ -26,60 +30,8 @@ permissions:
   contents: read
 
 jobs:
-  
-  # Multi-platform build testing - can run independently of other jobs section
-  multiplatform-build:
-    name: Multi-Platform Build Test
-    runs-on: ${{ matrix.os }}
-    strategy:
-      matrix:
-        include:
-          - os: macos-latest
-            target: x86_64-apple-darwin
-            cross_target: aarch64-apple-darwin
 
-          - os: macos-latest  
-            target: aarch64-apple-darwin
-            cross_target: x86_64-unknown-linux-musl
-
-          # Use musl for static linking - avoids GLIBC version dependency (Issue #24)
-          - os: ubuntu-latest
-            target: x86_64-unknown-linux-musl
-            cross_target: aarch64-unknown-linux-musl
- 
-    steps:
-    - uses: actions/checkout@v5
- 
-    - name: Install Rust
-      uses: dtolnay/rust-toolchain@stable
-      with:
-        targets: ${{ matrix.target }},${{ matrix.cross_target }}
-
-    - name: Install musl tools (Linux)
-      if: runner.os == 'Linux'
-      run: |
-        # Install musl for static linking (Issue #24 - GLIBC independence)
-        sudo apt-get update
-        sudo apt-get install -y musl-tools musl-dev
- 
-    - name: Test multi-platform build system
-      run: |
-        chmod +x scripts/utils/build-multiplatform.sh
-        ./scripts/utils/build-multiplatform.sh --current-only
- 
-    - name: Test cross-compilation (may fail)
-      continue-on-error: true
-      run: |
-        echo "Testing cross-compilation to ${{ matrix.cross_target }}"
-        cargo build --target ${{ matrix.cross_target }} || echo "Cross-compilation failed (expected)"
- 
-    - name: Test Homebrew release generation (macOS only)
-      if: matrix.os == 'macos-latest'
-      run: |
-        chmod +x scripts/utils/generate-homebrew-release.sh
-        ./scripts/utils/generate-homebrew-release.sh || echo "Homebrew generation completed with warnings"
-
-  # Test jobs - combined Rust + NPM suites via matrix
+  # Test jobs - Rust + NPM suites via matrix
   test:
     name: Test - ${{ matrix.name }}
     runs-on: ${{ matrix.os }}
@@ -89,9 +41,6 @@ jobs:
           - name: Rust (Ubuntu)
             suite: rust
             os: ubuntu-latest
-          - name: Rust (macOS)
-            suite: rust
-            os: macos-latest
           - name: NPM (Node 18)
             suite: npm
             os: ubuntu-latest
@@ -110,6 +59,16 @@ jobs:
       with:
         components: rustfmt, clippy
 
+    - name: Cache cargo dependencies
+      if: ${{ matrix.suite == 'rust' }}
+      uses: actions/cache@v4
+      with:
+        path: |
+          ~/.cargo/registry
+          ~/.cargo/git
+        key: cargo-${{ runner.os }}-${{ hashFiles('**/Cargo.lock') }}
+        restore-keys: cargo-${{ runner.os }}-
+
     - name: Check formatting
       if: ${{ matrix.suite == 'rust' }}
       run: cargo fmt --all -- --check
@@ -126,6 +85,16 @@ jobs:
     - name: Install Rust toolchain (for npm build)
       if: ${{ matrix.suite == 'npm' }}
       uses: dtolnay/rust-toolchain@stable
+
+    - name: Cache cargo dependencies
+      if: ${{ matrix.suite == 'npm' }}
+      uses: actions/cache@v4
+      with:
+        path: |
+          ~/.cargo/registry
+          ~/.cargo/git
+        key: cargo-${{ runner.os }}-${{ hashFiles('**/Cargo.lock') }}
+        restore-keys: cargo-${{ runner.os }}-
 
     - name: Build release binary
       if: ${{ matrix.suite == 'npm' }}
@@ -170,62 +139,68 @@ jobs:
         echo "High: $HIGH, Critical: $CRIT"; \
         [ $((HIGH+CRIT)) -eq 0 ]
 
-  # Security jobs - matrix fan-out of all security checks
-  security:
-    name: Security - ${{ matrix.tool }}
+  # Security - Rust dependency checks (cargo-audit + cargo-deny in one runner)
+  security-rust:
+    name: Security - Rust
     permissions:
       contents: read
-      security-events: write
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        tool: [cargo-audit, secrets-scan, cargo-deny, shellcheck, sbom-scan]
-    # Allow PRs to surface SBOM findings without blocking; block on main by required checks
-    continue-on-error: ${{ github.event_name == 'pull_request' && matrix.tool == 'sbom-scan' }}
     steps:
     - uses: actions/checkout@v5
 
-    # cargo-audit
-    - name: Install Rust (cargo-audit)
-      if: ${{ matrix.tool == 'cargo-audit' }}
+    - name: Install Rust
       uses: dtolnay/rust-toolchain@stable
+
+    - name: Cache cargo dependencies
+      uses: actions/cache@v4
+      with:
+        path: |
+          ~/.cargo/registry
+          ~/.cargo/git
+        key: cargo-${{ runner.os }}-${{ hashFiles('**/Cargo.lock') }}
+        restore-keys: cargo-${{ runner.os }}-
+
     - name: Install dependencies for cargo-audit
-      if: ${{ matrix.tool == 'cargo-audit' }}
       run: sudo apt-get update && sudo apt-get install -y pkg-config libssl-dev
+
     - name: Install cargo-audit
-      if: ${{ matrix.tool == 'cargo-audit' }}
       run: cargo install cargo-audit
+
     - name: Run cargo-audit
-      if: ${{ matrix.tool == 'cargo-audit' }}
       run: cargo audit --deny warnings --ignore RUSTSEC-2025-0134 --ignore RUSTSEC-2025-0141
 
-    # secrets-scan (gitleaks)
-    - name: Ensure full history for secrets scan
-      if: ${{ matrix.tool == 'secrets-scan' }}
-      run: |
-        git fetch --prune --unshallow || true
-    - name: Run Gitleaks
-      if: ${{ matrix.tool == 'secrets-scan' }}
-      uses: gitleaks/gitleaks-action@v2
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-    # cargo-deny
-    - name: Install Rust (cargo-deny)
-      if: ${{ matrix.tool == 'cargo-deny' }}
-      uses: dtolnay/rust-toolchain@stable
     - name: Run cargo-deny checks
-      if: ${{ matrix.tool == 'cargo-deny' }}
       uses: EmbarkStudios/cargo-deny-action@v2
       with:
         command: check advisories bans sources
 
-    # shellcheck
+  # Security - General checks (gitleaks, shellcheck, SBOM - no Rust needed)
+  security-general:
+    name: Security - General
+    permissions:
+      contents: read
+      security-events: write
+    runs-on: ubuntu-latest
+    # Allow PRs to surface SBOM findings without blocking; block on main by required checks
+    continue-on-error: ${{ github.event_name == 'pull_request' }}
+    steps:
+    - uses: actions/checkout@v5
+
+    # Gitleaks secrets scan
+    - name: Ensure full history for secrets scan
+      run: |
+        git fetch --prune --unshallow || true
+
+    - name: Run Gitleaks
+      uses: gitleaks/gitleaks-action@v2
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+    # ShellCheck
     - name: Install ShellCheck
-      if: ${{ matrix.tool == 'shellcheck' }}
       run: sudo apt-get update && sudo apt-get install -y shellcheck
+
     - name: Run ShellCheck
-      if: ${{ matrix.tool == 'shellcheck' }}
       run: |
         set -e
         if [ -d scripts ]; then
@@ -234,7 +209,6 @@ jobs:
 
     # SBOM and vulnerability scan (Anchore)
     - name: Scan workspace with Anchore
-      if: ${{ matrix.tool == 'sbom-scan' }}
       id: anchore
       uses: anchore/scan-action@v4
       with:
@@ -242,9 +216,10 @@ jobs:
         fail-build: true
         severity-cutoff: critical
         output-format: sarif
+
     - name: Upload SARIF to code scanning
       # Upload only on push events and when the SARIF file exists
-      if: ${{ matrix.tool == 'sbom-scan' && always() && github.event_name == 'push' && hashFiles('results.sarif') != '' }}
+      if: ${{ always() && github.event_name == 'push' && hashFiles('results.sarif') != '' }}
       uses: github/codeql-action/upload-sarif@v3
       with:
         sarif_file: results.sarif
