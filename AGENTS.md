@@ -95,7 +95,9 @@ All detailed instructions are organized as modular, reusable skills in [.github/
 
 **Distribution**: NPM, Cargo, Homebrew
 
-**Current Version**: 0.0.75
+**Current Deployed Version**: 0.0.76
+
+> **Version Rule**: Always determine the current version from what is **actually deployed** (crates.io, npmjs.com, Homebrew tap), NOT from local files (Cargo.toml, package.json). Local files may contain a prepared-but-unpublished version bump that was never released.
 
 ### Installation
 
