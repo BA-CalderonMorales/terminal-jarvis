@@ -52,6 +52,11 @@ pub static COMMANDS: &[CommandDef] = &[
         aliases: &[],
     },
     CommandDef {
+        command: "/dashboard",
+        description: "Tool Health Dashboard",
+        aliases: &["/status"],
+    },
+    CommandDef {
         command: "/help",
         description: "Show help",
         aliases: &[],

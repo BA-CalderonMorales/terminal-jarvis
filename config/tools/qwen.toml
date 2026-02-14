@@ -26,10 +26,17 @@ args = ["update", "-g", "@qwen-code/qwen-code"]
 verify_command = "qwen --version"
 
 [tool.auth]
-env_vars = ["QWEN_API_KEY"]
-setup_url = "https://dashscope.aliyun.com/"
+env_vars = ["DASHSCOPE_API_KEY", "QWEN_CODE_API_KEY", "OPENAI_API_KEY"]
+setup_url = "https://dashscope.console.aliyun.com/"
 browser_auth = false
-auth_instructions = "Visit DashScope to generate your API key"
+auth_instructions = "Visit DashScope to generate your API key, or use OpenAI-compatible mode"
+auth_mode = "any"
+default_env_var = "DASHSCOPE_API_KEY"
+providers = [
+    {name = "DashScope", env_var = "DASHSCOPE_API_KEY", setup_url = "https://dashscope.console.aliyun.com/"},
+    {name = "Qwen", env_var = "QWEN_CODE_API_KEY", setup_url = "https://dashscope.console.aliyun.com/"},
+    {name = "OpenAI", env_var = "OPENAI_API_KEY", key_hint = "sk-*", setup_url = "https://platform.openai.com/api-keys"},
+]
 
 [tool.features]
 supports_files = true

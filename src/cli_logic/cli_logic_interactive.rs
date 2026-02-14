@@ -155,6 +155,11 @@ async fn execute_command(
             handle_theme_selection().await?;
             refresh_screen(theme, npm_available).await?;
         }
+        "/dashboard" | "/status" => {
+            print!("\x1b[2J\x1b[H");
+            crate::cli_logic::cli_logic_dashboard::handle_dashboard().await?;
+            refresh_screen(theme, npm_available).await?;
+        }
         "/exit" | "/quit" => {
             print!("{}", theme.reset());
             print!("\x1b[0m");
@@ -204,15 +209,16 @@ fn display_available_commands(theme: &crate::theme::Theme) {
         "Minimal" => {
             // Ultra-minimal: no colors, just aligned text
             println!("Commands:");
-            println!("  /tools     AI CLI Tools");
-            println!("  /evals     Evals & Comparisons");
-            println!("  /auth      Authentication");
-            println!("  /links     Important Links");
-            println!("  /settings  Settings");
-            println!("  /db        Database Management");
-            println!("  /theme     Change UI Theme");
-            println!("  /help      Show this help");
-            println!("  /exit      Exit");
+            println!("  /tools      AI CLI Tools");
+            println!("  /evals      Evals & Comparisons");
+            println!("  /auth       Authentication");
+            println!("  /links      Important Links");
+            println!("  /settings   Settings");
+            println!("  /db         Database Management");
+            println!("  /theme      Change UI Theme");
+            println!("  /dashboard  Tool Health Status");
+            println!("  /help       Show this help");
+            println!("  /exit       Exit");
             println!();
             println!("Tab to autocomplete");
         }
@@ -256,6 +262,11 @@ fn display_available_commands(theme: &crate::theme::Theme) {
             );
             println!(
                 "  {} {}",
+                theme.accent("/dashboard"),
+                theme.secondary("Tool health status")
+            );
+            println!(
+                "  {} {}",
                 theme.accent("/help"),
                 theme.secondary("Display this command list")
             );
@@ -277,6 +288,7 @@ fn display_available_commands(theme: &crate::theme::Theme) {
             println!("  {} - Settings", theme.secondary("/settings"));
             println!("  {} - Database Management", theme.secondary("/db"));
             println!("  {} - Change UI Theme", theme.secondary("/theme"));
+            println!("  {} - Tool Health Status", theme.secondary("/dashboard"));
             println!("  {} - Show this help", theme.secondary("/help"));
             println!("  {} - Exit", theme.secondary("/exit"));
             println!();

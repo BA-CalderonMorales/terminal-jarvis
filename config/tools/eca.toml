@@ -1,0 +1,45 @@
+# =============================================================================
+# ECA - Editor Code Assistant
+# =============================================================================
+
+[tool]
+display_name = "ECA"
+config_key = "eca"
+description = "Editor Code Assistant"
+homepage = "https://eca.dev"
+documentation = "https://eca.dev/docs"
+cli_command = "eca"
+requires_npm = false
+requires_sudo = false
+status = "beta"
+
+[tool.install]
+command = "curl"
+args = ["-s", "https://raw.githubusercontent.com/editor-code-assistant/eca/master/install"]
+pipe_to = "bash"
+verify_command = "eca --version"
+post_install_message = "ECA installed!"
+
+[tool.update]
+command = "eca"
+args = ["upgrade"]
+verify_command = "eca --version"
+
+[tool.auth]
+env_vars = ["ANTHROPIC_API_KEY", "OPENAI_API_KEY", "ECA_API_KEY"]
+setup_url = "https://eca.dev"
+browser_auth = true
+auth_instructions = "Run 'eca auth' or set an API key for your preferred provider"
+auth_mode = "any"
+cli_auth_command = "eca auth"
+providers = [
+    {name = "Anthropic", env_var = "ANTHROPIC_API_KEY", key_hint = "sk-ant-*", setup_url = "https://console.anthropic.com/"},
+    {name = "OpenAI", env_var = "OPENAI_API_KEY", key_hint = "sk-*", setup_url = "https://platform.openai.com/api-keys"},
+    {name = "ECA", env_var = "ECA_API_KEY", setup_url = "https://eca.dev"},
+]
+
+[tool.features]
+supports_files = true
+supports_streaming = true
+supports_conversation = true
+supported_languages = ["all"]

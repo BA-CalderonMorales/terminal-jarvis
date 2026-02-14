@@ -29,7 +29,11 @@ verify_command = "gemini --version"
 env_vars = ["GOOGLE_API_KEY", "GEMINI_API_KEY"]
 setup_url = "https://aistudio.google.com/app/apikey"
 browser_auth = true
-auth_instructions = "Visit Google AI Studio to generate your API key"
+auth_instructions = "Visit Google AI Studio to generate your API key, or run 'gemini auth'"
+auth_mode = "any"
+default_env_var = "GOOGLE_API_KEY"
+key_format_hint = "AIza*"
+cli_auth_command = "gemini auth"
 
 [tool.features]
 supports_files = true

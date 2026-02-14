@@ -163,7 +163,7 @@ generate_testing_note() {
                 ;;
         esac
         
-        echo "**Testing Phase**: Looking for testers! $tools_list are new additions — see the [Testing Guide](https://ba-calderonmorales.github.io/my-life-as-a-dev/projects/active/terminal-jarvis/#testing)."
+        echo "**Testing Phase**: Looking for testers! $tools_list are new additions — see the [Testing Guide](https://ba-calderonmorales.github.io/my-life-as-a-dev/latest/projects/active/terminal-jarvis/#testing)."
     fi
 }
 

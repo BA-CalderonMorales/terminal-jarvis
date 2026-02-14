@@ -452,7 +452,7 @@ pub async fn handle_quick_launch() -> Result<()> {
         None => {
             ProgressUtils::warning_message("No last-used tool found");
             println!("  Use 'terminal-jarvis <tool>' to launch a tool directly");
-            println!("  Available tools: claude, gemini, qwen, opencode, codex, aider, amp, goose, crush, llxprt");
+            println!("  Available tools: claude, gemini, qwen, opencode, codex, aider, amp, goose, crush, llxprt, ollama, vibe, droid, forge, cursor-agent, jules, kilocode, letta, nanocoder, pi, code, eca");
             Ok(())
         }
     }

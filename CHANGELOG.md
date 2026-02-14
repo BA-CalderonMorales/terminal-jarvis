@@ -2,6 +2,27 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.0.76] - 2026-02-14
+
+### Added
+- **12 New AI CLI Tools**: Full ecosystem integration for Ollama, Cody, Continue, Tabby, Cursor, Windsurf, Zed, Void, Pear, Blackbox, Tabnine, and Replit
+- **Unified Data-Driven Auth**: Consolidated authentication system with flow hardening
+- **Health Dashboard**: System health monitoring dashboard for tool status
+
+### Fixed
+- **Security**: Updated bytes 1.11.0 -> 1.11.1 to resolve RUSTSEC-2026-0007
+- **Homebrew**: Added missing Formula file to main repo to unblock tap updates
+- **CI**: Removed 'v' prefix from homebrew tap update commit message to prevent double-v error
+- **Docs**: Fixed broken documentation links and updated module counts in READMEs
+
+### Changed
+- **CI Pipeline Optimization**: Reduced from 12 jobs to 5, cutting estimated CI time ~60%
+  - Removed redundant macOS Rust test matrix (logic tests, not platform-specific)
+  - Removed multiplatform-build job (CD already covers this before releases)
+  - Consolidated 5 security jobs into 2 (Rust and General)
+  - Added cargo dependency caching via actions/cache
+  - Added concurrency groups to cancel stale in-flight CI runs
+
 ## [0.0.75] - 2026-01-28
 
 ### Added

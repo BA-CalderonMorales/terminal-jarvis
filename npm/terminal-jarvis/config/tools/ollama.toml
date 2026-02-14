@@ -1,0 +1,42 @@
+# =============================================================================
+# OLLAMA - Local LLM Runner
+# =============================================================================
+# Single Responsibility: Manages Ollama CLI tool configuration and settings
+# Open/Closed Principle: Self-contained tool definition, extensible without modification
+
+[tool]
+display_name = "Ollama"
+config_key = "ollama"
+description = "Get up and running with large language models locally"
+homepage = "https://ollama.com"
+documentation = "https://github.com/ollama/ollama/tree/main/docs"
+cli_command = "ollama"
+requires_npm = false
+requires_sudo = false
+status = "stable"
+
+[tool.install]
+command = "curl"
+args = ["-fsSL", "https://ollama.com/install.sh"]
+pipe_to = "sh"
+verify_command = "ollama --version"
+post_install_message = "Ollama installed successfully! Run 'ollama run llama3' to get started."
+
+[tool.update]
+command = "curl"
+args = ["-fsSL", "https://ollama.com/install.sh"]
+pipe_to = "sh"
+verify_command = "ollama --version"
+
+[tool.auth]
+env_vars = []
+setup_url = ""
+browser_auth = false
+auth_instructions = "Ollama runs locally and does not typically require authentication."
+
+[tool.features]
+supports_files = true
+supports_streaming = true
+supports_conversation = true
+max_context_tokens = 4096
+supported_languages = ["text"]
