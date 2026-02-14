@@ -68,7 +68,7 @@ fn print_help() {
     println!("  - Requires API key authentication");
     println!("  - Supports multiple programming languages");
     println!();
-    println!("For more information, see: https://ba-calderonmorales.github.io/my-life-as-a-dev/projects/active/terminal-jarvis/");
+    println!("For more information, see: https://ba-calderonmorales.github.io/my-life-as-a-dev/latest/projects/active/terminal-jarvis/");
 }
 
 fn main() {
