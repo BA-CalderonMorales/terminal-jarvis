@@ -4,8 +4,10 @@
 // between different authentication domains for a unified API.
 
 use anyhow::Result;
+use std::collections::HashMap;
 
 use super::auth_credentials_store::CredentialsStore;
+use super::auth_preflight;
 
 /// Main authentication manager that coordinates all authentication functionality
 pub struct AuthManager;
@@ -92,5 +94,18 @@ impl AuthManager {
     /// Clear all saved credentials for all tools
     pub fn clear_all_credentials() -> Result<()> {
         CredentialsStore::clear_all()
+    }
+
+    /// Data-driven auth preflight check using TOML config
+    pub fn check_auth_preflight(tool: &str) -> auth_preflight::AuthPreflightResult {
+        auth_preflight::AuthPreflight::check(tool)
+    }
+
+    /// Interactively prompt the user for missing auth credentials
+    pub fn prompt_for_missing_auth(
+        tool: &str,
+        result: &auth_preflight::AuthPreflightResult,
+    ) -> Result<HashMap<String, String>> {
+        auth_preflight::AuthPreflight::prompt_for_missing(tool, result)
     }
 }

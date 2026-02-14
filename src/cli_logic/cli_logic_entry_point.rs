@@ -238,23 +238,33 @@ fn initial_case(s: &str) -> String {
     }
 }
 
-/// Get tool auth configuration: (command, args, action_label)
-fn get_tool_auth_config(
-    tool: &str,
-) -> Option<(&'static str, &'static [&'static str], &'static str)> {
-    match tool {
-        "amp" => Some(("amp", &["login"], "Login to")),
-        "codex" => Some(("codex", &["login"], "Login to")),
-        "crush" => Some(("crush", &["login"], "Login to")),
-        "opencode" => Some(("opencode", &["auth"], "Authenticate")),
-        "goose" => Some(("goose", &["configure"], "Configure")),
-        "claude" => Some(("claude", &["--help"], "Setup")),
-        "gemini" => Some(("gemini", &["--help"], "Setup")),
-        "qwen" => Some(("qwen", &["--help"], "Setup")),
-        "aider" => Some(("aider", &["--help"], "Setup")),
-        "llxprt" => Some(("llxprt", &["--help"], "Setup")),
-        _ => None,
+/// Get tool auth configuration from TOML config: (command, args, action_label)
+///
+/// Reads cli_auth_command from config/tools/*.toml instead of hardcoded match arms.
+fn get_tool_auth_config(tool: &str) -> Option<(String, Vec<String>, String)> {
+    use crate::auth_manager::auth_preflight::AuthPreflight;
+
+    let result = AuthPreflight::check(tool);
+    let cli_cmd = result.cli_auth_command?;
+
+    // Parse "goose configure" -> ("goose", ["configure"])
+    let parts: Vec<&str> = cli_cmd.split_whitespace().collect();
+    if parts.is_empty() {
+        return None;
     }
+
+    let command = parts[0].to_string();
+    let args: Vec<String> = parts[1..].iter().map(|s| s.to_string()).collect();
+
+    // Derive action label from the first arg
+    let action = match args.first().map(|s| s.as_str()) {
+        Some("login") => "Login to",
+        Some("configure") => "Configure",
+        Some("auth") => "Authenticate",
+        _ => "Setup",
+    };
+
+    Some((command, args, action.to_string()))
 }
 
 /// Handle user choice after tool exit
@@ -271,7 +281,7 @@ async fn handle_post_tool_exit(last_tool: &str, last_args: &[String]) -> Result<
         let auth_config = get_tool_auth_config(last_tool);
 
         // Add login option if tool supports CLI login
-        if let Some((_, _, action)) = auth_config {
+        if let Some((_, _, ref action)) = auth_config {
             exit_options.push(format!("2. {action} {tool_display}"));
             exit_options.push("3. Back to Main Menu".to_string());
             exit_options.push("4. Switch to Another AI Tool".to_string());
@@ -316,7 +326,7 @@ async fn handle_post_tool_exit(last_tool: &str, last_args: &[String]) -> Result<
                         "\n{}",
                         theme.accent(&format!("Running {} {}...", cmd, args.join(" ")))
                     );
-                    let status = std::process::Command::new(cmd).args(args).status();
+                    let status = std::process::Command::new(&cmd).args(&args).status();
                     match status {
                         Ok(exit_status) if exit_status.success() => {
                             println!(

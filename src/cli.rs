@@ -161,6 +161,8 @@ impl Cli {
                 DbCommands::Reset { force } => cli_logic::handle_db_reset(force).await,
             },
 
+            Some(Commands::Status) => cli_logic::handle_status_command().await,
+
             // (Duplicate Auth handler removed; handled above)
             None => cli_logic::handle_interactive_mode().await,
         }
@@ -235,6 +237,9 @@ pub enum Commands {
         #[command(subcommand)]
         action: DbCommands,
     },
+
+    /// Show tool health status dashboard
+    Status,
 }
 
 #[derive(Subcommand)]

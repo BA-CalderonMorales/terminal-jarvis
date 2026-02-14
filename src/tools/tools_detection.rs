@@ -14,6 +14,7 @@ pub enum PackageManager {
     Uv,
     Cargo,
     Curl,
+    Pip,
     Unknown,
 }
 
@@ -25,6 +26,7 @@ impl PackageManager {
             Self::Uv => "uv",
             Self::Cargo => "cargo",
             Self::Curl => "curl",
+            Self::Pip => "pip",
             Self::Unknown => "",
         }
     }
@@ -36,6 +38,7 @@ impl PackageManager {
             Self::Uv => check_tool_installed("uv"),
             Self::Cargo => check_tool_installed("cargo"),
             Self::Curl => check_tool_installed("curl"),
+            Self::Pip => check_tool_installed("pip") || check_tool_installed("pip3"),
             Self::Unknown => true,
         }
     }
@@ -47,6 +50,7 @@ impl PackageManager {
             Self::Uv => "Install uv from: https://docs.astral.sh/uv/",
             Self::Cargo => "Install Rust from: https://rustup.rs/",
             Self::Curl => "Install curl via your system package manager",
+            Self::Pip => "Install Python from: https://python.org/",
             Self::Unknown => "Check tool documentation for requirements",
         }
     }
@@ -71,6 +75,7 @@ pub fn infer_package_manager(tool_name: &str) -> PackageManager {
         "uv" => PackageManager::Uv,
         "cargo" => PackageManager::Cargo,
         "curl" => PackageManager::Curl,
+        "pip" | "pip3" => PackageManager::Pip,
         _ => PackageManager::Unknown,
     }
 }

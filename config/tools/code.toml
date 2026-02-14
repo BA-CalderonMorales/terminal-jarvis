@@ -29,6 +29,9 @@ env_vars = ["OPENAI_API_KEY"]
 setup_url = ""
 browser_auth = false
 auth_instructions = "Set OPENAI_API_KEY."
+auth_mode = "any"
+default_env_var = "OPENAI_API_KEY"
+key_format_hint = "sk-*"
 
 [tool.features]
 supports_files = true
