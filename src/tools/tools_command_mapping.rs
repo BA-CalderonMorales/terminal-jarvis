@@ -38,6 +38,18 @@ pub fn get_command_mapping() -> HashMap<&'static str, &'static str> {
     mapping.insert("amp", "amp"); // Sourcegraph Amp installs as 'amp'
     mapping.insert("aider", "aider"); // Aider installs as 'aider'
     mapping.insert("copilot", "copilot"); // GitHub Copilot CLI installs as 'copilot'
+    mapping.insert("ollama", "ollama");
+    mapping.insert("vibe", "vibe");
+    mapping.insert("droid", "droid");
+    mapping.insert("forge", "forge");
+    mapping.insert("cursor-agent", "cursor-agent");
+    mapping.insert("jules", "jules");
+    mapping.insert("kilocode", "kilocode");
+    mapping.insert("letta", "letta");
+    mapping.insert("nanocoder", "nanocoder");
+    mapping.insert("pi", "pi");
+    mapping.insert("code", "code");
+    mapping.insert("eca", "eca");
     mapping
 }
 

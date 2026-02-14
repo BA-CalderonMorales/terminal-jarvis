@@ -1,65 +1,52 @@
 // Tools Startup Guidance Domain
 // Handles tool-specific startup messages and user guidance
+//
+// Uses data-driven auth checks from AuthPreflight instead of
+// hardcoded per-tool match arms.
 
 use anyhow::Result;
 
-/// Show minimal startup guidance for tools - only when critical info is needed
+/// Show minimal startup guidance for tools -- only when critical info is needed.
+///
+/// Reads auth requirements from TOML config via AuthPreflight rather than
+/// maintaining per-tool match arms.
 pub fn show_tool_startup_guidance(display_name: &str) -> Result<()> {
+    use crate::auth_manager::auth_preflight::AuthPreflight;
     use crate::theme::theme_global_config;
+
+    let result = AuthPreflight::check(display_name);
+
+    // No guidance needed if auth is satisfied or tool needs no auth
+    if result.is_ready || result.auth_mode == "none" {
+        return Ok(());
+    }
 
     let theme = theme_global_config::current_theme();
 
-    // Only show guidance for tools that need API keys and don't have them set
-    match display_name {
-        "claude" => {
-            if std::env::var("ANTHROPIC_API_KEY").is_err() {
-                println!(
-                    "{}",
-                    theme.secondary("Tip: Set ANTHROPIC_API_KEY for Claude API access")
-                );
-            }
-        }
-        "gemini" => {
-            if std::env::var("GOOGLE_API_KEY").is_err() && std::env::var("GEMINI_API_KEY").is_err()
-            {
-                println!(
-                    "{}",
-                    theme.secondary("Tip: Set GOOGLE_API_KEY for Gemini API access")
-                );
-            }
-        }
-        "codex" => {
-            if std::env::var("OPENAI_API_KEY").is_err() {
-                println!(
-                    "{}",
-                    theme.secondary("Tip: Set OPENAI_API_KEY for Codex API access")
-                );
-            }
-        }
-        "aider" => {
-            let has_key = std::env::var("OPENROUTER_API_KEY").is_ok()
-                || std::env::var("OPENAI_API_KEY").is_ok()
-                || std::env::var("ANTHROPIC_API_KEY").is_ok();
-            if !has_key {
-                println!(
-                    "{}",
-                    theme.secondary("Tip: Set OPENROUTER_API_KEY for Aider (or OPENAI/ANTHROPIC)")
-                );
-            }
-        }
-        "goose" => {
-            let has_key = std::env::var("OPENAI_API_KEY").is_ok()
-                || std::env::var("ANTHROPIC_API_KEY").is_ok()
-                || std::env::var("GOOGLE_API_KEY").is_ok();
-            if !has_key {
-                println!(
-                    "{}",
-                    theme.secondary("Tip: Run 'goose configure' to set up provider/API key")
-                );
-            }
-        }
-        // Tools that don't need API keys - no guidance needed
-        _ => {}
+    // Build a concise tip from the preflight result
+    if let Some(cmd) = &result.cli_auth_command {
+        println!(
+            "{}",
+            theme.secondary(&format!(
+                "Tip: Run '{}' to set up {} credentials",
+                cmd, display_name
+            ))
+        );
+    } else if !result.missing_vars.is_empty() {
+        let hint = if result.auth_mode == "any" {
+            // Show default or first missing var
+            result
+                .default_env_var
+                .as_deref()
+                .unwrap_or(&result.missing_vars[0])
+                .to_string()
+        } else {
+            result.missing_vars.join(", ")
+        };
+        println!(
+            "{}",
+            theme.secondary(&format!("Tip: Set {} for {} access", hint, display_name))
+        );
     }
 
     Ok(())

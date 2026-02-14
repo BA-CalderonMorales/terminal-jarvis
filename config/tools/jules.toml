@@ -1,0 +1,38 @@
+# =============================================================================
+# JULES - Google AI Agent
+# =============================================================================
+
+[tool]
+display_name = "Jules"
+config_key = "jules"
+description = "Google's asynchronous coding agent in the terminal"
+homepage = "https://jules.google"
+documentation = "https://jules.google/docs"
+cli_command = "jules"
+requires_npm = true
+requires_sudo = false
+status = "beta"
+
+[tool.install]
+command = "npm"
+args = ["install", "-g", "@google/jules"]
+verify_command = "jules --version"
+post_install_message = "Jules installed successfully!"
+
+[tool.update]
+command = "npm"
+args = ["update", "-g", "@google/jules"]
+verify_command = "jules --version"
+
+[tool.auth]
+env_vars = []
+setup_url = "https://jules.google"
+browser_auth = true
+auth_instructions = "Run 'jules login' to authenticate with Google."
+auth_mode = "none"
+
+[tool.features]
+supports_files = true
+supports_streaming = true
+supports_conversation = true
+supported_languages = ["all"]

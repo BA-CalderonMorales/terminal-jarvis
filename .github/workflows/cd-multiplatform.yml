@@ -376,7 +376,11 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add Formula/terminal-jarvis.rb
-          git commit -m "feat: update Terminal Jarvis to ${{ needs.build-multiplatform.outputs.version }}"
+          # Use VERSION_NUM (0.0.X) instead of VERSION (v0.0.X) to prevent double-v prefix in downstream scripts
+          # Downstream script likely adds 'v' automatically: v + 0.0.X = v0.0.X
+          VERSION="${{ needs.build-multiplatform.outputs.version }}"
+          VERSION_NUM=${VERSION#v}
+          git commit -m "feat: update Terminal Jarvis to ${VERSION_NUM}"
           git push
 
   # Publish NPM package LAST - requires update-homebrew-tap to succeed

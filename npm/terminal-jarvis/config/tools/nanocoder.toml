@@ -1,0 +1,37 @@
+# =============================================================================
+# NANOCODER - Local-First Agent
+# =============================================================================
+
+[tool]
+display_name = "Nanocoder"
+config_key = "nanocoder"
+description = "Local-first coding agent"
+homepage = "https://github.com/motesoftware/nanocoder"
+documentation = "https://github.com/motesoftware/nanocoder"
+cli_command = "nanocoder"
+requires_npm = true
+requires_sudo = false
+status = "experimental"
+
+[tool.install]
+command = "npm"
+args = ["install", "-g", "@motesoftware/nanocoder"]
+verify_command = "nanocoder --version"
+post_install_message = "Nanocoder installed!"
+
+[tool.update]
+command = "npm"
+args = ["update", "-g", "@motesoftware/nanocoder"]
+verify_command = "nanocoder --version"
+
+[tool.auth]
+env_vars = []
+setup_url = ""
+browser_auth = false
+auth_instructions = "Nanocoder runs locally."
+
+[tool.features]
+supports_files = true
+supports_streaming = true
+supports_conversation = true
+supported_languages = ["all"]

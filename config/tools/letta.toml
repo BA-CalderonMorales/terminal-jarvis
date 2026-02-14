@@ -1,0 +1,44 @@
+# =============================================================================
+# LETTA - Memory-First Agent
+# =============================================================================
+
+[tool]
+display_name = "Letta"
+config_key = "letta"
+description = "Memory-first coding agent"
+homepage = "https://letta.com"
+documentation = "https://docs.letta.com"
+cli_command = "letta"
+requires_npm = true
+requires_sudo = false
+status = "experimental"
+
+[tool.install]
+command = "npm"
+args = ["install", "-g", "@letta-ai/letta-code"]
+verify_command = "letta --version"
+post_install_message = "Letta installed!"
+
+[tool.update]
+command = "npm"
+args = ["update", "-g", "@letta-ai/letta-code"]
+verify_command = "letta --version"
+
+[tool.auth]
+env_vars = ["ANTHROPIC_API_KEY", "OPENAI_API_KEY", "LETTA_API_KEY"]
+setup_url = "https://letta.com"
+browser_auth = true
+auth_instructions = "Run 'letta login' or set an API key for your preferred provider"
+auth_mode = "any"
+cli_auth_command = "letta login"
+providers = [
+    {name = "Anthropic", env_var = "ANTHROPIC_API_KEY", key_hint = "sk-ant-*", setup_url = "https://console.anthropic.com/"},
+    {name = "OpenAI", env_var = "OPENAI_API_KEY", key_hint = "sk-*", setup_url = "https://platform.openai.com/api-keys"},
+    {name = "Letta", env_var = "LETTA_API_KEY", setup_url = "https://letta.com"},
+]
+
+[tool.features]
+supports_files = true
+supports_streaming = true
+supports_conversation = true
+supported_languages = ["all"]

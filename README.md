@@ -69,11 +69,11 @@ terminal-jarvis/
 ├── src/                           # Rust application
 │   ├── main.rs                    # Entry point
 │   ├── cli.rs                     # CLI definitions
-│   ├── cli_logic/                 # Business logic (21 modules)
-│   ├── auth_manager/              # Authentication (7 modules)
+│   ├── cli_logic/                 # Business logic (22 modules)
+│   ├── auth_manager/              # Authentication (8 modules)
 │   ├── config/                    # Configuration (6 modules)
 │   ├── services/                  # External integrations (6 modules)
-│   ├── tools/                     # Tool management (10 modules)
+│   ├── tools/                     # Tool management (14 modules)
 │   ├── theme/                     # UI theming (9 modules)
 │   └── api/                       # API framework (4 modules)
 │
@@ -87,12 +87,12 @@ terminal-jarvis/
 │   └── verify/                    # Verification feedback loop
 │
 ├── .github/                       # GitHub integrations
-│   └── skills/                    # AI agent skills (15 modules)
+│   └── skills/                    # AI agent skills (17 modules)
 │       ├── verification/          # Quality verification
 │       ├── release-checklist/     # Pre-release automation
 │       ├── qa-testing/            # Minimal QA branch testing
 │       ├── deployment/            # Release workflows
-│       └── ...                    # 11 more skills
+│       └── ...                    # 13 more skills
 │
 ├── tests/                         # Rust tests (cargo test)
 ├── e2e/                           # E2E tests (TypeScript/Vitest)
@@ -141,7 +141,7 @@ cd e2e && npm test      # End-to-end tests with Vitest
 
 ## Contributing
 
-See [AGENTS.md](AGENTS.md) for AI-assisted development guidelines and the [Contribution Guide](https://ba-calderonmorales.github.io/my-life-as-a-dev/projects/active/terminal-jarvis/details/contributions/).
+See [AGENTS.md](AGENTS.md) for AI-assisted development guidelines and the [Contribution Guide](https://ba-calderonmorales.github.io/my-life-as-a-dev/latest/projects/active/terminal-jarvis/details/contributions/).
 
 ## License
 

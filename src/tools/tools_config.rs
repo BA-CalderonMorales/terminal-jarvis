@@ -45,6 +45,17 @@ pub struct InstallCommand {
     pub post_install_message: Option<String>,
 }
 
+/// Authentication provider for multi-provider tools
+#[derive(Debug, Clone, Deserialize, Serialize)]
+pub struct AuthProvider {
+    pub name: String,
+    pub env_var: String,
+    #[serde(default)]
+    pub key_hint: Option<String>,
+    #[serde(default)]
+    pub setup_url: Option<String>,
+}
+
 /// Authentication configuration
 #[derive(Debug, Clone, Deserialize, Serialize)]
 pub struct AuthDefinition {
@@ -52,6 +63,21 @@ pub struct AuthDefinition {
     pub setup_url: String,
     pub browser_auth: bool,
     pub auth_instructions: Option<String>,
+    /// "any" (default) = any one env var suffices, "all" = all required, "none" = no auth needed
+    #[serde(default)]
+    pub auth_mode: Option<String>,
+    /// Primary env var to prompt for when no key is set
+    #[serde(default)]
+    pub default_env_var: Option<String>,
+    /// Glob-like prefix hint for key validation (e.g. "sk-or-*", "AIza*")
+    #[serde(default)]
+    pub key_format_hint: Option<String>,
+    /// CLI command the tool provides for interactive auth (e.g. "amp login", "goose configure")
+    #[serde(default)]
+    pub cli_auth_command: Option<String>,
+    /// Named providers for multi-provider tools
+    #[serde(default)]
+    pub providers: Vec<AuthProvider>,
 }
 
 /// Tool feature capabilities

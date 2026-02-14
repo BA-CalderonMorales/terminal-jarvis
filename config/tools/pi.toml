@@ -1,0 +1,42 @@
+# =============================================================================
+# PI - AI Coding Agent
+# =============================================================================
+
+[tool]
+display_name = "Pi"
+config_key = "pi"
+description = "Terminal-based coding agent"
+homepage = "https://github.com/mariozechner/pi-coding-agent"
+documentation = "https://github.com/mariozechner/pi-coding-agent"
+cli_command = "pi"
+requires_npm = true
+requires_sudo = false
+status = "experimental"
+
+[tool.install]
+command = "npm"
+args = ["install", "-g", "@mariozechner/pi-coding-agent"]
+verify_command = "pi --version"
+post_install_message = "Pi installed!"
+
+[tool.update]
+command = "npm"
+args = ["update", "-g", "@mariozechner/pi-coding-agent"]
+verify_command = "pi --version"
+
+[tool.auth]
+env_vars = ["OPENAI_API_KEY", "ANTHROPIC_API_KEY"]
+setup_url = ""
+browser_auth = false
+auth_instructions = "Set OPENAI_API_KEY or ANTHROPIC_API_KEY."
+auth_mode = "any"
+providers = [
+    {name = "OpenAI", env_var = "OPENAI_API_KEY", key_hint = "sk-*", setup_url = "https://platform.openai.com/api-keys"},
+    {name = "Anthropic", env_var = "ANTHROPIC_API_KEY", key_hint = "sk-ant-*", setup_url = "https://console.anthropic.com/"},
+]
+
+[tool.features]
+supports_files = true
+supports_streaming = true
+supports_conversation = true
+supported_languages = ["all"]
