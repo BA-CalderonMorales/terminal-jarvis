@@ -171,11 +171,28 @@ async fn execute_command(
             display_available_commands(theme);
         }
         _ => {
-            println!("\n{} Unknown command: {}", theme.accent("[!]"), selection);
-            println!(
-                "Type {} or press Tab for suggestions",
-                theme.accent("/help")
-            );
+            // Check if the input is a known tool name typed directly (without /run).
+            // This lets users type e.g. "claude" or "gemini" to launch a tool
+            // immediately, matching the headless invocation pattern:
+            //   terminal-jarvis claude
+            let candidate = selection.trim().to_lowercase();
+            let known_tools = crate::installation_arguments::InstallationManager::get_tool_names();
+            if known_tools.iter().any(|t| t.to_lowercase() == candidate) {
+                match crate::cli_logic::cli_logic_tool_execution::handle_run_tool(&candidate, &[])
+                    .await
+                {
+                    Ok(_) => {}
+                    Err(e) => eprintln!("\n{} {}", theme.accent("[!]"), e),
+                }
+                refresh_screen(theme, npm_available).await?;
+            } else {
+                println!("\n{} Unknown command: {}", theme.accent("[!]"), selection);
+                println!(
+                    "Type {} for tools or {} for commands",
+                    theme.accent("/tools"),
+                    theme.accent("/help")
+                );
+            }
         }
     }
     Ok(false)

@@ -139,65 +139,70 @@ pub fn get_available_tools() -> BTreeMap<&'static str, ToolInfo> {
     tools
 }
 
-/// Check if a tool is installed by trying to run it
+/// Check if a tool is installed by trying to run it.
+///
+/// Detection order (fast → slow):
+///   1. `which <tool>`       – standard Unix PATH lookup
+///   2. `where <tool>`       – Windows equivalent
+///   3. Common ~/.local/bin paths – catches tools installed via curl scripts
+///      that prepend to PATH inside shell init files
+///   4. Shell-sourced lookup – sources ~/.bashrc / ~/.profile so that tools
+///      installed with non-standard installers (goose, vibe, ollama, …) that
+///      only update the user's shell config are found correctly
+///   5. `<tool> --version`   – last-resort direct execution
 pub fn check_tool_installed(tool: &str) -> bool {
-    // Try 'which' command first (Unix-like systems)
+    // 1. Standard PATH lookup (fastest)
     if let Ok(output) = Command::new("which").arg(tool).output() {
         if output.status.success() && !output.stdout.is_empty() {
             return true;
         }
     }
 
-    // Try 'where' command (Windows)
+    // 2. Windows equivalent
     if let Ok(output) = Command::new("where").arg(tool).output() {
         if output.status.success() && !output.stdout.is_empty() {
             return true;
         }
     }
 
-    // For opencode specifically, check common installation paths
-    if tool == "opencode" {
-        let common_paths = [
-            "/usr/local/bin/opencode",
-            "/home/vscode/.local/bin/opencode",
-            "/root/.local/bin/opencode",
-            &format!(
-                "{}/.local/bin/opencode",
-                std::env::var("HOME").unwrap_or_default()
-            ),
-        ];
+    // 3. Check common user-local installation paths directly.
+    //    Many curl-based installers (goose, claude, ollama, vibe, …) drop
+    //    binaries in ~/.local/bin which may not be in the process PATH.
+    let home = std::env::var("HOME").unwrap_or_default();
+    let candidate_paths = [
+        format!("{home}/.local/bin/{tool}"),
+        format!("/usr/local/bin/{tool}"),
+        format!("/home/vscode/.local/bin/{tool}"),
+        format!("/root/.local/bin/{tool}"),
+    ];
 
-        for path in &common_paths {
-            if std::path::Path::new(path).exists() {
-                if let Ok(output) = Command::new(path).arg("--version").output() {
-                    if output.status.success() {
-                        return true;
-                    }
+    for path in &candidate_paths {
+        if std::path::Path::new(path).exists() {
+            if let Ok(output) = Command::new(path).arg("--version").output() {
+                if output.status.success() {
+                    return true;
                 }
             }
-        }
-
-        // Try with shell environment loaded
-        if let Ok(output) = Command::new("sh")
-        .arg("-c")
-        .arg("source ~/.bashrc 2>/dev/null; source ~/.profile 2>/dev/null; which opencode 2>/dev/null")
-        .output()
-      {
-        if output.status.success() && !output.stdout.is_empty() {
-          return true;
-        }
-      }
-    }
-
-    // Try running the tool with --version
-    if let Ok(output) = Command::new(tool).arg("--version").output() {
-        if output.status.success() {
+            // Binary exists even if --version returns non-zero (some tools do this)
             return true;
         }
     }
 
-    // Try running the tool with --help as fallback
-    if let Ok(output) = Command::new(tool).arg("--help").output() {
+    // 4. Shell-sourced lookup – handles installers that only update PATH in
+    //    shell config files (e.g. curl | bash scripts that add to ~/.bashrc).
+    //    We do this for all tools, not just opencode, because the pattern is
+    //    common across curl-based AI tool installers.
+    let shell_cmd = format!(
+        "source ~/.bashrc 2>/dev/null; source ~/.profile 2>/dev/null; which {tool} 2>/dev/null"
+    );
+    if let Ok(output) = Command::new("sh").arg("-c").arg(&shell_cmd).output() {
+        if output.status.success() && !output.stdout.is_empty() {
+            return true;
+        }
+    }
+
+    // 5. Direct execution with --version as last resort
+    if let Ok(output) = Command::new(tool).arg("--version").output() {
         if output.status.success() {
             return true;
         }
