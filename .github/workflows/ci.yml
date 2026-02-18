@@ -3,7 +3,7 @@ name: Continuous Integration
 on:
 
   push:
-    branches: [ "main", "develop", "feat/*", "bug/*", "security/*", "hotfix/*" ]
+    branches: [ "main", "develop", "feat/*", "bug/*", "security/*", "hotfix/*", "claude/*" ]
     paths-ignore:
       - '**.md'
       - '.github/skills/**'
@@ -11,7 +11,7 @@ on:
       - 'LICENSE'
 
   pull_request:
-    branches: [ "main", "develop", "feat/*", "bug/*", "security/*", "hotfix/*" ]
+    branches: [ "main", "develop", "feat/*", "bug/*", "security/*", "hotfix/*", "claude/*" ]
     paths-ignore:
       - '**.md'
       - '.github/skills/**'
