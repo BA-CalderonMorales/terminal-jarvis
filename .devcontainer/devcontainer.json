@@ -35,15 +35,18 @@
     "LC_ALL": "en_US.UTF-8",
     "LC_CTYPE": "en_US.UTF-8",
     "LC_COLLATE": "en_US.UTF-8",
-    "LC_MESSAGES": "en_US.UTF-8"
+    "LC_MESSAGES": "en_US.UTF-8",
+    "CARGO_TARGET_DIR": "/home/vscode/.cache/terminal-jarvis/target"
   },
   "postCreateCommand": [
     "bash",
     ".devcontainer/scripts/setup-dev-environment.sh"
   ],
+  "postStartCommand": "cargo check --quiet 2>&1 | head -20 || true",
   "customizations": {
     "vscode": {
       "extensions": [
+        "rust-lang.rust-analyzer",
         "vadimcn.vscode-lldb",
         "tamasfe.even-better-toml",
         "ms-vscode.vscode-typescript-next",
@@ -58,7 +61,13 @@
           "**/target": true,
           "**/Cargo.lock": true
         },
-        "editor.formatOnSave": true
+        "editor.formatOnSave": true,
+        "rust-analyzer.check.command": "clippy",
+        "rust-analyzer.check.extraArgs": ["--", "-W", "clippy::pedantic"],
+        "rust-analyzer.cargo.buildScripts.enable": true,
+        "rust-analyzer.diagnostics.enable": true,
+        "rust-analyzer.inlayHints.bindingModeHints.enable": false,
+        "rust-analyzer.inlayHints.closureReturnTypeHints.enable": "never"
       }
     }
   },
