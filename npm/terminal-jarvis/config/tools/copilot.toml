@@ -31,6 +31,7 @@ env_vars = ["GITHUB_TOKEN", "GH_TOKEN"]
 setup_url = "https://github.com/settings/tokens"
 browser_auth = true
 auth_instructions = "Use '/login' command in Copilot CLI, or set GITHUB_TOKEN/GH_TOKEN, or authenticate via GitHub CLI (gh)"
+auth_mode = "any"
 
 [tool.features]
 supports_files = true

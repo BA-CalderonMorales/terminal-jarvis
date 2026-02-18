@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.0.77] - 2026-02-17
+
+### Fixed
+- **NPM Beta/Stable Workflows**: Rewrote both workflows as lightweight dist-tag managers
+  - Removed broken OTP-based publish flow incompatible with automation tokens
+  - Workflows now add dist-tags to already-published versions from the CD pipeline
+  - No Rust build, no npm publish, no 2FA required in these workflows
+  - Fixes: `npm install -g terminal-jarvis@beta` and `terminal-jarvis@stable` install paths
+
 ## [0.0.76] - 2026-02-14
 
 ### Added

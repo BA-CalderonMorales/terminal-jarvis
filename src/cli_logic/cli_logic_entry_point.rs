@@ -391,83 +391,123 @@ async fn handle_post_tool_exit(last_tool: &str, last_args: &[String]) -> Result<
     }
 }
 
-/// Get uninstall command configuration for a tool
-fn get_uninstall_config(tool: &str) -> Option<(&'static str, &'static [&'static str])> {
-    match tool {
-        "claude" => Some(("npm", &["uninstall", "-g", "@anthropic-ai/claude-code"])),
-        "gemini" => Some(("npm", &["uninstall", "-g", "@anthropic-ai/gemini-cli"])),
-        "qwen" => Some(("npm", &["uninstall", "-g", "@anthropic-ai/qwen-code"])),
-        "opencode" => Some(("npm", &["uninstall", "-g", "opencode-ai"])),
-        "codex" => Some(("npm", &["uninstall", "-g", "@openai/codex"])),
-        "aider" => Some(("pip", &["uninstall", "-y", "aider-chat"])),
-        "goose" => Some(("pip", &["uninstall", "-y", "goose-ai"])),
-        "amp" => Some(("cargo", &["uninstall", "amp"])),
-        "crush" => Some(("cargo", &["uninstall", "crush"])),
-        "llxprt" => Some(("cargo", &["uninstall", "llxprt"])),
+/// Derive uninstall command from the TOML install config.
+/// Maps install commands to their corresponding uninstall equivalents:
+///   npm install -g <pkg>       -> npm uninstall -g <pkg>
+///   uv tool install <pkg>      -> uv tool uninstall <pkg>
+///   cargo install <pkg>        -> cargo uninstall <pkg>
+///   pip/pip3 install <pkg>     -> pip/pip3 uninstall -y <pkg>
+///   curl ... | bash            -> None (binary; caller shows removal hint)
+fn get_uninstall_command(tool: &str) -> Option<(String, Vec<String>)> {
+    let config_loader = crate::tools::tools_config::get_tool_config_loader();
+    let install_cmd = config_loader.get_install_command(tool)?;
+
+    match install_cmd.command.as_str() {
+        "npm" => {
+            // npm install -g @scope/pkg  ->  npm uninstall -g @scope/pkg
+            let pkg = install_cmd.args.last()?.clone();
+            Some((
+                "npm".to_string(),
+                vec!["uninstall".to_string(), "-g".to_string(), pkg],
+            ))
+        }
+        "uv" => {
+            // uv tool install pkg  ->  uv tool uninstall pkg
+            let pkg = install_cmd.args.last()?.clone();
+            Some((
+                "uv".to_string(),
+                vec!["tool".to_string(), "uninstall".to_string(), pkg],
+            ))
+        }
+        "cargo" => {
+            // cargo install pkg  ->  cargo uninstall pkg
+            let pkg = install_cmd.args.last()?.clone();
+            Some(("cargo".to_string(), vec!["uninstall".to_string(), pkg]))
+        }
+        "pip" | "pip3" => {
+            let pkg = install_cmd.args.last()?.clone();
+            Some((
+                install_cmd.command.clone(),
+                vec!["uninstall".to_string(), "-y".to_string(), pkg],
+            ))
+        }
+        // curl-based installs (claude, goose, ollama, vibe, …) don't have a
+        // standard uninstall path. Caller handles this case.
         _ => None,
+    }
+}
+
+/// Return a user-facing hint for removing a curl-installed tool binary.
+fn curl_tool_removal_hint(tool: &str) -> &'static str {
+    match tool {
+        "claude" => "Remove via: rm $(which claude)  or  npm uninstall -g @anthropic-ai/claude-code",
+        "goose" => "Remove via: rm ~/.local/bin/goose  (or wherever goose was installed)",
+        "ollama" => "See https://ollama.com/blog/ollama-is-now-available-as-an-official-docker-image for removal steps",
+        "vibe" => "Remove via: rm $(which vibe)",
+        _ => "Check the tool's documentation for removal instructions",
     }
 }
 
 /// Handle tool uninstallation with appropriate package manager
 async fn handle_uninstall_tool(tool: &str, tool_display: &str, theme: &crate::theme::Theme) {
-    let Some((cmd, args)) = get_uninstall_config(tool) else {
-        println!(
-            "{}",
-            theme.accent(&format!(
-                "Uninstall command not configured for {tool_display}. Check the tool's documentation."
-            ))
-        );
-        tokio::time::sleep(tokio::time::Duration::from_millis(1500)).await;
-        return;
-    };
+    match get_uninstall_command(tool) {
+        None => {
+            // curl-installed tools: show removal hint instead of running a command
+            let hint = curl_tool_removal_hint(tool);
+            println!("\n{}", theme.primary(&format!("To remove {tool_display}:")));
+            println!("  {}", theme.secondary(hint));
+            tokio::time::sleep(tokio::time::Duration::from_millis(2000)).await;
+        }
+        Some((cmd, args)) => {
+            // Confirm before uninstalling
+            let Ok(confirmed) = themed_confirm(&format!("Uninstall {tool_display}?"))
+                .with_default(false)
+                .prompt()
+            else {
+                return;
+            };
 
-    // Confirm before uninstalling
-    let Ok(confirmed) = themed_confirm(&format!("Uninstall {tool_display}?"))
-        .with_default(false)
-        .prompt()
-    else {
-        return;
-    };
+            if !confirmed {
+                return;
+            }
 
-    if !confirmed {
-        return;
+            println!(
+                "{}",
+                theme.secondary(&format!("Uninstalling {tool_display}..."))
+            );
+
+            let result = std::process::Command::new(&cmd).args(&args).status();
+            match result {
+                Ok(status) if status.success() => {
+                    println!(
+                        "{}",
+                        theme.primary(&format!("{tool_display} has been uninstalled."))
+                    );
+                    // Also clear credentials
+                    let _ = AuthManager::delete_tool_credentials(tool, &[]);
+                }
+                Ok(_) => {
+                    println!(
+                        "{}",
+                        theme.accent(&format!(
+                            "Uninstall may have failed. Try manually: {} {}",
+                            cmd,
+                            args.join(" ")
+                        ))
+                    );
+                }
+                Err(e) => {
+                    println!(
+                        "{}",
+                        theme.accent(&format!("Could not run uninstall command: {e}"))
+                    );
+                }
+            }
+
+            // Brief pause to let user read the message
+            tokio::time::sleep(tokio::time::Duration::from_millis(1500)).await;
+        }
     }
-
-    println!(
-        "{}",
-        theme.secondary(&format!("Uninstalling {tool_display}..."))
-    );
-
-    let result = std::process::Command::new(cmd).args(args).status();
-    match result {
-        Ok(status) if status.success() => {
-            println!(
-                "{}",
-                theme.primary(&format!("{tool_display} has been uninstalled."))
-            );
-            // Also clear credentials
-            let _ = AuthManager::delete_tool_credentials(tool, &[]);
-        }
-        Ok(_) => {
-            println!(
-                "{}",
-                theme.accent(&format!(
-                    "Uninstall may have failed. Try manually: {} {}",
-                    cmd,
-                    args.join(" ")
-                ))
-            );
-        }
-        Err(e) => {
-            println!(
-                "{}",
-                theme.accent(&format!("Could not run uninstall command: {e}"))
-            );
-        }
-    }
-
-    // Brief pause to let user read the message
-    tokio::time::sleep(tokio::time::Duration::from_millis(1500)).await;
 }
 
 /// Handle the important links menu
@@ -690,18 +730,21 @@ async fn handle_install_tools_menu() -> Result<()> {
     // Implementation moved to a focused module - placeholder for now
     use crate::progress_utils::ProgressUtils;
 
-    // Check installer prerequisites with progress (npm, uv, curl)
+    // Check installer prerequisites with progress (npm, uv, curl).
+    // NOTE: A missing npm is a WARNING, not a hard stop. Curl/uv tools are
+    // still installable without npm. We filter out npm tools below when npm
+    // is unavailable so users can still install everything else.
     let npm_check = ProgressContext::new("Checking NPM availability");
     tokio::time::sleep(tokio::time::Duration::from_millis(150)).await;
-    if !InstallationManager::check_npm_available() {
-        npm_check.finish_error("Node.js ecosystem unavailable");
-        ProgressUtils::error_message("Node.js runtime required. Install from: https://nodejs.org/");
-        println!("  Download from: https://nodejs.org/");
-        println!("Press Enter to continue...");
-        std::io::stdin().read_line(&mut String::new())?;
-        return Ok(());
+    let npm_available = InstallationManager::check_npm_available();
+    if !npm_available {
+        npm_check.finish_error("Node.js not available - npm tools cannot be installed");
+        ProgressUtils::info_message(
+            "Install Node.js from: https://nodejs.org/ to enable npm-based tools",
+        );
+    } else {
+        npm_check.finish_success("NPM is available");
     }
-    npm_check.finish_success("NPM is available");
 
     let curl_check = ProgressContext::new("Checking curl availability");
     tokio::time::sleep(tokio::time::Duration::from_millis(100)).await;
@@ -816,19 +859,47 @@ async fn handle_install_tools_menu() -> Result<()> {
     let check_progress = ProgressContext::new("Scanning for uninstalled tools");
     tokio::time::sleep(tokio::time::Duration::from_millis(400)).await;
 
-    let uninstalled_tools = ToolManager::get_uninstalled_tools();
+    let all_uninstalled = ToolManager::get_uninstalled_tools();
+
+    // When npm is unavailable, exclude npm-dependent tools so users can still
+    // install curl/uv tools. This is the key behaviour: prefer native downloads
+    // (curl) and don't block the whole menu on a missing npm.
+    let uninstalled_tools: Vec<&'static str> = if npm_available {
+        all_uninstalled
+    } else {
+        all_uninstalled
+            .into_iter()
+            .filter(|tool| {
+                InstallationManager::get_install_command(tool)
+                    .map(|cmd| !cmd.requires_npm)
+                    .unwrap_or(false)
+            })
+            .collect()
+    };
 
     if uninstalled_tools.is_empty() {
-        check_progress.finish_success("All tools are already installed");
-        ProgressUtils::success_message("All tools are already installed!");
+        if npm_available {
+            check_progress.finish_success("All tools are already installed");
+            ProgressUtils::success_message("All tools are already installed!");
+        } else {
+            check_progress.finish_success("All curl/uv installable tools are already installed");
+            ProgressUtils::info_message(
+                "Install Node.js to unlock additional npm-based tools: https://nodejs.org/",
+            );
+        }
         println!("Press Enter to continue...");
         std::io::stdin().read_line(&mut String::new())?;
         return Ok(());
     }
 
+    let available_count = uninstalled_tools.len();
     check_progress.finish_success(&format!(
-        "Found {} tools available for installation",
-        uninstalled_tools.len()
+        "Found {available_count} tools available for installation{}",
+        if !npm_available {
+            " (npm tools hidden - Node.js not installed)"
+        } else {
+            ""
+        }
     ));
 
     let tools_to_install =

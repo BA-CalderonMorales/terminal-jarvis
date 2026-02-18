@@ -30,6 +30,7 @@ env_vars = ["LLXPRT_API_KEY", "OPENAI_API_KEY"]
 setup_url = "https://platform.openai.com/api-keys"
 browser_auth = false
 auth_instructions = "Visit OpenAI Platform to generate your API key"
+auth_mode = "any"
 
 [tool.features]
 supports_files = true
