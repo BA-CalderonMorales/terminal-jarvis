@@ -29,6 +29,7 @@ env_vars = []
 setup_url = "https://jules.google"
 browser_auth = true
 auth_instructions = "Run 'jules login' to authenticate with Google."
+auth_mode = "none"
 
 [tool.features]
 supports_files = true
