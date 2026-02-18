@@ -30,6 +30,10 @@ env_vars = ["OPENAI_API_KEY", "CODEX_API_KEY"]
 setup_url = "https://platform.openai.com/api-keys"
 browser_auth = false
 auth_instructions = "Visit OpenAI Platform to generate your API key"
+auth_mode = "any"
+default_env_var = "OPENAI_API_KEY"
+key_format_hint = "sk-*"
+cli_auth_command = "codex login"
 
 [tool.features]
 supports_files = true
