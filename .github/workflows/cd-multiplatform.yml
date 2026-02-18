@@ -67,14 +67,33 @@ jobs:
         with:
           targets: ${{ matrix.targets }}
 
+      - name: Cache cargo registry (build)
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+          key: cargo-cd-${{ runner.os }}-${{ hashFiles('**/Cargo.lock') }}
+          restore-keys: cargo-cd-${{ runner.os }}-
+
+      - name: Cache cross binary
+        if: matrix.platform == 'linux'
+        id: cache-cross
+        uses: actions/cache@v4
+        with:
+          path: ~/.cargo/bin/cross
+          key: cross-${{ runner.os }}-v0.2
+
       - name: Install cross-compilation tools (Linux)
         if: matrix.platform == 'linux'
         run: |
           # Install musl tools for static linking (Issue #24 - GLIBC independence)
           sudo apt-get update
           sudo apt-get install -y musl-tools musl-dev
-          # Install cross for cross-compilation
-          cargo install cross --git https://github.com/cross-rs/cross
+          # Install cross only if not restored from cache
+          if [ "${{ steps.cache-cross.outputs.cache-hit }}" != "true" ]; then
+            cargo install cross --git https://github.com/cross-rs/cross
+          fi
 
       - name: Make scripts executable
         shell: bash
@@ -115,6 +134,15 @@ jobs:
 
       - name: Install Rust
         uses: dtolnay/rust-toolchain@stable
+
+      - name: Cache cargo registry (publish)
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+          key: cargo-cd-${{ runner.os }}-${{ hashFiles('**/Cargo.lock') }}
+          restore-keys: cargo-cd-${{ runner.os }}-
 
       - name: Check if Cargo.lock needs to be committed
         run: |
@@ -392,11 +420,26 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v5
 
-      - name: Install Rust
-        uses: dtolnay/rust-toolchain@stable
+      # Reuse the Linux binary built in build-multiplatform instead of
+      # rebuilding from scratch. Saves the full Rust compilation time.
+      - name: Download Linux binary artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: binaries-linux
+          path: artifacts/binaries-linux
 
-      - name: Build release binary
-        run: cargo build --release
+      - name: Stage binary for NPM packaging
+        run: |
+          mkdir -p target/release
+          # Find the x86_64 musl binary (primary Linux target)
+          BINARY=$(find artifacts/binaries-linux -name "terminal-jarvis" -type f | head -1)
+          if [ -z "$BINARY" ]; then
+            echo "ERROR: No terminal-jarvis binary found in artifact"
+            exit 1
+          fi
+          cp "$BINARY" target/release/terminal-jarvis
+          chmod +x target/release/terminal-jarvis
+          echo "Staged binary: $BINARY -> target/release/terminal-jarvis"
 
       - name: Setup Node.js
         uses: actions/setup-node@v5

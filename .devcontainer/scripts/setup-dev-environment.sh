@@ -61,6 +61,17 @@ echo 'export LC_CTYPE=en_US.UTF-8' >> ~/.bashrc
 echo 'export LC_COLLATE=en_US.UTF-8' >> ~/.bashrc
 echo 'export LC_MESSAGES=en_US.UTF-8' >> ~/.bashrc
 
+# Redirect Cargo's build artifact directory off the Windows 9P mount and onto
+# the Linux overlay filesystem. The project root (/workspaces/terminal-jarvis)
+# is served via 9P protocol (Windows filesystem) at ~90 MB/s sequential and
+# much slower for small random I/O. The Linux overlay fs runs at ~800 MB/s.
+# Moving target/ here makes incremental builds ~10x faster.
+CARGO_CACHE_DIR="$HOME/.cache/terminal-jarvis/target"
+mkdir -p "$CARGO_CACHE_DIR"
+if ! grep -q "CARGO_TARGET_DIR" ~/.bashrc; then
+    echo "export CARGO_TARGET_DIR=$CARGO_CACHE_DIR" >> ~/.bashrc
+fi
+
 # Ensure uv is available in PATH
 if [ -f "$HOME/.cargo/bin/uv" ]; then
     echo "uv is already installed and available"

@@ -66,8 +66,15 @@ jobs:
         path: |
           ~/.cargo/registry
           ~/.cargo/git
+          target
         key: cargo-${{ runner.os }}-${{ hashFiles('**/Cargo.lock') }}
         restore-keys: cargo-${{ runner.os }}-
+
+    # mold is required by .cargo/config.toml for x86_64-unknown-linux-gnu builds.
+    # clang is pre-installed on ubuntu-latest; only mold needs explicit installation.
+    - name: Install mold linker
+      if: ${{ matrix.suite == 'rust' && runner.os == 'Linux' }}
+      run: sudo apt-get update -q && sudo apt-get install -y mold
 
     - name: Check formatting
       if: ${{ matrix.suite == 'rust' }}
@@ -79,7 +86,7 @@ jobs:
 
     - name: Run Rust tests
       if: ${{ matrix.suite == 'rust' }}
-      run: cargo test --verbose
+      run: cargo test --locked --verbose
 
     # NPM package tests (build the Rust binary first)
     - name: Install Rust toolchain (for npm build)
@@ -93,12 +100,17 @@ jobs:
         path: |
           ~/.cargo/registry
           ~/.cargo/git
+          target
         key: cargo-${{ runner.os }}-${{ hashFiles('**/Cargo.lock') }}
         restore-keys: cargo-${{ runner.os }}-
 
+    - name: Install mold linker
+      if: ${{ matrix.suite == 'npm' && runner.os == 'Linux' }}
+      run: sudo apt-get update -q && sudo apt-get install -y mold
+
     - name: Build release binary
       if: ${{ matrix.suite == 'npm' }}
-      run: cargo build --release
+      run: cargo build --locked --release
 
     - name: Setup Node.js
       if: ${{ matrix.suite == 'npm' }}
@@ -151,20 +163,24 @@ jobs:
     - name: Install Rust
       uses: dtolnay/rust-toolchain@stable
 
-    - name: Cache cargo dependencies
+    - name: Cache cargo dependencies and tools
       uses: actions/cache@v4
       with:
         path: |
           ~/.cargo/registry
           ~/.cargo/git
-        key: cargo-${{ runner.os }}-${{ hashFiles('**/Cargo.lock') }}
-        restore-keys: cargo-${{ runner.os }}-
+          ~/.cargo/bin/cargo-audit
+        key: cargo-security-${{ runner.os }}-${{ hashFiles('**/Cargo.lock') }}
+        restore-keys: cargo-security-${{ runner.os }}-
 
     - name: Install dependencies for cargo-audit
       run: sudo apt-get update && sudo apt-get install -y pkg-config libssl-dev
 
     - name: Install cargo-audit
-      run: cargo install cargo-audit
+      run: |
+        if ! command -v cargo-audit &> /dev/null; then
+          cargo install cargo-audit
+        fi
 
     - name: Run cargo-audit
       run: cargo audit --deny warnings --ignore RUSTSEC-2025-0134 --ignore RUSTSEC-2025-0141

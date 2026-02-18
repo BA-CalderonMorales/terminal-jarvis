@@ -1,0 +1,53 @@
+[build]
+jobs = 16
+incremental = true
+# NOTE: Do NOT put rustflags here if you also have [target.X].rustflags.
+# Cargo does not merge them - target-specific rustflags fully override build-level
+# ones. Put all desired flags directly in the target sections below.
+#
+# NOTE: target-dir is intentionally NOT set here. In the devcontainer, the project
+# root is on the Windows filesystem (9P mount, ~90 MB/s) while the Linux overlay
+# runs at ~800 MB/s. CARGO_TARGET_DIR is set to ~/.cache/terminal-jarvis/target
+# via devcontainer.json containerEnv to redirect artifacts to fast storage.
+# This gives ~10x faster incremental builds. See .devcontainer/devcontainer.json.
+
+[target.x86_64-unknown-linux-gnu]
+# clang + mold: fastest linker combo on Linux. Both must be installed.
+# In devcontainer: apt install clang mold (see .devcontainer/Dockerfile)
+# In CI: apt install mold (clang is pre-installed on ubuntu-latest)
+linker = "clang"
+rustflags = [
+    "-C", "link-arg=-fuse-ld=mold",
+    "-C", "target-cpu=native",
+]
+
+# musl targets are used for release builds (static linking, GLIBC independence).
+# Do NOT add target-cpu=native here - those binaries must run on end-user hardware.
+[target.x86_64-unknown-linux-musl]
+rustflags = ["-C", "target-feature=+crt-static"]
+
+[target.aarch64-unknown-linux-musl]
+rustflags = ["-C", "target-feature=+crt-static"]
+
+[profile.dev]
+codegen-units = 256
+# Use line-table-only debug info: preserves file+line numbers for backtraces
+# and panic messages without the overhead of full variable/type info.
+# This is much better than strip=true (which breaks the LLDB debugger).
+debug = 1
+
+[profile.dev.build-override]
+# Proc-macros and build scripts run at compile time, so optimizing them
+# directly speeds up every cargo build invocation.
+opt-level = 1
+codegen-units = 16
+
+[profile.release]
+# Thin LTO: inlines across crate boundaries for better codegen without
+# the multi-minute overhead of fat LTO. Good default for release binaries.
+lto = "thin"
+codegen-units = 1
+strip = "symbols"
+
+[net]
+retry = 2

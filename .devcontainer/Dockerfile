@@ -7,7 +7,9 @@ RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y \
     && locale-gen \
     && update-locale LANG=en_US.UTF-8
 
-# Install essential development tools
+# Install essential development tools.
+# clang + mold are required by .cargo/config.toml for fast linking on Linux.
+# mold is the fastest open-source linker; clang is its preferred frontend.
 RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y \
     curl \
     git \
@@ -15,6 +17,8 @@ RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y \
     build-essential \
     pkg-config \
     libssl-dev \
+    clang \
+    mold \
     nodejs \
     npm \
     python3 \
@@ -27,9 +31,20 @@ RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y \
     && echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | tee /etc/apt/sources.list.d/github-cli.list > /dev/null \
     && apt-get update \
     && apt-get install -y gh \
-    && rustup component add clippy rustfmt \
+    && rustup component add clippy rustfmt rust-analyzer \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
+
+# Pre-populate the Cargo registry cache using a minimal stub project.
+# This layer is cached by Docker and survives rebuilds as long as
+# Cargo.toml/Cargo.lock do not change. Speeds up first `cargo build`
+# inside the devcontainer significantly.
+WORKDIR /tmp/dep-cache
+COPY Cargo.toml Cargo.lock ./
+# Create a stub lib.rs so cargo fetch has a valid crate to resolve
+RUN mkdir -p src && echo 'fn main() {}' > src/main.rs && echo '' > src/lib.rs \
+    && cargo fetch \
+    && rm -rf /tmp/dep-cache
 
 # Create vscode user for better compatibility with VS Code
 RUN groupadd --gid 1000 vscode \
