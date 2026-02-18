@@ -197,3 +197,6 @@ npm/terminal-jarvis/bin/terminal-jarvis-bin
 npm/terminal-jarvis/bin/terminal-jarvis.exe
 npm/terminal-jarvis/bin/terminal-jarvis.cmd
 npm/terminal-jarvis/downloads/
+
+# adk folders/files to ignore
+adk/__pycache__/*
