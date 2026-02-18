@@ -37,6 +37,7 @@ verify_command = "aider --version"
 
 [tool.auth]
 env_vars = [
+    "OPENROUTER_API_KEY",
     "OPENAI_API_KEY",
     "ANTHROPIC_API_KEY",
     "GEMINI_API_KEY",
@@ -45,6 +46,14 @@ env_vars = [
 setup_url = "https://aider.chat/docs/install.html#api-keys"
 browser_auth = false
 auth_instructions = "Set your preferred AI provider API key (OpenAI, Anthropic, Google, Azure, etc.)"
+auth_mode = "any"
+default_env_var = "OPENROUTER_API_KEY"
+providers = [
+    {name = "OpenRouter", env_var = "OPENROUTER_API_KEY", key_hint = "sk-or-*", setup_url = "https://openrouter.ai/keys"},
+    {name = "OpenAI", env_var = "OPENAI_API_KEY", key_hint = "sk-*", setup_url = "https://platform.openai.com/api-keys"},
+    {name = "Anthropic", env_var = "ANTHROPIC_API_KEY", key_hint = "sk-ant-*", setup_url = "https://console.anthropic.com/"},
+    {name = "Gemini", env_var = "GEMINI_API_KEY", key_hint = "AIza*", setup_url = "https://aistudio.google.com/app/apikey"},
+]
 
 [tool.features]
 supports_files = true
