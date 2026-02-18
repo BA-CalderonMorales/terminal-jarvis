@@ -29,6 +29,7 @@ env_vars = []
 setup_url = ""
 browser_auth = false
 auth_instructions = "Nanocoder runs locally."
+auth_mode = "none"
 
 [tool.features]
 supports_files = true
