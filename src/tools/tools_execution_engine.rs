@@ -9,7 +9,7 @@ use std::io::Write;
 use std::process::Command;
 
 use super::tools_command_mapping::get_cli_command;
-use super::tools_detection::check_tool_installed;
+use super::tools_detection::resolve_tool_path;
 use super::tools_environment::{apply_aider_headless_args, apply_tool_environment};
 use super::tools_process_management::{
     prepare_opencode_terminal_state, run_opencode_with_clean_exit, run_tool_intercepting_sigint,
@@ -103,11 +103,14 @@ fn should_continue_session(
 pub async fn run_tool_once(display_name: &str, args: &[String]) -> Result<()> {
     let cli_command = get_cli_command(display_name);
 
-    if !check_tool_installed(cli_command) {
-        return Err(anyhow::anyhow!(
-            "Tool '{display_name}' is not installed. Use 'terminal-jarvis install {display_name}' to install it."
-        ));
-    }
+    let executable_path = match resolve_tool_path(cli_command) {
+        Some(path) => path,
+        None => {
+            return Err(anyhow::anyhow!(
+                "Tool '{display_name}' is not installed. Use 'terminal-jarvis install {display_name}' to install it."
+            ));
+        }
+    };
 
     // --- UNIFIED AUTH: Check and prompt if needed ---
     let auth_result = AuthPreflight::check(display_name);
@@ -138,7 +141,7 @@ pub async fn run_tool_once(display_name: &str, args: &[String]) -> Result<()> {
         std::io::stdout().flush().unwrap_or_default();
     }
 
-    let mut cmd = Command::new(cli_command);
+    let mut cmd = Command::new(&executable_path);
 
     // --- INJECT SAVED CREDENTIALS ---
     AuthPreflight::inject_credentials(&mut cmd, display_name)?;
@@ -175,7 +178,7 @@ pub async fn run_tool_once(display_name: &str, args: &[String]) -> Result<()> {
 
     // --- EXIT CODE HANDLING ---
     if !status.success() {
-        return handle_tool_failure(display_name, cli_command, args, status);
+        return handle_tool_failure(display_name, &executable_path, args, status);
     }
 
     Ok(())
@@ -307,7 +310,7 @@ fn validate_goose_gemini_key(cmd: &mut Command) -> Result<()> {
 /// Handle tool exit with non-zero status code.
 fn handle_tool_failure(
     display_name: &str,
-    cli_command: &str,
+    executable_path: &str,
     args: &[String],
     status: std::process::ExitStatus,
 ) -> Result<()> {
@@ -328,7 +331,7 @@ fn handle_tool_failure(
             crate::theme::theme_global_config::current_theme()
                 .primary("Goose requires a provider. Launching 'goose configure'...\n")
         );
-        let mut configure_cmd = Command::new(cli_command);
+        let mut configure_cmd = Command::new(executable_path);
         configure_cmd
             .arg("configure")
             .stdin(std::process::Stdio::inherit())

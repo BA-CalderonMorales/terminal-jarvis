@@ -139,7 +139,8 @@ pub fn get_available_tools() -> BTreeMap<&'static str, ToolInfo> {
     tools
 }
 
-/// Check if a tool is installed by trying to run it.
+/// Resolve the executable path for a tool.
+/// Returns Some(path) if found, or None if not installed.
 ///
 /// Detection order (fast → slow):
 ///   1. `which <tool>`       – standard Unix PATH lookup
@@ -150,27 +151,32 @@ pub fn get_available_tools() -> BTreeMap<&'static str, ToolInfo> {
 ///      installed with non-standard installers (goose, vibe, ollama, …) that
 ///      only update the user's shell config are found correctly
 ///   5. `<tool> --version`   – last-resort direct execution
-pub fn check_tool_installed(tool: &str) -> bool {
+pub fn resolve_tool_path(tool: &str) -> Option<String> {
     // 1. Standard PATH lookup (fastest)
     if let Ok(output) = Command::new("which").arg(tool).output() {
         if output.status.success() && !output.stdout.is_empty() {
-            return true;
+             // 'which' returns the full path
+             let path = String::from_utf8_lossy(&output.stdout).trim().to_string();
+             return Some(path);
         }
     }
 
     // 2. Windows equivalent
     if let Ok(output) = Command::new("where").arg(tool).output() {
         if output.status.success() && !output.stdout.is_empty() {
-            return true;
+             let path = String::from_utf8_lossy(&output.stdout).lines().next().unwrap_or("").trim().to_string();
+             if !path.is_empty() {
+                 return Some(path);
+             }
         }
     }
 
     // 3. Check common user-local installation paths directly.
-    //    Many curl-based installers (goose, claude, ollama, vibe, …) drop
-    //    binaries in ~/.local/bin which may not be in the process PATH.
     let home = std::env::var("HOME").unwrap_or_default();
     let candidate_paths = [
         format!("{home}/.local/bin/{tool}"),
+        format!("{home}/.local/share/npm-global/bin/{tool}"),
+        format!("{home}/.npm-global/bin/{tool}"),
         format!("/usr/local/bin/{tool}"),
         format!("/home/vscode/.local/bin/{tool}"),
         format!("/root/.local/bin/{tool}"),
@@ -178,37 +184,39 @@ pub fn check_tool_installed(tool: &str) -> bool {
 
     for path in &candidate_paths {
         if std::path::Path::new(path).exists() {
-            if let Ok(output) = Command::new(path).arg("--version").output() {
-                if output.status.success() {
-                    return true;
-                }
-            }
-            // Binary exists even if --version returns non-zero (some tools do this)
-            return true;
+            // We found the binary. Return the absolute path.
+            return Some(path.clone());
         }
     }
-
-    // 4. Shell-sourced lookup – handles installers that only update PATH in
-    //    shell config files (e.g. curl | bash scripts that add to ~/.bashrc).
-    //    We do this for all tools, not just opencode, because the pattern is
-    //    common across curl-based AI tool installers.
+    
+    // 4. Shell-sourced lookup
     let shell_cmd = format!(
         "source ~/.bashrc 2>/dev/null; source ~/.profile 2>/dev/null; which {tool} 2>/dev/null"
     );
     if let Ok(output) = Command::new("sh").arg("-c").arg(&shell_cmd).output() {
         if output.status.success() && !output.stdout.is_empty() {
-            return true;
+             let path = String::from_utf8_lossy(&output.stdout).trim().to_string();
+             if !path.is_empty() {
+                 return Some(path);
+             }
         }
     }
 
-    // 5. Direct execution with --version as last resort
+    // 5. Direct execution check (fallback)
     if let Ok(output) = Command::new(tool).arg("--version").output() {
         if output.status.success() {
-            return true;
+             // If direct execution works but 'which' failed, it's likely in the PATH but 'which' is broken?
+             // Or it's a built-in. Return the command itself.
+             return Some(tool.to_string());
         }
     }
 
-    false
+    None
+}
+
+/// Check if a tool is installed by trying to run it.
+pub fn check_tool_installed(tool: &str) -> bool {
+    resolve_tool_path(tool).is_some()
 }
 
 /// Get list of installed tools (display names)

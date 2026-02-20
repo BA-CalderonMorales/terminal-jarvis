@@ -17,15 +17,6 @@ pub struct Cli {
     /// Quick mode: skip all prompts, launch last-used tool immediately
     #[arg(short = 'q', long = "quick", global = true)]
     pub quick: bool,
-
-    /// Direct tool launch (e.g., `terminal-jarvis claude`)
-    /// Supported: claude, gemini, qwen, opencode, codex, aider, amp, goose, crush, llxprt
-    #[arg(value_name = "TOOL")]
-    pub tool: Option<String>,
-
-    /// Arguments to pass to the directly launched tool
-    #[arg(trailing_var_arg = true, allow_hyphen_values = true)]
-    pub tool_args: Vec<String>,
 }
 
 impl Default for Cli {
@@ -50,6 +41,7 @@ impl Cli {
                 | "codex"
                 | "aider"
                 | "amp"
+                | "copilot"
                 | "goose"
                 | "crush"
                 | "llxprt"
@@ -70,26 +62,32 @@ impl Cli {
 
     pub async fn run(self) -> anyhow::Result<()> {
         // Handle quick mode: launch last-used tool immediately
-        if self.quick && self.command.is_none() && self.tool.is_none() {
+        if self.quick && self.command.is_none() {
             return cli_logic::handle_quick_launch().await;
-        }
-
-        // Handle direct tool invocation: `terminal-jarvis claude`
-        if let Some(ref tool_name) = self.tool {
-            if Self::is_valid_tool(tool_name) {
-                return cli_logic::handle_run_tool(tool_name, &self.tool_args).await;
-            }
-            // Invalid tool name - show error and exit (don't fall through to interactive mode)
-            eprintln!("error: '{tool_name}' is not a valid tool or command");
-            eprintln!();
-            eprintln!("Available tools: claude, gemini, qwen, opencode, codex, aider, amp, goose, crush, llxprt, ollama, vibe, droid, forge, cursor-agent, jules, kilocode, letta, nanocoder, pi, code, eca");
-            eprintln!();
-            eprintln!("For more information, try '--help'");
-            std::process::exit(1);
         }
 
         match self.command {
             Some(Commands::Run { tool, args }) => cli_logic::handle_run_tool(&tool, &args).await,
+
+            Some(Commands::External(args)) => {
+                if args.is_empty() {
+                    return cli_logic::handle_interactive_mode().await;
+                }
+                let tool_name = &args[0];
+                let tool_args = &args[1..];
+                
+                if Self::is_valid_tool(tool_name) {
+                    return cli_logic::handle_run_tool(tool_name, tool_args).await;
+                }
+                
+                // Invalid tool name - show error and exit
+                eprintln!("error: '{tool_name}' is not a valid tool or command");
+                eprintln!();
+                eprintln!("Available tools: claude, gemini, qwen, opencode, codex, aider, amp, copilot, goose, crush, llxprt, ollama, vibe, droid, forge, cursor-agent, jules, kilocode, letta, nanocoder, pi, code, eca");
+                eprintln!();
+                eprintln!("For more information, try '--help'");
+                std::process::exit(1);
+            }
 
             Some(Commands::Install { tool }) => cli_logic::handle_install_tool(&tool).await,
 
@@ -180,6 +178,9 @@ pub enum Commands {
         #[arg(trailing_var_arg = true, allow_hyphen_values = true)]
         args: Vec<String>,
     },
+
+    #[command(external_subcommand)]
+    External(Vec<String>),
 
     /// Install a specific AI coding tool
     Install {

@@ -145,21 +145,21 @@ fn test_copilot_features() {
 }
 
 #[test]
-fn test_eleven_tools_total() {
+fn test_twelve_tools_total() {
     let loader = get_tool_config_loader();
     let tool_names = loader.get_tool_names();
 
-    // We should now have 11 tools total (10 original + copilot)
+    // We should now have at least 12 tools total (including newer integrations).
     assert!(
-        tool_names.len() >= 11,
-        "Should have at least 11 tools loaded, got {}",
+        tool_names.len() >= 12,
+        "Should have at least 12 tools loaded, got {}",
         tool_names.len()
     );
 
     // Verify all expected tools are present
     let expected_tools = vec![
         "claude", "gemini", "qwen", "opencode", "llxprt", "codex", "crush", "goose", "amp",
-        "aider", "copilot",
+        "aider", "copilot", "kimi",
     ];
 
     for tool in expected_tools {

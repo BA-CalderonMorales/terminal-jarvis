@@ -37,7 +37,7 @@ fn test_all_tools_have_install_commands() {
 /// remain installable without Node.js present.
 #[test]
 fn test_curl_tools_do_not_require_npm() {
-    let curl_tools = ["claude", "goose", "ollama", "vibe"];
+    let curl_tools = ["claude", "goose", "ollama", "vibe", "kimi"];
 
     for tool in curl_tools {
         if let Some(cmd) = InstallationManager::get_install_command(tool) {
@@ -53,6 +53,24 @@ fn test_curl_tools_do_not_require_npm() {
             );
         }
     }
+}
+
+/// kimi should install via official shell installer and not require npm.
+#[test]
+fn test_kimi_install_uses_official_curl_installer() {
+    let cmd = InstallationManager::get_install_command("kimi")
+        .expect("kimi must be in the tool registry");
+
+    assert_eq!(cmd.command, "curl", "kimi must use curl installer");
+    assert!(
+        cmd.args.iter().any(|a| a.contains("code.kimi.com/install.sh")),
+        "kimi installer should use official install script URL, got: {:?}",
+        cmd.args
+    );
+    assert!(
+        !cmd.requires_npm,
+        "kimi must not require npm - official installation uses shell installer"
+    );
 }
 
 /// npm tools must carry the correct package registry path.
