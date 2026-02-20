@@ -8,7 +8,7 @@ use anyhow::Result;
 use crate::auth_manager::auth_preflight::{AuthPreflight, AuthPreflightResult};
 
 use super::tools_command_mapping::get_cli_command;
-use super::tools_detection::{infer_package_manager, PackageManager};
+use super::tools_detection::{infer_package_manager, resolve_tool_path, PackageManager};
 
 /// Unified result of all pre-flight checks for a single tool.
 #[derive(Debug, Clone)]
@@ -159,13 +159,15 @@ impl ToolPreflight {
     /// Returns (installed, install_message, version).
     fn check_installation(tool_name: &str) -> (bool, Option<String>, Option<String>) {
         let cli_command = get_cli_command(tool_name);
-        let installed = super::tools_detection::check_tool_installed(cli_command);
+        let path_opt = resolve_tool_path(cli_command);
+        let installed = path_opt.is_some();
         let mut version = None;
         let message = if !installed {
             Some(format!("'{}' is not installed", tool_name))
         } else {
+            let path = path_opt.as_ref().unwrap();
             // Try to get version
-            if let Ok(output) = std::process::Command::new(cli_command)
+            if let Ok(output) = std::process::Command::new(path)
                 .arg("--version")
                 .output()
             {
@@ -182,10 +184,13 @@ impl ToolPreflight {
     /// Returns (ok, message).
     fn check_runtime(tool_name: &str) -> (bool, Option<String>) {
         let cli_command = get_cli_command(tool_name);
-        match std::process::Command::new(cli_command)
-            .arg("--version")
-            .output()
-        {
+        let path_opt = resolve_tool_path(cli_command);
+        let path = match path_opt {
+            Some(p) => p,
+            None => return (false, Some(format!("Tool '{}' not found", tool_name))),
+        };
+
+        match std::process::Command::new(path).arg("--version").output() {
             Ok(output) if output.status.success() => (true, None),
             Ok(output) => {
                 let stderr = String::from_utf8_lossy(&output.stderr);

@@ -7,6 +7,7 @@ use crate::cli_logic::themed_components::{themed_confirm, themed_multiselect, th
 use crate::installation_arguments::InstallationManager;
 use crate::progress_utils::ProgressContext;
 use crate::theme::theme_global_config;
+use crate::tools::tools_detection::resolve_tool_path;
 use crate::tools::tools_display::ToolDisplayFormatter;
 use crate::tools::ToolManager;
 use anyhow::Result;
@@ -326,7 +327,11 @@ async fn handle_post_tool_exit(last_tool: &str, last_args: &[String]) -> Result<
                         "\n{}",
                         theme.accent(&format!("Running {} {}...", cmd, args.join(" ")))
                     );
-                    let status = std::process::Command::new(&cmd).args(&args).status();
+                    
+                    // Try to resolve the absolute path for the command (it might be the tool itself)
+                    let cmd_path = resolve_tool_path(&cmd).unwrap_or_else(|| cmd.clone());
+                    
+                    let status = std::process::Command::new(&cmd_path).args(&args).status();
                     match status {
                         Ok(exit_status) if exit_status.success() => {
                             println!(
@@ -476,7 +481,10 @@ async fn handle_uninstall_tool(tool: &str, tool_display: &str, theme: &crate::th
                 theme.secondary(&format!("Uninstalling {tool_display}..."))
             );
 
-            let result = std::process::Command::new(&cmd).args(&args).status();
+            // Try to resolve the absolute path for the package manager command (e.g. npm, uv, cargo)
+            let cmd_path = resolve_tool_path(&cmd).unwrap_or_else(|| cmd.clone());
+
+            let result = std::process::Command::new(&cmd_path).args(&args).status();
             match result {
                 Ok(status) if status.success() => {
                     println!(

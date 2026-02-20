@@ -6,6 +6,7 @@
 
 use crate::config::Config;
 use crate::progress_utils::ProgressUtils;
+use crate::tools::tools_detection::resolve_tool_path;
 use anyhow::{anyhow, Result};
 use tokio::process::Command as AsyncCommand;
 
@@ -21,7 +22,10 @@ impl PackageOperationsManager {
     /// Check if a tool is installed by attempting to run it with --version
     #[allow(dead_code)]
     pub async fn is_tool_installed(&self, tool_name: &str) -> Result<bool> {
-        let output = AsyncCommand::new(tool_name).arg("--version").output().await;
+        // Use resolve_tool_path to find the absolute path if available
+        let tool_path = resolve_tool_path(tool_name).unwrap_or_else(|| tool_name.to_string());
+        
+        let output = AsyncCommand::new(tool_path).arg("--version").output().await;
 
         match output {
             Ok(output) => Ok(output.status.success()),
