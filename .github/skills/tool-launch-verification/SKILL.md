@@ -1,50 +1,111 @@
 # Skill: Tool Launch Verification
 
 **Name**: tool-launch-verification  
-**Description**: Session-based verification of tool launch flows using a reusable command pattern  
+**Description**: Session-based verification of all Terminal Jarvis command paths for tool operations and runtime flow integrity  
 **Trigger**: "verify tool launches", "which tools are actually operational", pre-release launch validation
 
 ---
 
 ## Goal
 
-Verify which tools are truly operational in the current session, then classify each tool for release decisions.
+Verify real behavior across all supported command paths, not just one launch command shape.
 
-## Core Pattern
+## Source Of Truth
 
-Use the same command template for every tool, instead of hardcoding long per-tool lists:
+- Runtime entrypoint: `src/main.rs`
+- Primary dispatcher: `src/cli.rs`
+- Interactive dispatcher: `src/cli_logic/cli_logic_interactive.rs`
+- Menu/tool dispatcher: `src/cli_logic/cli_logic_entry_point.rs`
+- Deep flow map and author intent: `./references/src-main-flow-map.md`
+
+Before changing flow behavior, re-read these files and update the reference.
+
+## Placeholders
+
+- `[tool]`: tool key (e.g. `claude`, `code`, `kilocode`)
+- `[action]`: forwarded tool flag/action (usually `help` or `version`)
+- `[binary]`: `terminal-jarvis`, `target/debug/terminal-jarvis`, or `target/release/terminal-jarvis`
+
+## Command Path Matrix
+
+### 1) Source-run path (Cargo)
 
 ```bash
-cargo run -- [tool]
+cargo run -- [tool] --[action]
 cargo run -- run [tool] -- --[action]
 ```
 
-- `[tool]`: tool key (for example `claude`, `code`, `kilocode`)
-- `[action]`: forwarded CLI action (default `help`; also `version` when supported)
-
-## Recommended Session Check
+### 2) Built-binary paths (Debug/Release/Installed)
 
 ```bash
-# default action
-ACTION=help
+[binary] [tool] --[action]
+[binary] run [tool] -- --[action]
+```
 
-# sample tool set; expand as needed
+### 3) Tool-management paths
+
+```bash
+[binary] list
+[binary] info [tool]
+[binary] auth help [tool]
+[binary] status
+```
+
+### 4) Platform-management paths
+
+```bash
+[binary] config show
+[binary] cache status
+[binary] templates list
+[binary] benchmark list
+[binary] db status
+```
+
+### 5) ADK home-screen paths (Go REPL)
+
+```bash
+./jarvis.sh
+# inside REPL:
+/tools
+/auth [tool]
+/setup
+/logout [provider]
+launch [tool]
+```
+
+## Recommended Session Sweep
+
+```bash
+ACTION=help
+BINARY=target/debug/terminal-jarvis
 TOOLS=(claude gemini qwen opencode codex aider amp copilot goose crush llxprt ollama vibe droid forge cursor-agent jules kilocode letta nanocoder pi code eca)
 
 for tool in "${TOOLS[@]}"; do
   echo "=== $tool ==="
-  timeout 20s cargo run -- run "$tool" -- "--$ACTION"
   timeout 20s cargo run -- "$tool" "--$ACTION"
+  timeout 20s cargo run -- run "$tool" -- "--$ACTION"
+  timeout 20s "$BINARY" "$tool" "--$ACTION"
+  timeout 20s "$BINARY" run "$tool" -- "--$ACTION"
+  "$BINARY" info "$tool" >/dev/null 2>&1 || true
+  "$BINARY" auth help "$tool" >/dev/null 2>&1 || true
   echo
- done
+done
 ```
 
-## Classification Rules
+## Classification
 
-- `VERIFIED`: both launch paths succeed for `[action]`
-- `PARTIAL`: launches but emits blocking warnings/errors or hangs intermittently
-- `INTEGRATION-PENDING`: missing install, broken launch path, or cancelled setup flow
+- `VERIFIED`: direct + run paths pass for selected `[action]` on at least one `[binary]`
+- `PARTIAL`: command runs but reports environment/install/network/permission issues
+- `INTEGRATION-PENDING`: unavailable, cancelled install flow, or missing integration path
 
 ## Release Rule
 
-Only claim `VERIFIED` tools as operational. Keep `PARTIAL` and `INTEGRATION-PENDING` documented for future release work.
+Only advertise `VERIFIED` as operational. Keep `PARTIAL` and `INTEGRATION-PENDING` documented for future release work.
+
+## Maintenance Rule
+
+If a new command path, alias path, or interactive route is introduced, update:
+
+1. `./references/src-main-flow-map.md`
+2. This skill's command matrix
+3. Any related E2E/verification checks
