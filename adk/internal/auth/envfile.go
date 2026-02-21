@@ -33,6 +33,47 @@ func writeEnvKeyToFile(envPath, key, value string) {
 	_ = os.WriteFile(envPath, []byte(strings.Join(lines, "\n")+"\n"), 0600)
 }
 
+// clearEnvKeysFromFile removes KEY=value entries from the .env file.
+// Missing files are ignored.
+func clearEnvKeysFromFile(envPath string, keys ...string) {
+	if len(keys) == 0 {
+		return
+	}
+
+	raw, err := os.ReadFile(envPath)
+	if err != nil {
+		return
+	}
+
+	toRemove := make(map[string]struct{}, len(keys))
+	for _, k := range keys {
+		toRemove[k] = struct{}{}
+	}
+
+	lines := strings.Split(string(raw), "\n")
+	kept := make([]string, 0, len(lines))
+
+	for _, line := range lines {
+		stripped := strings.TrimLeft(line, "# \t")
+		shouldRemove := false
+		for key := range toRemove {
+			if strings.HasPrefix(stripped, key+"=") {
+				shouldRemove = true
+				break
+			}
+		}
+		if !shouldRemove {
+			kept = append(kept, line)
+		}
+	}
+
+	for len(kept) > 0 && strings.TrimSpace(kept[len(kept)-1]) == "" {
+		kept = kept[:len(kept)-1]
+	}
+
+	_ = os.WriteFile(envPath, []byte(strings.Join(kept, "\n")+"\n"), 0600)
+}
+
 // openBrowser tries to open url in the default browser.
 // Returns false in headless environments.
 func openBrowser(rawURL string) bool {

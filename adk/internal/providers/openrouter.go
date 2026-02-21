@@ -40,16 +40,16 @@ func (o *OpenRouterProvider) Label() string { return o.label }
 
 // orMessage is the OpenAI-compatible message wire type.
 type orMessage struct {
-	Role       string      `json:"role"`
-	Content    interface{} `json:"content"`
-	ToolCallID string      `json:"tool_call_id,omitempty"`
-	Name       string      `json:"name,omitempty"`
+	Role       string          `json:"role"`
+	Content    interface{}     `json:"content"`
+	ToolCallID string          `json:"tool_call_id,omitempty"`
+	Name       string          `json:"name,omitempty"`
 	ToolCalls  []orToolCallRef `json:"tool_calls,omitempty"`
 }
 
 type orToolCallRef struct {
-	ID       string       `json:"id"`
-	Type     string       `json:"type"`
+	ID       string         `json:"id"`
+	Type     string         `json:"type"`
 	Function orFunctionCall `json:"function"`
 }
 
@@ -77,8 +77,8 @@ type orRequest struct {
 
 type orChoice struct {
 	Message struct {
-		Role      string         `json:"role"`
-		Content   string         `json:"content"`
+		Role      string          `json:"role"`
+		Content   string          `json:"content"`
 		ToolCalls []orToolCallRef `json:"tool_calls"`
 	} `json:"message"`
 }
@@ -98,7 +98,30 @@ func (o *OpenRouterProvider) Chat(ctx context.Context, messages []Message, tools
 		case "user":
 			wireMessages = append(wireMessages, orMessage{Role: "user", Content: m.Content})
 		case "assistant":
-			wireMessages = append(wireMessages, orMessage{Role: "assistant", Content: m.Content})
+			if len(m.ToolCalls) > 0 {
+				toolCalls := make([]orToolCallRef, 0, len(m.ToolCalls))
+				for _, tc := range m.ToolCalls {
+					rawArgs, err := json.Marshal(tc.Args)
+					if err != nil {
+						rawArgs = []byte("{}")
+					}
+					toolCalls = append(toolCalls, orToolCallRef{
+						ID:   tc.ID,
+						Type: "function",
+						Function: orFunctionCall{
+							Name:      tc.Name,
+							Arguments: string(rawArgs),
+						},
+					})
+				}
+				wireMessages = append(wireMessages, orMessage{
+					Role:      "assistant",
+					Content:   "",
+					ToolCalls: toolCalls,
+				})
+			} else {
+				wireMessages = append(wireMessages, orMessage{Role: "assistant", Content: m.Content})
+			}
 		case "tool":
 			wireMessages = append(wireMessages, orMessage{
 				Role:       "tool",

@@ -36,11 +36,8 @@ func Send(ctx context.Context, session *Session, provider providers.Provider, us
 		strArgs := decodeArgs(tc.Args)
 		result := tools.Dispatch(tc.Name, strArgs)
 
-		// Record the assistant's tool-call message.
-		session.Messages = append(session.Messages, providers.Message{
-			Role:    "assistant",
-			Content: fmt.Sprintf("[tool_call: %s]", tc.Name),
-		})
+		// Record the assistant's tool-call message with structured metadata.
+		session.AddAssistantToolCall(*tc)
 		session.AddToolResult(tc.ID, tc.Name, result)
 	}
 

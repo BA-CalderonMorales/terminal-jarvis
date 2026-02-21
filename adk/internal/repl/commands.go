@@ -14,11 +14,11 @@ import (
 )
 
 // handleSlash dispatches a "/" command without involving the LLM.
-// Returns true if the REPL should exit.
-func handleSlash(input string, envPath string, replLine *liner.State) (exit bool) {
+// Returns (exit, refreshProviders).
+func handleSlash(input string, envPath string, replLine *liner.State) (exit bool, refreshProviders bool) {
 	parts := strings.Fields(input)
 	if len(parts) == 0 {
-		return false
+		return false, false
 	}
 	cmd := strings.ToLower(parts[0])
 	rest := parts[1:]
@@ -62,16 +62,31 @@ func handleSlash(input string, envPath string, replLine *liner.State) (exit bool
 		}
 
 	case "/setup":
+		var configured bool
 		if replLine != nil {
-			auth.RunWizardWithPrompt(envPath, replLine.Prompt)
+			configured = auth.RunWizardWithPrompt(envPath, replLine.Prompt)
 		} else {
-			auth.RunWizard(envPath)
+			configured = auth.RunWizard(envPath)
 		}
+		return false, configured
+
+	case "/logout":
+		target := ""
+		if len(rest) > 0 {
+			target = rest[0]
+		}
+		provider, err := auth.LogoutProvider(envPath, target)
+		if err != nil {
+			fmt.Printf("   %sCould not log out provider: %v%s\n", ui.LightB, err, ui.Reset)
+		} else {
+			fmt.Printf("   %sLogged out %s credentials. Run /setup to switch providers.%s\n", ui.Green, provider, ui.Reset)
+		}
+		return false, true
 
 	default:
 		fmt.Printf("   %sUnknown command '%s'. Type /help for options.%s\n", ui.LightB, cmd, ui.Reset)
 	}
-	return false
+	return false, false
 }
 
 // findEnvPath resolves the adk/.env path relative to the binary location.

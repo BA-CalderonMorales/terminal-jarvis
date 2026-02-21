@@ -12,6 +12,7 @@ This directory contains reusable AI agent skills that enhance the capabilities o
 | [qa-testing](qa-testing/) | Minimal QA branch creation and testing | Verifying releases in fresh environments |
 | [versioning](versioning/) | Version management across platforms | Updating version numbers |
 | [testing](testing/) | Test-driven development practices | Bug fixes, new features |
+| [tool-launch-verification](tool-launch-verification/) | Session-based tool launch verification | Before releases, launch regression checks |
 | [refactoring](refactoring/) | Code refactoring patterns | Large file extraction |
 | [database](database/) | Database architecture patterns | Schema, queries, migrations |
 | [tool-config](tool-config/) | AI tool configuration | Adding new tools |
