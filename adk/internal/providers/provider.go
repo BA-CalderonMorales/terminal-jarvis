@@ -1,7 +1,8 @@
 // Package providers implements LLM provider detection and API clients.
 //
 // Priority chain (mirrors Python providers.py):
-//   JARVIS_MODEL env var → GOOGLE_API_KEY → OPENROUTER_API_KEY → Ollama
+//
+//	JARVIS_MODEL env var → GOOGLE_API_KEY → OPENROUTER_API_KEY → Ollama
 //
 // Each provider implements the Provider interface. The chat engine in
 // internal/chat uses the chain and falls back on timeout or auth failure.
@@ -16,8 +17,9 @@ import (
 type Message struct {
 	Role       string // "user", "assistant", "tool"
 	Content    string
-	ToolCallID string // non-empty when Role == "tool"
-	ToolName   string // non-empty when Role == "tool"
+	ToolCallID string     // non-empty when Role == "tool"
+	ToolName   string     // non-empty when Role == "tool"
+	ToolCalls  []ToolCall // non-empty when Role == "assistant" and responding with tool calls
 }
 
 // ToolCall is a request from the LLM to invoke a tool.

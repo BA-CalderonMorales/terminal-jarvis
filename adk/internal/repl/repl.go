@@ -70,7 +70,22 @@ func Run(chain []providers.Provider, envPath string) {
 		line.AppendHistory(input)
 
 		if strings.HasPrefix(input, "/") {
-			handleSlash(input, envPath, line)
+			shouldExit, refreshProviders := handleSlash(input, envPath, line)
+			if shouldExit {
+				return
+			}
+			if refreshProviders {
+				newChain, err := providers.BuildChain()
+				if err != nil || len(newChain) == 0 {
+					fmt.Printf("\n   %s[setup]%s Provider update saved, but no active provider is ready yet. Run /setup again.\n\n", ui.Cyan, ui.Reset)
+				} else {
+					chain = newChain
+					providerIdx = 0
+					currentProvider = chain[providerIdx]
+					session = chat.NewSession(chat.SystemPrompt)
+					fmt.Printf("\n   %sActive provider switched to %s.%s\n\n", ui.Green, currentProvider.Label(), ui.Reset)
+				}
+			}
 			continue
 		}
 		if maybeHandleDirectLaunchIntent(input) {

@@ -69,7 +69,25 @@ func (g *GeminiProvider) Chat(ctx context.Context, messages []Message, tools []T
 				history = append(history, &genai.Content{Role: "user", Parts: lastUserParts})
 			}
 		case "assistant":
-			history = append(history, &genai.Content{Role: "model", Parts: []genai.Part{genai.Text(m.Content)}})
+			if len(m.ToolCalls) > 0 {
+				parts := make([]genai.Part, 0, len(m.ToolCalls))
+				for _, tc := range m.ToolCalls {
+					args := make(map[string]interface{}, len(tc.Args))
+					for k, raw := range tc.Args {
+						var decoded interface{}
+						if err := json.Unmarshal(raw, &decoded); err == nil {
+							args[k] = decoded
+						}
+					}
+					parts = append(parts, genai.FunctionCall{
+						Name: tc.Name,
+						Args: args,
+					})
+				}
+				history = append(history, &genai.Content{Role: "model", Parts: parts})
+			} else {
+				history = append(history, &genai.Content{Role: "model", Parts: []genai.Part{genai.Text(m.Content)}})
+			}
 		case "tool":
 			// Tool results are appended as function responses.
 			var result interface{}

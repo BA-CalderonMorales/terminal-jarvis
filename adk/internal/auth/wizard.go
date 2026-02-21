@@ -48,26 +48,37 @@ func runWizard(envPath string, promptFn TextPrompt) bool {
 		key := setupGoogleWithPrompt(envPath, promptFn)
 		if key != "" {
 			os.Setenv("GOOGLE_API_KEY", key)
+			if _, err := ActivateProvider(envPath, "gemini"); err != nil {
+				fmt.Printf("   %sWarning: could not set active provider: %v%s\n", ui.LightB, err, ui.Reset)
+			}
 			fmt.Println()
-			fmt.Printf("   %sGOOGLE_API_KEY saved to .env%s\n\n", ui.Green, ui.Reset)
+			fmt.Printf("   %sGOOGLE_API_KEY saved to .env%s\n", ui.Green, ui.Reset)
+			fmt.Printf("   %sActive provider set to Google Gemini.%s\n\n", ui.Green, ui.Reset)
 			return true
 		}
 	case "2":
 		key := setupOpenRouterWithPrompt(envPath, promptFn)
 		if key != "" {
 			os.Setenv("OPENROUTER_API_KEY", key)
+			if _, err := ActivateProvider(envPath, "openrouter"); err != nil {
+				fmt.Printf("   %sWarning: could not set active provider: %v%s\n", ui.LightB, err, ui.Reset)
+			}
 			fmt.Println()
-			fmt.Printf("   %sOPENROUTER_API_KEY saved to .env%s\n\n", ui.Green, ui.Reset)
+			fmt.Printf("   %sOPENROUTER_API_KEY saved to .env%s\n", ui.Green, ui.Reset)
+			fmt.Printf("   %sActive provider set to OpenRouter.%s\n\n", ui.Green, ui.Reset)
 			return true
 		}
 	case "3":
 		SetupOllama()
+		if _, err := ActivateProvider(envPath, "ollama"); err != nil {
+			fmt.Printf("   %sWarning: could not set active provider: %v%s\n", ui.LightB, err, ui.Reset)
+		}
 		host := os.Getenv("OLLAMA_HOST")
 		if host == "" {
 			host = "http://localhost:11434"
 		}
 		if providers.OllamaReachable(host) {
-			fmt.Printf("   %sOllama detected at %s. Continuing without restart.%s\n\n", ui.Green, host, ui.Reset)
+			fmt.Printf("   %sOllama detected at %s. Active provider set to Ollama.%s\n\n", ui.Green, host, ui.Reset)
 			return true
 		}
 		fmt.Printf("   %sOllama is not reachable yet. Start it, then run /setup again.%s\n\n", ui.LightB, ui.Reset)

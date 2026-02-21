@@ -36,6 +36,15 @@ func (s *Session) AddAssistant(content string) {
 	s.Messages = append(s.Messages, providers.Message{Role: "assistant", Content: content})
 }
 
+// AddAssistantToolCall records an assistant tool call message so provider history
+// remains valid before a subsequent tool result turn.
+func (s *Session) AddAssistantToolCall(call providers.ToolCall) {
+	s.Messages = append(s.Messages, providers.Message{
+		Role:      "assistant",
+		ToolCalls: []providers.ToolCall{call},
+	})
+}
+
 // AddToolResult appends a tool result message.
 func (s *Session) AddToolResult(toolCallID, toolName, result string) {
 	s.Messages = append(s.Messages, providers.Message{

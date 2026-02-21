@@ -11,6 +11,7 @@ func PrintHelp() {
 	fmt.Printf("   %s/status%s              tool health dashboard\n", Cyan, Reset)
 	fmt.Printf("   %s/auth [tool]%s         authentication help\n", Cyan, Reset)
 	fmt.Printf("   %s/setup%s               interactive provider setup wizard\n", Cyan, Reset)
+	fmt.Printf("   %s/logout [provider]%s   clear provider credentials (gemini/openrouter/ollama/all)\n", Cyan, Reset)
 	fmt.Printf("   %s/config%s              show current config\n", Cyan, Reset)
 	fmt.Printf("   %s/update [tool]%s       update one or all tools\n", Cyan, Reset)
 	fmt.Printf("   %s/help%s                show this help\n", Cyan, Reset)
