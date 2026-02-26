@@ -83,6 +83,10 @@ jobs:
       if: ${{ matrix.suite == 'rust' }}
       run: cargo clippy --all-targets --all-features -- -D warnings
 
+    - name: Build tests
+      if: ${{ matrix.suite == 'rust' }}
+      run: cargo build --tests --locked
+
     - name: Run Rust tests
       if: ${{ matrix.suite == 'rust' }}
       run: cargo test --locked --verbose
