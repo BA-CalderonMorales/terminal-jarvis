@@ -156,18 +156,33 @@ impl Cli {
                 }
 
                 // Prioritize launching the Go ADK Home Screen (pristine UI/UX)
-                // adk/ lives inside the project repo. Walk upward and probe for local builds.
+                // Search strategy:
+                // 1. Same directory as current exe (NPM install style: bin/terminal-jarvis-bin and bin/jarvis)
+                // 2. ../adk/jarvis (Local dev style)
+                // 3. Walk upward for adk/jarvis (Repo root style)
                 let adk_binary = {
                     let mut path = None;
                     if let Ok(exe) = std::env::current_exe() {
-                        let mut dir = exe.parent();
-                        while let Some(d) = dir {
-                            let adk = d.join("adk").join("jarvis");
+                        // Check same directory (NPM style)
+                        if let Some(dir) = exe.parent() {
+                            let adk = dir.join("jarvis");
                             if adk.exists() {
                                 path = Some(adk);
-                                break;
                             }
-                            dir = d.parent();
+                        }
+
+                        // Check repo-style paths if not found
+                        if path.is_none() {
+                            let mut dir = exe.parent();
+                            while let Some(d) = dir {
+                                // Try direct sibling adk/jarvis
+                                let adk = d.join("adk").join("jarvis");
+                                if adk.exists() {
+                                    path = Some(adk);
+                                    break;
+                                }
+                                dir = d.parent();
+                            }
                         }
                     }
                     path

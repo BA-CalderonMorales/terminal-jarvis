@@ -8,7 +8,7 @@
  - Verify installation
 
  Version Hint (used by CI for consistency checks):
- Terminal Jarvis v0.0.77
+ Terminal Jarvis v0.0.78
 */
 
 const fs = require('fs');
@@ -261,14 +261,28 @@ function checkPrerequisites() {
         const extractTime = ((Date.now() - extractStart) / 1000).toFixed(1);
         log(`[SUCCESS] Extraction complete (${extractTime}s)`);
 
-        // Move binary to bin directory
+        // Move binaries to bin directory
+        await fs.promises.mkdir(binDir, { recursive: true });
+
+        // 1. Rust binary
         const extractedBin = path.join(downloadDir, 'terminal-jarvis');
         const binaryDest = path.join(binDir, platformInfo.isWindows ? 'terminal-jarvis.exe' : 'terminal-jarvis-bin');
-
-        await fs.promises.mkdir(binDir, { recursive: true });
         await fs.promises.copyFile(extractedBin, binaryDest);
         if (!platformInfo.isWindows) {
             await fs.promises.chmod(binaryDest, 0o755);
+        }
+
+        // 2. Go binary (ADK home screen)
+        const extractedGo = path.join(downloadDir, platformInfo.isWindows ? 'jarvis.exe' : 'jarvis');
+        const goDest = path.join(binDir, platformInfo.isWindows ? 'jarvis.exe' : 'jarvis');
+        if (fs.existsSync(extractedGo)) {
+            await fs.promises.copyFile(extractedGo, goDest);
+            if (!platformInfo.isWindows) {
+                await fs.promises.chmod(goDest, 0o755);
+            }
+            log('[SUCCESS] Go ADK installed');
+        } else {
+            warn('Go ADK not found in archive, falling back to Rust UI');
         }
 
         // Note: The launcher script (bin/terminal-jarvis) is committed to the repository
