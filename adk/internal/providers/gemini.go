@@ -19,7 +19,7 @@ type GeminiProvider struct {
 // NewGemini creates a Gemini provider for the given model and API key.
 func NewGemini(apiKey, modelName string) (*GeminiProvider, error) {
 	if modelName == "" {
-		modelName = "gemini-2.0-flash"
+		modelName = "gemini-2.5-flash"
 	}
 	ctx := context.Background()
 	client, err := genai.NewClient(ctx, option.WithAPIKey(apiKey))

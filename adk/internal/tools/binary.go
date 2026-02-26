@@ -37,6 +37,14 @@ func FindBinary() string {
 		dir = parent
 	}
 
+	// Also check the current working directory's target folder
+	if cwd, err := os.Getwd(); err == nil {
+		candidates = append(candidates,
+			filepath.Join(cwd, "target", "release", "terminal-jarvis"),
+			filepath.Join(cwd, "target", "debug", "terminal-jarvis"),
+		)
+	}
+
 	cargoHome := os.Getenv("CARGO_HOME")
 	if cargoHome == "" {
 		if home, err := os.UserHomeDir(); err == nil {

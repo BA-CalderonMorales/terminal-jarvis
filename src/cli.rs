@@ -1,6 +1,5 @@
 use crate::cli_logic;
 use clap::{Parser, Subcommand};
-use std::path::PathBuf;
 
 /// Terminal Jarvis - A unified interface for AI coding tools
 #[derive(Parser)]
@@ -17,6 +16,15 @@ pub struct Cli {
     /// Quick mode: skip all prompts, launch last-used tool immediately
     #[arg(short = 'q', long = "quick", global = true)]
     pub quick: bool,
+
+    /// Headless mode: no interactive prompts, no ANSI escape codes, plain text output.
+    /// Also enabled by setting JARVIS_HEADLESS=1 or when stdin is not a TTY.
+    #[arg(long, global = true, env = "JARVIS_HEADLESS")]
+    pub headless: bool,
+
+    /// Auto-confirm all prompts (implied in headless mode)
+    #[arg(short = 'y', long, global = true)]
+    pub yes: bool,
 }
 
 impl Default for Cli {
@@ -30,37 +38,21 @@ impl Cli {
         Self::parse()
     }
 
-    /// Check if a string is a valid tool name for direct invocation
+    /// Check if a string is a valid tool name for direct invocation.
+    /// Dynamically reads from config/tools/*.toml (single source of truth).
     fn is_valid_tool(name: &str) -> bool {
-        matches!(
-            name.to_lowercase().as_str(),
-            "claude"
-                | "gemini"
-                | "qwen"
-                | "opencode"
-                | "codex"
-                | "aider"
-                | "amp"
-                | "copilot"
-                | "goose"
-                | "crush"
-                | "llxprt"
-                | "ollama"
-                | "vibe"
-                | "droid"
-                | "forge"
-                | "cursor-agent"
-                | "jules"
-                | "kilocode"
-                | "letta"
-                | "nanocoder"
-                | "pi"
-                | "code"
-                | "eca"
-        )
+        let loader = crate::tools::tools_config::get_tool_config_loader();
+        let lower = name.to_lowercase();
+        loader
+            .get_tool_names()
+            .iter()
+            .any(|t| t.to_lowercase() == lower)
     }
 
     pub async fn run(self) -> anyhow::Result<()> {
+        // Initialize headless detection from CLI flags (and TTY check)
+        cli_logic::cli_logic_headless::init(self.headless, self.yes);
+
         // Handle quick mode: launch last-used tool immediately
         if self.quick && self.command.is_none() {
             return cli_logic::handle_quick_launch().await;
@@ -71,6 +63,11 @@ impl Cli {
 
             Some(Commands::External(args)) => {
                 if args.is_empty() {
+                    if cli_logic::cli_logic_headless::is_headless() {
+                        eprintln!("error: interactive mode is not available in headless mode");
+                        eprintln!("hint: use 'terminal-jarvis list' or 'terminal-jarvis run <tool>'");
+                        std::process::exit(1);
+                    }
                     return cli_logic::handle_interactive_mode().await;
                 }
                 let tool_name = &args[0];
@@ -81,9 +78,11 @@ impl Cli {
                 }
                 
                 // Invalid tool name - show error and exit
+                let loader = crate::tools::tools_config::get_tool_config_loader();
+                let tool_names = loader.get_tool_names();
                 eprintln!("error: '{tool_name}' is not a valid tool or command");
                 eprintln!();
-                eprintln!("Available tools: claude, gemini, qwen, opencode, codex, aider, amp, copilot, goose, crush, llxprt, ollama, vibe, droid, forge, cursor-agent, jules, kilocode, letta, nanocoder, pi, code, eca");
+                eprintln!("Available tools: {}", tool_names.join(", "));
                 eprintln!();
                 eprintln!("For more information, try '--help'");
                 std::process::exit(1);
@@ -139,20 +138,6 @@ impl Cli {
                 CacheCommands::Refresh { ttl } => cli_logic::handle_cache_refresh(ttl).await,
             },
 
-            Some(Commands::Benchmark { action }) => match action {
-                BenchmarkCommands::List => cli_logic::handle_benchmark_list().await,
-
-                BenchmarkCommands::Run {
-                    scenario,
-                    tool,
-                    export_json,
-                } => cli_logic::handle_benchmark_run(&scenario, &tool, export_json.as_ref()).await,
-
-                BenchmarkCommands::Validate { scenario_file } => {
-                    cli_logic::handle_benchmark_validate(&scenario_file).await
-                }
-            },
-
             Some(Commands::Db { action }) => match action {
                 DbCommands::Import => cli_logic::handle_db_import().await,
                 DbCommands::Status => cli_logic::handle_db_status().await,
@@ -161,8 +146,41 @@ impl Cli {
 
             Some(Commands::Status) => cli_logic::handle_status_command().await,
 
-            // (Duplicate Auth handler removed; handled above)
-            None => cli_logic::handle_interactive_mode().await,
+            None => {
+                if cli_logic::cli_logic_headless::is_headless() {
+                    eprintln!("error: interactive mode is not available in headless mode");
+                    eprintln!("hint: use 'terminal-jarvis list' or 'terminal-jarvis run <tool>'");
+                    std::process::exit(1);
+                }
+
+                // Prioritize launching the Go ADK Home Screen (pristine UI/UX)
+                // adk/ lives inside the project repo. Walk upward and probe for local builds.
+                let adk_binary = {
+                    let mut path = None;
+                    if let Ok(exe) = std::env::current_exe() {
+                        let mut dir = exe.parent();
+                        while let Some(d) = dir {
+                            let adk = d.join("adk").join("jarvis");
+                            if adk.exists() {
+                                path = Some(adk);
+                                break;
+                            }
+                            dir = d.parent();
+                        }
+                    }
+                    path
+                };
+
+                if let Some(adk) = adk_binary {
+                    let mut child = std::process::Command::new(adk)
+                        .spawn()
+                        .expect("failed to spawn Go ADK home screen");
+                    let _ = child.wait();
+                    return Ok(());
+                }
+
+                cli_logic::handle_interactive_mode().await
+            }
         }
     }
 }
@@ -225,12 +243,6 @@ pub enum Commands {
     Cache {
         #[command(subcommand)]
         action: CacheCommands,
-    },
-
-    /// Benchmark management commands
-    Benchmark {
-        #[command(subcommand)]
-        action: BenchmarkCommands,
     },
 
     /// Database management commands
@@ -309,34 +321,6 @@ pub enum AuthCommands {
         /// Optional tool name; if omitted, opens interactive menu
         #[arg(long)]
         tool: Option<String>,
-    },
-}
-
-#[derive(Subcommand)]
-pub enum BenchmarkCommands {
-    /// List all available benchmark scenarios
-    List,
-
-    /// Run a benchmark scenario against a tool
-    Run {
-        /// Benchmark scenario ID to run
-        #[arg(long)]
-        scenario: String,
-
-        /// Tool name to test
-        #[arg(long)]
-        tool: String,
-
-        /// Optional path to export results as JSON
-        #[arg(long)]
-        export_json: Option<PathBuf>,
-    },
-
-    /// Validate a benchmark scenario file
-    Validate {
-        /// Path to the scenario TOML file
-        #[arg(long)]
-        scenario_file: PathBuf,
     },
 }
 

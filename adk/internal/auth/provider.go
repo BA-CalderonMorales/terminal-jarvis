@@ -7,7 +7,7 @@ import (
 )
 
 const (
-	geminiModel     = "gemini-2.0-flash"
+	geminiModel     = "gemini-2.5-flash"
 	openRouterModel = "openrouter/google/gemini-flash-1.5"
 	ollamaModel     = "ollama/llama3.2"
 )

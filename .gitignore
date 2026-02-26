@@ -200,3 +200,5 @@ npm/terminal-jarvis/downloads/
 
 # adk folders/files to ignore
 adk/__pycache__/*
+adk/jarvis
+adk/jarvis.exe

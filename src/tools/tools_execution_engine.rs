@@ -103,7 +103,7 @@ fn should_continue_session(
 pub async fn run_tool_once(display_name: &str, args: &[String]) -> Result<()> {
     let cli_command = get_cli_command(display_name);
 
-    let executable_path = match resolve_tool_path(cli_command) {
+    let executable_path = match resolve_tool_path(&cli_command) {
         Some(path) => path,
         None => {
             return Err(anyhow::anyhow!(

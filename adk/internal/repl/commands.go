@@ -4,10 +4,10 @@ package repl
 import (
 	"fmt"
 	"os"
-	"path/filepath"
 	"strings"
 
 	"github.com/BA-CalderonMorales/terminal-jarvis/adk/internal/auth"
+	"github.com/BA-CalderonMorales/terminal-jarvis/adk/internal/envutil"
 	"github.com/BA-CalderonMorales/terminal-jarvis/adk/internal/tools"
 	"github.com/BA-CalderonMorales/terminal-jarvis/adk/internal/ui"
 	"github.com/peterh/liner"
@@ -89,29 +89,7 @@ func handleSlash(input string, envPath string, replLine *liner.State) (exit bool
 	return false, false
 }
 
-// findEnvPath resolves the adk/.env path relative to the binary location.
+// findEnvPath delegates to the shared envutil package.
 func findEnvPath() string {
-	exe, err := os.Executable()
-	if err != nil {
-		return "adk/.env"
-	}
-	// adk binary is at <repo>/adk/jarvis (or similar)
-	// Walk up to find adk/.env
-	dir := filepath.Dir(exe)
-	for i := 0; i < 5; i++ {
-		candidate := filepath.Join(dir, "adk", ".env")
-		if _, err := os.Stat(candidate); err == nil {
-			return candidate
-		}
-		candidate = filepath.Join(dir, ".env")
-		if _, err := os.Stat(candidate); err == nil {
-			return candidate
-		}
-		parent := filepath.Dir(dir)
-		if parent == dir {
-			break
-		}
-		dir = parent
-	}
-	return "adk/.env"
+	return envutil.FindEnvPath()
 }

@@ -96,9 +96,7 @@ impl DbToolManager {
             result.insert(
                 tool.id.clone(),
                 ToolInfo {
-                    // We need to leak the string to get &'static str
-                    // This is acceptable since tools are long-lived
-                    command: Box::leak(tool.cli_command.clone().into_boxed_str()),
+                    command: tool.cli_command.clone(),
                     is_installed,
                     package_manager,
                 },
@@ -138,13 +136,13 @@ fn get_available_tools_from_toml() -> BTreeMap<String, ToolInfo> {
     let tool_names = config_loader.get_tool_names();
 
     for tool_name in tool_names {
-        if let Some(cli_command) = mapping.get(tool_name.as_str()) {
+        if let Some(cli_command) = mapping.get(&tool_name) {
             let is_installed = check_tool_installed(cli_command);
             let package_manager = infer_package_manager(&tool_name);
             tools.insert(
                 tool_name.clone(),
                 ToolInfo {
-                    command: cli_command,
+                    command: cli_command.clone(),
                     is_installed,
                     package_manager,
                 },

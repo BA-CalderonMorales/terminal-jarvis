@@ -22,11 +22,6 @@ pub static COMMANDS: &[CommandDef] = &[
         aliases: &[],
     },
     CommandDef {
-        command: "/evals",
-        description: "Evals & Comparisons",
-        aliases: &[],
-    },
-    CommandDef {
         command: "/auth",
         description: "Authentication",
         aliases: &[],

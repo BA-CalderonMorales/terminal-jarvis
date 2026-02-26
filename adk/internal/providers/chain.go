@@ -11,7 +11,7 @@ import (
 // Priority (mirrors Python providers.py):
 //  1. JARVIS_MODEL env var — if set, use it exclusively (no litellm required
 //     in Go; we handle openrouter/... and gemini/... natively).
-//  2. GOOGLE_API_KEY / GEMINI_API_KEY → gemini-2.0-flash
+//  2. GOOGLE_API_KEY / GEMINI_API_KEY → gemini-2.5-flash
 //  3. OPENROUTER_API_KEY → openrouter/google/gemini-flash-1.5
 //  4. Ollama reachable at localhost → ollama/llama3.2
 func BuildChain() ([]Provider, error) {
@@ -24,7 +24,7 @@ func BuildChain() ([]Provider, error) {
 
 	// Google Gemini
 	if key := firstOf("GOOGLE_API_KEY", "GEMINI_API_KEY"); key != "" {
-		p, err := NewGemini(key, "gemini-2.0-flash")
+		p, err := NewGemini(key, "gemini-2.5-flash")
 		if err == nil {
 			chain = append(chain, p)
 		}

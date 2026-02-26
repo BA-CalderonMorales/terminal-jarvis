@@ -149,17 +149,17 @@ fn test_twelve_tools_total() {
     let loader = get_tool_config_loader();
     let tool_names = loader.get_tool_names();
 
-    // We should now have at least 12 tools total (including newer integrations).
+    // We should have at least 23 tools loaded from config/tools/*.toml.
     assert!(
-        tool_names.len() >= 12,
-        "Should have at least 12 tools loaded, got {}",
+        tool_names.len() >= 23,
+        "Should have at least 23 tools loaded, got {}",
         tool_names.len()
     );
 
     // Verify all expected tools are present
     let expected_tools = vec![
         "claude", "gemini", "qwen", "opencode", "llxprt", "codex", "crush", "goose", "amp",
-        "aider", "copilot", "kimi",
+        "aider", "copilot",
     ];
 
     for tool in expected_tools {

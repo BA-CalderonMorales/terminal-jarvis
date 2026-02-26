@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file.
 
+## [Unreleased]
+
+### Added
+- **Go-based ADK Home Screen**: Replaced Python-based home screen with a high-performance Go binary for millisecond startup times.
+- **Hybrid Architecture**: Leverages Go for the interactive REPL/Home screen and Rust for core tool management and execution logic.
+- **Headless Mode**: Native support for agentic/scripted environments with plain-text output and automatic prompt acceptance (via `JARVIS_HEADLESS=1` or non-TTY stdin).
+- **22 AI Tools Integrated**: Expanded support to a total of 22 AI coding assistants, all manageable via unified commands.
+
+### Changed
+- **Removed Experimental Features**: Pruned dead code and removed the experimental benchmarks/evaluations and voice modules to focus on core stability.
+- **Optimized Toolchain**: Switched to `sccache` for faster local Rust builds and improved devcontainer performance.
+
 ## [0.0.77] - 2026-02-17
 
 ### Fixed

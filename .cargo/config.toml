@@ -1,6 +1,6 @@
 [build]
 jobs = 16
-incremental = true
+rustc-wrapper = "sccache"
 # NOTE: Do NOT put rustflags here if you also have [target.X].rustflags.
 # Cargo does not merge them - target-specific rustflags fully override build-level
 # ones. Put all desired flags directly in the target sections below.
@@ -16,10 +16,7 @@ incremental = true
 # In devcontainer: apt install clang mold (see .devcontainer/Dockerfile)
 # In CI: apt install mold (clang is pre-installed on ubuntu-latest)
 linker = "clang"
-rustflags = [
-    "-C", "link-arg=-fuse-ld=mold",
-    "-C", "target-cpu=native",
-]
+rustflags = ["-C", "link-arg=-fuse-ld=mold", "-C", "target-cpu=native"]
 
 # musl targets are used for release builds (static linking, GLIBC independence).
 # Do NOT add target-cpu=native here - those binaries must run on end-user hardware.
@@ -35,6 +32,10 @@ codegen-units = 256
 # and panic messages without the overhead of full variable/type info.
 # This is much better than strip=true (which breaks the LLDB debugger).
 debug = 1
+# Optimize dependencies even in dev builds to speed up execution and reduce CPU load
+# during development, at the cost of slightly slower initial compilation.
+[profile.dev.package."*"]
+opt-level = 1
 
 [profile.dev.build-override]
 # Proc-macros and build scripts run at compile time, so optimizing them

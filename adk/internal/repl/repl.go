@@ -22,6 +22,12 @@ const setupNowPromptText = "   Run setup wizard now? [Y/n] "
 // Run starts the REPL loop.
 // chain is the ordered list of providers to try; the first that responds wins.
 func Run(chain []providers.Provider, envPath string) {
+	// In headless mode, use the non-interactive REPL (no TTY, no ANSI, no liner).
+	if IsHeadless() {
+		runHeadless(chain)
+		return
+	}
+
 	if restoreTTY := attachControllingTTY(); restoreTTY != nil {
 		defer restoreTTY()
 	}

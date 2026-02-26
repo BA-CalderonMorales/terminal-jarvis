@@ -9,6 +9,9 @@ func attachControllingTTY() (restore func()) {
 	if os.Getenv("JARVIS_NO_TTY_ATTACH") == "1" {
 		return nil
 	}
+	if os.Getenv("JARVIS_HEADLESS") == "1" || os.Getenv("JARVIS_HEADLESS") == "true" {
+		return nil
+	}
 
 	tty, err := os.OpenFile("/dev/tty", os.O_RDWR, 0)
 	if err != nil {

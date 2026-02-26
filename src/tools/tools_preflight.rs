@@ -159,7 +159,7 @@ impl ToolPreflight {
     /// Returns (installed, install_message, version).
     fn check_installation(tool_name: &str) -> (bool, Option<String>, Option<String>) {
         let cli_command = get_cli_command(tool_name);
-        let path_opt = resolve_tool_path(cli_command);
+        let path_opt = resolve_tool_path(&cli_command);
         let installed = path_opt.is_some();
         let mut version = None;
         let message = if !installed {
@@ -184,7 +184,7 @@ impl ToolPreflight {
     /// Returns (ok, message).
     fn check_runtime(tool_name: &str) -> (bool, Option<String>) {
         let cli_command = get_cli_command(tool_name);
-        let path_opt = resolve_tool_path(cli_command);
+        let path_opt = resolve_tool_path(&cli_command);
         let path = match path_opt {
             Some(p) => p,
             None => return (false, Some(format!("Tool '{}' not found", tool_name))),

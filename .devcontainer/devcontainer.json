@@ -29,7 +29,7 @@
   "containerEnv": {
     "RUST_LOG": "debug",
     "CARGO_TERM_COLOR": "always",
-    "CARGO_INCREMENTAL": "1",
+    "CARGO_INCREMENTAL": "0",
     "RUST_BACKTRACE": "1",
     "LANG": "en_US.UTF-8",
     "LC_ALL": "en_US.UTF-8",
@@ -63,7 +63,11 @@
         },
         "editor.formatOnSave": true,
         "rust-analyzer.check.command": "clippy",
-        "rust-analyzer.check.extraArgs": ["--", "-W", "clippy::pedantic"],
+        "rust-analyzer.check.extraArgs": [
+          "--",
+          "-W",
+          "clippy::pedantic"
+        ],
         "rust-analyzer.cargo.buildScripts.enable": true,
         "rust-analyzer.diagnostics.enable": true,
         "rust-analyzer.inlayHints.bindingModeHints.enable": false,

@@ -23,41 +23,27 @@ pub struct InstallCommandInfo {
     pub requires_sudo: bool,
 }
 
-/// Map display names to actual CLI command names
-pub fn get_command_mapping() -> HashMap<&'static str, &'static str> {
+/// Map display names to actual CLI command names.
+/// Dynamically loaded from config/tools/*.toml (single source of truth).
+pub fn get_command_mapping() -> HashMap<String, String> {
+    let config_loader = get_tool_config_loader();
     let mut mapping = HashMap::new();
-    // Map display names to actual CLI commands (no API key enforcement)
-    mapping.insert("claude", "claude"); // Assuming claude-code installs as 'claude'
-    mapping.insert("gemini", "gemini"); // Assuming gemini-cli installs as 'gemini'
-    mapping.insert("qwen", "qwen"); // Assuming qwen-code installs as 'qwen'
-    mapping.insert("opencode", "opencode"); // OpenCode installs as 'opencode'
-    mapping.insert("llxprt", "llxprt"); // LLxprt Code installs as 'llxprt'
-    mapping.insert("codex", "codex"); // OpenAI Codex CLI installs as 'codex'
-    mapping.insert("crush", "crush"); // Crush installs as 'crush'
-    mapping.insert("goose", "goose"); // Block Goose CLI installs as 'goose'
-    mapping.insert("amp", "amp"); // Sourcegraph Amp installs as 'amp'
-    mapping.insert("aider", "aider"); // Aider installs as 'aider'
-    mapping.insert("copilot", "copilot"); // GitHub Copilot CLI installs as 'copilot'
-    mapping.insert("ollama", "ollama");
-    mapping.insert("vibe", "vibe");
-    mapping.insert("droid", "droid");
-    mapping.insert("forge", "forge");
-    mapping.insert("cursor-agent", "cursor-agent");
-    mapping.insert("jules", "jules");
-    mapping.insert("kilocode", "kilocode");
-    mapping.insert("letta", "letta");
-    mapping.insert("nanocoder", "nanocoder");
-    mapping.insert("pi", "pi");
-    mapping.insert("code", "code");
-    mapping.insert("eca", "eca");
+    for name in config_loader.get_tool_names() {
+        if let Some(tool_def) = config_loader.get_tool_definition(&name) {
+            mapping.insert(name, tool_def.cli_command.clone());
+        }
+    }
     mapping
 }
 
 /// Get actual CLI command from display name
-pub fn get_cli_command(display_name: &str) -> &str {
-    get_command_mapping()
-        .get(display_name)
-        .unwrap_or(&display_name)
+pub fn get_cli_command(display_name: &str) -> String {
+    let config_loader = get_tool_config_loader();
+    if let Some(tool_def) = config_loader.get_tool_definition(display_name) {
+        tool_def.cli_command.clone()
+    } else {
+        display_name.to_string()
+    }
 }
 
 /// Get installation command for a tool from configuration

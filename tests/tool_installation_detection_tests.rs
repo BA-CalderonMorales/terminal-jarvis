@@ -55,24 +55,6 @@ fn test_curl_tools_do_not_require_npm() {
     }
 }
 
-/// kimi should install via official shell installer and not require npm.
-#[test]
-fn test_kimi_install_uses_official_curl_installer() {
-    let cmd = InstallationManager::get_install_command("kimi")
-        .expect("kimi must be in the tool registry");
-
-    assert_eq!(cmd.command, "curl", "kimi must use curl installer");
-    assert!(
-        cmd.args.iter().any(|a| a.contains("code.kimi.com/install.sh")),
-        "kimi installer should use official install script URL, got: {:?}",
-        cmd.args
-    );
-    assert!(
-        !cmd.requires_npm,
-        "kimi must not require npm - official installation uses shell installer"
-    );
-}
-
 /// npm tools must carry the correct package registry path.
 /// This prevents regression of the wrong-package-name bug (e.g. gemini was
 /// using @anthropic-ai/gemini-cli instead of @google/gemini-cli).

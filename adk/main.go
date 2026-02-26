@@ -13,12 +13,9 @@
 package main
 
 import (
-	"fmt"
-	"os"
-	"path/filepath"
-
 	"github.com/joho/godotenv"
 
+	"github.com/BA-CalderonMorales/terminal-jarvis/adk/internal/envutil"
 	"github.com/BA-CalderonMorales/terminal-jarvis/adk/internal/providers"
 	"github.com/BA-CalderonMorales/terminal-jarvis/adk/internal/repl"
 	"github.com/BA-CalderonMorales/terminal-jarvis/adk/internal/ui"
@@ -26,7 +23,7 @@ import (
 
 func main() {
 	// Load .env for the Go home screen.
-	envPath := findEnvPath()
+	envPath := envutil.FindEnvPath()
 	_ = godotenv.Load(envPath)
 
 	// Start the startup spinner immediately -- before any blocking work.
@@ -43,48 +40,4 @@ func main() {
 	}
 
 	repl.Run(chain, envPath)
-}
-
-// findEnvPath locates adk/.env relative to the binary.
-func findEnvPath() string {
-	exe, err := os.Executable()
-	if err != nil {
-		return "adk/.env"
-	}
-
-	dir := filepath.Dir(exe)
-	// The binary typically lives in adk/ inside the project root.
-	// Walk up to find adk/.env.
-	for i := 0; i < 5; i++ {
-		// Check <dir>/adk/.env (when binary is in project root or subdir)
-		candidate := filepath.Join(dir, "adk", ".env")
-		if _, err := os.Stat(candidate); err == nil {
-			return candidate
-		}
-		// Check <dir>/.env (when binary is inside adk/ itself)
-		candidate = filepath.Join(dir, "..", ".env")
-		if abs, err := filepath.Abs(candidate); err == nil {
-			if _, err := os.Stat(abs); err == nil {
-				return abs
-			}
-		}
-		parent := filepath.Dir(dir)
-		if parent == dir {
-			break
-		}
-		dir = parent
-	}
-
-	// Fallback: look for .env in current working directory.
-	if cwd, err := os.Getwd(); err == nil {
-		for _, rel := range []string{"adk/.env", ".env"} {
-			p := filepath.Join(cwd, rel)
-			if _, err := os.Stat(p); err == nil {
-				return p
-			}
-		}
-	}
-
-	fmt.Fprintf(os.Stderr, "Warning: could not locate adk/.env; set GOOGLE_API_KEY or OPENROUTER_API_KEY in environment.\n")
-	return "adk/.env"
 }
