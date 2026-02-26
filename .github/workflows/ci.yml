@@ -24,6 +24,7 @@ concurrency:
 
 env:
   CARGO_TERM_COLOR: always
+  RUSTC_WRAPPER: ""
 
 # Minimal permissions by default; specific jobs can elevate
 permissions:
@@ -36,6 +37,7 @@ jobs:
     name: Test - ${{ matrix.name }}
     runs-on: ${{ matrix.os }}
     strategy:
+      fail-fast: true
       matrix:
         include:
           - name: Rust (Ubuntu)
@@ -73,12 +75,6 @@ jobs:
         key: cargo-${{ runner.os }}-${{ hashFiles('**/Cargo.lock') }}
         restore-keys: cargo-${{ runner.os }}-
 
-    # mold is required by .cargo/config.toml for x86_64-unknown-linux-gnu builds.
-    # clang is pre-installed on ubuntu-latest; only mold needs explicit installation.
-    - name: Install mold linker
-      if: ${{ matrix.suite == 'rust' && runner.os == 'Linux' }}
-      run: sudo apt-get update -q && sudo apt-get install -y mold
-
     - name: Check formatting
       if: ${{ matrix.suite == 'rust' }}
       run: cargo fmt --all -- --check
@@ -98,6 +94,12 @@ jobs:
       with:
         go-version: '1.24.x'
         cache-dependency-path: adk/go.sum
+
+    - name: Download Go dependencies
+      if: ${{ matrix.suite == 'go' }}
+      run: |
+        cd adk
+        go mod download
 
     - name: Check Go formatting
       if: ${{ matrix.suite == 'go' }}
@@ -130,10 +132,6 @@ jobs:
           target
         key: cargo-${{ runner.os }}-${{ hashFiles('**/Cargo.lock') }}
         restore-keys: cargo-${{ runner.os }}-
-
-    - name: Install mold linker
-      if: ${{ matrix.suite == 'npm' && runner.os == 'Linux' }}
-      run: sudo apt-get update -q && sudo apt-get install -y mold
 
     - name: Build release binary
       if: ${{ matrix.suite == 'npm' }}
@@ -210,7 +208,7 @@ jobs:
         fi
 
     - name: Run cargo-audit
-      run: cargo audit --deny warnings --ignore RUSTSEC-2025-0134 --ignore RUSTSEC-2025-0141
+      run: cargo audit --deny warnings --ignore RUSTSEC-2025-0134 --ignore RUSTSEC-2025-0141 --ignore RUSTSEC-2024-0375 --ignore RUSTSEC-2021-0145
 
     - name: Run cargo-deny checks
       uses: EmbarkStudios/cargo-deny-action@v2

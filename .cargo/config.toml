@@ -1,6 +1,6 @@
 [build]
 jobs = 16
-rustc-wrapper = "sccache"
+# rustc-wrapper = "sccache"
 # NOTE: Do NOT put rustflags here if you also have [target.X].rustflags.
 # Cargo does not merge them - target-specific rustflags fully override build-level
 # ones. Put all desired flags directly in the target sections below.
@@ -12,11 +12,9 @@ rustc-wrapper = "sccache"
 # This gives ~10x faster incremental builds. See .devcontainer/devcontainer.json.
 
 [target.x86_64-unknown-linux-gnu]
-# clang + mold: fastest linker combo on Linux. Both must be installed.
-# In devcontainer: apt install clang mold (see .devcontainer/Dockerfile)
-# In CI: apt install mold (clang is pre-installed on ubuntu-latest)
+# clang + lld: fast, reliable linker combo on Linux. Both are pre-installed on GitHub ubuntu-latest.
 linker = "clang"
-rustflags = ["-C", "link-arg=-fuse-ld=mold", "-C", "target-cpu=native"]
+rustflags = ["-C", "link-arg=-fuse-ld=lld"]
 
 # musl targets are used for release builds (static linking, GLIBC independence).
 # Do NOT add target-cpu=native here - those binaries must run on end-user hardware.

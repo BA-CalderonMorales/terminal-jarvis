@@ -47,7 +47,6 @@ inquire = "0.9.1"
 terminal_size = "0.4.3"
 indicatif = "0.18.3"
 signal-hook = "0.3.18"
-atty = "0.2.14"
 libc = { version = "0.2.177", optional = false }
 unicode-width = "0.2.2"
 tempfile = "3.23.0"
@@ -62,6 +61,7 @@ libsql = "0.9"
 
 # Async trait for repository pattern
 async-trait = "0.1.89"
+is-terminal = "0.4.17"
 
 [features]
 default = []

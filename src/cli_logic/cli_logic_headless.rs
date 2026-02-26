@@ -11,7 +11,8 @@ static AUTO_YES: OnceLock<bool> = OnceLock::new();
 /// Initialize headless state from CLI flags.
 /// Must be called once at startup before any `is_headless()` checks.
 pub fn init(headless_flag: bool, yes_flag: bool) {
-    let headless = headless_flag || !atty::is(atty::Stream::Stdin);
+    use is_terminal::IsTerminal;
+    let headless = headless_flag || !std::io::stdin().is_terminal();
     let _ = HEADLESS.set(headless);
     // In headless mode, --yes is always implied
     let _ = AUTO_YES.set(yes_flag || headless);
