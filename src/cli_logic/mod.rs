@@ -4,11 +4,11 @@
 pub mod cli_logic_auth_operations;
 pub mod cli_logic_autocomplete;
 pub mod cli_logic_config_management;
-pub mod cli_logic_headless;
 pub mod cli_logic_dashboard;
 pub mod cli_logic_db_operations;
 pub mod cli_logic_entry_point;
 pub mod cli_logic_first_run;
+pub mod cli_logic_headless;
 pub mod cli_logic_info_operations;
 pub mod cli_logic_interactive;
 pub mod cli_logic_list_operations;

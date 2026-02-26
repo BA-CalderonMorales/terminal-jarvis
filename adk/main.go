@@ -4,12 +4,13 @@
 // for millisecond startup times. No Python interpreter, no litellm, no venv.
 //
 // Architecture (DDD layers, mirroring src/ Rust structure):
-//   providers/ -- LLM backend detection + API clients (Gemini, OpenRouter, Ollama)
-//   tools/     -- terminal-jarvis binary wrappers + LLM tool schemas
-//   chat/      -- conversation history + LLM dispatch loop
-//   auth/      -- provider auth wizards (PKCE OAuth, browser-guided key paste)
-//   repl/      -- interactive REPL + slash command handlers
-//   ui/        -- ANSI theme, spinner, home screen, help
+//
+//	providers/ -- LLM backend detection + API clients (Gemini, OpenRouter, Ollama)
+//	tools/     -- terminal-jarvis binary wrappers + LLM tool schemas
+//	chat/      -- conversation history + LLM dispatch loop
+//	auth/      -- provider auth wizards (PKCE OAuth, browser-guided key paste)
+//	repl/      -- interactive REPL + slash command handlers
+//	ui/        -- ANSI theme, spinner, home screen, help
 package main
 
 import (

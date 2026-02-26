@@ -24,7 +24,7 @@ impl PackageOperationsManager {
     pub async fn is_tool_installed(&self, tool_name: &str) -> Result<bool> {
         // Use resolve_tool_path to find the absolute path if available
         let tool_path = resolve_tool_path(tool_name).unwrap_or_else(|| tool_name.to_string());
-        
+
         let output = AsyncCommand::new(tool_path).arg("--version").output().await;
 
         match output {

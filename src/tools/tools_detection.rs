@@ -119,18 +119,23 @@ pub fn resolve_tool_path(tool: &str) -> Option<String> {
     // 1. Standard PATH lookup (fastest)
     if let Ok(output) = Command::new("which").arg(tool).output() {
         if output.status.success() && !output.stdout.is_empty() {
-             let path = String::from_utf8_lossy(&output.stdout).trim().to_string();
-             return Some(path);
+            let path = String::from_utf8_lossy(&output.stdout).trim().to_string();
+            return Some(path);
         }
     }
 
     // 2. Windows equivalent
     if let Ok(output) = Command::new("where").arg(tool).output() {
         if output.status.success() && !output.stdout.is_empty() {
-             let path = String::from_utf8_lossy(&output.stdout).lines().next().unwrap_or("").trim().to_string();
-             if !path.is_empty() {
-                 return Some(path);
-             }
+            let path = String::from_utf8_lossy(&output.stdout)
+                .lines()
+                .next()
+                .unwrap_or("")
+                .trim()
+                .to_string();
+            if !path.is_empty() {
+                return Some(path);
+            }
         }
     }
 
@@ -157,17 +162,17 @@ pub fn resolve_tool_path(tool: &str) -> Option<String> {
     );
     if let Ok(output) = Command::new("sh").arg("-c").arg(&shell_cmd).output() {
         if output.status.success() && !output.stdout.is_empty() {
-             let path = String::from_utf8_lossy(&output.stdout).trim().to_string();
-             if !path.is_empty() {
-                 return Some(path);
-             }
+            let path = String::from_utf8_lossy(&output.stdout).trim().to_string();
+            if !path.is_empty() {
+                return Some(path);
+            }
         }
     }
 
     // 5. Direct execution check (fallback)
     if let Ok(output) = Command::new(tool).arg("--version").output() {
         if output.status.success() {
-             return Some(tool.to_string());
+            return Some(tool.to_string());
         }
     }
 

@@ -167,10 +167,7 @@ impl ToolPreflight {
         } else {
             let path = path_opt.as_ref().unwrap();
             // Try to get version
-            if let Ok(output) = std::process::Command::new(path)
-                .arg("--version")
-                .output()
-            {
+            if let Ok(output) = std::process::Command::new(path).arg("--version").output() {
                 if output.status.success() {
                     version = Some(String::from_utf8_lossy(&output.stdout).trim().to_string());
                 }

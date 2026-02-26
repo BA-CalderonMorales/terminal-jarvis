@@ -1,13 +1,11 @@
 // CLI Logic Entry Point
 // This module coordinates all CLI business logic operations
 
-use crate::auth_manager::AuthManager;
 use crate::cli_logic::cli_logic_welcome::display_welcome_screen;
 use crate::cli_logic::themed_components::{themed_confirm, themed_multiselect, themed_select_with};
 use crate::installation_arguments::InstallationManager;
 use crate::progress_utils::ProgressContext;
 use crate::theme::theme_global_config;
-use crate::tools::tools_detection::resolve_tool_path;
 use crate::tools::tools_display::ToolDisplayFormatter;
 use crate::tools::ToolManager;
 use anyhow::Result;
@@ -220,35 +218,6 @@ fn initial_case(s: &str) -> String {
     }
 }
 
-/// Get tool auth configuration from TOML config: (command, args, action_label)
-///
-/// Reads cli_auth_command from config/tools/*.toml instead of hardcoded match arms.
-fn get_tool_auth_config(tool: &str) -> Option<(String, Vec<String>, String)> {
-    use crate::auth_manager::auth_preflight::AuthPreflight;
-
-    let result = AuthPreflight::check(tool);
-    let cli_cmd = result.cli_auth_command?;
-
-    // Parse "goose configure" -> ("goose", ["configure"])
-    let parts: Vec<&str> = cli_cmd.split_whitespace().collect();
-    if parts.is_empty() {
-        return None;
-    }
-
-    let command = parts[0].to_string();
-    let args: Vec<String> = parts[1..].iter().map(|s| s.to_string()).collect();
-
-    // Derive action label from the first arg
-    let action = match args.first().map(|s| s.as_str()) {
-        Some("login") => "Login to",
-        Some("configure") => "Configure",
-        Some("auth") => "Authenticate",
-        _ => "Setup",
-    };
-
-    Some((command, args, action.to_string()))
-}
-
 /// Handle user choice after tool exit -- streamlined to 3 options
 async fn handle_post_tool_exit(last_tool: &str, last_args: &[String]) -> Result<()> {
     loop {
@@ -261,13 +230,10 @@ async fn handle_post_tool_exit(last_tool: &str, last_args: &[String]) -> Result<
             "Exit".to_string(),
         ];
 
-        let exit_choice =
-            match themed_select_with(&theme, "What next?", exit_options)
-                .prompt()
-            {
-                Ok(choice) => choice,
-                Err(_) => return Ok(()),
-            };
+        let exit_choice = match themed_select_with(&theme, "What next?", exit_options).prompt() {
+            Ok(choice) => choice,
+            Err(_) => return Ok(()),
+        };
 
         match exit_choice.as_str() {
             s if s.starts_with("Reopen ") => {
@@ -280,128 +246,6 @@ async fn handle_post_tool_exit(last_tool: &str, last_args: &[String]) -> Result<
                 std::process::exit(0);
             }
             _ => return Ok(()),
-        }
-    }
-}
-
-/// Derive uninstall command from the TOML install config.
-/// Maps install commands to their corresponding uninstall equivalents:
-///   npm install -g <pkg>       -> npm uninstall -g <pkg>
-///   uv tool install <pkg>      -> uv tool uninstall <pkg>
-///   cargo install <pkg>        -> cargo uninstall <pkg>
-///   pip/pip3 install <pkg>     -> pip/pip3 uninstall -y <pkg>
-///   curl ... | bash            -> None (binary; caller shows removal hint)
-fn get_uninstall_command(tool: &str) -> Option<(String, Vec<String>)> {
-    let config_loader = crate::tools::tools_config::get_tool_config_loader();
-    let install_cmd = config_loader.get_install_command(tool)?;
-
-    match install_cmd.command.as_str() {
-        "npm" => {
-            // npm install -g @scope/pkg  ->  npm uninstall -g @scope/pkg
-            let pkg = install_cmd.args.last()?.clone();
-            Some((
-                "npm".to_string(),
-                vec!["uninstall".to_string(), "-g".to_string(), pkg],
-            ))
-        }
-        "uv" => {
-            // uv tool install pkg  ->  uv tool uninstall pkg
-            let pkg = install_cmd.args.last()?.clone();
-            Some((
-                "uv".to_string(),
-                vec!["tool".to_string(), "uninstall".to_string(), pkg],
-            ))
-        }
-        "cargo" => {
-            // cargo install pkg  ->  cargo uninstall pkg
-            let pkg = install_cmd.args.last()?.clone();
-            Some(("cargo".to_string(), vec!["uninstall".to_string(), pkg]))
-        }
-        "pip" | "pip3" => {
-            let pkg = install_cmd.args.last()?.clone();
-            Some((
-                install_cmd.command.clone(),
-                vec!["uninstall".to_string(), "-y".to_string(), pkg],
-            ))
-        }
-        // curl-based installs (claude, goose, ollama, vibe, …) don't have a
-        // standard uninstall path. Caller handles this case.
-        _ => None,
-    }
-}
-
-/// Return a user-facing hint for removing a curl-installed tool binary.
-fn curl_tool_removal_hint(tool: &str) -> &'static str {
-    match tool {
-        "claude" => "Remove via: rm $(which claude)  or  npm uninstall -g @anthropic-ai/claude-code",
-        "goose" => "Remove via: rm ~/.local/bin/goose  (or wherever goose was installed)",
-        "ollama" => "See https://ollama.com/blog/ollama-is-now-available-as-an-official-docker-image for removal steps",
-        "vibe" => "Remove via: rm $(which vibe)",
-        _ => "Check the tool's documentation for removal instructions",
-    }
-}
-
-/// Handle tool uninstallation with appropriate package manager
-async fn handle_uninstall_tool(tool: &str, tool_display: &str, theme: &crate::theme::Theme) {
-    match get_uninstall_command(tool) {
-        None => {
-            // curl-installed tools: show removal hint instead of running a command
-            let hint = curl_tool_removal_hint(tool);
-            println!("\n{}", theme.primary(&format!("To remove {tool_display}:")));
-            println!("  {}", theme.secondary(hint));
-            tokio::time::sleep(tokio::time::Duration::from_millis(2000)).await;
-        }
-        Some((cmd, args)) => {
-            // Confirm before uninstalling
-            let Ok(confirmed) = themed_confirm(&format!("Uninstall {tool_display}?"))
-                .with_default(false)
-                .prompt()
-            else {
-                return;
-            };
-
-            if !confirmed {
-                return;
-            }
-
-            println!(
-                "{}",
-                theme.secondary(&format!("Uninstalling {tool_display}..."))
-            );
-
-            // Try to resolve the absolute path for the package manager command (e.g. npm, uv, cargo)
-            let cmd_path = resolve_tool_path(&cmd).unwrap_or_else(|| cmd.clone());
-
-            let result = std::process::Command::new(&cmd_path).args(&args).status();
-            match result {
-                Ok(status) if status.success() => {
-                    println!(
-                        "{}",
-                        theme.primary(&format!("{tool_display} has been uninstalled."))
-                    );
-                    // Also clear credentials
-                    let _ = AuthManager::delete_tool_credentials(tool, &[]);
-                }
-                Ok(_) => {
-                    println!(
-                        "{}",
-                        theme.accent(&format!(
-                            "Uninstall may have failed. Try manually: {} {}",
-                            cmd,
-                            args.join(" ")
-                        ))
-                    );
-                }
-                Err(e) => {
-                    println!(
-                        "{}",
-                        theme.accent(&format!("Could not run uninstall command: {e}"))
-                    );
-                }
-            }
-
-            // Brief pause to let user read the message
-            tokio::time::sleep(tokio::time::Duration::from_millis(1500)).await;
         }
     }
 }

@@ -65,18 +65,20 @@ impl Cli {
                 if args.is_empty() {
                     if cli_logic::cli_logic_headless::is_headless() {
                         eprintln!("error: interactive mode is not available in headless mode");
-                        eprintln!("hint: use 'terminal-jarvis list' or 'terminal-jarvis run <tool>'");
+                        eprintln!(
+                            "hint: use 'terminal-jarvis list' or 'terminal-jarvis run <tool>'"
+                        );
                         std::process::exit(1);
                     }
                     return cli_logic::handle_interactive_mode().await;
                 }
                 let tool_name = &args[0];
                 let tool_args = &args[1..];
-                
+
                 if Self::is_valid_tool(tool_name) {
                     return cli_logic::handle_run_tool(tool_name, tool_args).await;
                 }
-                
+
                 // Invalid tool name - show error and exit
                 let loader = crate::tools::tools_config::get_tool_config_loader();
                 let tool_names = loader.get_tool_names();
