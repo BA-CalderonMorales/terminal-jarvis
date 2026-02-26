@@ -146,6 +146,8 @@ display_version_status() {
     ts_version=$(grep "console.log.*Terminal Jarvis v" npm/terminal-jarvis/src/index.ts | sed 's/.*Terminal Jarvis v\([0-9.]*\).*/\1/')
     local postinstall_version
     postinstall_version=$(grep "Terminal Jarvis v" npm/terminal-jarvis/package.json | sed 's/.*Terminal Jarvis v\([0-9.]*\).*/\1/')
+    local adk_version
+    adk_version=$(grep 'Version = "' adk/internal/ui/theme.go | sed 's/.*Version = "v\(.*\)".*/\1/')
     local homebrew_version=""
     
     if [ -f "homebrew-terminal-jarvis/Formula/terminal-jarvis.rb" ]; then
@@ -157,6 +159,7 @@ display_version_status() {
     log_info_if_enabled "  • npm/terminal-jarvis/package.json: ${npm_version}"
     log_info_if_enabled "  • npm/terminal-jarvis/src/index.ts: ${ts_version}"
     log_info_if_enabled "  • npm/terminal-jarvis/package.json postinstall: ${postinstall_version}"
+    log_info_if_enabled "  • adk/internal/ui/theme.go: ${adk_version}"
     if [ -n "$homebrew_version" ]; then
         log_info_if_enabled "  • homebrew-terminal-jarvis/Formula/terminal-jarvis.rb: ${homebrew_version}"
     else
@@ -226,6 +229,10 @@ update_all_versions() {
     # Update postinstall script version
     log_info_if_enabled "  • Updating npm/terminal-jarvis/package.json postinstall script"
     sed -i "s/Terminal Jarvis v[0-9]\+\.[0-9]\+\.[0-9]\+/Terminal Jarvis v$new_version/g" npm/terminal-jarvis/package.json
+    
+    # Update Go ADK version in theme.go
+    log_info_if_enabled "  • Updating adk/internal/ui/theme.go version"
+    sed -i "s/Version = \"v[0-9]\+\.[0-9]\+\.[0-9]\+\"/Version = \"v$new_version\"/" adk/internal/ui/theme.go
     
     # Update version references in README files (if any exist)
     log_info_if_enabled "  • Updating version references in documentation"
@@ -331,6 +338,7 @@ class TerminalJarvis < Formula
 
   def install
     bin.install "terminal-jarvis"
+    bin.install "jarvis"
   end
 
   test do

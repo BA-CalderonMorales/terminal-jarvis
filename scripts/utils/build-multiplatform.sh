@@ -89,7 +89,43 @@ build_for_target() {
     fi
     
     if $build_command build --release --target "$target"; then
-        print_info "Successfully built for $platform_name"
+        print_info "Successfully built Rust binary for $platform_name"
+        
+        # Build Go ADK for the same target
+        print_step "Building Go ADK for $platform_name ($target)"
+        
+        # Map Rust target to Go GOOS/GOARCH
+        local goos=""
+        local goarch=""
+        
+        case "$target" in
+            "x86_64-apple-darwin")
+                goos="darwin"
+                goarch="amd64"
+                ;;
+            "aarch64-apple-darwin")
+                goos="darwin"
+                goarch="arm64"
+                ;;
+            "x86_64-unknown-linux-musl" | "x86_64-unknown-linux-gnu")
+                goos="linux"
+                goarch="amd64"
+                ;;
+            "aarch64-unknown-linux-musl" | "aarch64-unknown-linux-gnu")
+                goos="linux"
+                goarch="arm64"
+                ;;
+        esac
+        
+        if [ -n "$goos" ] && [ -n "$goarch" ]; then
+            (
+                cd "$PROJECT_ROOT/adk"
+                GOOS=$goos GOARCH=$goarch go build -o "jarvis-${goos}-${goarch}" .
+                print_info "Successfully built Go binary: adk/jarvis-${goos}-${goarch}"
+            )
+        else
+            print_warning "Skipping Go build for unsupported target: $target"
+        fi
         
         # Check if binary exists and display info
         local binary_path="target/$target/release/terminal-jarvis"

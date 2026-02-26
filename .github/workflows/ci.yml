@@ -41,6 +41,9 @@ jobs:
           - name: Rust (Ubuntu)
             suite: rust
             os: ubuntu-latest
+          - name: Go (Ubuntu)
+            suite: go
+            os: ubuntu-latest
           - name: NPM (Node 18)
             suite: npm
             os: ubuntu-latest
@@ -87,6 +90,30 @@ jobs:
     - name: Run Rust tests
       if: ${{ matrix.suite == 'rust' }}
       run: cargo test --locked --verbose
+
+    # Go code quality + tests
+    - name: Setup Go
+      if: ${{ matrix.suite == 'go' }}
+      uses: actions/setup-go@v5
+      with:
+        go-version: '1.24.x'
+        cache-dependency-path: adk/go.sum
+
+    - name: Check Go formatting
+      if: ${{ matrix.suite == 'go' }}
+      run: |
+        cd adk
+        if [ "$(gofmt -l . | wc -l)" -gt 0 ]; then
+          echo "Go code is not formatted properly! Run 'gofmt -w .' locally."
+          gofmt -l .
+          exit 1
+        fi
+
+    - name: Run Go tests
+      if: ${{ matrix.suite == 'go' }}
+      run: |
+        cd adk
+        go test -v ./...
 
     # NPM package tests (build the Rust binary first)
     - name: Install Rust toolchain (for npm build)
