@@ -1,5 +1,6 @@
 use crate::cli_logic;
 use clap::{Parser, Subcommand};
+use std::path::{Path, PathBuf};
 
 /// Terminal Jarvis - A unified interface for AI coding tools
 #[derive(Parser)]
@@ -47,6 +48,83 @@ impl Cli {
             .get_tool_names()
             .iter()
             .any(|t| t.to_lowercase() == lower)
+    }
+
+    /// Find the Go ADK binary for the home screen.
+    /// Search strategy:
+    /// 0. Respect JARVIS_DISABLE_ADK=1 to force Rust interactive fallback
+    /// 1. JARVIS_ADK_BINARY environment override (if it exists)
+    /// 2. Same directory as current exe (NPM style)
+    /// 3. Walk upward for adk/jarvis (repo style)
+    fn find_adk_binary() -> Option<PathBuf> {
+        if std::env::var("JARVIS_DISABLE_ADK")
+            .ok()
+            .is_some_and(|v| v == "1" || v.eq_ignore_ascii_case("true"))
+        {
+            return None;
+        }
+
+        if let Ok(explicit) = std::env::var("JARVIS_ADK_BINARY") {
+            let p = PathBuf::from(explicit);
+            if p.exists() {
+                return Some(p);
+            }
+        }
+
+        if let Ok(exe) = std::env::current_exe() {
+            // Check same directory (NPM style)
+            if let Some(dir) = exe.parent() {
+                let adk = dir.join("jarvis");
+                if adk.exists() {
+                    return Some(adk);
+                }
+            }
+
+            // Check repo-style paths
+            let mut dir = exe.parent();
+            while let Some(d) = dir {
+                let adk = d.join("adk").join("jarvis");
+                if adk.exists() {
+                    return Some(adk);
+                }
+                dir = d.parent();
+            }
+        }
+
+        None
+    }
+
+    /// Try to launch ADK binary. Returns true only on successful launch and wait.
+    fn try_launch_adk_binary(path: &Path) -> bool {
+        match std::process::Command::new(path).spawn() {
+            Ok(mut child) => match child.wait() {
+                Ok(status) if status.success() => true,
+                Ok(status) => {
+                    eprintln!(
+                        "warning: Go ADK home screen exited with status {} ({}); falling back",
+                        status,
+                        path.display()
+                    );
+                    false
+                }
+                Err(e) => {
+                    eprintln!(
+                        "warning: failed while waiting for Go ADK home screen ({}): {}",
+                        path.display(),
+                        e
+                    );
+                    false
+                }
+            },
+            Err(e) => {
+                eprintln!(
+                    "warning: failed to launch Go ADK home screen ({}): {}",
+                    path.display(),
+                    e
+                );
+                false
+            }
+        }
     }
 
     pub async fn run(self) -> anyhow::Result<()> {
@@ -155,45 +233,12 @@ impl Cli {
                     std::process::exit(1);
                 }
 
-                // Prioritize launching the Go ADK Home Screen (pristine UI/UX)
-                // Search strategy:
-                // 1. Same directory as current exe (NPM install style: bin/terminal-jarvis-bin and bin/jarvis)
-                // 2. ../adk/jarvis (Local dev style)
-                // 3. Walk upward for adk/jarvis (Repo root style)
-                let adk_binary = {
-                    let mut path = None;
-                    if let Ok(exe) = std::env::current_exe() {
-                        // Check same directory (NPM style)
-                        if let Some(dir) = exe.parent() {
-                            let adk = dir.join("jarvis");
-                            if adk.exists() {
-                                path = Some(adk);
-                            }
-                        }
-
-                        // Check repo-style paths if not found
-                        if path.is_none() {
-                            let mut dir = exe.parent();
-                            while let Some(d) = dir {
-                                // Try direct sibling adk/jarvis
-                                let adk = d.join("adk").join("jarvis");
-                                if adk.exists() {
-                                    path = Some(adk);
-                                    break;
-                                }
-                                dir = d.parent();
-                            }
-                        }
+                // Prioritize launching the Go ADK home screen when available.
+                if let Some(adk) = Self::find_adk_binary() {
+                    if Self::try_launch_adk_binary(&adk) {
+                        return Ok(());
                     }
-                    path
-                };
-
-                if let Some(adk) = adk_binary {
-                    let mut child = std::process::Command::new(adk)
-                        .spawn()
-                        .expect("failed to spawn Go ADK home screen");
-                    let _ = child.wait();
-                    return Ok(());
+                    // Fall back to Rust interactive mode if ADK fails to launch.
                 }
 
                 cli_logic::handle_interactive_mode().await
@@ -355,4 +400,58 @@ pub enum DbCommands {
         #[arg(long)]
         force: bool,
     },
+}
+
+#[cfg(test)]
+mod tests {
+    use super::Cli;
+    use std::path::{Path, PathBuf};
+
+    #[test]
+    fn launch_adk_failure_returns_false_instead_of_panicking() {
+        let missing = PathBuf::from("/tmp/terminal-jarvis-does-not-exist/jarvis");
+        assert!(!Cli::try_launch_adk_binary(&missing));
+    }
+
+    #[test]
+    fn disable_adk_env_skips_discovery() {
+        std::env::set_var("JARVIS_DISABLE_ADK", "1");
+        assert!(Cli::find_adk_binary().is_none());
+        std::env::remove_var("JARVIS_DISABLE_ADK");
+    }
+
+    #[test]
+    fn invalid_adk_override_path_is_ignored() {
+        std::env::remove_var("JARVIS_DISABLE_ADK");
+        std::env::set_var("JARVIS_ADK_BINARY", "/tmp/does-not-exist/jarvis");
+        let discovered = Cli::find_adk_binary();
+        std::env::remove_var("JARVIS_ADK_BINARY");
+        if let Some(path) = discovered {
+            assert!(
+                path.exists(),
+                "discovered ADK path must exist: {}",
+                path.display()
+            );
+        }
+    }
+
+    #[cfg(unix)]
+    #[test]
+    fn adk_nonzero_exit_triggers_fallback() {
+        use std::os::unix::fs::PermissionsExt;
+
+        let dir =
+            std::env::temp_dir().join(format!("terminal-jarvis-adk-test-{}", std::process::id()));
+        let _ = std::fs::create_dir_all(&dir);
+        let script = dir.join("fake-adk.sh");
+        std::fs::write(&script, "#!/usr/bin/env sh\nexit 7\n").expect("write script");
+        let mut perms = std::fs::metadata(&script).expect("metadata").permissions();
+        perms.set_mode(0o755);
+        std::fs::set_permissions(&script, perms).expect("chmod");
+
+        assert!(!Cli::try_launch_adk_binary(Path::new(&script)));
+
+        let _ = std::fs::remove_file(script);
+        let _ = std::fs::remove_dir_all(dir);
+    }
 }
