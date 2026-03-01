@@ -12,5 +12,5 @@ const (
 	Red    = "\033[38;2;255;100;100m"
 	Reset  = "\033[0m"
 
-	Version = "v0.0.79"
+	Version = "v0.0.78"
 )

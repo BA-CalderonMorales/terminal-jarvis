@@ -2,17 +2,6 @@
 
 All notable changes to this project will be documented in this file.
 
-## [0.0.79] - 2026-03-01
-
-### Fixed
-- **ADK Launch Resilience**: Rust CLI now falls back cleanly to native interactive mode if the Go ADK binary fails to spawn or exits non-zero.
-- **Tool Session Reliability**: Added environment restoration guard to ensure auth-related environment variables are always restored after tool execution failures.
-- **OpenCode Invocation Consistency**: Normalized argument routing so explicit subcommands/flags pass through unchanged while free-form input is correctly mapped to `run`.
-
-### Changed
-- **Headless ADK Command Parity**: Extended headless slash-command support (`/tools`, `/status`, `/config`, `/auth`, `/install`, `/update`) to better match interactive mode behavior.
-- **Release Metadata Sync**: Updated Cargo, NPM, ADK UI, and Homebrew version references to `0.0.79`.
-
 ## [0.0.78] - 2026-02-26
 
 ### Fixed
