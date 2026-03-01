@@ -123,13 +123,6 @@ async fn execute_command(
             handle_ai_tools_menu().await?;
             refresh_screen(theme, npm_available).await?;
         }
-        "/evals" => {
-            print!("\x1b[2J\x1b[H");
-            if let Err(e) = crate::cli_logic::cli_logic_evals_operations::show_evals_menu() {
-                eprintln!("Error in Evals menu: {e}");
-            }
-            refresh_screen(theme, npm_available).await?;
-        }
         "/auth" => {
             print!("\x1b[2J\x1b[H");
             crate::cli_logic::handle_authentication_menu().await?;
@@ -227,7 +220,6 @@ fn display_available_commands(theme: &crate::theme::Theme) {
             // Ultra-minimal: no colors, just aligned text
             println!("Commands:");
             println!("  /tools      AI CLI Tools");
-            println!("  /evals      Evals & Comparisons");
             println!("  /auth       Authentication");
             println!("  /links      Important Links");
             println!("  /settings   Settings");
@@ -246,11 +238,6 @@ fn display_available_commands(theme: &crate::theme::Theme) {
                 "  {} {}",
                 theme.accent("/tools"),
                 theme.secondary("Launch AI coding assistants")
-            );
-            println!(
-                "  {} {}",
-                theme.accent("/evals"),
-                theme.secondary("Tool evaluations & benchmarks")
             );
             println!(
                 "  {} {}",
@@ -299,7 +286,6 @@ fn display_available_commands(theme: &crate::theme::Theme) {
             // Default TJarvis: Clean, modern layout
             println!("{}", theme.accent("Commands:"));
             println!("  {} - AI CLI Tools", theme.secondary("/tools"));
-            println!("  {} - Evals & Comparisons", theme.secondary("/evals"));
             println!("  {} - Authentication", theme.secondary("/auth"));
             println!("  {} - Important Links", theme.secondary("/links"));
             println!("  {} - Settings", theme.secondary("/settings"));

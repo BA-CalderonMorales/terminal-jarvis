@@ -165,17 +165,21 @@ pub async fn handle_run_tool(tool: &str, args: &[String]) -> Result<()> {
     // Add a small delay to show the progress indicator
     tokio::time::sleep(tokio::time::Duration::from_millis(300)).await;
 
-    if !ToolManager::check_tool_installed(cli_command) {
+    if !ToolManager::check_tool_installed(&cli_command) {
         check_progress.finish_error(&format!("Tool '{tool}' is not installed"));
 
-        let should_install = match themed_confirm(&format!("Install '{tool}' now?"))
-            .with_default(true)
-            .prompt()
-        {
-            Ok(result) => result,
-            Err(_) => {
-                // User interrupted - treat as "no"
-                return Err(anyhow!("Installation cancelled"));
+        let should_install = if crate::cli_logic::cli_logic_headless::is_auto_yes() {
+            true
+        } else {
+            match themed_confirm(&format!("Install '{tool}' now?"))
+                .with_default(true)
+                .prompt()
+            {
+                Ok(result) => result,
+                Err(_) => {
+                    // User interrupted - treat as "no"
+                    return Err(anyhow!("Installation cancelled"));
+                }
             }
         };
 
@@ -376,7 +380,7 @@ pub async fn handle_install_tool(tool: &str) -> Result<()> {
         ProgressUtils::simulate_verification_progress(&verify_progress.spinner, tool).await;
 
         let cli_command = ToolManager::get_cli_command(tool);
-        if ToolManager::check_tool_installed(cli_command) {
+        if ToolManager::check_tool_installed(&cli_command) {
             verify_progress.finish_success(&format!("{tool} is ready to use"));
 
             // Provide PATH guidance for user-prefix installations
@@ -451,8 +455,10 @@ pub async fn handle_quick_launch() -> Result<()> {
         }
         None => {
             ProgressUtils::warning_message("No last-used tool found");
+            let loader = crate::tools::tools_config::get_tool_config_loader();
+            let tool_names = loader.get_tool_names();
             println!("  Use 'terminal-jarvis <tool>' to launch a tool directly");
-            println!("  Available tools: claude, gemini, qwen, opencode, codex, aider, amp, goose, crush, llxprt, ollama, vibe, droid, forge, cursor-agent, jules, kilocode, letta, nanocoder, pi, code, eca");
+            println!("  Available tools: {}", tool_names.join(", "));
             Ok(())
         }
     }

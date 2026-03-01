@@ -37,7 +37,7 @@ fn test_all_tools_have_install_commands() {
 /// remain installable without Node.js present.
 #[test]
 fn test_curl_tools_do_not_require_npm() {
-    let curl_tools = ["claude", "goose", "ollama", "vibe"];
+    let curl_tools = ["claude", "goose", "ollama", "vibe", "kimi"];
 
     for tool in curl_tools {
         if let Some(cmd) = InstallationManager::get_install_command(tool) {

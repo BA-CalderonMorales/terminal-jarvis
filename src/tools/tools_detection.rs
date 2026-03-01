@@ -58,7 +58,7 @@ impl PackageManager {
 
 #[derive(Clone, Debug)]
 pub struct ToolInfo {
-    pub command: &'static str,
+    pub command: String,
     pub is_installed: bool,
     pub package_manager: PackageManager,
 }
@@ -80,56 +80,20 @@ pub fn infer_package_manager(tool_name: &str) -> PackageManager {
     }
 }
 
-/// Known tool names for static string mapping
-const KNOWN_TOOLS: &[&str] = &[
-    "aider",
-    "amp",
-    "claude",
-    "codex",
-    "copilot",
-    "crush",
-    "gemini",
-    "goose",
-    "llxprt",
-    "opencode",
-    "qwen",
-    "ollama",
-    "vibe",
-    "droid",
-    "forge",
-    "cursor-agent",
-    "jules",
-    "kilocode",
-    "letta",
-    "nanocoder",
-    "pi",
-    "code",
-    "eca",
-];
-
-/// Get all available tools with their installation status and command
-pub fn get_available_tools() -> BTreeMap<&'static str, ToolInfo> {
+/// Get all available tools with their installation status and command.
+/// Tool list is dynamically loaded from config/tools/*.toml.
+pub fn get_available_tools() -> BTreeMap<String, ToolInfo> {
     let mut tools = BTreeMap::new();
     let mapping = get_command_mapping();
-    let config_loader = get_tool_config_loader();
-    let tool_names = config_loader.get_tool_names();
 
-    for tool_name in tool_names {
-        let Some(cli_command) = mapping.get(tool_name.as_str()) else {
-            continue;
-        };
-
-        let Some(static_name) = KNOWN_TOOLS.iter().find(|&&name| name == tool_name) else {
-            continue;
-        };
-
+    for (tool_name, cli_command) in &mapping {
         let is_installed = check_tool_installed(cli_command);
-        let package_manager = infer_package_manager(&tool_name);
+        let package_manager = infer_package_manager(tool_name);
 
         tools.insert(
-            *static_name,
+            tool_name.clone(),
             ToolInfo {
-                command: cli_command,
+                command: cli_command.clone(),
                 is_installed,
                 package_manager,
             },
@@ -139,38 +103,48 @@ pub fn get_available_tools() -> BTreeMap<&'static str, ToolInfo> {
     tools
 }
 
-/// Check if a tool is installed by trying to run it.
+/// Resolve the executable path for a tool.
+/// Returns Some(path) if found, or None if not installed.
 ///
-/// Detection order (fast → slow):
-///   1. `which <tool>`       – standard Unix PATH lookup
-///   2. `where <tool>`       – Windows equivalent
-///   3. Common ~/.local/bin paths – catches tools installed via curl scripts
+/// Detection order (fast -> slow):
+///   1. `which <tool>`       - standard Unix PATH lookup
+///   2. `where <tool>`       - Windows equivalent
+///   3. Common ~/.local/bin paths - catches tools installed via curl scripts
 ///      that prepend to PATH inside shell init files
-///   4. Shell-sourced lookup – sources ~/.bashrc / ~/.profile so that tools
-///      installed with non-standard installers (goose, vibe, ollama, …) that
+///   4. Shell-sourced lookup - sources ~/.bashrc / ~/.profile so that tools
+///      installed with non-standard installers (goose, vibe, ollama, ...) that
 ///      only update the user's shell config are found correctly
-///   5. `<tool> --version`   – last-resort direct execution
-pub fn check_tool_installed(tool: &str) -> bool {
+///   5. `<tool> --version`   - last-resort direct execution
+pub fn resolve_tool_path(tool: &str) -> Option<String> {
     // 1. Standard PATH lookup (fastest)
     if let Ok(output) = Command::new("which").arg(tool).output() {
         if output.status.success() && !output.stdout.is_empty() {
-            return true;
+            let path = String::from_utf8_lossy(&output.stdout).trim().to_string();
+            return Some(path);
         }
     }
 
     // 2. Windows equivalent
     if let Ok(output) = Command::new("where").arg(tool).output() {
         if output.status.success() && !output.stdout.is_empty() {
-            return true;
+            let path = String::from_utf8_lossy(&output.stdout)
+                .lines()
+                .next()
+                .unwrap_or("")
+                .trim()
+                .to_string();
+            if !path.is_empty() {
+                return Some(path);
+            }
         }
     }
 
     // 3. Check common user-local installation paths directly.
-    //    Many curl-based installers (goose, claude, ollama, vibe, …) drop
-    //    binaries in ~/.local/bin which may not be in the process PATH.
     let home = std::env::var("HOME").unwrap_or_default();
     let candidate_paths = [
         format!("{home}/.local/bin/{tool}"),
+        format!("{home}/.local/share/npm-global/bin/{tool}"),
+        format!("{home}/.npm-global/bin/{tool}"),
         format!("/usr/local/bin/{tool}"),
         format!("/home/vscode/.local/bin/{tool}"),
         format!("/root/.local/bin/{tool}"),
@@ -178,55 +152,54 @@ pub fn check_tool_installed(tool: &str) -> bool {
 
     for path in &candidate_paths {
         if std::path::Path::new(path).exists() {
-            if let Ok(output) = Command::new(path).arg("--version").output() {
-                if output.status.success() {
-                    return true;
-                }
-            }
-            // Binary exists even if --version returns non-zero (some tools do this)
-            return true;
+            return Some(path.clone());
         }
     }
 
-    // 4. Shell-sourced lookup – handles installers that only update PATH in
-    //    shell config files (e.g. curl | bash scripts that add to ~/.bashrc).
-    //    We do this for all tools, not just opencode, because the pattern is
-    //    common across curl-based AI tool installers.
+    // 4. Shell-sourced lookup
     let shell_cmd = format!(
         "source ~/.bashrc 2>/dev/null; source ~/.profile 2>/dev/null; which {tool} 2>/dev/null"
     );
     if let Ok(output) = Command::new("sh").arg("-c").arg(&shell_cmd).output() {
         if output.status.success() && !output.stdout.is_empty() {
-            return true;
+            let path = String::from_utf8_lossy(&output.stdout).trim().to_string();
+            if !path.is_empty() {
+                return Some(path);
+            }
         }
     }
 
-    // 5. Direct execution with --version as last resort
+    // 5. Direct execution check (fallback)
     if let Ok(output) = Command::new(tool).arg("--version").output() {
         if output.status.success() {
-            return true;
+            return Some(tool.to_string());
         }
     }
 
-    false
+    None
+}
+
+/// Check if a tool is installed by trying to run it.
+pub fn check_tool_installed(tool: &str) -> bool {
+    resolve_tool_path(tool).is_some()
 }
 
 /// Get list of installed tools (display names)
-pub fn get_installed_tools() -> Vec<&'static str> {
+pub fn get_installed_tools() -> Vec<String> {
     let mapping = get_command_mapping();
     mapping
         .iter()
         .filter(|(_, cli_command)| check_tool_installed(cli_command))
-        .map(|(display_name, _)| *display_name)
+        .map(|(display_name, _)| display_name.clone())
         .collect()
 }
 
 /// Get list of uninstalled tools (display names)
-pub fn get_uninstalled_tools() -> Vec<&'static str> {
+pub fn get_uninstalled_tools() -> Vec<String> {
     let mapping = get_command_mapping();
     mapping
         .iter()
         .filter(|(_, cli_command)| !check_tool_installed(cli_command))
-        .map(|(display_name, _)| *display_name)
+        .map(|(display_name, _)| display_name.clone())
         .collect()
 }

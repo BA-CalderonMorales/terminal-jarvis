@@ -4,7 +4,7 @@
 
 **Unified command center for AI coding tools**
 
-Manage Claude, Gemini, Qwen, and 8 more AI assistants from one terminal interface.
+Manage Claude, Gemini, Qwen, and 19 more AI assistants from one terminal interface.
 
 [![NPM Version](https://img.shields.io/npm/v/terminal-jarvis.svg?logo=npm&style=flat-square)](https://www.npmjs.com/package/terminal-jarvis)
 [![Crates.io](https://img.shields.io/crates/v/terminal-jarvis.svg?logo=rust&style=flat-square)](https://crates.io/crates/terminal-jarvis)
@@ -39,10 +39,9 @@ brew tap ba-calderonmorales/terminal-jarvis && brew install terminal-jarvis  # H
 | Feature | Description |
 |:--------|:------------|
 | **Interactive Interface** | Beautiful terminal UI with ASCII art, themed menus, and keyboard navigation for a polished command-line experience. |
-| **11 AI Tools Supported** | Claude, Gemini, Qwen, OpenCode, Codex, Aider, Goose, Amp, Crush, LLXPRT, and GitHub Copilot CLI - all manageable from a single interface. |
+| **22 AI Tools Supported** | Claude, Gemini, Qwen, OpenCode, Codex, Aider, Goose, Amp, Crush, LLXPRT, and many more - all manageable from a single interface. |
 | **Integrated Installation** | Install, update, or uninstall any supported AI tool directly from the menu without leaving the terminal. |
 | **Session Continuity** | Preserves your terminal session state during browser-based authentication flows. Currently in development with expanding coverage. |
-| **Comparative Evaluation** | Built-in framework for running evaluations across different AI tools. Currently in development with expanding coverage. |
 
 <p align="center">
 <img src="https://raw.githubusercontent.com/BA-CalderonMorales/terminal-jarvis/docs/screenshots_and_demos/screenshots_and_demo/Terminal%20Jarvis%20Demo.gif" alt="Demo" width="100%">

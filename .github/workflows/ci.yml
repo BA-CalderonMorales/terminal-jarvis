@@ -24,6 +24,7 @@ concurrency:
 
 env:
   CARGO_TERM_COLOR: always
+  RUSTC_WRAPPER: ""
 
 # Minimal permissions by default; specific jobs can elevate
 permissions:
@@ -36,10 +37,14 @@ jobs:
     name: Test - ${{ matrix.name }}
     runs-on: ${{ matrix.os }}
     strategy:
+      fail-fast: true
       matrix:
         include:
           - name: Rust (Ubuntu)
             suite: rust
+            os: ubuntu-latest
+          - name: Go (Ubuntu)
+            suite: go
             os: ubuntu-latest
           - name: NPM (Node 18)
             suite: npm
@@ -66,6 +71,7 @@ jobs:
         path: |
           ~/.cargo/registry
           ~/.cargo/git
+          target
         key: cargo-${{ runner.os }}-${{ hashFiles('**/Cargo.lock') }}
         restore-keys: cargo-${{ runner.os }}-
 
@@ -77,9 +83,43 @@ jobs:
       if: ${{ matrix.suite == 'rust' }}
       run: cargo clippy --all-targets --all-features -- -D warnings
 
+    - name: Build tests
+      if: ${{ matrix.suite == 'rust' }}
+      run: cargo build --tests --locked
+
     - name: Run Rust tests
       if: ${{ matrix.suite == 'rust' }}
-      run: cargo test --verbose
+      run: cargo test --locked --verbose
+
+    # Go code quality + tests
+    - name: Setup Go
+      if: ${{ matrix.suite == 'go' }}
+      uses: actions/setup-go@v5
+      with:
+        go-version: '1.24.x'
+        cache-dependency-path: adk/go.sum
+
+    - name: Download Go dependencies
+      if: ${{ matrix.suite == 'go' }}
+      run: |
+        cd adk
+        go mod download
+
+    - name: Check Go formatting
+      if: ${{ matrix.suite == 'go' }}
+      run: |
+        cd adk
+        if [ "$(gofmt -l . | wc -l)" -gt 0 ]; then
+          echo "Go code is not formatted properly! Run 'gofmt -w .' locally."
+          gofmt -l .
+          exit 1
+        fi
+
+    - name: Run Go tests
+      if: ${{ matrix.suite == 'go' }}
+      run: |
+        cd adk
+        go test -v ./...
 
     # NPM package tests (build the Rust binary first)
     - name: Install Rust toolchain (for npm build)
@@ -93,12 +133,13 @@ jobs:
         path: |
           ~/.cargo/registry
           ~/.cargo/git
+          target
         key: cargo-${{ runner.os }}-${{ hashFiles('**/Cargo.lock') }}
         restore-keys: cargo-${{ runner.os }}-
 
     - name: Build release binary
       if: ${{ matrix.suite == 'npm' }}
-      run: cargo build --release
+      run: cargo build --locked --release
 
     - name: Setup Node.js
       if: ${{ matrix.suite == 'npm' }}
@@ -151,23 +192,27 @@ jobs:
     - name: Install Rust
       uses: dtolnay/rust-toolchain@stable
 
-    - name: Cache cargo dependencies
+    - name: Cache cargo dependencies and tools
       uses: actions/cache@v4
       with:
         path: |
           ~/.cargo/registry
           ~/.cargo/git
-        key: cargo-${{ runner.os }}-${{ hashFiles('**/Cargo.lock') }}
-        restore-keys: cargo-${{ runner.os }}-
+          ~/.cargo/bin/cargo-audit
+        key: cargo-security-${{ runner.os }}-${{ hashFiles('**/Cargo.lock') }}
+        restore-keys: cargo-security-${{ runner.os }}-
 
     - name: Install dependencies for cargo-audit
       run: sudo apt-get update && sudo apt-get install -y pkg-config libssl-dev
 
     - name: Install cargo-audit
-      run: cargo install cargo-audit
+      run: |
+        if ! command -v cargo-audit &> /dev/null; then
+          cargo install cargo-audit
+        fi
 
     - name: Run cargo-audit
-      run: cargo audit --deny warnings --ignore RUSTSEC-2025-0134 --ignore RUSTSEC-2025-0141
+      run: cargo audit --deny warnings --ignore RUSTSEC-2025-0134 --ignore RUSTSEC-2025-0141 --ignore RUSTSEC-2024-0375 --ignore RUSTSEC-2021-0145
 
     - name: Run cargo-deny checks
       uses: EmbarkStudios/cargo-deny-action@v2

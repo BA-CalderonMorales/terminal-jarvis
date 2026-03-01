@@ -21,7 +21,7 @@ pub struct ToolManager;
 
 impl ToolManager {
     /// Get actual CLI command from display name
-    pub fn get_cli_command(display_name: &str) -> &str {
+    pub fn get_cli_command(display_name: &str) -> String {
         get_cli_command(display_name)
     }
 
@@ -32,7 +32,7 @@ impl ToolManager {
     }
 
     /// Get all available tools with their installation status (sync version - uses TOML)
-    pub fn get_available_tools() -> BTreeMap<&'static str, ToolInfo> {
+    pub fn get_available_tools() -> BTreeMap<String, ToolInfo> {
         get_available_tools()
     }
 
@@ -60,12 +60,12 @@ impl ToolManager {
     }
 
     /// Get list of installed tools (display names)
-    pub fn get_installed_tools() -> Vec<&'static str> {
+    pub fn get_installed_tools() -> Vec<String> {
         get_installed_tools()
     }
 
     /// Get list of uninstalled tools (display names)
-    pub fn get_uninstalled_tools() -> Vec<&'static str> {
+    pub fn get_uninstalled_tools() -> Vec<String> {
         get_uninstalled_tools()
     }
 

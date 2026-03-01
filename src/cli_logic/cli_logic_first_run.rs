@@ -42,15 +42,8 @@ pub struct ToolDetectionResult {
 
 /// Detect all tools and categorize them
 pub fn detect_tools() -> ToolDetectionResult {
-    let installed: Vec<String> = ToolManager::get_installed_tools()
-        .iter()
-        .map(|s| s.to_string())
-        .collect();
-
-    let available: Vec<String> = ToolManager::get_uninstalled_tools()
-        .iter()
-        .map(|s| s.to_string())
-        .collect();
+    let installed = ToolManager::get_installed_tools();
+    let available = ToolManager::get_uninstalled_tools();
 
     ToolDetectionResult {
         installed,

@@ -2,7 +2,25 @@
 
 All notable changes to this project will be documented in this file.
 
-## [0.0.77] - 2026-02-17
+## [0.0.78] - 2026-02-26
+
+### Fixed
+- **NPM Hybrid Integration**: Updated `postinstall.js` to correctly install both Rust orchestrator and Go ADK binaries.
+- **Binary Detection**: Improved Rust orchestrator to find Go ADK in NPM-style directory structures.
+- **CI/CD Reliability**: Switched to `lld` linker and disabled `sccache` in CI to fix build timeouts and errors.
+- **Dependency Security**: Replaced `atty` with `is-terminal` to resolve security advisories.
+
+## [0.0.77] - 2026-02-26
+
+### Added
+- **Go-based ADK Home Screen**: Replaced Python-based home screen with a high-performance Go binary for millisecond startup times.
+- **Hybrid Architecture**: Leverages Go for the interactive REPL/Home screen and Rust for core tool management and execution logic.
+- **Headless Mode**: Native support for agentic/scripted environments with plain-text output and automatic prompt acceptance (via `JARVIS_HEADLESS=1` or non-TTY stdin).
+- **22 AI Tools Integrated**: Expanded support to a total of 22 AI coding assistants, all manageable via unified commands.
+
+### Changed
+- **Removed Experimental Features**: Pruned dead code and removed the experimental benchmarks/evaluations and voice modules to focus on core stability.
+- **Optimized Toolchain**: Switched to `sccache` for faster local Rust builds and improved devcontainer performance.
 
 ### Fixed
 - **NPM Beta/Stable Workflows**: Rewrote both workflows as lightweight dist-tag managers

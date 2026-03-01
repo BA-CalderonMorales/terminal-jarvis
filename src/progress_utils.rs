@@ -43,6 +43,14 @@ impl ProgressUtils {
     /// spinner.finish_with_message("Tool ready!");
     /// ```
     pub fn spinner(message: &str) -> ProgressBar {
+        // In headless mode, use a hidden progress bar (no ANSI output)
+        if crate::cli_logic::cli_logic_headless::is_headless() {
+            let pb = ProgressBar::hidden();
+            pb.set_message(message.to_string());
+            println!("[INFO] {message}");
+            return pb;
+        }
+
         let pb = ProgressBar::new_spinner();
 
         pb.set_style(
@@ -141,6 +149,11 @@ impl ProgressUtils {
     /// ProgressUtils::finish_with_success(&spinner, "Tool installed successfully!");
     /// ```
     pub fn finish_with_success(pb: &ProgressBar, message: &str) {
+        if crate::cli_logic::cli_logic_headless::is_headless() {
+            pb.finish_and_clear();
+            println!("[OK] {message}");
+            return;
+        }
         pb.finish_with_message(format!("SUCCESS: {message}"));
 
         // Brief pause to let user see the success message before clearing
@@ -167,6 +180,11 @@ impl ProgressUtils {
     /// }
     /// ```
     pub fn finish_with_error(pb: &ProgressBar, message: &str) {
+        if crate::cli_logic::cli_logic_headless::is_headless() {
+            pb.finish_and_clear();
+            eprintln!("[ERROR] {message}");
+            return;
+        }
         pb.finish_with_message(format!("ERROR: {message}"));
 
         // Brief pause to let user see the error message before clearing
@@ -220,15 +238,21 @@ impl ProgressUtils {
 
     /// Create a styled info message
     pub fn info_message(message: &str) {
+        if crate::cli_logic::cli_logic_headless::is_headless() {
+            println!("[INFO] {message}");
+            return;
+        }
         let theme = theme_global_config::current_theme();
-
         println!("{} {}", theme.accent("T.JARVIS:"), theme.primary(message));
     }
 
     /// Create a styled warning message
     pub fn warning_message(message: &str) {
+        if crate::cli_logic::cli_logic_headless::is_headless() {
+            eprintln!("[WARN] {message}");
+            return;
+        }
         let theme = theme_global_config::current_theme();
-
         println!(
             "{} {}",
             theme.secondary("⚠ ADVISORY:"),
@@ -238,15 +262,21 @@ impl ProgressUtils {
 
     /// Create a styled error message
     pub fn error_message(message: &str) {
+        if crate::cli_logic::cli_logic_headless::is_headless() {
+            eprintln!("[ERROR] {message}");
+            return;
+        }
         let theme = theme_global_config::current_theme();
-
         println!("{} {}", theme.accent("✗ SYSTEM:"), theme.primary(message));
     }
 
     /// Create a styled success message
     pub fn success_message(message: &str) {
+        if crate::cli_logic::cli_logic_headless::is_headless() {
+            println!("[OK] {message}");
+            return;
+        }
         let theme = theme_global_config::current_theme();
-
         println!("{} {}", theme.accent("✓ COMPLETE:"), theme.primary(message));
     }
 }
@@ -296,9 +326,11 @@ impl ProgressContext {
     pub fn finish_success(&self, message: &str) {
         ProgressUtils::finish_with_success(&self.spinner, message);
 
-        // Clear the line after showing success message and flush
-        print!("\x1b[2K\r");
-        std::io::Write::flush(&mut std::io::stdout()).unwrap_or_default();
+        if !crate::cli_logic::cli_logic_headless::is_headless() {
+            // Clear the line after showing success message and flush
+            print!("\x1b[2K\r");
+            std::io::Write::flush(&mut std::io::stdout()).unwrap_or_default();
+        }
     }
 
     pub fn finish_error(&self, message: &str) {
@@ -313,9 +345,11 @@ impl Drop for ProgressContext {
             self.spinner.finish_and_clear();
         }
 
-        // Ensure cursor is visible and terminal is clean
-        print!("\x1b[?25h"); // Show cursor
-        print!("\x1b[2K\r"); // Clear current line
-        std::io::Write::flush(&mut std::io::stdout()).unwrap_or_default();
+        if !crate::cli_logic::cli_logic_headless::is_headless() {
+            // Ensure cursor is visible and terminal is clean
+            print!("\x1b[?25h"); // Show cursor
+            print!("\x1b[2K\r"); // Clear current line
+            std::io::Write::flush(&mut std::io::stdout()).unwrap_or_default();
+        }
     }
 }

@@ -67,14 +67,39 @@ jobs:
         with:
           targets: ${{ matrix.targets }}
 
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.24.x'
+          cache-dependency-path: adk/go.sum
+
+      - name: Cache cargo registry (build)
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+          key: cargo-cd-${{ runner.os }}-${{ hashFiles('**/Cargo.lock') }}
+          restore-keys: cargo-cd-${{ runner.os }}-
+
+      - name: Cache cross binary
+        if: matrix.platform == 'linux'
+        id: cache-cross
+        uses: actions/cache@v4
+        with:
+          path: ~/.cargo/bin/cross
+          key: cross-${{ runner.os }}-v0.2
+
       - name: Install cross-compilation tools (Linux)
         if: matrix.platform == 'linux'
         run: |
           # Install musl tools for static linking (Issue #24 - GLIBC independence)
           sudo apt-get update
           sudo apt-get install -y musl-tools musl-dev
-          # Install cross for cross-compilation
-          cargo install cross --git https://github.com/cross-rs/cross
+          # Install cross only if not restored from cache
+          if [ "${{ steps.cache-cross.outputs.cache-hit }}" != "true" ]; then
+            cargo install cross --git https://github.com/cross-rs/cross
+          fi
 
       - name: Make scripts executable
         shell: bash
@@ -115,6 +140,15 @@ jobs:
 
       - name: Install Rust
         uses: dtolnay/rust-toolchain@stable
+
+      - name: Cache cargo registry (publish)
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+          key: cargo-cd-${{ runner.os }}-${{ hashFiles('**/Cargo.lock') }}
+          restore-keys: cargo-cd-${{ runner.os }}-
 
       - name: Check if Cargo.lock needs to be committed
         run: |
@@ -188,8 +222,10 @@ jobs:
             mkdir -p /tmp/macos-binary
             # Use the first available macOS binary (universal binary approach)
             find artifacts/binaries-macos -name "terminal-jarvis" -type f | head -1 | xargs cp -t /tmp/macos-binary/
-            tar -czf "release-assets/terminal-jarvis-mac.tar.gz" -C /tmp/macos-binary terminal-jarvis
-            echo "Created Homebrew-compatible macOS archive: terminal-jarvis-mac.tar.gz"
+            # Find and copy a macos ADK binary
+            find adk -name "jarvis-darwin-*" -type f | head -1 | xargs -I {} cp {} /tmp/macos-binary/jarvis
+            tar -czf "release-assets/terminal-jarvis-mac.tar.gz" -C /tmp/macos-binary .
+            echo "Created Homebrew-compatible macOS archive with ADK"
           fi
           
           # Create Linux universal archive (compatible with Homebrew Formula)
@@ -197,8 +233,10 @@ jobs:
             mkdir -p /tmp/linux-binary
             # Use the first available Linux binary (universal binary approach)
             find artifacts/binaries-linux -name "terminal-jarvis" -type f | head -1 | xargs cp -t /tmp/linux-binary/
-            tar -czf "release-assets/terminal-jarvis-linux.tar.gz" -C /tmp/linux-binary terminal-jarvis
-            echo "Created Homebrew-compatible Linux archive: terminal-jarvis-linux.tar.gz"
+            # Find and copy a linux ADK binary
+            find adk -name "jarvis-linux-*" -type f | head -1 | xargs -I {} cp {} /tmp/linux-binary/jarvis
+            tar -czf "release-assets/terminal-jarvis-linux.tar.gz" -C /tmp/linux-binary .
+            echo "Created Homebrew-compatible Linux archive with ADK"
           fi
           
           # Create detailed platform-specific archives (Aviv Laufer's contribution)
@@ -211,9 +249,31 @@ jobs:
               # Determine architecture from path
               arch=$(echo "$binary" | grep -o '[^/]*-[^/]*-[^/]*' | head -1 | cut -d'-' -f1)
               
-              # Create platform-specific archive with correct binary name
+              # Map arch to Go naming convention
+              go_arch=$arch
+              [ "$arch" = "x86_64" ] && go_arch="amd64"
+              
+              # Map platform to Go naming convention
+              go_os=$platform
+              [ "$platform" = "macos" ] && go_os="darwin"
+              
+              # Find corresponding Go binary
+              go_binary="adk/jarvis-${go_os}-${go_arch}"
+              
+              # Create platform-specific archive with both binaries
               archive_name="terminal-jarvis-${platform}-${arch}.tar.gz"
-              tar -czf "release-assets/$archive_name" -C "$(dirname "$binary")" "$(basename "$binary")"
+              
+              # Temporary staging dir for this archive
+              mkdir -p "/tmp/archive-${platform}-${arch}"
+              cp "$binary" "/tmp/archive-${platform}-${arch}/terminal-jarvis"
+              if [ -f "$go_binary" ]; then
+                cp "$go_binary" "/tmp/archive-${platform}-${arch}/jarvis"
+                echo "Added Go ADK to archive: $go_binary"
+              else
+                echo "WARNING: Go ADK not found for ${platform}-${arch} at ${go_binary}"
+              fi
+              
+              tar -czf "release-assets/$archive_name" -C "/tmp/archive-${platform}-${arch}" .
               echo "Created detailed archive: $archive_name"
             done
           done
@@ -360,6 +420,7 @@ jobs:
           
             def install
               bin.install "terminal-jarvis"
+              bin.install "jarvis"
             end
           
             test do
@@ -392,11 +453,26 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v5
 
-      - name: Install Rust
-        uses: dtolnay/rust-toolchain@stable
+      # Reuse the Linux binary built in build-multiplatform instead of
+      # rebuilding from scratch. Saves the full Rust compilation time.
+      - name: Download Linux binary artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: binaries-linux
+          path: artifacts/binaries-linux
 
-      - name: Build release binary
-        run: cargo build --release
+      - name: Stage binary for NPM packaging
+        run: |
+          mkdir -p target/release
+          # Find the x86_64 musl binary (primary Linux target)
+          BINARY=$(find artifacts/binaries-linux -name "terminal-jarvis" -type f | head -1)
+          if [ -z "$BINARY" ]; then
+            echo "ERROR: No terminal-jarvis binary found in artifact"
+            exit 1
+          fi
+          cp "$BINARY" target/release/terminal-jarvis
+          chmod +x target/release/terminal-jarvis
+          echo "Staged binary: $BINARY -> target/release/terminal-jarvis"
 
       - name: Setup Node.js
         uses: actions/setup-node@v5

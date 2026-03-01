@@ -1,6 +1,6 @@
 [package]
 name = "terminal-jarvis"
-version = "0.0.77"
+version = "0.0.78"
 edition = "2021"
 description = "A thin Rust wrapper that provides a unified interface for managing and running AI coding tools"
 authors = ["BA-CalderonMorales"]
@@ -59,8 +59,9 @@ sha2 = "0.10.9"
 # Database (Turso/libSQL for modern config storage)
 libsql = "0.9"
 
-# Async trait for voice providers
+# Async trait for repository pattern
 async-trait = "0.1.89"
+is-terminal = "0.4.17"
 
 [features]
 default = []

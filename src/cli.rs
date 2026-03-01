@@ -1,6 +1,6 @@
 use crate::cli_logic;
 use clap::{Parser, Subcommand};
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 
 /// Terminal Jarvis - A unified interface for AI coding tools
 #[derive(Parser)]
@@ -18,14 +18,14 @@ pub struct Cli {
     #[arg(short = 'q', long = "quick", global = true)]
     pub quick: bool,
 
-    /// Direct tool launch (e.g., `terminal-jarvis claude`)
-    /// Supported: claude, gemini, qwen, opencode, codex, aider, amp, goose, crush, llxprt
-    #[arg(value_name = "TOOL")]
-    pub tool: Option<String>,
+    /// Headless mode: no interactive prompts, no ANSI escape codes, plain text output.
+    /// Also enabled by setting JARVIS_HEADLESS=1 or when stdin is not a TTY.
+    #[arg(long, global = true, env = "JARVIS_HEADLESS")]
+    pub headless: bool,
 
-    /// Arguments to pass to the directly launched tool
-    #[arg(trailing_var_arg = true, allow_hyphen_values = true)]
-    pub tool_args: Vec<String>,
+    /// Auto-confirm all prompts (implied in headless mode)
+    #[arg(short = 'y', long, global = true)]
+    pub yes: bool,
 }
 
 impl Default for Cli {
@@ -39,57 +39,134 @@ impl Cli {
         Self::parse()
     }
 
-    /// Check if a string is a valid tool name for direct invocation
+    /// Check if a string is a valid tool name for direct invocation.
+    /// Dynamically reads from config/tools/*.toml (single source of truth).
     fn is_valid_tool(name: &str) -> bool {
-        matches!(
-            name.to_lowercase().as_str(),
-            "claude"
-                | "gemini"
-                | "qwen"
-                | "opencode"
-                | "codex"
-                | "aider"
-                | "amp"
-                | "goose"
-                | "crush"
-                | "llxprt"
-                | "ollama"
-                | "vibe"
-                | "droid"
-                | "forge"
-                | "cursor-agent"
-                | "jules"
-                | "kilocode"
-                | "letta"
-                | "nanocoder"
-                | "pi"
-                | "code"
-                | "eca"
-        )
+        let loader = crate::tools::tools_config::get_tool_config_loader();
+        let lower = name.to_lowercase();
+        loader
+            .get_tool_names()
+            .iter()
+            .any(|t| t.to_lowercase() == lower)
+    }
+
+    /// Find the Go ADK binary for the home screen.
+    /// Search strategy:
+    /// 0. Respect JARVIS_DISABLE_ADK=1 to force Rust interactive fallback
+    /// 1. JARVIS_ADK_BINARY environment override (if it exists)
+    /// 2. Same directory as current exe (NPM style)
+    /// 3. Walk upward for adk/jarvis (repo style)
+    fn find_adk_binary() -> Option<PathBuf> {
+        if std::env::var("JARVIS_DISABLE_ADK")
+            .ok()
+            .is_some_and(|v| v == "1" || v.eq_ignore_ascii_case("true"))
+        {
+            return None;
+        }
+
+        if let Ok(explicit) = std::env::var("JARVIS_ADK_BINARY") {
+            let p = PathBuf::from(explicit);
+            if p.exists() {
+                return Some(p);
+            }
+        }
+
+        if let Ok(exe) = std::env::current_exe() {
+            // Check same directory (NPM style)
+            if let Some(dir) = exe.parent() {
+                let adk = dir.join("jarvis");
+                if adk.exists() {
+                    return Some(adk);
+                }
+            }
+
+            // Check repo-style paths
+            let mut dir = exe.parent();
+            while let Some(d) = dir {
+                let adk = d.join("adk").join("jarvis");
+                if adk.exists() {
+                    return Some(adk);
+                }
+                dir = d.parent();
+            }
+        }
+
+        None
+    }
+
+    /// Try to launch ADK binary. Returns true only on successful launch and wait.
+    fn try_launch_adk_binary(path: &Path) -> bool {
+        match std::process::Command::new(path).spawn() {
+            Ok(mut child) => match child.wait() {
+                Ok(status) if status.success() => true,
+                Ok(status) => {
+                    eprintln!(
+                        "warning: Go ADK home screen exited with status {} ({}); falling back",
+                        status,
+                        path.display()
+                    );
+                    false
+                }
+                Err(e) => {
+                    eprintln!(
+                        "warning: failed while waiting for Go ADK home screen ({}): {}",
+                        path.display(),
+                        e
+                    );
+                    false
+                }
+            },
+            Err(e) => {
+                eprintln!(
+                    "warning: failed to launch Go ADK home screen ({}): {}",
+                    path.display(),
+                    e
+                );
+                false
+            }
+        }
     }
 
     pub async fn run(self) -> anyhow::Result<()> {
-        // Handle quick mode: launch last-used tool immediately
-        if self.quick && self.command.is_none() && self.tool.is_none() {
-            return cli_logic::handle_quick_launch().await;
-        }
+        // Initialize headless detection from CLI flags (and TTY check)
+        cli_logic::cli_logic_headless::init(self.headless, self.yes);
 
-        // Handle direct tool invocation: `terminal-jarvis claude`
-        if let Some(ref tool_name) = self.tool {
-            if Self::is_valid_tool(tool_name) {
-                return cli_logic::handle_run_tool(tool_name, &self.tool_args).await;
-            }
-            // Invalid tool name - show error and exit (don't fall through to interactive mode)
-            eprintln!("error: '{tool_name}' is not a valid tool or command");
-            eprintln!();
-            eprintln!("Available tools: claude, gemini, qwen, opencode, codex, aider, amp, goose, crush, llxprt, ollama, vibe, droid, forge, cursor-agent, jules, kilocode, letta, nanocoder, pi, code, eca");
-            eprintln!();
-            eprintln!("For more information, try '--help'");
-            std::process::exit(1);
+        // Handle quick mode: launch last-used tool immediately
+        if self.quick && self.command.is_none() {
+            return cli_logic::handle_quick_launch().await;
         }
 
         match self.command {
             Some(Commands::Run { tool, args }) => cli_logic::handle_run_tool(&tool, &args).await,
+
+            Some(Commands::External(args)) => {
+                if args.is_empty() {
+                    if cli_logic::cli_logic_headless::is_headless() {
+                        eprintln!("error: interactive mode is not available in headless mode");
+                        eprintln!(
+                            "hint: use 'terminal-jarvis list' or 'terminal-jarvis run <tool>'"
+                        );
+                        std::process::exit(1);
+                    }
+                    return cli_logic::handle_interactive_mode().await;
+                }
+                let tool_name = &args[0];
+                let tool_args = &args[1..];
+
+                if Self::is_valid_tool(tool_name) {
+                    return cli_logic::handle_run_tool(tool_name, tool_args).await;
+                }
+
+                // Invalid tool name - show error and exit
+                let loader = crate::tools::tools_config::get_tool_config_loader();
+                let tool_names = loader.get_tool_names();
+                eprintln!("error: '{tool_name}' is not a valid tool or command");
+                eprintln!();
+                eprintln!("Available tools: {}", tool_names.join(", "));
+                eprintln!();
+                eprintln!("For more information, try '--help'");
+                std::process::exit(1);
+            }
 
             Some(Commands::Install { tool }) => cli_logic::handle_install_tool(&tool).await,
 
@@ -141,20 +218,6 @@ impl Cli {
                 CacheCommands::Refresh { ttl } => cli_logic::handle_cache_refresh(ttl).await,
             },
 
-            Some(Commands::Benchmark { action }) => match action {
-                BenchmarkCommands::List => cli_logic::handle_benchmark_list().await,
-
-                BenchmarkCommands::Run {
-                    scenario,
-                    tool,
-                    export_json,
-                } => cli_logic::handle_benchmark_run(&scenario, &tool, export_json.as_ref()).await,
-
-                BenchmarkCommands::Validate { scenario_file } => {
-                    cli_logic::handle_benchmark_validate(&scenario_file).await
-                }
-            },
-
             Some(Commands::Db { action }) => match action {
                 DbCommands::Import => cli_logic::handle_db_import().await,
                 DbCommands::Status => cli_logic::handle_db_status().await,
@@ -163,8 +226,23 @@ impl Cli {
 
             Some(Commands::Status) => cli_logic::handle_status_command().await,
 
-            // (Duplicate Auth handler removed; handled above)
-            None => cli_logic::handle_interactive_mode().await,
+            None => {
+                if cli_logic::cli_logic_headless::is_headless() {
+                    eprintln!("error: interactive mode is not available in headless mode");
+                    eprintln!("hint: use 'terminal-jarvis list' or 'terminal-jarvis run <tool>'");
+                    std::process::exit(1);
+                }
+
+                // Prioritize launching the Go ADK home screen when available.
+                if let Some(adk) = Self::find_adk_binary() {
+                    if Self::try_launch_adk_binary(&adk) {
+                        return Ok(());
+                    }
+                    // Fall back to Rust interactive mode if ADK fails to launch.
+                }
+
+                cli_logic::handle_interactive_mode().await
+            }
         }
     }
 }
@@ -180,6 +258,9 @@ pub enum Commands {
         #[arg(trailing_var_arg = true, allow_hyphen_values = true)]
         args: Vec<String>,
     },
+
+    #[command(external_subcommand)]
+    External(Vec<String>),
 
     /// Install a specific AI coding tool
     Install {
@@ -224,12 +305,6 @@ pub enum Commands {
     Cache {
         #[command(subcommand)]
         action: CacheCommands,
-    },
-
-    /// Benchmark management commands
-    Benchmark {
-        #[command(subcommand)]
-        action: BenchmarkCommands,
     },
 
     /// Database management commands
@@ -312,34 +387,6 @@ pub enum AuthCommands {
 }
 
 #[derive(Subcommand)]
-pub enum BenchmarkCommands {
-    /// List all available benchmark scenarios
-    List,
-
-    /// Run a benchmark scenario against a tool
-    Run {
-        /// Benchmark scenario ID to run
-        #[arg(long)]
-        scenario: String,
-
-        /// Tool name to test
-        #[arg(long)]
-        tool: String,
-
-        /// Optional path to export results as JSON
-        #[arg(long)]
-        export_json: Option<PathBuf>,
-    },
-
-    /// Validate a benchmark scenario file
-    Validate {
-        /// Path to the scenario TOML file
-        #[arg(long)]
-        scenario_file: PathBuf,
-    },
-}
-
-#[derive(Subcommand)]
 pub enum DbCommands {
     /// Import tool configurations from TOML files into database
     Import,
@@ -353,4 +400,58 @@ pub enum DbCommands {
         #[arg(long)]
         force: bool,
     },
+}
+
+#[cfg(test)]
+mod tests {
+    use super::Cli;
+    use std::path::{Path, PathBuf};
+
+    #[test]
+    fn launch_adk_failure_returns_false_instead_of_panicking() {
+        let missing = PathBuf::from("/tmp/terminal-jarvis-does-not-exist/jarvis");
+        assert!(!Cli::try_launch_adk_binary(&missing));
+    }
+
+    #[test]
+    fn disable_adk_env_skips_discovery() {
+        std::env::set_var("JARVIS_DISABLE_ADK", "1");
+        assert!(Cli::find_adk_binary().is_none());
+        std::env::remove_var("JARVIS_DISABLE_ADK");
+    }
+
+    #[test]
+    fn invalid_adk_override_path_is_ignored() {
+        std::env::remove_var("JARVIS_DISABLE_ADK");
+        std::env::set_var("JARVIS_ADK_BINARY", "/tmp/does-not-exist/jarvis");
+        let discovered = Cli::find_adk_binary();
+        std::env::remove_var("JARVIS_ADK_BINARY");
+        if let Some(path) = discovered {
+            assert!(
+                path.exists(),
+                "discovered ADK path must exist: {}",
+                path.display()
+            );
+        }
+    }
+
+    #[cfg(unix)]
+    #[test]
+    fn adk_nonzero_exit_triggers_fallback() {
+        use std::os::unix::fs::PermissionsExt;
+
+        let dir =
+            std::env::temp_dir().join(format!("terminal-jarvis-adk-test-{}", std::process::id()));
+        let _ = std::fs::create_dir_all(&dir);
+        let script = dir.join("fake-adk.sh");
+        std::fs::write(&script, "#!/usr/bin/env sh\nexit 7\n").expect("write script");
+        let mut perms = std::fs::metadata(&script).expect("metadata").permissions();
+        perms.set_mode(0o755);
+        std::fs::set_permissions(&script, perms).expect("chmod");
+
+        assert!(!Cli::try_launch_adk_binary(Path::new(&script)));
+
+        let _ = std::fs::remove_file(script);
+        let _ = std::fs::remove_dir_all(dir);
+    }
 }

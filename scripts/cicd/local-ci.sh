@@ -138,14 +138,38 @@ log_separator
 
 # Step 1: Quality Checks
 log_info_if_enabled "Step 1: Running Quality Checks"
+
 echo -e "${BLUE}→ Running cargo fmt...${RESET}"
-cargo fmt --all
+cargo fmt --all --check
 
 echo -e "${BLUE}→ Running cargo clippy...${RESET}"
 cargo clippy --all-targets --all-features -- -D warnings
 
-echo -e "${BLUE}→ Running tests...${RESET}"
-cargo test
+echo -e "${BLUE}→ Running Rust tests...${RESET}"
+cargo test --locked
+
+# Go quality checks
+if command -v go >/dev/null 2>&1; then
+    echo -e "${BLUE}→ Running Go quality checks...${RESET}"
+    cd adk
+    
+    echo -e "${BLUE}  • Checking gofmt...${RESET}"
+    if [ "$(gofmt -l . | wc -l)" -gt 0 ]; then
+        echo -e "${RED}  ✗ Go code is not formatted properly! Run 'gofmt -w .' to fix.${RESET}"
+        gofmt -l .
+        exit 1
+    fi
+    
+    echo -e "${BLUE}  • Running go vet...${RESET}"
+    go vet ./...
+    
+    echo -e "${BLUE}  • Running Go tests...${RESET}"
+    go test -v ./...
+    
+    cd ..
+else
+    log_warn_if_enabled "Go not found - skipping Go quality checks"
+fi
 
 # Run Clippy (strict mode - warnings as errors)
 log_progress "Running Clippy checks"

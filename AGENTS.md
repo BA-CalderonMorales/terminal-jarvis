@@ -59,6 +59,8 @@ git push origin develop
 | "Before I commit" | [code-quality](.github/skills/code-quality/) | Quality gates checklist |
 | "Homebrew release" | [homebrew](.github/skills/homebrew/) | Archive -> Formula -> Commit -> Release |
 | "NPM publish" | [npm](.github/skills/npm/) | `npm whoami` then publish |
+| "Start the home screen" | [home-screen](.github/skills/home-screen/) | `./jarvis.sh` |
+| "Set up the ADK" | [home-screen](.github/skills/home-screen/) | `cp adk/.env.example adk/.env` then `./jarvis.sh` and `/setup` |
 
 ---
 
@@ -79,6 +81,7 @@ All detailed instructions are organized as modular, reusable skills in [.github/
 | [tool-config](.github/skills/tool-config/) | AI tool configuration |
 | [homebrew](.github/skills/homebrew/) | Homebrew distribution |
 | [npm](.github/skills/npm/) | NPM distribution |
+| [home-screen](.github/skills/home-screen/) | ADK home screen setup, start, and stop |
 | [code-quality](.github/skills/code-quality/) | Code quality standards |
 | [git-workflow](.github/skills/git-workflow/) | Branching and merge strategy |
 | [token-budget](.github/skills/token-budget/) | Token efficiency for AI sessions |

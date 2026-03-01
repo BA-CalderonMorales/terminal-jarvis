@@ -9,7 +9,7 @@ use std::io::Write;
 use std::process::Command;
 
 use super::tools_command_mapping::get_cli_command;
-use super::tools_detection::check_tool_installed;
+use super::tools_detection::resolve_tool_path;
 use super::tools_environment::{apply_aider_headless_args, apply_tool_environment};
 use super::tools_process_management::{
     prepare_opencode_terminal_state, run_opencode_with_clean_exit, run_tool_intercepting_sigint,
@@ -17,6 +17,27 @@ use super::tools_process_management::{
 use super::tools_startup_guidance::show_tool_startup_guidance;
 use crate::auth_manager::auth_preflight::AuthPreflight;
 use crate::auth_manager::AuthManager;
+
+struct AuthEnvironmentGuard {
+    enabled: bool,
+}
+
+impl AuthEnvironmentGuard {
+    fn prepare(enabled: bool) -> Result<Self> {
+        if enabled {
+            AuthManager::prepare_auth_safe_environment()?;
+        }
+        Ok(Self { enabled })
+    }
+}
+
+impl Drop for AuthEnvironmentGuard {
+    fn drop(&mut self) {
+        if self.enabled {
+            let _ = AuthManager::restore_environment();
+        }
+    }
+}
 
 // Heuristic validators for Gemini API keys (used for goose preflight validation)
 fn looks_like_gemini_api_key(key: &str) -> bool {
@@ -103,11 +124,14 @@ fn should_continue_session(
 pub async fn run_tool_once(display_name: &str, args: &[String]) -> Result<()> {
     let cli_command = get_cli_command(display_name);
 
-    if !check_tool_installed(cli_command) {
-        return Err(anyhow::anyhow!(
-            "Tool '{display_name}' is not installed. Use 'terminal-jarvis install {display_name}' to install it."
-        ));
-    }
+    let executable_path = match resolve_tool_path(&cli_command) {
+        Some(path) => path,
+        None => {
+            return Err(anyhow::anyhow!(
+                "Tool '{display_name}' is not installed. Use 'terminal-jarvis install {display_name}' to install it."
+            ));
+        }
+    };
 
     // --- UNIFIED AUTH: Check and prompt if needed ---
     let auth_result = AuthPreflight::check(display_name);
@@ -121,9 +145,7 @@ pub async fn run_tool_once(display_name: &str, args: &[String]) -> Result<()> {
 
     // Prepare authentication-safe environment and warn about browser opening
     // Skip environment mutations for Goose to let provider tools run with the host env.
-    if display_name != "goose" {
-        AuthManager::prepare_auth_safe_environment()?;
-    }
+    let _auth_env_guard = AuthEnvironmentGuard::prepare(display_name != "goose")?;
     AuthManager::warn_if_browser_likely(display_name)?;
 
     // Provide minimal guidance before tool startup (only shows tips if API keys missing)
@@ -138,7 +160,7 @@ pub async fn run_tool_once(display_name: &str, args: &[String]) -> Result<()> {
         std::io::stdout().flush().unwrap_or_default();
     }
 
-    let mut cmd = Command::new(cli_command);
+    let mut cmd = Command::new(&executable_path);
 
     // --- INJECT SAVED CREDENTIALS ---
     AuthPreflight::inject_credentials(&mut cmd, display_name)?;
@@ -170,12 +192,9 @@ pub async fn run_tool_once(display_name: &str, args: &[String]) -> Result<()> {
             .map_err(|e| anyhow::anyhow!("Failed to execute {cli_command}: {e}"))?
     };
 
-    // Restore environment after tool execution
-    AuthManager::restore_environment()?;
-
     // --- EXIT CODE HANDLING ---
     if !status.success() {
-        return handle_tool_failure(display_name, cli_command, args, status);
+        return handle_tool_failure(display_name, &executable_path, args, status);
     }
 
     Ok(())
@@ -185,15 +204,7 @@ pub async fn run_tool_once(display_name: &str, args: &[String]) -> Result<()> {
 fn apply_tool_args(cmd: &mut Command, display_name: &str, args: &[String]) {
     match display_name {
         "opencode" => {
-            if args.is_empty() {
-                // No arguments - start pure TUI mode
-            } else if args.len() == 1 && (args[0] == "." || std::path::Path::new(&args[0]).is_dir())
-            {
-                cmd.args(args);
-            } else {
-                cmd.arg("run");
-                cmd.args(args);
-            }
+            cmd.args(normalize_opencode_args(args));
         }
         "codex" => {
             // All argument combinations pass through directly
@@ -208,6 +219,37 @@ fn apply_tool_args(cmd: &mut Command, display_name: &str, args: &[String]) {
             cmd.args(args);
         }
     }
+}
+
+/// Normalize opencode args:
+/// - no args => launch TUI
+/// - explicit subcommands/flags/paths => passthrough
+/// - free-form input => prefix with "run"
+fn normalize_opencode_args(args: &[String]) -> Vec<String> {
+    if args.is_empty() {
+        return vec![];
+    }
+
+    let first = args[0].as_str();
+
+    // Preserve explicit subcommands and common flags
+    let passthrough_subcommands = [
+        "run", "auth", "config", "models", "mcp", "status", "update", "help", "version",
+    ];
+    let is_passthrough = first.starts_with('-')
+        || passthrough_subcommands
+            .iter()
+            .any(|subcommand| first.eq_ignore_ascii_case(subcommand));
+
+    if is_passthrough || (args.len() == 1 && (first == "." || std::path::Path::new(first).is_dir()))
+    {
+        return args.to_vec();
+    }
+
+    let mut normalized = Vec::with_capacity(args.len() + 1);
+    normalized.push("run".to_string());
+    normalized.extend(args.to_vec());
+    normalized
 }
 
 /// Hydrate Goose credentials from saved store (goose + gemini tools).
@@ -307,7 +349,7 @@ fn validate_goose_gemini_key(cmd: &mut Command) -> Result<()> {
 /// Handle tool exit with non-zero status code.
 fn handle_tool_failure(
     display_name: &str,
-    cli_command: &str,
+    executable_path: &str,
     args: &[String],
     status: std::process::ExitStatus,
 ) -> Result<()> {
@@ -328,7 +370,7 @@ fn handle_tool_failure(
             crate::theme::theme_global_config::current_theme()
                 .primary("Goose requires a provider. Launching 'goose configure'...\n")
         );
-        let mut configure_cmd = Command::new(cli_command);
+        let mut configure_cmd = Command::new(executable_path);
         configure_cmd
             .arg("configure")
             .stdin(std::process::Stdio::inherit())
@@ -345,4 +387,51 @@ fn handle_tool_failure(
         display_name,
         status.code()
     ))
+}
+
+#[cfg(test)]
+mod tests {
+    use super::normalize_opencode_args;
+
+    fn strings(items: &[&str]) -> Vec<String> {
+        items.iter().map(|s| s.to_string()).collect()
+    }
+
+    #[test]
+    fn opencode_no_args_remains_empty() {
+        assert!(normalize_opencode_args(&[]).is_empty());
+    }
+
+    #[test]
+    fn opencode_explicit_run_subcommand_is_not_prefixed_twice() {
+        let args = strings(&["run", "--help"]);
+        assert_eq!(normalize_opencode_args(&args), args);
+    }
+
+    #[test]
+    fn opencode_flags_pass_through() {
+        let args = strings(&["--help"]);
+        assert_eq!(normalize_opencode_args(&args), args);
+    }
+
+    #[test]
+    fn opencode_known_subcommand_passes_through() {
+        let args = strings(&["status"]);
+        assert_eq!(normalize_opencode_args(&args), args);
+    }
+
+    #[test]
+    fn opencode_directory_path_passes_through() {
+        let args = strings(&["."]);
+        assert_eq!(normalize_opencode_args(&args), args);
+    }
+
+    #[test]
+    fn opencode_free_form_input_is_prefixed_with_run() {
+        let args = strings(&["write tests for auth flow"]);
+        assert_eq!(
+            normalize_opencode_args(&args),
+            strings(&["run", "write tests for auth flow"])
+        );
+    }
 }
