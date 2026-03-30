@@ -22,6 +22,16 @@ Manage Claude, Gemini, Qwen, and 19 more AI assistants from one terminal interfa
 
 ---
 
+## Table of Contents
+
+- [Quick Start](#quick-start)
+- [What It Does](#what-it-does)
+- [Documentation](#documentation)
+- [Project Structure](#project-structure)
+- [Development](#development)
+- [Contributing](#contributing)
+- [License](#license)
+
 ## Quick Start
 
 ```bash
