@@ -147,11 +147,19 @@ jobs:
       with:
         node-version: ${{ matrix.node }}
 
+    - name: Verify lockfile is in sync
+      if: ${{ matrix.suite == 'npm' }}
+      run: |
+        cd npm/terminal-jarvis
+        # Ensure package-lock.json is in sync with package.json
+        npm install --package-lock-only
+        git diff --exit-code package-lock.json || (echo "package-lock.json is out of sync. Run 'npm install' locally and commit the changes." && exit 1)
+
     - name: Install dependencies
       if: ${{ matrix.suite == 'npm' }}
       run: |
         cd npm/terminal-jarvis
-        npm install
+        npm ci
 
     - name: Build TypeScript
       if: ${{ matrix.suite == 'npm' }}
@@ -169,16 +177,17 @@ jobs:
       if: ${{ matrix.suite == 'npm' }}
       run: sudo apt-get update && sudo apt-get install -y jq
 
-    - name: NPM Audit (high severity)
+    - name: NPM Audit (moderate severity)
       if: ${{ matrix.suite == 'npm' }}
       run: |
         cd npm/terminal-jarvis
-        npm audit --audit-level=high --json | jq '.' > npm-audit.json || true
-        # Fail build if high/critical vulnerabilities are present
+        npm audit --audit-level=moderate --json | jq '.' > npm-audit.json || true
+        # Fail build if moderate/high/critical vulnerabilities are present
+        MODERATE=$(jq '.metadata.vulnerabilities.moderate // 0' npm-audit.json); \
         HIGH=$(jq '.metadata.vulnerabilities.high // 0' npm-audit.json); \
         CRIT=$(jq '.metadata.vulnerabilities.critical // 0' npm-audit.json); \
-        echo "High: $HIGH, Critical: $CRIT"; \
-        [ $((HIGH+CRIT)) -eq 0 ]
+        echo "Moderate: $MODERATE, High: $HIGH, Critical: $CRIT"; \
+        [ $((MODERATE+HIGH+CRIT)) -eq 0 ]
 
   # Security - Rust dependency checks (cargo-audit + cargo-deny in one runner)
   security-rust:
