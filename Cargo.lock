@@ -2566,7 +2566,7 @@ dependencies = [
 
 [[package]]
 name = "terminal-jarvis"
-version = "0.0.78"
+version = "0.0.79"
 dependencies = [
  "aes-gcm",
  "anyhow",

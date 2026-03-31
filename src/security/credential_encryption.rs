@@ -188,7 +188,7 @@ impl CredentialEncryption {
             let argon2 = Argon2::default();
 
             // Use the salt directly with argon2
-            let salt_str = format!("{:x}", sha2::Sha256::digest(&salt));
+            let salt_str = format!("{:x}", sha2::Sha256::digest(salt));
             let parsed_salt = argon2::password_hash::Salt::from_b64(&salt_str[..32])
                 .map_err(|e| anyhow!("Failed to create salt: {}", e))?
                 .to_owned();
@@ -274,6 +274,7 @@ impl CredentialEncryption {
     }
 
     /// Store credentials in plaintext (fallback when encryption disabled)
+    #[cfg(not(feature = "credential-encryption"))]
     fn store_plaintext(&self, tools: &HashMap<String, HashMap<String, String>>) -> Result<()> {
         let path = self.plaintext_creds_path()?;
 
@@ -333,7 +334,9 @@ impl CredentialEncryption {
     fn load_from_keychain(&self) -> Result<HashMap<String, HashMap<String, String>>> {
         let entry = keyring::Entry::new(&self.config.service_name, "credentials")
             .context("Failed to create keychain entry")?;
-        let json = entry.get_password().context("Failed to read from keychain")?;
+        let json = entry
+            .get_password()
+            .context("Failed to read from keychain")?;
         let tools: HashMap<String, HashMap<String, String>> = serde_json::from_str(&json)?;
         Ok(tools)
     }
@@ -399,11 +402,6 @@ impl CredentialEncryption {
         println!("Enter master password for credential encryption:");
         let password = rpassword::read_password()?;
         Ok(password)
-    }
-
-    #[cfg(not(feature = "credential-encryption"))]
-    fn prompt_master_password(&self) -> Result<String> {
-        Err(anyhow!("Credential encryption not available - feature not enabled"))
     }
 
     /// Get encryption status for display
@@ -499,7 +497,10 @@ mod tests {
         let json = serde_json::to_string(&store).unwrap();
         let deserialized: EncryptedCredentialStore = serde_json::from_str(&json).unwrap();
 
-        assert_eq!(deserialized.version, EncryptedCredentialStore::CURRENT_VERSION);
+        assert_eq!(
+            deserialized.version,
+            EncryptedCredentialStore::CURRENT_VERSION
+        );
         assert_eq!(deserialized.salt, vec![1, 2, 3]);
         assert_eq!(deserialized.nonce, vec![4, 5, 6]);
         assert_eq!(deserialized.ciphertext, vec![7, 8, 9]);
@@ -508,12 +509,18 @@ mod tests {
 
     #[test]
     fn test_encryption_method_display() {
-        assert_eq!(format!("{}", EncryptionMethod::None), "No credentials stored");
+        assert_eq!(
+            format!("{}", EncryptionMethod::None),
+            "No credentials stored"
+        );
         assert_eq!(
             format!("{}", EncryptionMethod::Plaintext),
             "Plaintext (not encrypted)"
         );
-        assert_eq!(format!("{}", EncryptionMethod::Keychain), "Platform Keychain");
+        assert_eq!(
+            format!("{}", EncryptionMethod::Keychain),
+            "Platform Keychain"
+        );
         assert_eq!(format!("{}", EncryptionMethod::Aes256Gcm), "AES-256-GCM");
     }
 }

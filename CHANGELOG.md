@@ -2,6 +2,27 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.0.79] - 2026-03-31
+
+### Security
+- **Supply Chain Hardening**: Pinned all NPM dependencies to exact versions for reproducible builds
+- **Lockfile Verification**: Added CI check to ensure package-lock.json is in sync with package.json
+- **Dependency Audit**: Lowered audit threshold to moderate severity for stricter security
+- **Credential Encryption**: Implemented encrypted credential storage with multiple backends
+  - Platform keychain integration (macOS Keychain, Windows Credential Manager, Linux Secret Service)
+  - AES-256-GCM file-based encryption fallback
+  - Argon2id key derivation for password-based encryption
+  - Transparent migration from plaintext credentials
+  - New `security` subcommand: `status`, `encrypt`, `audit`
+
+### Added
+- **SECURITY.md**: Comprehensive security documentation covering supply chain practices, credential storage, and reporting procedures
+
+### Technical
+- Added `credential-encryption` feature flag with keyring, aes-gcm, argon2, rpassword dependencies
+- Created `src/security/credential_encryption.rs` for encryption logic
+- Created `src/cli_logic/cli_logic_security.rs` for security CLI handlers
+
 ## [0.0.78] - 2026-02-26
 
 ### Fixed

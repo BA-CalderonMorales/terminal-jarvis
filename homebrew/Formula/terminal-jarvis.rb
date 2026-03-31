@@ -1,7 +1,7 @@
 class TerminalJarvis < Formula
   desc "A unified command center for AI coding tools"
   homepage "https://github.com/BA-CalderonMorales/terminal-jarvis"
-  version "0.0.78"
+  version "0.0.79"
   license "MIT"
 
   on_macos do
