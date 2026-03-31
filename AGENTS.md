@@ -20,19 +20,25 @@
 
 ## DEPLOYMENT WORKFLOW
 
-**CI/CD Pipeline Flow:**
+**Agent-Driven Release (Recommended):**
+
+For manual releases with docs sync, see [release skill](.github/skills/release/):
+
+```bash
+./scripts/cicd/local-ci.sh              # Verify locally
+./scripts/cicd/local-cd.sh              # Full release with prompts
+./scripts/verify/verify-docs.sh         # Validate docs in sync
+./scripts/sync-docs-site.sh 0.0.X       # Sync my-life-as-a-dev docs
+cargo publish                           # Crates.io
+npm publish                             # NPM (requires 2FA)
+```
+
+**CI/CD Pipeline (GitHub Actions):**
 
 1. **Develop locally** - Make changes, run `./scripts/cicd/local-ci.sh`
 2. **Push to develop** - Triggers GitHub Actions CI
 3. **CI validates** - Build, tests, clippy, formatting
 4. **CD auto-deploys** - Once CI passes, CD handles release automatically
-
-**Do NOT run `local-cd.sh` for full deployment** - GitHub Actions CD pipeline handles:
-- Tag creation
-- Binary builds for all platforms
-- crates.io publishing
-- GitHub release creation
-- NPM coordination
 
 **Version updates only:**
 ```bash
@@ -49,6 +55,7 @@ git push origin develop
 | User Says | Skill | Quick Command |
 |-----------|-------|---------------|
 | "Let's deploy" | [deployment](.github/skills/deployment/) | Push to develop, CI/CD handles it |
+| "Release with docs sync" | [release](.github/skills/release/) | `./scripts/cicd/local-cd.sh` (full agent-driven) |
 | "Harden release" | [release-checklist](.github/skills/release-checklist/) | Pre-release verification |
 | "Test in Codespace" | [qa-testing](.github/skills/qa-testing/) | Create minimal QA branch |
 | "Fix this bug" | [testing](.github/skills/testing/) | Write failing test first |
@@ -72,6 +79,7 @@ All detailed instructions are organized as modular, reusable skills in [.github/
 |-------|-------------|
 | [verification](.github/skills/verification/) | Quality verification feedback loop |
 | [deployment](.github/skills/deployment/) | Deployment workflows and CI/CD |
+| [release](.github/skills/release/) | **Agent-driven release with docs sync** |
 | [release-checklist](.github/skills/release-checklist/) | Pre-release automation and hardening |
 | [qa-testing](.github/skills/qa-testing/) | Minimal QA branch creation and testing |
 | [versioning](.github/skills/versioning/) | Version management across platforms |

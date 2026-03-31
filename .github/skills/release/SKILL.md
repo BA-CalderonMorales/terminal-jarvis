@@ -319,32 +319,57 @@ curl -s https://ba-calderonmorales.github.io/my-life-as-a-dev/latest/projects/ac
 
 ---
 
+## Quick Release (Streamlined)
+
+For most releases, use this condensed workflow:
+
+```bash
+cd ~/projects/terminal-jarvis
+
+# 1. Verify and build
+./scripts/cicd/local-ci.sh
+
+# 2. Full release (includes version bump, docs validation, external sync)
+./scripts/cicd/local-cd.sh
+# - Select patch/minor/major when prompted
+# - Docs validation runs automatically
+# - Offers to sync my-life-as-a-dev site
+
+# 3. Publish
+cargo publish
+cd npm/terminal-jarvis && npm publish --otp=<CODE> && cd ../..
+gh release create v0.0.80 homebrew/release/*.tar.gz --generate-notes
+```
+
+**Time saved:** ~10-15 minutes per release through automation
+
+---
+
 ## Quick Reference: Common Scenarios
 
 ### Hotfix Release
 
-For urgent fixes, minimize steps:
-
 ```bash
-# 1. Fix the bug
 cd ~/projects/terminal-jarvis
-# ... make fix ...
 
-# 2. Bump patch version
+# 1. Fix the bug
+# ... edit files ...
+
+# 2. Bump version
 ./scripts/cicd/local-cd.sh --update-version 0.0.81
 
-# 3. Update CHANGELOG.md (add to [0.0.81] section)
-
-# 4. Quick validation
+# 3. Validate docs
 ./scripts/verify/verify-docs.sh
 
-# 5. Commit, tag, push
+# 4. Update CHANGELOG.md
+
+# 5. Sync docs site
+./scripts/sync-docs-site.sh 0.0.81
+
+# 6. Commit and publish
 git add -A
 git commit -m "hotfix: [description] - v0.0.81"
-git tag v0.0.81
-git push origin develop && git push origin v0.0.81
-
-# 6. Publish
+git tag v0.0.81 && git push origin develop && git push origin v0.0.81
 cargo publish
 cd npm/terminal-jarvis && npm publish && cd ../..
 ```

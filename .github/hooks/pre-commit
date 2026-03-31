@@ -1,0 +1,21 @@
+#!/usr/bin/env bash
+# Pre-commit hook for terminal-jarvis
+# Prevents commits if docs are out of sync
+
+set -e
+
+echo "Running pre-commit docs validation..."
+
+# Only run if verify-docs.sh exists
+if [[ -f "scripts/verify/verify-docs.sh" ]]; then
+    if ! ./scripts/verify/verify-docs.sh --ci; then
+        echo ""
+        echo "ERROR: Docs validation failed!"
+        echo "Fix issues before committing:"
+        echo "  ./scripts/verify/verify-docs.sh --fix"
+        echo ""
+        exit 1
+    fi
+fi
+
+exit 0

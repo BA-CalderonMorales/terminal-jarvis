@@ -762,6 +762,32 @@ cd npm/terminal-jarvis && npm install --package-lock-only --silent && cd ../..
 
 echo ""
 
+# Docs Validation and Sync
+log_section "Step 2b: Docs Drift Prevention"
+
+echo -e "${BLUE}→ Running docs validation...${RESET}"
+if ./scripts/verify/verify-docs.sh; then
+    log_success "Docs validation passed"
+else
+    log_warn "Docs validation found issues"
+    echo "Auto-fixing..."
+    ./scripts/verify/verify-docs.sh --fix
+    echo "Re-validating..."
+    ./scripts/verify/verify-docs.sh
+fi
+
+echo ""
+echo -e "${BLUE}→ Syncing external documentation site...${RESET}"
+read -r -p "Sync to my-life-as-a-dev docs site? (Y/n): " sync_docs
+if [[ ! "$sync_docs" =~ ^[Nn]$ ]]; then
+    ./scripts/sync-docs-site.sh "${NEW_VERSION}"
+else
+    log_warn "Skipping docs site sync (you can run manually later)"
+    echo "Manual command: ./scripts/sync-docs-site.sh ${NEW_VERSION}"
+fi
+
+echo ""
+
 # Git Operations
 log_section "Step 3: Git Operations"
 
