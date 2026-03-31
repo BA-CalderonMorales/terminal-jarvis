@@ -129,7 +129,7 @@ git diff --stat
 
 # Prompt for commit
 echo ""
-read -p "Commit and push these changes? (y/N): " confirm
+read -rp "Commit and push these changes? (y/N): " confirm
 
 if [[ "$confirm" =~ ^[Yy]$ ]]; then
     git add docs/projects/active/terminal-jarvis/
