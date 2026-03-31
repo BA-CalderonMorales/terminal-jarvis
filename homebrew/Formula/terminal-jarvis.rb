@@ -6,21 +6,21 @@ class TerminalJarvis < Formula
 
   on_macos do
     if Hardware::CPU.intel?
-      url "https://github.com/BA-CalderonMorales/terminal-jarvis/releases/download/v0.0.78/terminal-jarvis-mac.tar.gz"
+      url "https://github.com/BA-CalderonMorales/terminal-jarvis/releases/download/v0.0.79/terminal-jarvis-mac.tar.gz"
       sha256 "SKIP_CHECK"
     elsif Hardware::CPU.arm?
-      url "https://github.com/BA-CalderonMorales/terminal-jarvis/releases/download/v0.0.78/terminal-jarvis-mac.tar.gz"
+      url "https://github.com/BA-CalderonMorales/terminal-jarvis/releases/download/v0.0.79/terminal-jarvis-mac.tar.gz"
       sha256 "SKIP_CHECK"
     end
   end
 
   on_linux do
     if Hardware::CPU.intel?
-      url "https://github.com/BA-CalderonMorales/terminal-jarvis/releases/download/v0.0.78/terminal-jarvis-linux.tar.gz"
+      url "https://github.com/BA-CalderonMorales/terminal-jarvis/releases/download/v0.0.79/terminal-jarvis-linux.tar.gz"
       sha256 "SKIP_CHECK"
     else
       # Fallback for other Linux architectures
-      url "https://github.com/BA-CalderonMorales/terminal-jarvis/releases/download/v0.0.78/terminal-jarvis-linux.tar.gz"
+      url "https://github.com/BA-CalderonMorales/terminal-jarvis/releases/download/v0.0.79/terminal-jarvis-linux.tar.gz"
       sha256 "SKIP_CHECK"
     end
   end
