@@ -449,12 +449,23 @@ sed -i '9a\
 
 ## Integration with Other Skills
 
+- **multi-repo**: Underlying cross-repo sync pattern (reusable for other projects)
 - **release-checklist**: Legacy checklist skill (use this skill instead)
 - **verification**: Run quality gates before release
 - **versioning**: Used internally by this skill
 - **deployment**: GitHub release creation
 - **homebrew**: Formula updates
 - **npm**: Package publishing
+
+---
+
+## Reusing This Pattern
+
+This release workflow uses the [multi-repo skill](../multi-repo/) pattern. To adapt for other projects:
+
+1. Copy `scripts/verify/verify-docs.sh` - Adapt version extraction to your package manager
+2. Copy `scripts/sync-docs-site.sh` - Update `DOCS_REPO` path and file patterns
+3. Follow the multi-repo skill for detailed adaptation guidance
 
 ---
 

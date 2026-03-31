@@ -56,6 +56,7 @@ git push origin develop
 |-----------|-------|---------------|
 | "Let's deploy" | [deployment](.github/skills/deployment/) | Push to develop, CI/CD handles it |
 | "Release with docs sync" | [release](.github/skills/release/) | `./scripts/cicd/local-cd.sh` (full agent-driven) |
+| "Cross-repo sync" | [multi-repo](.github/skills/multi-repo/) | Reusable pattern for code + docs repos |
 | "Harden release" | [release-checklist](.github/skills/release-checklist/) | Pre-release verification |
 | "Test in Codespace" | [qa-testing](.github/skills/qa-testing/) | Create minimal QA branch |
 | "Fix this bug" | [testing](.github/skills/testing/) | Write failing test first |
@@ -80,6 +81,7 @@ All detailed instructions are organized as modular, reusable skills in [.github/
 | [verification](.github/skills/verification/) | Quality verification feedback loop |
 | [deployment](.github/skills/deployment/) | Deployment workflows and CI/CD |
 | [release](.github/skills/release/) | **Agent-driven release with docs sync** |
+| [multi-repo](.github/skills/multi-repo/) | **Cross-repo docs sync pattern** (reusable) |
 | [release-checklist](.github/skills/release-checklist/) | Pre-release automation and hardening |
 | [qa-testing](.github/skills/qa-testing/) | Minimal QA branch creation and testing |
 | [versioning](.github/skills/versioning/) | Version management across platforms |
