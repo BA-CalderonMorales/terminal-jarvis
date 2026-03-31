@@ -33,9 +33,9 @@
 //!
 //! The framework provides three core components:
 //!
-//! - **[`ApiBase`](api_base::ApiBase)**: Base configuration with timeout and retry logic
-//! - **[`ApiClient`](api_client::ApiClient)**: HTTP client abstraction with error handling
-//! - **[`ToolApi`](api_tool_operations::ToolApi)**: Tool-specific operations framework
+//! - **[`ApiBase`]**: Base configuration with timeout and retry logic
+//! - **[`ApiClient`]**: HTTP client abstraction with error handling
+//! - **[`ToolApi`]**: Tool-specific operations framework
 //!
 //! # ARCHITECTURE JUSTIFICATION
 //!

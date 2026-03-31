@@ -5,13 +5,15 @@
   "bin": {
     "terminal-jarvis": "bin/terminal-jarvis"
   },
+  "types": "index.d.ts",
   "files": [
     "lib/",
     "bin/",
     "scripts/",
     "config/",
     "README.md",
-    "package.json"
+    "package.json",
+    "index.d.ts"
   ],
   "scripts": {
     "generate-tools": "../../scripts/utils/generate-readme-tools.sh",
@@ -30,6 +32,7 @@
     "test:watch": "vitest",
     "test:ui": "vitest --ui",
     "test:coverage": "vitest run --coverage",
+    "typecheck": "tsc --noEmit && echo 'TypeScript type check passed'",
     "test:e2e": "npm run build-rust && vitest run",
     "build": "npm run copy-configs && npm run sync-readme-npm",
     "prepack": "npm run build",
