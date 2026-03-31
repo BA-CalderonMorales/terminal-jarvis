@@ -76,6 +76,8 @@ ignore = [
     #{ crate = "a-crate-that-is-yanked@0.1.1", reason = "you can specify why you are ignoring the yanked crate" },
     { id = "RUSTSEC-2025-0134", reason = "rustls-pemfile is a transitive dependency of libsql - waiting for upstream fix" },
     { id = "RUSTSEC-2025-0141", reason = "bincode 1.3.3 is unmaintained but no safe upgrade is available and it is a transitive dependency" },
+    { id = "RUSTSEC-2026-0049", reason = "rustls-webpki is a transitive dependency of reqwest/libsql - waiting for upstream fix" },
+    { id = "RUSTSEC-2026-0037", reason = "rustls-webpki is a transitive dependency of reqwest/libsql - waiting for upstream fix" },
 ]
 # If this is true, then cargo deny will use the git executable to fetch advisory database.
 # If this is false, then it uses a built-in git library.
