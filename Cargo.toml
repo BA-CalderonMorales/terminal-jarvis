@@ -55,6 +55,11 @@ chrono = { version = "0.4.42", features = ["serde"] }
 
 # Security dependencies
 sha2 = "0.10.9"
+keyring = { version = "3.6.2", optional = true }
+aes-gcm = { version = "0.10.3", optional = true }
+argon2 = { version = "0.5.3", optional = true }
+rand = { version = "0.8.5", optional = true }
+rpassword = { version = "7.3.1", optional = true }
 
 # Database (Turso/libSQL for modern config storage)
 libsql = "0.9"
@@ -64,7 +69,9 @@ async-trait = "0.1.89"
 is-terminal = "0.4.17"
 
 [features]
-default = []
+default = ["credential-encryption"]
+credential-encryption = ["dep:keyring", "dep:aes-gcm", "dep:argon2", "dep:rand", "dep:rpassword"]
+plaintext-credentials = []  # Disables encryption (for testing only)
 
 [dev-dependencies]
 tokio-test = "0.4.4"

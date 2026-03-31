@@ -226,6 +226,12 @@ impl Cli {
 
             Some(Commands::Status) => cli_logic::handle_status_command().await,
 
+            Some(Commands::Security { action }) => match action {
+                SecurityCommands::Status => cli_logic::handle_security_status().await,
+                SecurityCommands::Encrypt => cli_logic::handle_security_encrypt().await,
+                SecurityCommands::Audit => cli_logic::handle_security_audit().await,
+            },
+
             None => {
                 if cli_logic::cli_logic_headless::is_headless() {
                     eprintln!("error: interactive mode is not available in headless mode");
@@ -315,6 +321,12 @@ pub enum Commands {
 
     /// Show tool health status dashboard
     Status,
+
+    /// Security management commands
+    Security {
+        #[command(subcommand)]
+        action: SecurityCommands,
+    },
 }
 
 #[derive(Subcommand)]
@@ -400,6 +412,18 @@ pub enum DbCommands {
         #[arg(long)]
         force: bool,
     },
+}
+
+#[derive(Subcommand)]
+pub enum SecurityCommands {
+    /// Show security status (encryption, credentials, vulnerabilities)
+    Status,
+
+    /// Encrypt existing plaintext credentials
+    Encrypt,
+
+    /// Check for security updates and vulnerabilities
+    Audit,
 }
 
 #[cfg(test)]

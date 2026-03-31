@@ -12,6 +12,7 @@ pub mod cli_logic_headless;
 pub mod cli_logic_info_operations;
 pub mod cli_logic_interactive;
 pub mod cli_logic_list_operations;
+pub mod cli_logic_security;
 pub mod cli_logic_template_operations;
 pub mod cli_logic_tool_execution;
 pub mod cli_logic_update_operations;
@@ -25,3 +26,6 @@ pub use cli_logic_dashboard::handle_status_command;
 pub use cli_logic_db_operations::*;
 pub use cli_logic_entry_point::*;
 pub use cli_logic_first_run::*;
+pub use cli_logic_security::{
+    handle_security_audit, handle_security_encrypt, handle_security_status,
+};

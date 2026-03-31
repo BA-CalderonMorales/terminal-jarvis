@@ -2,10 +2,14 @@
 // Implements defense-in-depth against supply chain attacks
 
 pub mod core;
+pub mod credential_encryption;
 pub mod crypto;
 pub mod supply_chain;
 
 pub use core::{SecurityConfig, SecurityError, SecurityValidator};
+pub use credential_encryption::{
+    CredentialEncryption, EncryptionConfig, EncryptionMethod, EncryptionStatus,
+};
 pub use crypto::IntegrityVerifier;
 pub use supply_chain::{ModelAllowlist, SecureModelLoader};
 
