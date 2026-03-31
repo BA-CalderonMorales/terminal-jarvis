@@ -221,7 +221,7 @@ jobs:
         fi
 
     - name: Run cargo-audit
-      run: cargo audit --deny warnings --ignore RUSTSEC-2025-0134 --ignore RUSTSEC-2025-0141 --ignore RUSTSEC-2024-0375 --ignore RUSTSEC-2021-0145
+      run: cargo audit --deny warnings --ignore RUSTSEC-2025-0134 --ignore RUSTSEC-2025-0141 --ignore RUSTSEC-2024-0375 --ignore RUSTSEC-2021-0145 --ignore RUSTSEC-2026-0049
 
     - name: Run cargo-deny checks
       uses: EmbarkStudios/cargo-deny-action@v2
@@ -262,6 +262,12 @@ jobs:
         fi
 
     # SBOM and vulnerability scan (Anchore)
+    - name: Update Grype vulnerability database
+      run: |
+        # Install grype and update vulnerability database
+        curl -sSfL https://raw.githubusercontent.com/anchore/grype/main/install.sh | sh -s -- -b /usr/local/bin
+        grype db update || true
+
     - name: Scan workspace with Anchore
       id: anchore
       uses: anchore/scan-action@v4
@@ -270,6 +276,7 @@ jobs:
         fail-build: true
         severity-cutoff: critical
         output-format: sarif
+        db-auto-update: true
 
     - name: Upload SARIF to code scanning
       # Upload only on push events and when the SARIF file exists

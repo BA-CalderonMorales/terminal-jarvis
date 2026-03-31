@@ -218,6 +218,13 @@ function checkPrerequisites() {
 (async () => {
     const startTime = Date.now();
 
+    // Skip binary download in CI environments - binary hasn't been released yet
+    if (process.env.CI || process.env.SKIP_POSTINSTALL) {
+        log('CI environment detected - skipping binary download');
+        log('Binary will be built from source or downloaded on first use');
+        process.exit(0);
+    }
+
     try {
         // Detect platform
         const platformInfo = getPlatformInfo();
