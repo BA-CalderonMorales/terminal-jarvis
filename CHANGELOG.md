@@ -2,6 +2,21 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.0.80] - 2026-03-31
+
+### Added
+- **TypeScript Type Definitions**: Added `index.d.ts` for NPM wrapper package
+  - Complete type definitions for `JarvisOptions`, `SupportedTool`, `VersionInfo`
+  - Exported functions: `run()`, `runRaw()`, `getBinaryPath()`, `isAvailable()`, `getVersion()`
+  - Full JSDoc documentation with usage examples
+
+### Changed
+- **Quality Badges**: Added documentation and coverage badges to README
+- **CI Coverage**: Added cargo-tarpaulin test coverage reporting to CI workflow
+
+### Fixed
+- **Documentation Warnings**: Fixed rustdoc redundant link warnings in `api/mod.rs`
+
 ## [0.0.79] - 2026-03-31
 
 ### Security
