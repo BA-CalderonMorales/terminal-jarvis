@@ -1,8 +1,10 @@
-# AGENTS.md - AI Assistant Guidelines for Terminal Jarvis
+# AGENTS.md - Terminal Jarvis Development Guide
 
-**Single Source of Truth for All AI Coding Assistants**
-
----
+> Domain-specific constitution for this repository.
+>
+> This file extends [PHILOSOPHY.md](./PHILOSOPHY.md) with project-specific conventions.
+>
+> **Single Source of Truth for All AI Coding Assistants**
 
 ## CRITICAL RULES - READ FIRST
 
