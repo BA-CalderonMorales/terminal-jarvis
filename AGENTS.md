@@ -72,6 +72,13 @@ git push origin develop
 | "Start the home screen" | [home-screen](.github/skills/home-screen/) | `./jarvis.sh` |
 | "Set up the ADK" | [home-screen](.github/skills/home-screen/) | `cp adk/.env.example adk/.env` then `./jarvis.sh` and `/setup` |
 
+## Working Rules
+
+- If a prompt would require a major architectural deviation, stop and explain before proceeding.
+- Keep changes and milestones separated into distinct commits.
+- After each change or milestone, commit and push before starting the next one.
+- Do not bundle unrelated work from different prompts into the same commit.
+
 ---
 
 ## SKILLS DIRECTORY
