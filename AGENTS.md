@@ -208,6 +208,44 @@ cargo test                       # Must pass
 
 ---
 
+## CROSS-REPO OPERATIONS
+
+Terminal Jarvis is part of a workspace ecosystem with shared patterns across multiple agent harnesses:
+
+| Repository | Language | Purpose |
+|------------|----------|---------|
+| [terminal-jarvis](https://github.com/BA-CalderonMorales/terminal-jarvis) | Rust | Session-continuation ADK (this repo) |
+| [lumina-bot](https://github.com/BA-CalderonMorales/lumina-bot) | Go | Local AI gateway |
+| [agent-harness](https://github.com/BA-CalderonMorales/agent-harness) | Go | Clean-room agent harness |
+
+**Shared Resources**:
+- `~/PHILOSOPHY.md` - Root schema for all harnesses
+- `~/insights/shared-harness-patterns/` - Coordinated evolution plans
+- `~/Projects/skills/memory-system/` - Knowledge persistence across sessions
+
+**Workspace Commands**:
+```bash
+harness-status        # Status of all harness repos
+sync-philosophy       # Propagate PHILOSOPHY.md changes
+```
+
+## MEMORY SYSTEM
+
+After significant debugging, optimization, or architectural work, capture learnings to the persistent memory system:
+
+**When to Use**:
+- Fixed non-obvious bugs
+- Discovered performance optimizations
+- Created reusable patterns
+- Completed architectural investigations
+
+**How to Use**:
+1. Reference `~/Projects/skills/memory-system/SKILL.md`
+2. Follow the capture template
+3. Target: EverMemOS repository
+
+This ensures knowledge persists across sessions and agents.
+
 ## PROACTIVE AGENT USAGE
 
 AI assistants MUST invoke specialized agents immediately without waiting to be asked:
@@ -228,4 +266,12 @@ AI assistants MUST invoke specialized agents immediately without waiting to be a
 **Navigation**: Skills are in `.github/skills/` | Use Ctrl+F to search | Load skills on-demand
 
 ---
-*Last synced: 2026-03-30 via [workspace ecosystem](https://github.com/BA-CalderonMorales)*
+
+## SEE ALSO
+
+- [PHILOSOPHY.md](./PHILOSOPHY.md) - Core philosophy and patterns
+- [Shared Harness Patterns](../insights/shared-harness-patterns/) - Cross-repo coordination
+- [Memory System](../Projects/skills/memory-system/SKILL.md) - Knowledge persistence
+
+---
+*Last synced: 2026-04-05 via [workspace ecosystem](https://github.com/BA-CalderonMorales)*
