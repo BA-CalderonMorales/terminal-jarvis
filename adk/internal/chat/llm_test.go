@@ -46,7 +46,7 @@ func TestSendRecordsStructuredAssistantToolCallHistory(t *testing.T) {
 	session := NewSession("")
 	p := &stubProvider{}
 
-	resp, err := Send(context.Background(), session, p, "test")
+	resp, _, err := Send(context.Background(), session, p, "test")
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
