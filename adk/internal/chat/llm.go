@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"time"
 
 	"github.com/BA-CalderonMorales/terminal-jarvis/adk/internal/providers"
 	"github.com/BA-CalderonMorales/terminal-jarvis/adk/internal/tools"
@@ -13,22 +14,27 @@ import (
 const maxToolLoops = 5
 
 // Send adds the user message to the session, calls the provider, handles any
-// tool calls in a loop, then returns the final text reply.
-func Send(ctx context.Context, session *Session, provider providers.Provider, userText string) (string, error) {
+// tool calls in a loop, then returns the final text reply and response time.
+func Send(ctx context.Context, session *Session, provider providers.Provider, userText string) (string, int64, error) {
 	session.AddUser(userText)
 
 	toolSpecs := tools.SpecList()
+	var totalResponseTime int64
 
 	for i := 0; i < maxToolLoops; i++ {
+		start := time.Now()
 		resp, err := provider.Chat(ctx, session.Messages, toolSpecs)
+		elapsed := time.Since(start).Milliseconds()
+		totalResponseTime += elapsed
+
 		if err != nil {
-			return "", err
+			return "", totalResponseTime, err
 		}
 
 		// Plain text reply -- done.
 		if resp.ToolCall == nil {
-			session.AddAssistant(resp.Text)
-			return resp.Text, nil
+			session.AddAssistantWithTiming(resp.Text, totalResponseTime)
+			return resp.Text, totalResponseTime, nil
 		}
 
 		// Tool call: execute and add result to history.
@@ -41,7 +47,7 @@ func Send(ctx context.Context, session *Session, provider providers.Provider, us
 		session.AddToolResult(tc.ID, tc.Name, result)
 	}
 
-	return "", fmt.Errorf("tool call loop exceeded %d iterations", maxToolLoops)
+	return "", totalResponseTime, fmt.Errorf("tool call loop exceeded %d iterations", maxToolLoops)
 }
 
 // decodeArgs converts json.RawMessage values to plain strings for tool dispatch.

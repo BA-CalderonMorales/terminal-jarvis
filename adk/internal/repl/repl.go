@@ -104,13 +104,13 @@ func Run(chain []providers.Provider, envPath string) {
 			spin := ui.StartThinkingSpinner()
 
 			ctx, cancel := context.WithTimeout(context.Background(), llmTimeout)
-			reply, err := chat.Send(ctx, session, currentProvider, input)
+			reply, responseTimeMs, err := chat.Send(ctx, session, currentProvider, input)
 			cancel()
 			spin.Stop()
 
 			if err == nil {
 				fmt.Println()
-				ui.PrintResponse(reply)
+				ui.PrintResponse(reply, responseTimeMs)
 				replied = true
 				continue
 			}

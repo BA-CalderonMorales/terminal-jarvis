@@ -36,6 +36,15 @@ func (s *Session) AddAssistant(content string) {
 	s.Messages = append(s.Messages, providers.Message{Role: "assistant", Content: content})
 }
 
+// AddAssistantWithTiming appends an assistant message with response time.
+func (s *Session) AddAssistantWithTiming(content string, responseTimeMs int64) {
+	s.Messages = append(s.Messages, providers.Message{
+		Role:         "assistant",
+		Content:      content,
+		ResponseTime: responseTimeMs,
+	})
+}
+
 // AddAssistantToolCall records an assistant tool call message so provider history
 // remains valid before a subsequent tool result turn.
 func (s *Session) AddAssistantToolCall(call providers.ToolCall) {

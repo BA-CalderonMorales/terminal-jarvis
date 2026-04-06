@@ -15,11 +15,12 @@ import (
 
 // Message represents a single turn in the conversation history.
 type Message struct {
-	Role       string // "user", "assistant", "tool"
-	Content    string
-	ToolCallID string     // non-empty when Role == "tool"
-	ToolName   string     // non-empty when Role == "tool"
-	ToolCalls  []ToolCall // non-empty when Role == "assistant" and responding with tool calls
+	Role         string // "user", "assistant", "tool"
+	Content      string
+	ToolCallID   string     // non-empty when Role == "tool"
+	ToolName     string     // non-empty when Role == "tool"
+	ToolCalls    []ToolCall // non-empty when Role == "assistant" and responding with tool calls
+	ResponseTime int64      // milliseconds, only set for assistant messages
 }
 
 // ToolCall is a request from the LLM to invoke a tool.

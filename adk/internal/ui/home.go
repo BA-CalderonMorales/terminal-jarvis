@@ -8,7 +8,7 @@ import (
 
 // Clear clears the terminal screen.
 func Clear() {
-	fmt.Print("\033[2J\033[H")
+	fmt.Print("\x1b[2J\x1b[H")
 }
 
 // PrintHome renders the home screen matching the Rust TUI layout.

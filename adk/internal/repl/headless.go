@@ -70,7 +70,7 @@ func runHeadless(chain []providers.Provider) {
 
 		// Send to LLM
 		ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
-		reply, err := chat.Send(ctx, session, currentProvider, input)
+		reply, _, err := chat.Send(ctx, session, currentProvider, input)
 		cancel()
 
 		if err != nil {
