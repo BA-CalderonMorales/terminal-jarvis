@@ -1,0 +1,5 @@
+# tmp/ folder - for one-off .md files and temporary documentation
+# This folder is never committed to git
+*
+!.gitignore
+
