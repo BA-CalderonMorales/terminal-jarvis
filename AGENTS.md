@@ -1,277 +1,54 @@
-# AGENTS.md - Terminal Jarvis Development Guide
+# AGENTS.md - Terminal Jarvis
 
-> Domain-specific constitution for this repository.
->
-> This file extends [PHILOSOPHY.md](./PHILOSOPHY.md) with project-specific conventions.
->
-> **Single Source of Truth for All AI Coding Assistants**
+## Quick Reference
 
-## CRITICAL RULES - READ FIRST
+- **Main**: `src/main.rs`
+- **ADK**: `adk/` (Go home screen)
+- **Run**: `./jarvis.sh`
+- **Local LLM**: `./scripts/tj-fast.sh` (gemma4:2b) or `./scripts/tj-local.sh` (gemma4:4b)
 
-| Rule | What | Why |
-|------|------|-----|
-| **NO EMOJIS** | Zero emojis in code, commits, docs, output | Use "[INSTALLED]", "►", "•" instead |
-| **CHANGELOG FIRST** | Update CHANGELOG.md BEFORE deployment scripts | Prevents version confusion |
-| **Formula BEFORE Release** | Commit Homebrew Formula BEFORE GitHub release | URL matching for brew install |
-| **Test-Driven Bugs** | Write failing test FIRST, then fix | Prevents regression |
-| **Version Sync** | Update Cargo.toml, package.json, Formula together | Multi-platform consistency |
-| **Verify Changes** | Run verify-change.sh before commits | 2-3x quality improvement |
-| **Git Full Paths** | Use `/usr/bin/git` not `git` | Avoid alias issues |
+## Critical Rules
 
----
+- Zero emojis anywhere (use [INSTALLED], [], [WARNING])
+- CHANGELOG before deployment scripts
+- Homebrew Formula before GitHub release
+- Test-driven bugs: failing test first, then fix
+- Version sync across Cargo.toml, package.json, Formula
+- Run verify-change.sh before commits
+- Use `/usr/bin/git` not `git`
 
-## DEPLOYMENT WORKFLOW
+## Deployment
 
-**Agent-Driven Release (Recommended):**
+- Local: `./scripts/cicd/local-ci.sh` then push to develop
+- CI/CD: Push to develop triggers GitHub Actions
+- Version only: `./scripts/cicd/local-cd.sh --update-version X.X.X`
 
-For manual releases with docs sync, see [release skill](.github/skills/release/):
+## Cross-Repo
 
-```bash
-./scripts/cicd/local-ci.sh              # Verify locally
-./scripts/cicd/local-cd.sh              # Full release with prompts
-./scripts/verify/verify-docs.sh         # Validate docs in sync
-./scripts/sync-docs-site.sh 0.0.X       # Sync my-life-as-a-dev docs
-cargo publish                           # Crates.io
-npm publish                             # NPM (requires 2FA)
-```
+- Related: agent-harness (Go), lumina-bot (Go gateway), claude-termux (JS CLI)
+- Commands: `harness-status`, `sync-philosophy`
 
-**CI/CD Pipeline (GitHub Actions):**
+## Environment Variables
 
-1. **Develop locally** - Make changes, run `./scripts/cicd/local-ci.sh`
-2. **Push to develop** - Triggers GitHub Actions CI
-3. **CI validates** - Build, tests, clippy, formatting
-4. **CD auto-deploys** - Once CI passes, CD handles release automatically
+- `OPENROUTER_API_KEY`: Cloud provider API key
+- `JARVIS_MODEL`: Explicit model string
+- `OLLAMA_HOST`: Local Ollama endpoint (default: http://localhost:11434)
 
-**Version updates only:**
-```bash
-./scripts/cicd/local-cd.sh --update-version X.X.X
-git add -A && git commit -m "chore(release): prepare vX.X.X"
-git push origin develop
-# Then wait for CI/CD pipeline
-```
+## Testing
 
----
+- `cargo test`
+- `./scripts/cicd/local-ci.sh`
 
-## QUICK START
+## Release Checklist
 
-| User Says | Skill | Quick Command |
-|-----------|-------|---------------|
-| "Let's deploy" | [deployment](.github/skills/deployment/) | Push to develop, CI/CD handles it |
-| "Release with docs sync" | [release](.github/skills/release/) | `./scripts/cicd/local-cd.sh` (full agent-driven) |
-| "Cross-repo sync" | [multi-repo](.github/skills/multi-repo/) | Reusable pattern for code + docs repos |
-| "Harden release" | [release-checklist](.github/skills/release-checklist/) | Pre-release verification |
-| "Test in Codespace" | [qa-testing](.github/skills/qa-testing/) | Create minimal QA branch |
-| "Fix this bug" | [testing](.github/skills/testing/) | Write failing test first |
-| "Add new AI tool" | [tool-config](.github/skills/tool-config/) | Create `config/tools/<name>.toml` |
-| "Refactor this file" | [refactoring](.github/skills/refactoring/) | Domain-based extraction |
-| "Update version" | [versioning](.github/skills/versioning/) | `./scripts/cicd/local-cd.sh --update-version X.X.X` |
-| "Verify my change" | [verification](.github/skills/verification/) | `./scripts/verify/verify-change.sh` |
-| "Before I commit" | [code-quality](.github/skills/code-quality/) | Quality gates checklist |
-| "Homebrew release" | [homebrew](.github/skills/homebrew/) | Archive -> Formula -> Commit -> Release |
-| "NPM publish" | [npm](.github/skills/npm/) | `npm whoami` then publish |
-| "Start the home screen" | [home-screen](.github/skills/home-screen/) | `./jarvis.sh` |
-| "Set up the ADK" | [home-screen](.github/skills/home-screen/) | `cp adk/.env.example adk/.env` then `./jarvis.sh` and `/setup` |
+1. Update CHANGELOG.md
+2. Update version in Cargo.toml, package.json, homebrew/Formula
+3. Run verify-change.sh
+4. Push to develop
+5. Monitor CI/CD pipeline
 
 ## Working Rules
 
-- If a prompt would require a major architectural deviation, stop and explain before proceeding.
-- Keep changes and milestones separated into distinct commits.
-- After each change or milestone, commit and push before starting the next one.
-- Do not bundle unrelated work from different prompts into the same commit.
-
----
-
-## SKILLS DIRECTORY
-
-All detailed instructions are organized as modular, reusable skills in [.github/skills/](.github/skills/):
-
-| Skill | Description |
-|-------|-------------|
-| [verification](.github/skills/verification/) | Quality verification feedback loop |
-| [deployment](.github/skills/deployment/) | Deployment workflows and CI/CD |
-| [release](.github/skills/release/) | **Agent-driven release with docs sync** |
-| [multi-repo](.github/skills/multi-repo/) | **Cross-repo docs sync pattern** (reusable) |
-| [release-checklist](.github/skills/release-checklist/) | Pre-release automation and hardening |
-| [qa-testing](.github/skills/qa-testing/) | Minimal QA branch creation and testing |
-| [versioning](.github/skills/versioning/) | Version management across platforms |
-| [testing](.github/skills/testing/) | Test-driven development practices |
-| [refactoring](.github/skills/refactoring/) | Code refactoring patterns |
-| [database](.github/skills/database/) | Database architecture patterns |
-| [tool-config](.github/skills/tool-config/) | AI tool configuration |
-| [homebrew](.github/skills/homebrew/) | Homebrew distribution |
-| [npm](.github/skills/npm/) | NPM distribution |
-| [home-screen](.github/skills/home-screen/) | ADK home screen setup, start, and stop |
-| [code-quality](.github/skills/code-quality/) | Code quality standards |
-| [git-workflow](.github/skills/git-workflow/) | Branching and merge strategy |
-| [token-budget](.github/skills/token-budget/) | Token efficiency for AI sessions |
-
-**Skills are loaded on-demand** - AI agents only load relevant skills into context when needed.
-
----
-
-## PROJECT OVERVIEW
-
-**Terminal Jarvis** = Unified command center for AI coding tools (claude-code, gemini-cli, qwen-code, opencode, llxprt, codex, goose, amp, aider, crush, copilot-cli).
-
-**Core Innovation**: Session Continuation System (prevents auth workflow interruptions).
-
-**Distribution**: NPM, Cargo, Homebrew
-
-**Current Deployed Version**: 0.0.76
-
-> **Version Rule**: Always determine the current version from what is **actually deployed** (crates.io, npmjs.com, Homebrew tap), NOT from local files (Cargo.toml, package.json). Local files may contain a prepared-but-unpublished version bump that was never released.
-
-### Installation
-
-```bash
-npm install -g terminal-jarvis        # NPM
-cargo install terminal-jarvis         # Cargo  
-brew tap ba-calderonmorales/terminal-jarvis && brew install terminal-jarvis  # Homebrew
-```
-
-### Architecture
-
-```
-/src/           - Rust application (domain-based modules)
-/config/        - Global + modular tool configs (config/tools/*.toml)
-/npm/           - TypeScript wrapper for NPM distribution
-/homebrew/      - Formula + release archives
-/scripts/       - CI/CD and utility scripts
-  /cicd/        - Deployment automation (local-ci.sh, local-cd.sh)
-  /verify/      - Verification feedback loop scripts
-/.github/skills/ - AI agent skills (modular instructions)
-```
-
----
-
-## VERIFICATION FEEDBACK LOOP
-
-> "Give Claude a way to verify its work. If Claude has that feedback loop, it will 2-3x the quality of the final result."
-> -- Creator of Claude Code
-
-```bash
-./scripts/verify/verify-change.sh        # Full verification before commits
-./scripts/verify/verify-change.sh --quick # Quick mode (skip tests)
-./scripts/verify/verify-build.sh         # Compilation only
-./scripts/verify/verify-quality.sh       # Clippy + formatting
-./scripts/verify/verify-tests.sh         # Unit + E2E tests
-./scripts/verify/verify-cli.sh           # CLI smoke tests
-```
-
-**See**: [verification skill](.github/skills/verification/) for full details.
-
----
-
-## QUALITY GATES
-
-```bash
-cargo check                      # Must compile
-cargo clippy -- -D warnings      # Must pass
-cargo fmt --all                  # Must be formatted
-cargo test                       # Must pass
-```
-
-**See**: [code-quality skill](.github/skills/code-quality/) for full standards.
-
----
-
-## PREFERRED TOOLING
-
-| Instead of | Use | Why |
-|-----------|-----|-----|
-| `grep` | `rg` (ripgrep) | Faster, respects .gitignore |
-| `pip` | `uv` | 10-100x faster Python packages |
-| `git` | `/usr/bin/git` | Avoid alias issues |
-
----
-
-## SESSION CONTINUATION SYSTEM
-
-**Key Feature**: Prevents users from being kicked out during authentication workflows.
-
-1. User launches AI tool (e.g., `terminal-jarvis run claude`)
-2. Tool requires authentication (redirects to browser)
-3. Traditional approach: User returns, session gone
-4. Terminal Jarvis: Session preserved, resumes automatically
-
-**Implementation**: `src/tools/tools_execution_engine.rs`
-
----
-
-## ENVIRONMENT VARIABLES
-
-| Variable | Purpose | Default |
-|----------|---------|---------|
-| `TERMINAL_JARVIS_CONFIG` | Config file path | `~/.terminal-jarvis/config.toml` |
-| `TERMINAL_JARVIS_LOG_LEVEL` | Logging verbosity | `info` |
-| `TERMINAL_JARVIS_SESSION_DIR` | Session state directory | `~/.terminal-jarvis/sessions/` |
-
----
-
-## CROSS-REPO OPERATIONS
-
-Terminal Jarvis is part of a workspace ecosystem with shared patterns across multiple agent harnesses:
-
-| Repository | Language | Purpose |
-|------------|----------|---------|
-| [terminal-jarvis](https://github.com/BA-CalderonMorales/terminal-jarvis) | Rust | Session-continuation ADK (this repo) |
-| [lumina-bot](https://github.com/BA-CalderonMorales/lumina-bot) | Go | Local AI gateway |
-| [agent-harness](https://github.com/BA-CalderonMorales/agent-harness) | Go | Clean-room agent harness |
-
-**Shared Resources**:
-- `~/PHILOSOPHY.md` - Root schema for all harnesses
-- `~/insights/shared-harness-patterns/` - Coordinated evolution plans
-- `~/Projects/skills/memory-system/` - Knowledge persistence across sessions
-
-**Workspace Commands**:
-```bash
-harness-status        # Status of all harness repos
-sync-philosophy       # Propagate PHILOSOPHY.md changes
-```
-
-## MEMORY SYSTEM
-
-After significant debugging, optimization, or architectural work, capture learnings to the persistent memory system:
-
-**When to Use**:
-- Fixed non-obvious bugs
-- Discovered performance optimizations
-- Created reusable patterns
-- Completed architectural investigations
-
-**How to Use**:
-1. Reference `~/Projects/skills/memory-system/SKILL.md`
-2. Follow the capture template
-3. Target: EverMemOS repository
-
-This ensures knowledge persists across sessions and agents.
-
-## PROACTIVE AGENT USAGE
-
-AI assistants MUST invoke specialized agents immediately without waiting to be asked:
-
-| Scenario | Agent |
-|----------|-------|
-| Documentation | @documentation-specialist |
-| Testing | @qa-automation-engineer |
-| Code review | @code-reviewer |
-| Security | @security-specialist |
-| Infrastructure | @devops-engineer |
-| Architecture | @software-architect |
-
-**See**: [token-budget skill](.github/skills/token-budget/) for orchestration patterns.
-
----
-
-**Navigation**: Skills are in `.github/skills/` | Use Ctrl+F to search | Load skills on-demand
-
----
-
-## SEE ALSO
-
-- [PHILOSOPHY.md](./PHILOSOPHY.md) - Core philosophy and patterns
-- [Shared Harness Patterns](../insights/shared-harness-patterns/) - Cross-repo coordination
-- [Memory System](../Projects/skills/memory-system/SKILL.md) - Knowledge persistence
-
----
-*Last synced: 2026-04-05 via [workspace ecosystem](https://github.com/BA-CalderonMorales)*
+- Stop and explain before major architectural changes
+- One change per commit, commit before starting next
+- Conventional commits: `type(scope): description`
