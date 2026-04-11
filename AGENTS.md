@@ -7,6 +7,20 @@
 - **Run**: `./jarvis.sh`
 - **Local LLM**: `./scripts/tj-fast.sh` (gemma4:2b) or `./scripts/tj-local.sh` (gemma4:4b)
 
+## Core Agent Loop
+
+All harnesses share identical control flow (`adk/internal/chat/llm.go:Send()`):
+
+```
+while not done:
+    1. Call LLM with current message context
+    2. If text-only response → done
+    3. If tool calls → execute, add results, continue
+    4. If max turns exceeded → error
+```
+
+Max turns: 5 (`maxToolLoops`). Sequential tool execution.
+
 ## Critical Rules
 
 - Zero emojis anywhere (use [INSTALLED], [], [WARNING])
