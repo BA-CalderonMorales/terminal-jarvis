@@ -4,19 +4,19 @@ updates:
     directory: "/"
     target-branch: "develop"
     schedule:
-      interval: "weekly"
+      interval: "monthly"
     open-pull-requests-limit: 1
 
   - package-ecosystem: "cargo"
     directory: "/"
     target-branch: "develop"
     schedule:
-      interval: "weekly"
+      interval: "monthly"
     open-pull-requests-limit: 1
 
   - package-ecosystem: "npm"
     directory: "/npm/terminal-jarvis"
     target-branch: "develop"
     schedule:
-      interval: "weekly"
+      interval: "monthly"
     open-pull-requests-limit: 1
