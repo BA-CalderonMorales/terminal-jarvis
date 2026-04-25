@@ -1,32 +1,22 @@
 version: 2
 updates:
-  # Core Rust dependencies — most critical, 1 PR max
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    target-branch: "develop"
+    schedule:
+      interval: "monthly"
+    open-pull-requests-limit: 1
+
   - package-ecosystem: "cargo"
     directory: "/"
     target-branch: "develop"
     schedule:
       interval: "monthly"
     open-pull-requests-limit: 1
-    groups:
-      rust-minor-patch:
-        patterns:
-          - "*"
-        update-types:
-          - "minor"
-          - "patch"
 
-  # GitHub Actions — security updates only (manual bumps for version updates)
-  - package-ecosystem: "github-actions"
-    directory: "/"
-    target-branch: "develop"
-    schedule:
-      interval: "monthly"
-    open-pull-requests-limit: 0
-
-  # NPM — security updates only (manual bumps for version updates)
   - package-ecosystem: "npm"
     directory: "/npm/terminal-jarvis"
     target-branch: "develop"
     schedule:
       interval: "monthly"
-    open-pull-requests-limit: 0
+    open-pull-requests-limit: 1
