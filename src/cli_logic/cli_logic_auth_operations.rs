@@ -155,6 +155,7 @@ async fn pick_tool_name() -> Result<Option<String>> {
     }
 }
 
+#[allow(clippy::collapsible_match)]
 async fn handle_auth_remove_menu() -> Result<()> {
     let theme = theme_global_config::current_theme();
     let options = vec![
