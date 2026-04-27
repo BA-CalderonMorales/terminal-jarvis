@@ -65,7 +65,7 @@
     "cli-testing-library": "3.0.1",
     "string-width": "8.1.0",
     "typescript": "5.9.3",
-    "vitest": "3.2.4",
+    "vitest": "4.1.5",
     "zod": "3.25.56"
   },
   "engines": {
