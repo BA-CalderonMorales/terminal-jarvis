@@ -45,25 +45,23 @@ expected_npm_package = "@vybestack/llxprt-code"
 expected_bin = "llxprt"
 
 [tools.nanocoder]
-expected_npm_package = "@motesoftware/nanocoder"
+expected_npm_package = "@nanocollective/nanocoder"
 expected_bin = "nanocoder"
+
+[tools.openclaw]
+expected_npm_package = "openclaw"
+expected_bin = "openclaw"
 
 [tools.opencode]
 expected_npm_package = "opencode-ai"
 expected_bin = "opencode"
 
 [tools.pi]
-expected_npm_package = "@mariozechner/pi-coding-agent"
+expected_npm_package = "@earendil-works/pi-coding-agent"
 expected_bin = "pi"
 
 [tools.qwen]
 expected_npm_package = "@qwen-code/qwen-code"
 expected_bin = "qwen"
 
-[deprecated_packages."@motesoftware/nanocoder"]
-replacement = "@nanocollective/nanocoder"
-temporary_allow_reason = "Known catalog drift; keep visible until the dedicated cleanup PR updates nanocoder metadata."
 
-[deprecated_packages."@mariozechner/pi-coding-agent"]
-replacement = "@earendil-works/pi-coding-agent"
-temporary_allow_reason = "Known catalog drift; keep visible until the dedicated cleanup PR updates pi metadata."
