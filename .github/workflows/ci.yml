@@ -25,6 +25,7 @@ concurrency:
 env:
   CARGO_TERM_COLOR: always
   RUSTC_WRAPPER: ""
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
 # Minimal permissions by default; specific jobs can elevate
 permissions:
@@ -66,7 +67,7 @@ jobs:
 
     - name: Cache cargo dependencies
       if: ${{ matrix.suite == 'rust' }}
-      uses: actions/cache@v4
+      uses: actions/cache@v5
       with:
         path: |
           ~/.cargo/registry
@@ -105,7 +106,7 @@ jobs:
     # Go code quality + tests
     - name: Setup Go
       if: ${{ matrix.suite == 'go' }}
-      uses: actions/setup-go@v5
+      uses: actions/setup-go@v6
       with:
         go-version: '1.24.x'
         cache-dependency-path: adk/go.sum
@@ -139,7 +140,7 @@ jobs:
 
     - name: Cache cargo dependencies
       if: ${{ matrix.suite == 'npm' }}
-      uses: actions/cache@v4
+      uses: actions/cache@v5
       with:
         path: |
           ~/.cargo/registry
@@ -154,7 +155,7 @@ jobs:
 
     - name: Setup Node.js
       if: ${{ matrix.suite == 'npm' }}
-      uses: actions/setup-node@v5
+      uses: actions/setup-node@v6
       with:
         node-version: ${{ matrix.node }}
 
@@ -217,7 +218,7 @@ jobs:
       uses: dtolnay/rust-toolchain@stable
 
     - name: Cache cargo dependencies and tools
-      uses: actions/cache@v4
+      uses: actions/cache@v5
       with:
         path: |
           ~/.cargo/registry
@@ -286,12 +287,13 @@ jobs:
     # SBOM and vulnerability scan (Anchore)
     - name: Scan workspace with Anchore
       id: anchore
-      uses: anchore/scan-action@v4
+      uses: anchore/scan-action@v7
       with:
         path: .
         fail-build: false
         severity-cutoff: critical
         output-format: sarif
+        cache-db: true
 
     - name: Check scan results
       run: |

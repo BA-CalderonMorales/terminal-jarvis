@@ -2,6 +2,21 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.0.81] - 2026-05-08
+
+### Added
+- **Hermes Agent**: Added catalog entry with canonical NousResearch installer, CLI `hermes`, and update command `hermes update`
+- **OpenClaw**: Added catalog entry as npm package `openclaw` with CLI `openclaw`, update command `openclaw update --yes --no-restart`, and OpenRouter onboarding support
+- **Tool Catalog Validation**: Added offline validation tests and fixtures to catch catalog drift before release
+
+### Fixed
+- **Headless Update-All**: `update all` now only attempts to update installed tools, preventing errors in headless/CI environments
+- **Tool Catalog Drift**: Corrected package metadata for `@just-every/code` (bin `coder`), `@nanocollective/nanocoder`, and `@earendil-works/pi-coding-agent` in root and npm-copied configs
+- **Documentation Counts**: Fixed README tool counts (22 -> 23), cli_logic module count (22 -> 19), and docs link tool count (11 -> 23)
+
+### Security
+- **SECURITY.md Restored**: Comprehensive security documentation covering supply chain practices, credential storage, and reporting procedures
+
 ## [0.0.80] - 2026-03-31
 
 ### Added

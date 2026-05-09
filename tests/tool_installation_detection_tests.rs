@@ -8,6 +8,7 @@
 //   - Tool detection must fall back to shell environment and ~/.local/bin
 
 use terminal_jarvis::installation_arguments::InstallationManager;
+use terminal_jarvis::tools::tools_command_mapping::{get_cli_command, get_update_command};
 
 // ---------------------------------------------------------------------------
 // Install command correctness
@@ -86,6 +87,22 @@ fn test_npm_tool_package_names_are_correct() {
             tool: "codex",
             expected_pkg: "@openai/codex",
         },
+        Case {
+            tool: "code",
+            expected_pkg: "@just-every/code",
+        },
+        Case {
+            tool: "nanocoder",
+            expected_pkg: "@nanocollective/nanocoder",
+        },
+        Case {
+            tool: "pi",
+            expected_pkg: "@earendil-works/pi-coding-agent",
+        },
+        Case {
+            tool: "openclaw",
+            expected_pkg: "openclaw",
+        },
     ];
 
     for case in &cases {
@@ -98,6 +115,40 @@ fn test_npm_tool_package_names_are_correct() {
             );
         }
     }
+}
+
+/// Update commands must use the same package identity as install commands.
+#[test]
+fn test_npm_tool_update_package_names_are_correct() {
+    for tool in ["code", "nanocoder", "pi"] {
+        let install_cmd = InstallationManager::get_install_command(tool)
+            .expect("tool must be in the tool registry");
+        let update_cmd = get_update_command(tool).expect("tool must have an update command");
+
+        let install_pkg = install_cmd
+            .args
+            .last()
+            .expect("install command must include a package");
+        let update_pkg = update_cmd
+            .args
+            .last()
+            .expect("update command must include a package");
+
+        assert_eq!(
+            update_pkg, install_pkg,
+            "Tool '{tool}' update package must match install package"
+        );
+    }
+}
+
+/// @just-every/code exposes the `coder` binary; `code` is commonly VS Code.
+#[test]
+fn test_code_uses_coder_binary() {
+    assert_eq!(
+        get_cli_command("code"),
+        "coder",
+        "@just-every/code must launch the upstream `coder` binary"
+    );
 }
 
 /// NPM tools must not require sudo (NVM users lack system npm in sudo PATH).
@@ -210,4 +261,57 @@ fn test_goose_install_uses_curl_not_pip() {
         !cmd.requires_npm,
         "goose must not require npm - it uses a curl-based installer"
     );
+}
+
+#[test]
+fn test_openclaw_catalog_metadata() {
+    use terminal_jarvis::tools::tools_command_mapping::get_cli_command;
+
+    let install_cmd = InstallationManager::get_install_command("openclaw")
+        .expect("openclaw must be in the tool registry");
+    assert_eq!(install_cmd.command, "npm");
+    assert_eq!(install_cmd.args, ["install", "-g", "openclaw"]);
+    assert!(install_cmd.requires_npm);
+    assert!(
+        !install_cmd.requires_sudo,
+        "openclaw uses npm and must not require sudo"
+    );
+
+    let update_cmd = InstallationManager::get_update_command("openclaw")
+        .expect("openclaw must have an update command");
+    assert_eq!(update_cmd.command, "openclaw");
+    assert_eq!(update_cmd.args, ["update", "--yes", "--no-restart"]);
+
+    assert_eq!(get_cli_command("openclaw"), "openclaw");
+}
+
+#[test]
+fn test_hermes_catalog_metadata() {
+    use terminal_jarvis::tools::tools_command_mapping::get_cli_command;
+
+    let install_cmd = InstallationManager::get_install_command("hermes")
+        .expect("hermes must be in the tool registry");
+    assert_eq!(install_cmd.command, "bash");
+    assert!(
+        install_cmd
+            .args
+            .iter()
+            .any(|arg| arg.contains("--skip-setup")),
+        "hermes install should skip the interactive setup wizard"
+    );
+    assert!(
+        !install_cmd.requires_npm,
+        "hermes installer manages its own runtime dependencies"
+    );
+    assert!(
+        !install_cmd.requires_sudo,
+        "hermes per-user install must not require sudo"
+    );
+
+    let update_cmd = InstallationManager::get_update_command("hermes")
+        .expect("hermes must have an update command");
+    assert_eq!(update_cmd.command, "hermes");
+    assert_eq!(update_cmd.args, ["update"]);
+
+    assert_eq!(get_cli_command("hermes"), "hermes");
 }
