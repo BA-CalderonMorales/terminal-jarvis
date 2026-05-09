@@ -1,0 +1,44 @@
+# =============================================================================
+# OPENCLAW - AI gateway and coding agent
+# =============================================================================
+
+[tool]
+display_name = "OpenClaw"
+config_key = "openclaw"
+description = "Open-source AI coding assistant and multi-channel local gateway"
+homepage = "https://openclaw.ai/"
+documentation = "https://docs.openclaw.ai/"
+cli_command = "openclaw"
+requires_npm = true
+requires_sudo = false
+status = "experimental"
+
+[tool.install]
+command = "npm"
+args = ["install", "-g", "openclaw"]
+verify_command = "openclaw --version"
+post_install_message = "OpenClaw installed successfully! Run 'openclaw onboard' or 'openclaw setup' to configure providers and gateway settings."
+
+[tool.update]
+command = "openclaw"
+args = ["update", "--yes", "--no-restart"]
+verify_command = "openclaw --version"
+
+[tool.auth]
+env_vars = ["OPENROUTER_API_KEY"]
+setup_url = "https://docs.openclaw.ai/"
+browser_auth = true
+auth_instructions = "Run 'openclaw onboard' to configure providers. For headless OpenRouter setup, use 'openclaw onboard --auth-choice openrouter-api-key'. OpenClaw can manage local gateway services, ports, webhooks, and token storage, so review gateway and provider settings before enabling persistent services."
+auth_mode = "any"
+default_env_var = "OPENROUTER_API_KEY"
+cli_auth_command = "openclaw onboard"
+providers = [
+    {name = "OpenRouter", env_var = "OPENROUTER_API_KEY", key_hint = "sk-or-*", setup_url = "https://openrouter.ai/keys"},
+]
+
+[tool.features]
+supports_files = true
+supports_streaming = true
+supports_conversation = true
+max_context_tokens = 200000
+supported_languages = ["all"]

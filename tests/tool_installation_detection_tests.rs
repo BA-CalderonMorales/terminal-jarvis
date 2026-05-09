@@ -86,6 +86,10 @@ fn test_npm_tool_package_names_are_correct() {
             tool: "codex",
             expected_pkg: "@openai/codex",
         },
+        Case {
+            tool: "openclaw",
+            expected_pkg: "openclaw",
+        },
     ];
 
     for case in &cases {
@@ -210,4 +214,57 @@ fn test_goose_install_uses_curl_not_pip() {
         !cmd.requires_npm,
         "goose must not require npm - it uses a curl-based installer"
     );
+}
+
+#[test]
+fn test_openclaw_catalog_metadata() {
+    use terminal_jarvis::tools::tools_command_mapping::get_cli_command;
+
+    let install_cmd = InstallationManager::get_install_command("openclaw")
+        .expect("openclaw must be in the tool registry");
+    assert_eq!(install_cmd.command, "npm");
+    assert_eq!(install_cmd.args, ["install", "-g", "openclaw"]);
+    assert!(install_cmd.requires_npm);
+    assert!(
+        !install_cmd.requires_sudo,
+        "openclaw uses npm and must not require sudo"
+    );
+
+    let update_cmd = InstallationManager::get_update_command("openclaw")
+        .expect("openclaw must have an update command");
+    assert_eq!(update_cmd.command, "openclaw");
+    assert_eq!(update_cmd.args, ["update", "--yes", "--no-restart"]);
+
+    assert_eq!(get_cli_command("openclaw"), "openclaw");
+}
+
+#[test]
+fn test_hermes_catalog_metadata() {
+    use terminal_jarvis::tools::tools_command_mapping::get_cli_command;
+
+    let install_cmd = InstallationManager::get_install_command("hermes")
+        .expect("hermes must be in the tool registry");
+    assert_eq!(install_cmd.command, "bash");
+    assert!(
+        install_cmd
+            .args
+            .iter()
+            .any(|arg| arg.contains("--skip-setup")),
+        "hermes install should skip the interactive setup wizard"
+    );
+    assert!(
+        !install_cmd.requires_npm,
+        "hermes installer manages its own runtime dependencies"
+    );
+    assert!(
+        !install_cmd.requires_sudo,
+        "hermes per-user install must not require sudo"
+    );
+
+    let update_cmd = InstallationManager::get_update_command("hermes")
+        .expect("hermes must have an update command");
+    assert_eq!(update_cmd.command, "hermes");
+    assert_eq!(update_cmd.args, ["update"]);
+
+    assert_eq!(get_cli_command("hermes"), "hermes");
 }
