@@ -161,10 +161,11 @@ fn command_failure_message(
     }
 }
 
-/// Truncate a string to a maximum length, appending ellipsis if needed
+/// Truncate a string to a maximum length, appending ellipsis if needed.
+/// Uses char-boundaries to avoid panicking on multi-byte UTF-8 codepoints.
 fn truncate(s: &str, max: usize) -> String {
-    if s.len() > max {
-        format!("{}...", &s[..max])
+    if s.chars().count() > max {
+        s.chars().take(max).collect::<String>() + "..."
     } else {
         s.to_string()
     }

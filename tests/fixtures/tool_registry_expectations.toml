@@ -5,8 +5,6 @@ expected_bin = "amp"
 [tools.code]
 expected_npm_package = "@just-every/code"
 expected_bin = "coder"
-allowed_bin_mismatch_reason = "Current catalog uses code, but the npm package exposes coder; tracked for drift cleanup."
-known_collision = "code collides with the Visual Studio Code CLI; do not use without an explicit compatibility decision."
 
 [tools.codex]
 expected_npm_package = "@openai/codex"
