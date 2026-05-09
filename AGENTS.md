@@ -34,7 +34,12 @@ Max turns: 5 (`maxToolLoops`). Sequential tool execution.
 ## Deployment
 
 - Local: `./scripts/cicd/local-ci.sh` then push to develop
-- CI/CD: Push to develop triggers GitHub Actions
+- CI: Push to develop triggers GitHub Actions (`.github/workflows/ci.yml`)
+- **CD/Release: Push a `v*` tag triggers `.github/workflows/cd-multiplatform.yml`**
+  - Builds binaries for macOS (x86_64, aarch64) and Linux (x86_64, aarch64)
+  - Publishes to crates.io (requires `CARGO_REGISTRY_TOKEN` secret)
+  - Creates GitHub release with all binary assets
+  - Updates `homebrew-terminal-jarvis` Formula automatically
 - Version only: `./scripts/cicd/local-cd.sh --update-version X.X.X`
 
 ## Cross-Repo
@@ -57,9 +62,16 @@ Max turns: 5 (`maxToolLoops`). Sequential tool execution.
 
 1. Update CHANGELOG.md
 2. Update version in Cargo.toml, package.json, homebrew/Formula
-3. Run verify-change.sh
-4. Push to develop
-5. Monitor CI/CD pipeline
+3. Run verify-change.sh (or rely on CI green status)
+4. Push to develop via PR
+5. Ensure CI on develop is green
+6. **Push version tag** (`git tag vX.X.X && git push origin vX.X.X`)
+   - Triggers `.github/workflows/cd-multiplatform.yml`
+   - CI builds multi-platform binaries, publishes to crates.io,
+     creates GitHub release, and updates `homebrew-terminal-jarvis` Formula
+7. Monitor CD pipeline
+8. Merge `develop` into `main`
+9. Verify `homebrew-terminal-jarvis` repo has the updated Formula
 
 ## Working Rules
 
