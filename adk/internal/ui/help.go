@@ -1,6 +1,9 @@
 package ui
 
-import "fmt"
+import (
+	"fmt"
+	"time"
+)
 
 // PrintHelp prints the slash-command reference.
 func PrintHelp() {
@@ -26,8 +29,8 @@ func PrintHelp() {
 	fmt.Println()
 }
 
-// PrintResponse prints the LLM reply with optional thinking section.
-func PrintResponse(text string) {
+// PrintResponse prints the LLM reply with optional thinking section and response time.
+func PrintResponse(text string, responseTimeMs int64) {
 	thinking, response := separateThinking(text)
 
 	if thinking != "" {
@@ -35,6 +38,10 @@ func PrintResponse(text string) {
 		fmt.Printf("   %s%s%s\n\n", ThinkG, thinking, Reset)
 	}
 	if response != "" {
+		// Display response time in header like agent-harness: "14:32:05 (6.2s)"
+		responseTime := time.Duration(responseTimeMs) * time.Millisecond
+		timestamp := time.Now().Format("15:04:05")
+		fmt.Printf("   %s%s%s %s(%.1fs)%s\n", Dim, timestamp, Reset, Dim, responseTime.Seconds(), Reset)
 		fmt.Printf("   %s%s%s\n\n", LightB, response, Reset)
 	}
 }

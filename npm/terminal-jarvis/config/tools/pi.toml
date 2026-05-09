@@ -6,8 +6,8 @@
 display_name = "Pi"
 config_key = "pi"
 description = "Terminal-based coding agent"
-homepage = "https://github.com/mariozechner/pi-coding-agent"
-documentation = "https://github.com/mariozechner/pi-coding-agent"
+homepage = "https://github.com/earendil-works/pi-mono"
+documentation = "https://github.com/earendil-works/pi-mono"
 cli_command = "pi"
 requires_npm = true
 requires_sudo = false
@@ -15,13 +15,13 @@ status = "experimental"
 
 [tool.install]
 command = "npm"
-args = ["install", "-g", "@mariozechner/pi-coding-agent"]
+args = ["install", "-g", "@earendil-works/pi-coding-agent"]
 verify_command = "pi --version"
 post_install_message = "Pi installed!"
 
 [tool.update]
 command = "npm"
-args = ["update", "-g", "@mariozechner/pi-coding-agent"]
+args = ["update", "-g", "@earendil-works/pi-coding-agent"]
 verify_command = "pi --version"
 
 [tool.auth]

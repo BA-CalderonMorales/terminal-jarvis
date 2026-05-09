@@ -8,7 +8,7 @@ config_key = "code"
 description = "Fork of Codex AI - multi-provider coding agent"
 homepage = "https://github.com/just-every/code"
 documentation = "https://github.com/just-every/code"
-cli_command = "code"
+cli_command = "coder"
 requires_npm = true
 requires_sudo = false
 status = "experimental"
@@ -16,13 +16,13 @@ status = "experimental"
 [tool.install]
 command = "npm"
 args = ["install", "-g", "@just-every/code"]
-verify_command = "code --version"
-post_install_message = "Code installed! If 'code' conflicts with VS Code, check alias."
+verify_command = "coder --version"
+post_install_message = "Code installed! Run it with 'coder'."
 
 [tool.update]
 command = "npm"
 args = ["update", "-g", "@just-every/code"]
-verify_command = "code --version"
+verify_command = "coder --version"
 
 [tool.auth]
 env_vars = ["OPENAI_API_KEY"]

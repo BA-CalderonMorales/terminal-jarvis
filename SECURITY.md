@@ -112,25 +112,29 @@ Download from: [GitHub Releases](https://github.com/BA-CalderonMorales/terminal-
 
 API keys and credentials are stored with encryption:
 
-| Feature                  | Status      | Version |
-|--------------------------|-------------|---------|
-| Platform Keychain        | Planned     | 0.0.79  |
-| AES-256-GCM Fallback     | Planned     | 0.0.79  |
-| Argon2 Key Derivation    | Planned     | 0.0.79  |
-| Plaintext Migration      | Supported   | Current |
+| Feature                  | Status       | Version |
+|--------------------------|--------------|---------|
+| Platform Keychain        | Implemented  | 0.0.80+ |
+| AES-256-GCM Fallback     | Implemented  | 0.0.80+ |
+| Argon2 Key Derivation    | Implemented  | 0.0.80+ |
+| Plaintext Migration      | Supported    | Current |
 
 ### Current Behavior
 
 - Credentials stored at: `~/.config/terminal-jarvis/credentials.toml`
-- Encryption: **None** (plaintext TOML)
-- Migration: Automatic encryption on first write after upgrade
+- Default: **Plaintext** on first use (backward compatible)
+- Encryption: Run `jarvis security encrypt` to migrate to encrypted storage
+- Migration: Automatic encryption on first write after upgrade if configured
 
-### Planned Improvements
+### Encryption Usage
 
-See Issue #59 for credential encryption implementation:
-- Master password protection
-- Platform-native keychain integration
-- Transparent migration from plaintext
+```bash
+# Check security status
+jarvis security status
+
+# Encrypt existing credentials
+jarvis security encrypt
+```
 
 ---
 
@@ -173,7 +177,7 @@ See `src/security/browser_attack_tests.rs` for:
 
 ## Related Documentation
 
-- [CONTRIBUTING.md](./CONTRIBUTING.md) - Development practices
+- [AGENTS.md](./AGENTS.md) - Development practices for AI-assisted contributions
 - [README.md](./README.md) - General project information
 - Issue #62 - Supply chain hardening
 - Issue #59 - Credential encryption

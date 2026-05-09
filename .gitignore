@@ -202,3 +202,5 @@ npm/terminal-jarvis/downloads/
 adk/__pycache__/*
 adk/jarvis
 adk/jarvis.exe
+# Temporary files folder - never commit
+tmp/

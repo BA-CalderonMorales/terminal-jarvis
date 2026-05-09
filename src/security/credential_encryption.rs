@@ -253,9 +253,24 @@ impl CredentialEncryption {
             .encrypt(nonce, plaintext.as_ref())
             .map_err(|e| anyhow!("Encryption failed: {:?}", e))?;
 
+        // Preserve existing salt so future decryption can re-derive the same key.
+        // If no store exists yet, generate a fresh random salt.
+        let salt = if let Ok(encoded) = fs::read(&path) {
+            if let Ok(existing) = serde_json::from_slice::<EncryptedCredentialStore>(&encoded) {
+                existing.salt
+            } else {
+                let mut salt = [0u8; 32];
+                rand::thread_rng().fill_bytes(&mut salt);
+                salt.to_vec()
+            }
+        } else {
+            let mut salt = [0u8; 32];
+            rand::thread_rng().fill_bytes(&mut salt);
+            salt.to_vec()
+        };
+
         let store = EncryptedCredentialStore::new(
-            // Use existing salt or generate new
-            vec![0u8; 32],
+            salt,
             nonce_bytes.to_vec(),
             ciphertext,
             tools.keys().cloned().collect(),
