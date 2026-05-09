@@ -1,0 +1,69 @@
+[tools.amp]
+expected_npm_package = "@sourcegraph/amp"
+expected_bin = "amp"
+
+[tools.code]
+expected_npm_package = "@just-every/code"
+expected_bin = "coder"
+allowed_bin_mismatch_reason = "Current catalog uses code, but the npm package exposes coder; tracked for drift cleanup."
+known_collision = "code collides with the Visual Studio Code CLI; do not use without an explicit compatibility decision."
+
+[tools.codex]
+expected_npm_package = "@openai/codex"
+expected_bin = "codex"
+
+[tools.copilot]
+expected_npm_package = "@github/copilot"
+expected_bin = "copilot"
+
+[tools.crush]
+expected_npm_package = "@charmland/crush"
+expected_bin = "crush"
+
+[tools.forge]
+expected_npm_package = "forgecode"
+expected_bin = "forge"
+
+[tools.gemini]
+expected_npm_package = "@google/gemini-cli"
+expected_bin = "gemini"
+
+[tools.jules]
+expected_npm_package = "@google/jules"
+expected_bin = "jules"
+
+[tools.kilocode]
+expected_npm_package = "@kilocode/cli"
+expected_bin = "kilocode"
+
+[tools.letta]
+expected_npm_package = "@letta-ai/letta-code"
+expected_bin = "letta"
+
+[tools.llxprt]
+expected_npm_package = "@vybestack/llxprt-code"
+expected_bin = "llxprt"
+
+[tools.nanocoder]
+expected_npm_package = "@motesoftware/nanocoder"
+expected_bin = "nanocoder"
+
+[tools.opencode]
+expected_npm_package = "opencode-ai"
+expected_bin = "opencode"
+
+[tools.pi]
+expected_npm_package = "@mariozechner/pi-coding-agent"
+expected_bin = "pi"
+
+[tools.qwen]
+expected_npm_package = "@qwen-code/qwen-code"
+expected_bin = "qwen"
+
+[deprecated_packages."@motesoftware/nanocoder"]
+replacement = "@nanocollective/nanocoder"
+temporary_allow_reason = "Known catalog drift; keep visible until the dedicated cleanup PR updates nanocoder metadata."
+
+[deprecated_packages."@mariozechner/pi-coding-agent"]
+replacement = "@earendil-works/pi-coding-agent"
+temporary_allow_reason = "Known catalog drift; keep visible until the dedicated cleanup PR updates pi metadata."
