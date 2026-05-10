@@ -42,9 +42,7 @@ function error(msg) {
 /**
  * Detect platform and return download information
  */
-function getPlatformInfo() {
-    const platform = os.platform();
-    const arch = os.arch();
+function getPlatformInfo(platform = os.platform(), arch = os.arch()) {
 
     // Map to GitHub release file names
     if (platform === 'darwin' && (arch === 'x64' || arch === 'arm64')) {
@@ -55,9 +53,9 @@ function getPlatformInfo() {
         };
     }
 
-    if (platform === 'linux' && (arch === 'x64' || arch === 'arm64')) {
+    if ((platform === 'linux' || platform === 'android') && (arch === 'x64' || arch === 'arm64')) {
         return {
-            name: 'Linux',
+            name: platform === 'android' ? 'Android/Termux' : 'Linux',
             file: 'terminal-jarvis-linux.tar.gz',
             isWindows: false
         };
@@ -193,7 +191,10 @@ function checkPrerequisites() {
         const platform = os.platform();
 
         if (missing.includes('tar')) {
-            if (platform === 'linux') {
+            if (platform === 'android') {
+                warn('Install tar using Termux packages:');
+                console.log('  pkg update && pkg install -y tar');
+            } else if (platform === 'linux') {
                 warn('Install tar using your package manager:');
                 console.log('  Debian/Ubuntu: sudo apt-get update && sudo apt-get install -y tar');
                 console.log('  Fedora/RHEL:   sudo dnf install -y tar');
@@ -215,7 +216,7 @@ function checkPrerequisites() {
 /**
  * Main installation workflow - optimized for speed
  */
-(async () => {
+async function main() {
     const startTime = Date.now();
 
     // Skip binary download in CI environments - binary hasn't been released yet
@@ -326,4 +327,15 @@ function checkPrerequisites() {
         // Don't fail npm install completely
         process.exit(0);
     }
-})();
+}
+
+if (require.main === module) {
+    main();
+}
+
+module.exports = {
+    getPlatformInfo,
+    getAssetUrl,
+    checkPrerequisites,
+    main
+};
