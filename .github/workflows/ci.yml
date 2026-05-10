@@ -255,6 +255,7 @@ jobs:
   security-general:
     name: Security - General
     permissions:
+      actions: read
       contents: read
       security-events: write
     runs-on: ubuntu-latest
@@ -295,9 +296,22 @@ jobs:
         output-format: sarif
         cache-db: true
 
-    - name: Check scan results
+    - name: Validate Anchore SARIF output
       run: |
-        if [ -f results.sarif ]; then
-          echo "Scan complete. Review SARIF output for details."
-          # SARIF upload disabled due to parsing issues - review artifacts manually
+        set -euo pipefail
+        sarif_file="${{ steps.anchore.outputs.sarif }}"
+        if [ -z "$sarif_file" ]; then
+          echo "Anchore did not report a SARIF output path."
+          exit 1
         fi
+        if [ ! -s "$sarif_file" ]; then
+          echo "Anchore SARIF output is missing or empty: $sarif_file"
+          exit 1
+        fi
+        echo "Anchore SARIF output is ready for upload: $sarif_file"
+
+    - name: Upload Anchore SARIF report
+      uses: github/codeql-action/upload-sarif@v4
+      with:
+        sarif_file: ${{ steps.anchore.outputs.sarif }}
+        category: security-general
