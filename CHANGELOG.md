@@ -12,7 +12,7 @@ All notable changes to this project will be documented in this file.
 ### Fixed
 - **Headless Update-All**: `update all` now only attempts to update installed tools, preventing errors in headless/CI environments
 - **Tool Catalog Drift**: Corrected package metadata for `@just-every/code` (bin `coder`), `@nanocollective/nanocoder`, and `@earendil-works/pi-coding-agent` in root and npm-copied configs
-- **Documentation Counts**: Fixed README tool counts (22 -> 23), cli_logic module count (22 -> 19), and docs link tool count (11 -> 23)
+- **Documentation Counts**: Fixed README tool counts to 25 supported tools, cli_logic module count (22 -> 19), and docs link tool count to 25
 
 ### Security
 - **SECURITY.md Restored**: Comprehensive security documentation covering supply chain practices, credential storage, and reporting procedures

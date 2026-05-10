@@ -1,4 +1,4 @@
-#!/data/data/com.termux/files/usr/bin/env bash
+#!/usr/bin/env bash
 #
 # tj-fast: Run Terminal Jarvis with local Ollama LLM (Gemma 2B for speed)
 #

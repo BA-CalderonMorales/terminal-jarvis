@@ -4,7 +4,7 @@
 
 **Unified command center for AI coding tools**
 
-Manage Claude, Gemini, Qwen, and 19 more AI assistants from one terminal interface.
+Manage Claude, Gemini, Qwen, and 22 more AI assistants from one terminal interface.
 
 [![NPM Version](https://img.shields.io/npm/v/terminal-jarvis.svg?logo=npm&style=flat-square)](https://www.npmjs.com/package/terminal-jarvis)
 [![Crates.io](https://img.shields.io/crates/v/terminal-jarvis.svg?logo=rust&style=flat-square)](https://crates.io/crates/terminal-jarvis)
@@ -54,7 +54,7 @@ brew tap ba-calderonmorales/terminal-jarvis && brew install terminal-jarvis  # H
 | Feature | Description |
 |:--------|:------------|
 | **Interactive Interface** | Beautiful terminal UI with ASCII art, themed menus, and keyboard navigation for a polished command-line experience. |
-| **22 AI Tools Supported** | Claude, Gemini, Qwen, OpenCode, Codex, Aider, Goose, Amp, Crush, LLXPRT, and many more - all manageable from a single interface. |
+| **25 AI Tools Supported** | Claude, Gemini, Qwen, OpenCode, Codex, Aider, Goose, Amp, Crush, LLXPRT, and many more - all manageable from a single interface. |
 | **Integrated Installation** | Install, update, or uninstall any supported AI tool directly from the menu without leaving the terminal. |
 | **Session Continuity** | Preserves your terminal session state during browser-based authentication flows. Currently in development with expanding coverage. |
 
@@ -69,7 +69,7 @@ Full guides at **[Terminal Jarvis Docs](https://ba-calderonmorales.github.io/my-
 | Guide | Description |
 |:------|:------------|
 | [Installation](https://ba-calderonmorales.github.io/my-life-as-a-dev/latest/projects/active/terminal-jarvis/quick_start/installation/) | Step-by-step platform setup for NPM, Cargo, and Homebrew with troubleshooting tips for common issues. |
-| [AI Tools](https://ba-calderonmorales.github.io/my-life-as-a-dev/latest/projects/active/terminal-jarvis/quick_start/ai-tools/) | Detailed overview of all 11 supported AI coding assistants including authentication requirements and capabilities. |
+| [AI Tools](https://ba-calderonmorales.github.io/my-life-as-a-dev/latest/projects/active/terminal-jarvis/quick_start/ai-tools/) | Detailed overview of all 25 supported AI coding assistants including authentication requirements and capabilities. |
 | [Configuration](https://ba-calderonmorales.github.io/my-life-as-a-dev/latest/projects/active/terminal-jarvis/quick_start/configuration/) | Customize themes, keybindings, default tools, and environment variables to match your workflow. |
 | [Architecture](https://ba-calderonmorales.github.io/my-life-as-a-dev/latest/projects/active/terminal-jarvis/details/architecture/) | Technical deep-dive into the Rust codebase, module organization, and design decisions. |
 
@@ -83,7 +83,7 @@ terminal-jarvis/
 ├── src/                           # Rust application
 │   ├── main.rs                    # Entry point
 │   ├── cli.rs                     # CLI definitions
-│   ├── cli_logic/                 # Business logic (22 modules)
+│   ├── cli_logic/                 # Business logic (19 modules)
 │   ├── auth_manager/              # Authentication (8 modules)
 │   ├── config/                    # Configuration (6 modules)
 │   ├── services/                  # External integrations (6 modules)
