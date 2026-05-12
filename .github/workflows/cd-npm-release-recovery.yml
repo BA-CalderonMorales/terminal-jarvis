@@ -1,0 +1,135 @@
+name: NPM Release Recovery
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to publish to NPM (e.g., 0.0.81 or v0.0.81)'
+        required: true
+        type: string
+      dist_tag:
+        description: 'NPM dist-tag to publish'
+        required: true
+        default: latest
+        type: choice
+        options:
+          - latest
+          - stable
+          - beta
+      dry_run:
+        description: 'Build and pack without publishing'
+        required: true
+        default: true
+        type: boolean
+
+permissions:
+  contents: read
+
+jobs:
+  publish-npm-from-release:
+    name: Publish NPM Package From GitHub Release
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Normalize version
+        id: version
+        shell: bash
+        run: |
+          INPUT_VERSION="${{ github.event.inputs.version }}"
+          VERSION="${INPUT_VERSION#v}"
+          TAG="v${VERSION}"
+
+          if [[ ! "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "[ERROR] Version must be X.X.X or vX.X.X"
+            exit 1
+          fi
+
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
+          echo "[OK] Publishing terminal-jarvis@$VERSION from $TAG"
+
+      - name: Checkout release tag
+        uses: actions/checkout@v5
+        with:
+          ref: ${{ steps.version.outputs.tag }}
+
+      - name: Verify package version
+        shell: bash
+        run: |
+          PACKAGE_VERSION=$(node -p "require('./npm/terminal-jarvis/package.json').version")
+          if [ "$PACKAGE_VERSION" != "${{ steps.version.outputs.version }}" ]; then
+            echo "[ERROR] npm package version is $PACKAGE_VERSION, expected ${{ steps.version.outputs.version }}"
+            exit 1
+          fi
+          echo "[OK] npm package version matches $PACKAGE_VERSION"
+
+      - name: Verify release asset exists
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          gh release view "${{ steps.version.outputs.tag }}" --json assets \
+            --jq '.assets[].name' | grep -Fx 'terminal-jarvis-linux.tar.gz'
+
+      - name: Download release binary
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          mkdir -p release-assets target/release
+          gh release download "${{ steps.version.outputs.tag }}" \
+            --pattern 'terminal-jarvis-linux.tar.gz' \
+            --dir release-assets
+          tar -xzf release-assets/terminal-jarvis-linux.tar.gz -C target/release
+          chmod +x target/release/terminal-jarvis
+          target/release/terminal-jarvis --version
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: '18'
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Check NPM publication status
+        shell: bash
+        run: |
+          if npm view "terminal-jarvis@${{ steps.version.outputs.version }}" version >/tmp/npm-version.txt 2>/tmp/npm-error.txt; then
+            echo "[ERROR] terminal-jarvis@${{ steps.version.outputs.version }} is already published:"
+            cat /tmp/npm-version.txt
+            exit 1
+          fi
+
+          if grep -q 'E404' /tmp/npm-error.txt; then
+            echo "[OK] terminal-jarvis@${{ steps.version.outputs.version }} is not published yet"
+            exit 0
+          fi
+
+          echo "[ERROR] Unable to verify NPM publication status"
+          cat /tmp/npm-error.txt
+          exit 1
+
+      - name: Build and pack NPM package
+        shell: bash
+        run: |
+          cd npm/terminal-jarvis
+          npm ci
+          npm run build
+          npm pack --dry-run
+
+      - name: Publish NPM package
+        if: ${{ github.event.inputs.dry_run == 'false' }}
+        shell: bash
+        run: |
+          cd npm/terminal-jarvis
+          npm publish --tag "${{ github.event.inputs.dist_tag }}"
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Verify published package
+        if: ${{ github.event.inputs.dry_run == 'false' }}
+        shell: bash
+        run: |
+          npm view "terminal-jarvis@${{ steps.version.outputs.version }}" version
+          npm dist-tag ls terminal-jarvis
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
