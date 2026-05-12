@@ -91,16 +91,19 @@ jobs:
           registry-url: 'https://registry.npmjs.org'
 
       - name: Check NPM publication status
+        id: npm_status
         shell: bash
         run: |
           if npm view "terminal-jarvis@${{ steps.version.outputs.version }}" version >/tmp/npm-version.txt 2>/tmp/npm-error.txt; then
-            echo "[ERROR] terminal-jarvis@${{ steps.version.outputs.version }} is already published:"
+            echo "[OK] terminal-jarvis@${{ steps.version.outputs.version }} is already published:"
             cat /tmp/npm-version.txt
-            exit 1
+            echo "already_published=true" >> "$GITHUB_OUTPUT"
+            exit 0
           fi
 
           if grep -q 'E404' /tmp/npm-error.txt; then
             echo "[OK] terminal-jarvis@${{ steps.version.outputs.version }} is not published yet"
+            echo "already_published=false" >> "$GITHUB_OUTPUT"
             exit 0
           fi
 
@@ -117,7 +120,7 @@ jobs:
           npm pack --dry-run
 
       - name: Publish NPM package
-        if: ${{ github.event.inputs.dry_run == 'false' }}
+        if: ${{ github.event.inputs.dry_run == 'false' && steps.npm_status.outputs.already_published != 'true' }}
         shell: bash
         run: |
           cd npm/terminal-jarvis
@@ -125,11 +128,47 @@ jobs:
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
+      - name: Skip publish for existing NPM package
+        if: ${{ github.event.inputs.dry_run == 'false' && steps.npm_status.outputs.already_published == 'true' }}
+        shell: bash
+        run: |
+          echo "[OK] terminal-jarvis@${{ steps.version.outputs.version }} is already published"
+          echo "[OK] Skipping npm publish and verifying the existing package instead"
+
       - name: Verify published package
         if: ${{ github.event.inputs.dry_run == 'false' }}
         shell: bash
         run: |
-          npm view "terminal-jarvis@${{ steps.version.outputs.version }}" version
-          npm dist-tag ls terminal-jarvis
+          VERSION="${{ steps.version.outputs.version }}"
+          DIST_TAG="${{ github.event.inputs.dist_tag }}"
+
+          echo "Verifying terminal-jarvis@$VERSION on NPM..."
+          for attempt in 1 2 3 4 5 6; do
+            if PUBLISHED_VERSION=$(npm view "terminal-jarvis@$VERSION" version 2>/tmp/npm-verify-error.txt); then
+              if [ "$PUBLISHED_VERSION" != "$VERSION" ]; then
+                echo "[ERROR] npm returned version $PUBLISHED_VERSION, expected $VERSION"
+                exit 1
+              fi
+              echo "[OK] terminal-jarvis@$VERSION is published"
+              break
+            fi
+
+            if [ "$attempt" = "6" ]; then
+              echo "[ERROR] terminal-jarvis@$VERSION was not visible on NPM after retries"
+              cat /tmp/npm-verify-error.txt
+              exit 1
+            fi
+
+            echo "[WAIT] terminal-jarvis@$VERSION is not visible yet; retrying in 10s"
+            sleep 10
+          done
+
+          echo "Verifying dist-tags..."
+          npm dist-tag ls terminal-jarvis | tee /tmp/npm-dist-tags.txt
+          if ! grep -Fx "$DIST_TAG: $VERSION" /tmp/npm-dist-tags.txt; then
+            echo "[ERROR] Expected dist-tag '$DIST_TAG' to point to $VERSION"
+            exit 1
+          fi
+          echo "[OK] dist-tag '$DIST_TAG' points to $VERSION"
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
