@@ -37,6 +37,11 @@ pub static COMMANDS: &[CommandDef] = &[
         aliases: &[],
     },
     CommandDef {
+        command: "/config",
+        description: "Configuration Path",
+        aliases: &[],
+    },
+    CommandDef {
         command: "/db",
         description: "Database Management",
         aliases: &[],
@@ -310,6 +315,7 @@ mod tests {
         assert_eq!(ac.resolve_command("/quit"), Some("/exit"));
         assert_eq!(ac.resolve_command("/tools"), Some("/tools"));
         assert_eq!(ac.resolve_command("/help"), Some("/help"));
+        assert_eq!(ac.resolve_command("/config"), Some("/config"));
     }
 
     #[test]
@@ -338,6 +344,7 @@ mod tests {
         let ac = CommandAutocomplete::new();
 
         assert!(ac.is_valid_command("/tools"));
+        assert!(ac.is_valid_command("/config"));
         assert!(ac.is_valid_command("/quit")); // Only remaining alias
         assert!(!ac.is_valid_command("/t")); // No longer an alias
         assert!(!ac.is_valid_command("/invalid"));
@@ -350,6 +357,14 @@ mod tests {
         // "/" should match all commands
         let suggestions = ac.suggest("/");
         assert!(suggestions.len() > 5);
+    }
+
+    #[test]
+    fn test_config_command_suggestions() {
+        let mut ac = CommandAutocomplete::new();
+
+        let suggestions = ac.suggest("/co");
+        assert!(suggestions.iter().any(|s| s.command == "/config"));
     }
 
     #[test]

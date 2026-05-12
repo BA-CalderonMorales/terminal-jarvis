@@ -358,6 +358,7 @@ pub async fn handle_manage_tools_menu() -> Result<()> {
             "List All Tools".to_string(),
             "Tool Information".to_string(),
             "Authentication".to_string(),
+            "Configuration Path".to_string(),
             "Switch Theme".to_string(),
             "Back to Main Menu".to_string(),
         ];
@@ -387,6 +388,9 @@ pub async fn handle_manage_tools_menu() -> Result<()> {
             }
             s if s.contains("Authentication") => {
                 crate::cli_logic::handle_authentication_menu().await?;
+            }
+            s if s.contains("Configuration Path") => {
+                handle_config_path_menu().await?;
             }
             s if s.contains("Switch Theme") => {
                 handle_theme_switch_menu().await?;

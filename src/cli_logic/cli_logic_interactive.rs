@@ -138,6 +138,10 @@ async fn execute_command(
             handle_manage_tools_menu().await?;
             refresh_screen(theme, npm_available).await?;
         }
+        s if s == "/config" || s.starts_with("/config ") => {
+            let args = s.strip_prefix("/config").unwrap_or("").trim();
+            crate::cli_logic::handle_config_command(args)?;
+        }
         "/db" => {
             print!("\x1b[2J\x1b[H");
             crate::cli_logic::handle_db_menu().await?;
@@ -223,6 +227,7 @@ fn display_available_commands(theme: &crate::theme::Theme) {
             println!("  /auth       Authentication");
             println!("  /links      Important Links");
             println!("  /settings   Settings");
+            println!("  /config     Configuration Path");
             println!("  /db         Database Management");
             println!("  /theme      Change UI Theme");
             println!("  /dashboard  Tool Health Status");
@@ -253,6 +258,11 @@ fn display_available_commands(theme: &crate::theme::Theme) {
                 "  {} {}",
                 theme.accent("/settings"),
                 theme.secondary("Install/update/configure")
+            );
+            println!(
+                "  {} {}",
+                theme.accent("/config"),
+                theme.secondary("Manage configuration path")
             );
             println!(
                 "  {} {}",
@@ -289,6 +299,7 @@ fn display_available_commands(theme: &crate::theme::Theme) {
             println!("  {} - Authentication", theme.secondary("/auth"));
             println!("  {} - Important Links", theme.secondary("/links"));
             println!("  {} - Settings", theme.secondary("/settings"));
+            println!("  {} - Configuration Path", theme.secondary("/config"));
             println!("  {} - Database Management", theme.secondary("/db"));
             println!("  {} - Change UI Theme", theme.secondary("/theme"));
             println!("  {} - Tool Health Status", theme.secondary("/dashboard"));
