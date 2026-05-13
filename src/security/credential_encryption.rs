@@ -552,7 +552,9 @@ mod tests {
             keychain_preferred: false,
             ..EncryptionConfig::default()
         };
-        let mut encryption = CredentialEncryption::with_master_key(config, vec![7; 32]);
+        let mut key = vec![0u8; 32];
+        rand::RngCore::fill_bytes(&mut rand::thread_rng(), &mut key);
+        let mut encryption = CredentialEncryption::with_master_key(config, key);
         let encrypted_path = encryption.encrypted_creds_path().unwrap();
         std::fs::write(&encrypted_path, b"not-json").unwrap();
 
