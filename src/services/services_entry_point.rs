@@ -138,7 +138,12 @@ mod tests {
 
     #[tokio::test]
     async fn test_config_key_resolution() -> Result<()> {
-        let service = PackageService::new()?;
+        let service = PackageService {
+            config: Config::default(),
+            tool_config_manager: ToolConfigurationManager::new(),
+            package_ops_manager: PackageOperationsManager::new(),
+            npm_ops_manager: NpmOperationsManager::new(),
+        };
 
         // Test that display names are correctly mapped to config keys
         assert_eq!(service.get_config_key_for_tool("qwen"), "qwen-code");

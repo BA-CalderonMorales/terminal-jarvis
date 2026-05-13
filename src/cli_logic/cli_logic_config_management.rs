@@ -241,9 +241,6 @@ fn display_cache_info(cache: &crate::config::VersionCache) {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use std::sync::Mutex;
-
-    static ENV_LOCK: Mutex<()> = Mutex::new(());
 
     fn write_valid_config(path: &Path) {
         let config = Config::default();
@@ -273,7 +270,9 @@ mod tests {
 
     #[test]
     fn test_config_command_persists_valid_path_and_rejects_invalid_path() {
-        let _guard = ENV_LOCK.lock().unwrap();
+        let _guard = crate::cli_logic::cli_logic_first_run::TEST_ENV_LOCK
+            .lock()
+            .unwrap();
         let temp_home = tempfile::tempdir().unwrap();
         let old_home = std::env::var_os("HOME");
         std::env::set_var("HOME", temp_home.path());
