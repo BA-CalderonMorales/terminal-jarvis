@@ -193,7 +193,7 @@ impl ToolDisplayFormatter {
 
     /// Format a tool name with requirement hint for menu display
     ///
-    /// Returns a formatted string like "claude [npm]" or "aider [uv]"
+    /// Returns a formatted string like "claude \[npm\]" or "aider \[uv\]"
     /// with visual indicators if the required package manager is missing.
     pub fn format_menu_item(tool_name: &str, tool_info: &ToolInfo) -> String {
         let label = tool_info.package_manager.label();
