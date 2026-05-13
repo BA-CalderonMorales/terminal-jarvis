@@ -13,5 +13,6 @@ mod config_version_cache;
 // Re-export main interfaces
 #[allow(unused_imports)]
 pub use config_entry_point::{ApiConfig, Config, TemplateConfig, ToolConfig};
+pub use config_file_operations::{active_config_path, default_config_path};
 pub use config_manager::ConfigManager;
 pub use config_version_cache::VersionCache;
