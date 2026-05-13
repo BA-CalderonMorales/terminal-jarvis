@@ -4,7 +4,7 @@
 
 **Unified command center for AI coding tools**
 
-Manage Claude, Gemini, Qwen, and 20 more AI assistants from one terminal interface.
+Manage Claude, Gemini, Qwen, and 22 more AI assistants from one terminal interface.
 
 [![NPM Version](https://img.shields.io/npm/v/terminal-jarvis.svg?logo=npm&style=flat-square)](https://www.npmjs.com/package/terminal-jarvis)
 [![Crates.io](https://img.shields.io/crates/v/terminal-jarvis.svg?logo=rust&style=flat-square)](https://crates.io/crates/terminal-jarvis)
