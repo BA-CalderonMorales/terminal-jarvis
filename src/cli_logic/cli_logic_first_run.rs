@@ -9,6 +9,9 @@ use std::fs;
 use std::io::{self, Write};
 use std::path::{Path, PathBuf};
 
+#[cfg(test)]
+pub(crate) static TEST_ENV_LOCK: std::sync::Mutex<()> = std::sync::Mutex::new(());
+
 /// Get the Terminal Jarvis config directory path
 pub fn get_config_dir() -> Option<PathBuf> {
     dirs::home_dir().map(|h| h.join(".terminal-jarvis"))
@@ -322,9 +325,6 @@ pub async fn get_last_used_tool_async() -> Option<String> {
 mod tests {
     use super::*;
     use crate::config::Config;
-    use std::sync::Mutex;
-
-    static ENV_LOCK: Mutex<()> = Mutex::new(());
 
     #[test]
     fn test_detect_tools_returns_valid_result() {
@@ -350,7 +350,7 @@ mod tests {
 
     #[test]
     fn test_custom_config_path_preferences_persist_and_reset() {
-        let _guard = ENV_LOCK.lock().unwrap();
+        let _guard = TEST_ENV_LOCK.lock().unwrap();
         let temp_home = tempfile::tempdir().unwrap();
         let old_home = std::env::var_os("HOME");
         std::env::set_var("HOME", temp_home.path());

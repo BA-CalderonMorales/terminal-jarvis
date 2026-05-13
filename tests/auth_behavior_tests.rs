@@ -31,6 +31,10 @@ impl AuthTestEnvironment {
             "XDG_CONFIG_HOME",
             "HOME",
             "DISPLAY",
+            "CI",
+            "TERM",
+            "CODESPACES",
+            "GITPOD_WORKSPACE_ID",
             "BROWSER",
         ];
 
@@ -330,6 +334,11 @@ mod tests {
     fn test_browser_detection_mechanism() {
         let _guard = ENV_TEST_MUTEX.lock().unwrap();
         // Test our ability to detect browser-opening scenarios
+        env::remove_var("DISPLAY");
+        env::remove_var("CODESPACES");
+        env::remove_var("GITPOD_WORKSPACE_ID");
+        env::set_var("CI", "true");
+        env::set_var("TERM", "xterm-256color");
         assert!(should_prevent_browser_opening());
 
         // Test with different environment configurations
