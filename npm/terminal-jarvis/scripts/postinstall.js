@@ -330,7 +330,16 @@ async function main() {
 }
 
 if (require.main === module) {
-    main();
+    void main().catch((err) => {
+        error(`Installation failed: ${err && err.message ? err.message : err}`);
+        warn('Fallback options:');
+        console.log('  1. Install via cargo: cargo install terminal-jarvis');
+        console.log('  2. Install via Homebrew: brew install ba-calderonmorales/terminal-jarvis/terminal-jarvis');
+        console.log('  3. Download manually from: https://github.com/BA-CalderonMorales/terminal-jarvis/releases');
+
+        // Don't fail npm install completely
+        process.exit(0);
+    });
 }
 
 module.exports = {
