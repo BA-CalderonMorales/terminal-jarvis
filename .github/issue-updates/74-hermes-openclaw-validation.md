@@ -52,7 +52,7 @@ Result:
 - Displayed `Tool Information: hermes`.
 - Displayed the Hermes description from the catalog.
 - Displayed command `hermes`.
-- Displayed installation command `bash -lc curl -fsSL https://raw.githubusercontent.com/NousResearch/hermes-agent/main/scripts/install.sh | bash -s -- --skip-setup`.
+- Displayed installation command `bash -lc 'curl -fsSL https://raw.githubusercontent.com/NousResearch/hermes-agent/main/scripts/install.sh | bash -s -- --skip-setup'`.
 - Displayed all configured auth environment variables and setup URL.
 
 Command:
