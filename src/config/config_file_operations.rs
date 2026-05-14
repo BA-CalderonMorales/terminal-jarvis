@@ -11,7 +11,7 @@
 // For new code, prefer using database repositories.
 
 use crate::config::config_structures::{Config, ToolConfig};
-use anyhow::Result;
+use anyhow::{Context, Result};
 use std::path::{Path, PathBuf};
 
 /// Default per-user configuration path.
@@ -61,15 +61,20 @@ impl Config {
                 match Self::load_from_path(&path, &mut config) {
                     Ok(()) => return Ok(config),
                     Err(e) => {
+                        if custom_path.as_ref() == Some(&path) {
+                            return Err(e).with_context(|| {
+                                format!(
+                                    "Failed to load custom configuration file {}",
+                                    path.display()
+                                )
+                            });
+                        }
                         eprintln!(
                             "Warning: Failed to load config file {}: {}",
                             path.display(),
                             e
                         );
-                        eprintln!("Using default configuration");
-                        if custom_path.as_ref() == Some(&path) {
-                            return Err(e);
-                        }
+                        eprintln!("Trying fallback configuration locations");
                     }
                 };
             } else if custom_path.as_ref() == Some(&path) {
@@ -139,5 +144,67 @@ impl Config {
     #[allow(dead_code)]
     pub fn is_tool_enabled(&self, tool: &str) -> bool {
         self.tools.get(tool).map(|c| c.enabled).unwrap_or(false)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use std::ffi::OsString;
+
+    struct EnvVarGuard {
+        originals: Vec<(&'static str, Option<OsString>)>,
+    }
+
+    impl EnvVarGuard {
+        fn capture(keys: &[&'static str]) -> Self {
+            Self {
+                originals: keys
+                    .iter()
+                    .map(|key| (*key, std::env::var_os(key)))
+                    .collect(),
+            }
+        }
+    }
+
+    impl Drop for EnvVarGuard {
+        fn drop(&mut self) {
+            for (key, value) in &self.originals {
+                match value {
+                    Some(val) => std::env::set_var(key, val),
+                    None => std::env::remove_var(key),
+                }
+            }
+        }
+    }
+
+    #[test]
+    fn custom_config_load_failure_reports_custom_path_without_fallback_message() {
+        let _lock = crate::cli_logic::cli_logic_first_run::TEST_ENV_LOCK
+            .lock()
+            .unwrap();
+        let _env = EnvVarGuard::capture(&["HOME"]);
+        let temp_home = tempfile::tempdir().unwrap();
+        std::env::set_var("HOME", temp_home.path());
+
+        let custom_path = temp_home.path().join("bad-config.toml");
+        std::fs::write(&custom_path, "not = [valid").unwrap();
+        crate::cli_logic::cli_logic_first_run::save_custom_config_path(&custom_path).unwrap();
+
+        let err = Config::load().unwrap_err();
+        let message = err.to_string();
+
+        assert!(
+            message.contains("Failed to load custom configuration file"),
+            "custom config load error should identify the custom config path: {message}"
+        );
+        assert!(
+            message.contains(&custom_path.display().to_string()),
+            "custom config load error should include the custom path: {message}"
+        );
+        assert!(
+            !message.contains("Using default configuration"),
+            "custom config load error should not imply fallback to defaults: {message}"
+        );
     }
 }

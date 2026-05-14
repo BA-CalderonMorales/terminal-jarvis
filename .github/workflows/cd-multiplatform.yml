@@ -477,13 +477,13 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v6
         with:
-          node-version: '18'
+          node-version: '20.19.0'
           registry-url: 'https://registry.npmjs.org'
 
       - name: Build and publish NPM package
         run: |
           cd npm/terminal-jarvis
-          npm install
+          npm ci --engine-strict
           npm run build
           npm publish
         env:

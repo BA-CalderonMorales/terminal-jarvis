@@ -70,6 +70,30 @@ impl WarningSystem {
 mod tests {
     use super::*;
     use std::env;
+    use std::ffi::OsString;
+
+    struct EnvVarGuard {
+        originals: Vec<(&'static str, Option<OsString>)>,
+    }
+
+    impl EnvVarGuard {
+        fn capture(keys: &[&'static str]) -> Self {
+            Self {
+                originals: keys.iter().map(|key| (*key, env::var_os(key))).collect(),
+            }
+        }
+    }
+
+    impl Drop for EnvVarGuard {
+        fn drop(&mut self) {
+            for (key, value) in &self.originals {
+                match value {
+                    Some(val) => env::set_var(key, val),
+                    None => env::remove_var(key),
+                }
+            }
+        }
+    }
 
     #[test]
     fn test_warning_system() {
@@ -85,6 +109,13 @@ mod tests {
         let _guard = crate::cli_logic::cli_logic_first_run::TEST_ENV_LOCK
             .lock()
             .unwrap();
+        let _env = EnvVarGuard::capture(&[
+            "CI",
+            "GOOGLE_API_KEY",
+            "GEMINI_API_KEY",
+            "XDG_CONFIG_HOME",
+            "APPDATA",
+        ]);
 
         // Test that warning logic is sound
         use crate::auth_manager::auth_api_key_management::ApiKeyManager;
@@ -92,11 +123,6 @@ mod tests {
 
         // Store original environment
         let temp_config = tempfile::tempdir().unwrap();
-        let original_ci = env::var("CI").ok();
-        let original_api_key = env::var("GOOGLE_API_KEY").ok();
-        let original_gemini_api_key = env::var("GEMINI_API_KEY").ok();
-        let original_xdg_config_home = env::var("XDG_CONFIG_HOME").ok();
-        let original_appdata = env::var("APPDATA").ok();
 
         // Set up warning condition (CI environment, no API key or saved credential)
         env::set_var("CI", "true");
@@ -108,27 +134,5 @@ mod tests {
         let should_warn = EnvironmentDetector::should_prevent_browser_opening()
             && !ApiKeyManager::check_api_keys_for_tool("gemini");
         assert!(should_warn);
-
-        // Clean up
-        match original_ci {
-            Some(val) => env::set_var("CI", val),
-            None => env::remove_var("CI"),
-        }
-        match original_api_key {
-            Some(val) => env::set_var("GOOGLE_API_KEY", val),
-            None => env::remove_var("GOOGLE_API_KEY"),
-        }
-        match original_gemini_api_key {
-            Some(val) => env::set_var("GEMINI_API_KEY", val),
-            None => env::remove_var("GEMINI_API_KEY"),
-        }
-        match original_xdg_config_home {
-            Some(val) => env::set_var("XDG_CONFIG_HOME", val),
-            None => env::remove_var("XDG_CONFIG_HOME"),
-        }
-        match original_appdata {
-            Some(val) => env::set_var("APPDATA", val),
-            None => env::remove_var("APPDATA"),
-        }
     }
 }

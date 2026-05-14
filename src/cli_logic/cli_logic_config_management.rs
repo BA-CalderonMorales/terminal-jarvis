@@ -241,6 +241,33 @@ fn display_cache_info(cache: &crate::config::VersionCache) {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use std::ffi::OsString;
+
+    struct EnvVarGuard {
+        originals: Vec<(&'static str, Option<OsString>)>,
+    }
+
+    impl EnvVarGuard {
+        fn capture(keys: &[&'static str]) -> Self {
+            Self {
+                originals: keys
+                    .iter()
+                    .map(|key| (*key, std::env::var_os(key)))
+                    .collect(),
+            }
+        }
+    }
+
+    impl Drop for EnvVarGuard {
+        fn drop(&mut self) {
+            for (key, value) in &self.originals {
+                match value {
+                    Some(val) => std::env::set_var(key, val),
+                    None => std::env::remove_var(key),
+                }
+            }
+        }
+    }
 
     fn write_valid_config(path: &Path) {
         let config = Config::default();
@@ -273,8 +300,8 @@ mod tests {
         let _guard = crate::cli_logic::cli_logic_first_run::TEST_ENV_LOCK
             .lock()
             .unwrap();
+        let _env = EnvVarGuard::capture(&["HOME"]);
         let temp_home = tempfile::tempdir().unwrap();
-        let old_home = std::env::var_os("HOME");
         std::env::set_var("HOME", temp_home.path());
 
         crate::cli_logic::cli_logic_first_run::clear_custom_config_path().unwrap();
@@ -298,11 +325,5 @@ mod tests {
             crate::cli_logic::cli_logic_first_run::get_custom_config_path(),
             None
         );
-
-        if let Some(home) = old_home {
-            std::env::set_var("HOME", home);
-        } else {
-            std::env::remove_var("HOME");
-        }
     }
 }
