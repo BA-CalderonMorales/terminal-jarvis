@@ -218,17 +218,13 @@ fn initial_case(s: &str) -> String {
     }
 }
 
-/// Handle user choice after tool exit -- streamlined to 3 options
+/// Handle user choice after tool exit
 async fn handle_post_tool_exit(last_tool: &str, last_args: &[String]) -> Result<()> {
     loop {
         let theme = theme_global_config::current_theme();
         let tool_display = initial_case(last_tool);
 
-        let exit_options = vec![
-            format!("Reopen {tool_display}"),
-            "Back to Home".to_string(),
-            "Exit".to_string(),
-        ];
+        let exit_options = post_tool_exit_options(last_tool);
 
         let exit_choice = match themed_select_with(&theme, "What next?", exit_options).prompt() {
             Ok(choice) => choice,
@@ -240,6 +236,10 @@ async fn handle_post_tool_exit(last_tool: &str, last_args: &[String]) -> Result<
                 let _ = launch_tool_with_progress(last_tool, last_args).await;
                 continue;
             }
+            s if s.starts_with("Update ") => {
+                handle_post_tool_update(last_tool, &tool_display, last_args).await?;
+                continue;
+            }
             "Back to Home" => return Ok(()),
             "Exit" => {
                 println!("{}", theme.accent("Goodbye!"));
@@ -248,6 +248,52 @@ async fn handle_post_tool_exit(last_tool: &str, last_args: &[String]) -> Result<
             _ => return Ok(()),
         }
     }
+}
+
+fn post_tool_exit_options(last_tool: &str) -> Vec<String> {
+    let tool_display = initial_case(last_tool);
+    let mut exit_options = vec![format!("Reopen {tool_display}")];
+
+    if InstallationManager::get_update_command(last_tool).is_some() {
+        exit_options.push(format!("Update {tool_display}"));
+    }
+
+    exit_options.push("Back to Home".to_string());
+    exit_options.push("Exit".to_string());
+
+    exit_options
+}
+
+async fn handle_post_tool_update(
+    last_tool: &str,
+    tool_display: &str,
+    last_args: &[String],
+) -> Result<()> {
+    let theme = theme_global_config::current_theme();
+    println!();
+
+    match handle_update_packages(Some(last_tool)).await {
+        Ok(()) => {
+            let reopen = themed_confirm(&format!("Reopen updated {tool_display}?"))
+                .with_default(true)
+                .prompt()
+                .unwrap_or_default();
+
+            if reopen {
+                let _ = launch_tool_with_progress(last_tool, last_args).await;
+            }
+        }
+        Err(err) => {
+            println!(
+                "{}",
+                theme.secondary(&format!(
+                    "Update failed for {tool_display}: {err}. Returning to menu."
+                ))
+            );
+        }
+    }
+
+    Ok(())
 }
 
 /// Handle the important links menu
@@ -739,5 +785,30 @@ async fn handle_tool_info_menu() -> Result<()> {
             std::io::stdin().read_line(&mut String::new())?;
             // Loop continues, returning to Tool Information menu
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn post_tool_exit_options_include_update_for_update_capable_tool() {
+        let options = post_tool_exit_options("claude");
+
+        assert_eq!(options[0], "Reopen Claude");
+        assert_eq!(options[1], "Update Claude");
+        assert!(options.contains(&"Back to Home".to_string()));
+        assert!(options.contains(&"Exit".to_string()));
+    }
+
+    #[test]
+    fn post_tool_exit_options_skip_update_when_tool_has_no_update_command() {
+        let options = post_tool_exit_options("__missing_tool__");
+
+        assert_eq!(
+            options,
+            vec!["Reopen __missing_tool__", "Back to Home", "Exit"]
+        );
     }
 }
