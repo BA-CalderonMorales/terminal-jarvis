@@ -4,39 +4,15 @@ import { spawn } from "child_process";
 import { existsSync } from "fs";
 import { arch, platform } from "os";
 import { join } from "path";
+import { getBundledBinaryName } from "./platform";
 
 function getBundledBinaryPath(): string {
-  const currentPlatform = platform();
-  const currentArch = arch();
-
-  // Map Node.js platform/arch to our binary naming convention
-  let binaryName = "terminal-jarvis";
-
-  if (currentPlatform === "linux") {
-    binaryName += "-linux";
-  } else if (currentPlatform === "darwin") {
-    binaryName += "-macos";
-  } else if (currentPlatform === "win32") {
-    binaryName += "-windows.exe";
-  } else {
-    binaryName += "-linux"; // fallback
-  }
-
-  if (currentPlatform !== "win32") {
-    if (currentArch === "x64" || currentArch === "x86_64") {
-      binaryName += "-x64";
-    } else if (currentArch === "arm64") {
-      binaryName += "-arm64";
-    } else {
-      binaryName += "-x64"; // fallback
-    }
-  }
-
-  return join(__dirname, "..", "bin", binaryName);
+  return join(__dirname, "..", "bin", getBundledBinaryName(platform(), arch()));
 }
 
 // Try to find the Rust binary in common locations
 const possibleBinaries = [
+  getBundledBinaryPath(),
   join(__dirname, "..", "bin", "terminal-jarvis"), // Bundled binary (generic)
   join(__dirname, "..", "bin", "terminal-jarvis-linux-x64"), // Bundled binary (platform-specific)
   join(__dirname, "..", "..", "..", "target", "debug", "terminal-jarvis"), // Local debug build
