@@ -1,0 +1,25 @@
+name: Repository Docs Guard
+
+on:
+  push:
+    branches: ["main", "develop"]
+  pull_request:
+    branches: ["main", "develop"]
+
+permissions:
+  contents: read
+
+jobs:
+  no-repo-docs:
+    name: Prevent top-level docs directory
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Reject repo-local docs directory
+        run: |
+          if [ -d docs ]; then
+            echo "::error::Do not add a top-level docs/ directory to terminal-jarvis. Project docs live in my-life-as-a-dev."
+            find docs -maxdepth 3 -type f | sort
+            exit 1
+          fi
