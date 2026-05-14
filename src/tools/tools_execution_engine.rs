@@ -8,6 +8,7 @@ use anyhow::Result;
 use std::io::Write;
 use std::process::Command;
 
+use super::handlers::tool_registry;
 use super::tools_command_mapping::get_cli_command;
 use super::tools_detection::resolve_tool_path;
 use super::tools_environment::{apply_aider_headless_args, apply_tool_environment};
@@ -37,20 +38,6 @@ impl Drop for AuthEnvironmentGuard {
             let _ = AuthManager::restore_environment();
         }
     }
-}
-
-// Heuristic validators for Gemini API keys (used for goose preflight validation)
-fn looks_like_gemini_api_key(key: &str) -> bool {
-    let k = key.trim();
-    (k.starts_with("AIza") || k.starts_with("AI"))
-        && k.len() >= 25
-        && k.chars()
-            .all(|c| c.is_ascii_alphanumeric() || c == '_' || c == '-')
-}
-
-fn looks_like_oauth_token(token: &str) -> bool {
-    let t = token.trim();
-    t.starts_with("4/") || t.starts_with("ya29.")
 }
 
 /// Run a tool with arguments - automatically handles session continuation for internal commands
@@ -143,9 +130,13 @@ pub async fn run_tool_once(display_name: &str, args: &[String]) -> Result<()> {
     // Export any saved credentials for this session so tools don't re-prompt
     let _ = AuthManager::export_saved_env_vars();
 
-    // Prepare authentication-safe environment and warn about browser opening
-    // Skip environment mutations for Goose to let provider tools run with the host env.
-    let _auth_env_guard = AuthEnvironmentGuard::prepare(display_name != "goose")?;
+    let registry = tool_registry();
+    let handler = registry.get(display_name);
+
+    // Prepare authentication-safe environment and warn about browser opening.
+    // Some provider tools need the host auth environment unchanged.
+    let _auth_env_guard =
+        AuthEnvironmentGuard::prepare(!handler.is_some_and(|h| h.uses_host_auth_environment()))?;
     AuthManager::warn_if_browser_likely(display_name)?;
 
     // Provide minimal guidance before tool startup (only shows tips if API keys missing)
@@ -168,10 +159,9 @@ pub async fn run_tool_once(display_name: &str, args: &[String]) -> Result<()> {
     // --- APPLY TOOL-SPECIFIC ENVIRONMENT ---
     apply_tool_environment(&mut cmd, display_name, args)?;
 
-    // --- GOOSE: Gemini key validation and credential hydration ---
-    if display_name == "goose" {
-        hydrate_goose_credentials(&mut cmd)?;
-        validate_goose_gemini_key(&mut cmd)?;
+    // --- TOOL HANDLER PRE-EXECUTION ---
+    if let Some(handler) = handler {
+        handler.pre_execution(&mut cmd)?;
     }
 
     // --- TOOL-SPECIFIC ARGUMENT HANDLING ---
@@ -250,100 +240,6 @@ fn normalize_opencode_args(args: &[String]) -> Vec<String> {
     normalized.push("run".to_string());
     normalized.extend(args.to_vec());
     normalized
-}
-
-/// Hydrate Goose credentials from saved store (goose + gemini tools).
-fn hydrate_goose_credentials(cmd: &mut Command) -> Result<()> {
-    if let Ok(saved) = AuthManager::get_tool_credentials("goose") {
-        for (k, v) in saved {
-            cmd.env(&k, &v);
-        }
-    }
-    // Also hydrate Gemini saved credentials for Goose's gemini provider
-    if let Ok(saved_gemini) = AuthManager::get_tool_credentials("gemini") {
-        for (k, v) in saved_gemini {
-            if k == "GOOGLE_API_KEY" || k == "GEMINI_API_KEY" {
-                cmd.env(&k, &v);
-            }
-        }
-    }
-    Ok(())
-}
-
-/// Validate Goose's Gemini key if present -- reject OAuth tokens.
-fn validate_goose_gemini_key(cmd: &mut Command) -> Result<()> {
-    let candidate_key = std::env::var("GOOGLE_API_KEY")
-        .ok()
-        .or_else(|| std::env::var("GEMINI_API_KEY").ok())
-        .or_else(|| {
-            AuthManager::get_tool_credentials("goose")
-                .ok()
-                .and_then(|m| {
-                    m.get("GOOGLE_API_KEY")
-                        .cloned()
-                        .or_else(|| m.get("GEMINI_API_KEY").cloned())
-                })
-                .or_else(|| {
-                    AuthManager::get_tool_credentials("gemini")
-                        .ok()
-                        .and_then(|m| {
-                            m.get("GOOGLE_API_KEY")
-                                .cloned()
-                                .or_else(|| m.get("GEMINI_API_KEY").cloned())
-                        })
-                })
-        });
-
-    if let Some(k) = candidate_key {
-        if looks_like_oauth_token(&k) || !looks_like_gemini_api_key(&k) {
-            let theme = crate::theme::theme_global_config::current_theme();
-            println!(
-                "{}",
-                theme.primary("Gemini provider requires a valid API key, not an OAuth token.")
-            );
-            println!(
-                "{}",
-                theme.secondary(
-                    "Get a key from Google AI Studio and set GOOGLE_API_KEY (or GEMINI_API_KEY).\nDocs: https://ai.google.dev/gemini-api/docs/api-key"
-                )
-            );
-
-            if std::io::IsTerminal::is_terminal(&std::io::stdin()) {
-                if let Ok(input) =
-                    inquire::Password::new("Enter a valid GOOGLE_API_KEY (leave blank to cancel):")
-                        .without_confirmation()
-                        .prompt()
-                {
-                    let new_key = input.trim().to_string();
-                    if !new_key.is_empty() {
-                        if looks_like_gemini_api_key(&new_key) {
-                            cmd.env("GOOGLE_API_KEY", &new_key);
-                            cmd.env("GEMINI_API_KEY", &new_key);
-                            let mut map = std::collections::HashMap::new();
-                            map.insert("GOOGLE_API_KEY".to_string(), new_key.clone());
-                            map.insert("GEMINI_API_KEY".to_string(), new_key);
-                            let _ = AuthManager::save_tool_credentials("gemini", &map);
-                            let _ = AuthManager::save_tool_credentials("goose", &map);
-                        } else {
-                            return Err(anyhow::anyhow!(
-                                "The provided key does not look like a valid Gemini API key."
-                            ));
-                        }
-                    } else {
-                        return Err(anyhow::anyhow!(
-                            "Invalid Gemini credentials detected. Update your GOOGLE_API_KEY and try again."
-                        ));
-                    }
-                }
-            } else {
-                return Err(anyhow::anyhow!(
-                    "Invalid Gemini credentials detected. Update your GOOGLE_API_KEY and try again."
-                ));
-            }
-        }
-    }
-
-    Ok(())
 }
 
 /// Handle tool exit with non-zero status code.
