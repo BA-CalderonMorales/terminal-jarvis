@@ -47,14 +47,14 @@ jobs:
           - name: Go (Ubuntu)
             suite: go
             os: ubuntu-latest
-          - name: NPM (Node 18)
-            suite: npm
-            os: ubuntu-latest
-            node: 18
           - name: NPM (Node 20)
             suite: npm
             os: ubuntu-latest
-            node: 20
+            node: 20.19.0
+          - name: NPM (Node 22)
+            suite: npm
+            os: ubuntu-latest
+            node: 22.12.0
     steps:
     - uses: actions/checkout@v5
 
@@ -165,7 +165,7 @@ jobs:
         cd npm/terminal-jarvis
         # Check if package-lock.json is in sync with package.json
         # Note: npm may modify lockfile due to platform-specific optional deps
-        npm install --package-lock-only
+        npm install --package-lock-only --engine-strict --ignore-scripts
         if ! git diff --quiet package-lock.json; then
           echo "::warning::package-lock.json has changes (may be due to platform-specific optional dependencies)"
           git diff package-lock.json | head -20
@@ -175,7 +175,7 @@ jobs:
       if: ${{ matrix.suite == 'npm' }}
       run: |
         cd npm/terminal-jarvis
-        npm ci
+        npm ci --engine-strict
 
     - name: Build TypeScript
       if: ${{ matrix.suite == 'npm' }}

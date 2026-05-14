@@ -83,10 +83,11 @@ fn normalize_npm_package(package: &str) -> &str {
     package.strip_suffix("@latest").unwrap_or(package)
 }
 
-fn contains_interactive_token(part: &str, interactive_tokens: &[&str]) -> bool {
+fn interactive_token_in_part(part: &str, interactive_tokens: &[&str]) -> Option<String> {
     part.to_ascii_lowercase()
         .split(|ch: char| !ch.is_ascii_alphanumeric())
-        .any(|token| interactive_tokens.contains(&token))
+        .find(|token| interactive_tokens.contains(token))
+        .map(str::to_string)
 }
 
 #[test]
@@ -148,10 +149,12 @@ fn tool_catalog_update_commands_are_non_interactive() {
         }
 
         for part in update_parts {
+            let interactive_token = interactive_token_in_part(part, &interactive_tokens);
             assert!(
-                !contains_interactive_token(part, &interactive_tokens),
-                "tool.update for '{tool_name}' appears interactive in {}: token '{part}'",
-                path.display()
+                interactive_token.is_none(),
+                "tool.update for '{tool_name}' in {} includes interactive token '{}' in command part '{part}'. Remove login/auth/configure/wizard/prompt flows from non-interactive update commands.",
+                path.display(),
+                interactive_token.unwrap_or_default()
             );
         }
     }
