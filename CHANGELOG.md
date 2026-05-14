@@ -2,6 +2,24 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.0.82] - 2026-05-14
+
+### Added
+- **Post-Tool Update Flow**: Added a post-exit option to update supported tools before reopening them.
+- **Config Path Command**: Added an interactive command for inspecting configuration paths.
+- **No Repo Docs Guard**: Added CI coverage to prevent reintroducing a top-level `docs/` directory.
+
+### Changed
+- **CLI Flow Cleanup**: Flattened tool launch and install control flow to reduce nested branching.
+- **Slash Command Parsing**: Reworked slash commands around typed command variants for clearer behavior.
+- **Goose Handler Structure**: Extracted Goose-specific handling into a dedicated tool handler module.
+- **Dependency Maintenance**: Consolidated dependency maintenance updates for Rust and npm workflows.
+
+### Fixed
+- **Android NPM Installs**: Improved npm wrapper platform handling for Android/Termux binaries.
+- **Security Review Follow-Up**: Addressed credential encryption and CI security review feedback.
+- **Docs Policy Alignment**: Kept project documentation out of this repo and aligned `develop` with `main` after removing the top-level `docs/` directory.
+
 ## [0.0.81] - 2026-05-08
 
 ### Added
