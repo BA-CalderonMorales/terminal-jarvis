@@ -18,6 +18,7 @@ pub mod cli_logic_tool_execution;
 pub mod cli_logic_update_operations;
 pub mod cli_logic_utilities;
 pub mod cli_logic_welcome;
+pub mod command;
 pub mod themed_components;
 
 // Re-export main public functions for backward compatibility
