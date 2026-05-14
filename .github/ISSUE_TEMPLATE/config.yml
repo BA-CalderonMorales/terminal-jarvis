@@ -1,0 +1,8 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Security vulnerability disclosure
+    url: mailto:security@ba-calderonmorales.dev
+    about: Report exploitable vulnerabilities privately instead of opening a public issue.
+  - name: Terminal Jarvis documentation
+    url: https://ba-calderonmorales.github.io/my-life-as-a-dev/latest/projects/active/terminal-jarvis/
+    about: Read the current user and contributor documentation.
