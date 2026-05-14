@@ -1,6 +1,7 @@
 // Tools Domain Modules
 // Each module handles a specific area of tool management
 
+pub mod handlers;
 pub mod tools_command_mapping;
 pub mod tools_config;
 pub mod tools_dashboard_scanner;
