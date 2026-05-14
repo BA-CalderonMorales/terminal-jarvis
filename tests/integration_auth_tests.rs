@@ -33,6 +33,25 @@ mod integration_tests {
     fn test_auth_manager_integration() {
         // Acquire mutex to prevent parallel environment variable manipulation
         let _guard = ENV_TEST_MUTEX.lock().unwrap();
+        let temp_config = tempfile::tempdir().expect("Failed to create temp config dir");
+        let auth_vars = [
+            "GOOGLE_API_KEY",
+            "GEMINI_API_KEY",
+            "GOOGLE_APPLICATION_CREDENTIALS",
+            "QWEN_CODE_API_KEY",
+            "DASHSCOPE_API_KEY",
+            "ANTHROPIC_API_KEY",
+            "CLAUDE_API_KEY",
+            "OPENAI_API_KEY",
+        ];
+        let original_auth_env: Vec<(&str, Option<String>)> = auth_vars
+            .iter()
+            .map(|key| (*key, env::var(key).ok()))
+            .collect();
+        let original_xdg_config_home = env::var("XDG_CONFIG_HOME").ok();
+        let original_appdata = env::var("APPDATA").ok();
+        env::set_var("XDG_CONFIG_HOME", temp_config.path());
+        env::set_var("APPDATA", temp_config.path());
 
         // Test that our AuthManager correctly detects the environment
         println!("Testing AuthManager environment detection...");
@@ -53,6 +72,21 @@ mod integration_tests {
         env::set_var("QWEN_CODE_API_KEY", "test-key");
         assert!(AuthManager::check_api_keys_for_tool("qwen"));
 
+        for (key, value) in original_auth_env {
+            match value {
+                Some(val) => env::set_var(key, val),
+                None => env::remove_var(key),
+            }
+        }
+        match original_xdg_config_home {
+            Some(val) => env::set_var("XDG_CONFIG_HOME", val),
+            None => env::remove_var("XDG_CONFIG_HOME"),
+        }
+        match original_appdata {
+            Some(val) => env::set_var("APPDATA", val),
+            None => env::remove_var("APPDATA"),
+        }
+
         println!("✅ AuthManager tests passed");
     }
 
@@ -60,6 +94,8 @@ mod integration_tests {
     fn test_no_browser_environment_setup() {
         // Acquire mutex to prevent parallel environment variable manipulation
         let _guard = ENV_TEST_MUTEX.lock().unwrap();
+        let original_ci = env::var("CI").ok();
+        env::set_var("CI", "true");
 
         // Test that we can set up a no-browser environment
         AuthManager::prepare_auth_safe_environment()
@@ -73,6 +109,11 @@ mod integration_tests {
             browser_cmd == "true" || browser_cmd.starts_with("echo "),
             "Unexpected BROWSER override: {browser_cmd}"
         );
+
+        match original_ci {
+            Some(val) => env::set_var("CI", val),
+            None => env::remove_var("CI"),
+        }
 
         println!("✅ No-browser environment setup successful");
     }

@@ -12,13 +12,37 @@
 
 use crate::config::config_structures::{Config, ToolConfig};
 use anyhow::Result;
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
+
+/// Default per-user configuration path.
+pub fn default_config_path() -> Option<PathBuf> {
+    dirs::config_dir().map(|p| p.join("terminal-jarvis").join("config.toml"))
+}
+
+/// Custom configuration path persisted in user preferences, if configured.
+pub fn custom_config_path() -> Option<PathBuf> {
+    crate::cli_logic::cli_logic_first_run::get_custom_config_path()
+}
+
+/// Active configuration path and whether it comes from a custom preference.
+pub fn active_config_path() -> (PathBuf, bool) {
+    if let Some(path) = custom_config_path() {
+        return (path, true);
+    }
+
+    (
+        default_config_path().unwrap_or_else(|| PathBuf::from("config.toml")),
+        false,
+    )
+}
 
 impl Config {
     /// Load configuration from file or create default
     pub fn load() -> Result<Self> {
+        let custom_path = custom_config_path();
         let config_paths = vec![
-            dirs::config_dir().map(|p| p.join("terminal-jarvis").join("config.toml")),
+            custom_path.clone(),
+            default_config_path(),
             Some(PathBuf::from("./terminal-jarvis.toml")),
             Some(PathBuf::from("./terminal-jarvis.toml.example")),
             // Add NPM package config path - look relative to binary location
@@ -34,50 +58,47 @@ impl Config {
         // Try to load user configuration and merge it
         for path in config_paths.into_iter().flatten() {
             if path.exists() {
-                match std::fs::read_to_string(&path) {
-                    Ok(content) => {
-                        // Try to parse as partial TOML first, then fallback to full Config
-                        match toml::from_str::<Config>(&content) {
-                            Ok(user_config) => {
-                                // Merge user config with defaults (user settings override defaults)
-                                for (tool_name, tool_config) in user_config.tools {
-                                    config.tools.insert(tool_name, tool_config);
-                                }
-
-                                // Update other settings if they exist in user config
-                                config.templates = user_config.templates;
-                                config.api = user_config.api;
-
-                                // Ensure all defaults are still present
-                                config.ensure_default_tools();
-                                return Ok(config);
-                            }
-                            Err(e) => {
-                                eprintln!(
-                                    "Warning: Failed to parse config file {}: {}",
-                                    path.display(),
-                                    e
-                                );
-                                eprintln!("Using default configuration");
-                                continue;
-                            }
-                        }
-                    }
+                match Self::load_from_path(&path, &mut config) {
+                    Ok(()) => return Ok(config),
                     Err(e) => {
                         eprintln!(
-                            "Warning: Failed to read config file {}: {}",
+                            "Warning: Failed to load config file {}: {}",
                             path.display(),
                             e
                         );
-                        continue;
+                        eprintln!("Using default configuration");
+                        if custom_path.as_ref() == Some(&path) {
+                            return Err(e);
+                        }
                     }
-                }
+                };
+            } else if custom_path.as_ref() == Some(&path) {
+                return Err(anyhow::anyhow!(
+                    "Custom configuration file does not exist: {}",
+                    path.display()
+                ));
             }
         }
 
         // Return default config if no file found (ensure defaults are present)
         config.ensure_default_tools();
         Ok(config)
+    }
+
+    /// Validate and merge a configuration file into the provided config.
+    pub fn load_from_path(path: &Path, config: &mut Config) -> Result<()> {
+        let content = std::fs::read_to_string(path)?;
+        let user_config = toml::from_str::<Config>(&content)?;
+
+        for (tool_name, tool_config) in user_config.tools {
+            config.tools.insert(tool_name, tool_config);
+        }
+
+        config.templates = user_config.templates;
+        config.api = user_config.api;
+        config.ensure_default_tools();
+
+        Ok(())
     }
 
     /// Save configuration to the user config directory

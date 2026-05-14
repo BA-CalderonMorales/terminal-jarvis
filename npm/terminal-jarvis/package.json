@@ -1,6 +1,6 @@
 {
   "name": "terminal-jarvis",
-  "version": "0.0.81",
+  "version": "0.0.82",
   "description": "AI Coding Tools Wrapper - Unified interface for claude-code, gemini-cli, qwen-code, opencode, llxprt, codex, crush, goose, amp, and aider",
   "bin": {
     "terminal-jarvis": "bin/terminal-jarvis"
@@ -21,18 +21,17 @@
     "sync-readme-npm": "npm run generate-tools && cp ../../README.md . && sed -i 's|screenshot_and_demo/|https://raw.githubusercontent.com/BA-CalderonMorales/terminal-jarvis/docs/screenshots_and_demos/screenshots_and_demo/|g' README.md",
     "build-rust": "cd ../.. && cargo build --release",
     "copy-configs": "node ./scripts/copy-configs.js",
-    "typecheck": "tsc --noEmit",
+    "typecheck": "tsc --noEmit && echo 'TypeScript type check passed'",
     "lint": "biome lint src/",
     "lint:fix": "biome lint --write src/",
     "format": "biome format src/",
     "format:fix": "biome format --write src/",
     "check": "biome check src/",
     "check:fix": "biome check --write src/",
-    "test": "vitest run",
+    "test": "vitest run --passWithNoTests",
     "test:watch": "vitest",
     "test:ui": "vitest --ui",
     "test:coverage": "vitest run --coverage",
-    "typecheck": "tsc --noEmit && echo 'TypeScript type check passed'",
     "test:e2e": "npm run build-rust && vitest run",
     "build": "npm run copy-configs && npm run sync-readme-npm",
     "prepack": "npm run build",
@@ -61,11 +60,10 @@
   "devDependencies": {
     "@biomejs/biome": "2.1.4",
     "@types/node": "22.15.3",
-    "@vitest/ui": "3.2.4",
-    "cli-testing-library": "3.0.1",
+    "@vitest/ui": "4.1.5",
     "string-width": "8.1.0",
     "typescript": "5.9.3",
-    "vitest": "3.2.4",
+    "vitest": "4.1.5",
     "zod": "3.25.56"
   },
   "engines": {

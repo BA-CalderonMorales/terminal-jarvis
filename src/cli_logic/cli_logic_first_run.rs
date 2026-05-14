@@ -7,7 +7,10 @@ use crate::tools::ToolManager;
 use anyhow::Result;
 use std::fs;
 use std::io::{self, Write};
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
+
+#[cfg(test)]
+pub(crate) static TEST_ENV_LOCK: std::sync::Mutex<()> = std::sync::Mutex::new(());
 
 /// Get the Terminal Jarvis config directory path
 pub fn get_config_dir() -> Option<PathBuf> {
@@ -213,21 +216,48 @@ fn get_preferences_path() -> Option<PathBuf> {
     get_config_dir().map(|d| d.join("preferences.json"))
 }
 
-/// Save the last-used tool (hybrid: database + file fallback)
-pub fn save_last_used_tool(tool: &str) -> Result<()> {
-    // Try database first (async context required)
-    // Fall back to file-based for sync context
+fn read_file_preferences() -> serde_json::Map<String, serde_json::Value> {
+    let Some(prefs_path) = get_preferences_path() else {
+        return serde_json::Map::new();
+    };
+
+    let Ok(content) = fs::read_to_string(&prefs_path) else {
+        return serde_json::Map::new();
+    };
+
+    serde_json::from_str::<serde_json::Value>(&content)
+        .ok()
+        .and_then(|value| value.as_object().cloned())
+        .unwrap_or_default()
+}
+
+fn write_file_preferences(prefs: &serde_json::Map<String, serde_json::Value>) -> Result<()> {
     if let Some(prefs_path) = get_preferences_path() {
         if let Some(parent) = prefs_path.parent() {
             fs::create_dir_all(parent)?;
         }
-        let prefs = serde_json::json!({
-            "last_used_tool": tool,
-            "updated_at": chrono::Utc::now().to_rfc3339()
-        });
-        fs::write(&prefs_path, serde_json::to_string_pretty(&prefs)?)?;
+        fs::write(
+            &prefs_path,
+            serde_json::to_string_pretty(&serde_json::Value::Object(prefs.clone()))?,
+        )?;
     }
     Ok(())
+}
+
+/// Save the last-used tool (hybrid: database + file fallback)
+pub fn save_last_used_tool(tool: &str) -> Result<()> {
+    // Try database first (async context required)
+    // Fall back to file-based for sync context
+    let mut prefs = read_file_preferences();
+    prefs.insert(
+        "last_used_tool".to_string(),
+        serde_json::Value::String(tool.to_string()),
+    );
+    prefs.insert(
+        "updated_at".to_string(),
+        serde_json::Value::String(chrono::Utc::now().to_rfc3339()),
+    );
+    write_file_preferences(&prefs)
 }
 
 /// Save the last-used tool to database (async version)
@@ -244,13 +274,44 @@ pub async fn save_last_used_tool_async(tool: &str) -> Result<()> {
 /// Get the last-used tool (hybrid: database + file fallback)
 pub fn get_last_used_tool() -> Option<String> {
     // Try file-based first (sync context)
-    let prefs_path = get_preferences_path()?;
-    let content = fs::read_to_string(&prefs_path).ok()?;
-    let prefs: serde_json::Value = serde_json::from_str(&content).ok()?;
-    prefs
+    read_file_preferences()
         .get("last_used_tool")
         .and_then(|v| v.as_str())
         .map(|s| s.to_string())
+}
+
+/// Save the custom configuration file path in file-based preferences.
+pub fn save_custom_config_path(path: &Path) -> Result<()> {
+    let mut prefs = read_file_preferences();
+    prefs.insert(
+        "config_path".to_string(),
+        serde_json::Value::String(path.to_string_lossy().to_string()),
+    );
+    prefs.insert(
+        "updated_at".to_string(),
+        serde_json::Value::String(chrono::Utc::now().to_rfc3339()),
+    );
+    write_file_preferences(&prefs)
+}
+
+/// Get the custom configuration file path from file-based preferences.
+pub fn get_custom_config_path() -> Option<PathBuf> {
+    read_file_preferences()
+        .get("config_path")
+        .and_then(|v| v.as_str())
+        .filter(|s| !s.trim().is_empty())
+        .map(PathBuf::from)
+}
+
+/// Clear the custom configuration file path from file-based preferences.
+pub fn clear_custom_config_path() -> Result<()> {
+    let mut prefs = read_file_preferences();
+    prefs.remove("config_path");
+    prefs.insert(
+        "updated_at".to_string(),
+        serde_json::Value::String(chrono::Utc::now().to_rfc3339()),
+    );
+    write_file_preferences(&prefs)
 }
 
 /// Get the last-used tool from database (async version)
@@ -263,6 +324,7 @@ pub async fn get_last_used_tool_async() -> Option<String> {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::config::Config;
 
     #[test]
     fn test_detect_tools_returns_valid_result() {
@@ -283,6 +345,43 @@ mod tests {
         // Should return Some path when home dir exists
         if let Some(config_dir) = get_config_dir() {
             assert!(config_dir.to_string_lossy().contains(".terminal-jarvis"));
+        }
+    }
+
+    #[test]
+    fn test_custom_config_path_preferences_persist_and_reset() {
+        let _guard = TEST_ENV_LOCK.lock().unwrap();
+        let temp_home = tempfile::tempdir().unwrap();
+        let old_home = std::env::var_os("HOME");
+        std::env::set_var("HOME", temp_home.path());
+
+        let config_path = temp_home.path().join("custom-config.toml");
+        let mut custom_config = Config::default();
+        custom_config.api.base_url = "https://custom-config.example".to_string();
+        fs::write(
+            &config_path,
+            toml::to_string_pretty(&custom_config).unwrap(),
+        )
+        .unwrap();
+
+        save_last_used_tool("codex").unwrap();
+        save_custom_config_path(&config_path).unwrap();
+
+        assert_eq!(get_custom_config_path(), Some(config_path));
+        assert_eq!(get_last_used_tool(), Some("codex".to_string()));
+        assert_eq!(
+            Config::load().unwrap().api.base_url,
+            "https://custom-config.example"
+        );
+
+        clear_custom_config_path().unwrap();
+        assert_eq!(get_custom_config_path(), None);
+        assert_eq!(get_last_used_tool(), Some("codex".to_string()));
+
+        if let Some(home) = old_home {
+            std::env::set_var("HOME", home);
+        } else {
+            std::env::remove_var("HOME");
         }
     }
 }

@@ -82,17 +82,28 @@ mod tests {
 
     #[test]
     fn test_warning_conditions() {
+        let _guard = crate::cli_logic::cli_logic_first_run::TEST_ENV_LOCK
+            .lock()
+            .unwrap();
+
         // Test that warning logic is sound
         use crate::auth_manager::auth_api_key_management::ApiKeyManager;
         use crate::auth_manager::auth_environment_detection::EnvironmentDetector;
 
         // Store original environment
+        let temp_config = tempfile::tempdir().unwrap();
         let original_ci = env::var("CI").ok();
         let original_api_key = env::var("GOOGLE_API_KEY").ok();
+        let original_gemini_api_key = env::var("GEMINI_API_KEY").ok();
+        let original_xdg_config_home = env::var("XDG_CONFIG_HOME").ok();
+        let original_appdata = env::var("APPDATA").ok();
 
-        // Set up warning condition (CI environment, no API key)
+        // Set up warning condition (CI environment, no API key or saved credential)
         env::set_var("CI", "true");
         env::remove_var("GOOGLE_API_KEY");
+        env::remove_var("GEMINI_API_KEY");
+        env::set_var("XDG_CONFIG_HOME", temp_config.path());
+        env::set_var("APPDATA", temp_config.path());
 
         let should_warn = EnvironmentDetector::should_prevent_browser_opening()
             && !ApiKeyManager::check_api_keys_for_tool("gemini");
@@ -106,6 +117,18 @@ mod tests {
         match original_api_key {
             Some(val) => env::set_var("GOOGLE_API_KEY", val),
             None => env::remove_var("GOOGLE_API_KEY"),
+        }
+        match original_gemini_api_key {
+            Some(val) => env::set_var("GEMINI_API_KEY", val),
+            None => env::remove_var("GEMINI_API_KEY"),
+        }
+        match original_xdg_config_home {
+            Some(val) => env::set_var("XDG_CONFIG_HOME", val),
+            None => env::remove_var("XDG_CONFIG_HOME"),
+        }
+        match original_appdata {
+            Some(val) => env::set_var("APPDATA", val),
+            None => env::remove_var("APPDATA"),
         }
     }
 }

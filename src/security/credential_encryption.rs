@@ -254,15 +254,12 @@ impl CredentialEncryption {
             .map_err(|e| anyhow!("Encryption failed: {:?}", e))?;
 
         // Preserve existing salt so future decryption can re-derive the same key.
-        // If no store exists yet, generate a fresh random salt.
+        // If an existing store cannot be parsed, fail fast rather than pairing
+        // a cached key with a new salt that cannot be re-derived later.
         let salt = if let Ok(encoded) = fs::read(&path) {
-            if let Ok(existing) = serde_json::from_slice::<EncryptedCredentialStore>(&encoded) {
-                existing.salt
-            } else {
-                let mut salt = [0u8; 32];
-                rand::thread_rng().fill_bytes(&mut salt);
-                salt.to_vec()
-            }
+            let existing = serde_json::from_slice::<EncryptedCredentialStore>(&encoded)
+                .context("Failed to parse existing encrypted credential store")?;
+            existing.salt
         } else {
             let mut salt = [0u8; 32];
             rand::thread_rng().fill_bytes(&mut salt);
@@ -537,5 +534,47 @@ mod tests {
             "Platform Keychain"
         );
         assert_eq!(format!("{}", EncryptionMethod::Aes256Gcm), "AES-256-GCM");
+    }
+
+    #[cfg(feature = "credential-encryption")]
+    #[test]
+    fn test_cached_key_fails_fast_when_existing_store_is_corrupt() {
+        let _guard = crate::cli_logic::cli_logic_first_run::TEST_ENV_LOCK
+            .lock()
+            .unwrap();
+        let temp_config = tempfile::tempdir().unwrap();
+        let old_xdg_config_home = std::env::var_os("XDG_CONFIG_HOME");
+        let old_appdata = std::env::var_os("APPDATA");
+        std::env::set_var("XDG_CONFIG_HOME", temp_config.path());
+        std::env::set_var("APPDATA", temp_config.path());
+
+        let config = EncryptionConfig {
+            keychain_preferred: false,
+            ..EncryptionConfig::default()
+        };
+        let key: Vec<u8> = (0..32).map(|_| rand::random::<u8>()).collect();
+        let mut encryption = CredentialEncryption::with_master_key(config, key);
+        let encrypted_path = encryption.encrypted_creds_path().unwrap();
+        std::fs::write(&encrypted_path, b"not-json").unwrap();
+
+        let mut tools = HashMap::new();
+        tools.insert("gemini".to_string(), HashMap::new());
+
+        let err = encryption.store_credentials(&tools).unwrap_err();
+        assert!(
+            err.to_string()
+                .contains("Failed to parse existing encrypted credential store"),
+            "unexpected error: {err}"
+        );
+        assert_eq!(std::fs::read(&encrypted_path).unwrap(), b"not-json");
+
+        match old_xdg_config_home {
+            Some(value) => std::env::set_var("XDG_CONFIG_HOME", value),
+            None => std::env::remove_var("XDG_CONFIG_HOME"),
+        }
+        match old_appdata {
+            Some(value) => std::env::set_var("APPDATA", value),
+            None => std::env::remove_var("APPDATA"),
+        }
     }
 }

@@ -1,4 +1,4 @@
-#!/data/data/com.termux/files/usr/bin/env bash
+#!/usr/bin/env bash
 #
 # tj-local: Run Terminal Jarvis with local Ollama LLM (Gemma 4B for quality)
 #

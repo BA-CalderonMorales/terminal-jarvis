@@ -1,0 +1,46 @@
+name: Feature Request
+description: Suggest a focused improvement for Terminal Jarvis
+title: "[Feature]: "
+labels:
+  - enhancement
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem
+      description: What user problem or workflow gap should this solve?
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed solution
+      description: Describe the smallest useful change.
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+      description: List any workarounds or different approaches.
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      options:
+        - CLI
+        - Interactive UI
+        - Tool catalog
+        - NPM package
+        - Cargo package
+        - Homebrew
+        - Release automation
+        - Documentation
+        - Other
+    validations:
+      required: true
+  - type: textarea
+    id: validation
+    attributes:
+      label: Validation ideas
+      description: What tests or checks would prove the change works?

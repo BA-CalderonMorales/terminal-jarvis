@@ -30,6 +30,8 @@ Max turns: 5 (`maxToolLoops`). Sequential tool execution.
 - Version sync across Cargo.toml, package.json, Formula
 - Run verify-change.sh before commits
 - Use `/usr/bin/git` not `git`
+- Do not add or update a `docs/` folder in this repo; Terminal Jarvis project docs live in `../my-life-as-a-dev/docs/projects/active/terminal-jarvis`
+- Keep issue status in GitHub issues or local `handoffs/`; do not add `.github/issue-updates/*.md` unless explicitly requested
 
 ## Deployment
 

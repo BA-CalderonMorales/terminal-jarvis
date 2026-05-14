@@ -83,6 +83,12 @@ fn normalize_npm_package(package: &str) -> &str {
     package.strip_suffix("@latest").unwrap_or(package)
 }
 
+fn contains_interactive_token(part: &str, interactive_tokens: &[&str]) -> bool {
+    part.to_ascii_lowercase()
+        .split(|ch: char| !ch.is_ascii_alphanumeric())
+        .any(|token| interactive_tokens.contains(&token))
+}
+
 #[test]
 fn tool_catalog_configs_parse_and_define_required_commands() {
     let configs = load_tool_configs();
@@ -143,7 +149,7 @@ fn tool_catalog_update_commands_are_non_interactive() {
 
         for part in update_parts {
             assert!(
-                !interactive_tokens.contains(&part),
+                !contains_interactive_token(part, &interactive_tokens),
                 "tool.update for '{tool_name}' appears interactive in {}: token '{part}'",
                 path.display()
             );

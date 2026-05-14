@@ -92,74 +92,17 @@ async fn handle_tool_launch(tool_name: &str) -> Result<()> {
 
     // Use async version that checks database first
     let tools = ToolManager::get_available_tools_async().await;
-    let tool_info = match tools.get(tool_name) {
-        Some(info) => info,
-        None => {
-            println!(
-                "\n{}: Tool '{}' not found in available tools",
-                theme.accent("Error"),
-                tool_name
-            );
-            return Ok(());
-        }
+    let Some(tool_info) = tools.get(tool_name) else {
+        println!(
+            "\n{}: Tool '{}' not found in available tools",
+            theme.accent("Error"),
+            tool_name
+        );
+        return Ok(());
     };
 
-    if !tool_info.is_installed {
-        // Check if required package manager is available before prompting install
-        if !tool_info.package_manager.is_available() {
-            let pm_label = tool_info.package_manager.label();
-            let install_hint = tool_info.package_manager.install_hint();
-
-            println!(
-                "\n{}",
-                theme.accent(&format!(
-                    "Cannot install '{}': {} is not available on your system.",
-                    tool_name, pm_label
-                ))
-            );
-            println!("{}", theme.secondary(install_hint));
-            println!("\n{}", theme.secondary("Press Enter to continue..."));
-            let _ = std::io::stdin().read_line(&mut String::new());
-            return Ok(());
-        }
-
-        let should_install = match themed_confirm(&format!(
-            "{} '{}' is not installed. Install it now?",
-            theme.accent("Tool"),
-            tool_name
-        ))
-        .with_default(true)
-        .prompt()
-        {
-            Ok(result) => result,
-            Err(_) => {
-                // User interrupted - go back to main menu
-                println!("\n{}", theme.accent("Installation cancelled"));
-                return Ok(());
-            }
-        };
-
-        if should_install {
-            println!("\n{}", theme.accent(&format!("Installing {tool_name}...")));
-            match handle_install_tool(tool_name).await {
-                Ok(_) => {
-                    println!("{}", theme.accent("Installation complete!\n"));
-                }
-                Err(e) => {
-                    // Show error gracefully and return to menu instead of crashing
-                    println!("\n{}", theme.accent(&format!("Installation failed: {e}")));
-                    println!(
-                        "{}",
-                        theme.secondary("You can try again or check the requirements.")
-                    );
-                    println!("\n{}", theme.secondary("Press Enter to continue..."));
-                    let _ = std::io::stdin().read_line(&mut String::new());
-                    return Ok(());
-                }
-            }
-        } else {
-            return Ok(());
-        }
+    if !tool_info.is_installed && !install_missing_tool_if_requested(tool_name, tool_info).await? {
+        return Ok(());
     }
 
     // Issue #26 Fix: Skip args prompt - launch immediately with defaults
@@ -170,6 +113,86 @@ async fn handle_tool_launch(tool_name: &str) -> Result<()> {
     // Always launch the tool and show post-tool menu regardless of success/failure
     let _result = launch_tool_with_progress(tool_name, &args).await;
     handle_post_tool_exit(tool_name, &args).await
+}
+
+async fn install_missing_tool_if_requested(
+    tool_name: &str,
+    tool_info: &crate::tools::ToolInfo,
+) -> Result<bool> {
+    let theme = theme_global_config::current_theme();
+    if !tool_info.package_manager.is_available() {
+        let pm_label = tool_info.package_manager.label();
+        let install_hint = tool_info.package_manager.install_hint();
+
+        println!(
+            "\n{}",
+            theme.accent(&format!(
+                "Cannot install '{}': {} is not available on your system.",
+                tool_name, pm_label
+            ))
+        );
+        println!("{}", theme.secondary(install_hint));
+        wait_for_enter(&theme);
+        return Ok(false);
+    }
+
+    let should_install = match themed_confirm(&format!(
+        "{} '{}' is not installed. Install it now?",
+        theme.accent("Tool"),
+        tool_name
+    ))
+    .with_default(true)
+    .prompt()
+    {
+        Ok(result) => result,
+        Err(_) => {
+            println!("\n{}", theme.accent("Installation cancelled"));
+            return Ok(false);
+        }
+    };
+
+    if !should_install {
+        return Ok(false);
+    }
+
+    println!("\n{}", theme.accent(&format!("Installing {tool_name}...")));
+    if let Err(e) = handle_install_tool(tool_name).await {
+        println!("\n{}", theme.accent(&format!("Installation failed: {e}")));
+        println!(
+            "{}",
+            theme.secondary("You can try again or check the requirements.")
+        );
+        wait_for_enter(&theme);
+        return Ok(false);
+    }
+
+    println!("{}", theme.accent("Installation complete!\n"));
+    Ok(true)
+}
+
+fn wait_for_enter(theme: &crate::theme::Theme) {
+    println!("\n{}", theme.secondary("Press Enter to continue..."));
+    let _ = std::io::stdin().read_line(&mut String::new());
+}
+
+fn command_exists(command: &str) -> bool {
+    std::process::Command::new("which")
+        .arg(command)
+        .output()
+        .map(|output| output.status.success())
+        .unwrap_or(false)
+}
+
+fn apt_get_install_command() -> tokio::process::Command {
+    use tokio::process::Command as AsyncCommand;
+
+    if command_exists("sudo") {
+        let mut command = AsyncCommand::new("sudo");
+        command.arg("apt-get");
+        command
+    } else {
+        AsyncCommand::new("apt-get")
+    }
 }
 
 /// Launch a tool with progress tracking
@@ -218,17 +241,13 @@ fn initial_case(s: &str) -> String {
     }
 }
 
-/// Handle user choice after tool exit -- streamlined to 3 options
+/// Handle user choice after tool exit
 async fn handle_post_tool_exit(last_tool: &str, last_args: &[String]) -> Result<()> {
     loop {
         let theme = theme_global_config::current_theme();
         let tool_display = initial_case(last_tool);
 
-        let exit_options = vec![
-            format!("Reopen {tool_display}"),
-            "Back to Home".to_string(),
-            "Exit".to_string(),
-        ];
+        let exit_options = post_tool_exit_options(last_tool);
 
         let exit_choice = match themed_select_with(&theme, "What next?", exit_options).prompt() {
             Ok(choice) => choice,
@@ -240,6 +259,10 @@ async fn handle_post_tool_exit(last_tool: &str, last_args: &[String]) -> Result<
                 let _ = launch_tool_with_progress(last_tool, last_args).await;
                 continue;
             }
+            s if s.starts_with("Update ") => {
+                handle_post_tool_update(last_tool, &tool_display, last_args).await?;
+                continue;
+            }
             "Back to Home" => return Ok(()),
             "Exit" => {
                 println!("{}", theme.accent("Goodbye!"));
@@ -248,6 +271,52 @@ async fn handle_post_tool_exit(last_tool: &str, last_args: &[String]) -> Result<
             _ => return Ok(()),
         }
     }
+}
+
+fn post_tool_exit_options(last_tool: &str) -> Vec<String> {
+    let tool_display = initial_case(last_tool);
+    let mut exit_options = vec![format!("Reopen {tool_display}")];
+
+    if InstallationManager::get_update_command(last_tool).is_some() {
+        exit_options.push(format!("Update {tool_display}"));
+    }
+
+    exit_options.push("Back to Home".to_string());
+    exit_options.push("Exit".to_string());
+
+    exit_options
+}
+
+async fn handle_post_tool_update(
+    last_tool: &str,
+    tool_display: &str,
+    last_args: &[String],
+) -> Result<()> {
+    let theme = theme_global_config::current_theme();
+    println!();
+
+    match handle_update_packages(Some(last_tool)).await {
+        Ok(()) => {
+            let reopen = themed_confirm(&format!("Reopen updated {tool_display}?"))
+                .with_default(true)
+                .prompt()
+                .unwrap_or_default();
+
+            if reopen {
+                let _ = launch_tool_with_progress(last_tool, last_args).await;
+            }
+        }
+        Err(err) => {
+            println!(
+                "{}",
+                theme.secondary(&format!(
+                    "Update failed for {tool_display}: {err}. Returning to menu."
+                ))
+            );
+        }
+    }
+
+    Ok(())
 }
 
 /// Handle the important links menu
@@ -358,6 +427,7 @@ pub async fn handle_manage_tools_menu() -> Result<()> {
             "List All Tools".to_string(),
             "Tool Information".to_string(),
             "Authentication".to_string(),
+            "Configuration Path".to_string(),
             "Switch Theme".to_string(),
             "Back to Main Menu".to_string(),
         ];
@@ -387,6 +457,9 @@ pub async fn handle_manage_tools_menu() -> Result<()> {
             }
             s if s.contains("Authentication") => {
                 crate::cli_logic::handle_authentication_menu().await?;
+            }
+            s if s.contains("Configuration Path") => {
+                handle_config_path_menu().await?;
             }
             s if s.contains("Switch Theme") => {
                 handle_theme_switch_menu().await?;
@@ -466,156 +539,167 @@ async fn handle_theme_switch_menu() -> Result<()> {
 }
 
 // Additional menu handlers will be moved to separate domain files as the refactoring continues
-async fn handle_install_tools_menu() -> Result<()> {
-    // Implementation moved to a focused module - placeholder for now
+async fn check_npm_for_install_menu() -> bool {
     use crate::progress_utils::ProgressUtils;
 
-    // Check installer prerequisites with progress (npm, uv, curl).
-    // NOTE: A missing npm is a WARNING, not a hard stop. Curl/uv tools are
-    // still installable without npm. We filter out npm tools below when npm
-    // is unavailable so users can still install everything else.
     let npm_check = ProgressContext::new("Checking NPM availability");
     tokio::time::sleep(tokio::time::Duration::from_millis(150)).await;
     let npm_available = InstallationManager::check_npm_available();
-    if !npm_available {
-        npm_check.finish_error("Node.js not available - npm tools cannot be installed");
-        ProgressUtils::info_message(
-            "Install Node.js from: https://nodejs.org/ to enable npm-based tools",
-        );
-    } else {
+
+    if npm_available {
         npm_check.finish_success("NPM is available");
+        return true;
     }
+
+    npm_check.finish_error("Node.js not available - npm tools cannot be installed");
+    ProgressUtils::info_message(
+        "Install Node.js from: https://nodejs.org/ to enable npm-based tools",
+    );
+    false
+}
+
+async fn ensure_curl_for_install_menu() {
+    use crate::progress_utils::ProgressUtils;
 
     let curl_check = ProgressContext::new("Checking curl availability");
     tokio::time::sleep(tokio::time::Duration::from_millis(100)).await;
     if InstallationManager::check_curl_available() {
         curl_check.finish_success("curl is available");
-    } else {
-        curl_check.finish_error("curl not found");
-        ProgressUtils::info_message(
-            "Some tools (e.g., Goose) use curl-based installers. Please install curl via your package manager.",
-        );
-        // Optional: Offer auto-install via apt-get if available
-        let apt_exists = std::process::Command::new("which")
-            .arg("apt-get")
-            .output()
-            .map(|o| o.status.success())
-            .unwrap_or(false);
-        if apt_exists
-            && themed_confirm("Install curl now using apt-get?")
-                .with_default(false)
-                .prompt()
-                .unwrap_or(false)
-        {
-            let sudo_available = std::process::Command::new("which")
-                .arg("sudo")
-                .output()
-                .map(|o| o.status.success())
-                .unwrap_or(false);
-            use tokio::process::Command as AsyncCommand;
-            let mut install = if sudo_available {
-                let mut c = AsyncCommand::new("sudo");
-                c.arg("apt-get");
-                c
-            } else {
-                AsyncCommand::new("apt-get")
-            };
-            let _ = install
-                .args(["update"]) // update first (best effort)
-                .status()
-                .await;
-            let mut install = if sudo_available {
-                let mut c = AsyncCommand::new("sudo");
-                c.arg("apt-get");
-                c
-            } else {
-                AsyncCommand::new("apt-get")
-            };
-            let status = install
-                .args(["install", "-y", "curl"]) // non-interactive
-                .status()
-                .await;
-            match status {
-                Ok(s) if s.success() => ProgressUtils::success_message("curl installed."),
-                _ => ProgressUtils::error_message("Failed to install curl with apt-get."),
-            }
-        }
+        return;
     }
+
+    curl_check.finish_error("curl not found");
+    ProgressUtils::info_message(
+        "Some tools (e.g., Goose) use curl-based installers. Please install curl via your package manager.",
+    );
+
+    if !command_exists("apt-get") {
+        return;
+    }
+
+    let should_install = themed_confirm("Install curl now using apt-get?")
+        .with_default(false)
+        .prompt()
+        .unwrap_or(false);
+    if !should_install {
+        return;
+    }
+
+    install_curl_with_apt_get().await;
+}
+
+async fn install_curl_with_apt_get() {
+    use crate::progress_utils::ProgressUtils;
+
+    let _ = apt_get_install_command().args(["update"]).status().await;
+    let status = apt_get_install_command()
+        .args(["install", "-y", "curl"])
+        .status()
+        .await;
+
+    match status {
+        Ok(status) if status.success() => ProgressUtils::success_message("curl installed."),
+        _ => ProgressUtils::error_message("Failed to install curl with apt-get."),
+    }
+}
+
+async fn ensure_uv_for_install_menu() {
+    use crate::progress_utils::ProgressUtils;
 
     let uv_check = ProgressContext::new("Checking uv availability");
     tokio::time::sleep(tokio::time::Duration::from_millis(100)).await;
-    let uv_available = InstallationManager::check_uv_available();
-    if uv_available {
+    if InstallationManager::check_uv_available() {
         uv_check.finish_success("uv is available");
-    } else {
-        uv_check.finish_error("uv not found");
-        ProgressUtils::info_message(
-            "Some tools (e.g., Aider) use uv for installation. Install uv: https://docs.astral.sh/uv/getting-started/installation/",
-        );
-        // Offer to install uv automatically if curl is available
-        if InstallationManager::check_curl_available()
-            && themed_confirm("Install uv now via official script?")
-                .with_default(false)
-                .prompt()
-                .unwrap_or(false)
-        {
-            // Download and run uv installer: curl -LsSf https://astral.sh/uv/install.sh | sh
-            use tokio::process::Command as AsyncCommand;
-            let url = "https://astral.sh/uv/install.sh";
-            let curl_output = AsyncCommand::new("curl")
-                .args(["-LsSf", url])
-                .output()
-                .await;
-            match curl_output {
-                Ok(out) if out.status.success() => {
-                    let mut sh = AsyncCommand::new("sh");
-                    sh.stdin(std::process::Stdio::piped());
-                    sh.stdout(std::process::Stdio::null());
-                    sh.stderr(std::process::Stdio::null());
-                    if let Ok(mut child) = sh.spawn() {
-                        if let Some(stdin) = child.stdin.as_mut() {
-                            use tokio::io::AsyncWriteExt;
-                            let _ = stdin.write_all(&out.stdout).await;
-                        }
-                        let _ = child.wait().await;
-                    }
-                    // Re-check availability
-                    if InstallationManager::check_uv_available() {
-                        ProgressUtils::success_message("uv installed successfully. You may need to restart your shell for PATH updates.");
-                    } else {
-                        ProgressUtils::warning_message("uv installation finished but not detected on PATH yet. Try restarting your terminal.");
-                    }
-                }
-                _ => {
-                    ProgressUtils::error_message(
-                        "Failed to download uv installer. See docs link above.",
-                    );
-                }
-            }
-        }
+        return;
     }
+
+    uv_check.finish_error("uv not found");
+    ProgressUtils::info_message(
+        "Some tools (e.g., Aider) use uv for installation. Install uv: https://docs.astral.sh/uv/getting-started/installation/",
+    );
+
+    let should_install = InstallationManager::check_curl_available()
+        && themed_confirm("Install uv now via official script?")
+            .with_default(false)
+            .prompt()
+            .unwrap_or(false);
+    if !should_install {
+        return;
+    }
+
+    install_uv_with_official_script().await;
+}
+
+async fn install_uv_with_official_script() {
+    use crate::progress_utils::ProgressUtils;
+    use tokio::process::Command as AsyncCommand;
+
+    let curl_output = AsyncCommand::new("curl")
+        .args(["-LsSf", "https://astral.sh/uv/install.sh"])
+        .output()
+        .await;
+    let Ok(output) = curl_output else {
+        ProgressUtils::error_message("Failed to download uv installer. See docs link above.");
+        return;
+    };
+
+    if !output.status.success() {
+        ProgressUtils::error_message("Failed to download uv installer. See docs link above.");
+        return;
+    }
+
+    let mut shell = AsyncCommand::new("sh");
+    shell.stdin(std::process::Stdio::piped());
+    shell.stdout(std::process::Stdio::null());
+    shell.stderr(std::process::Stdio::null());
+    if let Ok(mut child) = shell.spawn() {
+        if let Some(stdin) = child.stdin.as_mut() {
+            use tokio::io::AsyncWriteExt;
+            let _ = stdin.write_all(&output.stdout).await;
+        }
+        let _ = child.wait().await;
+    }
+
+    if InstallationManager::check_uv_available() {
+        ProgressUtils::success_message(
+            "uv installed successfully. You may need to restart your shell for PATH updates.",
+        );
+    } else {
+        ProgressUtils::warning_message(
+            "uv installation finished but not detected on PATH yet. Try restarting your terminal.",
+        );
+    }
+}
+
+fn filter_installable_tools(tools: Vec<String>, npm_available: bool) -> Vec<String> {
+    if npm_available {
+        return tools;
+    }
+
+    tools
+        .into_iter()
+        .filter(|tool| {
+            InstallationManager::get_install_command(tool)
+                .map(|command| !command.requires_npm)
+                .unwrap_or(false)
+        })
+        .collect()
+}
+
+async fn handle_install_tools_menu() -> Result<()> {
+    // Implementation moved to a focused module - placeholder for now
+    use crate::progress_utils::ProgressUtils;
+
+    let npm_available = check_npm_for_install_menu().await;
+    ensure_curl_for_install_menu().await;
+    ensure_uv_for_install_menu().await;
 
     // Check which tools are uninstalled with progress
     let check_progress = ProgressContext::new("Scanning for uninstalled tools");
     tokio::time::sleep(tokio::time::Duration::from_millis(400)).await;
 
-    let all_uninstalled = ToolManager::get_uninstalled_tools();
-
-    // When npm is unavailable, exclude npm-dependent tools so users can still
-    // install curl/uv tools. This is the key behaviour: prefer native downloads
-    // (curl) and don't block the whole menu on a missing npm.
-    let uninstalled_tools: Vec<String> = if npm_available {
-        all_uninstalled
-    } else {
-        all_uninstalled
-            .into_iter()
-            .filter(|tool| {
-                InstallationManager::get_install_command(tool)
-                    .map(|cmd| !cmd.requires_npm)
-                    .unwrap_or(false)
-            })
-            .collect()
-    };
+    let uninstalled_tools =
+        filter_installable_tools(ToolManager::get_uninstalled_tools(), npm_available);
 
     if uninstalled_tools.is_empty() {
         if npm_available {
@@ -735,5 +819,51 @@ async fn handle_tool_info_menu() -> Result<()> {
             std::io::stdin().read_line(&mut String::new())?;
             // Loop continues, returning to Tool Information menu
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn post_tool_exit_options_include_update_for_update_capable_tool() {
+        let options = post_tool_exit_options("claude");
+
+        assert_eq!(options[0], "Reopen Claude");
+        assert_eq!(options[1], "Update Claude");
+        assert!(options.contains(&"Back to Home".to_string()));
+        assert!(options.contains(&"Exit".to_string()));
+    }
+
+    #[test]
+    fn post_tool_exit_options_skip_update_when_tool_has_no_update_command() {
+        let options = post_tool_exit_options("__missing_tool__");
+
+        assert_eq!(
+            options,
+            vec!["Reopen __missing_tool__", "Back to Home", "Exit"]
+        );
+    }
+
+    #[test]
+    fn filter_installable_tools_keeps_all_tools_when_npm_is_available() {
+        let tools = vec!["claude".to_string(), "goose".to_string()];
+
+        assert_eq!(filter_installable_tools(tools.clone(), true), tools);
+    }
+
+    #[test]
+    fn filter_installable_tools_hides_npm_tools_when_npm_is_unavailable() {
+        let tools = vec![
+            "gemini".to_string(),
+            "goose".to_string(),
+            "aider".to_string(),
+        ];
+        let filtered = filter_installable_tools(tools, false);
+
+        assert!(!filtered.contains(&"gemini".to_string()));
+        assert!(filtered.contains(&"goose".to_string()));
+        assert!(filtered.contains(&"aider".to_string()));
     }
 }

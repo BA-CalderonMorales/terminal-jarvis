@@ -2,6 +2,24 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.0.82] - 2026-05-14
+
+### Added
+- **Post-Tool Update Flow**: Added a post-exit option to update supported tools before reopening them.
+- **Config Path Command**: Added an interactive command for inspecting configuration paths.
+- **No Repo Docs Guard**: Added CI coverage to prevent reintroducing a top-level `docs/` directory.
+
+### Changed
+- **CLI Flow Cleanup**: Flattened tool launch and install control flow to reduce nested branching.
+- **Slash Command Parsing**: Reworked slash commands around typed command variants for clearer behavior.
+- **Goose Handler Structure**: Extracted Goose-specific handling into a dedicated tool handler module.
+- **Dependency Maintenance**: Consolidated dependency maintenance updates for Rust and npm workflows.
+
+### Fixed
+- **Android NPM Installs**: Improved npm wrapper platform handling for Android/Termux binaries.
+- **Security Review Follow-Up**: Addressed credential encryption and CI security review feedback.
+- **Docs Policy Alignment**: Kept project documentation out of this repo and aligned `develop` with `main` after removing the top-level `docs/` directory.
+
 ## [0.0.81] - 2026-05-08
 
 ### Added
@@ -12,7 +30,7 @@ All notable changes to this project will be documented in this file.
 ### Fixed
 - **Headless Update-All**: `update all` now only attempts to update installed tools, preventing errors in headless/CI environments
 - **Tool Catalog Drift**: Corrected package metadata for `@just-every/code` (bin `coder`), `@nanocollective/nanocoder`, and `@earendil-works/pi-coding-agent` in root and npm-copied configs
-- **Documentation Counts**: Fixed README tool counts (22 -> 23), cli_logic module count (22 -> 19), and docs link tool count (11 -> 23)
+- **Documentation Counts**: Fixed README tool counts to 25 supported tools, cli_logic module count (22 -> 19), and docs link tool count to 25
 
 ### Security
 - **SECURITY.md Restored**: Comprehensive security documentation covering supply chain practices, credential storage, and reporting procedures

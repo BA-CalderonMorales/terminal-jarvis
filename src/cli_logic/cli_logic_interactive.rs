@@ -1,6 +1,7 @@
 use crate::cli_logic::cli_logic_autocomplete::{get_autocomplete, SlashCommandSuggester};
 use crate::cli_logic::cli_logic_first_run::{is_first_run, run_first_time_wizard};
 use crate::cli_logic::cli_logic_welcome::display_welcome_screen;
+use crate::cli_logic::command::SlashCommand;
 use crate::cli_logic::themed_components::get_autocomplete_config;
 use crate::db::core::connection::DatabaseManager;
 use crate::installation_arguments::InstallationManager;
@@ -117,77 +118,93 @@ async fn execute_command(
     theme: &crate::theme::Theme,
     npm_available: bool,
 ) -> Result<bool> {
-    match selection {
-        "/tools" => {
+    let Ok((command, args)) = SlashCommand::parse_input(selection) else {
+        return execute_non_slash_input(selection, theme, npm_available).await;
+    };
+
+    if !args.is_empty() && !command.accepts_arguments() {
+        return execute_non_slash_input(selection, theme, npm_available).await;
+    }
+
+    match command {
+        SlashCommand::Tools => {
             print!("\x1b[2J\x1b[H");
             handle_ai_tools_menu().await?;
             refresh_screen(theme, npm_available).await?;
         }
-        "/auth" => {
+        SlashCommand::Auth => {
             print!("\x1b[2J\x1b[H");
             crate::cli_logic::handle_authentication_menu().await?;
             refresh_screen(theme, npm_available).await?;
         }
-        "/links" => {
+        SlashCommand::Links => {
             print!("\x1b[2J\x1b[H");
             handle_important_links().await?;
             refresh_screen(theme, npm_available).await?;
         }
-        "/settings" => {
+        SlashCommand::Settings => {
             print!("\x1b[2J\x1b[H");
             handle_manage_tools_menu().await?;
             refresh_screen(theme, npm_available).await?;
         }
-        "/db" => {
+        SlashCommand::Config => {
+            crate::cli_logic::handle_config_command(args)?;
+        }
+        SlashCommand::Db => {
             print!("\x1b[2J\x1b[H");
             crate::cli_logic::handle_db_menu().await?;
             refresh_screen(theme, npm_available).await?;
         }
-        "/theme" => {
+        SlashCommand::Theme => {
             print!("\x1b[2J\x1b[H");
             handle_theme_selection().await?;
             refresh_screen(theme, npm_available).await?;
         }
-        "/dashboard" | "/status" => {
+        SlashCommand::Dashboard => {
             print!("\x1b[2J\x1b[H");
             crate::cli_logic::cli_logic_dashboard::handle_dashboard().await?;
             refresh_screen(theme, npm_available).await?;
         }
-        "/exit" | "/quit" => {
+        SlashCommand::Exit => {
             print!("{}", theme.reset());
             print!("\x1b[0m");
             print!("\x1b[2J\x1b[H");
             println!("Goodbye!");
             return Ok(true);
         }
-        "/help" => {
+        SlashCommand::Help => {
             display_available_commands(theme);
         }
-        _ => {
-            // Check if the input is a known tool name typed directly (without /run).
-            // This lets users type e.g. "claude" or "gemini" to launch a tool
-            // immediately, matching the headless invocation pattern:
-            //   terminal-jarvis claude
-            let candidate = selection.trim().to_lowercase();
-            let known_tools = crate::installation_arguments::InstallationManager::get_tool_names();
-            if known_tools.iter().any(|t| t.to_lowercase() == candidate) {
-                match crate::cli_logic::cli_logic_tool_execution::handle_run_tool(&candidate, &[])
-                    .await
-                {
-                    Ok(_) => {}
-                    Err(e) => eprintln!("\n{} {}", theme.accent("[!]"), e),
-                }
-                refresh_screen(theme, npm_available).await?;
-            } else {
-                println!("\n{} Unknown command: {}", theme.accent("[!]"), selection);
-                println!(
-                    "Type {} for tools or {} for commands",
-                    theme.accent("/tools"),
-                    theme.accent("/help")
-                );
-            }
-        }
     }
+    Ok(false)
+}
+
+async fn execute_non_slash_input(
+    selection: &str,
+    theme: &crate::theme::Theme,
+    npm_available: bool,
+) -> Result<bool> {
+    // Check if the input is a known tool name typed directly (without /run).
+    // This lets users type e.g. "claude" or "gemini" to launch a tool
+    // immediately, matching the headless invocation pattern:
+    //   terminal-jarvis claude
+    let candidate = selection.trim().to_lowercase();
+    let known_tools = crate::installation_arguments::InstallationManager::get_tool_names();
+    if known_tools.iter().any(|t| t.to_lowercase() == candidate) {
+        match crate::cli_logic::cli_logic_tool_execution::handle_run_tool(&candidate, &[]).await {
+            Ok(_) => {}
+            Err(e) => eprintln!("\n{} {}", theme.accent("[!]"), e),
+        }
+        refresh_screen(theme, npm_available).await?;
+    } else {
+        println!("\n{} Unknown command: {}", theme.accent("[!]"), selection);
+        println!(
+            "Type {} for tools or {} for commands",
+            theme.accent("/tools"),
+            theme.accent("/help")
+        );
+    }
+
     Ok(false)
 }
 
@@ -219,81 +236,35 @@ fn display_available_commands(theme: &crate::theme::Theme) {
         "Minimal" => {
             // Ultra-minimal: no colors, just aligned text
             println!("Commands:");
-            println!("  /tools      AI CLI Tools");
-            println!("  /auth       Authentication");
-            println!("  /links      Important Links");
-            println!("  /settings   Settings");
-            println!("  /db         Database Management");
-            println!("  /theme      Change UI Theme");
-            println!("  /dashboard  Tool Health Status");
-            println!("  /help       Show this help");
-            println!("  /exit       Exit");
+            for command in SlashCommand::all() {
+                println!("  {:<11} {}", command.command(), command.description());
+            }
             println!();
             println!("Tab to autocomplete");
         }
         "Terminal" => {
             // Hacker aesthetic: clean table format
             println!("{}", theme.primary("[COMMANDS]"));
-            println!(
-                "  {} {}",
-                theme.accent("/tools"),
-                theme.secondary("Launch AI coding assistants")
-            );
-            println!(
-                "  {} {}",
-                theme.accent("/auth"),
-                theme.secondary("Manage API credentials")
-            );
-            println!(
-                "  {} {}",
-                theme.accent("/links"),
-                theme.secondary("Documentation & resources")
-            );
-            println!(
-                "  {} {}",
-                theme.accent("/settings"),
-                theme.secondary("Install/update/configure")
-            );
-            println!(
-                "  {} {}",
-                theme.accent("/db"),
-                theme.secondary("Database operations")
-            );
-            println!(
-                "  {} {}",
-                theme.accent("/theme"),
-                theme.secondary("Switch visual theme")
-            );
-            println!(
-                "  {} {}",
-                theme.accent("/dashboard"),
-                theme.secondary("Tool health status")
-            );
-            println!(
-                "  {} {}",
-                theme.accent("/help"),
-                theme.secondary("Display this command list")
-            );
-            println!(
-                "  {} {}",
-                theme.accent("/exit"),
-                theme.secondary("Terminate session")
-            );
+            for command in SlashCommand::all() {
+                println!(
+                    "  {} {}",
+                    theme.accent(command.command()),
+                    theme.secondary(command.description())
+                );
+            }
             println!();
             println!("{}", theme.secondary("Tab to autocomplete"));
         }
         _ => {
             // Default TJarvis: Clean, modern layout
             println!("{}", theme.accent("Commands:"));
-            println!("  {} - AI CLI Tools", theme.secondary("/tools"));
-            println!("  {} - Authentication", theme.secondary("/auth"));
-            println!("  {} - Important Links", theme.secondary("/links"));
-            println!("  {} - Settings", theme.secondary("/settings"));
-            println!("  {} - Database Management", theme.secondary("/db"));
-            println!("  {} - Change UI Theme", theme.secondary("/theme"));
-            println!("  {} - Tool Health Status", theme.secondary("/dashboard"));
-            println!("  {} - Show this help", theme.secondary("/help"));
-            println!("  {} - Exit", theme.secondary("/exit"));
+            for command in SlashCommand::all() {
+                println!(
+                    "  {} - {}",
+                    theme.secondary(command.command()),
+                    command.description()
+                );
+            }
             println!();
             println!("{}", theme.secondary("Tab to autocomplete"));
         }

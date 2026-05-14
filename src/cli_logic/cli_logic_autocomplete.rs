@@ -4,64 +4,8 @@
 // Uses a simple prefix tree (trie-like) structure with caching for
 // fast lookups during interactive input.
 
+use crate::cli_logic::command::SlashCommand;
 use std::collections::HashMap;
-
-/// Command definition with metadata
-#[derive(Debug, Clone)]
-pub struct CommandDef {
-    pub command: &'static str,
-    pub description: &'static str,
-    pub aliases: &'static [&'static str],
-}
-
-/// Static command definitions - full names only, no single-letter aliases
-pub static COMMANDS: &[CommandDef] = &[
-    CommandDef {
-        command: "/tools",
-        description: "AI CLI Tools",
-        aliases: &[],
-    },
-    CommandDef {
-        command: "/auth",
-        description: "Authentication",
-        aliases: &[],
-    },
-    CommandDef {
-        command: "/links",
-        description: "Important Links",
-        aliases: &[],
-    },
-    CommandDef {
-        command: "/settings",
-        description: "Settings",
-        aliases: &[],
-    },
-    CommandDef {
-        command: "/db",
-        description: "Database Management",
-        aliases: &[],
-    },
-    CommandDef {
-        command: "/theme",
-        description: "Change UI Theme",
-        aliases: &[],
-    },
-    CommandDef {
-        command: "/dashboard",
-        description: "Tool Health Dashboard",
-        aliases: &["/status"],
-    },
-    CommandDef {
-        command: "/help",
-        description: "Show help",
-        aliases: &[],
-    },
-    CommandDef {
-        command: "/exit",
-        description: "Exit",
-        aliases: &["/quit"],
-    },
-];
 
 /// Autocomplete suggestion with match info
 #[derive(Debug, Clone)]
@@ -91,10 +35,10 @@ impl CommandAutocomplete {
         let mut all_commands = Vec::new();
 
         // Add all commands and their aliases
-        for cmd in COMMANDS {
-            all_commands.push((cmd.command.to_string(), cmd.description.to_string()));
-            for alias in cmd.aliases {
-                all_commands.push((alias.to_string(), cmd.description.to_string()));
+        for cmd in SlashCommand::all() {
+            all_commands.push((cmd.command().to_string(), cmd.description().to_string()));
+            for alias in cmd.aliases() {
+                all_commands.push((alias.to_string(), cmd.description().to_string()));
             }
         }
 
@@ -170,13 +114,13 @@ impl CommandAutocomplete {
     pub fn resolve_command(&self, input: &str) -> Option<&'static str> {
         let input_lower = input.to_lowercase();
 
-        for cmd in COMMANDS {
-            if cmd.command == input_lower {
-                return Some(cmd.command);
+        for command in SlashCommand::all() {
+            if command.command() == input_lower {
+                return Some(command.command());
             }
-            for alias in cmd.aliases {
+            for alias in command.aliases() {
                 if *alias == input_lower {
-                    return Some(cmd.command);
+                    return Some(command.command());
                 }
             }
         }
@@ -185,9 +129,9 @@ impl CommandAutocomplete {
 
     /// Get all available commands (for help display)
     pub fn all_commands(&self) -> Vec<(&'static str, &'static str)> {
-        COMMANDS
+        SlashCommand::all()
             .iter()
-            .map(|c| (c.command, c.description))
+            .map(|command| (command.command(), command.description()))
             .collect()
     }
 
@@ -273,9 +217,9 @@ impl inquire::Autocomplete for SlashCommandSuggester {
 
 /// Get all commands as formatted strings for display
 pub fn get_all_command_options() -> Vec<String> {
-    COMMANDS
+    SlashCommand::all()
         .iter()
-        .map(|c| format!("{} - {}", c.command, c.description))
+        .map(|command| format!("{} - {}", command.command(), command.description()))
         .collect()
 }
 
@@ -310,6 +254,7 @@ mod tests {
         assert_eq!(ac.resolve_command("/quit"), Some("/exit"));
         assert_eq!(ac.resolve_command("/tools"), Some("/tools"));
         assert_eq!(ac.resolve_command("/help"), Some("/help"));
+        assert_eq!(ac.resolve_command("/config"), Some("/config"));
     }
 
     #[test]
@@ -338,6 +283,7 @@ mod tests {
         let ac = CommandAutocomplete::new();
 
         assert!(ac.is_valid_command("/tools"));
+        assert!(ac.is_valid_command("/config"));
         assert!(ac.is_valid_command("/quit")); // Only remaining alias
         assert!(!ac.is_valid_command("/t")); // No longer an alias
         assert!(!ac.is_valid_command("/invalid"));
@@ -350,6 +296,14 @@ mod tests {
         // "/" should match all commands
         let suggestions = ac.suggest("/");
         assert!(suggestions.len() > 5);
+    }
+
+    #[test]
+    fn test_config_command_suggestions() {
+        let mut ac = CommandAutocomplete::new();
+
+        let suggestions = ac.suggest("/co");
+        assert!(suggestions.iter().any(|s| s.command == "/config"));
     }
 
     #[test]

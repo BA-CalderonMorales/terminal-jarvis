@@ -11,7 +11,7 @@ assignees: ""
 **BEFORE submitting this PR, please ensure:**
 
 - [ ] I have joined the [Terminal Jarvis Discord](https://discord.gg/WteQm6MTZW) and discussed this contribution
-- [ ] I have read and understand the [CONTRIBUTIONS.md](docs/CONTRIBUTIONS.md) guidelines
+- [ ] I have read and understand the [CONTRIBUTING.md](../CONTRIBUTING.md) guidelines
 - [ ] All tests pass locally (`cargo test`)
 - [ ] Code follows project formatting standards (`cargo fmt --all` and `cargo clippy`)
 - [ ] **NO EMOJIS** used anywhere in commits, code, or documentation (per AGENTS.md guidelines)
