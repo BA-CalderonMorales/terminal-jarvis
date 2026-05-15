@@ -333,6 +333,7 @@ mod tests {
     #[test]
     fn test_browser_detection_mechanism() {
         let _guard = ENV_TEST_MUTEX.lock().unwrap();
+        let _test_env = AuthTestEnvironment::new().expect("Failed to create test environment");
         // Test our ability to detect browser-opening scenarios
         env::remove_var("DISPLAY");
         env::remove_var("CODESPACES");

@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file.
 
+## [Unreleased]
+
+### Changed
+- **Release Review Gates**: Aligned npm CI/CD workflows to Node 20+ with engine-strict installs so dependency engine drift is caught before release or main sync.
+
+### Fixed
+- **Release Review Follow-Up**: Hardened environment-mutating tests with panic-safe restoration, clarified custom config load failures, aligned ADK version display, and improved tool catalog assertion diagnostics.
+- **Coverage Badge Link**: Updated the root README coverage badge to point at the CI workflow that produces the coverage report artifact.
+
 ## [0.0.82] - 2026-05-14
 
 ### Added

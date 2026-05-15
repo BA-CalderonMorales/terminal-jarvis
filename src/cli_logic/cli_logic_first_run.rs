@@ -325,6 +325,33 @@ pub async fn get_last_used_tool_async() -> Option<String> {
 mod tests {
     use super::*;
     use crate::config::Config;
+    use std::ffi::OsString;
+
+    struct EnvVarGuard {
+        originals: Vec<(&'static str, Option<OsString>)>,
+    }
+
+    impl EnvVarGuard {
+        fn capture(keys: &[&'static str]) -> Self {
+            Self {
+                originals: keys
+                    .iter()
+                    .map(|key| (*key, std::env::var_os(key)))
+                    .collect(),
+            }
+        }
+    }
+
+    impl Drop for EnvVarGuard {
+        fn drop(&mut self) {
+            for (key, value) in &self.originals {
+                match value {
+                    Some(val) => std::env::set_var(key, val),
+                    None => std::env::remove_var(key),
+                }
+            }
+        }
+    }
 
     #[test]
     fn test_detect_tools_returns_valid_result() {
@@ -351,8 +378,8 @@ mod tests {
     #[test]
     fn test_custom_config_path_preferences_persist_and_reset() {
         let _guard = TEST_ENV_LOCK.lock().unwrap();
+        let _env = EnvVarGuard::capture(&["HOME"]);
         let temp_home = tempfile::tempdir().unwrap();
-        let old_home = std::env::var_os("HOME");
         std::env::set_var("HOME", temp_home.path());
 
         let config_path = temp_home.path().join("custom-config.toml");
@@ -377,11 +404,5 @@ mod tests {
         clear_custom_config_path().unwrap();
         assert_eq!(get_custom_config_path(), None);
         assert_eq!(get_last_used_tool(), Some("codex".to_string()));
-
-        if let Some(home) = old_home {
-            std::env::set_var("HOME", home);
-        } else {
-            std::env::remove_var("HOME");
-        }
     }
 }

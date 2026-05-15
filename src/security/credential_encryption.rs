@@ -489,6 +489,33 @@ pub struct EncryptionStatus {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use std::ffi::OsString;
+
+    struct EnvVarGuard {
+        originals: Vec<(&'static str, Option<OsString>)>,
+    }
+
+    impl EnvVarGuard {
+        fn capture(keys: &[&'static str]) -> Self {
+            Self {
+                originals: keys
+                    .iter()
+                    .map(|key| (*key, std::env::var_os(key)))
+                    .collect(),
+            }
+        }
+    }
+
+    impl Drop for EnvVarGuard {
+        fn drop(&mut self) {
+            for (key, value) in &self.originals {
+                match value {
+                    Some(val) => std::env::set_var(key, val),
+                    None => std::env::remove_var(key),
+                }
+            }
+        }
+    }
 
     #[test]
     fn test_encryption_config_default() {
@@ -542,9 +569,8 @@ mod tests {
         let _guard = crate::cli_logic::cli_logic_first_run::TEST_ENV_LOCK
             .lock()
             .unwrap();
+        let _env = EnvVarGuard::capture(&["XDG_CONFIG_HOME", "APPDATA"]);
         let temp_config = tempfile::tempdir().unwrap();
-        let old_xdg_config_home = std::env::var_os("XDG_CONFIG_HOME");
-        let old_appdata = std::env::var_os("APPDATA");
         std::env::set_var("XDG_CONFIG_HOME", temp_config.path());
         std::env::set_var("APPDATA", temp_config.path());
 
@@ -567,14 +593,5 @@ mod tests {
             "unexpected error: {err}"
         );
         assert_eq!(std::fs::read(&encrypted_path).unwrap(), b"not-json");
-
-        match old_xdg_config_home {
-            Some(value) => std::env::set_var("XDG_CONFIG_HOME", value),
-            None => std::env::remove_var("XDG_CONFIG_HOME"),
-        }
-        match old_appdata {
-            Some(value) => std::env::set_var("APPDATA", value),
-            None => std::env::remove_var("APPDATA"),
-        }
     }
 }
