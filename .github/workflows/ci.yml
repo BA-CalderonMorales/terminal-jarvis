@@ -100,7 +100,12 @@ jobs:
           cargo install cargo-tarpaulin
         fi
         # Generate coverage report (xml for upload, stdout for logs)
-        cargo tarpaulin --verbose --all-features --workspace --timeout 120 --out Xml --out Stdout 2>&1 | head -100 || true
+        set +e
+        cargo tarpaulin --verbose --all-features --workspace --timeout 120 --out Xml --out Stdout > tarpaulin.log 2>&1
+        tarpaulin_status=$?
+        set -e
+        head -100 tarpaulin.log
+        exit "$tarpaulin_status"
       continue-on-error: true
 
     - name: Upload coverage report
