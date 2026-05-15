@@ -31,6 +31,7 @@ test_matrix() {
   local output
   output="$("$SCRIPT" --list-matrix)"
   assert_contains "$output" $'npm\tcold\tnpx-terminal-jarvis@beta' "matrix must include beta npx cold benchmark"
+  assert_contains "$output" $'npm\twarm\tnpx-terminal-jarvis@beta' "matrix must include beta npx warm benchmark"
   assert_contains "$output" $'npm\twarm\tnpm-install-g-terminal-jarvis' "matrix must include warm npm global install"
   assert_contains "$output" $'cargo\tcold\tcargo-install-terminal-jarvis' "matrix must include cargo baseline"
 }
@@ -46,7 +47,8 @@ test_matrix_mutation_is_caught() {
   rm -rf "$mutant_dir"
   mkdir -p "$mutant_dir"
   cp "$SCRIPT" "$mutant"
-  sed -i '/terminal-jarvis@beta/d' "$mutant"
+  awk '$0 != "  \"terminal-jarvis@beta\"" { print }' "$mutant" > "$mutant.tmp"
+  mv "$mutant.tmp" "$mutant"
   chmod +x "$mutant"
 
   if "$mutant" --work-dir "$mutant_dir/work" --self-test >/dev/null 2>&1; then

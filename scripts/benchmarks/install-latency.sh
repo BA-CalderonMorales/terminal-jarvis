@@ -102,6 +102,10 @@ self_test() {
     $'npm\tcold\tnpx-terminal-jarvis@latest\tnpx --yes terminal-jarvis@latest --version' \
     $'npm\tcold\tnpx-terminal-jarvis@beta\tnpx --yes terminal-jarvis@beta --version' \
     $'npm\tcold\tnpx-terminal-jarvis@stable\tnpx --yes terminal-jarvis@stable --version' \
+    $'npm\twarm\tnpx-terminal-jarvis\tnpx --yes terminal-jarvis --version' \
+    $'npm\twarm\tnpx-terminal-jarvis@latest\tnpx --yes terminal-jarvis@latest --version' \
+    $'npm\twarm\tnpx-terminal-jarvis@beta\tnpx --yes terminal-jarvis@beta --version' \
+    $'npm\twarm\tnpx-terminal-jarvis@stable\tnpx --yes terminal-jarvis@stable --version' \
     $'npm\tcold\tnpm-install-g-terminal-jarvis\tnpm install -g terminal-jarvis' \
     $'npm\twarm\tnpm-install-g-terminal-jarvis\tnpm install -g terminal-jarvis' \
     $'cargo\tcold\tcargo-install-terminal-jarvis\tcargo install terminal-jarvis --root <isolated>' \
@@ -195,11 +199,26 @@ require_command() {
   fi
 }
 
+now_ms() {
+  if command -v python3 >/dev/null 2>&1; then
+    python3 - <<'PY'
+import time
+print(time.time_ns() // 1_000_000)
+PY
+  elif command -v perl >/dev/null 2>&1; then
+    perl -MTime::HiRes=time -e 'printf "%.0f\n", time() * 1000'
+  elif command -v node >/dev/null 2>&1; then
+    node -e 'console.log(Date.now())'
+  else
+    echo $(( $(date +%s) * 1000 ))
+  fi
+}
+
 duration_ms() {
-  local started_ns="$1"
-  local ended_ns
-  ended_ns="$(date +%s%N)"
-  echo $(((ended_ns - started_ns) / 1000000))
+  local started_ms="$1"
+  local ended_ms
+  ended_ms="$(now_ms)"
+  echo $((ended_ms - started_ms))
 }
 
 slugify() {
@@ -251,17 +270,17 @@ run_case() {
   local slug
   slug="$(slugify "$manager-$mode-$name")"
   local log_file="$RUN_DIR/$slug.log"
-  local started_ns
+  local started_ms
   local exit_code=0
   local ms
 
   log "Running [$manager][$mode] $name"
-  started_ns="$(date +%s%N)"
+  started_ms="$(now_ms)"
   set +e
   "$@" > "$log_file" 2>&1
   exit_code=$?
   set -e
-  ms="$(duration_ms "$started_ns")"
+  ms="$(duration_ms "$started_ms")"
 
   printf "%s\t%s\t%s\t%s\t%s\t%s\t%s\n" \
     "$manager" "$mode" "$name" "$ms" "$exit_code" "$command_text" "$log_file" >> "$SUMMARY"
@@ -280,14 +299,9 @@ run_npm_matrix() {
   require_command npm
   require_command npx
 
-  reset_npm_dirs
-
-  for mode in cold warm; do
-    if [[ "$mode" == "cold" ]]; then
-      reset_npm_dirs
-    fi
-
-    for package_spec in "${NPM_PACKAGES[@]}"; do
+  for package_spec in "${NPM_PACKAGES[@]}"; do
+    reset_npm_dirs
+    for mode in cold warm; do
       run_case "npm" "$mode" "npx-$package_spec" "npx --yes $package_spec --version" \
         env \
           HOME="$RUN_DIR/npm-home" \
@@ -297,7 +311,10 @@ run_npm_matrix() {
           npm_config_foreground_scripts=true \
           npx --yes "$package_spec" --version
     done
+  done
 
+  reset_npm_dirs
+  for mode in cold warm; do
     run_case "npm" "$mode" "npm-install-g-terminal-jarvis" "npm install -g terminal-jarvis" \
       env \
         HOME="$RUN_DIR/npm-home" \
@@ -346,10 +363,12 @@ run_brew_matrix() {
   fi
 
   for mode in cold warm; do
-    brew uninstall --force terminal-jarvis >/dev/null 2>&1 || true
+    if [[ "$mode" == "cold" ]]; then
+      brew uninstall --force terminal-jarvis >/dev/null 2>&1 || true
 
-    if [[ "$mode" == "cold" && "$CLEAR_BREW_CACHE" == true && -n "$cache_dir" ]]; then
-      rm -f "$cache_dir"/downloads/*terminal-jarvis* "$cache_dir"/*terminal-jarvis* 2>/dev/null || true
+      if [[ "$CLEAR_BREW_CACHE" == true && -n "$cache_dir" ]]; then
+        rm -f "$cache_dir"/downloads/*terminal-jarvis* "$cache_dir"/*terminal-jarvis* 2>/dev/null || true
+      fi
     fi
 
     run_case "homebrew" "$mode" "brew-install-terminal-jarvis" "brew install $formula" \
