@@ -31,7 +31,10 @@ test_matrix() {
   local output
   output="$("$SCRIPT" --list-matrix)"
   assert_contains "$output" $'npm\tcold\tnpx-terminal-jarvis@beta' "matrix must include beta npx cold benchmark"
+  assert_contains "$output" $'npm\twarm\tnpx-terminal-jarvis' "matrix must include default npx warm benchmark"
+  assert_contains "$output" $'npm\twarm\tnpx-terminal-jarvis@latest' "matrix must include latest npx warm benchmark"
   assert_contains "$output" $'npm\twarm\tnpx-terminal-jarvis@beta' "matrix must include beta npx warm benchmark"
+  assert_contains "$output" $'npm\twarm\tnpx-terminal-jarvis@stable' "matrix must include stable npx warm benchmark"
   assert_contains "$output" $'npm\twarm\tnpm-install-g-terminal-jarvis' "matrix must include warm npm global install"
   assert_contains "$output" $'cargo\tcold\tcargo-install-terminal-jarvis' "matrix must include cargo baseline"
 }
