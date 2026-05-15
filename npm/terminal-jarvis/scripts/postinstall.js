@@ -100,7 +100,7 @@ async function download(url, dest, retries = DOWNLOAD_RETRIES) {
                     https.get(requestUrl, (res) => {
                         // Handle redirects (GitHub uses them for releases)
                         if (res.statusCode >= 300 && res.statusCode < 400 && res.headers.location) {
-                            clearTimeout(timeout);
+                            res.resume();
                             return makeRequest(res.headers.location);
                         }
 
@@ -346,5 +346,6 @@ module.exports = {
     getPlatformInfo,
     getAssetUrl,
     checkPrerequisites,
+    download,
     main
 };
