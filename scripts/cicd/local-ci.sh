@@ -253,15 +253,19 @@ log_info_if_enabled "Step 5: Validation Summary"
 log_progress "Checking version consistency"
 
 NPM_VERSION=$(grep '"version":' npm/terminal-jarvis/package.json | sed 's/.*"version": "\(.*\)".*/\1/')
+E2E_VERSION=$(grep '"version":' e2e/package.json | head -1 | sed 's/.*"version": "\(.*\)".*/\1/')
+E2E_LOCK_VERSION=$(grep '"version":' e2e/package-lock.json | head -1 | sed 's/.*"version": "\(.*\)".*/\1/')
 TS_VERSION=$(grep "console.log.*Terminal Jarvis v" npm/terminal-jarvis/src/index.ts | sed 's/.*Terminal Jarvis v\([0-9.]*\).*/\1/')
 POSTINSTALL_VERSION=$(grep "Terminal Jarvis v" npm/terminal-jarvis/scripts/postinstall.js | sed 's/.*Terminal Jarvis v\([0-9.]*\).*/\1/')
 
 log_info_if_enabled "  Cargo.toml: ${CURRENT_VERSION}"
 log_info_if_enabled "  package.json: ${NPM_VERSION}"
+log_info_if_enabled "  e2e/package.json: ${E2E_VERSION}"
+log_info_if_enabled "  e2e/package-lock.json: ${E2E_LOCK_VERSION}"
 log_info_if_enabled "  index.ts: ${TS_VERSION}"
 log_info_if_enabled "  postinstall: ${POSTINSTALL_VERSION}"
 
-if [ "$CURRENT_VERSION" = "$NPM_VERSION" ] && [ "$CURRENT_VERSION" = "$TS_VERSION" ] && [ "$CURRENT_VERSION" = "$POSTINSTALL_VERSION" ]; then
+if [ "$CURRENT_VERSION" = "$NPM_VERSION" ] && [ "$CURRENT_VERSION" = "$E2E_VERSION" ] && [ "$CURRENT_VERSION" = "$E2E_LOCK_VERSION" ] && [ "$CURRENT_VERSION" = "$TS_VERSION" ] && [ "$CURRENT_VERSION" = "$POSTINSTALL_VERSION" ]; then
     log_progress_done
     log_success_if_enabled "All versions are synchronized"
 else
