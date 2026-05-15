@@ -109,7 +109,7 @@ jobs:
       with:
         name: rust-coverage-report
         path: cobertura.xml
-        if-no-files-found: warn
+        if-no-files-found: error
         retention-days: 14
 
     # Go code quality + tests
