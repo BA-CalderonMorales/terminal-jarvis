@@ -2,9 +2,9 @@ name: CodeQL
 
 on:
   push:
-    branches: [ "main", "develop", "feat/*", "bug/*", "security/*", "hotfix/*" ]
+    branches: [ "main", "develop", "feat/*", "fix/*", "bug/*", "security/*", "hotfix/*" ]
   pull_request:
-    branches: [ "main", "develop", "feat/*", "bug/*", "security/*", "hotfix/*" ]
+    branches: [ "main", "develop", "feat/*", "fix/*", "bug/*", "security/*", "hotfix/*" ]
   schedule:
     - cron: '0 3 * * 1'
 

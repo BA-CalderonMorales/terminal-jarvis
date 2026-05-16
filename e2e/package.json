@@ -1,6 +1,6 @@
 {
     "name": "terminal-jarvis-e2e",
-    "version": "0.0.70",
+    "version": "0.0.82",
     "private": true,
     "description": "E2E tests for Terminal Jarvis using cli-testing-library",
     "scripts": {

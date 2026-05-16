@@ -142,10 +142,14 @@ display_version_status() {
     cargo_version=$(grep '^version = ' Cargo.toml | sed 's/version = "\(.*\)"/\1/')
     local npm_version
     npm_version=$(grep '"version":' npm/terminal-jarvis/package.json | sed 's/.*"version": "\(.*\)".*/\1/')
+    local e2e_version
+    e2e_version=$(grep '"version":' e2e/package.json | head -1 | sed 's/.*"version": "\(.*\)".*/\1/')
+    local e2e_lock_version
+    e2e_lock_version=$(grep '"version":' e2e/package-lock.json | head -1 | sed 's/.*"version": "\(.*\)".*/\1/')
     local ts_version
     ts_version=$(grep "console.log.*Terminal Jarvis v" npm/terminal-jarvis/src/index.ts | sed 's/.*Terminal Jarvis v\([0-9.]*\).*/\1/')
     local postinstall_version
-    postinstall_version=$(grep "Terminal Jarvis v" npm/terminal-jarvis/package.json | sed 's/.*Terminal Jarvis v\([0-9.]*\).*/\1/')
+    postinstall_version=$(grep "Terminal Jarvis v" npm/terminal-jarvis/scripts/postinstall.js | sed 's/.*Terminal Jarvis v\([0-9.]*\).*/\1/')
     local adk_version
     adk_version=$(grep 'Version = "' adk/internal/ui/theme.go | sed 's/.*Version = "v\(.*\)".*/\1/')
     local homebrew_version=""
@@ -157,6 +161,8 @@ display_version_status() {
     log_info_if_enabled "Current Version Status:"
     echo -e "${BLUE}  • Cargo.toml: ${cargo_version}${RESET}"
     log_info_if_enabled "  • npm/terminal-jarvis/package.json: ${npm_version}"
+    log_info_if_enabled "  • e2e/package.json: ${e2e_version}"
+    log_info_if_enabled "  • e2e/package-lock.json: ${e2e_lock_version}"
     log_info_if_enabled "  • npm/terminal-jarvis/src/index.ts: ${ts_version}"
     log_info_if_enabled "  • npm/terminal-jarvis/package.json postinstall: ${postinstall_version}"
     log_info_if_enabled "  • adk/internal/ui/theme.go: ${adk_version}"
@@ -173,7 +179,7 @@ display_version_status() {
     
     # Check if all versions match (including Homebrew and postinstall)
     local all_match=true
-    if [ "$cargo_version" != "$npm_version" ] || [ "$cargo_version" != "$ts_version" ] || [ "$cargo_version" != "$postinstall_version" ]; then
+    if [ "$cargo_version" != "$npm_version" ] || [ "$cargo_version" != "$e2e_version" ] || [ "$cargo_version" != "$e2e_lock_version" ] || [ "$cargo_version" != "$ts_version" ] || [ "$cargo_version" != "$postinstall_version" ]; then
         all_match=false
     fi
     
@@ -221,14 +227,21 @@ update_all_versions() {
     # Update package-lock.json to match new version
     log_info_if_enabled "  • Updating npm/terminal-jarvis/package-lock.json"
     cd npm/terminal-jarvis && npm install --package-lock-only --silent && cd ../..
+
+    # Update E2E package metadata so test output and lockfile stay aligned
+    log_info_if_enabled "  • Updating e2e/package.json"
+    sed -i "s/\"version\": \".*\"/\"version\": \"$new_version\"/" e2e/package.json
+
+    log_info_if_enabled "  • Updating e2e/package-lock.json"
+    cd e2e && npm install --package-lock-only --silent && cd ..
     
     # Update version display in TypeScript in showFallbackMessage function
     log_info_if_enabled "  • Updating npm/terminal-jarvis/src/index.ts"
     sed -i "s/console.log(\"Terminal Jarvis v[0-9]\+\.[0-9]\+\.[0-9]\+\");/console.log(\"Terminal Jarvis v$new_version\");/g" npm/terminal-jarvis/src/index.ts
     
     # Update postinstall script version
-    log_info_if_enabled "  • Updating npm/terminal-jarvis/package.json postinstall script"
-    sed -i "s/Terminal Jarvis v[0-9]\+\.[0-9]\+\.[0-9]\+/Terminal Jarvis v$new_version/g" npm/terminal-jarvis/package.json
+    log_info_if_enabled "  • Updating npm/terminal-jarvis/scripts/postinstall.js"
+    sed -i "s/Terminal Jarvis v[0-9]\+\.[0-9]\+\.[0-9]\+/Terminal Jarvis v$new_version/g" npm/terminal-jarvis/scripts/postinstall.js
     
     # Update Go ADK version in theme.go
     log_info_if_enabled "  • Updating adk/internal/ui/theme.go version"
@@ -704,14 +717,18 @@ case $version_choice in
         log_warn "Verifying version consistency across files..."
         
         NPM_VERSION=$(grep '"version":' npm/terminal-jarvis/package.json | sed 's/.*"version": "\(.*\)".*/\1/')
+        E2E_VERSION=$(grep '"version":' e2e/package.json | head -1 | sed 's/.*"version": "\(.*\)".*/\1/')
+        E2E_LOCK_VERSION=$(grep '"version":' e2e/package-lock.json | head -1 | sed 's/.*"version": "\(.*\)".*/\1/')
         TS_VERSION=$(grep "console.log.*Terminal Jarvis v" npm/terminal-jarvis/src/index.ts | sed 's/.*Terminal Jarvis v\([0-9.]*\).*/\1/')
         
         echo -e "${BLUE}  Cargo.toml: ${CURRENT_VERSION}${RESET}"
         echo -e "${BLUE}  package.json: ${NPM_VERSION}${RESET}"
+        echo -e "${BLUE}  e2e/package.json: ${E2E_VERSION}${RESET}"
+        echo -e "${BLUE}  e2e/package-lock.json: ${E2E_LOCK_VERSION}${RESET}"
         echo -e "${BLUE}  index.ts: ${TS_VERSION}${RESET}"
         echo -e "${BLUE}  cli_logic.rs: Uses env!(\"CARGO_PKG_VERSION\") - auto-synced${RESET}"
         
-        if [ "$CURRENT_VERSION" = "$NPM_VERSION" ] && [ "$CURRENT_VERSION" = "$TS_VERSION" ]; then
+        if [ "$CURRENT_VERSION" = "$NPM_VERSION" ] && [ "$CURRENT_VERSION" = "$E2E_VERSION" ] && [ "$CURRENT_VERSION" = "$E2E_LOCK_VERSION" ] && [ "$CURRENT_VERSION" = "$TS_VERSION" ]; then
             log_success "All versions are synchronized"
             echo -e "${BLUE}→ Will proceed with commit, tag v${CURRENT_VERSION}, and deployment${RESET}"
         else
@@ -721,6 +738,8 @@ case $version_choice in
             echo ""
             echo -e "${BLUE}Files that need updating:${RESET}"
             [ "$CURRENT_VERSION" != "$NPM_VERSION" ] && echo -e "${YELLOW}  • npm/terminal-jarvis/package.json (currently ${NPM_VERSION})${RESET}"
+            [ "$CURRENT_VERSION" != "$E2E_VERSION" ] && echo -e "${YELLOW}  • e2e/package.json (currently ${E2E_VERSION})${RESET}"
+            [ "$CURRENT_VERSION" != "$E2E_LOCK_VERSION" ] && echo -e "${YELLOW}  • e2e/package-lock.json (currently ${E2E_LOCK_VERSION})${RESET}"
             [ "$CURRENT_VERSION" != "$TS_VERSION" ] && echo -e "${YELLOW}  • npm/terminal-jarvis/src/index.ts (currently ${TS_VERSION})${RESET}"
             echo ""
             echo -e "${BLUE}Note: src/cli_logic.rs auto-updates from Cargo.toml${RESET}"

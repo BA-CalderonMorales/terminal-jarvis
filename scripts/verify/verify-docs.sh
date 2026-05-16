@@ -70,19 +70,6 @@ get_cargo_version() {
     grep '^version = ' Cargo.toml | sed 's/version = "\(.*\)"/\1/'
 }
 
-# Check version in Cargo.toml
-check_cargo_version() {
-    local version
-    version=$(get_cargo_version)
-    if [[ "$version" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
-        log_success "Cargo.toml version: $version"
-        echo "$version"
-    else
-        log_error "Invalid version format in Cargo.toml: $version"
-        echo ""
-    fi
-}
-
 # Check version in npm package.json
 check_npm_version() {
     local expected="$1"
@@ -103,6 +90,49 @@ check_npm_version() {
         if [[ "$FIX_MODE" == true ]]; then
             sed -i "s/\"version\": \".*\"/\"version\": \"$expected\"/" "$file"
             log_info "Fixed: Updated $file to version $expected"
+        fi
+    fi
+}
+
+# Check version in E2E package metadata
+check_e2e_version() {
+    local expected="$1"
+    local package_file="e2e/package.json"
+    local lock_file="e2e/package-lock.json"
+
+    if [[ ! -f "$package_file" ]]; then
+        log_error "$package_file not found"
+        return
+    fi
+
+    local package_version
+    package_version=$(grep '"version":' "$package_file" | head -1 | sed 's/.*"version": "\(.*\)".*/\1/')
+
+    if [[ "$package_version" == "$expected" ]]; then
+        log_success "E2E package.json version: $package_version"
+    else
+        log_error "E2E package.json version mismatch: expected $expected, found $package_version"
+        if [[ "$FIX_MODE" == true ]]; then
+            sed -i "s/\"version\": \".*\"/\"version\": \"$expected\"/" "$package_file"
+            log_info "Fixed: Updated $package_file to version $expected"
+        fi
+    fi
+
+    if [[ ! -f "$lock_file" ]]; then
+        log_error "$lock_file not found"
+        return
+    fi
+
+    local lock_version
+    lock_version=$(grep '"version":' "$lock_file" | head -1 | sed 's/.*"version": "\(.*\)".*/\1/')
+
+    if [[ "$lock_version" == "$expected" ]]; then
+        log_success "E2E package-lock.json version: $lock_version"
+    else
+        log_error "E2E package-lock.json version mismatch: expected $expected, found $lock_version"
+        if [[ "$FIX_MODE" == true ]]; then
+            (cd e2e && npm install --package-lock-only --silent)
+            log_info "Fixed: Updated $lock_file to version $expected"
         fi
     fi
 }
@@ -310,13 +340,15 @@ if [[ "$FIX_MODE" == true ]]; then
 fi
 
 # Get canonical version
-CANONICAL_VERSION=$(check_cargo_version)
+CANONICAL_VERSION=$(get_cargo_version)
 
-if [[ -z "$CANONICAL_VERSION" ]]; then
+if [[ "$CANONICAL_VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+    log_success "Cargo.toml version: $CANONICAL_VERSION"
+else
     echo ""
     echo "=============================================="
     echo -e "${RED}  VALIDATION FAILED${RESET}"
-    echo "  Cannot determine canonical version"
+    echo "  Invalid Cargo.toml version: $CANONICAL_VERSION"
     echo "=============================================="
     exit 1
 fi
@@ -327,6 +359,7 @@ echo "----------------------------------------------"
 
 # Run all checks
 check_npm_version "$CANONICAL_VERSION"
+check_e2e_version "$CANONICAL_VERSION"
 check_ts_version "$CANONICAL_VERSION"
 check_adk_version "$CANONICAL_VERSION"
 check_homebrew_formula "$CANONICAL_VERSION"
