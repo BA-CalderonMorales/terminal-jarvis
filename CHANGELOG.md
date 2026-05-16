@@ -8,6 +8,7 @@ All notable changes to this project will be documented in this file.
 - **Release Review Gates**: Aligned npm CI/CD workflows to Node 20+ with engine-strict installs so dependency engine drift is caught before release or main sync.
 
 ### Fixed
+- **Dependency Security Alerts**: Updated ADK Go telemetry/gRPC dependencies, removed vulnerable Rollup transitive packages from the E2E lockfile, and trimmed libsql features to eliminate vulnerable Rust TLS/parser paths.
 - **Release Review Follow-Up**: Hardened environment-mutating tests with panic-safe restoration, clarified custom config load failures, aligned ADK version display, and improved tool catalog assertion diagnostics.
 - **Coverage Badge Link**: Updated the root README coverage badge to point at the CI workflow that produces the coverage report artifact.
 

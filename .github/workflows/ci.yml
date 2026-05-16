@@ -3,7 +3,7 @@ name: Continuous Integration
 on:
 
   push:
-    branches: [ "main", "develop", "feat/*", "bug/*", "security/*", "hotfix/*", "claude/*" ]
+    branches: [ "main", "develop", "feat/*", "fix/*", "bug/*", "security/*", "hotfix/*", "claude/*" ]
     paths-ignore:
       - '**.md'
       - '.github/skills/**'
@@ -11,7 +11,7 @@ on:
       - 'LICENSE'
 
   pull_request:
-    branches: [ "main", "develop", "feat/*", "bug/*", "security/*", "hotfix/*", "claude/*" ]
+    branches: [ "main", "develop", "feat/*", "fix/*", "bug/*", "security/*", "hotfix/*", "claude/*" ]
     paths-ignore:
       - '**.md'
       - '.github/skills/**'
@@ -57,6 +57,10 @@ jobs:
             node: 22.12.0
     steps:
     - uses: actions/checkout@v5
+
+    - name: Verify dependency security alerts
+      if: ${{ matrix.suite == 'rust' }}
+      run: bash scripts/verify/test-dependency-alerts-mutations.sh
 
     # Rust code quality + tests
     - name: Install Rust toolchain
@@ -122,7 +126,7 @@ jobs:
       if: ${{ matrix.suite == 'go' }}
       uses: actions/setup-go@v6
       with:
-        go-version: '1.24.x'
+        go-version: '1.25.x'
         cache-dependency-path: adk/go.sum
 
     - name: Download Go dependencies
@@ -255,8 +259,8 @@ jobs:
       # - RUSTSEC-2025-0134 / RUSTSEC-2025-0141: unmaintained crates in libsql's dep tree (transitive, not actionable)
       # - RUSTSEC-2024-0375 / RUSTSEC-2021-0145: historical advisories for dependencies already at latest compatible versions
       # - RUSTSEC-2026-0037 / RUSTSEC-2026-0049 / RUSTSEC-2026-0098 / RUSTSEC-2026-0099 / RUSTSEC-2026-0104:
-      #   rustls-webpki and quinn-proto issues in libsql/reqwest transitive deps; fixed where possible via cargo update,
-      #   remaining rustls-webpki 0.102.8 issues blocked on libsql upgrading from rustls 0.22
+      #   rustls-webpki and quinn-proto issues in libsql/reqwest transitive deps; dependency-alert guardrails
+      #   fail if rustls-webpki falls below the patched lockfile version or vulnerable libsql parser paths return.
       run: cargo audit --deny warnings --ignore RUSTSEC-2025-0134 --ignore RUSTSEC-2025-0141 --ignore RUSTSEC-2024-0375 --ignore RUSTSEC-2021-0145 --ignore RUSTSEC-2026-0049 --ignore RUSTSEC-2026-0037 --ignore RUSTSEC-2026-0098 --ignore RUSTSEC-2026-0099 --ignore RUSTSEC-2026-0104
 
     - name: Run cargo-deny checks

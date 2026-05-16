@@ -59,10 +59,10 @@ keyring = { version = "3.6.2", optional = true }
 aes-gcm = { version = "0.10.3", optional = true }
 argon2 = { version = "0.5.3", optional = true }
 rand = { version = "0.8.5", optional = true }
-rpassword = { version = "7.3.1", optional = true }
+rpassword = { version = "7.5.2", optional = true }
 
 # Database (Turso/libSQL for modern config storage)
-libsql = "0.9"
+libsql = { version = "0.9", default-features = false, features = ["core"] }
 
 # Async trait for repository pattern
 async-trait = "0.1.89"

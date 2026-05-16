@@ -27,7 +27,7 @@ Max turns: 5 (`maxToolLoops`). Sequential tool execution.
 - CHANGELOG before deployment scripts
 - Homebrew Formula before GitHub release
 - Test-driven bugs: failing test first, then fix
-- Version sync across Cargo.toml, package.json, Formula
+- Version sync across Cargo.toml, npm/terminal-jarvis/package.json, e2e/package.json, e2e/package-lock.json, Formula
 - Run verify-change.sh before commits
 - Use `/usr/bin/git` not `git`
 - Do not add or update a `docs/` folder in this repo; Terminal Jarvis project docs live in `../my-life-as-a-dev/docs/projects/active/terminal-jarvis`
@@ -63,7 +63,7 @@ Max turns: 5 (`maxToolLoops`). Sequential tool execution.
 ## Release Checklist
 
 1. Update CHANGELOG.md
-2. Update version in Cargo.toml, package.json, homebrew/Formula
+2. Update version in Cargo.toml, npm/terminal-jarvis/package.json, e2e/package.json, e2e/package-lock.json, homebrew/Formula
 3. Run verify-change.sh (or rely on CI green status)
 4. Push to develop via PR
 5. Ensure CI on develop is green
