@@ -7,8 +7,6 @@
 mod services_entry_point;
 mod services_github_integration;
 mod services_npm_operations;
-mod services_package_operations;
-mod services_tool_configuration;
 
 // Re-export main interfaces
 pub use services_entry_point::{GitHubService, PackageService};
