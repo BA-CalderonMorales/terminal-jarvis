@@ -5,6 +5,7 @@ All notable changes to this project will be documented in this file.
 ## [Unreleased]
 
 ### Changed
+- **Service Layer Cleanup**: Removed unused package-management service shims and made local GNU builds use the platform default linker for easier contributor validation.
 - **Release Review Gates**: Aligned npm CI/CD workflows to Node 20+ with engine-strict installs so dependency engine drift is caught before release or main sync.
 
 ### Fixed

@@ -12,9 +12,8 @@ jobs = 16
 # This gives ~10x faster incremental builds. See .devcontainer/devcontainer.json.
 
 [target.x86_64-unknown-linux-gnu]
-# clang + lld: fast, reliable linker combo on Linux. Both are pre-installed on GitHub ubuntu-latest.
-linker = "clang"
-rustflags = ["-C", "link-arg=-fuse-ld=lld"]
+# Use the platform default linker for local GNU builds. Contributors can still
+# opt into faster linkers with CARGO_TARGET_X86_64_UNKNOWN_LINUX_GNU_LINKER.
 
 # musl targets are used for release builds (static linking, GLIBC independence).
 # Do NOT add target-cpu=native here - those binaries must run on end-user hardware.
