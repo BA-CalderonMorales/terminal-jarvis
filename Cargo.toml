@@ -54,7 +54,7 @@ regex = "1.12.1"
 chrono = { version = "0.4.42", features = ["serde"] }
 
 # Security dependencies
-sha2 = "0.10.9"
+sha2 = "0.11.0"
 keyring = { version = "3.6.2", optional = true }
 aes-gcm = { version = "0.10.3", optional = true }
 argon2 = { version = "0.5.3", optional = true }
