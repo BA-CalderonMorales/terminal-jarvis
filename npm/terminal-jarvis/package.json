@@ -62,7 +62,7 @@
     "@types/node": "22.15.3",
     "@vitest/ui": "4.1.5",
     "string-width": "8.1.0",
-    "typescript": "5.9.3",
+    "typescript": "6.0.3",
     "vitest": "4.1.5",
     "zod": "3.25.56"
   },
