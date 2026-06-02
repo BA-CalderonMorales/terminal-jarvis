@@ -18,8 +18,11 @@ GO_MINIMUMS = {
 }
 
 CARGO_MINIMUMS = {
-    "rustls-webpki": (0, 103, 12),
     "rpassword": (7, 5, 2),
+}
+
+OPTIONAL_CARGO_MINIMUMS = {
+    "rustls-webpki": (0, 103, 12),
 }
 
 GO_MODULE_RE = re.compile(r"^\s*([^\s]+)\s+v([0-9][^\s]*)")
@@ -80,6 +83,12 @@ def check_cargo_lock(root: Path) -> list[str]:
             errors.append(f"{package} is missing from Cargo.lock")
             continue
         for version in versions:
+            actual = parse_version(version)
+            if actual < minimum:
+                errors.append(f"{package} is {version}, expected >= {format_version(minimum)}")
+
+    for package, minimum in OPTIONAL_CARGO_MINIMUMS.items():
+        for version in by_name.get(package, []):
             actual = parse_version(version)
             if actual < minimum:
                 errors.append(f"{package} is {version}, expected >= {format_version(minimum)}")
