@@ -1,4 +1,3 @@
-pub mod api;
 pub mod auth_manager;
 pub mod cli;
 pub mod cli_logic;

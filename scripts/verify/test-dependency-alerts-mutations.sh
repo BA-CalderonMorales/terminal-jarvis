@@ -75,6 +75,18 @@ path.write_text(mutated, encoding="utf-8")
 PY
 expect_failure "rpassword downgrade" "$CARGO_FIXTURE"
 
+RUSTLS_FIXTURE="$TMP_ROOT/rustls"
+copy_inputs "$RUSTLS_FIXTURE"
+cat >>"$RUSTLS_FIXTURE/Cargo.lock" <<'EOF'
+
+[[package]]
+name = "rustls-webpki"
+version = "0.103.11"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "mutation-test-placeholder"
+EOF
+expect_failure "rustls-webpki vulnerable reintroduced" "$RUSTLS_FIXTURE"
+
 NPM_FIXTURE="$TMP_ROOT/npm"
 copy_inputs "$NPM_FIXTURE"
 python3 - "$NPM_FIXTURE/e2e/package-lock.json" <<'PY'
