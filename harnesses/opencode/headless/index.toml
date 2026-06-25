@@ -1,0 +1,3 @@
+summary = "Run OpenCode headlessly when the local CLI supports it."
+command = "opencode"
+args = ["run"]

@@ -1,0 +1,3 @@
+summary = "Update ECA without interactive setup flows."
+command = "eca"
+args = ["upgrade"]

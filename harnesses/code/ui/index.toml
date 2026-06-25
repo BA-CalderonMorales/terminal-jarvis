@@ -1,0 +1,3 @@
+summary = "Open the interactive Code interface."
+command = "coder"
+args = []

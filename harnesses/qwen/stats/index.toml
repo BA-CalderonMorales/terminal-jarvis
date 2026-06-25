@@ -1,0 +1,3 @@
+summary = "Review Qwen local status and usage command surface."
+command = "qwen"
+args = ["--help"]

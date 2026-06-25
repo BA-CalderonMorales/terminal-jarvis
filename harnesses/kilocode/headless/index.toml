@@ -1,0 +1,3 @@
+summary = "Review Kilocode headless invocation options."
+command = "kilocode"
+args = ["--help"]

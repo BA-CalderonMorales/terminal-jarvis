@@ -1,0 +1,3 @@
+summary = "Review Nanocoder headless invocation options."
+command = "nanocoder"
+args = ["--help"]

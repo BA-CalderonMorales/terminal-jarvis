@@ -1,0 +1,3 @@
+summary = "Review Hermes Agent headless invocation options."
+command = "hermes"
+args = ["--help"]

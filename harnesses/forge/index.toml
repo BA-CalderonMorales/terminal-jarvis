@@ -1,0 +1,6 @@
+name = "forge"
+display = "Forge"
+description = "AI-Enhanced Terminal Development Environment"
+binary = "forge"
+env_mode = "any"
+env = ["ANTHROPIC_API_KEY", "OPENAI_API_KEY", "FORGE_API_KEY"]

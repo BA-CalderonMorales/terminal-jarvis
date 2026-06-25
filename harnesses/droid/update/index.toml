@@ -1,0 +1,3 @@
+summary = "Update Droid without interactive setup flows."
+command = "droid"
+args = ["update"]

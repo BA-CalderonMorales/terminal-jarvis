@@ -1,0 +1,3 @@
+summary = "Print the installed Codex version."
+command = "codex"
+args = ["--version"]

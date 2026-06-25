@@ -1,334 +1,117 @@
-name: Continuous Integration
+name: CI
 
 on:
-
   push:
-    branches: [ "main", "develop", "feat/*", "fix/*", "bug/*", "security/*", "hotfix/*", "claude/*" ]
-    paths-ignore:
-      - '**.md'
-      - '.github/skills/**'
-      - '.github/copilot-instructions.md'
-      - 'LICENSE'
-
+    branches: [main, develop]
   pull_request:
-    branches: [ "main", "develop", "feat/*", "fix/*", "bug/*", "security/*", "hotfix/*", "claude/*" ]
-    paths-ignore:
-      - '**.md'
-      - '.github/skills/**'
-      - '.github/copilot-instructions.md'
-      - 'LICENSE'
+    branches: [main, develop]
+  workflow_dispatch:
 
 concurrency:
-  group: ci-${{ github.ref }}
+  group: ci-${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
-env:
-  CARGO_TERM_COLOR: always
-  RUSTC_WRAPPER: ""
-  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
-
-# Minimal permissions by default; specific jobs can elevate
 permissions:
   contents: read
 
+env:
+  CARGO_TERM_COLOR: always
+
 jobs:
-
-  # Test jobs - Rust + NPM suites via matrix
-  test:
-    name: Test - ${{ matrix.name }}
-    runs-on: ${{ matrix.os }}
-    strategy:
-      fail-fast: true
-      matrix:
-        include:
-          - name: Rust (Ubuntu)
-            suite: rust
-            os: ubuntu-latest
-          - name: Go (Ubuntu)
-            suite: go
-            os: ubuntu-latest
-          - name: NPM (Node 20)
-            suite: npm
-            os: ubuntu-latest
-            node: 20.19.0
-          - name: NPM (Node 22)
-            suite: npm
-            os: ubuntu-latest
-            node: 22.12.0
-    steps:
-    - uses: actions/checkout@v5
-
-    - name: Verify dependency security alerts
-      if: ${{ matrix.suite == 'rust' }}
-      run: bash scripts/verify/test-dependency-alerts-mutations.sh
-
-    # Rust code quality + tests
-    - name: Install Rust toolchain
-      if: ${{ matrix.suite == 'rust' }}
-      uses: dtolnay/rust-toolchain@stable
-      with:
-        components: rustfmt, clippy
-
-    - name: Cache cargo dependencies
-      if: ${{ matrix.suite == 'rust' }}
-      uses: actions/cache@v5
-      with:
-        path: |
-          ~/.cargo/registry
-          ~/.cargo/git
-          target
-        key: cargo-${{ runner.os }}-${{ hashFiles('**/Cargo.lock') }}
-        restore-keys: cargo-${{ runner.os }}-
-
-    - name: Check formatting
-      if: ${{ matrix.suite == 'rust' }}
-      run: cargo fmt --all -- --check
-
-    - name: Check clippy
-      if: ${{ matrix.suite == 'rust' }}
-      run: cargo clippy --all-targets --all-features -- -D warnings
-
-    - name: Build tests
-      if: ${{ matrix.suite == 'rust' }}
-      run: cargo build --tests --locked
-
-    - name: Run Rust tests
-      if: ${{ matrix.suite == 'rust' }}
-      run: cargo test --locked --verbose
-
-    - name: Generate test coverage report
-      if: ${{ matrix.suite == 'rust' }}
-      run: |
-        # Install cargo-tarpaulin for coverage if not cached
-        if ! command -v cargo-tarpaulin &> /dev/null; then
-          cargo install cargo-tarpaulin
-        fi
-        # Generate coverage report (xml for upload, stdout for logs)
-        set +e
-        cargo tarpaulin --verbose --all-features --workspace --timeout 120 --out Xml --out Stdout > tarpaulin.log 2>&1
-        tarpaulin_status=$?
-        set -e
-        head -100 tarpaulin.log
-        exit "$tarpaulin_status"
-      continue-on-error: true
-
-    - name: Upload coverage report
-      if: ${{ matrix.suite == 'rust' }}
-      uses: actions/upload-artifact@v6
-      with:
-        name: rust-coverage-report
-        path: cobertura.xml
-        if-no-files-found: error
-        retention-days: 14
-
-    # Go code quality + tests
-    - name: Setup Go
-      if: ${{ matrix.suite == 'go' }}
-      uses: actions/setup-go@v6
-      with:
-        go-version: '1.25.x'
-        cache-dependency-path: adk/go.sum
-
-    - name: Download Go dependencies
-      if: ${{ matrix.suite == 'go' }}
-      run: |
-        cd adk
-        go mod download
-
-    - name: Check Go formatting
-      if: ${{ matrix.suite == 'go' }}
-      run: |
-        cd adk
-        if [ "$(gofmt -l . | wc -l)" -gt 0 ]; then
-          echo "Go code is not formatted properly! Run 'gofmt -w .' locally."
-          gofmt -l .
-          exit 1
-        fi
-
-    - name: Run Go tests
-      if: ${{ matrix.suite == 'go' }}
-      run: |
-        cd adk
-        go test -v ./...
-
-    # NPM package tests (build the Rust binary first)
-    - name: Install Rust toolchain (for npm build)
-      if: ${{ matrix.suite == 'npm' }}
-      uses: dtolnay/rust-toolchain@stable
-
-    - name: Cache cargo dependencies
-      if: ${{ matrix.suite == 'npm' }}
-      uses: actions/cache@v5
-      with:
-        path: |
-          ~/.cargo/registry
-          ~/.cargo/git
-          target
-        key: cargo-${{ runner.os }}-${{ hashFiles('**/Cargo.lock') }}
-        restore-keys: cargo-${{ runner.os }}-
-
-    - name: Build release binary
-      if: ${{ matrix.suite == 'npm' }}
-      run: cargo build --locked --release
-
-    - name: Setup Node.js
-      if: ${{ matrix.suite == 'npm' }}
-      uses: actions/setup-node@v6
-      with:
-        node-version: ${{ matrix.node }}
-
-    - name: Verify lockfile is in sync
-      if: ${{ matrix.suite == 'npm' }}
-      run: |
-        cd npm/terminal-jarvis
-        # Check if package-lock.json is in sync with package.json
-        # Note: npm may modify lockfile due to platform-specific optional deps
-        npm install --package-lock-only --engine-strict --ignore-scripts
-        if ! git diff --quiet package-lock.json; then
-          echo "::warning::package-lock.json has changes (may be due to platform-specific optional dependencies)"
-          git diff package-lock.json | head -20
-        fi
-
-    - name: Install dependencies
-      if: ${{ matrix.suite == 'npm' }}
-      run: |
-        cd npm/terminal-jarvis
-        npm ci --engine-strict
-
-    - name: Build TypeScript
-      if: ${{ matrix.suite == 'npm' }}
-      run: |
-        cd npm/terminal-jarvis
-        npm run build
-
-    - name: Lint NPM Package
-      if: ${{ matrix.suite == 'npm' }}
-      run: |
-        cd npm/terminal-jarvis
-        npm run lint
-
-    - name: Ensure jq is installed
-      if: ${{ matrix.suite == 'npm' }}
-      run: sudo apt-get update && sudo apt-get install -y jq
-
-    - name: NPM Audit (moderate severity)
-      if: ${{ matrix.suite == 'npm' }}
-      run: |
-        cd npm/terminal-jarvis
-        npm audit --audit-level=moderate --json | jq '.' > npm-audit.json || true
-        # Fail build if moderate/high/critical vulnerabilities are present
-        MODERATE=$(jq '.metadata.vulnerabilities.moderate // 0' npm-audit.json); \
-        HIGH=$(jq '.metadata.vulnerabilities.high // 0' npm-audit.json); \
-        CRIT=$(jq '.metadata.vulnerabilities.critical // 0' npm-audit.json); \
-        echo "Moderate: $MODERATE, High: $HIGH, Critical: $CRIT"; \
-        [ $((MODERATE+HIGH+CRIT)) -eq 0 ]
-
-  # Security - Rust dependency checks (cargo-audit + cargo-deny in one runner)
-  security-rust:
-    name: Security - Rust
-    permissions:
-      contents: read
+  verify:
+    name: Verify
     runs-on: ubuntu-latest
+    timeout-minutes: 35
     steps:
-    - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
 
-    - name: Install Rust
-      uses: dtolnay/rust-toolchain@stable
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt, clippy
 
-    - name: Cache cargo dependencies and tools
-      uses: actions/cache@v5
-      with:
-        path: |
-          ~/.cargo/registry
-          ~/.cargo/git
-          ~/.cargo/bin/cargo-audit
-        key: cargo-security-${{ runner.os }}-${{ hashFiles('**/Cargo.lock') }}
-        restore-keys: cargo-security-${{ runner.os }}-
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: npm/terminal-jarvis/package-lock.json
 
-    - name: Install dependencies for cargo-audit
-      run: sudo apt-get update && sudo apt-get install -y pkg-config libssl-dev
+      - uses: actions/cache@v6
+        with:
+          path: |
+            ~/.cargo/bin/cargo-audit
+            ~/.cargo/bin/cargo-deny
+            ~/.cargo/bin/cargo-llvm-cov
+            ~/.cargo/git
+            ~/.cargo/registry
+            target
+          key: cargo-verify-${{ runner.os }}-${{ hashFiles('Cargo.lock') }}-v1
+          restore-keys: cargo-verify-${{ runner.os }}-
 
-    - name: Install cargo-audit
-      run: |
-        if ! command -v cargo-audit &> /dev/null; then
-          cargo install cargo-audit
-        fi
+      - name: Install CI cargo tools
+        run: |
+          command -v cargo-audit >/dev/null || cargo install cargo-audit --locked
+          command -v cargo-deny >/dev/null || cargo install cargo-deny --locked
+          command -v cargo-llvm-cov >/dev/null || cargo install cargo-llvm-cov --locked
 
-    - name: Run cargo-audit
-      # Ignored advisories:
-      # - RUSTSEC-2025-0134 / RUSTSEC-2025-0141: unmaintained crates in libsql's dep tree (transitive, not actionable)
-      # - RUSTSEC-2024-0375 / RUSTSEC-2021-0145: historical advisories for dependencies already at latest compatible versions
-      # - RUSTSEC-2026-0037 / RUSTSEC-2026-0049 / RUSTSEC-2026-0098 / RUSTSEC-2026-0099 / RUSTSEC-2026-0104:
-      #   rustls-webpki and quinn-proto issues in libsql/reqwest transitive deps; dependency-alert guardrails
-      #   fail if rustls-webpki falls below the patched lockfile version or vulnerable libsql parser paths return.
-      run: cargo audit --deny warnings --ignore RUSTSEC-2025-0134 --ignore RUSTSEC-2025-0141 --ignore RUSTSEC-2024-0375 --ignore RUSTSEC-2021-0145 --ignore RUSTSEC-2026-0049 --ignore RUSTSEC-2026-0037 --ignore RUSTSEC-2026-0098 --ignore RUSTSEC-2026-0099 --ignore RUSTSEC-2026-0104
+      - name: Run branch verification
+        run: scripts/verify.sh
+        env:
+          TJ_REQUIRE_SECURITY_TOOLS: "1"
 
-    - name: Run cargo-deny checks
-      uses: EmbarkStudios/cargo-deny-action@v2
-      with:
-        command: check advisories bans sources
-
-  # Security - General checks (gitleaks, shellcheck, SBOM - no Rust needed)
-  security-general:
-    name: Security - General
-    permissions:
-      actions: read
-      contents: read
-      security-events: write
+  package:
+    name: Package Smoke
     runs-on: ubuntu-latest
-    # Allow PRs to surface SBOM findings without blocking; block on main by required checks
-    continue-on-error: ${{ github.event_name == 'pull_request' }}
+    timeout-minutes: 20
     steps:
-    - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
 
-    # Gitleaks secrets scan
-    - name: Ensure full history for secrets scan
-      run: |
-        git fetch --prune --unshallow || true
+      - uses: dtolnay/rust-toolchain@stable
 
-    - name: Run Gitleaks
-      uses: gitleaks/gitleaks-action@v2
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: npm/terminal-jarvis/package-lock.json
 
-    # ShellCheck
-    - name: Install ShellCheck
-      run: sudo apt-get update && sudo apt-get install -y shellcheck
+      - uses: actions/cache@v6
+        with:
+          path: |
+            ~/.cargo/git
+            ~/.cargo/registry
+            target
+          key: cargo-package-${{ runner.os }}-${{ hashFiles('Cargo.lock') }}-v1
+          restore-keys: cargo-package-${{ runner.os }}-
 
-    - name: Run ShellCheck
-      run: |
-        set -e
-        if [ -d scripts ]; then
-          find scripts -type f -name "*.sh" -print0 | xargs -0 -r shellcheck -S style -x
-        fi
+      - name: Build release package
+        run: scripts/package-release.sh
 
-    # SBOM and vulnerability scan (Anchore)
-    - name: Scan workspace with Anchore
-      id: anchore
-      uses: anchore/scan-action@v7
-      with:
-        path: .
-        fail-build: false
-        severity-cutoff: critical
-        output-format: sarif
-        cache-db: true
+      - uses: actions/upload-artifact@v7
+        with:
+          name: package-smoke-linux
+          path: dist/**
+          retention-days: 7
 
-    - name: Validate Anchore SARIF output
-      run: |
-        set -euo pipefail
-        sarif_file="${{ steps.anchore.outputs.sarif }}"
-        if [ -z "$sarif_file" ]; then
-          echo "Anchore did not report a SARIF output path."
-          exit 1
-        fi
-        if [ ! -s "$sarif_file" ]; then
-          echo "Anchore SARIF output is missing or empty: $sarif_file"
-          exit 1
-        fi
-        echo "Anchore SARIF output is ready for upload: $sarif_file"
+  mutation:
+    name: Mutation
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v7
 
-    - name: Upload Anchore SARIF report
-      uses: github/codeql-action/upload-sarif@v4
-      with:
-        sarif_file: ${{ steps.anchore.outputs.sarif }}
-        category: security-general
+      - uses: dtolnay/rust-toolchain@stable
+
+      - uses: actions/cache@v6
+        with:
+          path: |
+            ~/.cargo/bin/cargo-mutants
+            ~/.cargo/git
+            ~/.cargo/registry
+            target
+          key: cargo-mutation-${{ runner.os }}-${{ hashFiles('Cargo.lock') }}-v1
+          restore-keys: cargo-mutation-${{ runner.os }}-
+
+      - name: Install cargo-mutants
+        run: command -v cargo-mutants >/dev/null || cargo install cargo-mutants --locked
+
+      - name: Run mutation tests
+        run: cargo mutants --minimum-test-timeout 30 --jobs 2

@@ -1,54 +1,25 @@
 {
   "name": "terminal-jarvis",
-  "version": "0.0.82",
-  "description": "AI Coding Tools Wrapper - Unified interface for claude-code, gemini-cli, qwen-code, opencode, llxprt, codex, crush, goose, amp, and aider",
+  "version": "0.1.0",
+  "description": "Data-driven harness switcher for AI coding agents",
   "bin": {
     "terminal-jarvis": "bin/terminal-jarvis"
   },
-  "types": "index.d.ts",
   "files": [
-    "lib/",
     "bin/",
-    "scripts/",
-    "config/",
+    "harnesses/",
     "README.md",
-    "package.json",
-    "index.d.ts"
+    "package.json"
   ],
   "scripts": {
-    "generate-tools": "../../scripts/utils/generate-readme-tools.sh",
-    "sync-readme": "npm run generate-tools && cp ../../README.md .",
-    "sync-readme-npm": "npm run generate-tools && cp ../../README.md . && sed -i 's|screenshot_and_demo/|https://raw.githubusercontent.com/BA-CalderonMorales/terminal-jarvis/docs/screenshots_and_demos/screenshots_and_demo/|g' README.md",
-    "build-rust": "cd ../.. && cargo build --release",
-    "copy-configs": "node ./scripts/copy-configs.js",
-    "typecheck": "tsc --noEmit && echo 'TypeScript type check passed'",
-    "lint": "biome lint src/",
-    "lint:fix": "biome lint --write src/",
-    "format": "biome format src/",
-    "format:fix": "biome format --write src/",
-    "check": "biome check src/",
-    "check:fix": "biome check --write src/",
-    "test": "vitest run --passWithNoTests",
-    "test:watch": "vitest",
-    "test:ui": "vitest --ui",
-    "test:coverage": "vitest run --coverage",
-    "test:e2e": "npm run build-rust && vitest run",
-    "build": "npm run copy-configs && npm run sync-readme-npm",
-    "prepack": "npm run build",
-    "prepublishOnly": "npm run build",
-    "dev": "npm run build && node lib/index.js",
-    "postinstall": "node ./scripts/postinstall.js"
+    "build:rust": "cd ../.. && cargo build",
+    "smoke": "npm run build:rust && node bin/terminal-jarvis --help"
   },
   "keywords": [
     "cli",
     "ai",
-    "tools",
-    "wrapper",
-    "claude",
-    "gemini",
-    "qwen",
-    "opencode",
-    "llxprt"
+    "agents",
+    "harness"
   ],
   "author": "BA-CalderonMorales",
   "license": "MIT",
@@ -56,17 +27,7 @@
     "type": "git",
     "url": "git+https://github.com/BA-CalderonMorales/terminal-jarvis.git"
   },
-  "homepage": "https://github.com/BA-CalderonMorales/terminal-jarvis#readme",
-  "devDependencies": {
-    "@biomejs/biome": "2.1.4",
-    "@types/node": "22.15.3",
-    "@vitest/ui": "4.1.5",
-    "string-width": "8.1.0",
-    "typescript": "5.9.3",
-    "vitest": "4.1.5",
-    "zod": "3.25.56"
-  },
   "engines": {
-    "node": ">=20.19.0"
+    "node": ">=20"
   }
 }

@@ -1,0 +1,3 @@
+summary = "Update Aider without interactive setup flows."
+command = "uv"
+args = ["tool", "upgrade", "aider-chat"]

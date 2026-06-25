@@ -1,0 +1,3 @@
+summary = "Review Code security and auth command surface."
+command = "coder"
+args = ["--help"]

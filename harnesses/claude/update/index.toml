@@ -1,0 +1,3 @@
+summary = "Update Claude without interactive setup flows."
+command = "claude"
+args = ["update"]

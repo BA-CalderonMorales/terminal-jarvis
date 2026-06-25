@@ -1,0 +1,3 @@
+summary = "Review Forge model selection command surface."
+command = "forge"
+args = ["--help"]

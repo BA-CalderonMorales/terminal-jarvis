@@ -1,0 +1,3 @@
+summary = "Install LLXPRT from its documented distribution channel."
+command = "npm"
+args = ["install", "-g", "@vybestack/llxprt-code"]

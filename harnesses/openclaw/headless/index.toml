@@ -1,0 +1,3 @@
+summary = "Review OpenClaw headless invocation options."
+command = "openclaw"
+args = ["--help"]

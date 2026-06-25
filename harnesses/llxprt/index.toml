@@ -1,0 +1,6 @@
+name = "llxprt"
+display = "LLXPRT"
+description = "Multi-provider AI coding assistant"
+binary = "llxprt"
+env_mode = "any"
+env = ["LLXPRT_API_KEY", "OPENAI_API_KEY"]

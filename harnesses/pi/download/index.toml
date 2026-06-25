@@ -1,0 +1,3 @@
+summary = "Install Pi from its documented distribution channel."
+command = "npm"
+args = ["install", "-g", "@earendil-works/pi-coding-agent"]

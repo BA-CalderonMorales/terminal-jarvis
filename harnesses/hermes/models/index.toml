@@ -1,0 +1,3 @@
+summary = "Review Hermes Agent model selection command surface."
+command = "hermes"
+args = ["--help"]

@@ -1,0 +1,3 @@
+summary = "Review Crush headless invocation options."
+command = "crush"
+args = ["--help"]

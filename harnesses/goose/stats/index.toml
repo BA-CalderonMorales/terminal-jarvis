@@ -1,0 +1,3 @@
+summary = "Review Goose local status and usage command surface."
+command = "goose"
+args = ["--help"]

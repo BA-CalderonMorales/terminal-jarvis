@@ -1,0 +1,3 @@
+summary = "Dangerous mode is not normalized for LLXPRT yet."
+command = "sh"
+args = ["-c", "echo danger yolo mode is not configured for llxprt; exit 1"]

@@ -1,0 +1,3 @@
+summary = "Review Qwen headless invocation options."
+command = "qwen"
+args = ["--help"]

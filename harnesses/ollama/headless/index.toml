@@ -1,0 +1,3 @@
+summary = "Review Ollama headless invocation options."
+command = "ollama"
+args = ["--help"]

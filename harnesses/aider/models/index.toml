@@ -1,0 +1,3 @@
+summary = "Review Aider model selection command surface."
+command = "aider"
+args = ["--help"]

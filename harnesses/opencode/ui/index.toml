@@ -1,0 +1,3 @@
+summary = "Open the interactive OpenCode terminal UI."
+command = "opencode"
+args = []

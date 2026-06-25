@@ -1,0 +1,3 @@
+summary = "Print or verify the installed Qwen version."
+command = "sh"
+args = ["-c", "qwen --version"]

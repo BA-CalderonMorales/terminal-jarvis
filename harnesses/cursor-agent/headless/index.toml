@@ -1,0 +1,3 @@
+summary = "Review Cursor Agent headless invocation options."
+command = "cursor-agent"
+args = ["--help"]

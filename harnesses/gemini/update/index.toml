@@ -1,0 +1,3 @@
+summary = "Update Gemini without interactive setup flows."
+command = "npm"
+args = ["update", "-g", "@google/gemini-cli"]

@@ -1,0 +1,3 @@
+summary = "Print or verify the installed Mistral Vibe version."
+command = "sh"
+args = ["-c", "vibe --version"]

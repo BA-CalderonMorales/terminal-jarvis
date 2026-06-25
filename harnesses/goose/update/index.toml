@@ -1,0 +1,3 @@
+summary = "Update Goose without interactive setup flows."
+command = "goose"
+args = ["update"]

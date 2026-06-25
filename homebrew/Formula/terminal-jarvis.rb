@@ -1,35 +1,17 @@
 class TerminalJarvis < Formula
-  desc "A unified command center for AI coding tools"
+  desc "Data-driven harness switcher for AI coding agents"
   homepage "https://github.com/BA-CalderonMorales/terminal-jarvis"
-  version "0.0.82"
   license "MIT"
+  head "https://github.com/BA-CalderonMorales/terminal-jarvis.git", branch: "develop"
 
-  on_macos do
-    if Hardware::CPU.intel?
-      url "https://github.com/BA-CalderonMorales/terminal-jarvis/releases/download/v0.0.82/terminal-jarvis-mac.tar.gz"
-      sha256 "SKIP_CHECK"
-    elsif Hardware::CPU.arm?
-      url "https://github.com/BA-CalderonMorales/terminal-jarvis/releases/download/v0.0.82/terminal-jarvis-mac.tar.gz"
-      sha256 "SKIP_CHECK"
-    end
-  end
-
-  on_linux do
-    if Hardware::CPU.intel?
-      url "https://github.com/BA-CalderonMorales/terminal-jarvis/releases/download/v0.0.82/terminal-jarvis-linux.tar.gz"
-      sha256 "SKIP_CHECK"
-    else
-      # Fallback for other Linux architectures
-      url "https://github.com/BA-CalderonMorales/terminal-jarvis/releases/download/v0.0.82/terminal-jarvis-linux.tar.gz"
-      sha256 "SKIP_CHECK"
-    end
-  end
+  depends_on "rust" => :build
 
   def install
-    bin.install "terminal-jarvis"
+    system "cargo", "install", "--locked", "--path", ".", "--root", prefix
+    pkgshare.install "harnesses"
   end
 
   test do
-    system "#{bin}/terminal-jarvis", "--version"
+    assert_match "terminal-jarvis", shell_output("#{bin}/terminal-jarvis --help")
   end
 end

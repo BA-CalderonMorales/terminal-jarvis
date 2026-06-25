@@ -1,0 +1,6 @@
+name = "ollama"
+display = "Ollama"
+description = "Get up and running with large language models locally"
+binary = "ollama"
+env_mode = "none"
+env = []

@@ -1,0 +1,3 @@
+summary = "Review Aider security and auth command surface."
+command = "aider"
+args = ["--help"]

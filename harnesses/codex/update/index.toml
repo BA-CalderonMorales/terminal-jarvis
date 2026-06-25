@@ -1,0 +1,3 @@
+summary = "Update the npm-installed Codex package without interactive auth."
+command = "npm"
+args = ["update", "-g", "@openai/codex"]

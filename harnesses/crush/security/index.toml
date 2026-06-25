@@ -1,0 +1,3 @@
+summary = "Review Crush security and auth command surface."
+command = "crush"
+args = ["--help"]

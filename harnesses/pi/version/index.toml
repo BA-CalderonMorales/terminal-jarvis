@@ -1,0 +1,3 @@
+summary = "Print or verify the installed Pi version."
+command = "sh"
+args = ["-c", "pi --version"]

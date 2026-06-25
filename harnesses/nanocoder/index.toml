@@ -1,0 +1,6 @@
+name = "nanocoder"
+display = "Nanocoder"
+description = "Local-first coding agent"
+binary = "nanocoder"
+env_mode = "none"
+env = []

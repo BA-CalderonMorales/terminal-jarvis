@@ -1,0 +1,3 @@
+summary = "Review Jules model selection command surface."
+command = "jules"
+args = ["--help"]

@@ -1,0 +1,3 @@
+summary = "Review OpenCode auth, terminal, and provider settings before running."
+command = "opencode"
+args = ["--help"]

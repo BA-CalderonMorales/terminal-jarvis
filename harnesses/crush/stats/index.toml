@@ -1,0 +1,3 @@
+summary = "Review Crush local status and usage command surface."
+command = "crush"
+args = ["--help"]
