@@ -40,6 +40,8 @@ scripts/local-cd.sh --check-auth
 That script delegates package creation to `scripts/package-release.sh`, collects
 the same archive/checksum files that CD uploads, verifies checksums, and reports
 GitHub, npm, and Cargo auth boundaries without printing secrets.
+It also checks that each `.sha256` file names the archive basename so flattened
+release assets work with `sha256sum -c`.
 
 ## Environment Safety
 

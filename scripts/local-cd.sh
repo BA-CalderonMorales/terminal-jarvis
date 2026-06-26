@@ -1,7 +1,7 @@
 #!/usr/bin/env sh
 set -eu
 
-repo=terminal-jarvis
+config=scripts/release.toml
 out_root=${TJ_LOCAL_CD_OUT:-}
 auth=0
 
@@ -26,6 +26,26 @@ fail() {
 
 version() {
   sed -n 's/^version = "\([^"]*\)"/\1/p' Cargo.toml | head -n 1
+}
+
+package_name() {
+  sed -n 's/^name = "\([^"]*\)"/\1/p' Cargo.toml | head -n 1
+}
+
+config_value() {
+  sed -n "s/^$1 = \"\\([^\"]*\\)\"/\\1/p" "$config" | head -n 1
+}
+
+find_testing_root() {
+  dir=$PWD
+  while [ "$dir" != "/" ]; do
+    if [ -d "$dir/testing" ]; then
+      echo "$dir/testing"
+      return 0
+    fi
+    dir=$(dirname "$dir")
+  done
+  return 1
 }
 
 sha256_file() {
@@ -70,11 +90,17 @@ done
 
 cd "$(dirname "$0")/.."
 
+name=$(package_name)
+test -n "$name" || fail "Cargo.toml name missing"
+test -f "$config" || fail "$config missing"
+
 if [ -z "$out_root" ]; then
-  if [ -d ../../../testing ]; then
-    out_root=../../../testing/$repo/local-cd
+  local_dir=$(config_value local_cd_dir)
+  test -n "$local_dir" || fail "$config missing local_cd_dir"
+  if testing_root=$(find_testing_root); then
+    out_root=$testing_root/$name/$local_dir
   else
-    out_root=dist/local-cd
+    out_root=dist/$local_dir
   fi
 fi
 
@@ -88,20 +114,26 @@ asset_dir=$out_root/release-assets/$tag
 rm -rf "$asset_dir"
 mkdir -p "$asset_dir"
 find "$out_root/$version" -type f \( \
-  -name "$repo-$version-*.tar.gz" -o \
-  -name "$repo-$version-*.tar.gz.sha256" \
+  -name "$name-$version-*.tar.gz" -o \
+  -name "$name-$version-*.tar.gz.sha256" \
 \) -exec cp {} "$asset_dir/" \;
 
-archives=$(find "$asset_dir" -maxdepth 1 -name "$repo-$version-*.tar.gz" | wc -l | tr -d ' ')
-checksums=$(find "$asset_dir" -maxdepth 1 -name "$repo-$version-*.tar.gz.sha256" | wc -l | tr -d ' ')
+archives=$(find "$asset_dir" -maxdepth 1 -name "$name-$version-*.tar.gz" | wc -l | tr -d ' ')
+checksums=$(find "$asset_dir" -maxdepth 1 -name "$name-$version-*.tar.gz.sha256" | wc -l | tr -d ' ')
 test "$archives" -gt 0 || fail "no release archives collected"
 test "$archives" = "$checksums" || fail "$archives archives but $checksums checksums"
 
-for archive in "$asset_dir"/$repo-$version-*.tar.gz; do
+for archive in "$asset_dir"/$name-$version-*.tar.gz; do
   checksum=$archive.sha256
+  archive_name=$(basename "$archive")
   expected=$(cut -d ' ' -f 1 "$checksum")
+  recorded=$(awk '{print $2}' "$checksum")
   actual=$(sha256_file "$archive" | cut -d ' ' -f 1)
-  test "$expected" = "$actual" || fail "checksum mismatch for $(basename "$archive")"
+  case "$recorded" in
+    "$archive_name" | "./$archive_name") ;;
+    *) fail "$checksum references $recorded, expected $archive_name" ;;
+  esac
+  test "$expected" = "$actual" || fail "checksum mismatch for $archive_name"
 done
 
 if [ "$auth" = "1" ]; then

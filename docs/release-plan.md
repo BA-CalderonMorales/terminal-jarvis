@@ -53,8 +53,9 @@ labels such as `linux-x64-gnu` or `macos-arm64`; the Rust target triple remains
 visible in `scripts/package-release.sh --check`.
 
 `scripts/local-cd.sh` collects the same archive and checksum files into a
-`release-assets/v<version>/` directory and verifies every checksum. In this
-workspace, its default output is `testing/terminal-jarvis/local-cd/`.
+`release-assets/v<version>/` directory and verifies every checksum and recorded
+archive filename. Release script defaults live in `scripts/release.toml`. In
+this workspace, default output is `testing/terminal-jarvis/local-cd/`.
 
 ## Distribution Hygiene
 
