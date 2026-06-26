@@ -23,6 +23,7 @@ on:
         type: boolean
 
 permissions:
+  actions: write
   contents: read
 
 jobs:
