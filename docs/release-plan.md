@@ -83,7 +83,8 @@ Auth boundaries:
 
 - GitHub draft release upload requires `contents: write` through GitHub Actions
   or a local `gh` session with equivalent repository access.
-- npm publish still requires a renewed npm automation token with package publish
-  rights before any registry publish step is added or run.
+- npm beta and stable workflows build the staged npm package through
+  `scripts/package-release.sh`; real publishes or dist-tag updates require a
+  renewed npm automation token with package publish rights in `NPM_TOKEN`.
 - crates.io publish requires `CARGO_REGISTRY_TOKEN` with publish scope before
   any Cargo publish step is added or run.
