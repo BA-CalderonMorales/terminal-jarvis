@@ -1,0 +1,6 @@
+name = "gemini"
+display = "Gemini"
+description = "Google's Gemini CLI tool"
+binary = "gemini"
+env_mode = "any"
+env = ["GOOGLE_API_KEY", "GEMINI_API_KEY"]

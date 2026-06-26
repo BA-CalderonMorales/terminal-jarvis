@@ -1,0 +1,3 @@
+summary = "Review Goose model selection command surface."
+command = "goose"
+args = ["--help"]

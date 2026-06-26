@@ -1,0 +1,3 @@
+summary = "Review Letta local status and usage command surface."
+command = "letta"
+args = ["--help"]

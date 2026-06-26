@@ -1,0 +1,3 @@
+summary = "Review Letta headless invocation options."
+command = "letta"
+args = ["--help"]

@@ -1,0 +1,3 @@
+summary = "Install OpenCode with npm without sudo."
+command = "npm"
+args = ["install", "-g", "opencode-ai@latest"]

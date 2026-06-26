@@ -1,0 +1,3 @@
+summary = "Update Letta without interactive setup flows."
+command = "npm"
+args = ["update", "-g", "@letta-ai/letta-code"]

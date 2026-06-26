@@ -1,0 +1,3 @@
+summary = "Review Droid local status and usage command surface."
+command = "droid"
+args = ["--help"]

@@ -1,0 +1,6 @@
+name = "crush"
+display = "Crush"
+description = "Charm's multi-model AI assistant with LSP"
+binary = "crush"
+env_mode = "any"
+env = ["ANTHROPIC_API_KEY", "OPENAI_API_KEY", "CHARM_API_KEY"]

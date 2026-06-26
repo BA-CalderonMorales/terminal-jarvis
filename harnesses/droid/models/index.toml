@@ -1,0 +1,3 @@
+summary = "Review Droid model selection command surface."
+command = "droid"
+args = ["--help"]

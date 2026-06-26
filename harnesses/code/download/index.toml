@@ -1,0 +1,3 @@
+summary = "Install Code from its documented distribution channel."
+command = "npm"
+args = ["install", "-g", "@just-every/code"]

@@ -1,0 +1,3 @@
+summary = "Update Copilot without interactive setup flows."
+command = "npm"
+args = ["update", "-g", "@github/copilot"]

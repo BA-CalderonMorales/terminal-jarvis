@@ -1,0 +1,3 @@
+summary = "Review ECA security and auth command surface."
+command = "eca"
+args = ["--help"]

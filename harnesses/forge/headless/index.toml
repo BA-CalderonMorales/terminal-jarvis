@@ -1,0 +1,3 @@
+summary = "Review Forge headless invocation options."
+command = "forge"
+args = ["--help"]

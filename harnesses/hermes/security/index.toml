@@ -1,0 +1,3 @@
+summary = "Review Hermes Agent security and auth command surface."
+command = "hermes"
+args = ["--help"]

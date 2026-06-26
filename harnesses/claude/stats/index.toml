@@ -1,0 +1,3 @@
+summary = "Review Claude local status and usage command surface."
+command = "claude"
+args = ["--help"]

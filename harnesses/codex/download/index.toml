@@ -1,0 +1,3 @@
+summary = "Install Codex with npm without sudo."
+command = "npm"
+args = ["install", "-g", "@openai/codex"]

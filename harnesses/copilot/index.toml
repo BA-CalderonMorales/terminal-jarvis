@@ -1,0 +1,6 @@
+name = "copilot"
+display = "Copilot"
+description = "GitHub Copilot CLI - AI pair programming directly in your terminal"
+binary = "copilot"
+env_mode = "any"
+env = ["GITHUB_TOKEN", "GH_TOKEN"]

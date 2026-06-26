@@ -1,0 +1,3 @@
+summary = "Dangerous mode is not normalized for Nanocoder yet."
+command = "sh"
+args = ["-c", "echo danger yolo mode is not configured for nanocoder; exit 1"]

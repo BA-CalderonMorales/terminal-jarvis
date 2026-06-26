@@ -1,0 +1,3 @@
+summary = "Review Pi headless invocation options."
+command = "pi"
+args = ["--help"]

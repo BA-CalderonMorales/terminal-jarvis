@@ -1,0 +1,3 @@
+summary = "Review Amp headless invocation options."
+command = "amp"
+args = ["--help"]

@@ -1,0 +1,3 @@
+summary = "Review Pi security and auth command surface."
+command = "pi"
+args = ["--help"]

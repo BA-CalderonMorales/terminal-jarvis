@@ -1,0 +1,3 @@
+summary = "Install Copilot from its documented distribution channel."
+command = "npm"
+args = ["install", "-g", "@github/copilot"]

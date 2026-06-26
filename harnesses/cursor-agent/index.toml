@@ -1,0 +1,6 @@
+name = "cursor-agent"
+display = "Cursor Agent"
+description = "AI agent replicating Cursor's capabilities in the CLI"
+binary = "cursor-agent"
+env_mode = "any"
+env = ["OPENAI_API_KEY", "ANTHROPIC_API_KEY"]

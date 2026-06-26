@@ -1,0 +1,3 @@
+summary = "Install Kilocode from its documented distribution channel."
+command = "npm"
+args = ["install", "-g", "@kilocode/cli"]

@@ -1,0 +1,3 @@
+summary = "Install Hermes Agent from its documented distribution channel."
+command = "bash"
+args = ["-lc", "curl -fsSL https://raw.githubusercontent.com/NousResearch/hermes-agent/main/scripts/install.sh | bash -s -- --skip-setup"]

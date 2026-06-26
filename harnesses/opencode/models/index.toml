@@ -1,0 +1,3 @@
+summary = "Show local OpenCode help until model listing is normalized."
+command = "opencode"
+args = ["--help"]

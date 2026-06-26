@@ -1,0 +1,3 @@
+summary = "Dangerous mode: run OpenCode with local safeguards disabled if supported."
+command = "opencode"
+args = ["--dangerously-disable-safeguards"]

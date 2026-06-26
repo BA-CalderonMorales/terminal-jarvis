@@ -1,0 +1,3 @@
+summary = "Review Letta model selection command surface."
+command = "letta"
+args = ["--help"]

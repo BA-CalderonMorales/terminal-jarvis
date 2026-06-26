@@ -1,0 +1,3 @@
+summary = "Update Crush without interactive setup flows."
+command = "npm"
+args = ["update", "-g", "@charmland/crush"]

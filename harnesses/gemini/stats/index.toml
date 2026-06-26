@@ -1,0 +1,3 @@
+summary = "Review Gemini local status and usage command surface."
+command = "gemini"
+args = ["--help"]

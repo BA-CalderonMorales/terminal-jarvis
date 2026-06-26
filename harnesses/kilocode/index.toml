@@ -1,0 +1,6 @@
+name = "kilocode"
+display = "Kilocode"
+description = "Open-source AI coding agent"
+binary = "kilocode"
+env_mode = "any"
+env = ["ANTHROPIC_API_KEY", "OPENAI_API_KEY", "KILO_API_KEY"]

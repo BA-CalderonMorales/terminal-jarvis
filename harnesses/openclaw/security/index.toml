@@ -1,0 +1,3 @@
+summary = "Review OpenClaw security and auth command surface."
+command = "openclaw"
+args = ["--help"]

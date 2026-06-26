@@ -1,0 +1,3 @@
+summary = "Review Codex sandbox and approval settings before running."
+command = "codex"
+args = ["--help"]

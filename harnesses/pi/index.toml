@@ -1,0 +1,6 @@
+name = "pi"
+display = "Pi"
+description = "Terminal-based coding agent"
+binary = "pi"
+env_mode = "any"
+env = ["OPENAI_API_KEY", "ANTHROPIC_API_KEY"]

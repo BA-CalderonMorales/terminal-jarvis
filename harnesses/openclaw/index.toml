@@ -1,0 +1,6 @@
+name = "openclaw"
+display = "OpenClaw"
+description = "Open-source AI coding assistant and multi-channel local gateway"
+binary = "openclaw"
+env_mode = "any"
+env = ["OPENROUTER_API_KEY"]

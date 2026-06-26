@@ -1,0 +1,3 @@
+summary = "Review Nanocoder model selection command surface."
+command = "nanocoder"
+args = ["--help"]

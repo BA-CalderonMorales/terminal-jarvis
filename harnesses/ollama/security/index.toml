@@ -1,0 +1,3 @@
+summary = "Review Ollama security and auth command surface."
+command = "ollama"
+args = ["--help"]

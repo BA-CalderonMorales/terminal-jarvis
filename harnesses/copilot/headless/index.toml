@@ -1,0 +1,3 @@
+summary = "Review Copilot headless invocation options."
+command = "copilot"
+args = ["--help"]

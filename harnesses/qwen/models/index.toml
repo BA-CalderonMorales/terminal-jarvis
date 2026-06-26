@@ -1,0 +1,3 @@
+summary = "Review Qwen model selection command surface."
+command = "qwen"
+args = ["--help"]

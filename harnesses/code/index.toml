@@ -1,0 +1,6 @@
+name = "code"
+display = "Code"
+description = "Fork of Codex AI - multi-provider coding agent"
+binary = "coder"
+env_mode = "any"
+env = ["OPENAI_API_KEY"]

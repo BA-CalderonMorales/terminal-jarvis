@@ -1,0 +1,3 @@
+summary = "Review Crush model selection command surface."
+command = "crush"
+args = ["--help"]

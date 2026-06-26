@@ -1,0 +1,3 @@
+summary = "Review Mistral Vibe headless invocation options."
+command = "vibe"
+args = ["--help"]

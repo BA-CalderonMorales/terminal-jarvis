@@ -1,0 +1,3 @@
+summary = "Review Jules headless invocation options."
+command = "jules"
+args = ["--help"]

@@ -1,0 +1,6 @@
+name = "amp"
+display = "Amp"
+description = "Sourcegraph's AI-powered code assistant with advanced context awareness"
+binary = "amp"
+env_mode = "any"
+env = ["ANTHROPIC_API_KEY", "OPENAI_API_KEY", "AMP_API_KEY"]

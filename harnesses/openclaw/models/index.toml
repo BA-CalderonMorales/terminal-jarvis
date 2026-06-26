@@ -1,0 +1,3 @@
+summary = "Review OpenClaw model selection command surface."
+command = "openclaw"
+args = ["--help"]

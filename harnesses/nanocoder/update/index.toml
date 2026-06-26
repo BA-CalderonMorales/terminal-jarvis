@@ -1,0 +1,3 @@
+summary = "Update Nanocoder without interactive setup flows."
+command = "npm"
+args = ["update", "-g", "@nanocollective/nanocoder"]

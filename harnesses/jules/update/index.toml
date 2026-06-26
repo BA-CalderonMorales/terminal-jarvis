@@ -1,0 +1,3 @@
+summary = "Update Jules without interactive setup flows."
+command = "npm"
+args = ["update", "-g", "@google/jules"]

@@ -1,0 +1,3 @@
+summary = "Review Mistral Vibe security and auth command surface."
+command = "vibe"
+args = ["--help"]

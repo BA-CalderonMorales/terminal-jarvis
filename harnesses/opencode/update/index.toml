@@ -1,0 +1,3 @@
+summary = "Update the npm-installed OpenCode package without interactive auth."
+command = "npm"
+args = ["update", "-g", "opencode-ai"]

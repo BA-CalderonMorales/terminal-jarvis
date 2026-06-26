@@ -1,0 +1,3 @@
+summary = "Review LLXPRT headless invocation options."
+command = "llxprt"
+args = ["--help"]

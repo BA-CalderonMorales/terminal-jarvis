@@ -1,0 +1,6 @@
+name = "qwen"
+display = "Qwen"
+description = "Qwen coding assistant"
+binary = "qwen"
+env_mode = "any"
+env = ["DASHSCOPE_API_KEY", "QWEN_CODE_API_KEY", "OPENAI_API_KEY"]

@@ -1,0 +1,3 @@
+summary = "Show local Codex help until a stable stats command is defined."
+command = "codex"
+args = ["--help"]
