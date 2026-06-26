@@ -1,8 +1,6 @@
 #!/usr/bin/env sh
 set -eu
 
-name=terminal-jarvis
-repo=https://github.com/BA-CalderonMorales/terminal-jarvis
 mode=${1:-build}
 out_root=${2:-dist}
 
@@ -25,6 +23,8 @@ sha256_file() {
   fi
 }
 
+name=$(value_from_cargo name)
+repo=$(value_from_cargo repository)
 version=$(value_from_cargo version)
 target=$(rustc -vV | sed -n 's/^host: //p')
 platform=$(case "$target" in
@@ -38,6 +38,8 @@ platform=$(case "$target" in
 esac)
 archive=$name-$version-$platform.tar.gz
 
+test -n "$name" || fail "Cargo.toml name missing"
+test -n "$repo" || fail "Cargo.toml repository missing"
 test -n "$version" || fail "Cargo.toml version missing"
 test -n "$target" || fail "rustc host target missing"
 test -d harnesses || fail "harnesses directory missing"
@@ -73,7 +75,7 @@ cp -R harnesses "$stage/"
 chmod +x "$stage/bin/$name"
 
 (cd "$dist/package" && tar -czf "../$archive" "$name-$version-$platform")
-sha256_file "$dist/$archive" >"$dist/$archive.sha256"
+(cd "$dist" && sha256_file "$archive" >"$archive.sha256")
 sha=$(cut -d ' ' -f 1 "$dist/$archive.sha256")
 
 cp npm/terminal-jarvis/package.json npm/terminal-jarvis/README.md "$npm_stage/"

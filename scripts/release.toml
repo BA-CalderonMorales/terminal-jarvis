@@ -1,0 +1,2 @@
+local_cd_dir = "local-cd"
+release_platforms = ["linux-x64-gnu", "macos-x64", "macos-arm64"]
