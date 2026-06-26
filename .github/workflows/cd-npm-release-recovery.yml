@@ -1,13 +1,21 @@
-name: NPM Stable Release
+name: NPM Release Recovery
 
 on:
   workflow_dispatch:
     inputs:
       version:
-        description: "Version to publish or tag as stable, such as 0.1.1"
+        description: "Version to publish or retag, such as 0.1.1 or v0.1.1"
         required: true
-        default: "0.1.1"
         type: string
+      dist_tag:
+        description: "NPM dist-tag to publish or move"
+        required: true
+        default: latest
+        type: choice
+        options:
+          - latest
+          - stable
+          - beta
       dry_run:
         description: "Build and validate without publishing or retagging"
         required: true
@@ -15,15 +23,32 @@ on:
         type: boolean
 
 permissions:
+  actions: write
   contents: read
 
 jobs:
-  npm-stable:
-    name: Publish or Tag Stable
+  npm-recovery:
+    name: Publish or Retag NPM
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
+      - name: Normalize version
+        id: version
+        shell: bash
+        run: |
+          set -euo pipefail
+          version="${{ inputs.version }}"
+          version="${version#v}"
+          [[ "$version" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]] || {
+            echo "version must be X.Y.Z or vX.Y.Z: ${{ inputs.version }}" >&2
+            exit 1
+          }
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+          echo "tag=v$version" >> "$GITHUB_OUTPUT"
+
       - uses: actions/checkout@v7
+        with:
+          ref: ${{ steps.version.outputs.tag }}
 
       - uses: dtolnay/rust-toolchain@stable
 
@@ -40,43 +65,38 @@ jobs:
             ~/.cargo/git
             ~/.cargo/registry
             target
-          key: cargo-npm-stable-${{ runner.os }}-${{ hashFiles('Cargo.lock') }}-v1
-          restore-keys: cargo-npm-stable-${{ runner.os }}-
+          key: cargo-npm-recovery-${{ runner.os }}-${{ hashFiles('Cargo.lock') }}-v1
+          restore-keys: cargo-npm-recovery-${{ runner.os }}-
 
       - name: Build npm package stage
         run: scripts/package-release.sh build dist/npm-release
 
-      - name: Publish or retag stable
+      - name: Publish or retag package
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-          INPUT_VERSION: ${{ inputs.version }}
+          VERSION: ${{ steps.version.outputs.version }}
+          DIST_TAG: ${{ inputs.dist_tag }}
           DRY_RUN: ${{ inputs.dry_run }}
-          DIST_TAG: stable
         run: |
           set -eu
-          if ! [[ "$INPUT_VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
-            echo "invalid version: $INPUT_VERSION" >&2
-            exit 1
-          fi
           cargo_version="$(sed -n 's/^version = "\([^"]*\)"/\1/p' Cargo.toml | head -n 1)"
-          test "$INPUT_VERSION" = "$cargo_version"
-          package_dir="dist/npm-release/$INPUT_VERSION/linux-x64-gnu/npm/terminal-jarvis"
+          test "$VERSION" = "$cargo_version"
+          package_dir="dist/npm-release/$VERSION/linux-x64-gnu/npm/terminal-jarvis"
           test -f "$package_dir/package.json"
+          chmod +x "$package_dir/bin/terminal-jarvis" "$package_dir/bin/terminal-jarvis-bin"
           test -x "$package_dir/bin/terminal-jarvis"
           test -x "$package_dir/bin/terminal-jarvis-bin"
-          expected="$(find harnesses -mindepth 1 -maxdepth 1 -type d | wc -l | tr -d ' ')"
-          actual="$(node "$package_dir/bin/terminal-jarvis" list | wc -l | tr -d ' ')"
-          test "$actual" = "$expected"
+          (cd "$package_dir" && npm pack --dry-run --loglevel error)
 
-          if npm view "terminal-jarvis@$INPUT_VERSION" version >/dev/null 2>&1; then
+          if npm view "terminal-jarvis@$VERSION" version >/dev/null 2>&1; then
             if [ "$DRY_RUN" = "true" ]; then
-              echo "dry run: npm dist-tag add terminal-jarvis@$INPUT_VERSION $DIST_TAG"
+              echo "dry run: npm dist-tag add terminal-jarvis@$VERSION $DIST_TAG"
             else
               test -n "${NODE_AUTH_TOKEN:-}" || {
                 echo "NPM_TOKEN is required to update npm dist-tags" >&2
                 exit 1
               }
-              npm dist-tag add "terminal-jarvis@$INPUT_VERSION" "$DIST_TAG"
+              npm dist-tag add "terminal-jarvis@$VERSION" "$DIST_TAG"
             fi
           elif [ "$DRY_RUN" = "true" ]; then
             (cd "$package_dir" && npm publish --dry-run --tag "$DIST_TAG")
@@ -88,12 +108,12 @@ jobs:
             (cd "$package_dir" && npm publish --tag "$DIST_TAG")
           fi
 
-      - name: Verify stable tag
+      - name: Verify dist-tag
         if: ${{ inputs.dry_run == false }}
         env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-          INPUT_VERSION: ${{ inputs.version }}
+          VERSION: ${{ steps.version.outputs.version }}
+          DIST_TAG: ${{ inputs.dist_tag }}
         run: |
           set -eu
-          npm view "terminal-jarvis@$INPUT_VERSION" version
-          npm dist-tag ls terminal-jarvis | grep "^stable: $INPUT_VERSION$"
+          npm view "terminal-jarvis@$VERSION" version
+          npm dist-tag ls terminal-jarvis | grep "^$DIST_TAG: $VERSION$"

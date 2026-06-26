@@ -1,7 +1,7 @@
 # Testing
 
 The baseline target is 90 percent or better line coverage and mutation score.
-The v0.1.0 root starts by making behavior smaller and more testable.
+The v0.1 root starts by making behavior smaller and more testable.
 
 The current tests enforce the expected 25-harness catalog, the full
 nine-capability harness contract, non-interactive update plans, visible yolo

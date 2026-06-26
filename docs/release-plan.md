@@ -1,7 +1,11 @@
 # Release Plan
 
-This repository is preparing `v0.1.0`, the first breaking minor revision before
-`v1.0.0`.
+This repository is on the `v0.1.x` line, the first breaking minor revision
+before `v1.0.0`.
+
+Patch releases carry packaging, release automation, documentation, and bug
+fixes. Do not cut a minor or major version unless that version level is
+explicitly requested.
 
 ## User Notice
 
@@ -59,19 +63,20 @@ this workspace, default output is `testing/terminal-jarvis/local-cd/`.
 
 ## Distribution Hygiene
 
-Before publishing this minor revision:
+Before publishing a `v0.1.x` release:
 
 1. Run `scripts/verify.sh`.
 2. Run `scripts/local-ci.sh`; pass `--strict` when optional security tools must
    be installed instead of skipped.
-3. Run `scripts/local-cd.sh --check-auth` and inspect
-   `testing/terminal-jarvis/local-cd/release-assets/v0.1.0/`.
+3. Run `scripts/local-cd.sh --check-auth` and inspect the generated
+   `testing/terminal-jarvis/local-cd/release-assets/v<version>/` directory.
 4. Run `cargo llvm-cov` with the 90 percent line coverage gate installed when
    coverage is not already covered by `scripts/verify.sh`.
 5. Run `TJ_MUTATION=1 scripts/verify.sh` or `scripts/local-ci.sh --mutation`
    with `cargo-mutants` installed before cutting the tag.
 6. Test install, update, and version commands through Cargo, npm, and Homebrew.
-7. Push a signed or reviewed `v0.1.0` tag only after the release PR is accepted.
+7. Push a signed or reviewed `v<version>` tag only after the release PR is
+   accepted.
 
 The root GitHub workflows keep the tag-push release shape. CI verifies the lean
 Rust crate, catalog contracts, package metadata, security gates, npm wrapper,
