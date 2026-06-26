@@ -27,15 +27,15 @@ name=$(value_from_cargo name)
 repo=$(value_from_cargo repository)
 version=$(value_from_cargo version)
 target=$(rustc -vV | sed -n 's/^host: //p')
-platform=$(case "$target" in
-  x86_64-unknown-linux-gnu) echo linux-x64-gnu ;;
-  aarch64-unknown-linux-gnu) echo linux-arm64-gnu ;;
-  x86_64-unknown-linux-musl) echo linux-x64-musl ;;
-  aarch64-unknown-linux-musl) echo linux-arm64-musl ;;
-  x86_64-apple-darwin) echo macos-x64 ;;
-  aarch64-apple-darwin) echo macos-arm64 ;;
-  *) echo "$target" ;;
-esac)
+case "$target" in
+  x86_64-unknown-linux-gnu) platform=linux-x64-gnu ;;
+  aarch64-unknown-linux-gnu) platform=linux-arm64-gnu ;;
+  x86_64-unknown-linux-musl) platform=linux-x64-musl ;;
+  aarch64-unknown-linux-musl) platform=linux-arm64-musl ;;
+  x86_64-apple-darwin) platform=macos-x64 ;;
+  aarch64-apple-darwin) platform=macos-arm64 ;;
+  *) platform=$target ;;
+esac
 archive=$name-$version-$platform.tar.gz
 
 test -n "$name" || fail "Cargo.toml name missing"
