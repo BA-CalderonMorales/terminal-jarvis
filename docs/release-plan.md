@@ -39,7 +39,7 @@ For host release packaging:
 scripts/package-release.sh
 ```
 
-For the full local CD smoke path without tagging, pushing, or publishing:
+For the local CD smoke path without tagging, pushing, or publishing:
 
 ```bash
 scripts/local-cd.sh --check-auth
@@ -73,18 +73,20 @@ Before publishing this minor revision:
 6. Test install, update, and version commands through Cargo, npm, and Homebrew.
 7. Push a signed or reviewed `v0.1.0` tag only after the release PR is accepted.
 
-The root GitHub workflows intentionally replace the old release flow. CI now
-verifies the lean Rust crate, catalog contracts, package metadata, security
-gates, npm wrapper, Homebrew syntax, coverage, and mutation. Multi-platform CD
-builds host archives for Linux and macOS and publishes draft GitHub release
-assets for tagged releases.
+The root GitHub workflows keep the tag-push release shape. CI verifies the lean
+Rust crate, catalog contracts, package metadata, security gates, npm wrapper,
+Homebrew syntax, coverage, and mutation. Multi-platform CD builds host archives
+for Linux and macOS, publishes the crates.io package when needed, publishes the
+GitHub release assets, updates the Homebrew tap, and publishes or retags the npm
+package as `latest`.
 
 Auth boundaries:
 
-- GitHub draft release upload requires `contents: write` through GitHub Actions
-  or a local `gh` session with equivalent repository access.
-- npm beta and stable workflows build the staged npm package through
-  `scripts/package-release.sh`; real publishes or dist-tag updates require a
-  renewed npm automation token with package publish rights in `NPM_TOKEN`.
-- crates.io publish requires `CARGO_REGISTRY_TOKEN` with publish scope before
-  any Cargo publish step is added or run.
+- GitHub release upload requires `contents: write` through GitHub Actions or a
+  local `gh` session with equivalent repository access.
+- Homebrew tap updates require `HOMEBREW_TAP_TOKEN` with push rights to
+  `BA-CalderonMorales/homebrew-terminal-jarvis`.
+- npm publish or `latest` dist-tag updates require `NPM_TOKEN` with package
+  publish rights. Beta and stable workflows remain available for explicit
+  dist-tag promotion.
+- crates.io publish requires `CARGO_REGISTRY_TOKEN` with publish scope.

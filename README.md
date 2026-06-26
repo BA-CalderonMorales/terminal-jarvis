@@ -87,7 +87,7 @@ Cargo is the active development surface. Minimal npm and Homebrew source-build
 surfaces are included for smoke testing, while `scripts/package-release.sh`
 builds versioned archives, checksums, npm staging files, and generated Homebrew
 formula output. Tagged releases use `.github/workflows/cd-multiplatform.yml` to
-publish draft GitHub release assets after hosted CI passes.
+publish the crate, GitHub release assets, Homebrew tap update, and npm package.
 
 See [docs/release-plan.md](docs/release-plan.md) for the v0.1.0 checklist and
 auth boundaries.
