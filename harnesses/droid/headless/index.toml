@@ -1,0 +1,3 @@
+summary = "Review Droid headless invocation options."
+command = "droid"
+args = ["--help"]

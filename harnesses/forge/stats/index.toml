@@ -1,0 +1,3 @@
+summary = "Review Forge local status and usage command surface."
+command = "forge"
+args = ["--help"]

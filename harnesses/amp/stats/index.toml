@@ -1,0 +1,3 @@
+summary = "Review Amp local status and usage command surface."
+command = "amp"
+args = ["--help"]

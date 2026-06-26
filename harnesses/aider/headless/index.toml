@@ -1,0 +1,3 @@
+summary = "Review Aider headless invocation options."
+command = "aider"
+args = ["--help"]

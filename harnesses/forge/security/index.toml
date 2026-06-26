@@ -1,0 +1,3 @@
+summary = "Review Forge security and auth command surface."
+command = "forge"
+args = ["--help"]

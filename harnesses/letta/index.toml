@@ -1,0 +1,6 @@
+name = "letta"
+display = "Letta"
+description = "Memory-first coding agent"
+binary = "letta"
+env_mode = "any"
+env = ["ANTHROPIC_API_KEY", "OPENAI_API_KEY", "LETTA_API_KEY"]

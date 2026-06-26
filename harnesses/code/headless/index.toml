@@ -1,0 +1,3 @@
+summary = "Review Code headless invocation options."
+command = "coder"
+args = ["--help"]

@@ -1,0 +1,3 @@
+summary = "Review Code model selection command surface."
+command = "coder"
+args = ["--help"]

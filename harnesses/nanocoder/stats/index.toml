@@ -1,0 +1,3 @@
+summary = "Review Nanocoder local status and usage command surface."
+command = "nanocoder"
+args = ["--help"]

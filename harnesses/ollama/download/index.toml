@@ -1,0 +1,3 @@
+summary = "Install Ollama from its documented distribution channel."
+command = "sh"
+args = ["-c", "curl -fsSL https://ollama.com/install.sh | sh"]

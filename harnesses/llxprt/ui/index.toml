@@ -1,0 +1,3 @@
+summary = "Open the interactive LLXPRT interface."
+command = "llxprt"
+args = []

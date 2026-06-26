@@ -1,24 +1,16 @@
 [package]
 name = "terminal-jarvis"
-version = "0.0.82"
+version = "0.1.0"
 edition = "2021"
-description = "A thin Rust wrapper that provides a unified interface for managing and running AI coding tools"
+description = "A data-driven harness switcher for AI coding agents"
 authors = ["BA-CalderonMorales"]
 license = "MIT"
 repository = "https://github.com/BA-CalderonMorales/terminal-jarvis"
 homepage = "https://github.com/BA-CalderonMorales/terminal-jarvis"
 readme = "README.md"
-keywords = ["cli", "ai", "tools", "wrapper"]
-categories = ["command-line-utilities"]
-include = [
-    "src/**",
-    "Cargo.toml",
-    "README.md",
-    "LICENSE",
-    "config/**",
-    "config.toml",
-    "terminal-jarvis.toml.example",
-]
+keywords = ["cli", "ai", "agents", "harness"]
+categories = ["command-line-utilities", "development-tools"]
+include = ["src/**", "harnesses/**", "docs/**", "Cargo.toml", "README.md", "LICENSE"]
 
 [[bin]]
 name = "terminal-jarvis"
@@ -29,81 +21,3 @@ name = "terminal_jarvis"
 path = "src/lib.rs"
 
 [dependencies]
-clap = { version = "4.5.50", features = ["derive", "env", "wrap_help"] }
-clap_complete = "4.5.58"
-tokio = { version = "1.47.1", features = ["full"] }
-# Use rustls for TLS to enable static linking with musl (Issue #24 - GLIBC independence)
-reqwest = { version = "0.12.23", default-features = false, features = [
-    "json",
-    "multipart",
-    "rustls-tls",
-] }
-serde = { version = "1.0.228", features = ["derive"] }
-serde_json = "1.0.145"
-anyhow = "1.0.100"
-toml = "0.9.8"
-dirs = "6.0.0"
-inquire = "0.9.4"
-terminal_size = "0.4.4"
-indicatif = "0.18.3"
-signal-hook = "0.4.1"
-libc = { version = "0.2.177", optional = false }
-unicode-width = "0.2.2"
-tempfile = "3.23.0"
-regex = "1.12.1"
-chrono = { version = "0.4.42", features = ["serde"] }
-
-# Security dependencies
-sha2 = "0.10.9"
-keyring = { version = "3.6.2", optional = true }
-aes-gcm = { version = "0.10.3", optional = true }
-argon2 = { version = "0.5.3", optional = true }
-rand = { version = "0.8.5", optional = true }
-rpassword = { version = "7.5.2", optional = true }
-
-# Database (Turso/libSQL for modern config storage)
-libsql = { version = "0.9", default-features = false, features = ["core"] }
-
-# Async trait for repository pattern
-async-trait = "0.1.89"
-is-terminal = "0.4.17"
-
-[features]
-default = ["credential-encryption"]
-credential-encryption = ["dep:keyring", "dep:aes-gcm", "dep:argon2", "dep:rand", "dep:rpassword"]
-plaintext-credentials = []  # Disables encryption (for testing only)
-
-[dev-dependencies]
-tokio-test = "0.4.4"
-
-# cargo-binstall support: download pre-built binaries from GitHub releases
-# Users can install with: cargo binstall terminal-jarvis
-[package.metadata.binstall]
-pkg-url = "{ repo }/releases/download/v{ version }/{ name }-{ target }{ archive-suffix }"
-bin-dir = "{ bin }{ binary-ext }"
-pkg-fmt = "tgz"
-
-# Platform-specific overrides for GitHub release naming
-[package.metadata.binstall.overrides.x86_64-apple-darwin]
-pkg-url = "{ repo }/releases/download/v{ version }/terminal-jarvis-mac.tar.gz"
-
-[package.metadata.binstall.overrides.aarch64-apple-darwin]
-pkg-url = "{ repo }/releases/download/v{ version }/terminal-jarvis-mac.tar.gz"
-
-[package.metadata.binstall.overrides.x86_64-unknown-linux-gnu]
-pkg-url = "{ repo }/releases/download/v{ version }/terminal-jarvis-linux.tar.gz"
-
-[package.metadata.binstall.overrides.x86_64-unknown-linux-musl]
-pkg-url = "{ repo }/releases/download/v{ version }/terminal-jarvis-linux.tar.gz"
-
-[package.metadata.binstall.overrides.aarch64-unknown-linux-gnu]
-pkg-url = "{ repo }/releases/download/v{ version }/terminal-jarvis-linux.tar.gz"
-
-[package.metadata.binstall.overrides.aarch64-unknown-linux-musl]
-pkg-url = "{ repo }/releases/download/v{ version }/terminal-jarvis-linux.tar.gz"
-
-[package.metadata.binstall.overrides.x86_64-pc-windows-msvc]
-pkg-url = "{ repo }/releases/download/v{ version }/terminal-jarvis-windows.tar.gz"
-
-[package.metadata.binstall.overrides.aarch64-pc-windows-msvc]
-pkg-url = "{ repo }/releases/download/v{ version }/terminal-jarvis-windows.tar.gz"

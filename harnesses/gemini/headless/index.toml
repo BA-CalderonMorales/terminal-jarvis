@@ -1,0 +1,3 @@
+summary = "Review Gemini headless invocation options."
+command = "gemini"
+args = ["--help"]

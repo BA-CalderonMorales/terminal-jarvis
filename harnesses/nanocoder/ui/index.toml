@@ -1,0 +1,3 @@
+summary = "Open the interactive Nanocoder interface."
+command = "nanocoder"
+args = []

@@ -1,0 +1,3 @@
+summary = "Install Aider from its documented distribution channel."
+command = "uv"
+args = ["tool", "install", "--force", "--python", "python3.12", "--with", "pip", "aider-chat@latest"]

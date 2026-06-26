@@ -1,0 +1,3 @@
+summary = "Install Cursor Agent from its documented distribution channel."
+command = "pip"
+args = ["install", "cursor-agent-tools"]

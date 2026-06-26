@@ -1,0 +1,3 @@
+summary = "Run Codex in a headless command mode when the CLI supports it."
+command = "codex"
+args = ["exec"]

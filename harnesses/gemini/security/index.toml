@@ -1,0 +1,3 @@
+summary = "Review Gemini security and auth command surface."
+command = "gemini"
+args = ["--help"]

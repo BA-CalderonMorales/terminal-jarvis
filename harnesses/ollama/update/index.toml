@@ -1,0 +1,3 @@
+summary = "Update Ollama without interactive setup flows."
+command = "sh"
+args = ["-c", "curl -fsSL https://ollama.com/install.sh | sh"]

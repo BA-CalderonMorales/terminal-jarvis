@@ -1,0 +1,3 @@
+summary = "Review LLXPRT model selection command surface."
+command = "llxprt"
+args = ["--help"]

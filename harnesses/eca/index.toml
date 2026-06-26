@@ -1,0 +1,6 @@
+name = "eca"
+display = "ECA"
+description = "Editor Code Assistant"
+binary = "eca"
+env_mode = "any"
+env = ["ANTHROPIC_API_KEY", "OPENAI_API_KEY", "ECA_API_KEY"]

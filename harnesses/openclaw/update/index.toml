@@ -1,0 +1,3 @@
+summary = "Update OpenClaw without interactive setup flows."
+command = "openclaw"
+args = ["update", "--yes", "--no-restart"]

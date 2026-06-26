@@ -1,0 +1,3 @@
+summary = "Update Mistral Vibe without interactive setup flows."
+command = "vibe"
+args = ["update"]

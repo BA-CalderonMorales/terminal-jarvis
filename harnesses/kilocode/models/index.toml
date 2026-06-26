@@ -1,0 +1,3 @@
+summary = "Review Kilocode model selection command surface."
+command = "kilocode"
+args = ["--help"]

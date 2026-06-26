@@ -1,0 +1,3 @@
+summary = "Update Hermes Agent without interactive setup flows."
+command = "hermes"
+args = ["update"]

@@ -1,0 +1,3 @@
+summary = "Show local Codex help until model listing is normalized."
+command = "codex"
+args = ["--help"]

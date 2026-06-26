@@ -1,0 +1,3 @@
+summary = "Review Kilocode security and auth command surface."
+command = "kilocode"
+args = ["--help"]

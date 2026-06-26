@@ -1,0 +1,3 @@
+summary = "Review Goose headless invocation options."
+command = "goose"
+args = ["--help"]

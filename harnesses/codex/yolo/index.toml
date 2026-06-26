@@ -1,0 +1,3 @@
+summary = "Dangerous mode: bypass Codex approvals and sandboxing."
+command = "codex"
+args = ["--dangerously-bypass-approvals-and-sandbox"]

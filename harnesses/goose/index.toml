@@ -1,0 +1,6 @@
+name = "goose"
+display = "Goose"
+description = "Block's AI-powered coding assistant with developer toolkit integration"
+binary = "goose"
+env_mode = "any"
+env = ["OPENAI_API_KEY", "ANTHROPIC_API_KEY", "GEMINI_API_KEY", "GOOGLE_API_KEY"]

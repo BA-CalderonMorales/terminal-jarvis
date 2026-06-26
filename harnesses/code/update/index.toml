@@ -1,0 +1,3 @@
+summary = "Update Code without interactive setup flows."
+command = "npm"
+args = ["update", "-g", "@just-every/code"]

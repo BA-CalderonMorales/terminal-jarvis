@@ -1,0 +1,3 @@
+summary = "Review Goose security and auth command surface."
+command = "goose"
+args = ["--help"]

@@ -1,0 +1,6 @@
+name = "jules"
+display = "Jules"
+description = "Google's asynchronous coding agent in the terminal"
+binary = "jules"
+env_mode = "none"
+env = []

@@ -1,0 +1,3 @@
+summary = "Review Qwen security and auth command surface."
+command = "qwen"
+args = ["--help"]

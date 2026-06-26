@@ -1,0 +1,6 @@
+name = "hermes"
+display = "Hermes Agent"
+description = "Nous Research's terminal AI agent with CLI, TUI, tools, skills, and messaging gateway support"
+binary = "hermes"
+env_mode = "any"
+env = ["OPENROUTER_API_KEY", "AI_GATEWAY_API_KEY", "HF_TOKEN", "ANTHROPIC_API_KEY", "OPENAI_API_KEY", "GOOGLE_API_KEY", "GEMINI_API_KEY"]

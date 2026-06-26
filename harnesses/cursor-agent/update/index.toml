@@ -1,0 +1,3 @@
+summary = "Update Cursor Agent without interactive setup flows."
+command = "pip"
+args = ["install", "--upgrade", "cursor-agent-tools"]

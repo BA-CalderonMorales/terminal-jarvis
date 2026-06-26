@@ -1,0 +1,3 @@
+summary = "Review Pi model selection command surface."
+command = "pi"
+args = ["--help"]

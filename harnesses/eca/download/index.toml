@@ -1,0 +1,3 @@
+summary = "Install ECA from its documented distribution channel."
+command = "sh"
+args = ["-c", "curl -s https://raw.githubusercontent.com/editor-code-assistant/eca/master/install | bash"]
