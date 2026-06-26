@@ -4,9 +4,9 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: "Version to publish or tag as beta, such as 0.1.0"
+        description: "Version to publish or tag as beta, such as 0.1.1"
         required: true
-        default: "0.1.0"
+        default: "0.1.1"
         type: string
       dry_run:
         description: "Build and validate without publishing or retagging"

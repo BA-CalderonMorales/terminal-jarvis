@@ -1,6 +1,13 @@
 # Changelog
 
-## [0.1.0] - Unreleased
+## [0.1.1] - 2026-06-26
+
+- Publishes the npm package with the repository root README.
+- Keeps the tag-driven release workflow on patch increments for release and
+  packaging repairs.
+- Restores the npm release recovery workflow to the current package layout.
+
+## [0.1.0] - 2026-06-26
 
 - Starts the breaking minor revision around a data-driven harness catalog.
 - Prunes the pre-rewrite implementation from the PR to keep review focused on

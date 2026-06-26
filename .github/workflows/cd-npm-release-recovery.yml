@@ -4,11 +4,11 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: 'Version to publish to NPM (e.g., 0.0.81 or v0.0.81)'
+        description: "Version to publish or retag, such as 0.1.1 or v0.1.1"
         required: true
         type: string
       dist_tag:
-        description: 'NPM dist-tag to publish'
+        description: "NPM dist-tag to publish or move"
         required: true
         default: latest
         type: choice
@@ -17,158 +17,103 @@ on:
           - stable
           - beta
       dry_run:
-        description: 'Build and pack without publishing'
+        description: "Build and validate without publishing or retagging"
         required: true
         default: true
         type: boolean
 
 permissions:
+  actions: write
   contents: read
 
 jobs:
-  publish-npm-from-release:
-    name: Publish NPM Package From GitHub Release
+  npm-recovery:
+    name: Publish or Retag NPM
     runs-on: ubuntu-latest
-
+    timeout-minutes: 20
     steps:
       - name: Normalize version
         id: version
         shell: bash
         run: |
-          INPUT_VERSION="${{ github.event.inputs.version }}"
-          VERSION="${INPUT_VERSION#v}"
-          TAG="v${VERSION}"
-
-          if [[ ! "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
-            echo "[ERROR] Version must be X.X.X or vX.X.X"
+          set -euo pipefail
+          version="${{ inputs.version }}"
+          version="${version#v}"
+          [[ "$version" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]] || {
+            echo "version must be X.Y.Z or vX.Y.Z: ${{ inputs.version }}" >&2
             exit 1
-          fi
+          }
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+          echo "tag=v$version" >> "$GITHUB_OUTPUT"
 
-          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
-          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
-          echo "[OK] Publishing terminal-jarvis@$VERSION from $TAG"
-
-      - name: Checkout release tag
-        uses: actions/checkout@v5
+      - uses: actions/checkout@v7
         with:
           ref: ${{ steps.version.outputs.tag }}
 
-      - name: Verify package version
-        shell: bash
-        run: |
-          PACKAGE_VERSION=$(node -p "require('./npm/terminal-jarvis/package.json').version")
-          if [ "$PACKAGE_VERSION" != "${{ steps.version.outputs.version }}" ]; then
-            echo "[ERROR] npm package version is $PACKAGE_VERSION, expected ${{ steps.version.outputs.version }}"
-            exit 1
-          fi
-          echo "[OK] npm package version matches $PACKAGE_VERSION"
+      - uses: dtolnay/rust-toolchain@stable
 
-      - name: Verify release asset exists
-        env:
-          GH_TOKEN: ${{ github.token }}
-        shell: bash
-        run: |
-          gh release view "${{ steps.version.outputs.tag }}" --json assets \
-            --jq '.assets[].name' | grep -Fx 'terminal-jarvis-linux.tar.gz'
-
-      - name: Download release binary
-        env:
-          GH_TOKEN: ${{ github.token }}
-        shell: bash
-        run: |
-          mkdir -p release-assets target/release
-          gh release download "${{ steps.version.outputs.tag }}" \
-            --pattern 'terminal-jarvis-linux.tar.gz' \
-            --dir release-assets
-          tar -xzf release-assets/terminal-jarvis-linux.tar.gz -C target/release
-          chmod +x target/release/terminal-jarvis
-          target/release/terminal-jarvis --version
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v6
+      - uses: actions/setup-node@v6
         with:
-          node-version: '18'
-          registry-url: 'https://registry.npmjs.org'
+          node-version: 20
+          registry-url: "https://registry.npmjs.org"
+          cache: npm
+          cache-dependency-path: npm/terminal-jarvis/package-lock.json
 
-      - name: Check NPM publication status
-        id: npm_status
-        shell: bash
-        run: |
-          if npm view "terminal-jarvis@${{ steps.version.outputs.version }}" version >/tmp/npm-version.txt 2>/tmp/npm-error.txt; then
-            echo "[OK] terminal-jarvis@${{ steps.version.outputs.version }} is already published:"
-            cat /tmp/npm-version.txt
-            echo "already_published=true" >> "$GITHUB_OUTPUT"
-            exit 0
-          fi
+      - uses: actions/cache@v6
+        with:
+          path: |
+            ~/.cargo/git
+            ~/.cargo/registry
+            target
+          key: cargo-npm-recovery-${{ runner.os }}-${{ hashFiles('Cargo.lock') }}-v1
+          restore-keys: cargo-npm-recovery-${{ runner.os }}-
 
-          if grep -q 'E404' /tmp/npm-error.txt; then
-            echo "[OK] terminal-jarvis@${{ steps.version.outputs.version }} is not published yet"
-            echo "already_published=false" >> "$GITHUB_OUTPUT"
-            exit 0
-          fi
+      - name: Build npm package stage
+        run: scripts/package-release.sh build dist/npm-release
 
-          echo "[ERROR] Unable to verify NPM publication status"
-          cat /tmp/npm-error.txt
-          exit 1
-
-      - name: Build and pack NPM package
-        shell: bash
-        run: |
-          cd npm/terminal-jarvis
-          npm ci
-          npm run build
-          npm pack --dry-run
-
-      - name: Publish NPM package
-        if: ${{ github.event.inputs.dry_run == 'false' && steps.npm_status.outputs.already_published != 'true' }}
-        shell: bash
-        run: |
-          cd npm/terminal-jarvis
-          npm publish --tag "${{ github.event.inputs.dist_tag }}"
+      - name: Publish or retag package
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-
-      - name: Skip publish for existing NPM package
-        if: ${{ github.event.inputs.dry_run == 'false' && steps.npm_status.outputs.already_published == 'true' }}
-        shell: bash
+          VERSION: ${{ steps.version.outputs.version }}
+          DIST_TAG: ${{ inputs.dist_tag }}
+          DRY_RUN: ${{ inputs.dry_run }}
         run: |
-          echo "[OK] terminal-jarvis@${{ steps.version.outputs.version }} is already published"
-          echo "[OK] Skipping npm publish and verifying the existing package instead"
+          set -eu
+          cargo_version="$(sed -n 's/^version = "\([^"]*\)"/\1/p' Cargo.toml | head -n 1)"
+          test "$VERSION" = "$cargo_version"
+          package_dir="dist/npm-release/$VERSION/linux-x64-gnu/npm/terminal-jarvis"
+          test -f "$package_dir/package.json"
+          chmod +x "$package_dir/bin/terminal-jarvis" "$package_dir/bin/terminal-jarvis-bin"
+          test -x "$package_dir/bin/terminal-jarvis"
+          test -x "$package_dir/bin/terminal-jarvis-bin"
+          (cd "$package_dir" && npm pack --dry-run --loglevel error)
 
-      - name: Verify published package
-        if: ${{ github.event.inputs.dry_run == 'false' }}
-        shell: bash
-        run: |
-          VERSION="${{ steps.version.outputs.version }}"
-          DIST_TAG="${{ github.event.inputs.dist_tag }}"
-
-          echo "Verifying terminal-jarvis@$VERSION on NPM..."
-          for attempt in 1 2 3 4 5 6; do
-            if PUBLISHED_VERSION=$(npm view "terminal-jarvis@$VERSION" version 2>/tmp/npm-verify-error.txt); then
-              if [ "$PUBLISHED_VERSION" != "$VERSION" ]; then
-                echo "[ERROR] npm returned version $PUBLISHED_VERSION, expected $VERSION"
+          if npm view "terminal-jarvis@$VERSION" version >/dev/null 2>&1; then
+            if [ "$DRY_RUN" = "true" ]; then
+              echo "dry run: npm dist-tag add terminal-jarvis@$VERSION $DIST_TAG"
+            else
+              test -n "${NODE_AUTH_TOKEN:-}" || {
+                echo "NPM_TOKEN is required to update npm dist-tags" >&2
                 exit 1
-              fi
-              echo "[OK] terminal-jarvis@$VERSION is published"
-              break
+              }
+              npm dist-tag add "terminal-jarvis@$VERSION" "$DIST_TAG"
             fi
-
-            if [ "$attempt" = "6" ]; then
-              echo "[ERROR] terminal-jarvis@$VERSION was not visible on NPM after retries"
-              cat /tmp/npm-verify-error.txt
+          elif [ "$DRY_RUN" = "true" ]; then
+            (cd "$package_dir" && npm publish --dry-run --tag "$DIST_TAG")
+          else
+            test -n "${NODE_AUTH_TOKEN:-}" || {
+              echo "NPM_TOKEN is required to publish terminal-jarvis" >&2
               exit 1
-            fi
-
-            echo "[WAIT] terminal-jarvis@$VERSION is not visible yet; retrying in 10s"
-            sleep 10
-          done
-
-          echo "Verifying dist-tags..."
-          npm dist-tag ls terminal-jarvis | tee /tmp/npm-dist-tags.txt
-          if ! grep -Fx "$DIST_TAG: $VERSION" /tmp/npm-dist-tags.txt; then
-            echo "[ERROR] Expected dist-tag '$DIST_TAG' to point to $VERSION"
-            exit 1
+            }
+            (cd "$package_dir" && npm publish --tag "$DIST_TAG")
           fi
-          echo "[OK] dist-tag '$DIST_TAG' points to $VERSION"
+
+      - name: Verify dist-tag
+        if: ${{ inputs.dry_run == false }}
         env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          VERSION: ${{ steps.version.outputs.version }}
+          DIST_TAG: ${{ inputs.dist_tag }}
+        run: |
+          set -eu
+          npm view "terminal-jarvis@$VERSION" version
+          npm dist-tag ls terminal-jarvis | grep "^$DIST_TAG: $VERSION$"
