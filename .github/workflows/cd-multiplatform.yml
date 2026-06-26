@@ -305,6 +305,7 @@ jobs:
           }
           package_dir="artifacts/$VERSION/linux-x64-gnu/npm/terminal-jarvis"
           test -f "$package_dir/package.json"
+          chmod +x "$package_dir/bin/terminal-jarvis" "$package_dir/bin/terminal-jarvis-bin"
           test -x "$package_dir/bin/terminal-jarvis"
           test -x "$package_dir/bin/terminal-jarvis-bin"
           (cd "$package_dir" && npm pack --dry-run --loglevel error)
