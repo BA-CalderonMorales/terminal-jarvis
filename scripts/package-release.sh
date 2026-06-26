@@ -78,7 +78,8 @@ chmod +x "$stage/bin/$name"
 (cd "$dist" && sha256_file "$archive" >"$archive.sha256")
 sha=$(cut -d ' ' -f 1 "$dist/$archive.sha256")
 
-cp npm/terminal-jarvis/package.json npm/terminal-jarvis/README.md "$npm_stage/"
+cp npm/terminal-jarvis/package.json "$npm_stage/"
+cp README.md "$npm_stage/"
 cp npm/terminal-jarvis/bin/terminal-jarvis "$npm_stage/bin/"
 cp target/release/$name "$npm_stage/bin/terminal-jarvis-bin"
 cp -R harnesses "$npm_stage/"

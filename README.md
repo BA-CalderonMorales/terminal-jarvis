@@ -3,7 +3,7 @@
 Terminal Jarvis is being simplified into a small Rust CLI that switches between
 coding-agent harnesses through data contracts instead of hard-coded tool logic.
 
-The v0.1.0 line is a breaking minor revision focused on the harness catalog,
+The v0.1 line is a breaking minor revision focused on the harness catalog,
 local release checks, and compact distribution surfaces.
 
 ## Quick Start
@@ -89,5 +89,5 @@ builds versioned archives, checksums, npm staging files, and generated Homebrew
 formula output. Tagged releases use `.github/workflows/cd-multiplatform.yml` to
 publish the crate, GitHub release assets, Homebrew tap update, and npm package.
 
-See [docs/release-plan.md](docs/release-plan.md) for the v0.1.0 checklist and
+See [docs/release-plan.md](docs/release-plan.md) for the v0.1 release checklist and
 auth boundaries.
