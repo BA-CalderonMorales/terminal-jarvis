@@ -2,7 +2,8 @@
 
 This is the minimal npm surface for the harness-catalog rewrite.
 
-It does not bundle release binaries yet. In this branch it delegates to:
+It can use a bundled release binary when package output provides one. In source
+checkouts it delegates to:
 
 1. `TERMINAL_JARVIS_BIN`
 2. `bin/terminal-jarvis-bin`

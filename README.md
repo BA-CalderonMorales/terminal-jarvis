@@ -3,8 +3,8 @@
 Terminal Jarvis is being simplified into a small Rust CLI that switches between
 coding-agent harnesses through data contracts instead of hard-coded tool logic.
 
-This branch is the first breaking minor revision. The old implementation is
-pruned from this PR so review can focus on the lean v0.1 root.
+The v0.1.0 line is a breaking minor revision focused on the harness catalog,
+local release checks, and compact distribution surfaces.
 
 ## Quick Start
 
@@ -16,17 +16,34 @@ cargo run -- use opencode
 cargo run -- current
 ```
 
-Run the branch verification gate with:
+Run the verification gate with:
 
 ```bash
 scripts/verify.sh
 ```
 
-Run the stronger pre-PR gate with local security and package checks:
+Run the stronger local gate with security and package checks:
 
 ```bash
 scripts/local-ci.sh
 ```
+
+Exercise the local release asset shape without tagging or publishing:
+
+```bash
+scripts/local-cd.sh --check-auth
+```
+
+## Development Environment
+
+Prefer a remote or disposable Linux workspace for Terminal Jarvis development:
+Codespaces, a short-lived VM/container, or an SSH development host. Coding-agent
+harnesses install binaries, inspect repositories, and can run delegated commands,
+so avoid testing new harness plans directly on a daily-driver machine.
+
+Keep provider tokens scoped to the work, mount only the repositories being
+tested, and treat `headless`, `install`, `update`, and `yolo` capability plans as
+commands to review before execution.
 
 ## New Layout
 
@@ -64,9 +81,13 @@ without forcing users to configure every provider a tool supports.
 - Aim for 90 percent or better line coverage and mutation score as the CLI
   stabilizes.
 
-## Release Status
+## Release Path
 
-This branch is not ready for packaged release. Cargo is the active development
-surface. Minimal npm and Homebrew source-build surfaces exist for smoke testing
-until versioned release artifacts are rebuilt through
-[docs/release-plan.md](docs/release-plan.md).
+Cargo is the active development surface. Minimal npm and Homebrew source-build
+surfaces are included for smoke testing, while `scripts/package-release.sh`
+builds versioned archives, checksums, npm staging files, and generated Homebrew
+formula output. Tagged releases use `.github/workflows/cd-multiplatform.yml` to
+publish draft GitHub release assets after hosted CI passes.
+
+See [docs/release-plan.md](docs/release-plan.md) for the v0.1.0 checklist and
+auth boundaries.

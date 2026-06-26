@@ -73,7 +73,7 @@ cp -R harnesses "$stage/"
 chmod +x "$stage/bin/$name"
 
 (cd "$dist/package" && tar -czf "../$archive" "$name-$version-$platform")
-sha256_file "$dist/$archive" >"$dist/$archive.sha256"
+(cd "$dist" && sha256_file "$archive" >"$archive.sha256")
 sha=$(cut -d ' ' -f 1 "$dist/$archive.sha256")
 
 cp npm/terminal-jarvis/package.json npm/terminal-jarvis/README.md "$npm_stage/"

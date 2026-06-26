@@ -85,11 +85,19 @@ jobs:
             v*) ;;
             *) echo "release tag must start with v: $tag" >&2; exit 1 ;;
           esac
+          version="${tag#v}"
 
           mkdir -p release-assets
           find artifacts -type f \( -name "terminal-jarvis-*.tar.gz" -o -name "*.sha256" \) \
             -exec cp {} release-assets/ \;
-          test "$(find release-assets -type f | wc -l | tr -d ' ')" -gt 0
+          for platform in linux-x64-gnu macos-x64 macos-arm64; do
+            archive="terminal-jarvis-$version-$platform.tar.gz"
+            test -f "release-assets/$archive"
+            test -f "release-assets/$archive.sha256"
+            expected="$(cut -d ' ' -f 1 "release-assets/$archive.sha256")"
+            actual="$(sha256sum "release-assets/$archive" | cut -d ' ' -f 1)"
+            test "$expected" = "$actual"
+          done
 
           if gh release view "$tag" >/dev/null 2>&1; then
             gh release upload "$tag" release-assets/* --clobber
@@ -97,5 +105,5 @@ jobs:
             gh release create "$tag" release-assets/* \
               --draft \
               --title "$tag" \
-              --notes "Draft v0.1.0 harness catalog release assets."
+              --notes "Draft $tag harness catalog release assets."
           fi
