@@ -59,22 +59,16 @@ fn parses_legacy_and_direct_commands() {
 
 #[test]
 fn parses_version_flags() {
-    assert_eq!(
-        parse(["tj", "--version"]).unwrap(),
-        Action::Version { verbose: false }
-    );
-    assert_eq!(
-        parse(["tj", "version"]).unwrap(),
-        Action::Version { verbose: false }
-    );
-    assert_eq!(
-        parse(["tj", "version", "--verbose"]).unwrap(),
-        Action::Version { verbose: true }
-    );
-    assert_eq!(
-        parse(["tj", "--info"]).unwrap(),
-        Action::Version { verbose: true }
-    );
+    assert_eq!(parse(["tj", "--version"]).unwrap(), Action::Version { verbose: false });
+    assert_eq!(parse(["tj", "version"]).unwrap(), Action::Version { verbose: false });
+    assert_eq!(parse(["tj", "version", "--verbose"]).unwrap(), Action::Version { verbose: true });
+    assert_eq!(parse(["tj", "--info"]).unwrap(), Action::Version { verbose: true });
+}
+
+#[test]
+fn rejects_unknown_version_flag() {
+    let error = parse(["tj", "version", "--unknown"]).unwrap_err();
+    assert!(error.contains("usage"));
 }
 
 #[test]
@@ -92,10 +86,6 @@ fn rejects_unknown_flags_before_catalog_load() {
 #[test]
 fn parses_every_core_capability() {
     for capability in Capability::ALL {
-        assert_eq!(
-            Capability::parse(capability.as_str()),
-            Some(capability),
-            "capability parse failed for {capability}"
-        );
+        assert_eq!(Capability::parse(capability.as_str()), Some(capability));
     }
 }
