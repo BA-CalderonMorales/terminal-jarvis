@@ -58,9 +58,31 @@ fn parses_legacy_and_direct_commands() {
 }
 
 #[test]
+fn parses_version_flags() {
+    assert_eq!(
+        parse(["tj", "--version"]).unwrap(),
+        Action::Version { verbose: false }
+    );
+    assert_eq!(
+        parse(["tj", "version", "--verbose"]).unwrap(),
+        Action::Version { verbose: true }
+    );
+    assert_eq!(
+        parse(["tj", "--info"]).unwrap(),
+        Action::Version { verbose: true }
+    );
+}
+
+#[test]
 fn rejects_unknown_capability() {
     let error = parse(["tj", "plan", "codex", "launch"]).unwrap_err();
     assert!(error.contains("unknown capability"));
+}
+
+#[test]
+fn rejects_unknown_flags_before_catalog_load() {
+    let error = parse(["tj", "--v"]).unwrap_err();
+    assert!(error.contains("unknown flag '--v'"));
 }
 
 #[test]

@@ -1,15 +1,20 @@
 # terminal-jarvis npm wrapper
 
-This is the minimal npm surface for the harness-catalog rewrite.
+This is the npm launcher for Terminal Jarvis.
 
-It can use a bundled release binary when package output provides one. In source
-checkouts it delegates to:
+The package does not include a native binary. Installed npm copies download the
+matching Terminal Jarvis archive from GitHub Releases, verify the release
+`.sha256` checksum, cache the unpacked binary, and execute it.
+
+In source checkouts it delegates to:
 
 1. `TERMINAL_JARVIS_BIN`
-2. `bin/terminal-jarvis-bin`
-3. `target/release/terminal-jarvis`
-4. `target/debug/terminal-jarvis`
-5. `cargo run --` from the repository root
+2. `target/release/terminal-jarvis`
+3. `target/debug/terminal-jarvis`
+4. `cargo run --` from the repository root
+
+Use `TERMINAL_JARVIS_CACHE` to choose the cache directory. Set
+`TERMINAL_JARVIS_NO_DOWNLOAD=1` to require an already-cached binary.
 
 Run the local smoke check:
 

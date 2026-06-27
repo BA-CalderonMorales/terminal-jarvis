@@ -1,6 +1,6 @@
 # Distribution Hardening
 
-This document records the next release hardening target after `v0.1.2`.
+This document records the distribution hardening target after `v0.1.2`.
 
 ## Invariant
 
@@ -21,18 +21,18 @@ user's existing `PATH`.
   release automation. No release archive or native binary is tracked.
 - `Cargo.toml` uses an explicit source include list, so the crates.io package is
   source plus metadata, not a built binary.
-- `npm/terminal-jarvis` is source-level JS today, but release packaging copies
-  `target/release/terminal-jarvis` to
-  `bin/terminal-jarvis-bin` before publishing the npm package.
-- The npm release, beta, stable, and recovery workflows currently require
-  `bin/terminal-jarvis-bin`.
+- `npm/terminal-jarvis` is a JS launcher. Release packaging must not copy
+  `target/release/terminal-jarvis` into the npm package.
+- The npm launcher downloads Terminal Jarvis from GitHub Releases, verifies the
+  release `.sha256` checksum, caches the unpacked archive, and then executes the
+  cached binary.
 - Generated Homebrew formulas point at GitHub release archives. That is allowed
   because the binary source remains the GitHub Release asset, not the tap.
 
 ## Required Change
 
-The next distribution patch must remove `terminal-jarvis-bin` from npm package
-payloads and from npm workflow assertions.
+Release packaging must keep `terminal-jarvis-bin` out of npm package payloads
+and workflow assertions.
 
 The npm package should become a small launcher that resolves the expected
 Terminal Jarvis release asset for the current OS and CPU, verifies its checksum
@@ -62,13 +62,16 @@ The launcher must fail closed when:
 - Update npm docs to state where the binary is downloaded from and how to
   inspect or clear the cache.
 
-### `0.1.4` UX Fix
+### Current UX Hardening
 
-- Support `--version`, `-v`, and `version --verbose`.
-- Decide whether `--info` is an alias for `version --verbose` or a clear error
-  that points to the supported command.
-- Replace raw `No such file or directory (os error 2)` failures with messages
-  naming the missing catalog, binary, cache, or harness command.
+- Support `--version`, `-v`, `--info`, and `version --verbose`.
+- Treat `--info` as an alias for verbose provenance output.
+- Replace raw missing catalog `No such file or directory (os error 2)` failures
+  with messages naming the catalog path and `TERMINAL_JARVIS_CATALOG`.
+- Reject unknown flags such as `--v` before loading the catalog.
+
+### Remaining `0.1.4` UX Fix
+
 - Detect stale global installs that still expose the pre-`0.1.2` help surface.
 - Make `npx terminal-jarvis`, global npm installs, Cargo installs, and Homebrew
   installs report their source and binary path consistently.

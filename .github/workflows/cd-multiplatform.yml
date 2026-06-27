@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: "Release tag to publish, such as v0.1.2"
+        description: "Release tag to publish, such as v0.1.3"
         required: true
         type: string
 
@@ -305,9 +305,8 @@ jobs:
           }
           package_dir="artifacts/$VERSION/linux-x64-gnu/npm/terminal-jarvis"
           test -f "$package_dir/package.json"
-          chmod +x "$package_dir/bin/terminal-jarvis" "$package_dir/bin/terminal-jarvis-bin"
+          chmod +x "$package_dir/bin/terminal-jarvis"
           test -x "$package_dir/bin/terminal-jarvis"
-          test -x "$package_dir/bin/terminal-jarvis-bin"
           (cd "$package_dir" && npm pack --dry-run --loglevel error)
           if npm view "terminal-jarvis@$VERSION" version >/dev/null 2>&1; then
             npm dist-tag add "terminal-jarvis@$VERSION" latest

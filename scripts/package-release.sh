@@ -60,7 +60,8 @@ if test "$mode" = "--check"; then
 fi
 test "$mode" = "build" || fail "usage: scripts/package-release.sh [--check|build] [out-dir]"
 
-cargo build --release --locked
+git_sha=$(git rev-parse HEAD 2>/dev/null || echo unknown)
+TERMINAL_JARVIS_GIT_SHA=$git_sha cargo build --release --locked
 
 dist=$out_root/$version/$platform
 stage=$dist/package/$name-$version-$platform
@@ -81,9 +82,7 @@ sha=$(cut -d ' ' -f 1 "$dist/$archive.sha256")
 cp npm/terminal-jarvis/package.json "$npm_stage/"
 cp README.md "$npm_stage/"
 cp npm/terminal-jarvis/bin/terminal-jarvis "$npm_stage/bin/"
-cp target/release/$name "$npm_stage/bin/terminal-jarvis-bin"
-cp -R harnesses "$npm_stage/"
-chmod +x "$npm_stage/bin/terminal-jarvis" "$npm_stage/bin/terminal-jarvis-bin"
+chmod +x "$npm_stage/bin/terminal-jarvis"
 
 cat >"$formula_dir/terminal-jarvis.rb" <<EOF
 class TerminalJarvis < Formula
@@ -110,6 +109,7 @@ fi
 if command -v ruby >/dev/null 2>&1; then
   ruby -c "$formula_dir/terminal-jarvis.rb" >/dev/null
 fi
+scripts/check-distribution-payloads.sh --npm-stage "$npm_stage"
 
 tmp=$(mktemp -d)
 trap 'rm -rf "$tmp"' EXIT
@@ -120,7 +120,8 @@ test "$actual" = "$expected" || fail "archive smoke listed $actual of $expected 
 
 if command -v node >/dev/null 2>&1; then
   npm_stage_abs=$(cd "$npm_stage" && pwd)
-  (cd "$tmp" && node "$npm_stage_abs/bin/terminal-jarvis" list >/dev/null)
+  TERMINAL_JARVIS_BIN="$stage/bin/$name" TERMINAL_JARVIS_CATALOG="$stage/harnesses" \
+    node "$npm_stage_abs/bin/terminal-jarvis" list >/dev/null
 fi
 
 scripts/integration-hardening.sh \

@@ -58,13 +58,13 @@ scripts/local-cd.sh --check-auth
 The package script writes artifacts under `<out>/<version>/<platform>/`:
 a binary archive with bundled harness data, a SHA-256 file, an npm package
 staging directory, and a versioned Homebrew formula that points at the release
-archive URL. In `0.1.2`, npm staging still embeds `bin/terminal-jarvis-bin`;
-`docs/distribution-hardening.md` tracks removing that payload. Platform names
-are user-facing labels such as `linux-x64-gnu` or `macos-arm64`; the Rust target
-triple remains visible in `scripts/package-release.sh --check`. Packaging also
-runs `scripts/integration-hardening.sh` against the staged binary, bundled
-harnesses, npm wrapper, and generated Homebrew formula before reporting
-artifact paths.
+archive URL. npm staging must not embed `bin/terminal-jarvis-bin`; the npm
+launcher resolves prebuilt binaries from GitHub Releases with checksum
+verification. Platform names are user-facing labels such as `linux-x64-gnu` or
+`macos-arm64`; the Rust target triple remains visible in
+`scripts/package-release.sh --check`. Packaging also runs
+`scripts/integration-hardening.sh` against the staged binary, bundled harnesses,
+npm wrapper, and generated Homebrew formula before reporting artifact paths.
 
 `scripts/local-cd.sh` collects the same archive and checksum files into a
 `release-assets/v<version>/` directory and verifies every checksum and recorded

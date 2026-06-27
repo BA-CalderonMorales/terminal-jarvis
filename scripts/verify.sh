@@ -49,6 +49,7 @@ scripts/security-check.sh
 echo "[9/11] distribution smoke"
 if command -v node >/dev/null 2>&1 && command -v npm >/dev/null 2>&1; then
   npm --prefix npm/terminal-jarvis run smoke
+  scripts/check-distribution-payloads.sh --npm-stage npm/terminal-jarvis
 else
   echo "node/npm not installed; skipping npm wrapper smoke"
 fi

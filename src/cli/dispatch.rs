@@ -45,6 +45,7 @@ pub fn dispatch(
         Action::Security(words) => security(&words, harnesses),
         Action::Legacy(command) => Ok((0, compat::legacy(&command))),
         Action::Help => Ok((0, output::help().to_string())),
+        Action::Version { .. } => unreachable!("version is handled before catalog load"),
     }
 }
 

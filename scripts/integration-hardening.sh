@@ -72,6 +72,13 @@ run_tj --help >"$tmp/help"
 contains "$tmp/help" "terminal-jarvis"
 contains "$tmp/help" "terminal-jarvis run [harness] [capability] [args...]"
 
+run_tj --version >"$tmp/version"
+contains "$tmp/version" "terminal-jarvis"
+run_tj version --verbose >"$tmp/version-info"
+contains "$tmp/version-info" "binary:"
+contains "$tmp/version-info" "release:"
+contains "$tmp/version-info" "catalog:"
+
 run_tj list >"$tmp/list"
 line_count_is "$tmp/list" "$expected"
 
@@ -104,6 +111,10 @@ if run_tj unknown-command >"$tmp/unknown.out" 2>"$tmp/unknown.err"; then
   fail "unknown command unexpectedly succeeded"
 fi
 contains "$tmp/unknown.err" "unknown command"
+if run_tj --v >"$tmp/flag.out" 2>"$tmp/flag.err"; then
+  fail "unknown flag unexpectedly succeeded"
+fi
+contains "$tmp/flag.err" "unknown flag '--v'"
 
 if [ -z "$npm_wrapper" ] && [ -f npm/terminal-jarvis/bin/terminal-jarvis ]; then
   npm_wrapper=npm/terminal-jarvis/bin/terminal-jarvis
@@ -114,6 +125,9 @@ if [ -n "$npm_wrapper" ]; then
     TERMINAL_JARVIS_BIN="$binary" TERMINAL_JARVIS_CATALOG="$catalog" \
       TERMINAL_JARVIS_HOME="$tmp/npm-home" node "$npm_wrapper" list >"$tmp/npm-list"
     line_count_is "$tmp/npm-list" "$expected"
+    TERMINAL_JARVIS_BIN="$binary" TERMINAL_JARVIS_CATALOG="$catalog" \
+      node "$npm_wrapper" --version >"$tmp/npm-version"
+    contains "$tmp/npm-version" "terminal-jarvis"
   else
     echo "node not installed; skipping npm wrapper integration"
   fi

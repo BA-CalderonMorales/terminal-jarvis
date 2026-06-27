@@ -1,30 +1,6 @@
 use crate::contracts::Capability;
 
-#[derive(Debug, Eq, PartialEq)]
-pub enum Action {
-    Help,
-    List,
-    Check,
-    Current,
-    Use(String),
-    Show(String),
-    Plan {
-        harness: Option<String>,
-        capability: Capability,
-    },
-    Run(Vec<String>),
-    Direct {
-        harness: String,
-        extra: Vec<String>,
-    },
-    Install(String),
-    Update(Option<String>),
-    Auth(Vec<String>),
-    Config(Vec<String>),
-    Cache(Vec<String>),
-    Security(Vec<String>),
-    Legacy(String),
-}
+pub use super::action::Action;
 
 pub fn parse<I>(args: I) -> Result<Action, String>
 where
@@ -37,6 +13,9 @@ where
     }
     match words[0].as_str() {
         "help" | "--help" | "-h" => Ok(Action::Help),
+        "version" => version(&words[1..]),
+        "--version" | "-v" => Ok(Action::Version { verbose: false }),
+        "--info" => Ok(Action::Version { verbose: true }),
         "list" | "tools" => Ok(Action::List),
         "check" | "status" => Ok(Action::Check),
         "current" => Ok(Action::Current),
@@ -51,10 +30,23 @@ where
         "cache" => Ok(Action::Cache(words[1..].to_vec())),
         "security" => Ok(Action::Security(words[1..].to_vec())),
         "templates" | "db" => Ok(Action::Legacy(words[0].clone())),
+        other if other.starts_with('-') => Err(format!(
+            "unknown flag '{other}'; use --help, --version, -v, or --info"
+        )),
         other => Ok(Action::Direct {
             harness: other.to_string(),
             extra: words[1..].to_vec(),
         }),
+    }
+}
+
+fn version(words: &[String]) -> Result<Action, String> {
+    match words {
+        [] => Ok(Action::Version { verbose: false }),
+        [flag] if flag == "--verbose" || flag == "-v" || flag == "--info" => {
+            Ok(Action::Version { verbose: true })
+        }
+        _ => Err("usage: terminal-jarvis version [--verbose]".to_string()),
     }
 }
 

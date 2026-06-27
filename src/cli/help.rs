@@ -3,6 +3,7 @@ pub fn text() -> &'static str {
      usage:\n\
        terminal-jarvis [harness] [args...]\n\
        terminal-jarvis run [harness] [capability] [args...]\n\
+       terminal-jarvis version [--verbose]\n\
        terminal-jarvis list\n\
        terminal-jarvis check\n\
        terminal-jarvis use <harness>\n\

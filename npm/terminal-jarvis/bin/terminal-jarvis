@@ -1,32 +1,131 @@
 #!/usr/bin/env node
-const { existsSync } = require("node:fs");
-const { dirname, resolve } = require("node:path");
+const fs = require("node:fs");
+const https = require("node:https");
+const os = require("node:os");
+const path = require("node:path");
+const crypto = require("node:crypto");
 const { spawnSync } = require("node:child_process");
 
 const args = process.argv.slice(2);
-const here = dirname(__filename);
-const repo = resolve(here, "../../..");
-const candidates = [
-  process.env.TERMINAL_JARVIS_BIN,
-  resolve(here, "terminal-jarvis-bin"),
-  resolve(repo, "target/release/terminal-jarvis"),
-  resolve(repo, "target/debug/terminal-jarvis"),
-].filter(Boolean);
+const here = __dirname;
+const pkg = require(path.resolve(here, "../package.json"));
+const repo = path.resolve(here, "../../..");
 
-for (const binary of candidates) {
-  if (existsSync(binary)) {
-    const result = spawnSync(binary, args, { stdio: "inherit" });
-    process.exit(result.status ?? 1);
-  }
-}
+main().catch((error) => {
+  console.error(`terminal-jarvis: ${error.message}`);
+  process.exit(1);
+});
 
-if (existsSync(resolve(repo, "Cargo.toml"))) {
-  const result = spawnSync("cargo", ["run", "--quiet", "--", ...args], {
-    cwd: repo,
-    stdio: "inherit",
-  });
+async function main() {
+  const resolved = await resolveBinary();
+  const env = {
+    ...process.env,
+    TERMINAL_JARVIS_DISTRIBUTION: resolved.source,
+    TERMINAL_JARVIS_RELEASE_URL: resolved.releaseUrl || "",
+    TERMINAL_JARVIS_WRAPPER: __filename,
+  };
+  const result = spawnSync(resolved.binary, args, { stdio: "inherit", env });
   process.exit(result.status ?? 1);
 }
 
-console.error("terminal-jarvis binary is missing; reinstall or set TERMINAL_JARVIS_BIN");
-process.exit(1);
+async function resolveBinary() {
+  if (process.env.TERMINAL_JARVIS_BIN) {
+    return explicit(process.env.TERMINAL_JARVIS_BIN, "env");
+  }
+  for (const candidate of sourceCandidates()) {
+    if (fs.existsSync(candidate)) return explicit(candidate, "source");
+  }
+  if (fs.existsSync(path.resolve(repo, "Cargo.toml"))) {
+    const result = spawnSync("cargo", ["run", "--quiet", "--", ...args], {
+      cwd: repo,
+      stdio: "inherit",
+    });
+    process.exit(result.status ?? 1);
+  }
+  return downloadRelease();
+}
+
+function explicit(binary, source) {
+  if (!fs.existsSync(binary)) throw new Error(`binary not found: ${binary}`);
+  return { binary, source };
+}
+
+function sourceCandidates() {
+  return [
+    path.resolve(repo, "target/release/terminal-jarvis"),
+    path.resolve(repo, "target/debug/terminal-jarvis"),
+  ];
+}
+
+async function downloadRelease() {
+  const platform = platformName();
+  const archive = `${pkg.name}-${pkg.version}-${platform}.tar.gz`;
+  const base = releaseBase();
+  const releaseUrl = `${base}/${archive}`;
+  const checksumUrl = `${releaseUrl}.sha256`;
+  const root = path.join(cacheRoot(), pkg.version, platform);
+  const unpacked = path.join(root, `${pkg.name}-${pkg.version}-${platform}`);
+  const binary = path.join(unpacked, "bin", "terminal-jarvis");
+  if (fs.existsSync(binary)) return { binary, source: "github-release-cache", releaseUrl };
+  if (process.env.TERMINAL_JARVIS_NO_DOWNLOAD) {
+    throw new Error(`release binary is not cached: ${binary}`);
+  }
+  fs.rmSync(root, { recursive: true, force: true });
+  fs.mkdirSync(root, { recursive: true });
+  const archivePath = path.join(root, archive);
+  await fetchFile(releaseUrl, archivePath);
+  await verifyChecksum(checksumUrl, archivePath);
+  untar(archivePath, root);
+  if (!fs.existsSync(binary)) throw new Error(`release archive missing ${binary}`);
+  fs.chmodSync(binary, 0o755);
+  return { binary, source: "github-release", releaseUrl };
+}
+
+function platformName() {
+  if (process.platform === "linux" && process.arch === "x64") return "linux-x64-gnu";
+  if (process.platform === "darwin" && process.arch === "x64") return "macos-x64";
+  if (process.platform === "darwin" && process.arch === "arm64") return "macos-arm64";
+  throw new Error(`unsupported platform: ${process.platform}-${process.arch}`);
+}
+
+function releaseBase() {
+  return process.env.TERMINAL_JARVIS_RELEASE_BASE ||
+    `https://github.com/BA-CalderonMorales/terminal-jarvis/releases/download/v${pkg.version}`;
+}
+
+function cacheRoot() {
+  return process.env.TERMINAL_JARVIS_CACHE ||
+    path.join(os.homedir() || os.tmpdir(), ".cache", "terminal-jarvis", "npm");
+}
+
+async function verifyChecksum(checksumUrl, archivePath) {
+  const expected = (await fetchText(checksumUrl)).trim().split(/\s+/)[0];
+  const actual = crypto.createHash("sha256").update(fs.readFileSync(archivePath)).digest("hex");
+  if (!expected || expected !== actual) throw new Error(`checksum mismatch for ${archivePath}`);
+}
+
+function untar(archivePath, cwd) {
+  const result = spawnSync("tar", ["-xzf", archivePath, "-C", cwd], { stdio: "inherit" });
+  if (result.status !== 0) throw new Error("tar extraction failed");
+}
+
+function fetchText(url) {
+  const tmp = path.join(os.tmpdir(), `terminal-jarvis-${process.pid}.txt`);
+  return fetchFile(url, tmp).then(() => fs.readFileSync(tmp, "utf8"));
+}
+
+function fetchFile(url, destination, redirects = 0) {
+  return new Promise((resolve, reject) => {
+    https.get(url, (res) => {
+      if ([301, 302, 303, 307, 308].includes(res.statusCode) && res.headers.location) {
+        if (redirects > 5) return reject(new Error(`too many redirects: ${url}`));
+        return resolve(fetchFile(res.headers.location, destination, redirects + 1));
+      }
+      if (res.statusCode !== 200) return reject(new Error(`download failed ${res.statusCode}: ${url}`));
+      const file = fs.createWriteStream(destination, { mode: 0o644 });
+      res.pipe(file);
+      file.on("finish", () => file.close(resolve));
+      file.on("error", reject);
+    }).on("error", reject);
+  });
+}
