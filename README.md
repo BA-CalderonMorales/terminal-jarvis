@@ -17,7 +17,7 @@ across all agents. Differences shrink to the `index.toml` files.
 | `show <harness>` | Inspect a harness's full capability set |
 | `use <harness>` / `current` | Select / show active harness |
 | `plan [harness] <capability>` | Preview the shell command for a capability |
-| `run <harness> <capability>` | Execute a capability through the harness |
+| `run [harness] [capability] [args...]` | Execute a capability through the harness |
 | `check` | Report binary and environment readiness |
 | `security [status\|audit\|harness]` | Per-harness security posture |
 | `version [--verbose]` / `--version` / `-v` / `--info` | Version and provenance info |
