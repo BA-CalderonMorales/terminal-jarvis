@@ -24,9 +24,9 @@
 - **Docs-only PRs** (changes limited to `docs/`, `README.md`, `AGENTS.md`,
   `CLAUDE.md`) skip CI automatically via `paths-ignore`. Trigger manually
   with `workflow_dispatch` when needed.
-- The capability contract tables in `README.md` are the source of truth for
-  the tool command surface and the harness capability set. Keep them in sync
-  when adding capabilities or commands.
+- The harness capability contract lives in
+  [docs/harness-capability-contract.md](docs/harness-capability-contract.md).
+  Keep it in sync when adding capabilities or commands.
 
 ## Rules
 
