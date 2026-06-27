@@ -11,6 +11,23 @@
 - The pre-rewrite implementation is intentionally pruned; use Git history for
   legacy reference.
 
+## Branch Strategy
+
+- **`develop`**: default base for PRs. Experimentation and quick iteration.
+- **`main`**: tagged releases only. PRs merge into `develop` first, then
+  `develop` fast-forwards into `main` at release time.
+- **Feature branches**: branch from `develop`, PR against `develop`.
+
+## CI
+
+- Runs on every PR against `develop` or `main`.
+- **Docs-only PRs** (changes limited to `docs/`, `README.md`, `AGENTS.md`,
+  `CLAUDE.md`) skip CI automatically via `paths-ignore`. Trigger manually
+  with `workflow_dispatch` when needed.
+- The capability contract tables in `README.md` are the source of truth for
+  the tool command surface and the harness capability set. Keep them in sync
+  when adding capabilities or commands.
+
 ## Rules
 
 - Keep Rust source files at 100 lines or fewer.
