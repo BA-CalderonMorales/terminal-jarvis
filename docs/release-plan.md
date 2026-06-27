@@ -57,12 +57,14 @@ scripts/local-cd.sh --check-auth
 
 The package script writes artifacts under `<out>/<version>/<platform>/`:
 a binary archive with bundled harness data, a SHA-256 file, an npm package
-staging directory with `bin/terminal-jarvis-bin`, and a versioned Homebrew
-formula that points at the release archive URL. Platform names are user-facing
-labels such as `linux-x64-gnu` or `macos-arm64`; the Rust target triple remains
-visible in `scripts/package-release.sh --check`. Packaging also runs
-`scripts/integration-hardening.sh` against the staged binary, bundled harnesses,
-npm wrapper, and generated Homebrew formula before reporting artifact paths.
+staging directory, and a versioned Homebrew formula that points at the release
+archive URL. In `0.1.2`, npm staging still embeds `bin/terminal-jarvis-bin`;
+`docs/distribution-hardening.md` tracks removing that payload. Platform names
+are user-facing labels such as `linux-x64-gnu` or `macos-arm64`; the Rust target
+triple remains visible in `scripts/package-release.sh --check`. Packaging also
+runs `scripts/integration-hardening.sh` against the staged binary, bundled
+harnesses, npm wrapper, and generated Homebrew formula before reporting
+artifact paths.
 
 `scripts/local-cd.sh` collects the same archive and checksum files into a
 `release-assets/v<version>/` directory and verifies every checksum and recorded
@@ -70,6 +72,12 @@ archive filename. Release script defaults live in `scripts/release.toml`. In
 this workspace, default output is `testing/terminal-jarvis/local-cd/`.
 
 ## Distribution Hygiene
+
+Distribution hardening for the next patch is tracked in
+`docs/distribution-hardening.md`. The governing invariant is that GitHub
+Releases are the only source for prebuilt Terminal Jarvis binaries. npm,
+crates.io, and Homebrew tap payloads must not vendor native binaries; they may
+reference or verify GitHub Release assets.
 
 Before publishing a `v0.1.x` release:
 
@@ -85,7 +93,10 @@ Before publishing a `v0.1.x` release:
 6. Run `TJ_MUTATION=1 scripts/verify.sh` or `scripts/local-ci.sh --mutation`
    with `cargo-mutants` installed before cutting the tag.
 7. Test install, update, and version commands through Cargo, npm, and Homebrew.
-8. Push a signed or reviewed `v<version>` tag only after the release PR is
+8. Confirm npm staging contains no `terminal-jarvis-bin`, harness executable, or
+   other vendored native binary unless the release explicitly predates the
+   distribution hardening cutover.
+9. Push a signed or reviewed `v<version>` tag only after the release PR is
    accepted.
 
 The root GitHub workflows keep the tag-push release shape. CI verifies the lean
