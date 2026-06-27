@@ -9,11 +9,11 @@ start, and the tool command reference.
 
 ## Documents
 
-- [[harness-capability-contract|Harness Capability Contract]]
-- [[supported-agents|Supported Agents]]
-- [[maintainer-guide|Maintainer Guide]]
-- [[architecture|Architecture]]
-- [[distribution-hardening|Distribution Hardening]]
-- [[migration|Migration]]
-- [[release-plan|Release Plan]]
-- [[testing|Testing]]
+- [Harness Capability Contract](harness-capability-contract.md)
+- [Supported Agents](supported-agents.md)
+- [Maintainer Guide](maintainer-guide.md)
+- [Architecture](architecture.md)
+- [Distribution Hardening](distribution-hardening.md)
+- [Migration](migration.md)
+- [Release Plan](release-plan.md)
+- [Testing](testing.md)
