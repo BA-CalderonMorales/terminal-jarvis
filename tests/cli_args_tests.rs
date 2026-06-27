@@ -5,7 +5,6 @@ use terminal_jarvis::contracts::Capability;
 fn empty_args_show_help() {
     assert_eq!(parse(["tj"]).unwrap(), Action::Help);
 }
-
 #[test]
 fn parses_plan_with_explicit_harness() {
     assert_eq!(
@@ -16,7 +15,6 @@ fn parses_plan_with_explicit_harness() {
         }
     );
 }
-
 #[test]
 fn parses_plan_for_active_harness() {
     assert_eq!(
@@ -27,7 +25,6 @@ fn parses_plan_for_active_harness() {
         }
     );
 }
-
 #[test]
 fn parses_run_with_extra_args() {
     assert_eq!(
@@ -40,7 +37,6 @@ fn parses_run_with_extra_args() {
         ])
     );
 }
-
 #[test]
 fn parses_legacy_and_direct_commands() {
     assert_eq!(
@@ -64,6 +60,10 @@ fn parses_version_flags() {
         Action::Version { verbose: false }
     );
     assert_eq!(
+        parse(["tj", "version"]).unwrap(),
+        Action::Version { verbose: false }
+    );
+    assert_eq!(
         parse(["tj", "version", "--verbose"]).unwrap(),
         Action::Version { verbose: true }
     );
@@ -73,6 +73,12 @@ fn parses_version_flags() {
     );
 }
 
+#[test]
+fn rejects_unknown_version_flag() {
+    assert!(parse(["tj", "version", "-v"]).is_ok());
+    let error = parse(["tj", "version", "--unknown"]).unwrap_err();
+    assert!(error.contains("usage"));
+}
 #[test]
 fn rejects_unknown_capability() {
     let error = parse(["tj", "plan", "codex", "launch"]).unwrap_err();
@@ -88,10 +94,6 @@ fn rejects_unknown_flags_before_catalog_load() {
 #[test]
 fn parses_every_core_capability() {
     for capability in Capability::ALL {
-        assert_eq!(
-            Capability::parse(capability.as_str()),
-            Some(capability),
-            "capability parse failed for {capability}"
-        );
+        assert_eq!(Capability::parse(capability.as_str()), Some(capability));
     }
 }

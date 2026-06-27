@@ -161,7 +161,7 @@ fi
 step 6 "mutation"
 if [ "$mutation" = "1" ]; then
   if command -v cargo-mutants >/dev/null 2>&1; then
-    cargo mutants --minimum-test-timeout 30 --jobs 2
+    cargo mutants --config mutants.toml --minimum-test-timeout 30 --jobs 2
     rm -rf mutants.out mutants.out.old
   else
     skip_or_fail cargo-mutants "Install cargo-mutants or omit --mutation."

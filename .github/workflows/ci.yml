@@ -119,4 +119,4 @@ jobs:
         run: command -v cargo-mutants >/dev/null || cargo install cargo-mutants --locked
 
       - name: Run mutation tests
-        run: cargo mutants --minimum-test-timeout 30 --jobs 2
+        run: cargo mutants --config mutants.toml --minimum-test-timeout 30 --jobs 2
