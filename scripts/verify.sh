@@ -70,7 +70,7 @@ fi
 
 echo "[11/11] mutation"
 if command -v cargo-mutants >/dev/null 2>&1 && test "${TJ_MUTATION:-0}" = "1"; then
-  cargo mutants --minimum-test-timeout 30 --jobs 2
+  cargo mutants --config mutants.toml --minimum-test-timeout 30 --jobs 2
 else
   echo "cargo-mutants not run; install it and set TJ_MUTATION=1 for ${mutation_target}% mutation work"
 fi

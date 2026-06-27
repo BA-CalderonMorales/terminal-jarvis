@@ -64,6 +64,10 @@ fn parses_version_flags() {
         Action::Version { verbose: false }
     );
     assert_eq!(
+        parse(["tj", "version"]).unwrap(),
+        Action::Version { verbose: false }
+    );
+    assert_eq!(
         parse(["tj", "version", "--verbose"]).unwrap(),
         Action::Version { verbose: true }
     );

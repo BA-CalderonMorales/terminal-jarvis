@@ -1,4 +1,34 @@
+<div align="center">
+
 # Terminal Jarvis
+
+**Unified command center for AI coding tools**
+
+Manage Claude, Gemini, Qwen, and 22 more AI assistants from one terminal
+interface.
+
+[![NPM Version](https://img.shields.io/npm/v/terminal-jarvis.svg?logo=npm&style=flat-square)](https://www.npmjs.com/package/terminal-jarvis)
+[![Crates.io](https://img.shields.io/crates/v/terminal-jarvis.svg?logo=rust&style=flat-square)](https://crates.io/crates/terminal-jarvis)
+[![Homebrew](https://img.shields.io/badge/Homebrew-Available-blue.svg?logo=homebrew&style=flat-square)](https://github.com/BA-CalderonMorales/homebrew-terminal-jarvis)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square)](https://opensource.org/licenses/MIT)
+[![Mentioned in Awesome](https://img.shields.io/badge/Mentioned%20in-Awesome-6f42c1?style=flat-square)](https://github.com/Piebald-AI/awesome-gemini-cli)
+[![Docs](https://img.shields.io/badge/docs-latest-blue.svg?style=flat-square)](https://ba-calderonmorales.github.io/my-life-as-a-dev/latest/projects/active/terminal-jarvis/)
+[![Coverage](https://img.shields.io/badge/coverage-report-green.svg?style=flat-square)](https://github.com/BA-CalderonMorales/terminal-jarvis/actions/workflows/ci.yml?query=branch%3Adevelop)
+
+<img src="https://raw.githubusercontent.com/BA-CalderonMorales/terminal-jarvis/docs/screenshots_and_demos/screenshots_and_demo/promo_image_for_readme.png" alt="Terminal Jarvis Interface" width="100%">
+
+</div>
+
+---
+
+> **Safe Testing Recommended**: Terminal Jarvis is a harness for AI coding tools
+> that can modify files and execute commands. For the safest experience, test in
+> a remote development environment such as
+> [GitHub Codespaces](https://github.com/codespaces),
+> [Coder](https://coder.com/), [DevPod](https://devpod.sh/), or
+> [Google Colab](https://colab.research.google.com/).
+
+---
 
 A data-driven harness switcher for AI coding agents. Maps **25 coding-agent
 CLIs** through a shared **9-capability contract** -- one interface to

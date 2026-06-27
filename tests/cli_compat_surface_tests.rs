@@ -54,6 +54,7 @@ mod unix {
         assert!(stdout(&tj(&["info", "opencode"], &home, None)).contains("OpenCode"));
         assert!(stdout(&tj(&["auth"], &home, None)).contains("credential manager"));
         assert!(stdout(&tj(&["auth", "help", "opencode"], &home, None)).contains("OPENCODE"));
+        assert!(stdout(&tj(&["auth", "opencode"], &home, None)).contains("OPENCODE"));
         assert!(stdout(&tj(&["config", "show"], &home, None)).contains("active harness"));
         assert!(stdout(&tj(&["config", "path"], &home, None)).contains("catalog:"));
         assert!(stdout(&tj(&["config", "reset"], &home, None)).contains("not automatic"));
