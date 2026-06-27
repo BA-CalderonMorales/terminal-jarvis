@@ -75,10 +75,10 @@ fn parses_version_flags() {
 
 #[test]
 fn rejects_unknown_version_flag() {
+    assert!(parse(["tj", "version", "-v"]).is_ok());
     let error = parse(["tj", "version", "--unknown"]).unwrap_err();
     assert!(error.contains("usage"));
 }
-
 #[test]
 fn rejects_unknown_capability() {
     let error = parse(["tj", "plan", "codex", "launch"]).unwrap_err();
