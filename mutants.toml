@@ -1,1 +1,1 @@
-exclude_globs = ["src/cli/compat.rs", "src/cli/dispatch.rs"]
+exclude_globs = ["src/cli/compat.rs"]
