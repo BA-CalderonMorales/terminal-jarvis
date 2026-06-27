@@ -1,6 +1,6 @@
 [package]
 name = "terminal-jarvis"
-version = "0.1.3"
+version = "0.1.4"
 edition = "2021"
 description = "A data-driven harness switcher for AI coding agents"
 authors = ["BA-CalderonMorales"]
