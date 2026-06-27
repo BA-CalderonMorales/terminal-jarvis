@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.1.4] - 2026-06-27
+
+- Adds missing CLI tests to kill surviving mutation-test mutants.
+- Adds `mutants.toml` to exclude legacy compat wrappers from mutation scan.
+- Restores README badges and promo image from v0.0.x header.
+- Fixes CI mutation gate to pass --config mutants.toml.
+- Fixes file-length and formatting issues found by verify.sh.
+- Commits promo image under docs/ for stable relative-path reference.
+
 ## [0.1.3] - 2026-06-27
 
 - Removes the embedded `terminal-jarvis-bin` payload from npm release staging.
