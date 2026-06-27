@@ -9,6 +9,7 @@ package hygiene clearer, and keep release confidence tied to compact checks.
 ## Documents
 
 - [[architecture|Architecture]]
+- [[distribution-hardening|Distribution Hardening]]
 - [[migration|Migration]]
 - [[release-plan|Release Plan]]
 - [[testing|Testing]]

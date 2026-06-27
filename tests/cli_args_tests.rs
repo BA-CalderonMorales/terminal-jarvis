@@ -32,11 +32,44 @@ fn parses_plan_for_active_harness() {
 fn parses_run_with_extra_args() {
     assert_eq!(
         parse(["tj", "run", "codex", "headless", "fix", "tests"]).unwrap(),
-        Action::Run {
-            harness: "codex".to_string(),
-            capability: Capability::Headless,
-            extra: vec!["fix".to_string(), "tests".to_string()],
+        Action::Run(vec![
+            "codex".to_string(),
+            "headless".to_string(),
+            "fix".to_string(),
+            "tests".to_string(),
+        ])
+    );
+}
+
+#[test]
+fn parses_legacy_and_direct_commands() {
+    assert_eq!(
+        parse(["tj", "opencode", "--help"]).unwrap(),
+        Action::Direct {
+            harness: "opencode".to_string(),
+            extra: vec!["--help".to_string()],
         }
+    );
+    assert_eq!(
+        parse(["tj", "install", "opencode"]).unwrap(),
+        Action::Install("opencode".to_string())
+    );
+    assert_eq!(parse(["tj", "status"]).unwrap(), Action::Check);
+}
+
+#[test]
+fn parses_version_flags() {
+    assert_eq!(
+        parse(["tj", "--version"]).unwrap(),
+        Action::Version { verbose: false }
+    );
+    assert_eq!(
+        parse(["tj", "version", "--verbose"]).unwrap(),
+        Action::Version { verbose: true }
+    );
+    assert_eq!(
+        parse(["tj", "--info"]).unwrap(),
+        Action::Version { verbose: true }
     );
 }
 
@@ -44,6 +77,12 @@ fn parses_run_with_extra_args() {
 fn rejects_unknown_capability() {
     let error = parse(["tj", "plan", "codex", "launch"]).unwrap_err();
     assert!(error.contains("unknown capability"));
+}
+
+#[test]
+fn rejects_unknown_flags_before_catalog_load() {
+    let error = parse(["tj", "--v"]).unwrap_err();
+    assert!(error.contains("unknown flag '--v'"));
 }
 
 #[test]

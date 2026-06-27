@@ -1,13 +1,12 @@
 {
   "name": "terminal-jarvis",
-  "version": "0.1.1",
+  "version": "0.1.3",
   "description": "Data-driven harness switcher for AI coding agents",
   "bin": {
     "terminal-jarvis": "bin/terminal-jarvis"
   },
   "files": [
     "bin/",
-    "harnesses/",
     "README.md",
     "package.json"
   ],

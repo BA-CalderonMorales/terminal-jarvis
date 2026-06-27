@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: "Release tag to publish, such as v0.1.1"
+        description: "Release tag to publish, such as v0.1.3"
         required: true
         type: string
 
@@ -293,7 +293,7 @@ jobs:
           node-version: 20
           registry-url: "https://registry.npmjs.org"
 
-      - name: Publish or retag npm latest
+      - name: Publish or retag npm channels
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
           VERSION: ${{ needs.release-meta.outputs.version }}
@@ -305,13 +305,17 @@ jobs:
           }
           package_dir="artifacts/$VERSION/linux-x64-gnu/npm/terminal-jarvis"
           test -f "$package_dir/package.json"
-          chmod +x "$package_dir/bin/terminal-jarvis" "$package_dir/bin/terminal-jarvis-bin"
+          chmod +x "$package_dir/bin/terminal-jarvis"
           test -x "$package_dir/bin/terminal-jarvis"
-          test -x "$package_dir/bin/terminal-jarvis-bin"
           (cd "$package_dir" && npm pack --dry-run --loglevel error)
           if npm view "terminal-jarvis@$VERSION" version >/dev/null 2>&1; then
             npm dist-tag add "terminal-jarvis@$VERSION" latest
           else
             (cd "$package_dir" && npm publish --tag latest)
           fi
-          npm dist-tag ls terminal-jarvis | grep "^latest: $VERSION$"
+          for tag in stable beta; do
+            npm dist-tag add "terminal-jarvis@$VERSION" "$tag"
+          done
+          for tag in latest stable beta; do
+            npm dist-tag ls terminal-jarvis | grep "^$tag: $VERSION$"
+          done

@@ -1,7 +1,14 @@
+mod action;
 pub mod args;
+mod compat;
+mod dispatch;
+mod help;
+mod invoke;
 mod output;
+mod resolve;
+mod version;
 
-use crate::{catalog, context, runtime};
+use crate::catalog;
 use args::Action;
 use std::path::Path;
 
@@ -33,63 +40,27 @@ where
     if action == Action::Help {
         return Ok((0, output::help().to_string()));
     }
-    let harnesses = catalog::load(catalog_root).map_err(|error| error.to_string())?;
+    if let Action::Version { verbose } = action {
+        return Ok((0, version::text(verbose, catalog_root, home)));
+    }
+    let harnesses =
+        catalog::load(catalog_root).map_err(|error| catalog_error(catalog_root, error))?;
     let errors = catalog::validate(&harnesses);
     if !errors.is_empty() {
         return Err(errors.join("; "));
     }
-    match action {
-        Action::List => Ok((0, output::list(&harnesses))),
-        Action::Check => Ok((0, output::checks(&harnesses))),
-        Action::Current => Ok((
-            0,
-            output::current(context::load(home).map_err(|e| e.to_string())?),
-        )),
-        Action::Use(name) => {
-            find(&harnesses, &name)?;
-            context::save(home, &name).map_err(|error| error.to_string())?;
-            Ok((0, format!("active harness = {name}\n")))
-        }
-        Action::Show(name) => Ok((0, output::show(find(&harnesses, &name)?))),
-        Action::Plan {
-            harness,
-            capability,
-        } => {
-            let selected = selected_name(harness, home)?;
-            Ok((0, output::plan(find(&harnesses, &selected)?, capability)))
-        }
-        Action::Run {
-            harness,
-            capability,
-            extra,
-        } => {
-            let plan = find(&harnesses, &harness)?
-                .plan(capability)
-                .ok_or_else(|| format!("{harness} lacks {capability}"))?;
-            runtime::run_command(plan, &extra)
-                .map(|code| (code, String::new()))
-                .map_err(|error| error.to_string())
-        }
-        Action::Help => Ok((0, output::help().to_string())),
-    }
+    dispatch::dispatch(action, &harnesses, catalog_root, home)
 }
 
-fn selected_name(explicit: Option<String>, home: &Path) -> Result<String, String> {
-    if let Some(name) = explicit {
-        return Ok(name);
+fn catalog_error(path: &Path, error: std::io::Error) -> String {
+    if error.kind() == std::io::ErrorKind::NotFound {
+        return format!(
+            "harness catalog is missing at {}; reinstall terminal-jarvis or set TERMINAL_JARVIS_CATALOG",
+            path.display()
+        );
     }
-    context::load(home)
-        .map_err(|error| error.to_string())?
-        .map(|session| session.active_harness)
-        .ok_or_else(|| "no active harness; run `terminal-jarvis use <harness>`".to_string())
-}
-
-fn find<'a>(
-    harnesses: &'a [crate::contracts::Harness],
-    name: &str,
-) -> Result<&'a crate::contracts::Harness, String> {
-    harnesses
-        .iter()
-        .find(|harness| harness.name == name)
-        .ok_or_else(|| format!("unknown harness '{name}'"))
+    format!(
+        "failed to load harness catalog at {}: {error}",
+        path.display()
+    )
 }

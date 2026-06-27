@@ -33,19 +33,23 @@ test "$harnesses" -gt 0 || fail "no harnesses found"
 test "$indexes" -eq "$expected" ||
   fail "expected $expected harness index files, found $indexes"
 
-echo "[6/10] cli smoke"
+echo "[6/11] cli smoke"
 cargo run -- list >/tmp/terminal-jarvis-list.txt
 cargo run -- plan codex headless >/tmp/terminal-jarvis-plan.txt
 TERMINAL_JARVIS_HOME=/tmp/terminal-jarvis-verify cargo run -- use codex >/dev/null
 TERMINAL_JARVIS_HOME=/tmp/terminal-jarvis-verify cargo run -- current |
   grep 'active harness = codex' >/dev/null
 
-echo "[7/10] security"
+echo "[7/11] integration hardening"
+scripts/integration-hardening.sh
+
+echo "[8/11] security"
 scripts/security-check.sh
 
-echo "[8/10] distribution smoke"
+echo "[9/11] distribution smoke"
 if command -v node >/dev/null 2>&1 && command -v npm >/dev/null 2>&1; then
   npm --prefix npm/terminal-jarvis run smoke
+  scripts/check-distribution-payloads.sh --npm-stage npm/terminal-jarvis
 else
   echo "node/npm not installed; skipping npm wrapper smoke"
 fi
@@ -57,14 +61,14 @@ else
 fi
 scripts/package-release.sh --check
 
-echo "[9/10] coverage"
+echo "[10/11] coverage"
 if command -v cargo-llvm-cov >/dev/null 2>&1; then
   cargo llvm-cov --fail-under-lines "$coverage_target"
 else
   echo "cargo-llvm-cov not installed; skipping ${coverage_target}% line coverage gate"
 fi
 
-echo "[10/10] mutation"
+echo "[11/11] mutation"
 if command -v cargo-mutants >/dev/null 2>&1 && test "${TJ_MUTATION:-0}" = "1"; then
   cargo mutants --minimum-test-timeout 30 --jobs 2
 else
