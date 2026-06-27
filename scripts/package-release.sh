@@ -123,6 +123,12 @@ if command -v node >/dev/null 2>&1; then
   (cd "$tmp" && node "$npm_stage_abs/bin/terminal-jarvis" list >/dev/null)
 fi
 
+scripts/integration-hardening.sh \
+  --binary "$stage/bin/$name" \
+  --catalog "$stage/harnesses" \
+  --npm-wrapper "$npm_stage/bin/terminal-jarvis" \
+  --homebrew-formula "$formula_dir/terminal-jarvis.rb"
+
 echo "$dist/$archive"
 echo "$dist/$archive.sha256"
 echo "$npm_stage"

@@ -2,15 +2,7 @@ use crate::contracts::{Capability, Harness};
 use crate::{context::Session, runtime, security};
 
 pub fn help() -> &'static str {
-    "terminal-jarvis\n\
-     usage:\n\
-       terminal-jarvis list\n\
-       terminal-jarvis check\n\
-       terminal-jarvis use <harness>\n\
-       terminal-jarvis current\n\
-       terminal-jarvis show <harness>\n\
-       terminal-jarvis plan [harness] <capability>\n\
-       terminal-jarvis run <harness> <capability> [args...]\n"
+    super::help::text()
 }
 
 pub fn list(harnesses: &[Harness]) -> String {

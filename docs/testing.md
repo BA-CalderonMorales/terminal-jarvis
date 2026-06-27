@@ -5,7 +5,8 @@ The v0.1 root starts by making behavior smaller and more testable.
 
 The current tests enforce the expected 25-harness catalog, the full
 nine-capability harness contract, non-interactive update plans, visible yolo
-danger warnings, CLI parsing, context persistence, and runtime planning order.
+danger warnings, CLI parsing, context persistence, runtime planning order, and
+artifact-level integration smoke checks.
 
 ## Current Gates
 
@@ -14,10 +15,27 @@ scripts/verify.sh
 ```
 
 The script runs formatting, clippy, tests, the 100-line Rust file invariant,
-harness catalog shape checks, CLI smoke checks, security tooling, npm audit,
-npm wrapper smoke checks, Homebrew Formula syntax checks, and coverage/mutation
-gates. It also checks release-package metadata without writing `dist/`
-artifacts.
+harness catalog shape checks, CLI smoke checks, the integration hardening
+matrix, security tooling, npm audit, npm wrapper smoke checks, Homebrew Formula
+syntax checks, and coverage/mutation gates. It also checks release-package
+metadata without writing `dist/` artifacts.
+
+## Integration Hardening Matrix
+
+```bash
+scripts/integration-hardening.sh
+```
+
+This gate builds or receives a Terminal Jarvis binary, then exercises `help`,
+`list`, `check`, `use`, `current`, `show`, and `plan` across every harness and
+all nine capabilities. When an npm wrapper or Homebrew formula is present, it
+also verifies the wrapper list path and formula syntax/installation contract.
+
+The gate deliberately plans lifecycle commands instead of running arbitrary
+harness `download`, `update`, `headless`, or `yolo` commands. Terminal Jarvis
+must not automatically download or execute arbitrary harness dependencies
+during verification. Deeper start/stop tests should run only in disposable or
+remote environments with reviewed commands and scoped credentials.
 
 For the stronger local gate, run:
 
@@ -50,6 +68,12 @@ updates, headless execution, or yolo-style plans. These commands are designed to
 orchestrate coding agents and local binaries, so the safest default is a
 short-lived workspace with only the target repository mounted and only the
 provider tokens needed for that test.
+
+Docker images should be treated as extendable baseline environments, not magic
+installers for every harness dependency. First-class Docker dependency coverage
+should be limited to well-known harnesses such as OpenCode, Codex, Claude Code,
+Gemini, and Hermes Agent. Other harnesses should get explicit limitations or
+unsupported-OS messages instead of silent best-effort installation.
 
 ## Optional Gates
 

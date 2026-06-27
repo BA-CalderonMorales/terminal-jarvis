@@ -4,9 +4,9 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: "Version to publish or tag as stable, such as 0.1.1"
+        description: "Version to publish or tag as stable, such as 0.1.2"
         required: true
-        default: "0.1.1"
+        default: "0.1.2"
         type: string
       dry_run:
         description: "Build and validate without publishing or retagging"

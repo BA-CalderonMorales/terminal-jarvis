@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.1.2] - 2026-06-27
+
+- Restores compatible tool-manager command forms on the v0.1 catalog CLI:
+  direct harness invocation, `run <harness>`, free-form headless prompts,
+  `install`, `update`, `info`, `auth`, `config`, `cache`, and `security`.
+- Expands help and capability errors so users can discover the catalog model.
+- Keeps npm `latest`, `stable`, and `beta` channels synchronized during tag CD.
+
 ## [0.1.1] - 2026-06-26
 
 - Publishes the npm package with the repository root README.

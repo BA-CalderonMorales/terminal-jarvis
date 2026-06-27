@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: "Version to publish or retag, such as 0.1.1 or v0.1.1"
+        description: "Version to publish or retag, such as 0.1.2 or v0.1.2"
         required: true
         type: string
       dist_tag:
