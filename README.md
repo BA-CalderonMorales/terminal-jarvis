@@ -1,135 +1,87 @@
 # Terminal Jarvis
 
-A data-driven harness switcher for AI coding agents. Terminal Jarvis maps
-**25 coding-agent CLIs** through a shared **9-capability contract** --
-one interface to download, run, update, and inspect any agent tool.
+A data-driven harness switcher for AI coding agents. Maps **25 coding-agent
+CLIs** through a shared **9-capability contract** -- one interface to
+download, run, update, and inspect any agent tool.
 
-## The Pattern
+## Install
 
-Every harness exposes the same capability set. The tool commands are uniform
-across all agents. Differences shrink to the `index.toml` files.
+```bash
+# Cargo
+cargo install terminal-jarvis
 
-### Tool Commands (what Terminal Jarvis does)
+# npm
+npm install -g terminal-jarvis
 
-| Command | Purpose |
-|---|---|
-| `list` | Show all available coding agents |
-| `show <harness>` | Inspect a harness's full capability set |
-| `use <harness>` / `current` | Select / show active harness |
-| `plan [harness] <capability>` | Preview the shell command for a capability |
-| `run [harness] [capability] [args...]` | Execute a capability through the harness |
-| `check` | Report binary and environment readiness |
-| `security [status\|audit\|harness]` | Per-harness security posture |
-| `version [--verbose]` / `--version` / `-v` / `--info` | Version and provenance info |
-| `config show` | Active configuration state |
-| `auth help <harness>` | Credential setup guidance |
-| `[harness] [args...]` | Direct pass-through to the harness binary |
-
-Legacy aliases: `tools` &rarr; `list`, `status` &rarr; `check`, `info` &rarr; `show`,
-`install` &rarr; `run <h> download`, `update` &rarr; `run <h> update`.
-
-### Harness Capability Contract (every agent, every time)
-
-| Capability | Safety | Behavior |
-|---|---|---|
-| `download` | safe | Install the agent without sudo |
-| `update` | safe | Upgrade without interactive auth |
-| `headless` | safe | Run in non-interactive / command mode |
-| `version` | safe | Print the installed agent version |
-| `stats` | safe | Show local agent statistics |
-| `models` | safe | List available models |
-| `security` | safe | Review sandbox and approval settings |
-| `ui` | safe | Open the interactive terminal UI |
-| `yolo` | **dangerous** | Bypass all safeguards and approvals |
-
-8 safe capabilities, 1 dangerous. Every one of the **25 harnesses** implements
-all 9. Adding a new agent means adding a directory under `harnesses/` with
-9 `index.toml` files -- no Rust code changes.
-
-### Supported Agents
-
-aider, amp, claude, code, codex, copilot, crush, cursor-agent, droid, eca,
-forge, gemini, goose, hermes, jules, kilocode, letta, llxprt, nanocoder,
-ollama, openclaw, opencode, pi, qwen, vibe
+# Homebrew
+brew install BA-CalderonMorales/homebrew-terminal-jarvis/terminal-jarvis
+```
 
 ## Quick Start
 
 ```bash
-# List every available coding agent
-cargo run -- list
+# List every coding agent
+terminal-jarvis list
 
-# Inspect a harness and its capabilities
-cargo run -- show opencode
+# Inspect a harness
+terminal-jarvis show opencode
 
-# Preview the command for a capability
-cargo run -- plan codex headless
+# Preview a capability command
+terminal-jarvis plan codex headless
 
-# Select an active harness
-cargo run -- use opencode
-cargo run -- current
-
-# Check what's ready to run
-cargo run -- check
+# Select and verify the active harness
+terminal-jarvis use opencode
+terminal-jarvis current
+terminal-jarvis check
 ```
 
-### Verification
+For development builds, replace `terminal-jarvis` with `cargo run --`.
 
-```bash
-scripts/verify.sh              # fmt, lint, tests, shape, hardening, security
-scripts/local-ci.sh            # stronger gate with repository hygiene
-scripts/local-cd.sh --check-auth  # release asset shape without publishing
-```
-
-## How It Works
+### Layout
 
 ```text
-terminal-jarvis/
-├── harnesses/      # 25 agents, 9 capabilities each = 225 index.toml files
-│   └── <agent>/
-│       ├── index.toml         # name, display, binary, env requirements
-│       ├── download/index.toml
-│       ├── update/index.toml
-│       ├── headless/index.toml
-│       ├── version/index.toml
-│       ├── stats/index.toml
-│       ├── models/index.toml
-│       ├── security/index.toml
-│       ├── yolo/index.toml
-│       └── ui/index.toml
-├── src/            # Rust CLI (kept under 100 lines per file)
-├── tests/          # contract, CLI, and integration tests
-└── docs/           # architecture, testing, release, migration
+harnesses/<agent>/
+├── index.toml              # name, display, binary, env requirements
+├── download/index.toml     # install without sudo
+├── update/index.toml       # upgrade without interactive auth
+├── headless/index.toml     # non-interactive command mode
+├── version/index.toml      # print installed agent version
+├── stats/index.toml        # local agent statistics
+├── models/index.toml       # list available models
+├── security/index.toml     # sandbox and approval settings
+├── ui/index.toml           # interactive terminal UI
+└── yolo/index.toml         # bypass safeguards (dangerous)
 ```
 
-Auth setup lives at the harness level (`env_mode`, `env`). A harness can
-require no key, one of several, or all listed. Setup guidance stays accurate
-without forcing every provider key.
+Auth stays with each harness -- terminal-jarvis never retains credentials.
 
-## Development
+## Commands
 
-- **Branch strategy**: feature branches from `develop`, PRs against `develop`.
-  `main` is for tagged releases only.
-- **CI**: runs on every PR not limited to docs. Docs-only changes skip CI
-  (trigger manually via `workflow_dispatch` if needed).
-- **File discipline**: keep Rust source files at 100 lines or fewer. Prefer
-  `index.toml` data over Rust conditionals. Zero dependencies until one proves
-  its value.
-- **Environment**: use a remote or disposable Linux workspace. Harnesses
-  install binaries and run delegated commands; keep provider tokens scoped and
-  test on short-lived environments.
+| Command | Purpose |
+|---|---|
+| `list` | Show all coding agents |
+| `show <harness>` | Inspect a harness's capabilities |
+| `use <harness>` / `current` | Select / show active harness |
+| `plan [harness] <capability>` | Preview the shell command |
+| `run [harness] [capability] [args...]` | Execute a capability |
+| `check` | Report binary + env readiness |
+| `security [status\|audit\|harness]` | Security posture |
+| `version [--verbose]` / `--version` / `-v` / `--info` | Version info |
+| `config show` | Active config state |
+| `auth help <harness>` | Credential setup guidance |
+| `[harness] [args...]` | Pass-through to harness binary |
 
-## Release
+> Legacy aliases from 0.0.x: see [docs/migration.md](docs/migration.md).
 
-Cargo is the primary distribution. npm and Homebrew surfaces are generated
-from the same release build.
+## Docs
 
-```bash
-scripts/package-release.sh build dist/
-scripts/local-cd.sh --check-auth
-```
-
-Tagged releases (`v*`) trigger `.github/workflows/cd-multiplatform.yml`:
-crate publish, GitHub release assets, Homebrew tap update, and npm package.
-
-See [docs/release-plan.md](docs/release-plan.md) for the checklist and auth
-boundaries.
+| Document | What |
+|---|---|
+| [Capability contract](docs/harness-capability-contract.md) | Full breakdown of the 9 capabilities |
+| [Supported agents](docs/supported-agents.md) | All 25 coding agents |
+| [Maintainer guide](docs/maintainer-guide.md) | Development, verification, release |
+| [Architecture](docs/architecture.md) | Module boundaries and contracts |
+| [Release plan](docs/release-plan.md) | Checklist and auth boundaries |
+| [Migration](docs/migration.md) | Breaking changes from 0.0.x |
+| [Testing](docs/testing.md) | Test gates and integration hardening |
+| [Distribution hardening](docs/distribution-hardening.md) | Package integrity and provenance |
