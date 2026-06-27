@@ -5,7 +5,6 @@ use terminal_jarvis::contracts::Capability;
 fn empty_args_show_help() {
     assert_eq!(parse(["tj"]).unwrap(), Action::Help);
 }
-
 #[test]
 fn parses_plan_with_explicit_harness() {
     assert_eq!(
@@ -16,7 +15,6 @@ fn parses_plan_with_explicit_harness() {
         }
     );
 }
-
 #[test]
 fn parses_plan_for_active_harness() {
     assert_eq!(
@@ -27,7 +25,6 @@ fn parses_plan_for_active_harness() {
         }
     );
 }
-
 #[test]
 fn parses_run_with_extra_args() {
     assert_eq!(
@@ -40,7 +37,6 @@ fn parses_run_with_extra_args() {
         ])
     );
 }
-
 #[test]
 fn parses_legacy_and_direct_commands() {
     assert_eq!(
@@ -59,10 +55,22 @@ fn parses_legacy_and_direct_commands() {
 
 #[test]
 fn parses_version_flags() {
-    assert_eq!(parse(["tj", "--version"]).unwrap(), Action::Version { verbose: false });
-    assert_eq!(parse(["tj", "version"]).unwrap(), Action::Version { verbose: false });
-    assert_eq!(parse(["tj", "version", "--verbose"]).unwrap(), Action::Version { verbose: true });
-    assert_eq!(parse(["tj", "--info"]).unwrap(), Action::Version { verbose: true });
+    assert_eq!(
+        parse(["tj", "--version"]).unwrap(),
+        Action::Version { verbose: false }
+    );
+    assert_eq!(
+        parse(["tj", "version"]).unwrap(),
+        Action::Version { verbose: false }
+    );
+    assert_eq!(
+        parse(["tj", "version", "--verbose"]).unwrap(),
+        Action::Version { verbose: true }
+    );
+    assert_eq!(
+        parse(["tj", "--info"]).unwrap(),
+        Action::Version { verbose: true }
+    );
 }
 
 #[test]
