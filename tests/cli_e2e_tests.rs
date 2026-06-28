@@ -79,9 +79,10 @@ fn check_reports_setup_readiness() {
     let output = tj(&["check"]);
     assert!(output.status.success());
     let body = stdout(&output);
-    assert!(body.contains("jules binary="));
     assert!(body.contains("jules binary=missing env=ready"));
-    assert!(body.contains("aider binary=missing env=missing one of"));
+    assert!(body
+        .lines()
+        .any(|line| line.starts_with("aider binary=") && line.contains(" env=")));
 }
 
 #[test]

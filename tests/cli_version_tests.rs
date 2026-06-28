@@ -1,3 +1,4 @@
+use std::fs;
 use std::process::{Command, Output};
 
 fn tj(args: &[&str]) -> Output {
@@ -53,4 +54,24 @@ fn missing_catalog_error_names_catalog_path() {
     let error = stderr(&output);
     assert!(error.contains("harness catalog is missing at"));
     assert!(error.contains("TERMINAL_JARVIS_CATALOG"));
+}
+
+#[test]
+fn corrupt_session_error_reaches_stderr() {
+    let home = std::env::temp_dir().join(format!(
+        "terminal-jarvis-corrupt-session-{}",
+        std::process::id()
+    ));
+    let _ = fs::remove_dir_all(&home);
+    fs::create_dir_all(&home).unwrap();
+    fs::write(home.join("session.toml"), [0xff_u8]).unwrap();
+
+    let output = Command::new(env!("CARGO_BIN_EXE_terminal-jarvis"))
+        .arg("current")
+        .env("TERMINAL_JARVIS_HOME", home)
+        .output()
+        .expect("terminal-jarvis runs");
+
+    assert_eq!(output.status.code(), Some(2));
+    assert!(stderr(&output).contains("stream did not contain valid UTF-8"));
 }
