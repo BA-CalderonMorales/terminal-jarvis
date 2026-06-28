@@ -55,24 +55,8 @@ skip_or_fail() {
   echo "skip: $tool not available. $hint"
 }
 
-cargo_version() {
-  sed -n 's/^version = "\([^"]*\)"/\1/p' Cargo.toml | head -n 1
-}
-
-json_version() {
-  sed -n 's/.*"version": "\([^"]*\)".*/\1/p' "$1" | head -n 1
-}
-
 check_versions() {
-  cargo=$(cargo_version)
-  npm=$(json_version npm/terminal-jarvis/package.json)
-  lock=$(json_version npm/terminal-jarvis/package-lock.json)
-  test -n "$cargo" || fail "Cargo.toml version missing"
-  test "$cargo" = "$npm" || fail "npm version $npm != Cargo version $cargo"
-  test "$cargo" = "$lock" || fail "package-lock version $lock != Cargo version $cargo"
-  grep -q "## \\[$cargo\\]" CHANGELOG.md ||
-    fail "CHANGELOG.md missing ## [$cargo]"
-  echo "versions ok: $cargo"
+  scripts/release-preflight.sh
 }
 
 check_ignores() {
