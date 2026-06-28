@@ -45,10 +45,7 @@ test -n "$target" || fail "rustc host target missing"
 test -d harnesses || fail "harnesses directory missing"
 test -x npm/terminal-jarvis/bin/terminal-jarvis || fail "npm wrapper missing"
 
-npm_version=$(sed -n 's/.*"version": "\([^"]*\)".*/\1/p' \
-  npm/terminal-jarvis/package.json | head -n 1)
-test "$npm_version" = "$version" ||
-  fail "npm package version $npm_version does not match Cargo $version"
+scripts/release-preflight.sh
 
 if command -v ruby >/dev/null 2>&1; then
   ruby -c homebrew/Formula/terminal-jarvis.rb >/dev/null

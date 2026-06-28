@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.1.5] - 2026-06-28
+
+- Adds a release preflight gate for tag, Cargo, npm, and main-tip alignment.
+- Makes CD release metadata failures explain the mismatch before packaging or
+  publishing starts.
+- Bumps the release candidate metadata to 0.1.5.
+- Keeps the 0.1.5 UX polish release notes intact for the recovered release.
+
 ## [0.1.4] - 2026-06-27
 
 - Adds missing CLI tests to kill surviving mutation-test mutants.

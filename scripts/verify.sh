@@ -47,6 +47,7 @@ echo "[8/11] security"
 scripts/security-check.sh
 
 echo "[9/11] distribution smoke"
+scripts/release-preflight.sh
 if command -v node >/dev/null 2>&1 && command -v npm >/dev/null 2>&1; then
   npm --prefix npm/terminal-jarvis test
   npm --prefix npm/terminal-jarvis run smoke
