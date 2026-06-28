@@ -40,7 +40,10 @@ fn cache_path() -> Option<String> {
 }
 
 fn distribution() -> String {
-    env::var("TERMINAL_JARVIS_DISTRIBUTION").unwrap_or_else(|_| "unknown".to_string())
+    env::var("TERMINAL_JARVIS_DISTRIBUTION")
+        .ok()
+        .filter(|value| !value.is_empty())
+        .unwrap_or_else(|| "unknown".to_string())
 }
 
 fn release_line() -> String {

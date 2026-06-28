@@ -15,7 +15,7 @@ pub fn default_home() -> PathBuf {
 }
 
 pub fn catalog_root() -> PathBuf {
-    if let Some(path) = env::var_os("TERMINAL_JARVIS_CATALOG") {
+    if let Some(path) = env::var_os("TERMINAL_JARVIS_CATALOG").filter(|path| !path.is_empty()) {
         return PathBuf::from(path);
     }
     catalog_candidates()
