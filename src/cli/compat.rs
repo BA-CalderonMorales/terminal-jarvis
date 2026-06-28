@@ -1,6 +1,9 @@
 use crate::context::Session;
-use crate::contracts::{Capability, Harness};
+use crate::contracts::{Capability, EnvMode, Harness};
+use crate::security;
 use std::path::Path;
+
+pub use super::cache::handle as cache;
 
 pub fn update_summary(harnesses: &[Harness]) -> String {
     let mut out = "updates are per harness in v0.1.2\n".to_string();
@@ -44,18 +47,6 @@ pub fn config(
     }
 }
 
-pub fn cache(words: &[String]) -> Result<String, String> {
-    match words {
-        [] => Ok("version cache: not used in v0.1.2\n".to_string()),
-        [action] if action == "status" => Ok("version cache: not used in v0.1.2\n".to_string()),
-        [action] if action == "clear" => Ok("version cache: no cache to clear\n".to_string()),
-        [action, ..] if action == "refresh" => {
-            Ok("version cache: refresh is unnecessary in v0.1.2\n".to_string())
-        }
-        _ => Err("usage: terminal-jarvis cache [status|clear|refresh]".to_string()),
-    }
-}
-
 pub fn legacy(command: &str) -> String {
     format!(
         "{command} was removed with the v0.1 catalog rewrite.\n\
@@ -69,11 +60,24 @@ fn auth_for(name: &str, harnesses: &[Harness]) -> Result<String, String> {
         .find(|harness| harness.name == name)
         .ok_or_else(|| format!("unknown harness '{name}'"))?;
     Ok(format!(
-        "auth for {} ({})\nsetup: {}\ncredential storage is not active in v0.1.2; export env vars in your shell\n",
+        "auth for {} ({})\nsetup: {}\nstatus: {}\ncredential storage is not active in v0.1.2; export env vars in your shell\n",
         harness.display,
         harness.name,
-        harness.setup_hint()
+        harness.setup_hint(),
+        auth_status(harness)
     ))
+}
+
+fn auth_status(harness: &Harness) -> String {
+    let missing = security::missing_env(harness);
+    if missing.is_empty() {
+        return "ready".to_string();
+    }
+    match harness.env_mode {
+        EnvMode::Any => format!("missing one of: {}", missing.join(", ")),
+        EnvMode::All => format!("missing: {}", missing.join(", ")),
+        EnvMode::None => "ready".to_string(),
+    }
 }
 
 fn auth_notice() -> String {

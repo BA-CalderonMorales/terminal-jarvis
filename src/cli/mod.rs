@@ -1,5 +1,6 @@
 mod action;
 pub mod args;
+mod cache;
 mod compat;
 mod dispatch;
 mod help;
