@@ -41,6 +41,22 @@ fn verbose_version_reports_provenance_paths() {
 }
 
 #[test]
+fn verbose_version_ignores_empty_wrapper_env_values() {
+    let output = Command::new(env!("CARGO_BIN_EXE_terminal-jarvis"))
+        .args(["version", "--verbose"])
+        .env("TERMINAL_JARVIS_DISTRIBUTION", "")
+        .env("TERMINAL_JARVIS_RELEASE_URL", "")
+        .env("TERMINAL_JARVIS_CACHE", "")
+        .output()
+        .expect("terminal-jarvis runs");
+    assert!(output.status.success());
+    let body = stdout(&output);
+    assert!(body.contains("distribution: unknown"));
+    assert!(body.contains("release: https://github.com/BA-CalderonMorales"));
+    assert!(body.contains("cache: unavailable"));
+}
+
+#[test]
 fn missing_catalog_error_names_catalog_path() {
     let output = Command::new(env!("CARGO_BIN_EXE_terminal-jarvis"))
         .arg("list")

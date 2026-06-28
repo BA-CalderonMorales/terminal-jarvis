@@ -1,11 +1,18 @@
 use crate::contracts::{Capability, CapabilityPlan, CommandPlan, EnvMode, Harness};
+use std::env;
 use std::fs;
 use std::io;
 use std::path::{Path, PathBuf};
 
-use super::parser::{self, Fields};
+use super::{
+    embedded,
+    parser::{self, Fields},
+};
 
 pub fn load(root: &Path) -> io::Result<Vec<Harness>> {
+    if should_use_embedded(root) {
+        return embedded::load();
+    }
     let mut harnesses = Vec::new();
     for dir in dirs(root)? {
         if dir.is_dir() {
@@ -13,6 +20,14 @@ pub fn load(root: &Path) -> io::Result<Vec<Harness>> {
         }
     }
     Ok(harnesses)
+}
+
+fn should_use_embedded(root: &Path) -> bool {
+    !catalog_env_set() && root == Path::new("harnesses") && !root.is_dir()
+}
+
+fn catalog_env_set() -> bool {
+    env::var_os("TERMINAL_JARVIS_CATALOG").is_some_and(|value| !value.is_empty())
 }
 
 fn load_harness(dir: &Path) -> io::Result<Harness> {

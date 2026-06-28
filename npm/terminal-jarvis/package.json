@@ -12,6 +12,7 @@
   ],
   "scripts": {
     "build:rust": "cd ../.. && cargo build",
+    "test": "node --test test-wrapper.js",
     "smoke": "npm run build:rust && node bin/terminal-jarvis --help"
   },
   "keywords": [
