@@ -23,9 +23,11 @@ pub fn load(root: &Path) -> io::Result<Vec<Harness>> {
 }
 
 fn should_use_embedded(root: &Path) -> bool {
-    env::var_os("TERMINAL_JARVIS_CATALOG").is_none()
-        && root == Path::new("harnesses")
-        && !root.is_dir()
+    !catalog_env_set() && root == Path::new("harnesses") && !root.is_dir()
+}
+
+fn catalog_env_set() -> bool {
+    env::var_os("TERMINAL_JARVIS_CATALOG").is_some_and(|value| !value.is_empty())
 }
 
 fn load_harness(dir: &Path) -> io::Result<Harness> {
