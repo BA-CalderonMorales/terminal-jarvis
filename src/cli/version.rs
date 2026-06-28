@@ -16,6 +16,8 @@ pub fn text(verbose: bool, catalog: &Path, home: &Path) -> String {
     let wrapper = std::env::var("TERMINAL_JARVIS_WRAPPER").unwrap_or_default();
     let release = std::env::var("TERMINAL_JARVIS_RELEASE_URL")
         .unwrap_or_else(|_| format!("{REPO}/releases/tag/v{version}"));
+    let cache =
+        std::env::var("TERMINAL_JARVIS_CACHE").unwrap_or_else(|_| "unavailable".to_string());
     let wrapper_line = if wrapper.is_empty() {
         String::new()
     } else {
@@ -27,6 +29,7 @@ pub fn text(verbose: bool, catalog: &Path, home: &Path) -> String {
          distribution: {distribution}\n\
          git commit: {git_sha}\n\
          release: {release}\n\
+         cache: {cache}\n\
          catalog: {}\n\
          home: {}\n\
          {wrapper_line}",

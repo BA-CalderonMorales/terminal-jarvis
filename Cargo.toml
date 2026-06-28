@@ -10,7 +10,7 @@ homepage = "https://github.com/BA-CalderonMorales/terminal-jarvis"
 readme = "README.md"
 keywords = ["cli", "ai", "agents", "harness"]
 categories = ["command-line-utilities", "development-tools"]
-include = ["src/**", "harnesses/**", "docs/**", "Cargo.toml", "README.md", "LICENSE"]
+include = ["build.rs", "src/**", "harnesses/**", "docs/**", "Cargo.toml", "README.md", "LICENSE"]
 
 [[bin]]
 name = "terminal-jarvis"

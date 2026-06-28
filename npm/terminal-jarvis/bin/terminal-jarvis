@@ -11,32 +11,42 @@ const here = __dirname;
 const pkg = require(path.resolve(here, "../package.json"));
 const repo = path.resolve(here, "../../..");
 
-main().catch((error) => {
-  console.error(`terminal-jarvis: ${error.message}`);
-  process.exit(1);
-});
+if (require.main === module) {
+  main().catch((error) => {
+    console.error(`terminal-jarvis: ${error.message}`);
+    process.exit(1);
+  });
+}
 
 async function main() {
-  const resolved = await resolveBinary();
-  const env = {
-    ...process.env,
-    TERMINAL_JARVIS_DISTRIBUTION: resolved.source,
-    TERMINAL_JARVIS_RELEASE_URL: resolved.releaseUrl || "",
-    TERMINAL_JARVIS_WRAPPER: __filename,
-  };
+  const resolved = await resolveBinary(args);
+  const env = childEnv(resolved);
   const result = spawnSync(resolved.binary, args, { stdio: "inherit", env });
+  if (result.error) throw new Error(`failed to execute ${resolved.binary}: ${result.error.message}`);
   process.exit(result.status ?? 1);
 }
 
-async function resolveBinary() {
+function childEnv(resolved) {
+  const env = {
+    ...process.env,
+    TERMINAL_JARVIS_DISTRIBUTION: resolved.source,
+    TERMINAL_JARVIS_WRAPPER: __filename,
+  };
+  if (resolved.releaseUrl) env.TERMINAL_JARVIS_RELEASE_URL = resolved.releaseUrl;
+  if (resolved.cache) env.TERMINAL_JARVIS_CACHE = process.env.TERMINAL_JARVIS_CACHE || resolved.cache;
+  if (!env.TERMINAL_JARVIS_CATALOG && resolved.catalog) env.TERMINAL_JARVIS_CATALOG = resolved.catalog;
+  return env;
+}
+
+async function resolveBinary(argv = args) {
   if (process.env.TERMINAL_JARVIS_BIN) {
     return explicit(process.env.TERMINAL_JARVIS_BIN, "env");
   }
   for (const candidate of sourceCandidates()) {
-    if (fs.existsSync(candidate)) return explicit(candidate, "source");
+    if (fs.existsSync(candidate.binary)) return explicit(candidate.binary, "source", candidate.catalog);
   }
   if (fs.existsSync(path.resolve(repo, "Cargo.toml"))) {
-    const result = spawnSync("cargo", ["run", "--quiet", "--", ...args], {
+    const result = spawnSync("cargo", ["run", "--quiet", "--", ...argv], {
       cwd: repo,
       stdio: "inherit",
     });
@@ -45,15 +55,16 @@ async function resolveBinary() {
   return downloadRelease();
 }
 
-function explicit(binary, source) {
+function explicit(binary, source, catalog = "") {
   if (!fs.existsSync(binary)) throw new Error(`binary not found: ${binary}`);
-  return { binary, source };
+  return { binary, source, catalog };
 }
 
 function sourceCandidates() {
+  const catalog = path.resolve(repo, "harnesses");
   return [
-    path.resolve(repo, "target/release/terminal-jarvis"),
-    path.resolve(repo, "target/debug/terminal-jarvis"),
+    { binary: path.resolve(repo, "target/release/terminal-jarvis"), catalog },
+    { binary: path.resolve(repo, "target/debug/terminal-jarvis"), catalog },
   ];
 }
 
@@ -63,22 +74,69 @@ async function downloadRelease() {
   const base = releaseBase();
   const releaseUrl = `${base}/${archive}`;
   const checksumUrl = `${releaseUrl}.sha256`;
-  const root = path.join(cacheRoot(), pkg.version, platform);
+  const cache = cacheRoot();
+  const root = path.join(cache, pkg.version, platform);
   const unpacked = path.join(root, `${pkg.name}-${pkg.version}-${platform}`);
   const binary = path.join(unpacked, "bin", "terminal-jarvis");
-  if (fs.existsSync(binary)) return { binary, source: "github-release-cache", releaseUrl };
+  const catalog = path.join(unpacked, "harnesses");
+  if (cachedReleaseUsable(binary, catalog)) {
+    fs.chmodSync(binary, 0o755);
+    return { binary, source: "github-release-cache", releaseUrl, cache, catalog };
+  }
   if (process.env.TERMINAL_JARVIS_NO_DOWNLOAD) {
+    if (fs.existsSync(binary) || fs.existsSync(catalog)) {
+      throw new Error(`cached release is not usable: ${root}`);
+    }
     throw new Error(`release binary is not cached: ${binary}`);
   }
   fs.rmSync(root, { recursive: true, force: true });
   fs.mkdirSync(root, { recursive: true });
   const archivePath = path.join(root, archive);
-  await fetchFile(releaseUrl, archivePath);
-  await verifyChecksum(checksumUrl, archivePath);
-  untar(archivePath, root);
+  try {
+    await fetchFile(releaseUrl, archivePath);
+    await verifyChecksum(checksumUrl, archivePath);
+    untar(archivePath, root);
+  } catch (error) {
+    fs.rmSync(root, { recursive: true, force: true });
+    throw downloadFailure(releaseUrl, error);
+  }
   if (!fs.existsSync(binary)) throw new Error(`release archive missing ${binary}`);
+  if (!fs.existsSync(catalog)) throw new Error(`release archive missing ${catalog}`);
+  if (!cachedBinaryUsable(binary)) throw new Error(`release binary is not usable: ${binary}`);
   fs.chmodSync(binary, 0o755);
-  return { binary, source: "github-release", releaseUrl };
+  return { binary, source: "github-release", releaseUrl, cache, catalog };
+}
+
+function cachedReleaseUsable(binary, catalog) {
+  return cachedBinaryUsable(binary) && fs.existsSync(catalog);
+}
+
+function cachedBinaryUsable(binary) {
+  try {
+    if (!fs.statSync(binary).isFile()) return false;
+    const header = Buffer.alloc(4);
+    const fd = fs.openSync(binary, "r");
+    try {
+      if (fs.readSync(fd, header, 0, 4, 0) !== 4) return false;
+    } finally {
+      fs.closeSync(fd);
+    }
+    return hasNativeBinaryMagic(header);
+  } catch {
+    return false;
+  }
+}
+
+function hasNativeBinaryMagic(header) {
+  return ["7f454c46", "cffaedfe", "cefaedfe", "feedfacf", "feedface", "cafebabe"]
+    .includes(header.toString("hex"));
+}
+
+function downloadFailure(releaseUrl, error) {
+  return new Error(
+    `failed to download Terminal Jarvis release from ${releaseUrl}: ${error.message}; ` +
+    "check network access or TERMINAL_JARVIS_RELEASE_BASE"
+  );
 }
 
 function platformName() {
@@ -129,3 +187,12 @@ function fetchFile(url, destination, redirects = 0) {
     }).on("error", reject);
   });
 }
+
+module.exports = {
+  cacheRoot,
+  cachedBinaryUsable,
+  cachedReleaseUsable,
+  childEnv,
+  downloadFailure,
+  platformName,
+};
