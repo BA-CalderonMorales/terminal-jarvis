@@ -11,13 +11,13 @@ pub fn text(verbose: bool, catalog: &Path, home: &Path) -> String {
         .map(|path| path.display().to_string())
         .unwrap_or_else(|_| "unknown".to_string());
     let git_sha = option_env!("TERMINAL_JARVIS_GIT_SHA").unwrap_or("unknown");
-    let distribution =
-        std::env::var("TERMINAL_JARVIS_DISTRIBUTION").unwrap_or_else(|_| "unknown".to_string());
+    let distribution = nonempty_env("TERMINAL_JARVIS_DISTRIBUTION", "unknown");
     let wrapper = std::env::var("TERMINAL_JARVIS_WRAPPER").unwrap_or_default();
-    let release = std::env::var("TERMINAL_JARVIS_RELEASE_URL")
-        .unwrap_or_else(|_| format!("{REPO}/releases/tag/v{version}"));
-    let cache =
-        std::env::var("TERMINAL_JARVIS_CACHE").unwrap_or_else(|_| "unavailable".to_string());
+    let release = nonempty_env(
+        "TERMINAL_JARVIS_RELEASE_URL",
+        &format!("{REPO}/releases/tag/v{version}"),
+    );
+    let cache = nonempty_env("TERMINAL_JARVIS_CACHE", "unavailable");
     let wrapper_line = if wrapper.is_empty() {
         String::new()
     } else {
@@ -36,4 +36,11 @@ pub fn text(verbose: bool, catalog: &Path, home: &Path) -> String {
         catalog.display(),
         home.display()
     )
+}
+
+fn nonempty_env(key: &str, fallback: &str) -> String {
+    std::env::var(key)
+        .ok()
+        .filter(|value| !value.is_empty())
+        .unwrap_or_else(|| fallback.to_string())
 }
