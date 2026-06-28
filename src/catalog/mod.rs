@@ -1,3 +1,4 @@
+mod embedded;
 mod loader;
 mod parser;
 mod validate;

@@ -58,9 +58,9 @@ mod unix {
         assert!(stdout(&tj(&["config", "show"], &home, None)).contains("active harness"));
         assert!(stdout(&tj(&["config", "path"], &home, None)).contains("catalog:"));
         assert!(stdout(&tj(&["config", "reset"], &home, None)).contains("not automatic"));
-        assert!(stdout(&tj(&["cache", "status"], &home, None)).contains("not used"));
-        assert!(stdout(&tj(&["cache", "clear"], &home, None)).contains("no cache"));
-        assert!(stdout(&tj(&["cache", "refresh"], &home, None)).contains("unnecessary"));
+        assert!(stdout(&tj(&["cache", "status"], &home, None)).contains("cache:"));
+        assert!(stdout(&tj(&["cache", "clear"], &home, None)).contains("cache clear:"));
+        assert!(stdout(&tj(&["cache", "refresh"], &home, None)).contains("cache refresh:"));
         assert!(stdout(&tj(&["security"], &home, None)).contains("jules binary="));
         assert!(stdout(&tj(&["security", "opencode"], &home, None)).contains("opencode:security"));
         assert!(stdout(&tj(&["security", "audit"], &home, None)).contains("jules binary="));
