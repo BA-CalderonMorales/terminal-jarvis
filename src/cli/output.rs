@@ -64,6 +64,21 @@ pub fn checks(harnesses: &[Harness]) -> String {
     out
 }
 
+pub fn is_harness_ready(h: &Harness) -> bool {
+    security::command_on_path(&h.binary) && security::missing_env(h).is_empty()
+}
+
+pub fn audit(harnesses: &[Harness]) -> String {
+    let mut out = checks(harnesses);
+    let ready = harnesses.iter().filter(|h| is_harness_ready(h)).count();
+    out.push_str(&format!(
+        "\naudit summary: {}/{} harnesses ready\n",
+        ready,
+        harnesses.len()
+    ));
+    out
+}
+
 fn env_status(harness: &Harness, missing: &[String]) -> String {
     if missing.is_empty() {
         return "ready".to_string();
@@ -74,3 +89,7 @@ fn env_status(harness: &Harness, missing: &[String]) -> String {
         crate::contracts::EnvMode::None => "ready".to_string(),
     }
 }
+
+#[cfg(test)]
+#[path = "output_test.rs"]
+mod tests;

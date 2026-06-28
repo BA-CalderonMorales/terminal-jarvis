@@ -62,8 +62,9 @@ mod unix {
         assert!(stdout(&tj(&["cache", "clear"], &home, None)).contains("cache clear:"));
         assert!(stdout(&tj(&["cache", "refresh"], &home, None)).contains("cache refresh:"));
         assert!(stdout(&tj(&["security"], &home, None)).contains("jules binary="));
+        assert!(stdout(&tj(&["security", "status"], &home, None)).contains("jules binary="));
         assert!(stdout(&tj(&["security", "opencode"], &home, None)).contains("opencode:security"));
-        assert!(stdout(&tj(&["security", "audit"], &home, None)).contains("jules binary="));
+        assert!(stdout(&tj(&["security", "audit"], &home, None)).contains("audit summary:"));
         assert!(stdout(&tj(&["templates"], &home, None)).contains("removed"));
     }
 
