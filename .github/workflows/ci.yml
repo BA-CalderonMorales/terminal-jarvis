@@ -96,6 +96,49 @@ jobs:
           path: dist/**
           retention-days: 7
 
+  security-general:
+    name: Security - Grype SARIF
+    permissions:
+      contents: read
+      security-events: write
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Scan workspace with Grype
+        id: grype
+        uses: anchore/scan-action@v7
+        with:
+          path: .
+          fail-build: false
+          output-format: sarif
+          cache-db: true
+
+      - name: Validate Grype SARIF output
+        run: |
+          set -eu
+          sarif_file="${{ steps.grype.outputs.sarif }}"
+          if [ -z "$sarif_file" ] || [ ! -s "$sarif_file" ]; then
+            echo "Grype SARIF output is missing: $sarif_file"
+            exit 1
+          fi
+          echo "Grype SARIF output is ready for upload: $sarif_file"
+
+      - name: Upload Grype SARIF report
+        uses: github/codeql-action/upload-sarif@v4
+        with:
+          sarif_file: ${{ steps.grype.outputs.sarif }}
+          category: security-general
+
+      - name: Fail on Grype findings
+        run: |
+          set -eu
+          sarif_file="${{ steps.grype.outputs.sarif }}"
+          findings="$(node -e "const fs=require('fs'); const s=JSON.parse(fs.readFileSync(process.argv[1], 'utf8')); console.log((s.runs || []).reduce((n, run) => n + ((run.results || []).length), 0));" "$sarif_file")"
+          echo "Grype findings: $findings"
+          test "$findings" -eq 0
+
   mutation:
     name: Mutation
     runs-on: ubuntu-latest
