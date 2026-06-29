@@ -140,10 +140,21 @@ function downloadFailure(releaseUrl, error) {
 }
 
 function platformName() {
-  if (process.platform === "linux" && process.arch === "x64") return "linux-x64-gnu";
-  if (process.platform === "darwin" && process.arch === "x64") return "macos-x64";
-  if (process.platform === "darwin" && process.arch === "arm64") return "macos-arm64";
-  throw new Error(`unsupported platform: ${process.platform}-${process.arch}`);
+  return platformNameFor(process.platform, process.arch);
+}
+
+function platformNameFor(platform, arch) {
+  if (platform === "linux" && arch === "x64") return "linux-x64-gnu";
+  if (platform === "darwin" && arch === "x64") return "macos-x64";
+  if (platform === "darwin" && arch === "arm64") return "macos-arm64";
+  throw new Error(unsupportedPlatformMessage(platform, arch));
+}
+
+function unsupportedPlatformMessage(platform, arch) {
+  const current = `${platform}-${arch}`;
+  return `unsupported platform: ${current}. ` +
+    "The npm package downloads GitHub Release assets for linux-x64-gnu, macos-x64, and macos-arm64. " +
+    "Native Windows npm installs are not supported until a win32-x64 asset is built in CI; use WSL on Windows.";
 }
 
 function releaseBase() {
@@ -154,6 +165,98 @@ function releaseBase() {
 function cacheRoot() {
   return process.env.TERMINAL_JARVIS_CACHE ||
     path.join(os.homedir() || os.tmpdir(), ".cache", "terminal-jarvis", "npm");
+}
+
+function pathEntries(pathValue = process.env.PATH || "") {
+  return pathValue.split(path.delimiter).filter(Boolean);
+}
+
+function commandExtensions(platform = process.platform, pathExt = process.env.PATHEXT || "") {
+  if (platform !== "win32") return [""];
+  const extensions = pathExt.split(";").filter(Boolean);
+  return ["", ...extensions].map((extension) => extension.toLowerCase());
+}
+
+function commandPathMatches(command, options = {}) {
+  const entries = pathEntries(options.pathValue);
+  const extensions = commandExtensions(options.platform, options.pathExt);
+  const names = extensions.map((extension) => `${command}${extension}`);
+  const matches = [];
+  for (const entry of entries) {
+    for (const name of names) {
+      const candidate = path.join(entry, name);
+      if (isExecutableFile(candidate)) matches.push(candidate);
+    }
+  }
+  return matches;
+}
+
+function isExecutableFile(candidate) {
+  try {
+    const stats = fs.statSync(candidate);
+    return stats.isFile() && (process.platform === "win32" || (stats.mode & 0o111) !== 0);
+  } catch {
+    return false;
+  }
+}
+
+function samePath(left, right, platform = process.platform) {
+  const normalize = (candidate) => {
+    const resolved = fs.existsSync(candidate) ? fs.realpathSync(candidate) : path.resolve(candidate);
+    return platform === "win32" ? resolved.toLowerCase() : resolved;
+  };
+  return normalize(left) === normalize(right);
+}
+
+function expectedGlobalShim(prefix = process.env.npm_config_prefix, platform = process.platform) {
+  if (!prefix) return "";
+  const binDir = platform === "win32" ? prefix : path.join(prefix, "bin");
+  return path.join(binDir, platform === "win32" ? "terminal-jarvis.cmd" : "terminal-jarvis");
+}
+
+function pathShadowStatus(options = {}) {
+  const command = options.command || "terminal-jarvis";
+  const expectedPaths = (options.expectedPaths || [__filename, expectedGlobalShim()])
+    .filter(Boolean);
+  const matches = commandPathMatches(command, options);
+  const expectedIndex = matches.findIndex((match) =>
+    expectedPaths.some((expected) => samePath(match, expected, options.platform))
+  );
+  if (expectedIndex === 0) return { kind: "ok", diagnostic: "" };
+  const expected = expectedIndex > 0 ? matches[expectedIndex] : expectedPaths[0];
+  const expectedDir = path.dirname(expected);
+  if (matches.length > 0) {
+    const first = matches[0];
+    const firstDir = path.dirname(first);
+    return {
+      kind: "shadow",
+      diagnostic: `terminal-jarvis: PATH resolves to ${first} before the npm shim ${expected}. ` +
+        `Remove or update the stale binary, or put ${expectedDir} before ${firstDir} in PATH.`,
+    };
+  }
+  return {
+    kind: "missing",
+    diagnostic: `terminal-jarvis: npm shim ${expected} is not reachable on PATH. Add ${expectedDir} to PATH.`,
+  };
+}
+
+function pathShadowDiagnostic(options = {}) {
+  return pathShadowStatus(options).diagnostic;
+}
+
+function shouldRunPostinstallDiagnostic(env = process.env) {
+  if (env.TERMINAL_JARVIS_SKIP_PATH_DIAGNOSTIC) return false;
+  return env.npm_config_global === "true" || env.npm_config_location === "global";
+}
+
+function postinstallPathStatus(env = process.env) {
+  if (!shouldRunPostinstallDiagnostic(env)) return { kind: "ok", diagnostic: "" };
+  return pathShadowStatus({
+    pathValue: env.PATH,
+    pathExt: env.PATHEXT,
+    platform: process.platform,
+    expectedPaths: [expectedGlobalShim(env.npm_config_prefix, process.platform), __filename],
+  });
 }
 
 async function verifyChecksum(checksumUrl, archivePath) {
@@ -194,5 +297,8 @@ module.exports = {
   cachedReleaseUsable,
   childEnv,
   downloadFailure,
+  pathShadowDiagnostic,
+  platformNameFor,
   platformName,
+  postinstallPathStatus,
 };
