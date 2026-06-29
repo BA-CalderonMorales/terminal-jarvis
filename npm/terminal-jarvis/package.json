@@ -7,11 +7,13 @@
   },
   "files": [
     "bin/",
+    "postinstall.js",
     "README.md",
     "package.json"
   ],
   "scripts": {
     "build:rust": "cd ../.. && cargo build",
+    "postinstall": "node postinstall.js",
     "test": "node --test test-wrapper.js",
     "smoke": "npm run build:rust && node bin/terminal-jarvis --help"
   },

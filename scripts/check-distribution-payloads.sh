@@ -27,6 +27,11 @@ test -d "$npm_stage" || fail "npm stage missing: $npm_stage"
 test ! -e "$npm_stage/bin/terminal-jarvis-bin" ||
   fail "npm package must not include terminal-jarvis-bin"
 
+if grep -q '"postinstall"' "$npm_stage/package.json"; then
+  test -f "$npm_stage/postinstall.js" ||
+    fail "npm package declares postinstall but does not include postinstall.js"
+fi
+
 for name in opencode codex claude gemini aider goose jules; do
   if find "$npm_stage" -type f -name "$name" | grep . >/dev/null; then
     fail "npm package must not include harness binary: $name"

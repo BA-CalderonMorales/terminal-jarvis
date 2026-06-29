@@ -6,6 +6,10 @@ The package does not include a native binary. Installed npm copies download the
 matching Terminal Jarvis archive from GitHub Releases, verify the release
 `.sha256` checksum, cache the unpacked binary, and execute it.
 
+Supported npm release assets are `linux-x64-gnu`, `macos-x64`, and
+`macos-arm64`. Native Windows installs through Git Bash or cmd are not
+supported until CI publishes a `win32-x64` asset; use WSL on Windows.
+
 In source checkouts it delegates to:
 
 1. `TERMINAL_JARVIS_BIN`
