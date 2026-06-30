@@ -15,6 +15,26 @@ harness binary. Harness descriptors may name expected commands and reviewed
 install plans, but harness executables come from their upstream projects or the
 user's existing `PATH`.
 
+## Target Model
+
+- Cargo/crates.io is the source distribution. `cargo install terminal-jarvis`
+  builds the Rust CLI from the crate, using an anchored package allowlist that
+  includes only Cargo metadata, `Cargo.lock`, source, harness descriptors,
+  tests, user-facing docs, changelog, README, and license files.
+- npm is a launcher/helper distribution. The package ships a real executable
+  Node wrapper at `bin/terminal-jarvis` plus `bin/README.txt`; it does not ship
+  native binaries or harness executables. Installed copies download the matching
+  GitHub Release archive for the npm package version, verify the release
+  `.sha256` asset, cache the unpacked release, and execute it.
+- Homebrew is the binary installer path. The tap formula points at GitHub
+  Release archives with per-platform checksums and installs the
+  `terminal-jarvis` command plus the harness catalog.
+- The CLI command promise is the same across ecosystems: `terminal-jarvis`
+  exposes the same help, version/provenance output, harness list, and
+  capability commands. The packaging mechanics differ because Cargo builds from
+  source, npm launches a downloaded release asset, and Homebrew installs release
+  archives directly.
+
 ## Current Evidence
 
 - The git checkout tracks source, harness metadata, npm wrapper files, and
@@ -29,15 +49,15 @@ user's existing `PATH`.
 - Generated Homebrew formulas point at GitHub release archives. That is allowed
   because the binary source remains the GitHub Release asset, not the tap.
 
-## Required Change
+## Current Requirements
 
 Release packaging must keep `terminal-jarvis-bin` out of npm package payloads
 and workflow assertions.
 
-The npm package should become a small launcher that resolves the expected
+The npm package is a small launcher that resolves the expected
 Terminal Jarvis release asset for the current OS and CPU, verifies its checksum
 against the matching GitHub Release checksum, installs it into a user or npm
-cache, and then executes it. It should print the release URL and cached binary
+cache, and then executes it. It reports the release URL and cached binary
 path when asked for verbose version or provenance output.
 
 The launcher must fail closed when:
@@ -62,15 +82,13 @@ The launcher must fail closed when:
 - Update npm docs to state where the binary is downloaded from and how to
   inspect or clear the cache.
 
-### Current UX Hardening
+### Completed UX Hardening
 
 - Support `--version`, `-v`, `--info`, and `version --verbose`.
 - Treat `--info` as an alias for verbose provenance output.
 - Replace raw missing catalog `No such file or directory (os error 2)` failures
   with messages naming the catalog path and `TERMINAL_JARVIS_CATALOG`.
 - Reject unknown flags such as `--v` before loading the catalog.
-
-### Remaining `0.1.4` UX Fix
 
 - Detect stale global installs that still expose the pre-`0.1.2` help surface.
 - Make `npx terminal-jarvis`, global npm installs, Cargo installs, and Homebrew

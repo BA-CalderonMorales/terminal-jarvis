@@ -1,5 +1,16 @@
 # Changelog
 
+## [0.1.6] - 2026-06-30
+
+- Hardens npm distribution as a launcher package with a real executable wrapper
+  and shipped `bin/README.txt` guidance instead of relying on local behavior.
+- Anchors crates.io package contents to the source, harness catalog, tests,
+  user-facing docs, changelog, README, lockfile, and license.
+- Keeps crates.io README rendering while excluding the large promo image from
+  the crate payload.
+- Aligns Homebrew tap generation and maintainer guidance with platform-specific
+  GitHub Release archives and checksums.
+
 ## [0.1.5] - 2026-06-28
 
 - Adds a release preflight gate for tag, Cargo, npm, and main-tip alignment.

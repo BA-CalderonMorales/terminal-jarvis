@@ -1,6 +1,6 @@
 [package]
 name = "terminal-jarvis"
-version = "0.1.5"
+version = "0.1.6"
 edition = "2021"
 description = "A data-driven harness switcher for AI coding agents"
 authors = ["BA-CalderonMorales"]
@@ -10,7 +10,18 @@ homepage = "https://github.com/BA-CalderonMorales/terminal-jarvis"
 readme = "README.md"
 keywords = ["cli", "ai", "agents", "harness"]
 categories = ["command-line-utilities", "development-tools"]
-include = ["build.rs", "src/**", "harnesses/**", "docs/**", "Cargo.toml", "README.md", "LICENSE"]
+include = [
+  "/Cargo.toml",
+  "/Cargo.lock",
+  "/build.rs",
+  "/src/**",
+  "/harnesses/**",
+  "/tests/**",
+  "/docs/*.md",
+  "/README.md",
+  "/CHANGELOG.md",
+  "/LICENSE",
+]
 
 [[bin]]
 name = "terminal-jarvis"

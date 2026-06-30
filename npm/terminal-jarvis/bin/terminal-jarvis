@@ -135,7 +135,8 @@ function hasNativeBinaryMagic(header) {
 function downloadFailure(releaseUrl, error) {
   return new Error(
     `failed to download Terminal Jarvis release from ${releaseUrl}: ${error.message}; ` +
-    "check network access or TERMINAL_JARVIS_RELEASE_BASE"
+    "check network access, proxy settings, offline cache, or TERMINAL_JARVIS_RELEASE_BASE. " +
+    guidanceHint()
   );
 }
 
@@ -154,7 +155,12 @@ function unsupportedPlatformMessage(platform, arch) {
   const current = `${platform}-${arch}`;
   return `unsupported platform: ${current}. ` +
     "The npm package downloads GitHub Release assets for linux-x64-gnu, macos-x64, and macos-arm64. " +
-    "Native Windows npm installs are not supported until a win32-x64 asset is built in CI; use WSL on Windows.";
+    "Native Windows npm installs are not supported until a win32-x64 asset is built in CI; use WSL on Windows. " +
+    guidanceHint();
+}
+
+function guidanceHint() {
+  return `See ${path.join(here, "README.txt")} for npm launcher behavior and install-path limits.`;
 }
 
 function releaseBase() {
@@ -297,6 +303,7 @@ module.exports = {
   cachedReleaseUsable,
   childEnv,
   downloadFailure,
+  guidanceHint,
   pathShadowDiagnostic,
   platformNameFor,
   platformName,
