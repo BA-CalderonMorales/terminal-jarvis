@@ -54,6 +54,7 @@ test("download errors name the release URL and override knob", () => {
   assert.match(error.message, /failed to download Terminal Jarvis release/);
   assert.match(error.message, /https:\/\/example\.invalid\/release\.tgz/);
   assert.match(error.message, /TERMINAL_JARVIS_RELEASE_BASE/);
+  assert.match(error.message, /bin[\/\\]README\.txt/);
 });
 
 test("platform mapping names published release assets", () => {
@@ -65,8 +66,22 @@ test("platform mapping names published release assets", () => {
 test("unsupported platform text gives Windows install guidance", () => {
   assert.throws(
     () => wrapper.platformNameFor("win32", "x64"),
-    /Native Windows npm installs are not supported.*use WSL on Windows/
+    /Native Windows npm installs are not supported.*use WSL on Windows.*README\.txt/
   );
+});
+
+test("npm pack ships wrapper guidance without native binaries", () => {
+  const result = spawnSync("npm", ["pack", "--dry-run", "--json", "--loglevel", "error"], {
+    cwd: __dirname,
+    encoding: "utf8",
+  });
+  assert.equal(result.status, 0, result.stderr);
+  const [pack] = JSON.parse(result.stdout);
+  const files = pack.files.map((file) => file.path);
+  assert.ok(files.includes("bin/README.txt"));
+  assert.ok(files.includes("bin/terminal-jarvis"));
+  assert.ok(!files.some((file) => file.endsWith("terminal-jarvis-bin")));
+  assert.ok(!files.some((file) => file.startsWith("harnesses/")));
 });
 
 test("wrapper forwards --version to the resolved binary", () => {

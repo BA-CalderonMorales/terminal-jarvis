@@ -15,7 +15,7 @@ interface.
 [![Docs](https://img.shields.io/badge/docs-latest-blue.svg?style=flat-square)](https://ba-calderonmorales.github.io/my-life-as-a-dev/latest/projects/active/terminal-jarvis/)
 [![Coverage](https://img.shields.io/badge/coverage-report-green.svg?style=flat-square)](https://github.com/BA-CalderonMorales/terminal-jarvis/actions/workflows/ci.yml?query=branch%3Adevelop)
 
-<img src="docs/promo-image.png" alt="Terminal Jarvis Interface" width="100%">
+<img src="https://raw.githubusercontent.com/BA-CalderonMorales/terminal-jarvis/main/docs/promo-image.png" alt="Terminal Jarvis Interface" width="100%">
 
 </div>
 
@@ -46,6 +46,14 @@ npm install -g terminal-jarvis
 # Homebrew
 brew install BA-CalderonMorales/homebrew-terminal-jarvis/terminal-jarvis
 ```
+
+Cargo builds the Rust CLI from the crates.io source package. The npm package is
+a Node launcher that downloads the matching Terminal Jarvis GitHub Release
+asset, verifies its `.sha256` file, caches it, and then executes it. Homebrew is
+the binary installer path and installs the platform release archive from the tap.
+
+Supported prebuilt assets are `linux-x64-gnu`, `macos-x64`, and `macos-arm64`.
+Native Windows npm installs are not published yet; use WSL on Windows.
 
 ## Quick Start
 

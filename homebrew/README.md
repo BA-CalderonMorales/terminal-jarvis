@@ -1,10 +1,12 @@
 # Homebrew Surface
 
-This is the source-build Homebrew surface for the harness-catalog rewrite.
+This directory keeps the local source-build Homebrew smoke surface. The public
+tap at `BA-CalderonMorales/homebrew-terminal-jarvis` is the binary installer
+path and points at versioned GitHub Release archives with checksums.
 
-It is intentionally `head`-only until stable release archives and checksums are
-available. Release packaging generates versioned formulas under the configured
-package output directory.
+Release packaging generates versioned binary formulas under the configured
+package output directory, and the release workflow writes that formula into the
+tap.
 
 Local checks:
 
