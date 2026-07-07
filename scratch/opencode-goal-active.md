@@ -3,14 +3,19 @@
 Status: active
 Objective: Continue dogfooding terminal-jarvis (npm 0.1.6) to surface blind spots / UX gaps, apply meaningful core-improvement fixes to this branch, and hold it as the candidate for a 0.1.7 release.
 Started: 2026-07-07T21:17:45Z
-Updated: 2026-07-07T21:17:45Z
+Updated: 2026-07-07T21:22:49Z
 Repo: /mnt/c/Users/bacm6/world/repositories/working/terminal-jarvis
-Branch: dogfood/0.1.7-candidate
-Latest Commit: 9c5c15bcbe0d9e37f09ac9a6e854c141d6532086
-Remote: origin/dogfood/0.1.7-candidate (based on origin/develop)
+Branch: release/0.1.7
+Latest Commit: f2f1ef1 (will change after this ledger update)
+Remote: origin/release/0.1.7 (based on origin/develop)
 
 ## Constraints
 - Branch must stay based on `develop`; open PRs against `develop`, not `main`.
+- RELEASE GATE: Do NOT open the PR against develop, tag, publish, or upload
+  release assets until the operator EXPLICITLY states they are ready. The
+  operator will say so in their own words; absence of a readiness statement is
+  NOT approval. Until then, each /goal session continues dogfooding and applying
+  fixes only, then stops and waits.
 - Do NOT tag, publish, or upload release assets without an explicit operator decision (AGENTS.md rule).
 - Keep Rust source files <= 100 lines; prefer harness data in `harnesses/*/*/index.toml` over Rust branches.
 - No new external Rust dependencies unless documented first.
@@ -24,8 +29,8 @@ Remote: origin/dogfood/0.1.7-candidate (based on origin/develop)
 - [x] Fix #2: stale hardcoded v0.1.2 strings in auth/config/update -> dynamic CARGO_PKG_VERSION.
 - [ ] Continue dogfooding to find remaining blind spots (e.g., security/check/status output overlap, env-readiness messaging, Windows/WSL edge cases, npm download/checksum failure UX).
 - [ ] For each finding: reproduce with evidence, run impact(), implement minimal fix, update tests + CHANGELOG [Unreleased].
-- [ ] Keep commits small and scoped; push to origin/dogfood/0.1.7-candidate.
-- [ ] When operator is ready, raise branch as the 0.1.7 release candidate (PR against develop).
+- [ ] Keep commits small and scoped; push to origin/release/0.1.7.
+- [ ] Continue until the operator EXPLICITLY states they are ready; only then raise the 0.1.7 release (PR against develop, tag, publish). Until then, stop and wait.
 
 ## Progress
 - Dogfooded npm 0.1.6 from a clean prefix: download + SHA256 verify + cache path works; pass-through to harness binaries works; error exit codes (rc=2) correct; offline `TERMINAL_JARVIS_NO_DOWNLOAD` error is clear.
@@ -37,12 +42,13 @@ Remote: origin/dogfood/0.1.7-candidate (based on origin/develop)
 - Verified end-to-end against rebuilt `target/release/terminal-jarvis`: `use opencode` in repo root, then `current` from `/tmp` returns `opencode` (was `none`); `auth help claude` reads `v0.1.6`. `cargo fmt`, `clippy -D warnings`, `cargo test` (all suites) pass.
 
 ## Current State
-- Branch `dogfood/0.1.7-candidate` exists on origin, based on `origin/develop`, tracking `origin/dogfood/0.1.7-candidate`.
+- Branch `release/0.1.7` exists on origin, based on `origin/develop`, tracking `origin/release/0.1.7`. (Renamed from `dogfood/0.1.7-candidate` so the version being targeted is obvious and progress is visible on GitHub.)
 - Two dogfood fixes are committed and pushed. No dirty files.
+- RELEASE GATE is armed: no PR/tag/publish until the operator explicitly says they are ready.
 - Low/medium-priority observation not yet fixed: `check`, bare `security`, and `security status` produce identical output (only `security audit` adds the `X/Y ready` summary). Candidate for a follow-up fix if it reads as confusing to users.
 
 ## Blockers
-- None. Operator decision required only to raise the 0.1.7 candidate (tag/publish).
+- None. The release is gated behind explicit operator approval; every /goal session must stop short of raising it and wait.
 
 ## Verification
 - `cargo fmt --all -- --check` -> clean.
@@ -51,9 +57,15 @@ Remote: origin/dogfood/0.1.7-candidate (based on origin/develop)
 - GitNexus `detect_changes()` on the diff: risk medium, changed symbols limited to `default_home`, `update_summary`/`config`/`config_show` (version strings), and the context test; no HIGH/CRITICAL; `catalog_root` flag is a coarse same-file false positive (unchanged).
 
 ## Next Agent Prompt
-Work in /mnt/c/Users/bacm6/world/repositories/working/terminal-jarvis on branch `dogfood/0.1.7-candidate` (based on origin/develop, currently at 9c5c15b).
+Work in /mnt/c/Users/bacm6/world/repositories/working/terminal-jarvis on branch `release/0.1.7` (based on origin/develop, latest on origin/release/0.1.7).
 
-Objective: Keep dogfooding terminal-jarvis (npm 0.1.6) to surface blind spots and apply meaningful core-improvement fixes to this branch; hold it as the 0.1.7 release candidate. Do NOT tag/publish without explicit operator decision.
+Objective: Keep dogfooding terminal-jarvis (npm 0.1.6) to surface blind spots and apply meaningful core-improvement fixes to this branch; hold it as the 0.1.7 release.
+
+RELEASE GATE (critical): Do NOT open the PR against develop, tag, publish, or
+upload release assets until the operator EXPLICITLY states they are ready. The
+operator will say so in their own words; silence or vague progress is NOT
+approval. Each /goal session continues dogfooding + applying fixes, then stops
+and waits for that explicit go-ahead.
 
 Hard rules:
 - Branch off develop; PRs against develop.
@@ -65,7 +77,7 @@ Hard rules:
 Required reads:
 - AGENTS.md, CHANGELOG.md (Unreleased), src/context/session.rs, src/cli/compat.rs, src/cli/dispatch.rs, src/cli/mod.rs, npm/terminal-jarvis/bin/terminal-jarvis, scratch/opencode-goal-active.md (this ledger).
 
-Already done (commit 9c5c15b): global active-harness home + dynamic version strings. Verified working.
+Already done (commit 9c5c15b): global active-harness home + dynamic version strings. Verified working. Branch renamed to release/0.1.7 for visibility.
 
 Open questions / candidates for next slices:
 - Differentiate `check` vs bare `security` vs `security status` (currently identical output).
