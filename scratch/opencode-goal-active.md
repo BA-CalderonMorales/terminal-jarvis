@@ -3,10 +3,11 @@
 Status: active
 Objective: Continue dogfooding terminal-jarvis (npm 0.1.6) to surface blind spots / UX gaps, apply meaningful core-improvement fixes to this branch, and hold it as the candidate for a 0.1.7 release.
 Started: 2026-07-07T21:17:45Z
-Updated: 2026-07-07T21:22:49Z
+Updated: 2026-07-07T22:10:00Z
 Repo: /mnt/c/Users/bacm6/world/repositories/working/terminal-jarvis
 Branch: release/0.1.7
-Latest Commit: f2f1ef1 (will change after this ledger update)
+Latest Commit: f2f1ef1 (will change after this commit)
+Remote: origin/release/0.1.7 (based on origin/develop)
 Remote: origin/release/0.1.7 (based on origin/develop)
 
 ## Constraints
@@ -27,7 +28,8 @@ Remote: origin/release/0.1.7 (based on origin/develop)
 - [x] Install npm terminal-jarvis@0.1.6 in a clean prefix and exercise core commands (list/show/use/current/plan/run/check/version/config/security/auth/pass-through).
 - [x] Fix #1: active-harness home persisted CWD-relative (use/current broke across dirs/terminals). -> global home.
 - [x] Fix #2: stale hardcoded v0.1.2 strings in auth/config/update -> dynamic CARGO_PKG_VERSION.
-- [ ] Continue dogfooding to find remaining blind spots (e.g., security/check/status output overlap, env-readiness messaging, Windows/WSL edge cases, npm download/checksum failure UX).
+- [x] Fix #3: `check`, `security`, and `security status` printed identical output (security readiness was hidden). -> `check` stays terse; `security`/`security status` now append `status: X/Y harnesses ready` summary; `security audit` keeps `audit summary`.
+- [ ] Continue dogfooding to find remaining blind spots (env-readiness messaging, Windows/WSL edge cases, npm download/checksum failure UX).
 - [ ] For each finding: reproduce with evidence, run impact(), implement minimal fix, update tests + CHANGELOG [Unreleased].
 - [ ] Keep commits small and scoped; push to origin/release/0.1.7.
 - [ ] Continue until the operator EXPLICITLY states they are ready; only then raise the 0.1.7 release (PR against develop, tag, publish). Until then, stop and wait.
@@ -41,11 +43,21 @@ Remote: origin/release/0.1.7 (based on origin/develop)
   - `CHANGELOG.md`: added `[Unreleased]` documenting both fixes.
 - Verified end-to-end against rebuilt `target/release/terminal-jarvis`: `use opencode` in repo root, then `current` from `/tmp` returns `opencode` (was `none`); `auth help claude` reads `v0.1.6`. `cargo fmt`, `clippy -D warnings`, `cargo test` (all suites) pass.
 
+## Progress (continued, 2026-07-07T22:10Z)
+- Dogfooded the current build: confirmed `check`, `security`, and `security status` all produced identical per-harness tables (blind spot).
+- Commit <pending> "fix: separate check from security status readiness summary":
+  - `src/cli/output.rs`: added `status()` and a shared `readiness()` helper; `check` keeps `checks()` (no summary), `security`/`security status` use `status()` (appends `status: X/Y harnesses ready`), `security audit` keeps `audit summary`. File stays <= 100 lines.
+  - `src/cli/dispatch.rs`: `security([])` and `security(["status"])` now call `output::status` instead of `output::checks`.
+  - `src/cli/output_test.rs`: added `status_adds_readiness_summary_absent_from_checks` asserting `checks()` lacks the summary and `status()` includes `status: 1/1 harnesses ready`.
+  - `CHANGELOG.md`: added `[Unreleased]` bullet documenting the differentiation.
+- Gate: `cargo fmt --all -- --check` clean; `cargo clippy --all-targets -- -D warnings` clean; `cargo test` all suites pass. GitNexus `detect_changes()` risk medium, only `security`/`env_status` touched, no HIGH/CRITICAL.
+- Dogfood via npm wrapper (resolves the freshly built source binary): `security status` prints `status: 1/25 harnesses ready`; `use opencode` then `current` from `/tmp` returns `opencode` (global-home fix still intact).
+
 ## Current State
 - Branch `release/0.1.7` exists on origin, based on `origin/develop`, tracking `origin/release/0.1.7`. (Renamed from `dogfood/0.1.7-candidate` so the version being targeted is obvious and progress is visible on GitHub.)
-- Two dogfood fixes are committed and pushed. No dirty files.
+- Two dogfood fixes committed (9c5c15b) plus the third (check vs security status) pending commit/push this session. No unrelated dirty files.
 - RELEASE GATE is armed: no PR/tag/publish until the operator explicitly says they are ready.
-- Low/medium-priority observation not yet fixed: `check`, bare `security`, and `security status` produce identical output (only `security audit` adds the `X/Y ready` summary). Candidate for a follow-up fix if it reads as confusing to users.
+- Resolved: `check` vs `security`/`security status` overlap — `security`/`security status` now append a `status: X/Y harnesses ready` summary; `check` remains the terse table.
 
 ## Blockers
 - None. The release is gated behind explicit operator approval; every /goal session must stop short of raising it and wait.

@@ -68,15 +68,26 @@ pub fn is_harness_ready(h: &Harness) -> bool {
     security::command_on_path(&h.binary) && security::missing_env(h).is_empty()
 }
 
+pub fn status(harnesses: &[Harness]) -> String {
+    let mut out = checks(harnesses);
+    out.push_str(&readiness(harnesses, "status"));
+    out
+}
+
 pub fn audit(harnesses: &[Harness]) -> String {
     let mut out = checks(harnesses);
+    out.push_str(&readiness(harnesses, "audit summary"));
+    out
+}
+
+fn readiness(harnesses: &[Harness], label: &str) -> String {
     let ready = harnesses.iter().filter(|h| is_harness_ready(h)).count();
-    out.push_str(&format!(
-        "\naudit summary: {}/{} harnesses ready\n",
+    format!(
+        "\n{}: {}/{} harnesses ready\n",
+        label,
         ready,
         harnesses.len()
-    ));
-    out
+    )
 }
 
 fn env_status(harness: &Harness, missing: &[String]) -> String {

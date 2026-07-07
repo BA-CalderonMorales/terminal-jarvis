@@ -10,6 +10,10 @@
   home path so state location is never ambiguous.
 - Replaces hardcoded `v0.1.2` strings in `auth`/`config`/`update` messages with
   the package version, so compatibility notices never read stale again.
+- Differentiates `check` from `security status`: `check` stays a terse per-harness
+  binary/env table, while `security` and `security status` now append a `status:
+  X/Y harnesses ready` summary. Previously `check`, `security`, and `security status`
+  printed identical output, hiding that `security` reports overall readiness.
 
 ## [0.1.6] - 2026-06-30
 

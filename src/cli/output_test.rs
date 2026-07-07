@@ -89,3 +89,23 @@ fn is_harness_ready_true_when_binary_on_path_and_env_var_set() {
 
     std::env::remove_var("TJHARNESS_TEST_VAR");
 }
+
+#[test]
+fn status_adds_readiness_summary_absent_from_checks() {
+    let dir = tmpdir();
+    let _old = mock_binary_on_path(&dir);
+    let h = Harness {
+        name: "x".into(),
+        display: "X".into(),
+        description: "".into(),
+        binary: "mock-harness".into(),
+        env_mode: EnvMode::None,
+        env: vec![],
+        capabilities: vec![],
+    };
+    let harnesses = vec![h];
+    let checks = checks(&harnesses);
+    let status = status(&harnesses);
+    assert!(!checks.contains("harnesses ready"));
+    assert!(status.contains("status: 1/1 harnesses ready"));
+}
