@@ -6,7 +6,7 @@ Started: 2026-07-07T21:17:45Z
 Updated: 2026-07-07T22:10:00Z
 Repo: /mnt/c/Users/bacm6/world/repositories/working/terminal-jarvis
 Branch: release/0.1.7
-Latest Commit: f2f1ef1 (will change after this commit)
+Latest Commit: a5a0dcf
 Remote: origin/release/0.1.7 (based on origin/develop)
 Remote: origin/release/0.1.7 (based on origin/develop)
 
@@ -45,7 +45,7 @@ Remote: origin/release/0.1.7 (based on origin/develop)
 
 ## Progress (continued, 2026-07-07T22:10Z)
 - Dogfooded the current build: confirmed `check`, `security`, and `security status` all produced identical per-harness tables (blind spot).
-- Commit <pending> "fix: separate check from security status readiness summary":
+- Commit a5a0dcf "fix: separate check from security status readiness summary":
   - `src/cli/output.rs`: added `status()` and a shared `readiness()` helper; `check` keeps `checks()` (no summary), `security`/`security status` use `status()` (appends `status: X/Y harnesses ready`), `security audit` keeps `audit summary`. File stays <= 100 lines.
   - `src/cli/dispatch.rs`: `security([])` and `security(["status"])` now call `output::status` instead of `output::checks`.
   - `src/cli/output_test.rs`: added `status_adds_readiness_summary_absent_from_checks` asserting `checks()` lacks the summary and `status()` includes `status: 1/1 harnesses ready`.
@@ -55,7 +55,7 @@ Remote: origin/release/0.1.7 (based on origin/develop)
 
 ## Current State
 - Branch `release/0.1.7` exists on origin, based on `origin/develop`, tracking `origin/release/0.1.7`. (Renamed from `dogfood/0.1.7-candidate` so the version being targeted is obvious and progress is visible on GitHub.)
-- Two dogfood fixes committed (9c5c15b) plus the third (check vs security status) pending commit/push this session. No unrelated dirty files.
+- Three dogfood fixes committed and pushed (9c5c15b active-harness home + version strings; a5a0dcf check vs security status). No unrelated dirty files.
 - RELEASE GATE is armed: no PR/tag/publish until the operator explicitly says they are ready.
 - Resolved: `check` vs `security`/`security status` overlap — `security`/`security status` now append a `status: X/Y harnesses ready` summary; `check` remains the terse table.
 
@@ -89,10 +89,9 @@ Hard rules:
 Required reads:
 - AGENTS.md, CHANGELOG.md (Unreleased), src/context/session.rs, src/cli/compat.rs, src/cli/dispatch.rs, src/cli/mod.rs, npm/terminal-jarvis/bin/terminal-jarvis, scratch/opencode-goal-active.md (this ledger).
 
-Already done (commit 9c5c15b): global active-harness home + dynamic version strings. Verified working. Branch renamed to release/0.1.7 for visibility.
+Already done (commit 9c5c15b): global active-harness home + dynamic version strings. Commit a5a0dcf: `security`/`security status` now append a `status: X/Y harnesses ready` summary so they differ from the terse `check` (the previous identical-output blind spot is resolved). Verified through the rebuilt binary and the npm launcher wrapper.
 
 Open questions / candidates for next slices:
-- Differentiate `check` vs bare `security` vs `security status` (currently identical output).
 - Harden npm download/checksum-failure UX (retry/redirect/proxy guidance already present; verify on a throttled/redirecting mirror).
 - WSL/Windows path behavior (npm wrapper already excludes win32 binary; confirm messaging).
 - Per-harness env-readiness messaging clarity in `auth help`.
