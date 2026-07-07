@@ -16,8 +16,22 @@ pub fn run(words: &[String], harnesses: &[Harness], home: &Path) -> Result<Invoc
     if has_harness(harnesses, first) {
         return Ok(for_harness(first, &words[1..]));
     }
+    if first == "headless" {
+        return Ok(invocation(
+            active(home)?,
+            Capability::Headless,
+            words[1..].to_vec(),
+        ));
+    }
     if let Some(capability) = Capability::parse(first) {
-        return Ok(invocation(active(home)?, capability, words[1..].to_vec()));
+        if words.len() == 1 {
+            return Ok(invocation(active(home)?, capability, Vec::new()));
+        }
+        return Ok(invocation(
+            active(home)?,
+            Capability::Headless,
+            words.to_vec(),
+        ));
     }
     let selected = active(home)?;
     if has_harness(harnesses, &selected) {
@@ -74,3 +88,7 @@ fn invocation(harness: String, capability: Capability, extra: Vec<String>) -> In
         extra,
     }
 }
+
+#[cfg(test)]
+#[path = "resolve_test.rs"]
+mod tests;

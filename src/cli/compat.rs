@@ -21,7 +21,8 @@ pub fn auth(words: &[String], harnesses: &[Harness]) -> Result<String, String> {
     match words {
         [] => Ok(auth_notice()),
         [action] if action == "manage" => Ok(auth_notice()),
-        [action, name] if action == "help" || action == "set" => auth_for(name, harnesses),
+        [action, name] if action == "help" => auth_for(name, harnesses),
+        [action, name] if action == "set" => auth_set_for(name, harnesses),
         [name] => auth_for(name, harnesses),
         _ => Err("usage: terminal-jarvis auth [help|set] <harness>".to_string()),
     }
@@ -69,6 +70,19 @@ fn auth_for(name: &str, harnesses: &[Harness]) -> Result<String, String> {
     ))
 }
 
+fn auth_set_for(name: &str, harnesses: &[Harness]) -> Result<String, String> {
+    let harness = harnesses
+        .iter()
+        .find(|harness| harness.name == name)
+        .ok_or_else(|| format!("unknown harness '{name}'"))?;
+    Ok(format!(
+        "auth for {} ({})\nsetup: {}\nstatus: {}\nterminal-jarvis does not persist credentials; nothing was stored. Export the env vars in your shell.\n",
+        harness.display,
+        harness.name,
+        harness.setup_hint(),
+        auth_status(harness)
+    ))
+}
 fn auth_status(harness: &Harness) -> String {
     let missing = security::missing_env(harness);
     if missing.is_empty() {

@@ -15,7 +15,9 @@ fn status() -> String {
     let release = release_line();
     match cache_path() {
         Some(path) => format!("cache: {path}\ndistribution: {distribution}\n{release}"),
-        None => format!("cache: unavailable\ndistribution: {distribution}\n{release}"),
+        None => format!(
+            "cache: unavailable (set TERMINAL_JARVIS_CACHE or run via the npm launcher)\ndistribution: {distribution}\n{release}"
+        ),
     }
 }
 
