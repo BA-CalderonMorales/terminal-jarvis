@@ -1,6 +1,6 @@
 # Changelog
 
-## [Unreleased]
+## [0.1.7] - 2026-07-07
 
 - Bumps the release-candidate version to 0.1.7 in `Cargo.toml` and the npm
   package so `version` and every `v{VERSION}` notice report the correct release
