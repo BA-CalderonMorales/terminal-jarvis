@@ -1,5 +1,16 @@
 # Changelog
 
+## [Unreleased]
+
+- Fixes the active-harness home to a global config location
+  (`$XDG_CONFIG_HOME/terminal-jarvis`, else `~/.config/terminal-jarvis`) instead
+  of a CWD-relative `.terminal-jarvis`. `use`/`current`/`plan` (no harness) now
+  stay consistent across directories and terminals; `TERMINAL_JARVIS_HOME` still
+  overrides for per-project isolation. `config show` now prints the absolute
+  home path so state location is never ambiguous.
+- Replaces hardcoded `v0.1.2` strings in `auth`/`config`/`update` messages with
+  the package version, so compatibility notices never read stale again.
+
 ## [0.1.6] - 2026-06-30
 
 - Hardens npm distribution as a launcher package with a real executable wrapper

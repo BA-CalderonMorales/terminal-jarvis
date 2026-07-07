@@ -3,10 +3,12 @@ use crate::contracts::{Capability, EnvMode, Harness};
 use crate::security;
 use std::path::Path;
 
+const VERSION: &str = env!("CARGO_PKG_VERSION");
+
 pub use super::cache::handle as cache;
 
 pub fn update_summary(harnesses: &[Harness]) -> String {
-    let mut out = "updates are per harness in v0.1.2\n".to_string();
+    let mut out = format!("updates are per harness in v{VERSION}\n");
     out.push_str("run `terminal-jarvis update <harness>` to execute one update\n");
     for harness in harnesses {
         let plan = harness.plan(Capability::Update).expect("validated update");
@@ -39,10 +41,9 @@ pub fn config(
             home.display(),
             catalog_root.display()
         )),
-        [action] if action == "reset" => Ok(
-            "config reset is not automatic in v0.1.2; remove TERMINAL_JARVIS_HOME after review\n"
-                .to_string(),
-        ),
+        [action] if action == "reset" => Ok(format!(
+            "config reset is not automatic in v{VERSION}; remove TERMINAL_JARVIS_HOME after review\n"
+        )),
         _ => Err("usage: terminal-jarvis config [show|path|reset]".to_string()),
     }
 }
@@ -60,7 +61,7 @@ fn auth_for(name: &str, harnesses: &[Harness]) -> Result<String, String> {
         .find(|harness| harness.name == name)
         .ok_or_else(|| format!("unknown harness '{name}'"))?;
     Ok(format!(
-        "auth for {} ({})\nsetup: {}\nstatus: {}\ncredential storage is not active in v0.1.2; export env vars in your shell\n",
+        "auth for {} ({})\nsetup: {}\nstatus: {}\ncredential storage is not active in v{VERSION}; export env vars in your shell\n",
         harness.display,
         harness.name,
         harness.setup_hint(),
@@ -81,9 +82,10 @@ fn auth_status(harness: &Harness) -> String {
 }
 
 fn auth_notice() -> String {
-    "credential manager is not active in v0.1.2\n\
-     use `terminal-jarvis auth help <harness>` and export the listed env vars\n"
-        .to_string()
+    format!(
+        "credential manager is not active in v{VERSION}\n\
+         use `terminal-jarvis auth help <harness>` and export the listed env vars\n"
+    )
 }
 
 fn config_show(catalog_root: &Path, home: &Path, session: Option<Session>) -> String {
