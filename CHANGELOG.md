@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.1.10] - 2026-07-08
+
+- Fixes `-v version` to delegate to the `version` subcommand instead of
+  erroring, so `terminal-jarvis -v version` behaves consistently with
+  `terminal-jarvis version -v`.
+- Formalizes the headless invocation contract: every harness defines
+  `headless/index.toml` with a command and args; `run <harness> <prompt>`
+  routes to headless mode when prompt words don't match a reserved
+  capability. Three headless patterns are recognized (direct exec,
+  `--help` stub, interactive-only). Guidelines documented in
+  `docs/harness-capability-contract.md`.
+
 ## [0.1.9] - 2026-07-07
 
 - Fixes `hlp()` helper to scan all arguments after the subcommand so `plan yolo --help`,
