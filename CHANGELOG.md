@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.1.9] - 2026-07-07
+
+- Fixes `hlp()` helper to scan all arguments after the subcommand so `plan yolo --help`,
+  `security status --help`, `show opencode --help`, etc. route to help text. The `run`
+  subcommand still only checks position 1 so `run codex --help` forwards `--help` to
+  the harness as intended.
+- Fixes global `-v`/`--version`/`--info` to reject an unexpected subcommand after the
+  flag instead of silently discarding it: `terminal-jarvis -v version` and
+  `terminal-jarvis --info show opencode` now produce a clear error.
+- Fixes `npm postinstall` to exit 0 when a stale cargo binary shadows the npm shim on
+  PATH, so `npm install -g terminal-jarvis` no longer fails. The shadow warning is
+  still printed to stderr with actionable guidance.
+- Updates tests for all three bugfixes.
+
 ## [0.1.8] - 2026-07-07
 
 - Fixes `--help`/`-h` parsing on 12 of 14 subcommands so help text is reachable
