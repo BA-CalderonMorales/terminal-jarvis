@@ -2,6 +2,7 @@ mod action;
 pub mod args;
 mod cache;
 mod compat;
+mod compat_support;
 mod dispatch;
 mod help;
 mod invoke;

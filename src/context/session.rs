@@ -9,9 +9,20 @@ pub struct Session {
 }
 
 pub fn default_home() -> PathBuf {
-    env::var_os("TERMINAL_JARVIS_HOME")
-        .map(PathBuf::from)
-        .unwrap_or_else(|| PathBuf::from(".terminal-jarvis"))
+    if let Some(value) = env::var_os("TERMINAL_JARVIS_HOME").filter(|value| !value.is_empty()) {
+        return PathBuf::from(value);
+    }
+    config_home().join("terminal-jarvis")
+}
+
+fn config_home() -> PathBuf {
+    if let Some(value) = env::var_os("XDG_CONFIG_HOME").filter(|value| !value.is_empty()) {
+        return PathBuf::from(value);
+    }
+    if let Some(value) = env::var_os("HOME").filter(|value| !value.is_empty()) {
+        return PathBuf::from(value).join(".config");
+    }
+    PathBuf::from(".config")
 }
 
 pub fn catalog_root() -> PathBuf {

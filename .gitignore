@@ -16,3 +16,4 @@ lcov.info
 .DS_Store
 *.log
 *.tmp
+/scratch/

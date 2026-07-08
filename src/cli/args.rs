@@ -43,10 +43,9 @@ where
 fn version(words: &[String]) -> Result<Action, String> {
     match words {
         [] => Ok(Action::Version { verbose: false }),
-        [flag] if flag == "--verbose" || flag == "-v" || flag == "--info" => {
-            Ok(Action::Version { verbose: true })
-        }
-        _ => Err("usage: terminal-jarvis version [--verbose]".to_string()),
+        [flag] if flag == "--verbose" || flag == "--info" => Ok(Action::Version { verbose: true }),
+        [flag] if flag == "-v" => Ok(Action::Version { verbose: false }),
+        _ => Err("usage: terminal-jarvis version [--verbose|--info|-v]".to_string()),
     }
 }
 

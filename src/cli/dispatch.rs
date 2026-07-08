@@ -51,8 +51,8 @@ pub fn dispatch(
 
 fn security(words: &[String], harnesses: &[Harness]) -> Result<(i32, String), String> {
     match words {
-        [] => Ok((0, output::checks(harnesses))),
-        [action] if action == "status" => Ok((0, output::checks(harnesses))),
+        [] => Ok((0, output::status(harnesses))),
+        [action] if action == "status" => Ok((0, output::status(harnesses))),
         [action] if action == "audit" => Ok((0, output::audit(harnesses))),
         [name] => Ok((
             0,

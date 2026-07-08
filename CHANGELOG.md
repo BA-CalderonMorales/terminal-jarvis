@@ -1,5 +1,38 @@
 # Changelog
 
+## [0.1.7] - 2026-07-07
+
+- Bumps the release-candidate version to 0.1.7 in `Cargo.toml` and the npm
+  package so `version` and every `v{VERSION}` notice report the correct release
+  line; previously the `release/0.1.7` candidate still identified as 0.1.6,
+  which would publish the RC under the wrong version.
+- Fixes `run` so a free-form prompt whose first word is a capability (for example
+  `run update my database` or `run yolo clean tmp`) is sent to the harness as a
+  headless prompt instead of silently executing the side-effecting or dangerous
+  capability. Single-word `run <capability>` and `run <harness> <capability>`
+  are unchanged, and `run headless <prompt>` still works as documented.
+- Fixes `auth set <harness>` so it no longer implies a mutating action: it now
+  states explicitly that terminal-jarvis does not persist credentials and that
+  nothing was stored. `auth help <harness>` is unchanged.
+- Makes `-v` consistent: top-level `terminal-jarvis -v` and
+  `terminal-jarvis version -v` both print the plain version. Verbose provenance
+  stays on `--verbose`/`--info` (and `version --verbose`), and these global
+  flags are now documented in `help`.
+- Improves `cache status` so it explains the cache is wrapper-managed and how to
+  enable it when run outside the npm launcher, instead of a bare `unavailable`.
+- Fixes the active-harness home to a global config location
+  (`$XDG_CONFIG_HOME/terminal-jarvis`, else `~/.config/terminal-jarvis`) instead
+  of a CWD-relative `.terminal-jarvis`. `use`/`current`/`plan` (no harness) now
+  stay consistent across directories and terminals; `TERMINAL_JARVIS_HOME` still
+  overrides for per-project isolation. `config show` now prints the absolute
+  home path so state location is never ambiguous.
+- Replaces hardcoded `v0.1.2` strings in `auth`/`config`/`update` messages with
+  the package version, so compatibility notices never read stale again.
+- Differentiates `check` from `security status`: `check` stays a terse per-harness
+  binary/env table, while `security` and `security status` now append a `status:
+  X/Y harnesses ready` summary. Previously `check`, `security`, and `security status`
+  printed identical output, hiding that `security` reports overall readiness.
+
 ## [0.1.6] - 2026-06-30
 
 - Hardens npm distribution as a launcher package with a real executable wrapper

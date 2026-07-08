@@ -3,7 +3,7 @@ pub fn text() -> &'static str {
      usage:\n\
        terminal-jarvis [harness] [args...]\n\
        terminal-jarvis run [harness] [capability] [args...]\n\
-       terminal-jarvis version [--verbose]\n\
+       terminal-jarvis version [--verbose|--info|-v]\n\
        terminal-jarvis list\n\
        terminal-jarvis check\n\
        terminal-jarvis use <harness>\n\
@@ -16,7 +16,11 @@ pub fn text() -> &'static str {
        terminal-jarvis config show\n\
        terminal-jarvis cache status\n\
        terminal-jarvis security [status|audit|harness]\n\n\
-     capabilities:\n\
+      global flags:\n\
+        --help, -h      show this help\n\
+        --version, -v   print the version (plain)\n\
+        --info          print version with provenance (same as version --verbose)\n\n\
+      capabilities:\n\
        download update headless version stats models security yolo ui\n\n\
      examples:\n\
        terminal-jarvis use opencode\n\
