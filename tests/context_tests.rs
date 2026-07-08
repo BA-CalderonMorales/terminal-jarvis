@@ -1,3 +1,4 @@
+use std::env::{remove_var, set_var, var_os};
 use std::fs;
 use std::path::PathBuf;
 use std::sync::atomic::{AtomicUsize, Ordering};
@@ -45,6 +46,20 @@ fn default_home_resolves_to_global_config_dir_without_env() {
     assert!(home.ends_with("terminal-jarvis"));
     if let Some(value) = previous {
         std::env::set_var("TERMINAL_JARVIS_HOME", value);
+    }
+}
+
+#[test]
+fn config_home_skips_empty_xdg() {
+    let _guard = ENV_LOCK.lock().unwrap();
+    let prev_home = var_os("HOME");
+    remove_var("TERMINAL_JARVIS_HOME");
+    set_var("XDG_CONFIG_HOME", "");
+    set_var("HOME", temp_home());
+    let home = context::default_home();
+    assert!(home.is_absolute() && home.ends_with(".config/terminal-jarvis"));
+    if let Some(v) = prev_home {
+        set_var("HOME", v);
     }
 }
 
