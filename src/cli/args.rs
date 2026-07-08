@@ -10,7 +10,6 @@ where I: IntoIterator, I::Item: Into<String>,
     if words.is_empty() { return Ok(Action::Help); }
     match words[0].as_str() {
         "help" | "--help" | "-h" => Ok(Action::Help),
-        "version" if hlp(&words) => Ok(Action::Help),
         "version" => version(&words[1..]),
         "--version" | "-v" if words.len() == 1 => Ok(Action::Version { verbose: false }),
         "--version" | "-v" => Err(format!("unexpected argument '{}' after --version/-v flag", words[1])),

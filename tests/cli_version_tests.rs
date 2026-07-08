@@ -1,20 +1,12 @@
 use std::fs;
 use std::process::{Command, Output};
 
-fn tj(args: &[&str]) -> Output {
-    Command::new(env!("CARGO_BIN_EXE_terminal-jarvis"))
-        .args(args)
-        .output()
-        .expect("terminal-jarvis runs")
-}
-
-fn stdout(output: &Output) -> String {
-    String::from_utf8_lossy(&output.stdout).to_string()
-}
-
-fn stderr(output: &Output) -> String {
-    String::from_utf8_lossy(&output.stderr).to_string()
-}
+#[rustfmt::skip]
+fn cmd(args: &[&str]) -> Output { Command::new(env!("CARGO_BIN_EXE_terminal-jarvis")).args(args).output().unwrap() }
+#[rustfmt::skip]
+fn so(o: &Output) -> String { String::from_utf8_lossy(&o.stdout).to_string() }
+#[rustfmt::skip]
+fn se(o: &Output) -> String { String::from_utf8_lossy(&o.stderr).to_string() }
 
 #[test]
 fn version_flags_do_not_require_catalog() {
@@ -27,14 +19,14 @@ fn version_flags_do_not_require_catalog() {
         .output()
         .expect("terminal-jarvis runs");
     assert!(output.status.success());
-    assert!(stdout(&output).starts_with("terminal-jarvis "));
+    assert!(so(&output).starts_with("terminal-jarvis "));
 }
 
 #[test]
 fn verbose_version_reports_provenance_paths() {
-    let output = tj(&["version", "--verbose"]);
-    assert!(output.status.success());
-    let body = stdout(&output);
+    let o = cmd(&["version", "--verbose"]);
+    assert!(o.status.success());
+    let body = so(&o);
     assert!(body.contains("binary:"));
     assert!(body.contains("release:"));
     assert!(body.contains("catalog:"));
@@ -50,7 +42,7 @@ fn verbose_version_ignores_empty_wrapper_env_values() {
         .output()
         .expect("terminal-jarvis runs");
     assert!(output.status.success());
-    let body = stdout(&output);
+    let body = so(&output);
     assert!(body.contains("distribution: unknown"));
     assert!(body.contains("release: https://github.com/BA-CalderonMorales"));
     assert!(body.contains("cache: unavailable"));
@@ -67,9 +59,22 @@ fn missing_catalog_error_names_catalog_path() {
         .output()
         .expect("terminal-jarvis runs");
     assert_eq!(output.status.code(), Some(2));
-    let error = stderr(&output);
+    let error = se(&output);
     assert!(error.contains("harness catalog is missing at"));
     assert!(error.contains("TERMINAL_JARVIS_CATALOG"));
+}
+
+#[test]
+#[rustfmt::skip]
+fn garbled_session_warns_on_stderr() {
+    let home = std::env::temp_dir().join(format!("tj-garbled-{}", std::process::id()));
+    let _ = fs::remove_dir_all(&home);
+    fs::create_dir_all(&home).unwrap();
+    fs::write(home.join("session.toml"), "active_harness = \"codex\n").unwrap();
+    let o = Command::new(env!("CARGO_BIN_EXE_terminal-jarvis")).arg("current").env("TERMINAL_JARVIS_HOME", &home).output().unwrap();
+    assert!(o.status.success());
+    assert!(se(&o).contains("warning"));
+    assert!(se(&o).contains("session.toml"));
 }
 
 #[test]
@@ -89,5 +94,5 @@ fn corrupt_session_error_reaches_stderr() {
         .expect("terminal-jarvis runs");
 
     assert_eq!(output.status.code(), Some(2));
-    assert!(stderr(&output).contains("stream did not contain valid UTF-8"));
+    assert!(se(&output).contains("stream did not contain valid UTF-8"));
 }
