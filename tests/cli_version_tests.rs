@@ -21,6 +21,42 @@ fn version_flags_do_not_require_catalog() {
     );
 }
 #[test]
+fn plain_version_omits_channel_without_distribution_env() {
+    let o = Command::new(env!("CARGO_BIN_EXE_terminal-jarvis"))
+        .arg("--version")
+        .env_clear()
+        .output()
+        .unwrap();
+    assert!(o.status.success());
+    let b = String::from_utf8_lossy(&o.stdout);
+    assert!(b.starts_with("terminal-jarvis ") && !b.contains('('));
+}
+#[test]
+fn plain_version_reports_source_channel() {
+    let o = Command::new(env!("CARGO_BIN_EXE_terminal-jarvis"))
+        .arg("--version")
+        .env_clear()
+        .env("TERMINAL_JARVIS_DISTRIBUTION", "source")
+        .output()
+        .unwrap();
+    assert!(o.status.success());
+    assert!(String::from_utf8_lossy(&o.stdout).contains("(source)"));
+}
+#[test]
+fn plain_version_reports_npm_channel_for_wrapped_install() {
+    let o = Command::new(env!("CARGO_BIN_EXE_terminal-jarvis"))
+        .arg("--version")
+        .env_clear()
+        .env(
+            "TERMINAL_JARVIS_WRAPPER",
+            "/opt/node_modules/terminal-jarvis/bin/tj",
+        )
+        .output()
+        .unwrap();
+    assert!(o.status.success());
+    assert!(String::from_utf8_lossy(&o.stdout).contains("(npm)"));
+}
+#[test]
 fn verbose_version_reports_provenance_paths() {
     let o = tj(&["version", "--verbose"]);
     assert!(o.status.success());

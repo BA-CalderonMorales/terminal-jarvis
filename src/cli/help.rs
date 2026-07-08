@@ -19,7 +19,8 @@ pub fn text() -> &'static str {
       global flags:\n\
         --help, -h      show this help\n\
         --version, -v   print the version (plain)\n\
-        --info          print version with provenance (same as version --verbose)\n\n\
+        --info          print version with provenance (same as version --verbose)\n\
+        --update        self-update terminal-jarvis (npm/homebrew/cargo)\n\n\
       capabilities:\n\
        download update headless version stats models security yolo ui\n\n\
      examples:\n\

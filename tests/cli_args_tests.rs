@@ -77,3 +77,7 @@ use terminal_jarvis::contracts::Capability;
 #[test] fn run_help_without_harness_shows_help() {
     assert_eq!(parse(["tj", "run", "--help"]).unwrap(), Action::Help);
 }
+#[rustfmt::skip]
+#[test] fn update_flag_routes_to_self_update() {
+    assert_eq!(parse(["tj", "--update"]).unwrap(), Action::SelfUpdate);
+}

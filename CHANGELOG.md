@@ -5,6 +5,16 @@
 - Fixes `-v version` to delegate to the `version` subcommand instead of
   erroring, so `terminal-jarvis -v version` behaves consistently with
   `terminal-jarvis version -v`.
+- Feature: `--version` now reports the distribution channel as a suffix,
+  e.g. `terminal-jarvis 0.1.10 (npm)`, `(source)`, or `(homebrew)`. The
+  channel is derived from `TERMINAL_JARVIS_DISTRIBUTION`,
+  `TERMINAL_JARVIS_WRAPPER`, or the resolved binary path; when unset the
+  plain `terminal-jarvis <version>` line is printed.
+- Feature: `--update` performs a self-update based on the distribution.
+  npm/wrapped installs re-run `npm install -g terminal-jarvis@latest`,
+  Homebrew installs run `brew upgrade terminal-jarvis`, and source/env
+  installs run `cargo install terminal-jarvis`. The update runs before the
+  harness catalog loads so it works even with a missing/broken catalog.
 - Formalizes the headless invocation contract: every harness defines
   `headless/index.toml` with a command and args; `run <harness> <prompt>`
   routes to headless mode when prompt words don't match a reserved
