@@ -54,10 +54,7 @@ fn security(words: &[String], harnesses: &[Harness]) -> Result<(i32, String), St
         [] => Ok((0, output::status(harnesses))),
         [action] if action == "status" => Ok((0, output::status(harnesses))),
         [action] if action == "audit" => Ok((0, output::audit(harnesses))),
-        [name] => Ok((
-            0,
-            output::plan(find(harnesses, name)?, Capability::Security),
-        )),
+        [name] => Ok((0, output::plan(find(harnesses, name).map_err(|_| "usage: terminal-jarvis security [status|audit|harness]")?, Capability::Security))),
         _ => Err("usage: terminal-jarvis security [status|audit|harness]".to_string()),
     }
 }
