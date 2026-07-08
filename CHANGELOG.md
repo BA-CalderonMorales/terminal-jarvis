@@ -21,6 +21,9 @@
   capability. Three headless patterns are recognized (direct exec,
   `--help` stub, interactive-only). Guidelines documented in
   `docs/harness-capability-contract.md`.
+- Fix: failing harness commands now report the harness name, capability, exit
+  code, and stderr so operators can diagnose broken `run` invocations directly
+  from the error output.
 
 ## [0.1.9] - 2026-07-07
 
