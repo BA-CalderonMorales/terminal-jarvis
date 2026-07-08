@@ -66,7 +66,11 @@ pub fn load(home: &Path) -> io::Result<Option<Session>> {
         return Ok(None);
     }
     let data = fs::read_to_string(path)?;
-    Ok(parse_active(&data).map(|active_harness| Session { active_harness }))
+    let result = parse_active(&data).map(|active_harness| Session { active_harness });
+    if result.is_none() && !data.trim().is_empty() {
+        eprintln!("warning: session.toml could not be parsed; using defaults");
+    }
+    Ok(result)
 }
 
 fn parse_active(data: &str) -> Option<String> {
