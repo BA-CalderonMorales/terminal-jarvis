@@ -40,8 +40,9 @@ use terminal_jarvis::contracts::Capability;
 #[test] fn parses_every_core_capability() { for capability in Capability::ALL { assert_eq!(Capability::parse(capability.as_str()), Some(capability)); } }
 #[rustfmt::skip]
 #[test] fn subcommand_help_routes_to_action_help() {
-    for cmd in &["version", "list", "tools", "check", "status", "current", "use", "show", "info", "plan", "install", "update", "auth", "config", "cache", "security", "templates", "db"] {
+    for cmd in &["version", "list", "tools", "check", "status", "current", "use", "show", "info", "plan", "install", "update", "run", "auth", "config", "cache", "security", "templates", "db"] {
         assert_eq!(parse(["tj", cmd, "--help"]).unwrap(), Action::Help);
+        assert_eq!(parse(["tj", cmd, "-h"]).unwrap(), Action::Help);
     }
 }
 #[rustfmt::skip]
