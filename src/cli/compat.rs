@@ -60,7 +60,7 @@ fn auth_for(name: &str, harnesses: &[Harness]) -> Result<String, String> {
     auth_detail(
         name,
         harnesses,
-        "credential storage is not active in v{VERSION}; export env vars in your shell",
+        &format!("credential storage is not active in v{VERSION}; export env vars in your shell"),
     )
 }
 

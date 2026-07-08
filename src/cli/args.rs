@@ -45,7 +45,7 @@ fn version(words: &[String]) -> Result<Action, String> {
         [] => Ok(Action::Version { verbose: false }),
         [flag] if flag == "--verbose" || flag == "--info" => Ok(Action::Version { verbose: true }),
         [flag] if flag == "-v" => Ok(Action::Version { verbose: false }),
-        _ => Err("usage: terminal-jarvis version [--verbose]".to_string()),
+        _ => Err("usage: terminal-jarvis version [--verbose|--info|-v]".to_string()),
     }
 }
 
