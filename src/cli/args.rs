@@ -52,7 +52,7 @@ fn version(words: &[String]) -> Result<Action, String> {
         "-v" => verbose = false,
         "--verbose" | "--info" => verbose = true,
         "--help" | "-h" => return Ok(Action::Help),
-        _ => return Err("usage: terminal-jarvis version [--verbose|--info|-v]".to_string()),
+        _ => return Err(format!("unknown flag '{flag}'; usage: terminal-jarvis version [--verbose|--info|-v]")),
     } }
     Ok(Action::Version { verbose })
 }

@@ -38,3 +38,15 @@ use terminal_jarvis::contracts::Capability;
 #[test] fn rejects_unknown_flags_before_catalog_load() { let error = parse(["tj", "--v"]).unwrap_err(); assert!(error.contains("unknown flag '--v'")); }
 #[rustfmt::skip]
 #[test] fn parses_every_core_capability() { for capability in Capability::ALL { assert_eq!(Capability::parse(capability.as_str()), Some(capability)); } }
+#[rustfmt::skip]
+#[test] fn subcommand_help_routes_to_action_help() {
+    for cmd in &["version", "list", "tools", "check", "status", "current", "use", "show", "info", "plan", "install", "update", "auth", "config", "cache", "security", "templates", "db"] {
+        assert_eq!(parse(["tj", cmd, "--help"]).unwrap(), Action::Help);
+    }
+}
+#[rustfmt::skip]
+#[test] fn rejects_unknown_version_flag_reports_flag_name() {
+    let error = parse(["tj", "version", "--bogus"]).unwrap_err();
+    assert!(error.contains("--bogus"));
+    assert!(error.contains("usage"));
+}
