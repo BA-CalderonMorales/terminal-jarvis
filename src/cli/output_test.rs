@@ -21,17 +21,21 @@ fn mock_binary_on_path(tmpdir: &Path) -> String {
     old
 }
 
-#[test]
-fn is_harness_ready_false_when_binary_missing() {
-    let h = Harness {
+fn mock_harness(binary: &str, env_mode: EnvMode, env: Vec<String>) -> Harness {
+    Harness {
         name: "x".into(),
         display: "X".into(),
         description: "".into(),
-        binary: "does-not-exist-hopefully".into(),
-        env_mode: EnvMode::None,
-        env: vec![],
+        binary: binary.into(),
+        env_mode,
+        env,
         capabilities: vec![],
-    };
+    }
+}
+
+#[test]
+fn is_harness_ready_false_when_binary_missing() {
+    let h = mock_harness("does-not-exist-hopefully", EnvMode::None, vec![]);
     assert!(!is_harness_ready(&h));
 }
 
@@ -39,16 +43,11 @@ fn is_harness_ready_false_when_binary_missing() {
 fn is_harness_ready_false_when_env_var_missing() {
     let dir = tmpdir();
     let _old = mock_binary_on_path(&dir);
-
-    let h = Harness {
-        name: "x".into(),
-        display: "X".into(),
-        description: "".into(),
-        binary: "mock-harness".into(),
-        env_mode: EnvMode::All,
-        env: vec!["SOME_MISSING_VAR".into()],
-        capabilities: vec![],
-    };
+    let h = mock_harness(
+        "mock-harness",
+        EnvMode::All,
+        vec!["SOME_MISSING_VAR".into()],
+    );
     assert!(!is_harness_ready(&h));
 }
 
@@ -56,16 +55,7 @@ fn is_harness_ready_false_when_env_var_missing() {
 fn is_harness_ready_true_when_binary_on_path_and_no_env_required() {
     let dir = tmpdir();
     let _old = mock_binary_on_path(&dir);
-
-    let h = Harness {
-        name: "x".into(),
-        display: "X".into(),
-        description: "".into(),
-        binary: "mock-harness".into(),
-        env_mode: EnvMode::None,
-        env: vec![],
-        capabilities: vec![],
-    };
+    let h = mock_harness("mock-harness", EnvMode::None, vec![]);
     assert!(is_harness_ready(&h));
 }
 
@@ -73,20 +63,13 @@ fn is_harness_ready_true_when_binary_on_path_and_no_env_required() {
 fn is_harness_ready_true_when_binary_on_path_and_env_var_set() {
     let dir = tmpdir();
     let _old = mock_binary_on_path(&dir);
-
     std::env::set_var("TJHARNESS_TEST_VAR", "1");
-
-    let h = Harness {
-        name: "x".into(),
-        display: "X".into(),
-        description: "".into(),
-        binary: "mock-harness".into(),
-        env_mode: EnvMode::All,
-        env: vec!["TJHARNESS_TEST_VAR".into()],
-        capabilities: vec![],
-    };
+    let h = mock_harness(
+        "mock-harness",
+        EnvMode::All,
+        vec!["TJHARNESS_TEST_VAR".into()],
+    );
     assert!(is_harness_ready(&h));
-
     std::env::remove_var("TJHARNESS_TEST_VAR");
 }
 
@@ -94,15 +77,7 @@ fn is_harness_ready_true_when_binary_on_path_and_env_var_set() {
 fn status_adds_readiness_summary_absent_from_checks() {
     let dir = tmpdir();
     let _old = mock_binary_on_path(&dir);
-    let h = Harness {
-        name: "x".into(),
-        display: "X".into(),
-        description: "".into(),
-        binary: "mock-harness".into(),
-        env_mode: EnvMode::None,
-        env: vec![],
-        capabilities: vec![],
-    };
+    let h = mock_harness("mock-harness", EnvMode::None, vec![]);
     let harnesses = vec![h];
     let checks = checks(&harnesses);
     let status = status(&harnesses);

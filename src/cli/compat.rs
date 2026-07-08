@@ -1,11 +1,11 @@
 use crate::context::Session;
-use crate::contracts::{Capability, EnvMode, Harness};
-use crate::security;
+use crate::contracts::{Capability, Harness};
 use std::path::Path;
 
 const VERSION: &str = env!("CARGO_PKG_VERSION");
 
 pub use super::cache::handle as cache;
+use super::compat_support::{auth_notice, auth_status, config_show};
 
 pub fn update_summary(harnesses: &[Harness]) -> String {
     let mut out = format!("updates are per harness in v{VERSION}\n");
@@ -57,59 +57,28 @@ pub fn legacy(command: &str) -> String {
 }
 
 fn auth_for(name: &str, harnesses: &[Harness]) -> Result<String, String> {
-    let harness = harnesses
-        .iter()
-        .find(|harness| harness.name == name)
-        .ok_or_else(|| format!("unknown harness '{name}'"))?;
-    Ok(format!(
-        "auth for {} ({})\nsetup: {}\nstatus: {}\ncredential storage is not active in v{VERSION}; export env vars in your shell\n",
-        harness.display,
-        harness.name,
-        harness.setup_hint(),
-        auth_status(harness)
-    ))
+    auth_detail(
+        name,
+        harnesses,
+        "credential storage is not active in v{VERSION}; export env vars in your shell",
+    )
 }
 
 fn auth_set_for(name: &str, harnesses: &[Harness]) -> Result<String, String> {
+    auth_detail(name, harnesses, "terminal-jarvis does not persist credentials; nothing was stored. Export the env vars in your shell")
+}
+
+fn auth_detail(name: &str, harnesses: &[Harness], note: &str) -> Result<String, String> {
     let harness = harnesses
         .iter()
         .find(|harness| harness.name == name)
         .ok_or_else(|| format!("unknown harness '{name}'"))?;
     Ok(format!(
-        "auth for {} ({})\nsetup: {}\nstatus: {}\nterminal-jarvis does not persist credentials; nothing was stored. Export the env vars in your shell.\n",
+        "auth for {} ({})\nsetup: {}\nstatus: {}\n{}\n",
         harness.display,
         harness.name,
         harness.setup_hint(),
-        auth_status(harness)
+        auth_status(harness),
+        note
     ))
-}
-fn auth_status(harness: &Harness) -> String {
-    let missing = security::missing_env(harness);
-    if missing.is_empty() {
-        return "ready".to_string();
-    }
-    match harness.env_mode {
-        EnvMode::Any => format!("missing one of: {}", missing.join(", ")),
-        EnvMode::All => format!("missing: {}", missing.join(", ")),
-        EnvMode::None => "ready".to_string(),
-    }
-}
-
-fn auth_notice() -> String {
-    format!(
-        "credential manager is not active in v{VERSION}\n\
-         use `terminal-jarvis auth help <harness>` and export the listed env vars\n"
-    )
-}
-
-fn config_show(catalog_root: &Path, home: &Path, session: Option<Session>) -> String {
-    let active = session
-        .map(|session| session.active_harness)
-        .unwrap_or_else(|| "none".to_string());
-    format!(
-        "home: {}\ncatalog: {}\nactive harness: {}\n",
-        home.display(),
-        catalog_root.display(),
-        active
-    )
 }
