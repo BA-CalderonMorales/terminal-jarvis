@@ -1,7 +1,7 @@
 pub use super::action::Action;
 use crate::contracts::Capability;
 #[rustfmt::skip]
-fn hlp(words: &[String]) -> bool { words.get(1).is_some_and(|w| w == "--help" || w == "-h") }
+fn hlp(words: &[String]) -> bool { words.iter().skip(1).any(|w| w == "--help" || w == "-h") }
 #[rustfmt::skip]
 pub fn parse<I>(args: I) -> Result<Action, String>
 where I: IntoIterator, I::Item: Into<String>,
@@ -10,10 +10,11 @@ where I: IntoIterator, I::Item: Into<String>,
     if words.is_empty() { return Ok(Action::Help); }
     match words[0].as_str() {
         "help" | "--help" | "-h" => Ok(Action::Help),
-        "version" if hlp(&words) => Ok(Action::Help),
         "version" => version(&words[1..]),
-        "--version" | "-v" => Ok(Action::Version { verbose: false }),
-        "--info" => Ok(Action::Version { verbose: true }),
+        "--version" | "-v" if words.len() == 1 => Ok(Action::Version { verbose: false }),
+        "--version" | "-v" => Err(format!("unexpected argument '{}' after --version/-v flag", words[1])),
+        "--info" if words.len() == 1 => Ok(Action::Version { verbose: true }),
+        "--info" => Err(format!("unexpected argument '{}' after --info flag", words[1])),
         "list" | "tools" if hlp(&words) => Ok(Action::Help),
         "list" | "tools" => Ok(Action::List),
         "check" | "status" if hlp(&words) => Ok(Action::Help),
@@ -26,7 +27,7 @@ where I: IntoIterator, I::Item: Into<String>,
         "show" | "info" => one(&words, words[0].as_str()).map(Action::Show),
         "plan" if hlp(&words) => Ok(Action::Help),
         "plan" => plan(&words[1..]),
-        "run" if hlp(&words) => Ok(Action::Help),
+        "run" if words.get(1).is_some_and(|w| w == "--help" || w == "-h") => Ok(Action::Help),
         "run" => Ok(Action::Run(words[1..].to_vec())),
         "install" if hlp(&words) => Ok(Action::Help),
         "install" => one(&words, "install").map(Action::Install),

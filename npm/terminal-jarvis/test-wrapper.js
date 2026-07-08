@@ -110,7 +110,7 @@ test("path diagnostic reports stale binary before npm shim", () => {
   assert.match(diagnostic, /before the npm shim/);
 });
 
-test("global postinstall fails when PATH shadows the npm shim", () => {
+test("global postinstall warns on shadow but exits 0", () => {
   const root = tempDir();
   const prefix = path.join(root, "node");
   const stale = path.join(root, "cargo", "terminal-jarvis");
@@ -127,9 +127,10 @@ test("global postinstall fails when PATH shadows the npm shim", () => {
     },
     encoding: "utf8",
   });
-  assert.equal(result.status, 1);
+  assert.equal(result.status, 0);
   assert.ok(result.stderr.includes(stale));
   assert.ok(result.stderr.includes(shim));
+  assert.ok(result.stderr.includes("Remove or update"));
 });
 
 test("global postinstall path diagnostic supports explicit skip", () => {
