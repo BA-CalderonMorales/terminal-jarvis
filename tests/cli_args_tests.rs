@@ -66,9 +66,8 @@ use terminal_jarvis::contracts::Capability;
     assert_eq!(parse(["tj", "run", "codex", "-h"]).unwrap(), Action::Run(vec!["codex".into(), "-h".into()]));
 }
 #[rustfmt::skip]
-#[test] fn rejects_global_flag_with_subcommand() {
-    let err = parse(["tj", "-v", "version"]).unwrap_err();
-    assert!(err.contains("-v"));
+#[test] fn handles_global_flag_with_subcommand() {
+    assert_eq!(parse(["tj", "-v", "version"]).unwrap(), Action::Version { verbose: false });
     let err = parse(["tj", "--version", "list"]).unwrap_err();
     assert!(err.contains("--version"));
     let err = parse(["tj", "--info", "show", "opencode"]).unwrap_err();
