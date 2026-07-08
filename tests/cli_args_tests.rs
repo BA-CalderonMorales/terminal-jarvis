@@ -51,3 +51,30 @@ use terminal_jarvis::contracts::Capability;
     assert!(error.contains("--bogus"));
     assert!(error.contains("usage"));
 }
+#[rustfmt::skip]
+#[test] fn help_in_any_position_after_subcommand() {
+    assert_eq!(parse(["tj", "plan", "yolo", "--help"]).unwrap(), Action::Help);
+    assert_eq!(parse(["tj", "plan", "download", "--help"]).unwrap(), Action::Help);
+    assert_eq!(parse(["tj", "show", "opencode", "--help"]).unwrap(), Action::Help);
+    assert_eq!(parse(["tj", "use", "opencode", "--help"]).unwrap(), Action::Help);
+    assert_eq!(parse(["tj", "install", "opencode", "--help"]).unwrap(), Action::Help);
+    assert_eq!(parse(["tj", "security", "status", "--help"]).unwrap(), Action::Help);
+}
+#[rustfmt::skip]
+#[test] fn run_forwards_help_to_harness_when_not_at_position_1() {
+    assert_eq!(parse(["tj", "run", "codex", "--help"]).unwrap(), Action::Run(vec!["codex".into(), "--help".into()]));
+    assert_eq!(parse(["tj", "run", "codex", "-h"]).unwrap(), Action::Run(vec!["codex".into(), "-h".into()]));
+}
+#[rustfmt::skip]
+#[test] fn rejects_global_flag_with_subcommand() {
+    let err = parse(["tj", "-v", "version"]).unwrap_err();
+    assert!(err.contains("-v"));
+    let err = parse(["tj", "--version", "list"]).unwrap_err();
+    assert!(err.contains("--version"));
+    let err = parse(["tj", "--info", "show", "opencode"]).unwrap_err();
+    assert!(err.contains("--info"));
+}
+#[rustfmt::skip]
+#[test] fn run_help_without_harness_shows_help() {
+    assert_eq!(parse(["tj", "run", "--help"]).unwrap(), Action::Help);
+}
