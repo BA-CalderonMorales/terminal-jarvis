@@ -1,5 +1,16 @@
 # Changelog
 
+## [0.1.8] - 2026-07-07
+
+- Fixes `--help`/`-h` parsing on 12 of 14 subcommands so help text is reachable
+  on every command that supports it.
+- Fixes `version -v --verbose` and similar multi-flag combinations so both flags
+  are accepted instead of rejecting valid combinations.
+- Fixes `security <unrecognized>` so an unknown harness name produces a usage
+  error instead of being silently treated as a harness.
+- Fixes session loading so a garbage (non-empty unparseable) `session.toml` emits
+  a warning instead of being silently swallowed.
+
 ## [0.1.7] - 2026-07-07
 
 - Bumps the release-candidate version to 0.1.7 in `Cargo.toml` and the npm
