@@ -15,7 +15,7 @@ fn help_lists_every_public_command() {
     for command in [
         "terminal-jarvis [harness] [args...]",
         "terminal-jarvis run [harness] [capability] [args...]",
-        "terminal-jarvis version [--verbose]",
+        "terminal-jarvis version [--verbose|--info|-v]",
         "terminal-jarvis list",
         "terminal-jarvis check",
         "terminal-jarvis use <harness>",
