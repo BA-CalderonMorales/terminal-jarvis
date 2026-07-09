@@ -1,6 +1,6 @@
 {
   "name": "terminal-jarvis",
-  "version": "0.1.10",
+  "version": "0.1.11",
   "description": "Data-driven harness switcher for AI coding agents",
   "bin": {
     "terminal-jarvis": "bin/terminal-jarvis"
@@ -30,6 +30,6 @@
     "url": "git+https://github.com/BA-CalderonMorales/terminal-jarvis.git"
   },
   "engines": {
-    "node": ">=20"
+    "node": ">=18.17"
   }
 }

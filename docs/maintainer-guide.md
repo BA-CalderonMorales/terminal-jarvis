@@ -37,7 +37,8 @@ scripts/local-cd.sh --check-auth
 ```
 
 Tagged releases (`v*`) trigger `.github/workflows/cd-multiplatform.yml`:
-crate publish, GitHub release assets, Homebrew tap update, and npm package.
+crate publish, Linux/macOS/Windows GitHub release assets, Homebrew tap update,
+and npm package.
 
 See [release-plan.md](release-plan.md) for the checklist and auth boundaries.
 
