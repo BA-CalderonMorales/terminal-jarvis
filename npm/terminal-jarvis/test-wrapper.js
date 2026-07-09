@@ -146,6 +146,7 @@ test("global postinstall fails when stale binary shadows npm shim", () => {
   assert.ok(result.stderr.includes(stale));
   assert.ok(result.stderr.includes(shim));
   assert.ok(result.stderr.includes("refusing to complete a global install"));
+  assert.ok(!result.stderr.includes("@latest"));
 });
 
 test("global postinstall path diagnostic supports explicit skip", () => {
