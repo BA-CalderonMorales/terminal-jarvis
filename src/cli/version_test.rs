@@ -66,6 +66,19 @@ fn verbose_text_reports_fields() {
     });
 }
 #[test]
+fn homebrew_path_detection() {
+    assert_eq!(
+        homebrew_path("/opt/homebrew/bin/tj"),
+        Some("homebrew".to_string())
+    );
+    assert_eq!(
+        homebrew_path("/usr/local/Cellar/tj"),
+        Some("homebrew".to_string())
+    );
+    assert_eq!(homebrew_path("/usr/local/bin/tj"), None);
+}
+
+#[test]
 fn verbose_text_defaults() {
     with_env(|| {
         clear();

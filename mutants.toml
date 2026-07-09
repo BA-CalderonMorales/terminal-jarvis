@@ -1,1 +1,6 @@
 exclude_globs = ["src/cli/compat.rs"]
+
+# External package-manager runners shell out to real npm/brew/cargo and perform
+# network installs; they cannot be exercised deterministically in unit tests
+# (the crate forbids mocking deps). `run_cmd` remains mutation-tested below.
+exclude_re = ["\\b(npm_update|brew_update|cargo_update|run)\\b"]

@@ -20,3 +20,18 @@ fn wrapper_path_requires_package_json() {
     std::env::remove_var("TERMINAL_JARVIS_WRAPPER");
     let _ = fs::remove_dir_all(&base);
 }
+
+#[test]
+fn run_cmd_reports_success_output() {
+    let (code, out) = run_cmd("echo", &["mutation-marker"]).expect("echo should run");
+    assert_eq!(code, 0);
+    assert!(
+        out.contains("updated via echo"),
+        "success message was: {out:?}"
+    );
+}
+
+#[test]
+fn run_cmd_reports_failure() {
+    assert!(run_cmd("false", &[]).is_err(), "false should fail");
+}
