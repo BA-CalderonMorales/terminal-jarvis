@@ -77,3 +77,7 @@ fn distribution_channel() -> String {
         })
         .unwrap_or_default()
 }
+
+#[cfg(test)]
+#[path = "version_test.rs"]
+mod tests;

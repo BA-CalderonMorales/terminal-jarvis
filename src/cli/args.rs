@@ -68,3 +68,10 @@ fn optional_one(w: &[String], c: &str) -> Result<Option<String>, String> { match
 fn plan(words: &[String]) -> Result<Action, String> { match words { [c] => Ok(Action::Plan { harness: None, capability: cap(c)? }), [h, c] => Ok(Action::Plan { harness: Some(h.clone()), capability: cap(c)? }), _ => Err("usage: terminal-jarvis plan [harness] <capability>".to_string()) } }
 #[rustfmt::skip]
 fn cap(value: &str) -> Result<Capability, String> { Capability::parse(value).ok_or_else(|| format!("unknown capability '{value}'; expected one of: {}", Capability::ALL.iter().map(|c| c.as_str()).collect::<Vec<_>>().join(", "))) }
+
+#[cfg(test)]
+#[path = "args_test.rs"]
+mod tests;
+#[cfg(test)]
+#[path = "args_test_extra.rs"]
+mod tests_extra;

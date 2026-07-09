@@ -55,3 +55,7 @@ fn run_cmd(cmd: &str, args: &[&str]) -> Result<(i32, String), String> {
         Err(format!("'{} {}' exited with {code}", cmd, args.join(" ")))
     }
 }
+
+#[cfg(test)]
+#[path = "self_update_test.rs"]
+mod tests;

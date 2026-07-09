@@ -89,3 +89,7 @@ fn find<'a>(harnesses: &'a [Harness], name: &str) -> Result<&'a Harness, String>
 fn err(error: impl std::fmt::Display) -> String {
     error.to_string()
 }
+
+#[cfg(test)]
+#[path = "dispatch_test.rs"]
+mod tests;
