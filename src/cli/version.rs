@@ -62,8 +62,10 @@ fn distribution_channel() -> String {
             other => other.to_string(),
         };
     }
-    if std::env::var("TERMINAL_JARVIS_WRAPPER").is_ok() {
-        return "npm".to_string();
+    if let Ok(wrapper) = std::env::var("TERMINAL_JARVIS_WRAPPER") {
+        if !wrapper.is_empty() {
+            return "npm".to_string();
+        }
     }
     std::env::current_exe()
         .ok()

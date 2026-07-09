@@ -65,6 +65,12 @@ fn update_auth_config_cache_security_legacy() {
     assert_eq!(a(&["tj", "db"]), Action::Legacy("db".to_string()));
 }
 #[test]
+fn version_and_update_reject_unexpected_trailing_args() {
+    assert!(e(&["tj", "--version", "version"]).is_err());
+    assert!(e(&["tj", "--update", "foo"]).is_err());
+}
+
+#[test]
 fn help_routing_and_direct_and_flag() {
     for sub in [
         "list", "tools", "check", "status", "current", "use", "show", "info", "plan", "install",

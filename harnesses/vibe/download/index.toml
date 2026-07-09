@@ -1,3 +1,3 @@
 summary = "Install Mistral Vibe from its documented distribution channel."
 command = "bash"
-args = ["-c", "curl -LsSf https://mistral.ai/vibe/install.sh | sh"]
+args = ["-c", "curl -LsSf https://mistral.ai/vibe/install.sh | bash"]

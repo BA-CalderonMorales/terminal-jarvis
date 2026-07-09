@@ -1,4 +1,4 @@
-use std::process::Command;
+use std::process::{Command, Stdio};
 
 pub fn run() -> Result<(i32, String), String> {
     if wrapper_path().is_some() {
@@ -41,18 +41,28 @@ fn cargo_update() -> Result<(i32, String), String> {
 
 fn run_cmd(cmd: &str, args: &[&str]) -> Result<(i32, String), String> {
     let mut command = Command::new(cmd);
-    command.args(args);
-    let status = command.status().map_err(|e| {
+    command.args(args).stderr(Stdio::piped());
+    let output = command.output().map_err(|e| {
         format!(
             "failed to run '{}': {}; install {} or update manually",
             cmd, e, cmd
         )
     })?;
-    let code = status.code().unwrap_or(1);
+    let code = output.status.code().unwrap_or(1);
+    let stderr = String::from_utf8_lossy(&output.stderr).trim().to_string();
     if code == 0 {
         Ok((0, format!("terminal-jarvis updated via {cmd}\n")))
     } else {
-        Err(format!("'{} {}' exited with {code}", cmd, args.join(" ")))
+        Err(format!(
+            "'{} {}' exited with {code}{}",
+            cmd,
+            args.join(" "),
+            if stderr.is_empty() {
+                String::new()
+            } else {
+                format!(": {stderr}")
+            }
+        ))
     }
 }
 
