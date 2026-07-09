@@ -26,7 +26,13 @@ sha256_file() {
 name=$(value_from_cargo name)
 repo=$(value_from_cargo repository)
 version=$(value_from_cargo version)
-target=$(rustc -vV | sed -n 's/^host: //p')
+host_target=$(rustc -vV | sed -n 's/^host: //p')
+target=${CARGO_BUILD_TARGET:-${TARGET:-}}
+target_explicit=1
+if test -z "$target"; then
+  target=$host_target
+  target_explicit=0
+fi
 case "$target" in
   x86_64-unknown-linux-gnu) platform=linux-x64-gnu ;;
   aarch64-unknown-linux-gnu) platform=linux-arm64-gnu ;;
@@ -34,14 +40,20 @@ case "$target" in
   aarch64-unknown-linux-musl) platform=linux-arm64-musl ;;
   x86_64-apple-darwin) platform=macos-x64 ;;
   aarch64-apple-darwin) platform=macos-arm64 ;;
+  x86_64-pc-windows-msvc) platform=win32-x64 ;;
   *) platform=$target ;;
 esac
 archive=$name-$version-$platform.tar.gz
+binary_name=$name
+case "$target" in
+  *-pc-windows-*) binary_name=$name.exe ;;
+esac
 
 test -n "$name" || fail "Cargo.toml name missing"
 test -n "$repo" || fail "Cargo.toml repository missing"
 test -n "$version" || fail "Cargo.toml version missing"
-test -n "$target" || fail "rustc host target missing"
+test -n "$host_target" || fail "rustc host target missing"
+test -n "$target" || fail "rustc build target missing"
 test -d harnesses || fail "harnesses directory missing"
 test -x npm/terminal-jarvis/bin/terminal-jarvis || fail "npm wrapper missing"
 
@@ -58,7 +70,13 @@ fi
 test "$mode" = "build" || fail "usage: scripts/package-release.sh [--check|build] [out-dir]"
 
 git_sha=$(git rev-parse HEAD 2>/dev/null || echo unknown)
-TERMINAL_JARVIS_GIT_SHA=$git_sha cargo build --release --locked
+if test "$target_explicit" = "1"; then
+  TERMINAL_JARVIS_GIT_SHA=$git_sha cargo build --release --locked --target "$target"
+  release_dir=target/$target/release
+else
+  TERMINAL_JARVIS_GIT_SHA=$git_sha cargo build --release --locked
+  release_dir=target/release
+fi
 
 dist=$out_root/$version/$platform
 stage=$dist/package/$name-$version-$platform
@@ -67,13 +85,13 @@ formula_dir=$dist/homebrew/Formula
 rm -rf "$dist"
 mkdir -p "$stage/bin" "$npm_stage/bin" "$formula_dir"
 
-cp target/release/$name "$stage/bin/$name"
+cp "$release_dir/$binary_name" "$stage/bin/$binary_name"
 cp README.md LICENSE CHANGELOG.md "$stage/"
 cp -R harnesses "$stage/"
-chmod +x "$stage/bin/$name"
+chmod +x "$stage/bin/$binary_name"
 
 (cd "$dist/package" && tar -czf "../$archive" "$name-$version-$platform")
-(cd "$dist" && sha256_file "$archive" >"$archive.sha256")
+(cd "$dist" && sha256_file "$archive" | sed 's/ \*/  /' >"$archive.sha256")
 sha=$(cut -d ' ' -f 1 "$dist/$archive.sha256")
 
 cp npm/terminal-jarvis/package.json "$npm_stage/"
@@ -92,7 +110,7 @@ class TerminalJarvis < Formula
   license "MIT"
 
   def install
-    bin.install "bin/terminal-jarvis"
+    bin.install "bin/$binary_name" => "$name"
     pkgshare.install "harnesses"
   end
 
@@ -113,21 +131,30 @@ scripts/check-distribution-payloads.sh --npm-stage "$npm_stage"
 tmp=$(mktemp -d)
 trap 'rm -rf "$tmp"' EXIT
 tar -xzf "$dist/$archive" -C "$tmp"
-expected=$(find harnesses -mindepth 1 -maxdepth 1 -type d | wc -l | tr -d ' ')
-actual=$("$tmp/$name-$version-$platform/bin/$name" list | wc -l | tr -d ' ')
-test "$actual" = "$expected" || fail "archive smoke listed $actual of $expected harnesses"
+test -x "$tmp/$name-$version-$platform/bin/$binary_name" ||
+  fail "archive missing executable bin/$binary_name"
+test -d "$tmp/$name-$version-$platform/harnesses" ||
+  fail "archive missing harnesses"
 
-if command -v node >/dev/null 2>&1; then
-  npm_stage_abs=$(cd "$npm_stage" && pwd)
-  TERMINAL_JARVIS_BIN="$stage/bin/$name" TERMINAL_JARVIS_CATALOG="$stage/harnesses" \
-    node "$npm_stage_abs/bin/terminal-jarvis" list >/dev/null
+if test "$target" = "$host_target"; then
+  expected=$(find harnesses -mindepth 1 -maxdepth 1 -type d | wc -l | tr -d ' ')
+  actual=$("$tmp/$name-$version-$platform/bin/$binary_name" list | wc -l | tr -d ' ')
+  test "$actual" = "$expected" || fail "archive smoke listed $actual of $expected harnesses"
+
+  if command -v node >/dev/null 2>&1; then
+    npm_stage_abs=$(cd "$npm_stage" && pwd)
+    TERMINAL_JARVIS_BIN="$stage/bin/$binary_name" TERMINAL_JARVIS_CATALOG="$stage/harnesses" \
+      node "$npm_stage_abs/bin/terminal-jarvis" list >/dev/null
+  fi
+
+  scripts/integration-hardening.sh \
+    --binary "$stage/bin/$binary_name" \
+    --catalog "$stage/harnesses" \
+    --npm-wrapper "$npm_stage/bin/terminal-jarvis" \
+    --homebrew-formula "$formula_dir/terminal-jarvis.rb"
+else
+  echo "package-release: skipped execution smoke for cross target $target on $host_target"
 fi
-
-scripts/integration-hardening.sh \
-  --binary "$stage/bin/$name" \
-  --catalog "$stage/harnesses" \
-  --npm-wrapper "$npm_stage/bin/terminal-jarvis" \
-  --homebrew-formula "$formula_dir/terminal-jarvis.rb"
 
 echo "$dist/$archive"
 echo "$dist/$archive.sha256"

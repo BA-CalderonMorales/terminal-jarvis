@@ -65,7 +65,13 @@ The launcher must fail closed when:
 - the platform has no supported release asset;
 - the release archive or checksum is missing;
 - the downloaded checksum does not match;
-- the cache path is not executable after extraction.
+- the cached native binary is missing, invalid, or not executable after
+  extraction on platforms that expose executable bits.
+
+Global npm installs must also fail closed when the installed npm shim would be
+shadowed by an older `terminal-jarvis` earlier on `PATH`; otherwise
+`npm install -g terminal-jarvis@latest` can appear successful while the next
+`terminal-jarvis --version` still executes an older Cargo or manual install.
 
 ## Release Split
 

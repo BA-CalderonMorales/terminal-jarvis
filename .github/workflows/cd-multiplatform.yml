@@ -55,22 +55,36 @@ jobs:
     needs: release-meta
     runs-on: ${{ matrix.os }}
     timeout-minutes: 30
+    defaults:
+      run:
+        shell: bash
     strategy:
       fail-fast: false
       matrix:
         include:
           - platform: linux-x64-gnu
             os: ubuntu-latest
+            target: x86_64-unknown-linux-gnu
+          - platform: linux-arm64-gnu
+            os: ubuntu-24.04-arm
+            target: aarch64-unknown-linux-gnu
           - platform: macos-x64
             os: macos-15-intel
+            target: x86_64-apple-darwin
           - platform: macos-arm64
             os: macos-15
+            target: aarch64-apple-darwin
+          - platform: win32-x64
+            os: windows-latest
+            target: x86_64-pc-windows-msvc
     steps:
       - uses: actions/checkout@v7
         with:
           ref: ${{ needs.release-meta.outputs.tag }}
 
       - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.target }}
 
       - uses: actions/setup-node@v6
         with:
@@ -84,10 +98,12 @@ jobs:
             ~/.cargo/git
             ~/.cargo/registry
             target
-          key: cargo-cd-${{ runner.os }}-${{ hashFiles('Cargo.lock') }}-v1
-          restore-keys: cargo-cd-${{ runner.os }}-
+          key: cargo-cd-${{ runner.os }}-${{ matrix.target }}-${{ hashFiles('Cargo.lock') }}-v1
+          restore-keys: cargo-cd-${{ runner.os }}-${{ matrix.target }}-
 
       - name: Build package
+        env:
+          CARGO_BUILD_TARGET: ${{ matrix.target }}
         run: scripts/package-release.sh
 
       - name: Verify platform package shape
@@ -234,6 +250,7 @@ jobs:
           }
           repo="https://github.com/${GITHUB_REPOSITORY}"
           linux_x64_sha="$(sha_for linux-x64-gnu)"
+          linux_arm64_sha="$(sha_for linux-arm64-gnu)"
           macos_x64_sha="$(sha_for macos-x64)"
           macos_arm64_sha="$(sha_for macos-arm64)"
           cat > ../tap/Formula/terminal-jarvis.rb <<EOF
@@ -257,6 +274,9 @@ jobs:
               if Hardware::CPU.intel?
                 url "$repo/releases/download/$TAG/terminal-jarvis-$VERSION-linux-x64-gnu.tar.gz"
                 sha256 "$linux_x64_sha"
+              elsif Hardware::CPU.arm?
+                url "$repo/releases/download/$TAG/terminal-jarvis-$VERSION-linux-arm64-gnu.tar.gz"
+                sha256 "$linux_arm64_sha"
               end
             end
 

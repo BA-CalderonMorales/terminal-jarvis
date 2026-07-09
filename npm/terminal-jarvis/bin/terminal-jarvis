@@ -62,9 +62,10 @@ function explicit(binary, source, catalog = "") {
 
 function sourceCandidates() {
   const catalog = path.resolve(repo, "harnesses");
+  const binary = executableName();
   return [
-    { binary: path.resolve(repo, "target/release/terminal-jarvis"), catalog },
-    { binary: path.resolve(repo, "target/debug/terminal-jarvis"), catalog },
+    { binary: path.resolve(repo, "target/release", binary), catalog },
+    { binary: path.resolve(repo, "target/debug", binary), catalog },
   ];
 }
 
@@ -77,7 +78,7 @@ async function downloadRelease() {
   const cache = cacheRoot();
   const root = path.join(cache, pkg.version, platform);
   const unpacked = path.join(root, `${pkg.name}-${pkg.version}-${platform}`);
-  const binary = path.join(unpacked, "bin", "terminal-jarvis");
+  const binary = path.join(unpacked, "bin", executableName());
   const catalog = path.join(unpacked, "harnesses");
   if (cachedReleaseUsable(binary, catalog)) {
     fs.chmodSync(binary, 0o755);
@@ -128,8 +129,10 @@ function cachedBinaryUsable(binary) {
 }
 
 function hasNativeBinaryMagic(header) {
-  return ["7f454c46", "cffaedfe", "cefaedfe", "feedfacf", "feedface", "cafebabe"]
-    .includes(header.toString("hex"));
+  const hex = header.toString("hex");
+  return hex.startsWith("4d5a") ||
+    ["7f454c46", "cffaedfe", "cefaedfe", "feedfacf", "feedface", "cafebabe"]
+      .includes(hex);
 }
 
 function downloadFailure(releaseUrl, error) {
@@ -146,17 +149,23 @@ function platformName() {
 
 function platformNameFor(platform, arch) {
   if (platform === "linux" && arch === "x64") return "linux-x64-gnu";
+  if (platform === "linux" && arch === "arm64") return "linux-arm64-gnu";
   if (platform === "darwin" && arch === "x64") return "macos-x64";
   if (platform === "darwin" && arch === "arm64") return "macos-arm64";
+  if (platform === "win32" && arch === "x64") return "win32-x64";
   throw new Error(unsupportedPlatformMessage(platform, arch));
 }
 
 function unsupportedPlatformMessage(platform, arch) {
   const current = `${platform}-${arch}`;
   return `unsupported platform: ${current}. ` +
-    "The npm package downloads GitHub Release assets for linux-x64-gnu, macos-x64, and macos-arm64. " +
-    "Native Windows npm installs are not supported until a win32-x64 asset is built in CI; use WSL on Windows. " +
+    "The npm package downloads GitHub Release assets for linux-x64-gnu, linux-arm64-gnu, " +
+    "macos-x64, macos-arm64, and win32-x64. " +
     guidanceHint();
+}
+
+function executableName(platform = process.platform) {
+  return platform === "win32" ? "terminal-jarvis.exe" : "terminal-jarvis";
 }
 
 function guidanceHint() {
@@ -303,6 +312,7 @@ module.exports = {
   cachedReleaseUsable,
   childEnv,
   downloadFailure,
+  executableName,
   guidanceHint,
   pathShadowDiagnostic,
   platformNameFor,
