@@ -110,7 +110,7 @@ class TerminalJarvis < Formula
   license "MIT"
 
   def install
-    bin.install "bin/terminal-jarvis"
+    bin.install "bin/$binary_name" => "$name"
     pkgshare.install "harnesses"
   end
 
