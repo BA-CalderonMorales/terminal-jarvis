@@ -33,8 +33,8 @@ function childEnv(resolved) {
     TERMINAL_JARVIS_WRAPPER: __filename,
   };
   if (resolved.releaseUrl) env.TERMINAL_JARVIS_RELEASE_URL = resolved.releaseUrl;
-  if (resolved.cache) env.TERMINAL_JARVIS_CACHE = process.env.TERMINAL_JARVIS_CACHE || resolved.cache;
-  if (!env.TERMINAL_JARVIS_CATALOG && resolved.catalog) env.TERMINAL_JARVIS_CATALOG = resolved.catalog;
+  if (resolved.cache) env.TERMINAL_JARVIS_CACHE = resolved.cache;
+  if (resolved.catalog) env.TERMINAL_JARVIS_CATALOG = resolved.catalog;
   return env;
 }
 

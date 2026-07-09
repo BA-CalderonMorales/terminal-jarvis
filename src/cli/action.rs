@@ -21,6 +21,7 @@ pub enum Action {
         extra: Vec<String>,
     },
     Install(String),
+    SelfUpdate,
     Update(Option<String>),
     Auth(Vec<String>),
     Config(Vec<String>),

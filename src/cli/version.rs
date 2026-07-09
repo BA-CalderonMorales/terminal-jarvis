@@ -5,7 +5,13 @@ const REPO: &str = "https://github.com/BA-CalderonMorales/terminal-jarvis";
 pub fn text(verbose: bool, catalog: &Path, home: &Path) -> String {
     let version = env!("CARGO_PKG_VERSION");
     if !verbose {
-        return format!("terminal-jarvis {version}\n");
+        let channel = distribution_channel();
+        let suffix = if channel.is_empty() {
+            String::new()
+        } else {
+            format!(" ({channel})")
+        };
+        return format!("terminal-jarvis {version}{suffix}\n");
     }
     let binary = std::env::current_exe()
         .map(|path| path.display().to_string())
@@ -46,3 +52,38 @@ where
         .filter(|value| !value.is_empty())
         .unwrap_or_else(fallback)
 }
+
+fn distribution_channel() -> String {
+    let raw = std::env::var("TERMINAL_JARVIS_DISTRIBUTION").unwrap_or_default();
+    if !raw.is_empty() {
+        return match raw.as_str() {
+            "env" | "source" => "source".to_string(),
+            "github-release" | "github-release-cache" => "npm".to_string(),
+            other => other.to_string(),
+        };
+    }
+    if let Ok(wrapper) = std::env::var("TERMINAL_JARVIS_WRAPPER") {
+        if !wrapper.is_empty() {
+            return "npm".to_string();
+        }
+    }
+    homebrew_path(
+        &std::env::current_exe()
+            .ok()
+            .map(|p| p.to_string_lossy().to_string())
+            .unwrap_or_default(),
+    )
+    .unwrap_or_default()
+}
+
+fn homebrew_path(path: &str) -> Option<String> {
+    if path.contains("homebrew") || path.contains("Cellar") {
+        Some("homebrew".to_string())
+    } else {
+        None
+    }
+}
+
+#[cfg(test)]
+#[path = "version_test.rs"]
+mod tests;
