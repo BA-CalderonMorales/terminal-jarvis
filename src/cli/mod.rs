@@ -8,6 +8,7 @@ mod help;
 mod invoke;
 mod output;
 mod resolve;
+mod self_update;
 mod version;
 
 use crate::catalog;
@@ -44,6 +45,9 @@ where
     }
     if let Action::Version { verbose } = action {
         return Ok((0, version::text(verbose, catalog_root, home)));
+    }
+    if let Action::SelfUpdate = action {
+        return self_update::run();
     }
     let harnesses =
         catalog::load(catalog_root).map_err(|error| catalog_error(catalog_root, error))?;

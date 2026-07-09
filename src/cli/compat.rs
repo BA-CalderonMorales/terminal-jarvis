@@ -82,3 +82,7 @@ fn auth_detail(name: &str, harnesses: &[Harness], note: &str) -> Result<String, 
         note
     ))
 }
+
+#[cfg(test)]
+#[path = "compat_test.rs"]
+mod tests;

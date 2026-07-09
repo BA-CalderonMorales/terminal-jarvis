@@ -61,3 +61,7 @@ fn fields(files: &BTreeMap<&str, &str>, path: &str) -> io::Result<Fields> {
 fn invalid(message: String) -> io::Error {
     io::Error::new(io::ErrorKind::InvalidData, message)
 }
+
+#[cfg(test)]
+#[path = "embedded_test.rs"]
+mod tests;

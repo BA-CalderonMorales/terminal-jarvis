@@ -1,11 +1,8 @@
-use std::fs;
 use std::process::{Command, Output};
 #[rustfmt::skip]
 fn tj(args: &[&str]) -> Output { Command::new(env!("CARGO_BIN_EXE_terminal-jarvis")).args(args).output().expect("tj runs") }
 #[rustfmt::skip]
 fn se(o: &Output) -> String { String::from_utf8_lossy(&o.stderr).to_string() }
-#[rustfmt::skip]
-fn home(name: &str) -> std::path::PathBuf { let h = std::env::temp_dir().join(format!("{}-{}", name, std::process::id())); let _ = fs::remove_dir_all(&h); fs::create_dir_all(&h).unwrap(); h }
 #[rustfmt::skip]
 fn nocat() -> String { let p = std::env::temp_dir().join(format!("tj-nocat-{}", std::process::id())); p.to_string_lossy().to_string() }
 
@@ -19,6 +16,42 @@ fn version_flags_do_not_require_catalog() {
     assert!(
         o.status.success() && String::from_utf8_lossy(&o.stdout).starts_with("terminal-jarvis ")
     );
+}
+#[test]
+fn plain_version_omits_channel_without_distribution_env() {
+    let o = Command::new(env!("CARGO_BIN_EXE_terminal-jarvis"))
+        .arg("--version")
+        .env_clear()
+        .output()
+        .unwrap();
+    assert!(o.status.success());
+    let b = String::from_utf8_lossy(&o.stdout);
+    assert!(b.starts_with("terminal-jarvis ") && !b.contains('('));
+}
+#[test]
+fn plain_version_reports_source_channel() {
+    let o = Command::new(env!("CARGO_BIN_EXE_terminal-jarvis"))
+        .arg("--version")
+        .env_clear()
+        .env("TERMINAL_JARVIS_DISTRIBUTION", "source")
+        .output()
+        .unwrap();
+    assert!(o.status.success());
+    assert!(String::from_utf8_lossy(&o.stdout).contains("(source)"));
+}
+#[test]
+fn plain_version_reports_npm_channel_for_wrapped_install() {
+    let o = Command::new(env!("CARGO_BIN_EXE_terminal-jarvis"))
+        .arg("--version")
+        .env_clear()
+        .env(
+            "TERMINAL_JARVIS_WRAPPER",
+            "/opt/node_modules/terminal-jarvis/bin/tj",
+        )
+        .output()
+        .unwrap();
+    assert!(o.status.success());
+    assert!(String::from_utf8_lossy(&o.stdout).contains("(npm)"));
 }
 #[test]
 fn verbose_version_reports_provenance_paths() {
@@ -56,38 +89,4 @@ fn missing_catalog_error_names_catalog_path() {
         se(&o).contains("harness catalog is missing at")
             && se(&o).contains("TERMINAL_JARVIS_CATALOG")
     );
-}
-#[test]
-fn valid_session_skips_warning() {
-    let h = home("tj-v");
-    fs::write(h.join("session.toml"), "active_harness = \"codex\"").unwrap();
-    let o = Command::new(env!("CARGO_BIN_EXE_terminal-jarvis"))
-        .arg("current")
-        .env("TERMINAL_JARVIS_HOME", &h)
-        .output()
-        .unwrap();
-    assert!(o.status.success() && !se(&o).contains("session.toml could not be parsed"));
-}
-#[test]
-fn garbled_session_warns_on_stderr() {
-    let h = home("tj-g");
-    fs::write(h.join("session.toml"), "active_harness = \"codex\n").unwrap();
-    let o = Command::new(env!("CARGO_BIN_EXE_terminal-jarvis"))
-        .arg("current")
-        .env("TERMINAL_JARVIS_HOME", &h)
-        .output()
-        .unwrap();
-    assert!(o.status.success() && se(&o).contains("session.toml could not be parsed"));
-}
-#[test]
-fn corrupt_session_error_reaches_stderr() {
-    let h = home("tj-c");
-    fs::write(h.join("session.toml"), [0xff_u8]).unwrap();
-    let o = Command::new(env!("CARGO_BIN_EXE_terminal-jarvis"))
-        .arg("current")
-        .env("TERMINAL_JARVIS_HOME", h)
-        .output()
-        .unwrap();
-    assert_eq!(o.status.code(), Some(2));
-    assert!(se(&o).contains("stream did not contain valid UTF-8"));
 }

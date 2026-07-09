@@ -37,6 +37,28 @@ Auth guidance stays at the harness level. Terminal Jarvis never retains
 credentials -- it tells you what each harness needs and lets you manage
 your own provider keys.
 
+## Headless Invocation Guidelines
+
+Every harness MUST define `headless/index.toml`. The headless capability
+determines how `terminal-jarvis run <harness> <prompt>` behaves when
+prompt words do not match a reserved capability name.
+
+Three headless patterns are recognized:
+
+| Pattern | Example | Behavior |
+|---------|---------|----------|
+| Direct exec | `opencode` → `opencode run`, `codex` → `codex exec` | Appends extra args (the prompt) to the command line and invokes the harness in non-interactive mode |
+| `--help` stub | `claude` → `claude --help`, `aider` → `aider --help` | Harness has no documented non-interactive mode; shows guidance |
+| Interactive-only | `forge`, `droid` | Falls back to `--help`; headless mode is explicitly a stub |
+
+### Rules
+
+1. A harness with a documented `--exec` / `--run` / `--pipeline` / non-interactive flag MUST use it in `headless/index.toml`.
+2. A harness that ONLY supports interactive TUI MUST set `args = ["--help"]` so the user sees guidance.
+3. Extra args from `run <harness> <prompt>` are APPENDED to the headless command line.
+4. Harnesses MUST NOT execute destructive operations from headless mode without explicit user confirmation.
+5. When a harness lacks any non-interactive mode, the `summary` MUST describe the capability as a stub.
+
 ## Adding a New Agent
 
 ```bash
