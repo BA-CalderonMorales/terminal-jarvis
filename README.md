@@ -52,8 +52,10 @@ a Node launcher that downloads the matching Terminal Jarvis GitHub Release
 asset, verifies its `.sha256` file, caches it, and then executes it. Homebrew is
 the binary installer path and installs the platform release archive from the tap.
 
-Supported prebuilt assets are `linux-x64-gnu`, `macos-x64`, and `macos-arm64`.
-Native Windows npm installs are not published yet; use WSL on Windows.
+Supported prebuilt assets are `linux-x64-gnu`, `linux-arm64-gnu`,
+`macos-x64`, `macos-arm64`, and `win32-x64`. Native Windows npm installs use
+the `win32-x64` GitHub Release asset and work from Command Prompt, PowerShell,
+or Git Bash when the npm shim is first on `PATH`.
 
 ## Quick Start
 

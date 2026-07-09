@@ -60,11 +60,13 @@ a binary archive with bundled harness data, a SHA-256 file, an npm package
 staging directory, and a versioned Homebrew formula that points at the release
 archive URL. npm staging must not embed `bin/terminal-jarvis-bin`; the npm
 launcher resolves prebuilt binaries from GitHub Releases with checksum
-verification. Platform names are user-facing labels such as `linux-x64-gnu` or
-`macos-arm64`; the Rust target triple remains visible in
+verification. Platform names are user-facing labels such as `linux-x64-gnu`,
+`linux-arm64-gnu`, `macos-arm64`, or `win32-x64`; the Rust target triple remains visible in
 `scripts/package-release.sh --check`. Packaging also runs
 `scripts/integration-hardening.sh` against the staged binary, bundled harnesses,
-npm wrapper, and generated Homebrew formula before reporting artifact paths.
+npm wrapper, and generated Homebrew formula before reporting artifact paths
+when the target can run on the host. Cross-target packages still verify archive
+shape, checksum, npm payload shape, and formula syntax.
 
 `scripts/local-cd.sh` collects the same archive and checksum files into a
 `release-assets/v<version>/` directory and verifies every checksum and recorded
@@ -101,11 +103,12 @@ Before publishing a `v0.1.x` release:
 
 The root GitHub workflows keep the tag-push release shape. CI verifies the lean
 Rust crate, catalog contracts, package metadata, security gates, npm wrapper,
-Homebrew syntax, coverage, and mutation. Multi-platform CD builds host archives
-for Linux and macOS, runs integration hardening before publish jobs can proceed,
-publishes the crates.io package when needed, publishes the GitHub release
-assets, updates the Homebrew tap, and publishes or retags the npm package with
-`latest`, `stable`, and `beta` pointing at the same patch version.
+Homebrew syntax, coverage, and mutation. Multi-platform CD builds release
+archives for Linux x64, Linux ARM64, macOS Intel, macOS ARM64, and Windows x64;
+runs integration hardening before publish jobs can proceed for host-executable
+targets; publishes the crates.io package when needed; publishes the GitHub
+release assets; updates the Homebrew tap; and publishes or retags the npm
+package with `latest`, `stable`, and `beta` pointing at the same patch version.
 
 Terminal Jarvis release validation should not automatically download arbitrary
 harness dependencies. Docker coverage should start as documented baseline images

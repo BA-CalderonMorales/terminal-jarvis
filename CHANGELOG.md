@@ -1,5 +1,16 @@
 # Changelog
 
+## [0.1.11] - 2026-07-09
+
+- Adds real multi-platform release packaging for Linux x64, Linux ARM64,
+  macOS Intel, macOS ARM64, and Windows x64 GitHub Release assets.
+- Adds native Windows npm launcher support through the `win32-x64` release
+  asset and validates cached Windows PE binaries.
+- Makes global npm install fail when an older `terminal-jarvis` earlier on
+  `PATH` would keep `terminal-jarvis@latest` from being the command users run.
+- Lowers the npm wrapper engine requirement to Node `>=18.17`, matching the
+  runtime surface used by the wrapper.
+
 ## [0.1.10] - 2026-07-08
 
 - Fixes `-v version` to delegate to the `version` subcommand instead of

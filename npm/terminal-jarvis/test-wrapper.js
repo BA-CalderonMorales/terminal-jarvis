@@ -23,6 +23,13 @@ test("cached binary validation rejects text files", () => {
   assert.equal(wrapper.cachedBinaryUsable(file), false);
 });
 
+test("cached binary validation accepts Windows PE files", () => {
+  const file = path.join(tempDir(), "terminal-jarvis.exe");
+  fs.writeFileSync(file, Buffer.from([0x4d, 0x5a, 0x90, 0x00]));
+  fs.chmodSync(file, 0o755);
+  assert.equal(wrapper.cachedBinaryUsable(file), true);
+});
+
 test("cached release validation requires binary and catalog", () => {
   const root = tempDir();
   const binary = path.join(root, "bin", "terminal-jarvis");
@@ -59,14 +66,22 @@ test("download errors name the release URL and override knob", () => {
 
 test("platform mapping names published release assets", () => {
   assert.equal(wrapper.platformNameFor("linux", "x64"), "linux-x64-gnu");
+  assert.equal(wrapper.platformNameFor("linux", "arm64"), "linux-arm64-gnu");
   assert.equal(wrapper.platformNameFor("darwin", "x64"), "macos-x64");
   assert.equal(wrapper.platformNameFor("darwin", "arm64"), "macos-arm64");
+  assert.equal(wrapper.platformNameFor("win32", "x64"), "win32-x64");
 });
 
-test("unsupported platform text gives Windows install guidance", () => {
+test("executable name matches host conventions", () => {
+  assert.equal(wrapper.executableName("linux"), "terminal-jarvis");
+  assert.equal(wrapper.executableName("darwin"), "terminal-jarvis");
+  assert.equal(wrapper.executableName("win32"), "terminal-jarvis.exe");
+});
+
+test("unsupported platform text names supported release assets", () => {
   assert.throws(
-    () => wrapper.platformNameFor("win32", "x64"),
-    /Native Windows npm installs are not supported.*use WSL on Windows.*README\.txt/
+    () => wrapper.platformNameFor("freebsd", "x64"),
+    /linux-x64-gnu.*linux-arm64-gnu.*macos-x64.*macos-arm64.*win32-x64.*README\.txt/
   );
 });
 
@@ -110,7 +125,7 @@ test("path diagnostic reports stale binary before npm shim", () => {
   assert.match(diagnostic, /before the npm shim/);
 });
 
-test("global postinstall warns on shadow but exits 0", () => {
+test("global postinstall fails when stale binary shadows npm shim", () => {
   const root = tempDir();
   const prefix = path.join(root, "node");
   const stale = path.join(root, "cargo", "terminal-jarvis");
@@ -127,10 +142,10 @@ test("global postinstall warns on shadow but exits 0", () => {
     },
     encoding: "utf8",
   });
-  assert.equal(result.status, 0);
+  assert.equal(result.status, 1);
   assert.ok(result.stderr.includes(stale));
   assert.ok(result.stderr.includes(shim));
-  assert.ok(result.stderr.includes("Remove or update"));
+  assert.ok(result.stderr.includes("refusing to complete a global install"));
 });
 
 test("global postinstall path diagnostic supports explicit skip", () => {

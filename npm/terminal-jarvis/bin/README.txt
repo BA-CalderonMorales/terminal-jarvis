@@ -13,11 +13,15 @@ What it does:
 
 Supported downloaded assets:
 - linux-x64-gnu
+- linux-arm64-gnu
 - macos-x64
 - macos-arm64
+- win32-x64
 
-Native Windows npm installs are not supported until a win32-x64 release asset is
-published. Use WSL on Windows.
+Native Windows npm installs use the win32-x64 asset from Command Prompt,
+PowerShell, or Git Bash. If npm reports a stale terminal-jarvis binary earlier
+on PATH, remove that binary or move the npm prefix earlier in PATH before
+retrying the install.
 
 Useful environment variables:
 - TERMINAL_JARVIS_BIN: execute a specific local binary instead of downloading.

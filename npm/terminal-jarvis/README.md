@@ -7,9 +7,9 @@ The package does not include a native binary. Installed npm copies use
 Jarvis archive from GitHub Releases, verify the release `.sha256` checksum,
 cache the unpacked release, and execute it.
 
-Supported npm release assets are `linux-x64-gnu`, `macos-x64`, and
-`macos-arm64`. Native Windows installs through Git Bash or cmd are not
-supported until CI publishes a `win32-x64` asset; use WSL on Windows.
+Supported npm release assets are `linux-x64-gnu`, `linux-arm64-gnu`,
+`macos-x64`, `macos-arm64`, and `win32-x64`. Native Windows installs through
+Command Prompt, PowerShell, and Git Bash use the `win32-x64` asset.
 
 The wrapper guidance shipped at `bin/README.txt` is included in the npm package
 so installed copies can explain the package behavior without relying on the
@@ -18,8 +18,8 @@ source checkout.
 In source checkouts it delegates to:
 
 1. `TERMINAL_JARVIS_BIN`
-2. `target/release/terminal-jarvis`
-3. `target/debug/terminal-jarvis`
+2. `target/release/terminal-jarvis` or `target/release/terminal-jarvis.exe`
+3. `target/debug/terminal-jarvis` or `target/debug/terminal-jarvis.exe`
 4. `cargo run --` from the repository root
 
 Use `TERMINAL_JARVIS_CACHE` to choose the cache directory. Set
