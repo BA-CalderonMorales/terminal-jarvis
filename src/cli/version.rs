@@ -67,17 +67,21 @@ fn distribution_channel() -> String {
             return "npm".to_string();
         }
     }
-    std::env::current_exe()
-        .ok()
-        .and_then(|p| {
-            let s = p.to_string_lossy().to_string();
-            if s.contains("homebrew") || s.contains("Cellar") {
-                Some("homebrew".to_string())
-            } else {
-                None
-            }
-        })
-        .unwrap_or_default()
+    homebrew_path(
+        &std::env::current_exe()
+            .ok()
+            .map(|p| p.to_string_lossy().to_string())
+            .unwrap_or_default(),
+    )
+    .unwrap_or_default()
+}
+
+fn homebrew_path(path: &str) -> Option<String> {
+    if path.contains("homebrew") || path.contains("Cellar") {
+        Some("homebrew".to_string())
+    } else {
+        None
+    }
 }
 
 #[cfg(test)]

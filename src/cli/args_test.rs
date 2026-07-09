@@ -38,6 +38,7 @@ fn version_rejects_extra() {
     assert!(e(&["tj", "--version", "bogus"]).is_err());
     assert!(e(&["tj", "--info", "bogus"]).is_err());
     assert!(e(&["tj", "version", "bogus"]).is_err());
+    assert!(e(&["tj", "-v", "bogus"]).is_err());
 }
 #[test]
 fn list_status_check_current_use_show() {
