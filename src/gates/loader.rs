@@ -20,7 +20,11 @@ pub fn load(root: &Path) -> io::Result<Vec<Gate>> {
         if configured_root() {
             return Err(io::Error::new(
                 io::ErrorKind::NotFound,
-                root.display().to_string(),
+                format!(
+                    "gate catalog missing at {}; fix TERMINAL_JARVIS_GATES or unset it \
+                     for bundled gates",
+                    root.display()
+                ),
             ));
         }
         return Ok(vec![parse(EMBEDDED_TRIVY)?]);
