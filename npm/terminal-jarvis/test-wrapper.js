@@ -176,6 +176,24 @@ test("global postinstall warns when a stale binary shadows the npm shim", () => 
   assert.ok(!result.stderr.includes("refusing to complete a global install"));
 });
 
+test("global postinstall warns when the npm shim is missing from PATH", () => {
+  const root = tempDir();
+  const prefix = path.join(root, "node");
+  const result = spawnSync(process.execPath, [path.join(__dirname, "postinstall.js")], {
+    cwd: __dirname,
+    env: {
+      ...process.env,
+      npm_config_global: "true",
+      npm_config_prefix: prefix,
+      PATH: path.join(root, "not-on-path"),
+    },
+    encoding: "utf8",
+  });
+  assert.equal(result.status, 0, result.stderr);
+  assert.match(result.stderr, /npm shim .* is not reachable on PATH/);
+  assert.match(result.stderr, /Add .*node(?:[\\/]+bin)? to PATH/);
+});
+
 test("global postinstall path diagnostic supports explicit skip", () => {
   const status = wrapper.postinstallPathStatus({
     npm_config_global: "true",
