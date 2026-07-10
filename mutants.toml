@@ -5,4 +5,9 @@ exclude_globs = ["src/cli/compat.rs"]
 # deterministically in unit tests (the crate forbids mocking deps).
 # `run_cmd` remains mutation-tested. The `self_update.rs` qualifier scopes
 # the exclusion so other `run` functions (e.g. resolve.rs) stay covered.
-exclude_re = ["self_update\\.rs.*\\b(run|npm_update|brew_update|cargo_update)\\b"]
+# In `wrap`, `width(word) > limit` and `>= limit` are equivalent at equality:
+# both paths emit the same single chunk. Exclude only that exact mutant.
+exclude_re = [
+  "self_update\\.rs.*\\b(run|npm_update|brew_update|cargo_update)\\b",
+  "table_layout\\.rs.*replace > with >= in wrap",
+]

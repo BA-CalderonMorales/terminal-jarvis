@@ -35,3 +35,12 @@ fn run_cmd_reports_success_output() {
 fn run_cmd_reports_failure() {
     assert!(run_cmd("false", &[]).is_err(), "false should fail");
 }
+
+#[test]
+fn homebrew_paths_cover_both_install_layouts() {
+    assert!(homebrew_path("/opt/homebrew/bin/terminal-jarvis"));
+    assert!(homebrew_path(
+        "/usr/local/Cellar/terminal-jarvis/0.1/bin/tj"
+    ));
+    assert!(!homebrew_path("/usr/local/bin/terminal-jarvis"));
+}

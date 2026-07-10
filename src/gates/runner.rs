@@ -50,3 +50,7 @@ pub fn run(gate: &Gate) -> Result<(i32, String), String> {
     .join("\n");
     Ok((output.status.code().unwrap_or(1), body))
 }
+
+#[cfg(test)]
+#[path = "runner_test.rs"]
+mod tests;

@@ -77,6 +77,9 @@ fn plan(words: &[String]) -> Result<Action, String> { match words { [c] => Ok(Ac
 fn cap(value: &str) -> Result<Capability, String> { Capability::parse(value).ok_or_else(|| format!("unknown capability '{value}'; expected one of: {}", Capability::ALL.iter().map(|c| c.as_str()).collect::<Vec<_>>().join(", "))) }
 
 #[cfg(test)]
+#[path = "mutation_test.rs"]
+mod mutation_tests;
+#[cfg(test)]
 #[path = "args_test.rs"]
 mod tests;
 #[cfg(test)]

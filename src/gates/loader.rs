@@ -66,3 +66,7 @@ fn parse(data: &str) -> io::Result<Gate> {
 fn invalid(message: String) -> io::Error {
     io::Error::new(io::ErrorKind::InvalidData, message)
 }
+
+#[cfg(test)]
+#[path = "loader_test.rs"]
+mod tests;
