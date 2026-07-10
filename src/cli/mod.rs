@@ -4,13 +4,17 @@ mod cache;
 mod compat;
 mod compat_support;
 mod dispatch;
+mod experimental;
+mod gate_cmd;
+mod guard;
 mod help;
 mod invoke;
 mod output;
 mod resolve;
 mod self_update;
+mod style;
+mod table;
 mod version;
-
 use crate::catalog;
 use args::Action;
 use std::path::Path;
@@ -20,7 +24,10 @@ where
     I: IntoIterator,
     I::Item: Into<String>,
 {
-    match execute(args, catalog_root, home) {
+    let (args, plain, no_color) = presentation_args(args);
+    let previous = style::set(plain, no_color);
+    let result = execute(args, catalog_root, home);
+    let code = match result {
         Ok((code, body)) => {
             if !body.is_empty() {
                 print!("{body}");
@@ -28,10 +35,31 @@ where
             code
         }
         Err(error) => {
-            eprintln!("error: {error}");
+            eprint!("{}", style::error(&error));
             2
         }
+    };
+    style::restore(previous);
+    code
+}
+
+fn presentation_args<I>(args: I) -> (Vec<String>, bool, bool)
+where
+    I: IntoIterator,
+    I::Item: Into<String>,
+{
+    let mut all = args.into_iter().map(Into::into).collect::<Vec<_>>();
+    let mut plain = false;
+    let mut no_color = false;
+    while all
+        .get(1)
+        .is_some_and(|word| word == "--plain" || word == "--no-color")
+    {
+        let flag = all.remove(1);
+        plain |= flag == "--plain";
+        no_color |= flag == "--no-color";
     }
+    (all, plain, no_color)
 }
 
 fn execute<I>(args: I, catalog_root: &Path, home: &Path) -> Result<(i32, String), String>
@@ -46,8 +74,8 @@ where
     if let Action::Version { verbose } = action {
         return Ok((0, version::text(verbose, catalog_root, home)));
     }
-    if let Action::SelfUpdate = action {
-        return self_update::run();
+    if let Action::SelfUpdate { dry_run } = action {
+        return self_update::run(dry_run);
     }
     let harnesses =
         catalog::load(catalog_root).map_err(|error| catalog_error(catalog_root, error))?;

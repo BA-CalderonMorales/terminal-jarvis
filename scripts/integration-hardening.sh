@@ -56,7 +56,7 @@ expected=$(wc -l <"$harnesses" | tr -d ' ')
 test "$expected" -gt 0 || fail "catalog has no harnesses"
 
 run_tj() {
-  TERMINAL_JARVIS_CATALOG="$catalog" TERMINAL_JARVIS_HOME="$home" "$binary" "$@"
+  TERMINAL_JARVIS_CATALOG="$catalog" TERMINAL_JARVIS_HOME="$home" "$binary" --plain "$@"
 }
 
 contains() {
@@ -123,7 +123,7 @@ if [ -n "$npm_wrapper" ]; then
   test -f "$npm_wrapper" || fail "npm wrapper is missing: $npm_wrapper"
   if command -v node >/dev/null 2>&1; then
     TERMINAL_JARVIS_BIN="$binary" TERMINAL_JARVIS_CATALOG="$catalog" \
-      TERMINAL_JARVIS_HOME="$tmp/npm-home" node "$npm_wrapper" list >"$tmp/npm-list"
+      TERMINAL_JARVIS_HOME="$tmp/npm-home" node "$npm_wrapper" --plain list >"$tmp/npm-list"
     line_count_is "$tmp/npm-list" "$expected"
     TERMINAL_JARVIS_BIN="$binary" TERMINAL_JARVIS_CATALOG="$catalog" \
       node "$npm_wrapper" --version >"$tmp/npm-version"
@@ -144,6 +144,7 @@ if [ -n "$formula" ]; then
     echo "ruby not installed; skipping Homebrew formula syntax"
   fi
   contains "$formula" 'pkgshare.install "harnesses"'
+  contains "$formula" '"gates"'
   contains "$formula" 'terminal-jarvis --help'
 fi
 

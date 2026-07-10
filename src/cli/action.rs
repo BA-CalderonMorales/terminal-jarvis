@@ -21,11 +21,15 @@ pub enum Action {
         extra: Vec<String>,
     },
     Install(String),
-    SelfUpdate,
+    SelfUpdate {
+        dry_run: bool,
+    },
     Update(Option<String>),
     Auth(Vec<String>),
     Config(Vec<String>),
     Cache(Vec<String>),
     Security(Vec<String>),
+    Gate(Vec<String>),
+    Experimental(Vec<String>),
     Legacy(String),
 }

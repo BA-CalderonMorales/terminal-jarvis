@@ -9,7 +9,8 @@ What it does:
 - In source checkouts, delegates to target/release, target/debug, or cargo run.
 - In installed npm packages, downloads the matching GitHub Release archive,
   verifies the archive .sha256 file, caches the unpacked release, and executes
-  bin/terminal-jarvis from that cache.
+  bin/terminal-jarvis from that cache. Windows uses the native ZIP bundle and
+  PowerShell extraction; other platforms use the portable tar.gz bundle.
 
 Supported downloaded assets:
 - linux-x64-gnu
@@ -20,8 +21,8 @@ Supported downloaded assets:
 
 Native Windows npm installs use the win32-x64 asset from Command Prompt,
 PowerShell, or Git Bash. If npm reports a stale terminal-jarvis binary earlier
-on PATH, remove that binary or move the npm prefix earlier in PATH before
-retrying the install.
+on PATH, the install still completes; move the npm prefix earlier in PATH to
+run the newly installed command.
 
 Useful environment variables:
 - TERMINAL_JARVIS_BIN: execute a specific local binary instead of downloading.

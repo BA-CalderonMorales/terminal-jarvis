@@ -68,7 +68,7 @@ jobs:
           test -x "$binary"
           test -d "$catalog"
           expected="$(find harnesses -mindepth 1 -maxdepth 1 -type d | wc -l | tr -d ' ')"
-          actual="$(TERMINAL_JARVIS_BIN="$binary" TERMINAL_JARVIS_CATALOG="$catalog" node "$package_dir/bin/terminal-jarvis" list | wc -l | tr -d ' ')"
+          actual="$(TERMINAL_JARVIS_BIN="$binary" TERMINAL_JARVIS_CATALOG="$catalog" node "$package_dir/bin/terminal-jarvis" --plain list | wc -l | tr -d ' ')"
           test "$actual" = "$expected"
 
           if npm view "terminal-jarvis@$INPUT_VERSION" version >/dev/null 2>&1; then

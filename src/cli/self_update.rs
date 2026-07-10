@@ -1,21 +1,37 @@
+use super::{style, table};
 use std::process::{Command, Stdio};
 
-pub fn run() -> Result<(i32, String), String> {
+pub fn run(dry_run: bool) -> Result<(i32, String), String> {
+    let (command, args) = update_command();
+    if dry_run {
+        return Ok((0, dry_run_output(command, args)));
+    }
+    run_cmd(command, args)
+}
+
+fn update_command() -> (&'static str, &'static [&'static str]) {
     if wrapper_path().is_some() {
-        return npm_update();
+        return ("npm", &["install", "-g", "terminal-jarvis@latest"]);
     }
     let raw = std::env::var("TERMINAL_JARVIS_DISTRIBUTION").unwrap_or_default();
     match raw.as_str() {
-        "github-release" | "github-release-cache" => return npm_update(),
-        "source" | "env" => return cargo_update(),
+        "github-release" | "github-release-cache" => {
+            return ("npm", &["install", "-g", "terminal-jarvis@latest"])
+        }
         _ => {}
     }
-    let binary = std::env::current_exe().map_err(|e| e.to_string())?;
-    let path = binary.to_string_lossy();
-    if path.contains("homebrew") || path.contains("Cellar") {
-        return brew_update();
+    let path = std::env::current_exe()
+        .ok()
+        .map(|binary| binary.to_string_lossy().to_string())
+        .unwrap_or_default();
+    if homebrew_path(&path) {
+        return ("brew", &["upgrade", "terminal-jarvis"]);
     }
-    cargo_update()
+    ("cargo", &["install", "terminal-jarvis"])
+}
+
+fn homebrew_path(path: &str) -> bool {
+    path.contains("homebrew") || path.contains("Cellar")
 }
 
 fn wrapper_path() -> Option<std::path::PathBuf> {
@@ -25,18 +41,6 @@ fn wrapper_path() -> Option<std::path::PathBuf> {
         .and_then(std::path::Path::parent)?
         .join("package.json");
     pkg.exists().then_some(pkg)
-}
-
-fn npm_update() -> Result<(i32, String), String> {
-    run_cmd("npm", &["install", "-g", "terminal-jarvis@latest"])
-}
-
-fn brew_update() -> Result<(i32, String), String> {
-    run_cmd("brew", &["upgrade", "terminal-jarvis"])
-}
-
-fn cargo_update() -> Result<(i32, String), String> {
-    run_cmd("cargo", &["install", "terminal-jarvis"])
 }
 
 fn run_cmd(cmd: &str, args: &[&str]) -> Result<(i32, String), String> {
@@ -51,7 +55,7 @@ fn run_cmd(cmd: &str, args: &[&str]) -> Result<(i32, String), String> {
     let code = output.status.code().unwrap_or(1);
     let stderr = String::from_utf8_lossy(&output.stderr).trim().to_string();
     if code == 0 {
-        Ok((0, format!("terminal-jarvis updated via {cmd}\n")))
+        Ok((0, success_output(cmd)))
     } else {
         Err(format!(
             "'{} {}' exited with {code}{}",
@@ -64,6 +68,25 @@ fn run_cmd(cmd: &str, args: &[&str]) -> Result<(i32, String), String> {
             }
         ))
     }
+}
+
+fn dry_run_output(command: &str, args: &[&str]) -> String {
+    let value = format!("{command} {}", args.join(" "));
+    if style::plain() {
+        return format!("terminal-jarvis update plan: {value}\n");
+    }
+    table::fields("Self-Update Plan", &[("COMMAND", value)])
+}
+
+fn success_output(command: &str) -> String {
+    if style::plain() {
+        return format!("terminal-jarvis updated via {command}\n");
+    }
+    format!(
+        "{}\n{}",
+        style::success("Terminal Jarvis updated"),
+        table::fields("Self-Update", &[("METHOD", command.to_string())])
+    )
 }
 
 #[cfg(test)]

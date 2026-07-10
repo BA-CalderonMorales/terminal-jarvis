@@ -112,10 +112,19 @@ jobs:
           PLATFORM: ${{ matrix.platform }}
         run: |
           set -eu
-          archive="dist/$VERSION/$PLATFORM/terminal-jarvis-$VERSION-$PLATFORM.tar.gz"
+          dist="dist/$VERSION/$PLATFORM"
+          archive="$dist/terminal-jarvis-$VERSION-$PLATFORM.tar.gz"
+          native="$dist/terminal-jarvis-$VERSION-$PLATFORM"
+          if [ "$PLATFORM" = "win32-x64" ]; then
+            native="$native.exe"
+            test -f "$dist/terminal-jarvis-$VERSION-$PLATFORM.zip"
+            test -f "$dist/terminal-jarvis-$VERSION-$PLATFORM.zip.sha256"
+          fi
           test -f "$archive"
           test -f "$archive.sha256"
-          test -f "dist/$VERSION/$PLATFORM/homebrew/Formula/terminal-jarvis.rb"
+          test -f "$native"
+          test -f "$native.sha256"
+          test -f "$dist/homebrew/Formula/terminal-jarvis.rb"
 
       - uses: actions/upload-artifact@v7
         with:
@@ -183,8 +192,22 @@ jobs:
         run: |
           set -eu
           mkdir -p release-assets
-          find artifacts -type f \( -name "terminal-jarvis-$VERSION-*.tar.gz" -o -name "terminal-jarvis-$VERSION-*.tar.gz.sha256" \) \
+          find artifacts -type f -name "terminal-jarvis-$VERSION-*" \
             -exec cp {} release-assets/ \;
+          verify_asset() {
+            asset="$1"
+            checksum="release-assets/$asset.sha256"
+            test -f "release-assets/$asset"
+            test -f "$checksum"
+            expected="$(cut -d ' ' -f 1 "$checksum")"
+            recorded="$(awk '{print $2}' "$checksum")"
+            actual="$(sha256sum "release-assets/$asset" | cut -d ' ' -f 1)"
+            case "$recorded" in
+              "$asset" | "./$asset") ;;
+              *) echo "$checksum references $recorded, expected $asset" >&2; exit 1 ;;
+            esac
+            test "$expected" = "$actual"
+          }
           platforms="$(
             sed -n 's/^release_platforms = \[\(.*\)\]/\1/p' scripts/release.toml |
               tr ',' '\n' |
@@ -193,16 +216,11 @@ jobs:
           test -n "$platforms"
           for platform in $platforms; do
             archive="terminal-jarvis-$VERSION-$platform.tar.gz"
-            test -f "release-assets/$archive"
-            test -f "release-assets/$archive.sha256"
-            expected="$(cut -d ' ' -f 1 "release-assets/$archive.sha256")"
-            recorded="$(awk '{print $2}' "release-assets/$archive.sha256")"
-            actual="$(sha256sum "release-assets/$archive" | cut -d ' ' -f 1)"
-            case "$recorded" in
-              "$archive" | "./$archive") ;;
-              *) echo "release-assets/$archive.sha256 references $recorded, expected $archive" >&2; exit 1 ;;
-            esac
-            test "$expected" = "$actual"
+            native="terminal-jarvis-$VERSION-$platform"
+            test "$platform" != "win32-x64" || native="$native.exe"
+            verify_asset "$archive"
+            verify_asset "$native"
+            test "$platform" != "win32-x64" || verify_asset "terminal-jarvis-$VERSION-$platform.zip"
           done
           if gh release view "$TAG" >/dev/null 2>&1; then
             gh release upload "$TAG" release-assets/* --clobber
@@ -282,7 +300,7 @@ jobs:
 
             def install
               bin.install "bin/terminal-jarvis"
-              pkgshare.install "harnesses"
+              pkgshare.install "harnesses", "gates"
             end
 
             test do

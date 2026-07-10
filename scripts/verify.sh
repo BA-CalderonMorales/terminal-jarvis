@@ -34,10 +34,10 @@ test "$indexes" -eq "$expected" ||
   fail "expected $expected harness index files, found $indexes"
 
 echo "[6/11] cli smoke"
-cargo run -- list >/tmp/terminal-jarvis-list.txt
-cargo run -- plan codex headless >/tmp/terminal-jarvis-plan.txt
-TERMINAL_JARVIS_HOME=/tmp/terminal-jarvis-verify cargo run -- use codex >/dev/null
-TERMINAL_JARVIS_HOME=/tmp/terminal-jarvis-verify cargo run -- current |
+cargo run -- --plain list >/tmp/terminal-jarvis-list.txt
+cargo run -- --plain plan codex headless >/tmp/terminal-jarvis-plan.txt
+TERMINAL_JARVIS_HOME=/tmp/terminal-jarvis-verify cargo run -- --plain use codex >/dev/null
+TERMINAL_JARVIS_HOME=/tmp/terminal-jarvis-verify cargo run -- --plain current |
   grep 'active harness = codex' >/dev/null
 
 echo "[7/11] integration hardening"

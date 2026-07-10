@@ -1,0 +1,6 @@
+name = "trivy"
+display = "Trivy filesystem gate"
+description = "Scans the current workspace for high and critical vulnerabilities, secrets, and misconfigurations before a harness command runs."
+binary = "trivy"
+args = ["fs", "--scanners", "vuln,secret,misconfig", "--severity", "HIGH,CRITICAL", "--exit-code", "1", "."]
+install_hint = "Install Trivy from https://trivy.dev/docs/latest/getting-started/installation/ or run `terminal-jarvis gate disable`."

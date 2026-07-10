@@ -26,7 +26,7 @@ fn run_cmd_reports_success_output() {
     let (code, out) = run_cmd("echo", &["mutation-marker"]).expect("echo should run");
     assert_eq!(code, 0);
     assert!(
-        out.contains("updated via echo"),
+        out.contains("Terminal Jarvis updated"),
         "success message was: {out:?}"
     );
 }
@@ -34,4 +34,13 @@ fn run_cmd_reports_success_output() {
 #[test]
 fn run_cmd_reports_failure() {
     assert!(run_cmd("false", &[]).is_err(), "false should fail");
+}
+
+#[test]
+fn homebrew_paths_cover_both_install_layouts() {
+    assert!(homebrew_path("/opt/homebrew/bin/terminal-jarvis"));
+    assert!(homebrew_path(
+        "/usr/local/Cellar/terminal-jarvis/0.1/bin/tj"
+    ));
+    assert!(!homebrew_path("/usr/local/bin/terminal-jarvis"));
 }

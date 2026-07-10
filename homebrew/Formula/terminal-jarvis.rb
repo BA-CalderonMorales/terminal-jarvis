@@ -8,7 +8,7 @@ class TerminalJarvis < Formula
 
   def install
     system "cargo", "install", "--locked", "--path", ".", "--root", prefix
-    pkgshare.install "harnesses"
+    pkgshare.install "harnesses", "gates"
   end
 
   test do

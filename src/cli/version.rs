@@ -1,3 +1,4 @@
+use super::{style, table};
 use std::path::Path;
 
 const REPO: &str = "https://github.com/BA-CalderonMorales/terminal-jarvis";
@@ -23,24 +24,22 @@ pub fn text(verbose: bool, catalog: &Path, home: &Path) -> String {
         format!("{REPO}/releases/tag/v{version}")
     });
     let cache = nonempty_env("TERMINAL_JARVIS_CACHE", || "unavailable".to_string());
-    let wrapper_line = if wrapper.is_empty() {
-        String::new()
-    } else {
-        format!("wrapper: {wrapper}\n")
-    };
-    format!(
-        "terminal-jarvis {version}\n\
-         binary: {binary}\n\
-         distribution: {distribution}\n\
-         git commit: {git_sha}\n\
-         release: {release}\n\
-         cache: {cache}\n\
-         catalog: {}\n\
-         home: {}\n\
-         {wrapper_line}",
-        catalog.display(),
-        home.display()
-    )
+    let mut details = vec![
+        ("BINARY", binary),
+        ("DISTRIBUTION", distribution),
+        ("GIT COMMIT", git_sha.to_string()),
+        ("RELEASE", release),
+        ("CACHE", cache),
+        ("CATALOG", catalog.display().to_string()),
+        ("HOME", home.display().to_string()),
+    ];
+    if !wrapper.is_empty() {
+        details.push(("WRAPPER", wrapper));
+    }
+    if style::plain() {
+        return format!("terminal-jarvis {version}\n{}", table::fields("", &details));
+    }
+    table::fields(&format!("Terminal Jarvis {version}"), &details)
 }
 
 fn nonempty_env<F>(key: &str, fallback: F) -> String
