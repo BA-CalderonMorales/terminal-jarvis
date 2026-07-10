@@ -191,7 +191,7 @@ test("global postinstall warns when the npm shim is missing from PATH", () => {
   });
   assert.equal(result.status, 0, result.stderr);
   assert.match(result.stderr, /npm shim .* is not reachable on PATH/);
-  assert.match(result.stderr, /Add .*node.*bin to PATH/);
+  assert.match(result.stderr, /Add .*node(?:[\\/]+bin)? to PATH/);
 });
 
 test("global postinstall path diagnostic supports explicit skip", () => {
