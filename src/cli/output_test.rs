@@ -17,7 +17,7 @@ fn mock_binary_on_path(tmpdir: &Path) -> String {
     std::fs::write(&bin, "#!/bin/sh\necho ok").unwrap();
     std::fs::set_permissions(&bin, std::os::unix::fs::PermissionsExt::from_mode(0o755)).unwrap();
     let old = std::env::var("PATH").unwrap_or_default();
-    std::env::set_var("PATH", format!("{}:{}", tmpdir.display(), &old));
+    std::env::set_var("PATH", format!("{}:{}", tmpdir.display(), old));
     old
 }
 
