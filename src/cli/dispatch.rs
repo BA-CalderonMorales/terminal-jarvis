@@ -1,4 +1,4 @@
-use super::{args::Action, compat, invoke, output, resolve};
+use super::{args::Action, compat, experimental, gate_cmd, guard, output};
 use crate::context;
 use crate::contracts::{Capability, Harness};
 use std::path::Path;
@@ -16,7 +16,7 @@ pub fn dispatch(
         Action::Use(name) => {
             find(harnesses, &name)?;
             context::save(home, &name).map_err(err)?;
-            Ok((0, format!("active harness = {name}\n")))
+            Ok((0, output::selected(&name)))
         }
         Action::Show(name) => Ok((0, output::show(find(harnesses, &name)?))),
         Action::Plan {
@@ -26,13 +26,13 @@ pub fn dispatch(
             let selected = selected_name(harness, home)?;
             Ok((0, output::plan(find(harnesses, &selected)?, capability)))
         }
-        Action::SelfUpdate => unreachable!("self-update handled before catalog load in execute()"),
-        Action::Run(words) => invoke::invocation(resolve::run(&words, harnesses, home)?, harnesses),
-        Action::Direct { harness, extra } => {
-            invoke::invocation(resolve::direct(&harness, &extra, harnesses)?, harnesses)
+        Action::SelfUpdate { .. } => {
+            unreachable!("self-update handled before catalog load in execute()")
         }
-        Action::Install(name) => invoke::capability(harnesses, &name, Capability::Download, &[]),
-        Action::Update(Some(name)) => invoke::capability(harnesses, &name, Capability::Update, &[]),
+        Action::Run(words) => guard::run(&words, harnesses, home),
+        Action::Direct { harness, extra } => guard::direct(&harness, &extra, harnesses, home),
+        Action::Install(name) => guard::capability(harnesses, &name, Capability::Download, home),
+        Action::Update(Some(name)) => guard::capability(harnesses, &name, Capability::Update, home),
         Action::Update(None) => Ok((0, compat::update_summary(harnesses))),
         Action::Auth(words) => compat::auth(&words, harnesses).map(|body| (0, body)),
         Action::Config(words) => compat::config(
@@ -44,6 +44,10 @@ pub fn dispatch(
         .map(|body| (0, body)),
         Action::Cache(words) => compat::cache(&words).map(|body| (0, body)),
         Action::Security(words) => security(&words, harnesses),
+        Action::Gate(words) => gate_cmd::handle(&words, home),
+        Action::Experimental(words) => {
+            experimental::run(&words, harnesses, home).map(|body| (0, body))
+        }
         Action::Legacy(command) => Ok((0, compat::legacy(&command))),
         Action::Help => Ok((0, output::help().to_string())),
         Action::Version { .. } => unreachable!("version is handled before catalog load"),

@@ -69,3 +69,9 @@ Write `index.toml` for the harness root and each capability. Each
 capability `index.toml` contains a `summary`, `command`, and `args`.
 
 Run `scripts/verify.sh` to validate the contract is met.
+
+## Optional Security Gate
+
+Harness commands can be preceded by an opt-in Trivy scan. The gate is separate
+from harness metadata so scanner policy can evolve without turning a scanner
+into a required harness dependency. See [Security Gates](security-gates.md).

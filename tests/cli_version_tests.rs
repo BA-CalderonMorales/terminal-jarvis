@@ -1,6 +1,6 @@
 use std::process::{Command, Output};
 #[rustfmt::skip]
-fn tj(args: &[&str]) -> Output { Command::new(env!("CARGO_BIN_EXE_terminal-jarvis")).args(args).output().expect("tj runs") }
+fn tj(args: &[&str]) -> Output { Command::new(env!("CARGO_BIN_EXE_terminal-jarvis")).arg("--plain").args(args).output().expect("tj runs") }
 #[rustfmt::skip]
 fn se(o: &Output) -> String { String::from_utf8_lossy(&o.stderr).to_string() }
 #[rustfmt::skip]
@@ -9,7 +9,7 @@ fn nocat() -> String { let p = std::env::temp_dir().join(format!("tj-nocat-{}", 
 #[test]
 fn version_flags_do_not_require_catalog() {
     let o = Command::new(env!("CARGO_BIN_EXE_terminal-jarvis"))
-        .arg("--version")
+        .args(["--plain", "--version"])
         .env("TERMINAL_JARVIS_CATALOG", nocat())
         .output()
         .unwrap();
@@ -20,7 +20,7 @@ fn version_flags_do_not_require_catalog() {
 #[test]
 fn plain_version_omits_channel_without_distribution_env() {
     let o = Command::new(env!("CARGO_BIN_EXE_terminal-jarvis"))
-        .arg("--version")
+        .args(["--plain", "--version"])
         .env_clear()
         .output()
         .unwrap();
@@ -31,7 +31,7 @@ fn plain_version_omits_channel_without_distribution_env() {
 #[test]
 fn plain_version_reports_source_channel() {
     let o = Command::new(env!("CARGO_BIN_EXE_terminal-jarvis"))
-        .arg("--version")
+        .args(["--plain", "--version"])
         .env_clear()
         .env("TERMINAL_JARVIS_DISTRIBUTION", "source")
         .output()
@@ -42,7 +42,7 @@ fn plain_version_reports_source_channel() {
 #[test]
 fn plain_version_reports_npm_channel_for_wrapped_install() {
     let o = Command::new(env!("CARGO_BIN_EXE_terminal-jarvis"))
-        .arg("--version")
+        .args(["--plain", "--version"])
         .env_clear()
         .env(
             "TERMINAL_JARVIS_WRAPPER",
@@ -63,7 +63,7 @@ fn verbose_version_reports_provenance_paths() {
 #[test]
 fn verbose_version_ignores_empty_wrapper_env_values() {
     let o = Command::new(env!("CARGO_BIN_EXE_terminal-jarvis"))
-        .args(["version", "--verbose"])
+        .args(["--plain", "version", "--verbose"])
         .env("TERMINAL_JARVIS_DISTRIBUTION", "")
         .env("TERMINAL_JARVIS_RELEASE_URL", "")
         .env("TERMINAL_JARVIS_CACHE", "")
@@ -80,7 +80,7 @@ fn verbose_version_ignores_empty_wrapper_env_values() {
 #[test]
 fn missing_catalog_error_names_catalog_path() {
     let o = Command::new(env!("CARGO_BIN_EXE_terminal-jarvis"))
-        .arg("list")
+        .args(["--plain", "list"])
         .env("TERMINAL_JARVIS_CATALOG", nocat())
         .output()
         .unwrap();

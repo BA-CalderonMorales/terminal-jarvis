@@ -1,5 +1,24 @@
 # Changelog
 
+## [0.1.12] - 2026-07-09
+
+- Restores non-blocking global npm upgrades when an older Cargo or manual
+  `terminal-jarvis` appears first on `PATH`. The install completes and emits
+  actionable shadowing guidance instead of leaving the new package uninstalled.
+- Adds direct native executable assets for every supported platform. Windows
+  also receives a ZIP bundle, and the npm launcher uses it with PowerShell
+  extraction and a Windows-native cache location.
+- Adds an opt-in Trivy filesystem gate. Enable it with
+  `terminal-jarvis gate enable trivy` to scan the current workspace for high
+  and critical vulnerabilities, secrets, and misconfigurations before a
+  harness command executes; it is disabled by default and never installs Trivy.
+- Adds `terminal-jarvis --update --dry-run` for safe cross-platform verification
+  of the package-manager update route.
+- Adds a feature-gated, noninteractive dashboard preview behind
+  `TERMINAL_JARVIS_EXPERIMENTAL_UI=1` while keeping the default CLI headless.
+- Adds a release-time core-command matrix to exercise every public command
+  surface on each host-native package build without launching coding agents.
+
 ## [0.1.11] - 2026-07-09
 
 - Adds real multi-platform release packaging for Linux x64, Linux ARM64,

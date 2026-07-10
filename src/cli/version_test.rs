@@ -57,12 +57,9 @@ fn verbose_text_reports_fields() {
         std::env::set_var("TERMINAL_JARVIS_RELEASE_URL", "https://example/release");
         std::env::set_var("TERMINAL_JARVIS_CACHE", "/my/cache");
         let out = text(true, Path::new("/cat"), Path::new("/home"));
-        assert!(out.contains("binary:"));
-        assert!(out.contains("distribution: source"));
-        assert!(out.contains("release: https://example/release"));
-        assert!(out.contains("cache: /my/cache"));
-        assert!(out.contains("catalog: /cat"));
-        assert!(out.contains("home: /home"));
+        assert!(out.contains("BINARY") && out.contains("DISTRIBUTION"));
+        assert!(out.contains("source") && out.contains("https://example/release"));
+        assert!(out.contains("/my/cache") && out.contains("/cat") && out.contains("/home"));
     });
 }
 #[test]
@@ -83,8 +80,7 @@ fn verbose_text_defaults() {
     with_env(|| {
         clear();
         let out = text(true, Path::new("/cat"), Path::new("/home"));
-        assert!(out.contains("distribution: unknown"));
-        assert!(out.contains("cache: unavailable"));
-        assert!(!out.contains("wrapper:"));
+        assert!(out.contains("unknown") && out.contains("unavailable"));
+        assert!(!out.contains("WRAPPER"));
     });
 }

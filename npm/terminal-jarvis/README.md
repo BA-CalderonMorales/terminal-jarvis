@@ -4,12 +4,14 @@ This is the npm launcher for Terminal Jarvis.
 
 The package does not include a native binary. Installed npm copies use
 `bin/terminal-jarvis`, a Node shebang wrapper, to download the matching Terminal
-Jarvis archive from GitHub Releases, verify the release `.sha256` checksum,
-cache the unpacked release, and execute it.
+Jarvis bundle from GitHub Releases, verify the release `.sha256` checksum,
+cache the unpacked release, and execute it. Windows uses a ZIP bundle through
+PowerShell; Linux and macOS use a tar.gz bundle.
 
 Supported npm release assets are `linux-x64-gnu`, `linux-arm64-gnu`,
 `macos-x64`, `macos-arm64`, and `win32-x64`. Native Windows installs through
-Command Prompt, PowerShell, and Git Bash use the `win32-x64` asset.
+Command Prompt, PowerShell, and Git Bash use the `win32-x64` ZIP asset and the
+local application-data cache directory.
 
 The wrapper guidance shipped at `bin/README.txt` is included in the npm package
 so installed copies can explain the package behavior without relying on the

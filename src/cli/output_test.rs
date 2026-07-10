@@ -82,5 +82,5 @@ fn status_adds_readiness_summary_absent_from_checks() {
     let checks = checks(&harnesses);
     let status = status(&harnesses);
     assert!(!checks.contains("harnesses ready"));
-    assert!(status.contains("status: 1/1 harnesses ready"));
+    assert!(status.contains("Security Status") && status.contains("1/1 harnesses"));
 }

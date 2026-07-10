@@ -24,7 +24,7 @@ fn harness(name: &str) -> Harness {
 fn update_summary_lists_harnesses() {
     let out = update_summary(&[harness("opencode")]);
     assert!(out.contains("opencode"));
-    assert!(out.contains("updates are per harness"));
+    assert!(out.contains("Harness Updates"));
 }
 #[test]
 fn auth_routes() {
@@ -52,5 +52,5 @@ fn config_routes() {
 }
 #[test]
 fn legacy_message() {
-    assert!(legacy("templates").contains("removed"));
+    assert!(legacy("templates").contains("Legacy Command"));
 }

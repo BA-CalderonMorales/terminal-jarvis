@@ -79,5 +79,6 @@ use terminal_jarvis::contracts::Capability;
 }
 #[rustfmt::skip]
 #[test] fn update_flag_routes_to_self_update() {
-    assert_eq!(parse(["tj", "--update"]).unwrap(), Action::SelfUpdate);
+    assert_eq!(parse(["tj", "--update"]).unwrap(), Action::SelfUpdate { dry_run: false });
+    assert_eq!(parse(["tj", "--update", "--dry-run"]).unwrap(), Action::SelfUpdate { dry_run: true });
 }

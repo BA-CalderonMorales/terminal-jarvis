@@ -23,6 +23,10 @@ sha256_file() {
   fi
 }
 
+powershell_literal() {
+  printf "'%s'" "$(printf '%s' "$1" | sed "s/'/''/g")"
+}
+
 name=$(value_from_cargo name)
 repo=$(value_from_cargo repository)
 version=$(value_from_cargo version)
@@ -45,8 +49,14 @@ case "$target" in
 esac
 archive=$name-$version-$platform.tar.gz
 binary_name=$name
+native_asset=$name-$version-$platform
+zip_archive=
 case "$target" in
-  *-pc-windows-*) binary_name=$name.exe ;;
+  *-pc-windows-*)
+    binary_name=$name.exe
+    native_asset=$native_asset.exe
+    zip_archive=$name-$version-$platform.zip
+    ;;
 esac
 
 test -n "$name" || fail "Cargo.toml name missing"
@@ -55,6 +65,7 @@ test -n "$version" || fail "Cargo.toml version missing"
 test -n "$host_target" || fail "rustc host target missing"
 test -n "$target" || fail "rustc build target missing"
 test -d harnesses || fail "harnesses directory missing"
+test -d gates || fail "gates directory missing"
 test -x npm/terminal-jarvis/bin/terminal-jarvis || fail "npm wrapper missing"
 
 scripts/release-preflight.sh
@@ -86,12 +97,24 @@ rm -rf "$dist"
 mkdir -p "$stage/bin" "$npm_stage/bin" "$formula_dir"
 
 cp "$release_dir/$binary_name" "$stage/bin/$binary_name"
+cp "$release_dir/$binary_name" "$dist/$native_asset"
 cp README.md LICENSE CHANGELOG.md "$stage/"
 cp -R harnesses "$stage/"
+cp -R gates "$stage/"
 chmod +x "$stage/bin/$binary_name"
+chmod +x "$dist/$native_asset"
 
 (cd "$dist/package" && tar -czf "../$archive" "$name-$version-$platform")
 (cd "$dist" && sha256_file "$archive" | sed 's/ \*/  /' >"$archive.sha256")
+(cd "$dist" && sha256_file "$native_asset" | sed 's/ \*/  /' >"$native_asset.sha256")
+if test -n "$zip_archive"; then
+  command -v powershell.exe >/dev/null 2>&1 || fail "powershell.exe is required for Windows ZIP packaging"
+  source=$(powershell_literal "$dist/package/$name-$version-$platform")
+  destination=$(powershell_literal "$dist/$zip_archive")
+  powershell.exe -NoProfile -NonInteractive -Command \
+    "Compress-Archive -LiteralPath $source -DestinationPath $destination -Force"
+  (cd "$dist" && sha256_file "$zip_archive" | sed 's/ \*/  /' >"$zip_archive.sha256")
+fi
 sha=$(cut -d ' ' -f 1 "$dist/$archive.sha256")
 
 cp npm/terminal-jarvis/package.json "$npm_stage/"
@@ -111,7 +134,7 @@ class TerminalJarvis < Formula
 
   def install
     bin.install "bin/$binary_name" => "$name"
-    pkgshare.install "harnesses"
+    pkgshare.install "harnesses", "gates"
   end
 
   test do
@@ -135,16 +158,21 @@ test -x "$tmp/$name-$version-$platform/bin/$binary_name" ||
   fail "archive missing executable bin/$binary_name"
 test -d "$tmp/$name-$version-$platform/harnesses" ||
   fail "archive missing harnesses"
+test -d "$tmp/$name-$version-$platform/gates" ||
+  fail "archive missing gates"
 
 if test "$target" = "$host_target"; then
   expected=$(find harnesses -mindepth 1 -maxdepth 1 -type d | wc -l | tr -d ' ')
-  actual=$("$tmp/$name-$version-$platform/bin/$binary_name" list | wc -l | tr -d ' ')
+  actual=$("$tmp/$name-$version-$platform/bin/$binary_name" --plain list | wc -l | tr -d ' ')
   test "$actual" = "$expected" || fail "archive smoke listed $actual of $expected harnesses"
+  native=$(cd "$dist" && pwd)/$native_asset
+  actual=$(cd "$tmp" && TERMINAL_JARVIS_CATALOG= "$native" --plain list | wc -l | tr -d ' ')
+  test "$actual" = "$expected" || fail "standalone binary listed $actual of $expected harnesses"
 
   if command -v node >/dev/null 2>&1; then
     npm_stage_abs=$(cd "$npm_stage" && pwd)
     TERMINAL_JARVIS_BIN="$stage/bin/$binary_name" TERMINAL_JARVIS_CATALOG="$stage/harnesses" \
-      node "$npm_stage_abs/bin/terminal-jarvis" list >/dev/null
+      node "$npm_stage_abs/bin/terminal-jarvis" --plain list >/dev/null
   fi
 
   scripts/integration-hardening.sh \
@@ -152,11 +180,18 @@ if test "$target" = "$host_target"; then
     --catalog "$stage/harnesses" \
     --npm-wrapper "$npm_stage/bin/terminal-jarvis" \
     --homebrew-formula "$formula_dir/terminal-jarvis.rb"
+  scripts/core-command-matrix.sh \
+    --binary "$stage/bin/$binary_name" \
+    --catalog "$stage/harnesses"
 else
   echo "package-release: skipped execution smoke for cross target $target on $host_target"
 fi
 
 echo "$dist/$archive"
 echo "$dist/$archive.sha256"
+echo "$dist/$native_asset"
+echo "$dist/$native_asset.sha256"
+test -z "$zip_archive" || echo "$dist/$zip_archive"
+test -z "$zip_archive" || echo "$dist/$zip_archive.sha256"
 echo "$npm_stage"
 echo "$formula_dir/terminal-jarvis.rb"
