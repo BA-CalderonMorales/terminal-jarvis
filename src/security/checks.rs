@@ -56,6 +56,7 @@ pub fn missing_env(harness: &Harness) -> Vec<String> {
 #[cfg(test)]
 mod tests {
     use super::candidates;
+    use super::command_on_path;
 
     #[test]
     fn windows_candidates_include_pathext_extensions() {
@@ -68,5 +69,13 @@ mod tests {
     #[test]
     fn executable_extension_is_not_duplicated() {
         assert_eq!(candidates("trivy.exe", true, ".EXE"), ["trivy.exe"]);
+    }
+
+    #[test]
+    fn backslash_only_path_is_treated_as_explicit() {
+        let name = format!("tj-command-probe-{}\\shim", std::process::id());
+        std::fs::write(&name, "probe").unwrap();
+        assert!(command_on_path(&name));
+        std::fs::remove_file(name).unwrap();
     }
 }

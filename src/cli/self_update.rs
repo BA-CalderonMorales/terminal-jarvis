@@ -18,17 +18,20 @@ fn update_command() -> (&'static str, &'static [&'static str]) {
         "github-release" | "github-release-cache" => {
             return ("npm", &["install", "-g", "terminal-jarvis@latest"])
         }
-        "source" | "env" => return ("cargo", &["install", "terminal-jarvis"]),
         _ => {}
     }
     let path = std::env::current_exe()
         .ok()
         .map(|binary| binary.to_string_lossy().to_string())
         .unwrap_or_default();
-    if path.contains("homebrew") || path.contains("Cellar") {
+    if homebrew_path(&path) {
         return ("brew", &["upgrade", "terminal-jarvis"]);
     }
     ("cargo", &["install", "terminal-jarvis"])
+}
+
+fn homebrew_path(path: &str) -> bool {
+    path.contains("homebrew") || path.contains("Cellar")
 }
 
 fn wrapper_path() -> Option<std::path::PathBuf> {

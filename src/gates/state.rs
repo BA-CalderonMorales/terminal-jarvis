@@ -45,3 +45,7 @@ pub fn disable(home: &Path) -> io::Result<()> {
     }
     Ok(())
 }
+
+#[cfg(test)]
+#[path = "state_test.rs"]
+mod tests;

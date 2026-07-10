@@ -51,16 +51,27 @@ pub fn banner(title: &str, subtitle: &str) -> String {
 }
 
 fn paint(value: &str, code: &str) -> String {
-    if color_enabled() {
+    let term = std::env::var("TERM").ok();
+    if color_enabled_for(
+        std::io::stdout().is_terminal(),
+        OPTIONS.with(|cell| cell.get().no_color),
+        std::env::var_os("NO_COLOR").is_some(),
+        term_is_dumb(term.as_deref()),
+    ) {
         format!("\x1b[{code}m{value}\x1b[0m")
     } else {
         value.to_string()
     }
 }
 
-fn color_enabled() -> bool {
-    OPTIONS.with(|cell| !cell.get().no_color)
-        && std::io::stdout().is_terminal()
-        && std::env::var_os("NO_COLOR").is_none()
-        && std::env::var("TERM").as_deref() != Ok("dumb")
+fn term_is_dumb(term: Option<&str>) -> bool {
+    term == Some("dumb")
 }
+
+fn color_enabled_for(terminal: bool, no_color: bool, env_no_color: bool, dumb: bool) -> bool {
+    terminal && !no_color && !env_no_color && !dumb
+}
+
+#[cfg(test)]
+#[path = "style_test.rs"]
+mod tests;

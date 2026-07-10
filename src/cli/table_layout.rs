@@ -1,4 +1,3 @@
-use std::env;
 pub fn widths(headers: &[&str], rows: &[Vec<String>]) -> Vec<usize> {
     let mut widths = headers
         .iter()
@@ -10,7 +9,8 @@ pub fn widths(headers: &[&str], rows: &[Vec<String>]) -> Vec<usize> {
         }
     }
     let budget = terminal_width().saturating_sub(headers.len() * 3 + 1);
-    while widths.iter().sum::<usize>() > budget {
+    let shrink_by = widths.iter().sum::<usize>().saturating_sub(budget);
+    for _ in 0..shrink_by {
         let Some(index) = widest_shrinkable(&widths, headers) else {
             break;
         };
@@ -90,8 +90,8 @@ fn width(value: &str) -> usize {
     value.chars().count()
 }
 
-fn terminal_width() -> usize {
-    env::var("COLUMNS")
+pub(super) fn terminal_width() -> usize {
+    std::env::var("COLUMNS")
         .ok()
         .and_then(|value| value.parse::<usize>().ok())
         .filter(|width| *width >= 40)

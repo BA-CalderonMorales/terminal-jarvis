@@ -38,3 +38,13 @@ fn known(harnesses: &[Harness], name: &str) -> Result<(), String> {
         .then_some(())
         .ok_or_else(|| format!("unknown harness '{name}'"))
 }
+
+#[cfg(test)]
+mod tests {
+    use super::known;
+
+    #[test]
+    fn unknown_harness_is_rejected() {
+        assert_eq!(known(&[], "ghost").unwrap_err(), "unknown harness 'ghost'");
+    }
+}

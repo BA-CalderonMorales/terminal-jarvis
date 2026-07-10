@@ -63,3 +63,7 @@ fn names(available: &[gates::Gate]) -> String {
         .collect::<Vec<_>>()
         .join(", ")
 }
+
+#[cfg(test)]
+#[path = "gate_cmd_test.rs"]
+mod tests;

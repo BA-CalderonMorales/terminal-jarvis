@@ -57,3 +57,7 @@ fn row<T: AsRef<str>>(values: &[T], widths: &[usize]) -> String {
         .collect::<Vec<_>>();
     format!("|{}|", cells.join("|"))
 }
+
+#[cfg(test)]
+#[path = "table_test.rs"]
+mod tests;

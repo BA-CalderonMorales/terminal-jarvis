@@ -27,3 +27,7 @@ fn candidates() -> Vec<PathBuf> {
     }
     roots
 }
+
+#[cfg(test)]
+#[path = "gates_test.rs"]
+mod tests;
