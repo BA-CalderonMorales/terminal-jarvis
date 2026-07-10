@@ -21,7 +21,9 @@ fn tj(args: &[&str]) -> (Output, PathBuf) {
 
 fn base_command() -> Command {
     let mut command = Command::new(env!("CARGO_BIN_EXE_terminal-jarvis"));
-    command.env("TERMINAL_JARVIS_HOME", temp_path("home"));
+    command
+        .arg("--plain")
+        .env("TERMINAL_JARVIS_HOME", temp_path("home"));
     command
 }
 
@@ -33,13 +35,10 @@ fn temp_path(label: &str) -> PathBuf {
     ))
 }
 
-fn stdout(output: &Output) -> String {
-    String::from_utf8_lossy(&output.stdout).to_string()
-}
-
-fn stderr(output: &Output) -> String {
-    String::from_utf8_lossy(&output.stderr).to_string()
-}
+#[rustfmt::skip]
+fn stdout(output: &Output) -> String { String::from_utf8_lossy(&output.stdout).to_string() }
+#[rustfmt::skip]
+fn stderr(output: &Output) -> String { String::from_utf8_lossy(&output.stderr).to_string() }
 
 #[test]
 fn cache_status_reports_wrapper_cache_metadata() {

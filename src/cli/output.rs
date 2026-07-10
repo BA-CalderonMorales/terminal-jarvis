@@ -1,52 +1,67 @@
-use crate::contracts::{Capability, Harness};
-use crate::{context::Session, runtime, security};
+#[path = "output_catalog.rs"]
+mod catalog;
+#[path = "output_summary.rs"]
+mod summary;
 
-pub fn help() -> &'static str {
+use super::{style, table};
+use crate::contracts::Harness;
+use crate::{context::Session, security};
+
+pub use catalog::{list, plan, show};
+pub use summary::{audit, status};
+
+pub fn help() -> String {
     super::help::text()
 }
 
-pub fn list(harnesses: &[Harness]) -> String {
-    let mut out = String::new();
-    for harness in harnesses {
-        out.push_str(&format!("{} - {}\n", harness.name, harness.description));
-    }
-    out
-}
-
 pub fn current(session: Option<Session>) -> String {
-    session
-        .map(|session| format!("active harness = {}\n", session.active_harness))
-        .unwrap_or_else(|| "active harness = none\n".to_string())
-}
-
-pub fn show(harness: &Harness) -> String {
-    let mut out = format!(
-        "{} ({})\n{}\n",
-        harness.display, harness.name, harness.description
-    );
-    out.push_str(&format!("setup: {}\n", harness.setup_hint()));
-    out.push_str("agent loop:\n");
-    for plan in runtime::planned_steps(harness) {
-        out.push_str(&format!("  {}: {}\n", plan.capability, plan.summary));
+    let active = session
+        .map(|session| session.active_harness)
+        .unwrap_or_else(|| "none".to_string());
+    if style::plain() {
+        return format!("active harness = {active}\n");
     }
-    out
+    table::fields("Active Harness", &[("HARNESS", active)])
 }
 
-pub fn plan(harness: &Harness, capability: Capability) -> String {
-    let plan = harness
-        .plan(capability)
-        .expect("validated harness capability");
+pub fn selected(name: &str) -> String {
+    if style::plain() {
+        return format!("active harness = {name}\n");
+    }
     format!(
-        "{}:{}\n{}\ncommand: {}\nenv: {}\n",
-        harness.name,
-        capability,
-        plan.summary,
-        plan.command.render(),
-        harness.setup_hint()
+        "{}\n{}",
+        style::success("Active harness updated"),
+        table::fields("Active Harness", &[("HARNESS", name.to_string())])
     )
 }
 
 pub fn checks(harnesses: &[Harness]) -> String {
+    if style::plain() {
+        return plain_checks(harnesses);
+    }
+    let rows = harnesses
+        .iter()
+        .map(|harness| {
+            let binary = if security::command_on_path(&harness.binary) {
+                "found"
+            } else {
+                "missing"
+            };
+            vec![
+                harness.name.clone(),
+                binary.to_string(),
+                env_status(harness, &security::missing_env(harness)),
+            ]
+        })
+        .collect::<Vec<_>>();
+    table::render(
+        "Harness Readiness",
+        &["HARNESS", "BINARY", "ENVIRONMENT"],
+        &rows,
+    )
+}
+
+fn plain_checks(harnesses: &[Harness]) -> String {
     let mut out = String::new();
     for harness in harnesses {
         let binary = if security::command_on_path(&harness.binary) {
@@ -62,26 +77,6 @@ pub fn checks(harnesses: &[Harness]) -> String {
 
 pub fn is_harness_ready(h: &Harness) -> bool {
     security::command_on_path(&h.binary) && security::missing_env(h).is_empty()
-}
-
-pub fn status(harnesses: &[Harness]) -> String {
-    summary(harnesses, "status")
-}
-
-pub fn audit(harnesses: &[Harness]) -> String {
-    summary(harnesses, "audit summary")
-}
-
-fn summary(harnesses: &[Harness], label: &str) -> String {
-    let mut out = checks(harnesses);
-    let ready = harnesses.iter().filter(|h| is_harness_ready(h)).count();
-    out.push_str(&format!(
-        "\n{}: {}/{} harnesses ready\n",
-        label,
-        ready,
-        harnesses.len()
-    ));
-    out
 }
 
 fn env_status(harness: &Harness, missing: &[String]) -> String {

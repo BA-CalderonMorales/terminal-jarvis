@@ -72,6 +72,34 @@ test("platform mapping names published release assets", () => {
   assert.equal(wrapper.platformNameFor("win32", "x64"), "win32-x64");
 });
 
+test("archive names use a Windows-native zip and tar elsewhere", () => {
+  assert.match(wrapper.archiveName("win32", "x64"), /win32-x64\.zip$/);
+  assert.match(wrapper.archiveName("linux", "x64"), /linux-x64-gnu\.tar\.gz$/);
+});
+
+test("PowerShell extraction safely quotes Windows paths", () => {
+  const command = wrapper.powershellExtractCommand(
+    "C:\\Users\\O'Brien\\release.zip",
+    "C:\\Users\\O'Brien\\cache"
+  );
+  assert.equal(
+    command,
+    "Expand-Archive -LiteralPath 'C:\\Users\\O''Brien\\release.zip' " +
+      "-DestinationPath 'C:\\Users\\O''Brien\\cache' -Force"
+  );
+});
+
+test("cache roots use each platform's conventional user location", () => {
+  assert.equal(
+    wrapper.cacheRootFor("win32", { LOCALAPPDATA: "C:\\Users\\me\\AppData\\Local" }, "C:\\Users\\me"),
+    path.join("C:\\Users\\me\\AppData\\Local", "terminal-jarvis", "npm")
+  );
+  assert.equal(
+    wrapper.cacheRootFor("linux", {}, "/home/me"),
+    path.join("/home/me", ".cache", "terminal-jarvis", "npm")
+  );
+});
+
 test("executable name matches host conventions", () => {
   assert.equal(wrapper.executableName("linux"), "terminal-jarvis");
   assert.equal(wrapper.executableName("darwin"), "terminal-jarvis");
@@ -125,7 +153,7 @@ test("path diagnostic reports stale binary before npm shim", () => {
   assert.match(diagnostic, /before the npm shim/);
 });
 
-test("global postinstall fails when stale binary shadows npm shim", () => {
+test("global postinstall warns when a stale binary shadows the npm shim", () => {
   const root = tempDir();
   const prefix = path.join(root, "node");
   const stale = path.join(root, "cargo", "terminal-jarvis");
@@ -142,11 +170,10 @@ test("global postinstall fails when stale binary shadows npm shim", () => {
     },
     encoding: "utf8",
   });
-  assert.equal(result.status, 1);
+  assert.equal(result.status, 0, result.stderr);
   assert.ok(result.stderr.includes(stale));
   assert.ok(result.stderr.includes(shim));
-  assert.ok(result.stderr.includes("refusing to complete a global install"));
-  assert.ok(!result.stderr.includes("@latest"));
+  assert.ok(!result.stderr.includes("refusing to complete a global install"));
 });
 
 test("global postinstall path diagnostic supports explicit skip", () => {

@@ -114,26 +114,26 @@ asset_dir=$out_root/release-assets/$tag
 rm -rf "$asset_dir"
 mkdir -p "$asset_dir"
 find "$out_root/$version" -type f \( \
-  -name "$name-$version-*.tar.gz" -o \
-  -name "$name-$version-*.tar.gz.sha256" \
+  -name "$name-$version-*" \
 \) -exec cp {} "$asset_dir/" \;
 
-archives=$(find "$asset_dir" -maxdepth 1 -name "$name-$version-*.tar.gz" | wc -l | tr -d ' ')
-checksums=$(find "$asset_dir" -maxdepth 1 -name "$name-$version-*.tar.gz.sha256" | wc -l | tr -d ' ')
-test "$archives" -gt 0 || fail "no release archives collected"
-test "$archives" = "$checksums" || fail "$archives archives but $checksums checksums"
+assets=$(find "$asset_dir" -maxdepth 1 -type f -name "$name-$version-*" ! -name '*.sha256' | wc -l | tr -d ' ')
+checksums=$(find "$asset_dir" -maxdepth 1 -type f -name "$name-$version-*.sha256" | wc -l | tr -d ' ')
+test "$assets" -gt 0 || fail "no release assets collected"
+test "$assets" = "$checksums" || fail "$assets assets but $checksums checksums"
 
-for archive in "$asset_dir"/$name-$version-*.tar.gz; do
-  checksum=$archive.sha256
-  archive_name=$(basename "$archive")
+for asset in "$asset_dir"/$name-$version-*; do
+  case "$asset" in *.sha256) continue ;; esac
+  checksum=$asset.sha256
+  asset_name=$(basename "$asset")
   expected=$(cut -d ' ' -f 1 "$checksum")
   recorded=$(awk '{print $2}' "$checksum")
-  actual=$(sha256_file "$archive" | cut -d ' ' -f 1)
+  actual=$(sha256_file "$asset" | cut -d ' ' -f 1)
   case "$recorded" in
-    "$archive_name" | "./$archive_name") ;;
-    *) fail "$checksum references $recorded, expected $archive_name" ;;
+    "$asset_name" | "./$asset_name") ;;
+    *) fail "$checksum references $recorded, expected $asset_name" ;;
   esac
-  test "$expected" = "$actual" || fail "checksum mismatch for $archive_name"
+  test "$expected" = "$actual" || fail "checksum mismatch for $asset_name"
 done
 
 if [ "$auth" = "1" ]; then

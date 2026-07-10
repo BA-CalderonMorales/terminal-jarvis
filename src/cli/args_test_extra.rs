@@ -45,7 +45,14 @@ fn update_auth_config_cache_security_legacy() {
         Action::Update(Some("opencode".to_string()))
     );
     assert!(e(&["tj", "update", "a", "b"]).is_err());
-    assert_eq!(a(&["tj", "--update"]), Action::SelfUpdate);
+    assert_eq!(
+        a(&["tj", "--update"]),
+        Action::SelfUpdate { dry_run: false }
+    );
+    assert_eq!(
+        a(&["tj", "--update", "--dry-run"]),
+        Action::SelfUpdate { dry_run: true }
+    );
     assert_eq!(a(&["tj", "auth"]), Action::Auth(vec![]));
     assert_eq!(a(&["tj", "auth", "x"]), Action::Auth(vec!["x".to_string()]));
     assert_eq!(a(&["tj", "config"]), Action::Config(vec![]));

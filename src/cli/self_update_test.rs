@@ -26,7 +26,7 @@ fn run_cmd_reports_success_output() {
     let (code, out) = run_cmd("echo", &["mutation-marker"]).expect("echo should run");
     assert_eq!(code, 0);
     assert!(
-        out.contains("updated via echo"),
+        out.contains("Terminal Jarvis updated"),
         "success message was: {out:?}"
     );
 }

@@ -2,6 +2,7 @@ use std::process::Command;
 
 fn help(args: &[&str]) -> String {
     let output = Command::new(env!("CARGO_BIN_EXE_terminal-jarvis"))
+        .args(["--plain"])
         .args(args)
         .output()
         .expect("terminal-jarvis runs");

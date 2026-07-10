@@ -34,7 +34,10 @@ where I: IntoIterator, I::Item: Into<String>,
         "install" => one(&words, "install").map(Action::Install),
         "update" if hlp(&words) => Ok(Action::Help),
         "update" => optional_one(&words, "update").map(Action::Update),
-        "--update" if words.len() == 1 => Ok(Action::SelfUpdate),
+        "--update" if words.len() == 1 => Ok(Action::SelfUpdate { dry_run: false }),
+        "--update" if words.len() == 2 && words[1] == "--dry-run" => {
+            Ok(Action::SelfUpdate { dry_run: true })
+        }
         "auth" if hlp(&words) => Ok(Action::Help),
         "auth" => Ok(Action::Auth(words[1..].to_vec())),
         "config" if hlp(&words) => Ok(Action::Help),
@@ -43,6 +46,10 @@ where I: IntoIterator, I::Item: Into<String>,
         "cache" => Ok(Action::Cache(words[1..].to_vec())),
         "security" if hlp(&words) => Ok(Action::Help),
         "security" => Ok(Action::Security(words[1..].to_vec())),
+        "gate" if hlp(&words) => Ok(Action::Help),
+        "gate" => Ok(Action::Gate(words[1..].to_vec())),
+        "experimental" if hlp(&words) => Ok(Action::Help),
+        "experimental" => Ok(Action::Experimental(words[1..].to_vec())),
         "templates" | "db" if hlp(&words) => Ok(Action::Help),
         "templates" | "db" => Ok(Action::Legacy(words[0].clone())),
         other if other.starts_with('-') => Err(format!("unknown flag '{other}'; use --help, --version, -v, or --info")),
@@ -75,3 +82,6 @@ mod tests;
 #[cfg(test)]
 #[path = "args_test_extra.rs"]
 mod tests_extra;
+#[cfg(test)]
+#[path = "args_test_gate.rs"]
+mod tests_gate;

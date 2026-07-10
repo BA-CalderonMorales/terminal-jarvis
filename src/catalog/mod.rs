@@ -1,6 +1,6 @@
 mod embedded;
 mod loader;
-mod parser;
+pub(crate) mod parser;
 mod validate;
 
 pub use loader::load;

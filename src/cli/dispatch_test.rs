@@ -36,7 +36,7 @@ fn list_check_help_legacy() {
     let out = dispatch(Action::Legacy("templates".to_string()), &hs, p, h)
         .unwrap()
         .1;
-    assert!(out.contains("removed"));
+    assert!(out.contains("Legacy Command"));
 }
 #[test]
 fn security_routes() {

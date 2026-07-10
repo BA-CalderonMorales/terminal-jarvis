@@ -49,13 +49,19 @@ brew install BA-CalderonMorales/homebrew-terminal-jarvis/terminal-jarvis
 
 Cargo builds the Rust CLI from the crates.io source package. The npm package is
 a Node launcher that downloads the matching Terminal Jarvis GitHub Release
-asset, verifies its `.sha256` file, caches it, and then executes it. Homebrew is
-the binary installer path and installs the platform release archive from the tap.
+asset, verifies its `.sha256` file, caches it, and then executes it. Homebrew
+installs the matching platform release archive from the tap.
 
 Supported prebuilt assets are `linux-x64-gnu`, `linux-arm64-gnu`,
 `macos-x64`, `macos-arm64`, and `win32-x64`. Native Windows npm installs use
-the `win32-x64` GitHub Release asset and work from Command Prompt, PowerShell,
-or Git Bash when the npm shim is first on `PATH`.
+the `win32-x64` ZIP bundle and work from Command Prompt, PowerShell, or Git
+Bash. Every release also includes a direct native executable for each platform;
+downloaded Linux and macOS executables may need `chmod +x` before use.
+
+An older Cargo or manual install can still win `PATH` resolution after a global
+npm upgrade. The npm install now completes and prints the path-order fix rather
+than blocking the upgrade; place the npm prefix before the stale location to run
+the newly installed command.
 
 ## Quick Start
 
@@ -73,6 +79,10 @@ terminal-jarvis plan codex headless
 terminal-jarvis use opencode
 terminal-jarvis current
 terminal-jarvis check
+
+# Optional: block harness commands until Trivy clears this workspace
+terminal-jarvis gate enable trivy
+terminal-jarvis gate status
 ```
 
 For development builds, replace `terminal-jarvis` with `cargo run --`.
@@ -106,12 +116,26 @@ Auth stays with each harness -- terminal-jarvis never retains credentials.
 | `run [harness] [capability] [args...]` | Execute a capability |
 | `check` | Report binary + env readiness |
 | `security [status\|audit\|harness]` | Security posture |
+| `gate [status\|list\|enable\|disable\|run]` | Optional local security gate |
 | `version [--verbose]` / `--version` / `-v` / `--info` | Version info |
+| `--update [--dry-run]` | Update Terminal Jarvis or print the update command |
 | `config show` | Active config state |
 | `auth help <harness>` | Credential setup guidance |
 | `[harness] [args...]` | Pass-through to harness binary |
 
-> Legacy aliases from 0.0.x: see [docs/migration.md](docs/migration.md).
+Legacy aliases remain available: `tools -> list`, `status -> check`,
+`info <harness> -> show <harness>`, `install <harness> -> run <harness> download`, and `update <harness> -> run <harness> update`.
+
+Human-facing commands use width-aware structured output and color only on an
+interactive terminal. For scripts, put `--plain` before the command for stable
+line-oriented output; `--no-color` keeps the structured layout without color.
+
+The experimental dashboard is intentionally behind a feature wall and remains
+noninteractive:
+
+```bash
+TERMINAL_JARVIS_EXPERIMENTAL_UI=1 terminal-jarvis experimental dashboard
+```
 
 ## Docs
 
@@ -119,9 +143,5 @@ Auth stays with each harness -- terminal-jarvis never retains credentials.
 |---|---|
 | [Capability contract](docs/harness-capability-contract.md) | Full breakdown of the 9 capabilities |
 | [Supported agents](docs/supported-agents.md) | All 25 coding agents |
-| [Maintainer guide](docs/maintainer-guide.md) | Development, verification, release |
-| [Architecture](docs/architecture.md) | Module boundaries and contracts |
-| [Release plan](docs/release-plan.md) | Checklist and auth boundaries |
-| [Migration](docs/migration.md) | Breaking changes from 0.0.x |
-| [Testing](docs/testing.md) | Test gates and integration hardening |
-| [Distribution hardening](docs/distribution-hardening.md) | Package integrity and provenance |
+| [Security gates](docs/security-gates.md) | Optional Trivy scan behavior and configuration |
+| [Development](docs/development.md) | Architecture, verification, and release artifacts |

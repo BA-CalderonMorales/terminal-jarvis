@@ -5,6 +5,7 @@ static TEMP_ID: AtomicUsize = AtomicUsize::new(0);
 
 fn tj(args: &[&str]) -> Output {
     Command::new(env!("CARGO_BIN_EXE_terminal-jarvis"))
+        .args(["--plain"])
         .args(args)
         .env("TERMINAL_JARVIS_HOME", temp_home())
         .output()
@@ -13,6 +14,7 @@ fn tj(args: &[&str]) -> Output {
 
 fn tj_with_home(args: &[&str], home: &str) -> Output {
     Command::new(env!("CARGO_BIN_EXE_terminal-jarvis"))
+        .args(["--plain"])
         .args(args)
         .env("TERMINAL_JARVIS_HOME", home)
         .output()
@@ -33,11 +35,9 @@ fn temp_home() -> String {
 fn stdout(output: &Output) -> String {
     String::from_utf8_lossy(&output.stdout).to_string()
 }
-
 fn stderr(output: &Output) -> String {
     String::from_utf8_lossy(&output.stderr).to_string()
 }
-
 #[test]
 fn list_outputs_promoted_harnesses() {
     let output = tj(&["list"]);

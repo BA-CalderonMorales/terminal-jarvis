@@ -1,38 +1,50 @@
+use super::{style, table};
 use std::env;
 
 pub fn handle(words: &[String]) -> Result<String, String> {
     match words {
         [] => Ok(status()),
         [action] if action == "status" => Ok(status()),
-        [action] if action == "clear" => Ok(clear()),
-        [action, ..] if action == "refresh" => Ok(refresh()),
+        [action] if action == "clear" => Ok(maintenance("clear", "after terminal-jarvis exits")),
+        [action, ..] if action == "refresh" => {
+            Ok(maintenance("refresh", "the wrapper will fetch again"))
+        }
         _ => Err("usage: terminal-jarvis cache [status|clear|refresh]".to_string()),
     }
 }
 
 fn status() -> String {
+    let cache = cache_path().unwrap_or_else(|| {
+        "unavailable (set TERMINAL_JARVIS_CACHE or run via the npm launcher)".to_string()
+    });
     let distribution = distribution();
-    let release = release_line();
-    match cache_path() {
-        Some(path) => format!("cache: {path}\ndistribution: {distribution}\n{release}"),
-        None => format!(
-            "cache: unavailable (set TERMINAL_JARVIS_CACHE or run via the npm launcher)\ndistribution: {distribution}\n{release}"
-        ),
+    let release = release_url();
+    if style::plain() {
+        let mut out = format!("cache: {cache}\ndistribution: {distribution}\n");
+        if let Some(release) = release {
+            out.push_str(&format!("release: {release}\n"));
+        }
+        return out;
     }
+    let mut fields = vec![("CACHE", cache), ("DISTRIBUTION", distribution)];
+    if let Some(release) = release {
+        fields.push(("RELEASE", release));
+    }
+    table::fields("Cache Status", &fields)
 }
 
-fn clear() -> String {
-    match cache_path() {
-        Some(path) => format!("cache clear: remove {path} after terminal-jarvis exits\n"),
-        None => "cache clear: no wrapper cache path is active\n".to_string(),
+fn maintenance(action: &str, suffix: &str) -> String {
+    let detail = match cache_path() {
+        Some(path) => format!("remove {path}; {suffix}"),
+        None => "no wrapper cache path is active".to_string(),
+    };
+    if style::plain() {
+        return format!("cache {action}: {detail}\n");
     }
-}
-
-fn refresh() -> String {
-    match cache_path() {
-        Some(path) => format!("cache refresh: remove {path}; the wrapper will fetch again\n"),
-        None => "cache refresh: no wrapper cache path is active\n".to_string(),
-    }
+    table::fields(
+        "Cache Maintenance",
+        &[("REQUEST", action.to_string()), ("NEXT STEP", detail)],
+    )
 }
 
 fn cache_path() -> Option<String> {
@@ -48,9 +60,8 @@ fn distribution() -> String {
         .unwrap_or_else(|| "unknown".to_string())
 }
 
-fn release_line() -> String {
-    match env::var("TERMINAL_JARVIS_RELEASE_URL") {
-        Ok(url) if !url.is_empty() => format!("release: {url}\n"),
-        _ => String::new(),
-    }
+fn release_url() -> Option<String> {
+    env::var("TERMINAL_JARVIS_RELEASE_URL")
+        .ok()
+        .filter(|value| !value.is_empty())
 }

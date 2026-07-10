@@ -71,7 +71,7 @@ function sourceCandidates() {
 
 async function downloadRelease() {
   const platform = platformName();
-  const archive = `${pkg.name}-${pkg.version}-${platform}.tar.gz`;
+  const archive = archiveName();
   const base = releaseBase();
   const releaseUrl = `${base}/${archive}`;
   const checksumUrl = `${releaseUrl}.sha256`;
@@ -96,7 +96,7 @@ async function downloadRelease() {
   try {
     await fetchFile(releaseUrl, archivePath);
     await verifyChecksum(checksumUrl, archivePath);
-    untar(archivePath, root);
+    unpack(archivePath, root);
   } catch (error) {
     fs.rmSync(root, { recursive: true, force: true });
     throw downloadFailure(releaseUrl, error);
@@ -156,6 +156,14 @@ function platformNameFor(platform, arch) {
   throw new Error(unsupportedPlatformMessage(platform, arch));
 }
 
+function archiveName(platform = process.platform, arch = process.arch) {
+  return `${pkg.name}-${pkg.version}-${platformNameFor(platform, arch)}${archiveExtension(platform)}`;
+}
+
+function archiveExtension(platform = process.platform) {
+  return platform === "win32" ? ".zip" : ".tar.gz";
+}
+
 function unsupportedPlatformMessage(platform, arch) {
   const current = `${platform}-${arch}`;
   return `unsupported platform: ${current}. ` +
@@ -178,8 +186,16 @@ function releaseBase() {
 }
 
 function cacheRoot() {
-  return process.env.TERMINAL_JARVIS_CACHE ||
-    path.join(os.homedir() || os.tmpdir(), ".cache", "terminal-jarvis", "npm");
+  return cacheRootFor(process.platform, process.env, os.homedir());
+}
+
+function cacheRootFor(platform, env, home) {
+  if (env.TERMINAL_JARVIS_CACHE) return env.TERMINAL_JARVIS_CACHE;
+  if (platform === "win32") {
+    const root = env.LOCALAPPDATA || env.APPDATA || home || os.tmpdir();
+    return path.join(root, "terminal-jarvis", "npm");
+  }
+  return path.join(home || os.tmpdir(), ".cache", "terminal-jarvis", "npm");
 }
 
 function pathEntries(pathValue = process.env.PATH || "") {
@@ -280,9 +296,25 @@ async function verifyChecksum(checksumUrl, archivePath) {
   if (!expected || expected !== actual) throw new Error(`checksum mismatch for ${archivePath}`);
 }
 
-function untar(archivePath, cwd) {
-  const result = spawnSync("tar", ["-xzf", archivePath, "-C", cwd], { stdio: "inherit" });
-  if (result.status !== 0) throw new Error("tar extraction failed");
+function unpack(archivePath, cwd, platform = process.platform) {
+  const result = platform === "win32"
+    ? spawnSync("powershell.exe", [
+      "-NoProfile",
+      "-NonInteractive",
+      "-Command",
+      powershellExtractCommand(archivePath, cwd),
+    ], { stdio: "inherit" })
+    : spawnSync("tar", ["-xzf", archivePath, "-C", cwd], { stdio: "inherit" });
+  if (result.status !== 0) throw new Error(`${platform === "win32" ? "zip" : "tar"} extraction failed`);
+}
+
+function powershellExtractCommand(archivePath, cwd) {
+  return `Expand-Archive -LiteralPath ${powershellLiteral(archivePath)} ` +
+    `-DestinationPath ${powershellLiteral(cwd)} -Force`;
+}
+
+function powershellLiteral(value) {
+  return `'${value.replace(/'/g, "''")}'`;
 }
 
 function fetchText(url) {
@@ -308,6 +340,7 @@ function fetchFile(url, destination, redirects = 0) {
 
 module.exports = {
   cacheRoot,
+  cacheRootFor,
   cachedBinaryUsable,
   cachedReleaseUsable,
   childEnv,
@@ -315,6 +348,9 @@ module.exports = {
   executableName,
   guidanceHint,
   pathShadowDiagnostic,
+  powershellExtractCommand,
+  archiveExtension,
+  archiveName,
   platformNameFor,
   platformName,
   postinstallPathStatus,

@@ -8,7 +8,10 @@ mod unix {
 
     fn tj(args: &[&str], home: &str, path: Option<&str>) -> Output {
         let mut command = Command::new(env!("CARGO_BIN_EXE_terminal-jarvis"));
-        command.args(args).env("TERMINAL_JARVIS_HOME", home);
+        command
+            .arg("--plain")
+            .args(args)
+            .env("TERMINAL_JARVIS_HOME", home);
         if let Some(path) = path {
             command.env("PATH", path);
         }

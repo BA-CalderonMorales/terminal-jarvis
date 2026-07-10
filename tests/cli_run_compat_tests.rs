@@ -8,6 +8,7 @@ mod unix {
 
     fn tj(args: &[&str], home: &str, path: &str) -> Output {
         Command::new(env!("CARGO_BIN_EXE_terminal-jarvis"))
+            .arg("--plain")
             .args(args)
             .env("TERMINAL_JARVIS_HOME", home)
             .env("PATH", path)

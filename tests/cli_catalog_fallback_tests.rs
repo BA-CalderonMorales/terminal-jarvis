@@ -18,6 +18,7 @@ fn temp_dir() -> PathBuf {
 
 fn tj(args: &[&str], cwd: &PathBuf) -> Output {
     Command::new(env!("CARGO_BIN_EXE_terminal-jarvis"))
+        .arg("--plain")
         .args(args)
         .current_dir(cwd)
         .env("TERMINAL_JARVIS_HOME", cwd.join("home"))
@@ -28,6 +29,7 @@ fn tj(args: &[&str], cwd: &PathBuf) -> Output {
 
 fn tj_empty_catalog(args: &[&str], cwd: &PathBuf) -> Output {
     Command::new(env!("CARGO_BIN_EXE_terminal-jarvis"))
+        .arg("--plain")
         .args(args)
         .current_dir(cwd)
         .env("TERMINAL_JARVIS_HOME", cwd.join("home"))
@@ -38,6 +40,7 @@ fn tj_empty_catalog(args: &[&str], cwd: &PathBuf) -> Output {
 
 fn tj_catalog(args: &[&str], cwd: &PathBuf, catalog: &str) -> Output {
     Command::new(env!("CARGO_BIN_EXE_terminal-jarvis"))
+        .arg("--plain")
         .args(args)
         .current_dir(cwd)
         .env("TERMINAL_JARVIS_HOME", cwd.join("home"))
