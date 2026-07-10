@@ -49,7 +49,7 @@ pub fn dispatch(
             experimental::run(&words, harnesses, home).map(|body| (0, body))
         }
         Action::Legacy(command) => Ok((0, compat::legacy(&command))),
-        Action::Help => Ok((0, output::help().to_string())),
+        Action::Help => Ok((0, output::help())),
         Action::Version { .. } => unreachable!("version is handled before catalog load"),
     }
 }

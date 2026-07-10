@@ -11,7 +11,7 @@ pub use catalog::{list, plan, show};
 pub use summary::{audit, status};
 
 pub fn help() -> String {
-    super::help::text().to_string()
+    super::help::text()
 }
 
 pub fn current(session: Option<Session>) -> String {

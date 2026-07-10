@@ -124,8 +124,7 @@ Auth stays with each harness -- terminal-jarvis never retains credentials.
 | `[harness] [args...]` | Pass-through to harness binary |
 
 Legacy aliases remain available: `tools -> list`, `status -> check`,
-`info <harness> -> show <harness>`, `install <harness> -> run <harness>
-download`, and `update <harness> -> run <harness> update`.
+`info <harness> -> show <harness>`, `install <harness> -> run <harness> download`, and `update <harness> -> run <harness> update`.
 
 Human-facing commands use width-aware structured output and color only on an
 interactive terminal. For scripts, put `--plain` before the command for stable
