@@ -29,18 +29,24 @@ provider compromise/outage.
 For `zero-host`, replace broker/provider attack paths with an explicit absence
 audit plus remaining static hosting, external scenario, link hijack, content
 drift, analytics, and supply-chain threats. Zero-host is not presumed safe merely
-because no custom compute is deployed.
+because no custom compute is deployed. Unselected external scenarios, analytics,
+and feedback services must be absent rather than left configured.
 
 ## Mode-Specific Controls
 
 Hosted mode implements project-scoped secrets, broker/session controls,
 restricted non-root execution, egress policy, hard duration/concurrency/budget
-stops, session deletion, orphan reconciliation, provider alerts, and key rotation.
+stops, atomic budget reservation before create, session deletion, orphan
+reconciliation, provider alerts, and key rotation. Unknown cost or ambiguous
+creation fails closed until reconciliation; only bounded idempotent retries
+against the same selected provider are allowed. Before every create/retry,
+revalidate selected mode, exact manifest, unexpired opt-in, active reservation,
+remaining budget, and kill switch. Opt-in expiry disables creates immediately.
 
-Zero-host mode proves there are no sandbox credentials, broker routes, session
-stores, provider deployments, or billable compute resources; pins static and
-guided artifacts; limits analytics; verifies external scenario isolation; and
-provides link-removal/content-rollback controls.
+Zero-host mode proves the candidate references/requires no sandbox credential,
+broker route, session store, provider account/deployment, billable resource, analytics/feedback
+services, external logs, or unapproved scenario integrations; pins the local
+static artifact and provides link-removal/content-rollback controls.
 
 ## Common Work
 
@@ -54,18 +60,31 @@ provides link-removal/content-rollback controls.
 - [ ] Define retention/deletion for every selected-mode log, usage, and external platform record.
 - [ ] Add selected-mode emergency disable, rollback, and incident runbooks.
 - [ ] Run selected-mode adversarial, traffic/load, failure, and recovery tests.
+- [ ] In hosted private staging, test budget reservation races, partial/ambiguous
+  create, duplicate reconnect, worker/process crash, client disconnect, timeout,
+  revoked credentials, delete failure, unknown cost, and orphan reconciliation.
+- [ ] In zero-host, replace hosted load tests with dependency, account, secret,
+  route, deployment, analytics, external-log, and billable-resource absence tests.
+- [ ] Define cleanup-only reconciliation after opt-in expiry: it may list/delete
+  existing resources with a bounded cleanup credential until its deadline, but
+  cannot create/retry sessions, expand budget, or invoke another provider.
 
 ## Required Operational Controls
 
 | Control | Required behavior |
 |---|---|
 | Kill switch | Hosted: disable sessions; zero-host: remove/redirect affected links/content |
-| Budget stop | Hosted: reject sessions; zero-host: prove no custom compute resource exists |
+| Budget stop | Hosted: reserve before create and reject unknown/exhausted spend; zero-host: prove USD 0 and no billable resource |
 | Concurrency | Hosted: enforce cap; zero-host: document external platform limits |
 | Cleanup | Hosted: delete sessions; zero-host: prove no session resource is retained |
 | Logs | Exclude credentials and terminal command/body content by default |
-| Alerts | Cover denial spikes, cleanup failures, provider errors, and spend thresholds |
-| Fallback | Routes to static/Killercoda experience |
+| Alerts | Hosted: denial/cleanup/provider/spend alerts; zero-host: local drift/link checks with no analytics service required |
+| Fallback | Any failure routes to verified static zero-host; no alternate provider is attempted |
+
+For zero-host, hosted-only budget-race/session criteria close as
+`not-selected-zero-host` only after tests prove there is no create/retry/session
+path, provider dependency/binding, mutable budget reservation, or billable
+resource. Static asset/manifest failure and rollback tests remain mandatory.
 
 ## Acceptance Criteria
 
@@ -75,7 +94,10 @@ provides link-removal/content-rollback controls.
 - [ ] `OPS-04` Hosted reconciliation leaves zero orphans; zero-host inventory finds no session resources.
 - [ ] `OPS-05` Logs/metrics pass privacy and seeded-secret review.
 - [ ] `OPS-06` Selected-mode disable, credential/absence, outage, and incident drills pass.
-- [ ] `OPS-07` Hosted cost matches the model; zero-host custom provider cost is verified as zero.
+- [ ] `OPS-07` Hosted cost matches the inclusive model; zero-host verifies USD 0
+  maintainer demo spend and no provider/external-service billing resource.
+- [ ] `OPS-08` Budget races and uncertain lifecycle states fail closed, reconcile
+  before retry, and never invoke another provider or exceed the approved reservation.
 
 ## Evidence
 
@@ -88,18 +110,23 @@ provides link-removal/content-rollback controls.
 | OPS-05 | redaction/privacy test | pending | pending | pending | pending | pending |
 | OPS-06 | selected-mode operational drills | pending | pending | pending | pending | pending |
 | OPS-07 | provider usage or zero-cost reconciliation | pending | pending | pending | pending | pending |
+| OPS-08 | budget-race/ambiguous-lifecycle failure suite | pending | pending | pending | pending | pending |
 
 ## Risks and Rollback
 
 - Risk: account-level provider caps are advisory. Enforce broker-side counters and
   a default-deny hard stop as well.
+- Risk: retrying after an ambiguous create duplicates spend/resources. Reconcile
+  by idempotency key or inventory before any same-provider retry; never fail over.
 - Risk: observability records sensitive commands. Collect structured outcomes only.
 - Rollback trigger: any escape, secret leak, uncontrolled spend, or orphan breach.
-- Rollback action: kill switch immediately, revoke provider keys, delete active
-  sessions, preserve minimal incident evidence, and route to page 09.
+- Rollback action: atomically route to static zero-host and disable creates/retries;
+  run bounded cleanup-only reconciliation; then revoke provider credentials and
+  deployment bindings, preserve minimal incident evidence, and remain on page 09.
 
 ## Completion Gate
 
 Complete only after security and FinOps reviewers reproduce every selected-mode
-control. Zero-host requires positive absence evidence; it cannot complete by
-leaving hosted evidence rows pending.
+control. Zero-host requires positive absence evidence for all external and
+billable surfaces; hosted traffic tests run only in private synthetic staging.
+The page cannot complete by leaving unselected-mode evidence pending.

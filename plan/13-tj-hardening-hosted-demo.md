@@ -25,7 +25,9 @@ fallback contracts.
 Implement the following architecture:
 
 ```text
-static demo page + xterm.js
+verified manifest + protected mode gate
+          |
+static zero-host page + optional hosted terminal UI
           |
 authenticated/rate-limited session broker
           |
@@ -41,25 +43,49 @@ endpoint may be exposed to the browser.
 
 Hosted execution implements session create, ready, input, output, resize,
 interrupt, close, expiration, reconnect, provider failure, and kill-switch
-fallback through a typed protocol.
+recovery through a typed protocol. Every failure activates zero-host without
+attempting a second provider.
 
 ### No-host mode: `zero-host`
 
-Do not deploy xterm, a broker, an adapter, provider credentials, sandbox routes,
-or billable compute. Deliver page 09 as the primary experience, publish a
-versioned static/guided manifest, and prove through route, secret, deployment,
+Do not deploy a terminal execution client, broker, adapter, provider SDK,
+provider credentials, sandbox routes, or billable compute. Deliver the
+self-contained page 09 artifact as the primary experience and generate a
+versioned `provider: none` manifest. External static/scenario publication needs
+its own opt-in. Prove through dependency, route, secret, deployment, account,
 and provider-resource inventories that no executable hosted endpoint exists.
 
 ## Mode-Specific Work
 
 For hosted mode: enforce the page 08 command grammar server-side, pin the binary
 and checksum, bound input/output and process lifetime, add a fake adapter, and
-implement every lifecycle/failure state above.
+implement every lifecycle/failure state above in private synthetic staging.
 
-For zero-host mode: pin the static cast and guided scenario to the page 08
-fixture, expose clear static/Killercoda/Codespaces choices, add drift checks,
-and ensure any experimental hosted route returns the zero-host experience
-without creating a provider session.
+For zero-host mode: pin the local static cast/transcript to the page 08 fixture,
+add drift checks, omit unselected external links, and ensure any experimental
+hosted route returns the zero-host experience without importing an adapter or
+creating a provider session.
+
+Zero-host lifecycle/failure evidence replaces session events with deterministic
+static cases: missing/corrupt cast, missing/corrupt/stale manifest, checksum or
+fixture mismatch, offline load, unsupported browser feature, optional link
+disabled/unavailable, and rollback-manifest restoration. Each case must retain
+the transcript/downloadable evidence and make no provider call.
+
+## Surface Registry Contract
+
+`demo/surfaces.json` has `schema_version: 1` and exactly one entry for each of
+`local-static`, `pages`, `killercoda`, `codespaces`, `analytics`, `feedback`,
+and `hosted-terminal`. Each entry has a unique ID, kind, active boolean, cost
+class, location, owner, and opt-in ID. `local-static` is always active,
+`maintainer-zero`, points to a tracked repository file, and has no opt-in.
+
+Every active external location is HTTPS and resolves through an unexpired
+human-approved record of the matching kind. Inactive entries set
+`opt_in_id: null`; retaining a stale approval reference is invalid. Exactly one
+hosted-terminal entry is active in hosted mode and none is active in zero-host;
+its opt-in ID must equal the selected manifest's provider opt-in ID. Unknown or
+duplicate kinds fail validation instead of being treated as publication.
 
 ## Common Work
 
@@ -71,6 +97,15 @@ without creating a provider session.
   reduced-motion, copy behavior, and mobile constraints.
 - [ ] Keep provider code behind an adapter in hosted mode; prove the adapter and
   privileged routes are absent in zero-host mode.
+- [ ] Validate missing/unknown/stale/conflicting manifests, missing adapters and
+  credentials, expired opt-ins, disabled kill switch, quota errors, and provider
+  outages without making any cross-provider call.
+- [ ] Build and run zero-host after removing each provider adapter, provider SDK,
+  configuration file, secret name, route, and deployment binding.
+- [ ] Generate `demo/surfaces.json` with every local/static, Pages, Killercoda,
+  Codespaces, analytics, feedback, and hosted surface marked active/inactive,
+  cost class, URL/route, owner, and matching opt-in ID; active external entries
+  without a valid record fail validation.
 - [ ] Make the selected experience the first view, not a marketing landing page.
 - [ ] Add desktop/mobile E2E tests; include terminal pixel/nonblank checks only in hosted mode.
 
@@ -83,6 +118,8 @@ without creating a provider session.
 - [ ] `HST-05` Hosted secrets stay behind the broker; zero-host has no provider secrets or privileged IDs.
 - [ ] `HST-06` Desktop, mobile, keyboard, and screen-reader acceptance checks pass.
 - [ ] `HST-07` Hosted outage/kill switch or zero-host routing delivers page 09 without a broken page.
+- [ ] `HST-08` Zero-host startup, manifest validation, static walkthrough, and
+  rollback pass with Kernel and Cloudflare adapters/SDKs removed independently and together.
 
 ## Evidence
 
@@ -95,6 +132,7 @@ without creating a provider session.
 | HST-05 | secret boundary or secret/resource absence audit | pending | pending | pending | pending | pending |
 | HST-06 | accessibility/viewport review | pending | pending | pending | pending | pending |
 | HST-07 | outage/kill-switch or zero-host route drill | pending | pending | pending | pending | pending |
+| HST-08 | adapter/SDK removal build and E2E walkthrough | pending | pending | pending | pending | pending |
 
 ## Risks and Rollback
 
@@ -102,10 +140,15 @@ without creating a provider session.
   policy errors must state the bounded demo scope without obscuring the product.
 - Risk: reconnect duplicates sessions. Session ownership and idempotent cleanup are required.
 - Rollback trigger: policy bypass, credential exposure, uncontrolled lifecycle, or provider outage.
-- Rollback action: activate kill switch and serve the zero-cost showcase only.
+- Rollback action: execute page 14's canonical static-first cleanup sequence and
+  serve the zero-host showcase only.
 
 ## Completion Gate
 
-Complete only after all common criteria have selected-mode evidence. Hosted
-traffic remains disabled until page 14 completes; zero-host completes only
-after absence of hosted routes, secrets, deployments, and resources is reviewed.
+Complete only after all common criteria have selected-mode evidence. Private,
+synthetic hosted staging may be used for page 14 tests, but public traffic
+remains disabled until page 14 completes. Zero-host completes only after hosted
+dependencies, routes, secrets, account references, deployment bindings, and
+resources are absent from the candidate and adapter-removal behavior is reviewed.
+External account-wide absence is a release-owner attestation, not something a
+credential-free Luna agent is expected to query.

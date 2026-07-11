@@ -29,6 +29,9 @@ upstream harness output.
 - [ ] Define wrapping, truncation, ordering, headings, severity, and stderr rules.
 - [ ] Verify Windows newline/path handling and macOS/Linux shell behavior.
 - [ ] Preserve upstream process byte streams where the UX contract requires forwarding.
+- [ ] Mark the rendering boundary explicitly: width/wrapping/truncation applies
+  only to Terminal Jarvis-authored rich output. Forwarded child stdout/stderr is
+  byte-preserving and bypasses table layout, even when a line exceeds `COLUMNS`.
 - [ ] Add an intentional golden-update procedure requiring reviewer approval.
 
 ## Likely Areas
@@ -40,7 +43,8 @@ upstream harness output.
 ## Acceptance Criteria
 
 - [ ] `PRE-01` All core rich outputs have approved golden fixtures.
-- [ ] `PRE-02` No generated line exceeds the declared width where wrapping applies.
+- [ ] `PRE-02` No Terminal Jarvis-authored line exceeds the declared width where
+  wrapping applies; byte-preserved child streams are measured but exempt.
 - [ ] `PRE-03` Plain output remains stable, line-oriented, and decoration-free.
 - [ ] `PRE-04` Color is absent whenever flags, environment, or terminal state require it.
 - [ ] `PRE-05` Ordering and wording are deterministic across supported platforms.
@@ -65,10 +69,14 @@ upstream harness output.
   internal formatting tests focused.
 - Risk: truncation removes remediation. Wrap essential text; truncate only
   explicitly nonessential fields.
+- Risk: an agent "fixes" overflow by rewriting upstream output. Keep forwarded
+  byte streams outside the renderer and test the boundary separately.
 - Rollback trigger: approved scripts or terminals regress.
 - Rollback action: restore previous renderer behavior while retaining failing regression fixtures.
 
 ## Completion Gate
 
 Complete only when the matrix passes on Linux, macOS, and Windows and an
-independent reviewer approves intentional output changes.
+independent reviewer approves intentional output changes. Nonpublishing standard
+CI on this public repository is allowed by the zero-spend posture for native
+evidence; no agent may select a paid/larger runner without `OI-RELEASE-CI`.

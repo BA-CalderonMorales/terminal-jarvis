@@ -15,7 +15,7 @@ blocks: ["index-completion"]
 ## Objective
 
 Prove the complete change set is safe to promote as the v0.1.13 release
-candidate, rehearse staged rollout and rollback, align version metadata, and
+candidate, rehearse staged rollout and rollback, verify aligned metadata, and
 authorize the index to complete. This page does not itself tag or publish.
 
 ## Preconditions
@@ -24,29 +24,37 @@ authorize the index to complete. This page does not itself tag or publish.
 - The provider outcome from page 12 is implemented exactly, including a valid
   zero-host outcome.
 - `delivery_mode` matches the non-pending value bound by page 12.
+- Cargo/npm/lock/formula/changelog metadata already agrees on `0.1.13`; this
+  page collects evidence after that candidate metadata commit.
 - No unresolved blocker, placeholder owner, stale evidence, or unapproved scope
   change remains.
 - The working tree and branch history contain only intended v0.1.13 work.
 
 ## Hosted-Mode Rollout Stages
 
-1. Fixture-only local and deterministic CI validation.
-2. Protected hosted staging using synthetic traffic.
-3. Internal/invite-only walkthrough with kill switch armed.
-4. Limited public canary within approved concurrency and budget.
-5. General public link only after canary thresholds pass.
-6. Package release candidate approval; merge/tag/publish remains a separate operator action.
+1. Build and verify the zero-host candidate and rollback manifest first; publish
+   it only with `OI-PUBLISH`.
+2. Revalidate `OI-PROVIDER`, exact manifest/protected-input agreement, budget,
+   credentials, kill switch, and cleanup ownership.
+3. Protected hosted staging using synthetic traffic.
+4. Internal/invite-only walkthrough with kill switch armed.
+5. Limited public canary within approved concurrency and budget.
+6. General public link only after canary thresholds and `OI-PUBLISH` pass.
+7. Package release candidate approval; merge/tag/publish remains a separate operator action.
 
 ## Zero-Host Rollout Stages
 
 1. Fixture-only local and deterministic CI validation.
-2. Static candidate preview with final cast, transcript, links, and version manifest.
-3. Private/unlisted Killercoda scenario walkthrough and Codespaces link review.
-4. Limited documentation-link canary with drift, error, and feedback monitoring.
-5. Public static/scenario links after canary thresholds pass.
-6. Remove/restore links and manifests to rehearse rollback; verify no provider
-   secrets, deployments, sessions, or custom compute costs exist.
-7. Package release candidate approval; merge/tag/publish remains a separate operator action.
+2. Self-contained local/loopback candidate preview with final cast, transcript,
+   checksums, and `provider: none` version manifest.
+3. Prove the walkthrough with Pages, Killercoda, Codespaces, analytics, network,
+   provider APIs, credentials, and both adapters unavailable.
+4. If `OI-PUBLISH` exists, preview only the selected external static/scenario links.
+5. Remove/restore optional links and manifests to rehearse rollback; verify no provider
+   secrets, deployments, sessions, or custom compute references exist in the
+   candidate, and obtain release-owner attestation that no v0.1.13 external
+   resource/billing configuration was created.
+6. Package release candidate approval; merge/tag/publish remains a separate operator action.
 
 ## Work
 
@@ -57,10 +65,12 @@ authorize the index to complete. This page does not itself tag or publish.
 - [ ] Rehearse the exact hosted-mode or zero-host rollout, abort, fallback, and rollback sequence.
 - [ ] Run representative install, diagnostics, support, conformance, distribution,
   fixture, showcase, security, and selected-mode cost/absence and cleanup journeys.
-- [ ] Align `Cargo.toml`, Cargo lock metadata where applicable, npm package and
-  lock versions, formula/version references, and `CHANGELOG.md` to `0.1.13`.
+- [ ] Confirm page 15 aligned `Cargo.toml`, Cargo lock metadata where applicable,
+  npm package/lock, formula/version references, and `CHANGELOG.md` before this
+  page's evidence collection began.
 - [ ] Verify release notes describe behavior, limits, provider outcome, and recovery.
-- [ ] Run the full local gates without tagging, pushing, publishing, or uploading.
+- [ ] Run all required local or equivalent non-billable hosted gates without
+  tagging, publishing, or uploading release assets.
 - [ ] Obtain CI, security, distribution, documentation, FinOps/platform, and release approvals.
 - [ ] Record the exact candidate commit proposed for merge to `develop`/`main`.
 - [ ] Confirm the release operator understands that tag creation/push is still separate.
@@ -80,16 +90,46 @@ git diff --check
 git status --short
 ```
 
-Run hosted native workflows for Linux x64/ARM64, macOS x64/ARM64, and Windows
-x64. The tag-aware preflight can be fully satisfied only when a candidate tag
-exists at expected `main`; before operator tagging, record metadata preflight
-plus the exact proposed tag target, then rerun the tag-aware gate during release.
+The strict local command and the complete mutation result may be supplied by an
+equivalent successful public-repository standard-runner workflow when local
+tools are unavailable. Required checks are never silently skipped. A billing or
+runner-policy change blocks the release until a human supplies local evidence or
+approves `OI-RELEASE-CI`; it never permits automatic spend or weaker evidence.
+
+Every target below is mandatory. Accepted evidence is exactly either a
+successful, nonpublishing standard-runner workflow URL and named job at the
+candidate ref, or a committed local transcript produced on a host with the
+matching OS and architecture. Cross-compilation and package-shape inspection do
+not count as native execution.
+
+| Required target | Matching native execution |
+|---|---|
+| `linux-x64-gnu` | Linux x86_64 standard public-repository runner or matching local host |
+| `linux-arm64-gnu` | Linux AArch64 standard public-repository runner or matching local host |
+| `macos-x64` | macOS x86_64 standard public-repository runner or matching local host |
+| `macos-arm64` | macOS arm64 standard public-repository runner or matching local host |
+| `win32-x64` | Windows x86_64 standard public-repository runner or matching local host |
+
+If standard public-repository runner terms stop being non-billable, the row
+blocks until matching local evidence exists or a human authorizes
+`OI-RELEASE-CI`; the workflow never opts into a larger/metered runner itself.
+The tag-aware preflight can be fully satisfied only when a candidate tag exists
+at expected `main`; before operator tagging, record metadata preflight plus the
+exact proposed tag target, then rerun the tag-aware gate during release.
 
 ## Acceptance Criteria
 
+For `REL-05`, a zero-host canary is the local/loopback static walkthrough,
+offline/corrupt-asset failure matrix, optional-link disable test, and manifest
+rollback. It does not require public traffic, a provider session, Killercoda, or
+Codespaces. A criterion uses `not-selected-zero-host` only when it explicitly
+requires evidence for an unselected provider outcome; common criteria require
+positive evidence.
+
 - [ ] `REL-01` All child pages and index registry statuses agree and are complete.
 - [ ] `REL-02` Full local verification, strict security, mutation, package, and local-CD gates pass.
-- [ ] `REL-03` Hosted native CI and nonpublishing integration jobs pass on the candidate ref.
+- [ ] `REL-03` Standard native CI or equivalent nonpublishing native evidence
+  passes on the candidate ref without an unapproved metered runner/service.
 - [ ] `REL-04` Version metadata and changelog agree on `0.1.13`.
 - [ ] `REL-05` Selected-mode canary and abort thresholds pass; its rollback is rehearsed.
 - [ ] `REL-06` Selected-mode security, privacy, terms, cost/absence, accessibility,
@@ -97,6 +137,9 @@ plus the exact proposed tag target, then rerun the tag-aware gate during release
 - [ ] `REL-07` Previous `v0.1.12` package and showcase recovery paths remain usable.
 - [ ] `REL-08` Exact proposed merge and tag commit is recorded; no tag has been pushed by this page.
 - [ ] `REL-09` Release owner and independent reviewer authorize index completion.
+- [ ] `REL-10` Missing/corrupt manifest, missing adapter/credential, expired
+  opt-in, provider outage/quota/budget stop, and uncertain cleanup all preserve
+  or restore zero-host without invoking another provider.
 
 ## Evidence
 
@@ -104,13 +147,14 @@ plus the exact proposed tag target, then rerun the tag-aware gate during release
 |---|---|---|---|---|---|---|
 | REL-01 | plan status audit | pending | pending | pending | pending | pending |
 | REL-02 | local gate transcript | pending | pending | pending | pending | pending |
-| REL-03 | hosted workflow runs | pending | pending | pending | pending | pending |
+| REL-03 | native workflow/local evidence | pending | pending | pending | pending | pending |
 | REL-04 | release preflight metadata | pending | pending | pending | pending | pending |
 | REL-05 | selected-mode canary/rollback report | pending | pending | pending | pending | pending |
 | REL-06 | approval record | pending | pending | pending | pending | pending |
 | REL-07 | recovery walkthrough | pending | pending | pending | pending | pending |
 | REL-08 | proposed commit/tag record | pending | pending | pending | pending | pending |
 | REL-09 | signed completion approval | pending | pending | pending | pending | pending |
+| REL-10 | default/adapter/outage/rollback failure matrix | pending | pending | pending | pending | pending |
 
 ## Abort and Rollback
 
@@ -121,16 +165,20 @@ change, or failed recovery rehearsal.
 
 Rollback actions:
 
-1. Hosted: disable session creation; zero-host: remove/redirect affected public links.
-2. Restore the previous selected-mode manifest/fixture/content.
-3. Hosted: revoke keys and delete sessions; zero-host: verify no such resources exist.
-4. Stop release promotion; do not create or push `v0.1.13`.
-5. Keep v0.1.12 as the documented stable recovery target.
-6. Return affected pages and the index to `in-progress` with the failure evidence.
+1. Atomically restore the verified `provider: none` manifest/static routes and
+   disable hosted creates/retries or affected optional external links.
+2. Reconcile/delete selected-provider resources by inventory/idempotency record
+   with the bounded cleanup-only credential; do not create or start another provider.
+3. Revoke provider/cleanup credentials after reconciliation or its hard deadline,
+   disable deployment bindings, and record unresolved resources for incident response.
+4. Confirm the static fixture/content remains available throughout cleanup.
+5. Stop release promotion; do not create or push `v0.1.13`.
+6. Keep v0.1.12 as the documented stable recovery target.
+7. Return affected pages and the index to `in-progress` with the failure evidence.
 
 ## Completion Gate
 
-When and only when `REL-01` through `REL-09` pass, mark this page `complete`,
+When and only when `REL-01` through `REL-10` pass, mark this page `complete`,
 update every registry row and master checkbox in `plan/index.md`, reproduce the
 index completion algorithm, record both approvals, and set the index status to
 `complete`. Merge, tag, push, and publish still require explicit operator action.

@@ -30,7 +30,8 @@ release assets on every declared platform.
 - [ ] Decide whether to publish Linux musl x64/ARM64 assets; record compatibility,
   npm mapping, Homebrew implications, and release-matrix cost.
 - [ ] Verify release asset names/checksums match every launcher and formula consumer.
-- [ ] Add native hosted smoke jobs with no registry publication side effects.
+- [ ] Add standard native CI smoke jobs, or equivalent native evidence, with no
+  registry publication side effects or unapproved metered runner.
 
 ## Likely Areas
 
@@ -46,7 +47,8 @@ and README, release workflows, `src/cli/version.rs`, and update diagnostics.
 - [ ] `DST-04` Update routes are correct, dry-runnable, and never selected ambiguously.
 - [ ] `DST-05` Unsupported platform/channel combinations fail explicitly.
 - [ ] `DST-06` A documented musl decision is implemented consistently or rejected with evidence.
-- [ ] `DST-07` Hosted smoke jobs perform no tag, publish, tap, or dist-tag mutation.
+- [ ] `DST-07` Standard native smoke jobs perform no tag, publish, tap, or
+  dist-tag mutation and use no unapproved metered runner/service.
 
 ## Evidence
 
@@ -71,4 +73,6 @@ and README, release workflows, `src/cli/version.rs`, and update diagnostics.
 
 ## Completion Gate
 
-Complete only when the native distribution matrix and no-side-effect review pass.
+Complete only when the native distribution matrix and no-side-effect review
+pass. Nonpublishing standard CI on this public repository is the default native
+evidence path; paid/larger runners require `OI-RELEASE-CI`.

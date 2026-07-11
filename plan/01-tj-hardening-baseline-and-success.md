@@ -37,6 +37,10 @@ the execution ref.
 Role names are accountable placeholders for planning structure. A named person
 must accept each role before this page can leave `proposed`; one person may hold
 multiple owner roles, but a page reviewer must be different from its owner.
+These rows do not require 34 different people. Luna agents may execute bounded
+tasks and collect evidence, but they cannot occupy human approval fields or
+authorize spend, terms, publication, or release. The zero-host lane needs no
+provider account owner or provider-terms approver.
 
 | Page | Owner role | Named owner | Reviewer role | Named reviewer |
 |---|---|---|---|---|
@@ -60,16 +64,21 @@ multiple owner roles, but a page reviewer must be different from its owner.
 
 ## Work
 
-- [ ] Bind one named person to each owner/reviewer role and record rollback owners.
+- [ ] Bind one named human to each owner/reviewer role in both the table and
+  `plan/ownership.json`; record rollback owners and keep each page's people distinct.
 - [ ] Inventory user journeys: install, first run, inspect, select, check, plan,
-  execute, update, diagnose, recover, and try the hosted/free demos.
+  execute, update, diagnose, recover, and try the required/selected showcase surfaces.
 - [ ] Define the consistency matrix across OS, architecture, shell, install
   channel, TTY/non-TTY, color mode, terminal width, and harness support level.
 - [ ] Capture baseline rich/plain/error outputs at 40, 80, and 120 columns.
 - [ ] Record baseline install/update behavior for each supported distribution.
 - [ ] Record known unsupported, untested, stubbed, and dangerous paths.
 - [ ] Define success measures and the exact collection method for each.
-- [ ] Set an owner-approved monthly hosted-demo budget and emergency stop threshold.
+- [ ] Approve `zero-host` and USD 0 maintainer spend as the defaults; record any
+  provider, publication, user-metered, or nonstandard-CI opt-in separately using
+  the index schema.
+- [ ] Freeze exact denominators for every matrix, catalog, command, distribution,
+  viewport, and external-surface claim so smaller agents cannot redefine "all."
 - [ ] Approve the non-goals in `plan/index.md`.
 - [ ] Record full and skipped baseline checks with reasons.
 
@@ -81,21 +90,23 @@ The owner must replace `pending` thresholds before this page can be ready.
 |---|---|---|
 | Core command contract | 100% expected commands pass | core command matrix |
 | Harness metadata coverage | 100% of harness/capability rows classified | generated report |
-| Supported distribution smoke | 100% supported matrix rows pass | hosted native jobs |
+| Supported distribution smoke | 100% supported matrix rows pass | standard native CI/local jobs |
 | Rich output overflow | 0 lines exceed declared width | presentation tests |
 | Plain output compatibility | 0 unapproved schema changes | golden fixtures |
 | Diagnostic redaction | 0 seeded secrets emitted | adversarial tests |
 | Demo command policy | 0 denied command escapes | policy tests |
-| Demo readiness latency | pending | timed cold-start sample |
-| Demo session cost | pending | provider usage evidence |
-| Orphan session rate | 0 after reconciliation window | cleanup audit |
+| Static showcase readiness | local artifact opens and canonical walkthrough completes | timed local/loopback sample |
+| Maintainer demo spend | USD 0 in zero-host; explicit approved ceiling otherwise | billing/resource absence or usage evidence |
+| Provider session/orphan count | 0 in zero-host; 0 after hosted reconciliation | resource inventory/cleanup audit |
 
 ## Acceptance Criteria
 
 - [ ] `BAS-01` Baseline ref, release ref, matrix, and inventory are recorded.
-- [ ] `BAS-02` All user journeys have an owner and measurable expected outcome.
+- [ ] `BAS-02` All user journeys have an owner and measurable expected outcome,
+  and `plan/ownership.json` matches every page role with distinct named humans.
 - [ ] `BAS-03` Success and abort thresholds are numeric and approved.
-- [ ] `BAS-04` Scope, non-goals, budget ceiling, and secrets policy are approved.
+- [ ] `BAS-04` Scope, non-goals, USD 0 default budget, opt-in ceilings, and
+  secrets policy are approved.
 - [ ] `BAS-05` Baseline checks distinguish passed, failed, and skipped work.
 - [ ] `BAS-06` Issue #135 is mapped to pages in this plan without losing open work.
 
@@ -116,6 +127,8 @@ The owner must replace `pending` thresholds before this page can be ready.
   require an index decision for scope changes.
 - Risk: hosted-demo work masks product defects. Mitigation: product metrics are
   gates before provider work.
+- Risk: agents wait on unnecessary provider or publication authority.
+  Mitigation: missing opt-ins close those paths as `not-selected`; zero-host continues.
 - Rollback trigger: an approved threshold or owner is missing.
 - Rollback action: return this page to `proposed`; do not start page 02.
 - Recovery target: unchanged v0.1.12 behavior and current `develop` base.

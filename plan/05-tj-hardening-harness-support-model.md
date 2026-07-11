@@ -34,6 +34,9 @@ and last verification evidence without adding per-harness Rust branches.
 ## Work
 
 - [ ] Audit all 25 root descriptors and all 225 capability descriptors.
+- [ ] Generate the initial classification from existing catalog facts; use
+  `unknown` when evidence is absent instead of manually installing/researching
+  every upstream CLI or inventing support.
 - [ ] Design the smallest backward-compatible TOML schema that captures support truth.
 - [ ] Document schema tradeoffs before adding Rust fields or dependencies.
 - [ ] Update contracts, parser, validator, and embedded catalog generation.
@@ -82,4 +85,5 @@ and `docs/harness-capability-contract.md`.
 ## Completion Gate
 
 Complete only when the generated truth report has no unclassified row and
-catalog/CLI reviewers approve the schema and migration behavior.
+catalog/CLI reviewers approve the schema and migration behavior. `unknown` is a
+valid explicit classification and does not require external execution.

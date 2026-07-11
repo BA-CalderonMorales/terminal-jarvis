@@ -23,8 +23,10 @@ or destructive lifecycle commands on developer machines.
 2. Fake executable lifecycle tests for execution, stdin/stdout/stderr, exit codes,
    missing binary, missing environment, signals, and policy denial.
 3. Packaged-binary core command matrix with embedded and external catalogs.
-4. Hosted disposable no-auth smoke tests for Codex, Claude, Gemini, OpenCode,
-   and Hermes using only reviewed help/version/read-only invocations.
+4. Optional external no-auth smoke tests for a reviewed promoted subset using
+   only disposable standard CI and help/version/read-only invocations. Record
+   `not-selected` when safe acquisition or authority is unavailable; never turn
+   missing upstream smoke into a `tested` catalog claim.
 
 ## Work
 
@@ -34,8 +36,10 @@ or destructive lifecycle commands on developer machines.
 - [ ] Assert download, update, UI, headless, and yolo commands are never invoked
   accidentally by ordinary conformance jobs.
 - [ ] Test child exit code, stderr context, signal/timeout handling, and cleanup.
-- [ ] Add a reviewed allowlist for real no-auth smoke commands.
-- [ ] Schedule upstream smoke jobs separately from blocking deterministic CI.
+- [ ] Record upstream smoke as `not-selected`, or add a reviewed allowlist for
+  real no-auth commands and acquisition methods.
+- [ ] If selected, schedule upstream smoke separately from blocking deterministic
+  CI with no provider credentials, paid runners, state-changing hooks, or agent execution.
 - [ ] Define quarantine, owner notification, and freshness behavior for upstream drift.
 - [ ] Produce a machine-readable conformance report consumed by docs and release gates.
 
@@ -50,7 +54,8 @@ or destructive lifecycle commands on developer machines.
 - [ ] `CON-02` Fixtures require no network, credentials, or user-level configuration.
 - [ ] `CON-03` Child failures include harness, capability, exit, and stderr context.
 - [ ] `CON-04` Dangerous and unsupported paths fail closed in positive and negative tests.
-- [ ] `CON-05` Promoted harness smoke commands are reviewed, read-only, and disposable.
+- [ ] `CON-05` Upstream smoke has reviewed `not-selected` evidence, or every
+  promoted command/acquisition path is reviewed, read-only, disposable, and non-billable.
 - [ ] `CON-06` Upstream drift cannot silently downgrade blocking deterministic CI.
 - [ ] `CON-07` The report records tested ref, platform, result, and freshness.
 
@@ -62,7 +67,7 @@ or destructive lifecycle commands on developer machines.
 | CON-02 | offline fixture run | pending | pending | pending | pending | pending |
 | CON-03 | failure matrix | pending | pending | pending | pending | pending |
 | CON-04 | policy negative tests | pending | pending | pending | pending | pending |
-| CON-05 | hosted smoke review | pending | pending | pending | pending | pending |
+| CON-05 | smoke selection/allowlist review | pending | pending | pending | pending | pending |
 | CON-06 | simulated upstream failure | pending | pending | pending | pending | pending |
 | CON-07 | report schema validation | pending | pending | pending | pending | pending |
 
@@ -77,5 +82,6 @@ or destructive lifecycle commands on developer machines.
 
 ## Completion Gate
 
-Complete only when all catalog rows have deterministic evidence and the promoted
-smoke allowlist has security approval.
+Complete when all catalog rows have deterministic evidence and upstream smoke
+has a reviewed selection record. Any selected allowlist needs security approval;
+external CLI execution is not required for zero-host or honest `unknown` claims.

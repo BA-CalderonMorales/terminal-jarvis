@@ -27,6 +27,10 @@ clearly labeling simulated agent behavior.
 - Never request or accept visitor provider credentials.
 - Never expose shell escape, installer, updater, UI, arbitrary passthrough, or yolo.
 - Produce deterministic output suitable for tests, recordings, and guided scenarios.
+- The required fixture runs from local files with network disabled, provider
+  variables cleared, an explicit executable path, and a minimal environment.
+- Provider adapters consume the fixture only when selected; the fixture never
+  imports a provider SDK or assumes an external scenario/hosting service exists.
 
 ## Work
 
@@ -38,8 +42,12 @@ clearly labeling simulated agent behavior.
 - [ ] Package the fixture independently of user configuration and credentials.
 - [ ] Add tests for command injection, separators, control characters, path escape,
   environment override, oversized input/output, and interrupted sessions.
+- [ ] Add cases for symlinks, absolute executables, injected `PATH`, `env`, `--`,
+  inherited provider variables, seeded canary secrets, invalid UTF-8, and output flooding.
 - [ ] Generate a canonical walkthrough script used by every showcase surface.
 - [ ] Add an explicit fixture format/version and compatibility test.
+- [ ] Prove the offline fixture and static recording still build and run with
+  Kernel, Cloudflare, Killercoda, Codespaces, and network access unavailable.
 
 ## Likely Areas
 
@@ -55,7 +63,10 @@ The implementation must not add a second production runtime.
 - [ ] `DEM-04` Denied commands cannot reach a shell or third-party executable.
 - [ ] `DEM-05` Simulated behavior is obvious in banner, output, and documentation.
 - [ ] `DEM-06` Reset produces an identical clean state for every session.
-- [ ] `DEM-07` The same fixture drives CI, recordings, Killercoda, and hosted POCs.
+- [ ] `DEM-07` The same fixture drives mandatory CI/static recording and every
+  selected optional surface; unselected surfaces have reviewed decision records.
+- [ ] `DEM-08` Offline execution ignores inherited credentials, reads no seeded
+  secret, performs no network request, and runs with both provider adapters absent.
 
 ## Evidence
 
@@ -68,6 +79,7 @@ The implementation must not add a second production runtime.
 | DEM-05 | content review | pending | pending | pending | pending | pending |
 | DEM-06 | repeated reset hash | pending | pending | pending | pending | pending |
 | DEM-07 | cross-surface fixture test | pending | pending | pending | pending | pending |
+| DEM-08 | offline credential/network/adapter-absence test | pending | pending | pending | pending | pending |
 
 ## Risks and Rollback
 
@@ -80,5 +92,6 @@ The implementation must not add a second production runtime.
 
 ## Completion Gate
 
-Complete only after security review reproduces the adversarial policy suite and
-all showcase owners confirm they consume the same fixture.
+Complete only after security review reproduces the adversarial policy suite,
+the local static path works with every external surface absent, and each
+selected optional showcase confirms it consumes the same fixture.

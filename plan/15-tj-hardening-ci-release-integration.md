@@ -28,6 +28,8 @@ the existing operator-controlled tag release boundary.
 - [ ] Validate workflow syntax, permissions, concurrency, timeouts, and artifact retention.
 - [ ] Generate a versioned demo manifest containing release tag, commit, asset URL,
   checksum, fixture version, protocol version, and rollback version.
+- [ ] Validate the page 10 manifest schema and exact selected-mode/protected-input
+  agreement before promotion; malformed hosted input preserves zero-host.
 - [ ] Promote the selected delivery manifest only after required assets/checksums
   exist and its hosted or zero-host candidate walkthrough passes.
 - [ ] Ensure hosted deployment or zero-host static/scenario content can roll back
@@ -36,14 +38,31 @@ the existing operator-controlled tag release boundary.
   while detecting stale external scenario content.
 - [ ] Keep provider credentials out of pull-request contexts and fork-accessible
   jobs in hosted mode; prove no provider credentials/jobs exist in zero-host mode.
+- [ ] Make every provider POC/deploy job `workflow_dispatch`-only, protected by a
+  reviewed environment and `OI-PROVIDER`, with explicit mode, opt-in ID, budget,
+  expiry, and billable-use confirmation inputs. Do not schedule provider jobs.
+- [ ] Scan the zero-host artifact/dependency/route/workflow inventory for provider
+  SDKs, config/secret names, broker routes, deployment bindings, and executable endpoints.
+- [ ] Validate `demo/surfaces.json` and workflow runner/storage/service cost
+  classifications; fail any active external surface or metered CI job without
+  the matching unexpired secret-free opt-in record.
+- [ ] Add matrix cases for no adapters, each adapter removed, malformed/stale
+  manifests, missing/expired opt-in, missing credentials, disabled kill switch,
+  provider API outage, and no-cross-provider failover.
 - [ ] Add a plan-status verification that checks child/index status consistency
   without treating checkboxes alone as implementation evidence.
-- [ ] Pin a reviewed `cargo-mutants` version and upload each run's `mutants.out`
-  directory even on failure; record tool, Rust, runner, and lockfile identity.
-- [ ] Split mutation feedback into a production-diff PR tier and a complete
-  scheduled/release-candidate tier without broadening `mutants.toml` exclusions.
+- [ ] Pin a reviewed `cargo-mutants` version and retain each run's compressed
+  `mutants.out` even on failure; record tool, Rust, runner, and lockfile identity.
+  Default CI retention is three days with a 100 MiB pre-upload ceiling. If the
+  current storage policy would bill or the ceiling is exceeded, fail before
+  upload and use reviewed local release evidence unless `OI-RELEASE-CI` exists.
+- [ ] Split mutation feedback into a production-diff PR tier and a mandatory,
+  explicit release-candidate full tier without broadening `mutants.toml`
+  exclusions. Leave recurring full-suite scheduling disabled by default.
 - [ ] Benchmark mutant count, baseline duration, `--jobs` values, and identical
   2/4-way shards before changing parallelism or the 30-second timeout floor.
+- [ ] After behavior freezes, align Cargo/npm/lock/formula/changelog metadata to
+  `0.1.13` before final candidate evidence is collected on pages 16-17.
 - [ ] Preserve release preflight requirements that tag, Cargo, npm, changelog,
   HEAD, and expected main ref agree.
 
@@ -57,11 +76,14 @@ until the workflow enforces and reports one.
 
 Future execution should use cargo-mutants' diff input for fast pull-request
 feedback on changed production lines. A no-mutants result is not proof that the
-complete suite passed, and test-only changes receive their mutation evidence
-from the complete tier. The complete tier remains mandatory before release and
-runs on a schedule and by explicit release-candidate dispatch. It may shard one
-identical deterministic mutant list across runners only after a normal baseline
-test passes; every shard must pass and retain its separate output artifact.
+complete suite passed, and test-only changes receive mutation evidence from an
+explicit full-tier dispatch rather than a fabricated diff result. The complete
+tier remains mandatory before release and runs by explicit release-candidate
+dispatch. Recurring scheduling is optional and default-off; enabling it requires
+a reviewed cadence, runner/storage cost classification, retention cap, and stop
+condition. The complete tier may shard one identical deterministic mutant list
+across standard runners only after a normal baseline test passes; every shard
+must pass and retain its separate bounded output artifact.
 
 Use `--in-place` only in disposable CI checkouts and do not combine it with
 local `--jobs`. Keep the existing narrow, explained exclusions until targeted
@@ -69,6 +91,10 @@ mutation listing and replacement tests justify removing one. Do not lower
 timeouts, switch to nextest, increase local jobs, or choose a shard count from
 intuition; benchmark those choices against missed, timeout, unviable, runtime,
 and runner-cost results first.
+
+Mutation optimization is not permission to weaken the v0.1.13 gate. Preserving
+the existing complete mutation command with a reviewed `redesign-not-selected`
+record is valid for this release; workflow redesign may move to a later release.
 
 Revalidate the exact flags against the pinned release before implementation:
 
@@ -82,9 +108,14 @@ Revalidate the exact flags against the pinned release before implementation:
 
 - Pull request workflows: read-only, deterministic, no provider mutation.
 - Scheduled upstream smoke: disposable, no provider API keys for coding agents.
-- Hosted mode: protected staging environment and scoped sandbox credentials.
-- Zero-host mode: static preview plus private/unlisted guided-scenario review,
-  with no provider credential or sandbox deployment job.
+- Hosted mode: manual protected staging environment, scoped sandbox credentials,
+  exact opt-in inputs, and no automatic production/public promotion.
+- Zero-host mode: required local static preview with no provider credential or
+  sandbox deployment job; private/unlisted guided scenarios are included only
+  when selected by `OI-PUBLISH`.
+- Public-repository standard GitHub runners may provide non-billable release
+  evidence under current terms. Larger runners, metered services, or paid
+  artifact retention require `OI-RELEASE-CI`; a billing change never authorizes spend.
 - Tag CD: existing package/crate/release/Homebrew/npm publication order.
 - Demo promotion: protected, reversible, and never a prerequisite for local CLI use.
 
@@ -100,6 +131,9 @@ Revalidate the exact flags against the pinned release before implementation:
 - [ ] `CIC-08` Docs-only workflow skips are compensated by explicit dispatch evidence.
 - [ ] `CIC-09` Mutation PR feedback is bounded while a complete, artifact-backed
   mutation run remains a release gate with no unreviewed exclusion expansion.
+- [ ] `CIC-10` CI proves default zero-host, exact hosted opt-in, adapter removal,
+  secret absence, malformed-config rejection, and no paid-to-paid failover.
+- [ ] `CIC-11` Version metadata is aligned before the final evidence ref is frozen.
 
 ## Evidence
 
@@ -114,6 +148,8 @@ Revalidate the exact flags against the pinned release before implementation:
 | CIC-07 | release preflight tests | pending | pending | pending | pending | pending |
 | CIC-08 | workflow_dispatch run | pending | pending | pending | pending | pending |
 | CIC-09 | diff/full mutation workflow evidence | pending | pending | pending | pending | pending |
+| CIC-10 | mode/adapter/secret failure matrix | pending | pending | pending | pending | pending |
+| CIC-11 | release metadata ordering audit | pending | pending | pending | pending | pending |
 
 ## Risks and Rollback
 
@@ -129,4 +165,6 @@ Revalidate the exact flags against the pinned release before implementation:
 
 Complete only after selected-mode staging/preview, permissions audit,
 stale-artifact tests, and rollback drill pass on the final implementation ref.
-Zero-host requires explicit evidence that no provider workflow or secret exists.
+Zero-host requires explicit evidence that no provider workflow, SDK, route,
+deployment binding, account, or secret exists. Provider staging is manual and
+private; external publication and tag release remain separate operator actions.
