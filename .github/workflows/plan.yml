@@ -1,0 +1,35 @@
+name: Plan Validation
+
+on:
+  pull_request:
+    branches: [main, develop]
+    paths:
+      - 'plan/**'
+      - 'scripts/check-plan.rb'
+      - '.github/workflows/plan.yml'
+  push:
+    branches:
+      - 'release/**'
+    paths:
+      - 'plan/**'
+      - 'scripts/check-plan.rb'
+      - '.github/workflows/plan.yml'
+  workflow_dispatch:
+
+concurrency:
+  group: plan-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    name: Plan Structure
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Validate plan structure
+        run: ruby scripts/check-plan.rb

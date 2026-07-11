@@ -52,6 +52,10 @@ evaluation rubric before spending credits or writing provider-specific code.
   cleanup, cost, concurrency, observability, maintenance, portability, and terms.
 - [ ] Set hard go/no-go thresholds before measurements are collected.
 - [ ] Set monthly budget, per-session ceiling, concurrency ceiling, and alert thresholds.
+- [ ] Define one inclusive cost worksheet covering provider/plan minimums,
+  standby and idle time, image storage, egress, logs, broker/web hosting, failed
+  starts, failed cleanup, and taxes; credits and temporary discounts are recorded
+  separately and cannot make a provider pass.
 - [ ] Define a common benchmark fixture, regions, sample size, and timing method.
 - [ ] Define failure injections: provider timeout, stream loss, setup failure,
   process crash, client disconnect, delete failure, and exhausted quota.
@@ -76,7 +80,8 @@ evaluation rubric before spending credits or writing provider-specific code.
 ## Acceptance Criteria
 
 - [ ] `REQ-01` Mandatory requirements and weighted rubric are approved before POC work.
-- [ ] `REQ-02` Numeric cost, latency, reliability, concurrency, and cleanup gates are approved.
+- [ ] `REQ-02` Numeric cost, latency, reliability, concurrency, and cleanup gates,
+  including the complete cost-accounting boundary, are approved.
 - [ ] `REQ-03` The benchmark fixture and failure suite are provider-neutral.
 - [ ] `REQ-04` Terms and public-use clearance are hard decision gates.
 - [ ] `REQ-05` Data retention and telemetry fields are explicitly minimized.

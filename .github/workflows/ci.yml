@@ -5,6 +5,7 @@ on:
     branches: [main, develop]
     paths-ignore:
       - 'docs/**'
+      - 'plan/**'
       - 'README.md'
       - 'AGENTS.md'
       - 'CLAUDE.md'

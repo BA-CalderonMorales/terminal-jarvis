@@ -38,8 +38,45 @@ the existing operator-controlled tag release boundary.
   jobs in hosted mode; prove no provider credentials/jobs exist in zero-host mode.
 - [ ] Add a plan-status verification that checks child/index status consistency
   without treating checkboxes alone as implementation evidence.
+- [ ] Pin a reviewed `cargo-mutants` version and upload each run's `mutants.out`
+  directory even on failure; record tool, Rust, runner, and lockfile identity.
+- [ ] Split mutation feedback into a production-diff PR tier and a complete
+  scheduled/release-candidate tier without broadening `mutants.toml` exclusions.
+- [ ] Benchmark mutant count, baseline duration, `--jobs` values, and identical
+  2/4-way shards before changing parallelism or the 30-second timeout floor.
 - [ ] Preserve release preflight requirements that tag, Cargo, npm, changelog,
   HEAD, and expected main ref agree.
+
+## Mutation Gate Contract
+
+The current CI runs the complete mutation set on every non-docs pull request
+with `--jobs 2`, a 30-second minimum timeout, no artifacts, and a 25-minute job
+limit. The `mutation_target=90` variable in `scripts/verify.sh` is descriptive;
+it is not currently passed to `cargo-mutants`. Do not claim a 90% threshold
+until the workflow enforces and reports one.
+
+Future execution should use cargo-mutants' diff input for fast pull-request
+feedback on changed production lines. A no-mutants result is not proof that the
+complete suite passed, and test-only changes receive their mutation evidence
+from the complete tier. The complete tier remains mandatory before release and
+runs on a schedule and by explicit release-candidate dispatch. It may shard one
+identical deterministic mutant list across runners only after a normal baseline
+test passes; every shard must pass and retain its separate output artifact.
+
+Use `--in-place` only in disposable CI checkouts and do not combine it with
+local `--jobs`. Keep the existing narrow, explained exclusions until targeted
+mutation listing and replacement tests justify removing one. Do not lower
+timeouts, switch to nextest, increase local jobs, or choose a shard count from
+intuition; benchmark those choices against missed, timeout, unviable, runtime,
+and runner-cost results first.
+
+Revalidate the exact flags against the pinned release before implementation:
+
+- [cargo-mutants CI guidance](https://mutants.rs/ci.html)
+- [diff-scoped mutation](https://mutants.rs/pr-diff.html)
+- [sharding](https://mutants.rs/shards.html)
+- [timeouts](https://mutants.rs/timeouts.html)
+- [output artifacts](https://mutants.rs/mutants-out.html)
 
 ## Workflow Boundaries
 
@@ -61,6 +98,8 @@ the existing operator-controlled tag release boundary.
 - [ ] `CIC-06` Selected delivery rollback works without changing package registry versions.
 - [ ] `CIC-07` Existing release preflight and operator approval are not weakened.
 - [ ] `CIC-08` Docs-only workflow skips are compensated by explicit dispatch evidence.
+- [ ] `CIC-09` Mutation PR feedback is bounded while a complete, artifact-backed
+  mutation run remains a release gate with no unreviewed exclusion expansion.
 
 ## Evidence
 
@@ -74,6 +113,7 @@ the existing operator-controlled tag release boundary.
 | CIC-06 | selected delivery rollback drill | pending | pending | pending | pending | pending |
 | CIC-07 | release preflight tests | pending | pending | pending | pending | pending |
 | CIC-08 | workflow_dispatch run | pending | pending | pending | pending | pending |
+| CIC-09 | diff/full mutation workflow evidence | pending | pending | pending | pending | pending |
 
 ## Risks and Rollback
 

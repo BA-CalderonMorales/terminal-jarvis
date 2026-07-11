@@ -24,6 +24,9 @@
 - **Docs-only PRs** (changes limited to `docs/`, `README.md`, `AGENTS.md`,
   `CLAUDE.md`) skip CI automatically via `paths-ignore`. Trigger manually
   with `workflow_dispatch` when needed.
+- **Plan-only PRs** run the lightweight `Plan Validation` workflow instead of
+  the Rust/package/security/mutation jobs. Run `ruby scripts/check-plan.rb`
+  locally; mixed plan and product changes still run both workflows.
 - The harness capability contract lives in
   [docs/harness-capability-contract.md](docs/harness-capability-contract.md).
   Keep it in sync when adding capabilities or commands.
