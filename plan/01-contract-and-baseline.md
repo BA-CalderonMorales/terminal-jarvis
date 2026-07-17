@@ -2,7 +2,7 @@
 id: "01"
 target: v0.1.13
 title: Contract and Baseline
-status: in-progress
+status: complete
 owner: core-maintainer
 starts_after: []
 completion_requires: []
@@ -128,7 +128,7 @@ never compatible behavior.
 
 | Covers | Method | Artifact | Ref | UTC | Result | Verified by |
 |---|---|---|---|---|---|---|
-| pending | pending | pending | pending | pending | pending | pending |
+| CTR-01, CTR-02, CTR-03, CTR-04, CTR-05, CTR-06, CTR-07 | Baseline verification, isolated CLI probes, static catalog/distribution audit, and contract review | plan/evidence/phase-01-contract-and-baseline.md | ccde452 | 2026-07-17T05:07:06Z | pass | codex-terra |
 
 ## Exit
 
