@@ -8,7 +8,10 @@ require "yaml"
 ROOT = File.expand_path("..", __dir__)
 PLAN_DIR = File.join(ROOT, "plan")
 PAGE_PATTERN = /\A(\d{2})-tj-hardening-[a-z0-9]+(?:-[a-z0-9]+)*\.md\z/
-ALLOWED_STATUSES = %w[proposed ready in-progress blocked review complete].freeze
+ALLOWED_STATUSES = %w[
+  proposed ready in-progress blocked evidence-ready complete
+].freeze
+DEPENDENCY_READY_STATUSES = %w[evidence-ready complete].freeze
 ALLOWED_MODES = %w[pending-page-12-decision kernel-hosted cloudflare-hosted zero-host].freeze
 COMPLETE_RESULTS = %w[pass approved not-selected not-selected-zero-host].freeze
 COST_CLASSES = %w[
@@ -474,7 +477,6 @@ begin
   registered_names = page_paths.map { |_, path| File.basename(path) }
   extra_markdown = Dir.glob(File.join(PLAN_DIR, "*.md")).map { |path| File.basename(path) } -
                    ["index.md"] - registered_names
-  ensure_plan(extra_markdown.empty?, "unregistered plan pages: #{extra_markdown.join(', ')}")
 
   index_metadata, index_text = read_document(index_path)
   %w[
@@ -498,6 +500,9 @@ begin
               "plan/index.md: default maintainer budget must be USD 0")
   ensure_plan(index_metadata["provider_opt_in_required"] == true,
               "plan/index.md: provider opt-in must be required")
+  expected_support_files = ["#{target}-goal.md", "#{target}-final-review.md"]
+  ensure_plan(extra_markdown.sort == expected_support_files.sort,
+              "plan/index.md: support files must be #{expected_support_files.join(', ')}")
 
   pages = {}
   all_criteria = []
@@ -557,8 +562,9 @@ begin
       ensure_plan(pages.key?(dependency), "#{page[:path]}: unknown dependency #{dependency}")
       ensure_plan(dependency.to_i < id.to_i, "#{page[:path]}: dependencies must point backward")
       if page[:metadata]["status"] != "proposed"
-        ensure_plan(pages[dependency][:metadata]["status"] == "complete",
-                    "#{page[:path]}: active page has incomplete dependency #{dependency}")
+        ensure_plan(DEPENDENCY_READY_STATUSES.include?(pages[dependency][:metadata]["status"]),
+                    "#{page[:path]}: active page has dependency #{dependency} " \
+                    "that is not evidence-ready")
       end
     end
     page[:metadata]["blocks"].each do |blocked|
@@ -588,8 +594,8 @@ begin
     ensure_plan(expected_results.include?(sel_08[5]),
                 "#{pages.fetch('12')[:path]}: SEL-08 result is invalid for #{modes.first}")
   else
-    ensure_plan(modes.first == "pending-page-12-decision",
-                "delivery_mode must remain pending until page 12 is complete")
+    ensure_plan(%w[pending-page-12-decision zero-host].include?(modes.first),
+                "delivery_mode before page 12 completion must be pending or zero-host")
   end
   validate_surfaces(modes.first) if pages.fetch("13")[:metadata]["status"] == "complete"
 
