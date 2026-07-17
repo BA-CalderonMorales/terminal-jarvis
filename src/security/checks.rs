@@ -4,7 +4,7 @@ use std::path::Path;
 
 pub fn command_on_path(command: &str) -> bool {
     if command.contains('/') || command.contains('\\') {
-        return Path::new(command).exists();
+        return executable(Path::new(command));
     }
     let Some(path) = env::var_os("PATH") else {
         return false;
@@ -12,7 +12,28 @@ pub fn command_on_path(command: &str) -> bool {
     let path_ext = env::var("PATHEXT").unwrap_or_default();
     candidates(command, cfg!(windows), &path_ext)
         .iter()
-        .any(|name| env::split_paths(&path).any(|dir| dir.join(name).exists()))
+        .any(|name| env::split_paths(&path).any(|dir| executable(&dir.join(name))))
+}
+
+fn executable(path: &Path) -> bool {
+    let Ok(metadata) = path.metadata() else {
+        return false;
+    };
+    if !metadata.is_file() {
+        return false;
+    }
+    executable_mode(&metadata)
+}
+
+#[cfg(unix)]
+fn executable_mode(metadata: &std::fs::Metadata) -> bool {
+    use std::os::unix::fs::PermissionsExt;
+    metadata.permissions().mode() & 0o111 != 0
+}
+
+#[cfg(not(unix))]
+fn executable_mode(_metadata: &std::fs::Metadata) -> bool {
+    true
 }
 
 fn candidates(command: &str, windows: bool, path_ext: &str) -> Vec<String> {
@@ -38,7 +59,7 @@ pub fn missing_env(harness: &Harness) -> Vec<String> {
     match harness.env_mode {
         EnvMode::None => Vec::new(),
         EnvMode::Any => {
-            if harness.env.iter().any(|name| env::var_os(name).is_some()) {
+            if harness.env.iter().any(|name| nonempty_env(name)) {
                 Vec::new()
             } else {
                 harness.env.clone()
@@ -47,35 +68,16 @@ pub fn missing_env(harness: &Harness) -> Vec<String> {
         EnvMode::All => harness
             .env
             .iter()
-            .filter(|name| env::var_os(name).is_none())
+            .filter(|name| !nonempty_env(name))
             .cloned()
             .collect(),
     }
 }
 
-#[cfg(test)]
-mod tests {
-    use super::candidates;
-    use super::command_on_path;
-
-    #[test]
-    fn windows_candidates_include_pathext_extensions() {
-        assert_eq!(
-            candidates("trivy", true, ".EXE;.CMD"),
-            ["trivy", "trivy.EXE", "trivy.CMD"]
-        );
-    }
-
-    #[test]
-    fn executable_extension_is_not_duplicated() {
-        assert_eq!(candidates("trivy.exe", true, ".EXE"), ["trivy.exe"]);
-    }
-
-    #[test]
-    fn backslash_only_path_is_treated_as_explicit() {
-        let name = format!("tj-command-probe-{}\\shim", std::process::id());
-        std::fs::write(&name, "probe").unwrap();
-        assert!(command_on_path(&name));
-        std::fs::remove_file(name).unwrap();
-    }
+fn nonempty_env(name: &str) -> bool {
+    env::var(name).is_ok_and(|value| !value.trim().is_empty())
 }
+
+#[cfg(test)]
+#[path = "checks_test.rs"]
+mod tests;

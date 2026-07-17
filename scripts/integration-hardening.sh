@@ -82,8 +82,15 @@ contains "$tmp/version-info" "catalog:"
 run_tj list >"$tmp/list"
 line_count_is "$tmp/list" "$expected"
 
-run_tj check >"$tmp/check"
-line_count_is "$tmp/check" "$expected"
+if run_tj check >"$tmp/check" 2>"$tmp/check.err"; then
+  fail "zero-ready catalog diagnostics unexpectedly succeeded"
+else
+  code=$?
+fi
+test "$code" = 4 || fail "diagnostics exited $code, expected 4"
+test ! -s "$tmp/check.err" || fail "diagnostics wrote an expected outcome to stderr"
+contains "$tmp/check" "tj.version"
+contains "$tmp/check" "harness.codex.support"
 
 run_tj use codex >"$tmp/use"
 run_tj current >"$tmp/current"
@@ -92,15 +99,19 @@ contains "$tmp/current" "active harness = codex"
 while IFS= read -r harness; do
   run_tj show "$harness" >"$tmp/show"
   contains "$tmp/show" "setup:"
-  contains "$tmp/show" "agent loop:"
+  contains "$tmp/show" "support:"
   for capability in $capabilities; do
-    contains "$tmp/show" "$capability:"
+    contains "$tmp/show" "capability=$capability support="
   done
 done <"$harnesses"
 
 for capability in $capabilities; do
   run_tj plan codex "$capability" >"$tmp/plan"
   contains "$tmp/plan" "codex:$capability"
+  contains "$tmp/plan" "support:"
+  contains "$tmp/plan" "evidence:"
+  contains "$tmp/plan" "effect:"
+  contains "$tmp/plan" "platforms:"
   contains "$tmp/plan" "command:"
   contains "$tmp/plan" "env:"
 done

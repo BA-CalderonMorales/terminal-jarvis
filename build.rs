@@ -5,6 +5,7 @@ use std::path::{Path, PathBuf};
 
 fn main() {
     println!("cargo:rerun-if-changed=harnesses");
+    println!("cargo:rerun-if-env-changed=TERMINAL_JARVIS_EVIDENCE_AS_OF");
     let root = Path::new("harnesses");
     let mut files = Vec::new();
     collect(root, root, &mut files).expect("catalog files are readable");

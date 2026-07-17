@@ -1,3 +1,12 @@
 summary = "Run OpenCode headlessly when the local CLI supports it."
 command = "opencode"
 args = ["run"]
+support = "unknown"
+evidence = "deterministic"
+effect = "dangerous"
+network = true
+interaction = "noninteractive"
+platforms = []
+executable = "opencode"
+source = "internal:phase-01@fab5848"
+verified_at = "2026-07-17T04:59:27Z"

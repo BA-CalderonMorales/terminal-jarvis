@@ -40,8 +40,7 @@ fn default_output_is_structured_across_the_core_read_only_surface() {
     for (args, title) in [
         (&["--help"][..], "Commands"),
         (&["list"], "Available Harnesses"),
-        (&["check"], "Harness Readiness"),
-        (&["show", "codex"], "Capabilities"),
+        (&["show", "codex"], "Capability Truth"),
         (&["plan", "codex", "headless"], "Plan: codex headless"),
         (&["version", "--verbose"], "Terminal Jarvis"),
         (&["update"], "Harness Updates"),
@@ -50,10 +49,15 @@ fn default_output_is_structured_across_the_core_read_only_surface() {
         (&["cache", "status"], "Cache Status"),
         (&["security", "audit"], "Security Audit"),
         (&["gate", "status"], "Security Gate"),
-        (&["templates"], "Legacy Command"),
     ] {
         assert_table(&tj(args, &home), title);
     }
+    let check = tj(&["check"], &home);
+    assert_eq!(check.status.code(), Some(4));
+    assert!(stdout(&check).contains("Terminal Jarvis Diagnostics"));
+    let removed = tj(&["templates"], &home);
+    assert_eq!(removed.status.code(), Some(4));
+    assert!(String::from_utf8_lossy(&removed.stderr).contains("removed"));
 }
 
 #[test]

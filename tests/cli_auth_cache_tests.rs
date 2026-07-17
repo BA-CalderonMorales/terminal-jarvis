@@ -46,7 +46,7 @@ fn cache_status_reports_wrapper_cache_metadata() {
     assert!(output.status.success());
     let body = stdout(&output);
     assert!(body.contains(&format!("cache: {}", cache.display())));
-    assert!(body.contains("distribution: github-release-cache"));
+    assert!(body.contains("distribution: npm"));
     assert!(body.contains(&format!("release: {RELEASE}")));
 }
 
@@ -54,7 +54,7 @@ fn cache_status_reports_wrapper_cache_metadata() {
 fn cache_without_subcommand_reports_status() {
     let (output, _) = tj(&["cache"]);
     assert!(output.status.success());
-    assert!(stdout(&output).contains("distribution: github-release-cache"));
+    assert!(stdout(&output).contains("distribution: npm"));
 }
 
 #[test]

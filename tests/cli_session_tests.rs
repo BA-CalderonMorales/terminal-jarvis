@@ -36,6 +36,6 @@ fn corrupt_session_error_reaches_stderr() {
         .env("TERMINAL_JARVIS_HOME", h)
         .output()
         .unwrap();
-    assert_eq!(o.status.code(), Some(2));
+    assert_eq!(o.status.code(), Some(3));
     assert!(se(&o).contains("stream did not contain valid UTF-8"));
 }

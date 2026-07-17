@@ -1,5 +1,7 @@
 #[path = "table_layout.rs"]
 mod layout;
+#[path = "table_width.rs"]
+mod width;
 
 use super::style;
 
@@ -38,6 +40,10 @@ pub fn fields(title: &str, values: &[(&str, String)]) -> String {
     render(title, &["FIELD", "VALUE"], &rows)
 }
 
+pub fn terminal_width() -> usize {
+    width::terminal_width()
+}
+
 fn border(widths: &[usize]) -> String {
     format!(
         "+{}+\n",
@@ -53,7 +59,7 @@ fn row<T: AsRef<str>>(values: &[T], widths: &[usize]) -> String {
     let cells = widths
         .iter()
         .enumerate()
-        .map(|(index, width)| format!(" {:width$} ", values[index].as_ref(), width = width))
+        .map(|(index, target)| format!(" {} ", width::pad(values[index].as_ref(), *target)))
         .collect::<Vec<_>>();
     format!("|{}|", cells.join("|"))
 }

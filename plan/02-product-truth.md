@@ -2,7 +2,7 @@
 id: "02"
 target: v0.1.13
 title: Product Truth
-status: proposed
+status: in-progress
 owner: core-maintainer
 starts_after: ["01"]
 completion_requires: ["01"]
@@ -66,6 +66,41 @@ The workstreams below may run in parallel after Phase 01.
 - Validate corrupt/missing caches, stale path entries, wrong architecture,
   unsupported libc/platform, read-only homes, missing catalog, and channel conflicts.
 - Keep packaging and update operations nonpublishing throughout this phase.
+
+## WIP Checkpoint - 2026-07-17
+
+Implemented in the current branch checkpoint:
+
+- strict metadata and contradiction validation for all 225 capability rows,
+  currently classified as 99 `stub`, 23 `disabled`, and 103 `unknown`, with no
+  promoted executable-support claim;
+- catalog-derived list/show/plan/run truth, freshness and platform guards, and
+  pre-spawn rejection evidence for manual, stub, unsupported, disabled,
+  unknown, stale, incompatible-platform, dangerous, and non-TTY interactive paths;
+- canonical local diagnostics with rich/plain/schema-v1 JSON, redaction,
+  readiness, path/platform/presentation/catalog/gate/config/cache/update/checksum
+  records, and read-only permission inspection;
+- strict option parsing, stable handled-error envelopes, lifecycle preview and
+  bound intent, byte-preserved child streams, exact and signal exits, and
+  display-cell-aware width handling;
+- shared distribution-channel and update-route normalization plus initial npm
+  platform, checksum, extraction, and recovery hardening.
+
+Remaining before this phase can become evidence-ready:
+
+1. Persist and validate npm cache identity and integrity metadata for target,
+   architecture, archive, binary, catalog, and gates; preserve valid read-only
+   reuse and safe staged recovery; export the verified checksum state.
+2. Add the canonical self-update command/help forms required by Phase 01,
+   remove the unreachable alternate `check` dispatch, and stop update summaries
+   from exposing commands for guarded rows.
+3. Generate all 225 public support rows with evidence, freshness, source, and
+   platform fields; derive all five first-class non-promotion decisions from
+   data; remove blanket support claims from README and support documentation.
+4. Add interactive PTY confirmation evidence and close any remaining
+   diagnostic/distribution conflict cells.
+5. Run the complete gates on one committed ref and populate the evidence table;
+   the current 224-test working-tree pass is not accepted phase evidence.
 
 ## Work
 

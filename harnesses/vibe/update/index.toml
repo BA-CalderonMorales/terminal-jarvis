@@ -1,3 +1,12 @@
 summary = "Update Mistral Vibe without interactive setup flows."
 command = "vibe"
 args = ["update"]
+support = "unknown"
+evidence = "deterministic"
+effect = "state-changing"
+network = true
+interaction = "noninteractive"
+platforms = []
+executable = "vibe"
+source = "internal:phase-01@fab5848"
+verified_at = "2026-07-17T04:59:27Z"

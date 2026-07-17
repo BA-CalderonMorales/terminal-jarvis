@@ -32,30 +32,28 @@ fn temp_home() -> String {
         .to_string()
 }
 
-fn stdout(output: &Output) -> String {
-    String::from_utf8_lossy(&output.stdout).to_string()
-}
-fn stderr(output: &Output) -> String {
-    String::from_utf8_lossy(&output.stderr).to_string()
-}
+#[rustfmt::skip] fn stdout(output: &Output) -> String { String::from_utf8_lossy(&output.stdout).to_string() }
+#[rustfmt::skip] fn stderr(output: &Output) -> String { String::from_utf8_lossy(&output.stderr).to_string() }
 #[test]
-fn list_outputs_promoted_harnesses() {
+fn list_outputs_catalog_truth_without_promotion_claims() {
     let output = tj(&["list"]);
     assert!(output.status.success());
     let body = stdout(&output);
     assert_eq!(body.lines().count(), 25);
-    assert!(body.contains("codex - OpenAI coding agent CLI"));
-    assert!(body.contains("vibe - Minimal CLI coding agent by Mistral AI"));
+    assert!(body.contains("codex support="));
+    assert!(body.contains("vibe support="));
+    assert!(!body.contains("verified=1"));
 }
 
 #[test]
-fn show_includes_setup_and_agent_loop() {
+fn show_includes_setup_and_capability_truth() {
     let output = tj(&["show", "aider"]);
     assert!(output.status.success());
     let body = stdout(&output);
     assert!(body.contains("setup: set one of:"));
-    assert!(body.contains("download: Install Aider"));
-    assert!(body.contains("ui: Open the interactive Aider interface."));
+    assert!(body.contains("capability=download support=unknown"));
+    assert!(body.contains("summary=Install Aider"));
+    assert!(body.contains("capability=ui support=unknown"));
 }
 
 #[test]
@@ -76,25 +74,24 @@ fn use_and_current_round_trip_active_harness() {
 
 #[test]
 fn check_reports_setup_readiness() {
-    let output = tj(&["check"]);
-    assert!(output.status.success());
+    let output = tj(&["check", "--verbose"]);
+    assert_eq!(output.status.code(), Some(4));
     let body = stdout(&output);
-    assert!(body.contains("jules binary=missing env=ready"));
-    assert!(body
-        .lines()
-        .any(|line| line.starts_with("aider binary=") && line.contains(" env=")));
+    assert!(body.contains("harness.jules.readiness\tunsupported\terror"));
+    assert!(body.contains("harness.aider.executable\t"));
 }
 
 #[test]
 fn unknown_harness_fails_with_message() {
     let output = tj(&["show", "missing"]);
-    assert_eq!(output.status.code(), Some(2));
+    assert_eq!(output.status.code(), Some(4));
     assert!(stderr(&output).contains("unknown harness 'missing'"));
 }
 
 #[test]
-fn yolo_placeholder_runs_and_fails_closed() {
+fn disabled_yolo_fails_before_placeholder_spawn() {
     let output = tj(&["run", "aider", "yolo"]);
-    assert_eq!(output.status.code(), Some(1));
-    assert!(stdout(&output).contains("danger yolo mode is not configured for aider"));
+    assert_eq!(output.status.code(), Some(4));
+    assert!(stdout(&output).is_empty());
+    assert!(stderr(&output).contains("aider:yolo is disabled"));
 }

@@ -3,6 +3,7 @@ use crate::contracts::Capability;
 #[derive(Debug, Eq, PartialEq)]
 pub enum Action {
     Help,
+    CommandHelp(String),
     List,
     Check,
     Current,

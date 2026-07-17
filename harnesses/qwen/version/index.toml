@@ -1,3 +1,12 @@
 summary = "Print or verify the installed Qwen version."
 command = "sh"
 args = ["-c", "qwen --version"]
+support = "unknown"
+evidence = "deterministic"
+effect = "read-only"
+network = false
+interaction = "noninteractive"
+platforms = []
+executable = "sh"
+source = "internal:phase-01@fab5848"
+verified_at = "2026-07-17T04:59:27Z"

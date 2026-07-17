@@ -50,40 +50,42 @@ mod unix {
     }
 
     #[test]
-    fn run_accepts_tool_launch_and_prompt_forms() {
+    fn unknown_run_rows_do_not_launch_fake_tools() {
         let home = temp_home();
         let (bin, old_path) = fake_bin("opencode");
         let path = format!("{bin}:{old_path}");
 
         let launch = tj(&["run", "opencode"], &home, &path);
-        assert!(launch.status.success());
-        assert_eq!(stdout(&launch), "\n");
+        assert_eq!(launch.status.code(), Some(4));
+        assert!(stdout(&launch).is_empty());
+        assert!(stderr(&launch).contains("unknown"));
 
         let prompt = tj(&["run", "opencode", "yo!", "fix", "this"], &home, &path);
-        assert!(prompt.status.success());
-        assert_eq!(stdout(&prompt), "run yo! fix this\n");
+        assert_eq!(prompt.status.code(), Some(4));
+        assert!(stdout(&prompt).is_empty());
     }
 
     #[test]
-    fn direct_tool_invocation_forwards_args_to_ui_command() {
+    fn direct_tool_help_is_parsed_but_unknown_support_blocks_launch() {
         let home = temp_home();
         let (bin, old_path) = fake_bin("opencode");
         let path = format!("{bin}:{old_path}");
 
         let output = tj(&["opencode", "--help"], &home, &path);
-        assert!(output.status.success());
-        assert_eq!(stdout(&output), "--help\n");
+        assert_eq!(output.status.code(), Some(4));
+        assert!(stdout(&output).is_empty());
+        assert!(stderr(&output).contains("opencode:ui is unknown"));
     }
 
     #[test]
-    fn missing_harness_binary_points_to_install_guidance() {
+    fn support_guard_precedes_missing_binary_diagnosis() {
         let home = temp_home();
         let empty = std::path::PathBuf::from(temp_home()).join("bin");
         fs::create_dir_all(&empty).unwrap();
 
         let output = tj(&["run", "opencode"], &home, &empty.to_string_lossy());
 
-        assert_eq!(output.status.code(), Some(2));
-        assert!(stderr(&output).contains("terminal-jarvis install opencode"));
+        assert_eq!(output.status.code(), Some(4));
+        assert!(stderr(&output).contains("opencode:ui is unknown"));
     }
 }

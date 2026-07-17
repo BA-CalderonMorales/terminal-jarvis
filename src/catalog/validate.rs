@@ -1,5 +1,18 @@
 use crate::contracts::{Capability, EnvMode, Harness};
 use std::collections::BTreeSet;
+use std::io;
+
+pub(super) fn checked(harnesses: Vec<Harness>) -> io::Result<Vec<Harness>> {
+    let errors = validate(&harnesses);
+    if errors.is_empty() {
+        Ok(harnesses)
+    } else {
+        Err(io::Error::new(
+            io::ErrorKind::InvalidData,
+            errors.join("\n"),
+        ))
+    }
+}
 
 pub fn validate(harnesses: &[Harness]) -> Vec<String> {
     let mut errors = Vec::new();
@@ -27,7 +40,14 @@ pub fn validate(harnesses: &[Harness]) -> Vec<String> {
 }
 
 fn validate_plans(harness: &Harness, errors: &mut Vec<String>) {
+    let mut capabilities = BTreeSet::new();
     for plan in &harness.capabilities {
+        if !capabilities.insert(plan.capability) {
+            errors.push(format!(
+                "{} has duplicate capability {}",
+                harness.name, plan.capability
+            ));
+        }
         if plan.command.command.trim().is_empty() {
             errors.push(format!(
                 "{}:{} has an empty command",
@@ -40,6 +60,14 @@ fn validate_plans(harness: &Harness, errors: &mut Vec<String>) {
         if plan.capability == Capability::Yolo && !mentions_danger(&plan.summary) {
             errors.push(format!("{} yolo summary must mention danger", harness.name));
         }
+        super::truth::validate(&harness.name, plan, errors);
+    }
+    if harness.capabilities.len() != Capability::ALL.len() {
+        errors.push(format!(
+            "{} must define exactly {} capabilities",
+            harness.name,
+            Capability::ALL.len()
+        ));
     }
 }
 

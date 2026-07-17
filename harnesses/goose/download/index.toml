@@ -1,3 +1,12 @@
 summary = "Install Goose from its documented distribution channel."
 command = "sh"
 args = ["-c", "curl -fsSL https://github.com/block/goose/releases/download/stable/download_cli.sh | bash"]
+support = "unknown"
+evidence = "deterministic"
+effect = "state-changing"
+network = true
+interaction = "noninteractive"
+platforms = []
+executable = "sh"
+source = "internal:phase-01@fab5848"
+verified_at = "2026-07-17T04:59:27Z"

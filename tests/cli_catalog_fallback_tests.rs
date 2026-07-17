@@ -60,7 +60,8 @@ fn list_works_without_filesystem_catalog() {
     assert!(output.status.success());
     let body = stdout(&output);
     assert!(body.lines().count() > 0);
-    assert!(body.contains("codex - OpenAI coding agent CLI"));
+    assert!(body.contains("codex support="));
+    assert!(body.contains("OpenAI coding agent CLI"));
 }
 
 #[test]
@@ -75,5 +76,5 @@ fn empty_catalog_env_still_uses_embedded_catalog() {
 fn explicit_missing_catalog_path_stays_strict() {
     let cwd = temp_dir();
     let output = tj_catalog(&["list"], &cwd, "harnesses");
-    assert_eq!(output.status.code(), Some(2));
+    assert_eq!(output.status.code(), Some(3));
 }

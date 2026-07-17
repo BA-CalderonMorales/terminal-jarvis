@@ -1,8 +1,11 @@
-use crate::contracts::{Capability, CapabilityPlan, CommandPlan, EnvMode, Harness};
+use crate::contracts::{Capability, CapabilityPlan, Harness};
 use std::collections::BTreeMap;
 use std::io;
 
-use super::parser::{self, Fields};
+use super::{
+    metadata,
+    parser::{self, Fields},
+};
 
 include!(concat!(env!("OUT_DIR"), "/embedded_catalog.rs"));
 
@@ -13,10 +16,11 @@ pub fn load() -> io::Result<Vec<Harness>> {
             grouped.entry(name).or_default().insert(file, data);
         }
     }
-    grouped
+    let harnesses = grouped
         .into_values()
         .map(|files| load_harness(&files))
-        .collect()
+        .collect::<io::Result<Vec<_>>>()?;
+    super::validate::checked(harnesses)
 }
 
 fn load_harness(files: &BTreeMap<&str, &str>) -> io::Result<Harness> {
@@ -25,16 +29,7 @@ fn load_harness(files: &BTreeMap<&str, &str>) -> io::Result<Harness> {
     for capability in Capability::ALL {
         capabilities.push(load_capability(files, capability)?);
     }
-    Ok(Harness {
-        name: parser::string(&meta, "name").map_err(invalid)?,
-        display: parser::string(&meta, "display").map_err(invalid)?,
-        description: parser::string(&meta, "description").map_err(invalid)?,
-        binary: parser::string(&meta, "binary").map_err(invalid)?,
-        env_mode: EnvMode::parse(&parser::string(&meta, "env_mode").map_err(invalid)?)
-            .map_err(invalid)?,
-        env: parser::list(&meta, "env").map_err(invalid)?,
-        capabilities,
-    })
+    metadata::harness(&meta, capabilities).map_err(invalid)
 }
 
 fn load_capability(
@@ -43,12 +38,7 @@ fn load_capability(
 ) -> io::Result<CapabilityPlan> {
     let path = format!("{}/index.toml", capability.as_str());
     let data = fields(files, &path)?;
-    let command = parser::string(&data, "command").map_err(invalid)?;
-    Ok(CapabilityPlan {
-        capability,
-        summary: parser::string(&data, "summary").map_err(invalid)?,
-        command: CommandPlan::new(command, parser::list(&data, "args").map_err(invalid)?),
-    })
+    metadata::capability(&data, capability).map_err(invalid)
 }
 
 fn fields(files: &BTreeMap<&str, &str>, path: &str) -> io::Result<Fields> {

@@ -46,7 +46,7 @@ fn passthrough_channel_suffix() {
         clear();
         std::env::set_var("TERMINAL_JARVIS_DISTRIBUTION", "custom");
         let out = text(false, Path::new("/cat"), Path::new("/home"));
-        assert!(out.contains(" (custom)"));
+        assert!(out.contains(" (unknown)"));
     });
 }
 #[test]
@@ -64,15 +64,9 @@ fn verbose_text_reports_fields() {
 }
 #[test]
 fn homebrew_path_detection() {
-    assert_eq!(
-        homebrew_path("/opt/homebrew/bin/tj"),
-        Some("homebrew".to_string())
-    );
-    assert_eq!(
-        homebrew_path("/usr/local/Cellar/tj"),
-        Some("homebrew".to_string())
-    );
-    assert_eq!(homebrew_path("/usr/local/bin/tj"), None);
+    assert!(crate::distribution::homebrew_path("/opt/homebrew/bin/tj"));
+    assert!(crate::distribution::homebrew_path("/usr/local/Cellar/tj"));
+    assert!(!crate::distribution::homebrew_path("/usr/local/bin/tj"));
 }
 
 #[test]

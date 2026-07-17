@@ -1,46 +1,31 @@
 use super::{style, table};
 use std::process::{Command, Stdio};
 
+#[path = "self_update_route.rs"]
+mod route;
+
+#[cfg(test)]
+use route::{homebrew_path, wrapper_path};
+
 pub fn run(dry_run: bool) -> Result<(i32, String), String> {
-    let (command, args) = update_command();
     if dry_run {
-        return Ok((0, dry_run_output(command, args)));
+        return Ok((0, preview()));
     }
-    run_cmd(command, args)
+    match route::selected() {
+        route::Route::Command { command, args, .. } => run_cmd(command, args),
+        route::Route::Manual { guidance, .. } => Err(guidance.to_string()),
+    }
 }
 
-fn update_command() -> (&'static str, &'static [&'static str]) {
-    if wrapper_path().is_some() {
-        return ("npm", &["install", "-g", "terminal-jarvis@latest"]);
+pub fn preview() -> String {
+    match route::selected() {
+        route::Route::Command { command, args, .. } => dry_run_output(command, args),
+        route::Route::Manual { guidance, .. } => guidance_output(guidance),
     }
-    let raw = std::env::var("TERMINAL_JARVIS_DISTRIBUTION").unwrap_or_default();
-    match raw.as_str() {
-        "github-release" | "github-release-cache" => {
-            return ("npm", &["install", "-g", "terminal-jarvis@latest"])
-        }
-        _ => {}
-    }
-    let path = std::env::current_exe()
-        .ok()
-        .map(|binary| binary.to_string_lossy().to_string())
-        .unwrap_or_default();
-    if homebrew_path(&path) {
-        return ("brew", &["upgrade", "terminal-jarvis"]);
-    }
-    ("cargo", &["install", "terminal-jarvis"])
 }
 
-fn homebrew_path(path: &str) -> bool {
-    path.contains("homebrew") || path.contains("Cellar")
-}
-
-fn wrapper_path() -> Option<std::path::PathBuf> {
-    let wrapper = std::env::var("TERMINAL_JARVIS_WRAPPER").ok()?;
-    let pkg = std::path::Path::new(&wrapper)
-        .parent()
-        .and_then(std::path::Path::parent)?
-        .join("package.json");
-    pkg.exists().then_some(pkg)
+pub fn route_name() -> &'static str {
+    route::name()
 }
 
 fn run_cmd(cmd: &str, args: &[&str]) -> Result<(i32, String), String> {
@@ -76,6 +61,13 @@ fn dry_run_output(command: &str, args: &[&str]) -> String {
         return format!("terminal-jarvis update plan: {value}\n");
     }
     table::fields("Self-Update Plan", &[("COMMAND", value)])
+}
+
+fn guidance_output(guidance: &str) -> String {
+    if style::plain() {
+        return format!("terminal-jarvis update plan: {guidance}\n");
+    }
+    table::fields("Self-Update Plan", &[("NEXT ACTION", guidance.to_string())])
 }
 
 fn success_output(command: &str) -> String {

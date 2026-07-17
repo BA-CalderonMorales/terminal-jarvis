@@ -1,10 +1,19 @@
-use super::{Capability, CommandPlan, EnvMode};
+use super::{Capability, CommandPlan, Effect, EnvMode, EvidenceMode, Interaction, SupportState};
 
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct CapabilityPlan {
     pub capability: Capability,
     pub summary: String,
     pub command: CommandPlan,
+    pub support: SupportState,
+    pub evidence: EvidenceMode,
+    pub effect: Effect,
+    pub network: bool,
+    pub interaction: Interaction,
+    pub platforms: Vec<String>,
+    pub executable: String,
+    pub source: String,
+    pub verified_at: String,
 }
 
 #[derive(Clone, Debug, Eq, PartialEq)]

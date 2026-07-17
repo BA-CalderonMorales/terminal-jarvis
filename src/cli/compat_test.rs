@@ -1,12 +1,8 @@
 use super::*;
-use crate::contracts::{Capability, CapabilityPlan, CommandPlan, EnvMode, Harness};
+use crate::contracts::{Capability, CapabilityPlan, EnvMode, Harness};
 
 fn cap(c: Capability) -> CapabilityPlan {
-    CapabilityPlan {
-        capability: c,
-        summary: c.as_str().to_string(),
-        command: CommandPlan::new(c.as_str().to_string(), vec![]),
-    }
+    crate::cli::test_support::plan(c, c.as_str(), vec![])
 }
 fn harness(name: &str) -> Harness {
     Harness {
@@ -49,8 +45,4 @@ fn config_routes() {
     let reset = config(&["reset".to_string()], p, h, None).unwrap();
     assert!(reset.contains("not automatic"));
     assert!(config(&["bogus".to_string()], p, h, None).is_err());
-}
-#[test]
-fn legacy_message() {
-    assert!(legacy("templates").contains("Legacy Command"));
 }

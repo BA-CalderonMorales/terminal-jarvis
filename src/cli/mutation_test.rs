@@ -1,17 +1,17 @@
-use super::super::{experimental, presentation_args};
+use super::super::experimental;
+use super::{parse_cli, OutputMode};
 
 #[test]
-fn presentation_flags_are_removed_and_accumulated() {
-    let (args, plain, no_color) = presentation_args(["tj", "--plain", "--no-color", "list"]);
-    assert_eq!(args, ["tj", "list"]);
-    assert!(plain);
-    assert!(no_color);
-    let (_, plain, no_color) = presentation_args(["tj", "--plain", "list"]);
-    assert!(plain);
-    assert!(!no_color);
-    let (_, plain, no_color) = presentation_args(["tj", "--no-color", "list"]);
-    assert!(!plain);
-    assert!(no_color);
+fn presentation_flags_work_before_or_after_the_command() {
+    for args in [
+        ["tj", "--plain", "--no-color", "list"],
+        ["tj", "list", "--plain", "--no-color"],
+    ] {
+        let parsed = parse_cli(args).unwrap();
+        assert_eq!(parsed.options.output, OutputMode::Plain);
+        assert!(parsed.options.no_color);
+    }
+    assert!(parse_cli(["tj", "--plain", "--json", "list"]).is_err());
 }
 
 #[test]

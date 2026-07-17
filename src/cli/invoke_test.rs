@@ -1,58 +1,34 @@
 use super::*;
-use crate::contracts::{CapabilityPlan, EnvMode, Harness};
+use crate::contracts::{EnvMode, Harness};
 
-fn fake_harness() -> Vec<Harness> {
+fn harness(command: &str, args: Vec<String>) -> Vec<Harness> {
     vec![Harness {
         name: "vibe".into(),
         display: "Vibe".into(),
-        description: "t".into(),
-        binary: "sh".into(),
+        description: "test fixture".into(),
+        binary: command.into(),
         env_mode: EnvMode::None,
         env: vec![],
-        capabilities: vec![CapabilityPlan {
-            capability: Capability::Download,
-            summary: "d".into(),
-            command: CommandPlan::new("sh".into(), vec!["-c".into(), "exit 3".into()]),
-        }],
+        capabilities: vec![crate::cli::test_support::plan(
+            Capability::Download,
+            command,
+            args,
+        )],
     }]
 }
 
 #[test]
-fn failing_command_diagnoses_harness_capability_and_exit() {
-    let (code, body) = capability(&fake_harness(), "vibe", Capability::Download, &[]).unwrap();
+fn failing_command_preserves_exit_without_crossing_streams() {
+    let plans = harness("sh", vec!["-c".into(), "exit 3".into()]);
+    let (code, body) = capability(&plans, "vibe", Capability::Download, &[]).unwrap();
     assert_eq!(code, 3);
-    assert!(body.contains("vibe"), "harness: {body}");
-    assert!(body.contains("download"), "capability: {body}");
-    assert!(body.contains("exit 3"), "command: {body}");
-    assert!(body.contains('3'), "exit code: {body}");
-}
-
-fn pipefail_harness() -> Vec<Harness> {
-    vec![Harness {
-        name: "vibe".into(),
-        display: "Vibe".into(),
-        description: "t".into(),
-        binary: "sh".into(),
-        env_mode: EnvMode::None,
-        env: vec![],
-        capabilities: vec![CapabilityPlan {
-            capability: Capability::Download,
-            summary: "d".into(),
-            command: CommandPlan::new(
-                "sh".into(),
-                vec!["-c".into(), "echo pipefail >&2; exit 3".into()],
-            ),
-        }],
-    }]
+    assert!(body.is_empty());
 }
 
 #[test]
-fn failing_command_appends_pipefail_hint() {
-    let (code, body) = capability(&pipefail_harness(), "vibe", Capability::Download, &[]).unwrap();
-    assert_eq!(code, 3);
-    assert!(body.contains("pipefail"), "stderr not surfaced: {body}");
-    assert!(
-        body.contains("bash -c"),
-        "pipefail hint not appended: {body}"
-    );
+fn missing_binary_maps_to_shell_not_found_exit() {
+    let plans = harness("terminal-jarvis-definitely-missing", vec![]);
+    let (code, body) = capability(&plans, "vibe", Capability::Download, &[]).unwrap();
+    assert_eq!(code, 127);
+    assert!(body.is_empty());
 }

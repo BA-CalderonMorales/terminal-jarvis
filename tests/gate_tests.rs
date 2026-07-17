@@ -1,6 +1,9 @@
 use std::process::{Command, Output};
 use std::sync::atomic::{AtomicUsize, Ordering};
 
+#[path = "phase02_fixture/catalog.rs"]
+mod catalog;
+
 static TEMP_ID: AtomicUsize = AtomicUsize::new(0);
 
 fn home() -> String {
@@ -36,15 +39,19 @@ fn gate_is_disabled_by_default_and_can_be_enabled() {
 
 #[test]
 fn enabled_missing_trivy_blocks_harness_execution_with_guidance() {
-    let home = home();
+    let root = home();
+    let home = format!("{root}/home");
+    let catalog_root = std::path::Path::new(&root).join("catalog");
+    catalog::write(&catalog_root, "expected", "expected");
     assert!(tj(&["gate", "enable", "trivy"], &home).status.success());
     let output = Command::new(env!("CARGO_BIN_EXE_terminal-jarvis"))
-        .args(["--plain", "run", "aider", "yolo"])
+        .args(["--plain", "run", "fixture", "headless"])
         .env("TERMINAL_JARVIS_HOME", home)
+        .env("TERMINAL_JARVIS_CATALOG", catalog_root)
         .env("PATH", "")
         .output()
         .expect("terminal-jarvis runs");
-    assert_eq!(output.status.code(), Some(2));
+    assert_eq!(output.status.code(), Some(5));
     let stderr = String::from_utf8_lossy(&output.stderr);
     assert!(stderr.contains("optional gate 'trivy' is enabled"));
     assert!(stderr.contains("trivy.dev/docs/latest/getting-started/installation"));

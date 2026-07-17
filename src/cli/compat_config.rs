@@ -56,22 +56,3 @@ pub fn reset(version: &str) -> String {
         table::fields("Configuration Reset", &[("NEXT STEP", note)])
     )
 }
-
-pub fn legacy(command: &str) -> String {
-    if style::plain() {
-        return format!(
-            "{command} was removed with the v0.1 catalog rewrite.\nUse harness commands instead: list, show, plan, run, install, update, auth, security.\n"
-        );
-    }
-    format!(
-        "{}\n{}",
-        style::warning(&format!("{command} is a legacy command.")),
-        table::fields(
-            "Legacy Command",
-            &[(
-                "NEXT STEP",
-                "Use list, show, plan, run, install, update, auth, or security.".to_string(),
-            )],
-        )
-    )
-}

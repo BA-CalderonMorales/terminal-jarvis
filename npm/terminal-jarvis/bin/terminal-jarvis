@@ -69,22 +69,29 @@ function sourceCandidates() {
   ];
 }
 
-async function downloadRelease() {
-  const platform = platformName();
-  const archive = archiveName();
-  const base = releaseBase();
+async function downloadRelease(options = {}) {
+  const hostPlatform = options.platform || process.platform;
+  const hostArch = options.arch || process.arch;
+  const runtime = options.runtime || runtimePlatformDetails(hostPlatform);
+  const platform = platformNameFor(hostPlatform, hostArch, runtime);
+  const archive = archiveName(hostPlatform, hostArch, runtime);
+  const base = options.releaseBase || releaseBase();
   const releaseUrl = `${base}/${archive}`;
   const checksumUrl = `${releaseUrl}.sha256`;
-  const cache = cacheRoot();
+  const cache = options.cache || cacheRoot();
+  const env = options.env || process.env;
+  const fetch = options.fetchFile || fetchFile;
+  const checksum = options.verifyChecksum || verifyChecksum;
+  const extract = options.unpack || unpack;
   const root = path.join(cache, pkg.version, platform);
   const unpacked = path.join(root, `${pkg.name}-${pkg.version}-${platform}`);
-  const binary = path.join(unpacked, "bin", executableName());
+  const binary = path.join(unpacked, "bin", executableName(hostPlatform));
   const catalog = path.join(unpacked, "harnesses");
   if (cachedReleaseUsable(binary, catalog)) {
     fs.chmodSync(binary, 0o755);
     return { binary, source: "github-release-cache", releaseUrl, cache, catalog };
   }
-  if (process.env.TERMINAL_JARVIS_NO_DOWNLOAD) {
+  if (env.TERMINAL_JARVIS_NO_DOWNLOAD) {
     if (fs.existsSync(binary) || fs.existsSync(catalog)) {
       throw new Error(`cached release is not usable: ${root}`);
     }
@@ -94,22 +101,26 @@ async function downloadRelease() {
   fs.mkdirSync(root, { recursive: true });
   const archivePath = path.join(root, archive);
   try {
-    await fetchFile(releaseUrl, archivePath);
-    await verifyChecksum(checksumUrl, archivePath);
-    unpack(archivePath, root);
+    await fetch(releaseUrl, archivePath);
+    await checksum(checksumUrl, archivePath);
+    extract(archivePath, root, hostPlatform);
+    if (!fs.existsSync(binary)) throw new Error(`release archive missing ${binary}`);
+    if (!fs.existsSync(catalog)) throw new Error(`release archive missing ${catalog}`);
+    if (!cachedBinaryUsable(binary)) throw new Error(`release binary is not usable: ${binary}`);
   } catch (error) {
     fs.rmSync(root, { recursive: true, force: true });
     throw downloadFailure(releaseUrl, error);
   }
-  if (!fs.existsSync(binary)) throw new Error(`release archive missing ${binary}`);
-  if (!fs.existsSync(catalog)) throw new Error(`release archive missing ${catalog}`);
-  if (!cachedBinaryUsable(binary)) throw new Error(`release binary is not usable: ${binary}`);
   fs.chmodSync(binary, 0o755);
   return { binary, source: "github-release", releaseUrl, cache, catalog };
 }
 
 function cachedReleaseUsable(binary, catalog) {
-  return cachedBinaryUsable(binary) && fs.existsSync(catalog);
+  try {
+    return cachedBinaryUsable(binary) && fs.statSync(catalog).isDirectory();
+  } catch {
+    return false;
+  }
 }
 
 function cachedBinaryUsable(binary) {
@@ -143,30 +154,59 @@ function downloadFailure(releaseUrl, error) {
   );
 }
 
-function platformName() {
-  return platformNameFor(process.platform, process.arch);
+function runtimePlatformDetails(platform = process.platform, env = process.env, report = process.report) {
+  const android = platform === "android" || Boolean(env.TERMUX_VERSION) ||
+    Boolean(env.ANDROID_ROOT && env.ANDROID_DATA);
+  if (platform !== "linux" || android) return { android, libc: "" };
+  try {
+    const header = report && typeof report.getReport === "function"
+      ? report.getReport().header
+      : {};
+    return { android: false, libc: header && header.glibcVersionRuntime ? "gnu" : "unknown" };
+  } catch {
+    return { android: false, libc: "unknown" };
+  }
 }
 
-function platformNameFor(platform, arch) {
+function platformNameFor(platform, arch, runtime = {}) {
+  if (platform === "android" || runtime.android) {
+    throw new Error(unsupportedPlatformMessage(platform, arch, { ...runtime, android: true }));
+  }
+  if (platform === "linux" && runtime.libc !== "gnu") {
+    throw new Error(unsupportedPlatformMessage(platform, arch, runtime));
+  }
   if (platform === "linux" && arch === "x64") return "linux-x64-gnu";
   if (platform === "linux" && arch === "arm64") return "linux-arm64-gnu";
   if (platform === "darwin" && arch === "x64") return "macos-x64";
   if (platform === "darwin" && arch === "arm64") return "macos-arm64";
   if (platform === "win32" && arch === "x64") return "win32-x64";
-  throw new Error(unsupportedPlatformMessage(platform, arch));
+  throw new Error(unsupportedPlatformMessage(platform, arch, runtime));
 }
 
-function archiveName(platform = process.platform, arch = process.arch) {
-  return `${pkg.name}-${pkg.version}-${platformNameFor(platform, arch)}${archiveExtension(platform)}`;
+function archiveName(
+  platform = process.platform,
+  arch = process.arch,
+  runtime = runtimePlatformDetails(platform)
+) {
+  return `${pkg.name}-${pkg.version}-${platformNameFor(platform, arch, runtime)}` +
+    archiveExtension(platform);
 }
 
 function archiveExtension(platform = process.platform) {
   return platform === "win32" ? ".zip" : ".tar.gz";
 }
 
-function unsupportedPlatformMessage(platform, arch) {
+function unsupportedPlatformMessage(platform, arch, runtime = {}) {
   const current = `${platform}-${arch}`;
-  return `unsupported platform: ${current}. ` +
+  let reason = "";
+  if (platform === "android" || runtime.android) {
+    reason = " Android/Termux is not a claimed native target.";
+  } else if (platform === "linux" && runtime.libc !== "gnu") {
+    const libc = runtime.libc || "unknown";
+    reason = ` Only GNU libc is supported on Linux; detected libc=${libc}. ` +
+      "musl/Alpine and unidentified libc combinations are not claimed.";
+  }
+  return `unsupported platform: ${current}.${reason} ` +
     "The npm package downloads GitHub Release assets for linux-x64-gnu, linux-arm64-gnu, " +
     "macos-x64, macos-arm64, and win32-x64. " +
     guidanceHint();
@@ -290,21 +330,28 @@ function postinstallPathStatus(env = process.env) {
   });
 }
 
-async function verifyChecksum(checksumUrl, archivePath) {
-  const expected = (await fetchText(checksumUrl)).trim().split(/\s+/)[0];
+async function verifyChecksum(checksumUrl, archivePath, readChecksum = fetchText) {
+  const expected = (await readChecksum(checksumUrl)).trim().split(/\s+/)[0].toLowerCase();
   const actual = crypto.createHash("sha256").update(fs.readFileSync(archivePath)).digest("hex");
-  if (!expected || expected !== actual) throw new Error(`checksum mismatch for ${archivePath}`);
+  if (!/^[a-f0-9]{64}$/.test(expected)) {
+    throw new Error(`invalid SHA-256 checksum from ${checksumUrl}`);
+  }
+  if (expected !== actual) throw new Error(`checksum mismatch for ${archivePath}`);
 }
 
-function unpack(archivePath, cwd, platform = process.platform) {
+function unpack(archivePath, cwd, platform = process.platform, run = spawnSync) {
   const result = platform === "win32"
-    ? spawnSync("powershell.exe", [
+    ? run("powershell.exe", [
       "-NoProfile",
       "-NonInteractive",
       "-Command",
       powershellExtractCommand(archivePath, cwd),
     ], { stdio: "inherit" })
-    : spawnSync("tar", ["-xzf", archivePath, "-C", cwd], { stdio: "inherit" });
+    : run("tar", ["-xzf", archivePath, "-C", cwd], { stdio: "inherit" });
+  if (result.error) {
+    throw new Error(`failed to start ${platform === "win32" ? "zip" : "tar"} extraction: ` +
+      result.error.message);
+  }
   if (result.status !== 0) throw new Error(`${platform === "win32" ? "zip" : "tar"} extraction failed`);
 }
 
@@ -344,6 +391,7 @@ module.exports = {
   cachedBinaryUsable,
   cachedReleaseUsable,
   childEnv,
+  downloadRelease,
   downloadFailure,
   executableName,
   guidanceHint,
@@ -352,6 +400,8 @@ module.exports = {
   archiveExtension,
   archiveName,
   platformNameFor,
-  platformName,
   postinstallPathStatus,
+  runtimePlatformDetails,
+  unpack,
+  verifyChecksum,
 };

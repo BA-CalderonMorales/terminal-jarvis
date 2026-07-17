@@ -1,12 +1,18 @@
-use super::super::{style, table};
-use crate::contracts::{Capability, Harness};
-use crate::runtime;
+use super::super::{output_plan, output_truth, style, table};
+use crate::contracts::{Capability, CommandPlan, Harness};
 
 pub fn list(harnesses: &[Harness]) -> String {
     if style::plain() {
         return harnesses
             .iter()
-            .map(|harness| format!("{} - {}\n", harness.name, harness.description))
+            .map(|harness| {
+                format!(
+                    "{} support={} - {}\n",
+                    harness.name,
+                    output_truth::support_summary(harness),
+                    harness.description
+                )
+            })
             .collect();
     }
     let rows = harnesses
@@ -14,21 +20,33 @@ pub fn list(harnesses: &[Harness]) -> String {
         .map(|harness| {
             vec![
                 harness.name.clone(),
-                harness.display.clone(),
+                output_truth::support_summary(harness),
                 harness.description.clone(),
             ]
         })
         .collect::<Vec<_>>();
     table::render(
         "Available Harnesses",
-        &["NAME", "DISPLAY", "DESCRIPTION"],
+        &["NAME", "SUPPORT", "DESCRIPTION"],
         &rows,
     )
 }
 
 pub fn show(harness: &Harness) -> String {
     if style::plain() {
-        return plain_show(harness);
+        let mut out = format!(
+            "{} ({})\n{}\nbinary: {}\nsetup: {}\nsupport: {}\n",
+            harness.display,
+            harness.name,
+            harness.description,
+            harness.binary,
+            harness.setup_hint(),
+            output_truth::support_summary(harness)
+        );
+        for plan in &harness.capabilities {
+            out.push_str(&output_truth::plain_capability(plan));
+        }
+        return out;
     }
     let details = table::fields(
         &format!("{} ({})", harness.display, harness.name),
@@ -36,52 +54,46 @@ pub fn show(harness: &Harness) -> String {
             ("DESCRIPTION", harness.description.clone()),
             ("BINARY", harness.binary.clone()),
             ("SETUP", harness.setup_hint()),
+            ("SUPPORT", output_truth::support_summary(harness)),
         ],
     );
-    let rows = runtime::planned_steps(harness)
-        .into_iter()
-        .map(|plan| vec![plan.capability.to_string(), plan.summary.clone()])
+    let rows = harness
+        .capabilities
+        .iter()
+        .map(output_truth::capability_row)
         .collect::<Vec<_>>();
     format!(
         "{details}\n{}",
-        table::render("Capabilities", &["CAPABILITY", "BEHAVIOR"], &rows)
+        table::render(
+            "Capability Truth",
+            &[
+                "CAPABILITY",
+                "STATE",
+                "EVIDENCE",
+                "EFFECT",
+                "PLATFORMS",
+                "FRESHNESS"
+            ],
+            &rows
+        )
     )
 }
 
 pub fn plan(harness: &Harness, capability: Capability) -> String {
+    plan_with_extra(harness, capability, &[])
+}
+
+pub fn plan_with_extra(harness: &Harness, capability: Capability, extra: &[String]) -> String {
     let plan = harness
         .plan(capability)
         .expect("validated harness capability");
+    let mut command = CommandPlan::new(plan.command.command.clone(), plan.command.args.clone());
+    command.args.extend_from_slice(extra);
     if style::plain() {
-        return format!(
-            "{}:{}\n{}\ncommand: {}\nenv: {}\n",
-            harness.name,
-            capability,
-            plan.summary,
-            plan.command.render(),
-            harness.setup_hint()
-        );
+        return output_plan::plain(harness, plan, &command);
     }
     table::fields(
-        &format!("Plan: {} {}", harness.name, capability),
-        &[
-            ("SUMMARY", plan.summary.clone()),
-            ("COMMAND", plan.command.render()),
-            ("ENVIRONMENT", harness.setup_hint()),
-        ],
+        &format!("Plan: {} {capability}", harness.name),
+        &output_plan::fields(harness, plan, &command),
     )
-}
-
-fn plain_show(harness: &Harness) -> String {
-    let mut out = format!(
-        "{} ({})\n{}\nsetup: {}\nagent loop:\n",
-        harness.display,
-        harness.name,
-        harness.description,
-        harness.setup_hint()
-    );
-    for plan in runtime::planned_steps(harness) {
-        out.push_str(&format!("  {}: {}\n", plan.capability, plan.summary));
-    }
-    out
 }

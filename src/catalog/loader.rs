@@ -1,11 +1,11 @@
-use crate::contracts::{Capability, CapabilityPlan, CommandPlan, EnvMode, Harness};
+use crate::contracts::{Capability, CapabilityPlan, Harness};
 use std::env;
 use std::fs;
 use std::io;
 use std::path::{Path, PathBuf};
 
 use super::{
-    embedded,
+    embedded, metadata,
     parser::{self, Fields},
 };
 
@@ -19,7 +19,7 @@ pub fn load(root: &Path) -> io::Result<Vec<Harness>> {
             harnesses.push(load_harness(&dir)?);
         }
     }
-    Ok(harnesses)
+    super::validate::checked(harnesses)
 }
 
 fn should_use_embedded(root: &Path) -> bool {
@@ -36,27 +36,13 @@ fn load_harness(dir: &Path) -> io::Result<Harness> {
     for capability in Capability::ALL {
         capabilities.push(load_capability(dir, capability)?);
     }
-    Ok(Harness {
-        name: parser::string(&meta, "name").map_err(invalid)?,
-        display: parser::string(&meta, "display").map_err(invalid)?,
-        description: parser::string(&meta, "description").map_err(invalid)?,
-        binary: parser::string(&meta, "binary").map_err(invalid)?,
-        env_mode: EnvMode::parse(&parser::string(&meta, "env_mode").map_err(invalid)?)
-            .map_err(invalid)?,
-        env: parser::list(&meta, "env").map_err(invalid)?,
-        capabilities,
-    })
+    metadata::harness(&meta, capabilities).map_err(invalid)
 }
 
 fn load_capability(dir: &Path, capability: Capability) -> io::Result<CapabilityPlan> {
     let path = dir.join(capability.as_str()).join("index.toml");
     let data = fields(&path)?;
-    let command = parser::string(&data, "command").map_err(invalid)?;
-    Ok(CapabilityPlan {
-        capability,
-        summary: parser::string(&data, "summary").map_err(invalid)?,
-        command: CommandPlan::new(command, parser::list(&data, "args").map_err(invalid)?),
-    })
+    metadata::capability(&data, capability).map_err(invalid)
 }
 
 fn fields(path: &Path) -> io::Result<Fields> {

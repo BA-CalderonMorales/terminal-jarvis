@@ -1,3 +1,12 @@
 summary = "Update Aider without interactive setup flows."
 command = "uv"
 args = ["tool", "upgrade", "aider-chat"]
+support = "unknown"
+evidence = "deterministic"
+effect = "state-changing"
+network = true
+interaction = "noninteractive"
+platforms = []
+executable = "uv"
+source = "internal:phase-01@fab5848"
+verified_at = "2026-07-17T04:59:27Z"

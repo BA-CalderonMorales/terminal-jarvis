@@ -54,8 +54,17 @@ fn lines_wrap_words_chunks_and_empty_cells_exactly() {
 
 #[test]
 fn terminal_width_validates_and_caps_the_environment() {
-    with_columns("39", || assert_eq!(layout::terminal_width(), 100));
+    with_columns("39", || assert_eq!(layout::terminal_width(), 40));
     with_columns("40", || assert_eq!(layout::terminal_width(), 40));
     with_columns("121", || assert_eq!(layout::terminal_width(), 120));
     with_columns("invalid", || assert_eq!(layout::terminal_width(), 100));
+}
+
+#[test]
+fn display_cell_width_wraps_and_pads_wide_text() {
+    assert_eq!(
+        layout::lines(&["界界".to_string()], &[2]),
+        [vec!["界".to_string()], vec!["界".to_string()]]
+    );
+    assert_eq!(super::width::pad("界", 3), "界 ");
 }

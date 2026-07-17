@@ -1,3 +1,12 @@
 summary = "Install Hermes Agent from its documented distribution channel."
 command = "bash"
 args = ["-lc", "curl -fsSL https://raw.githubusercontent.com/NousResearch/hermes-agent/main/scripts/install.sh | bash -s -- --skip-setup"]
+support = "unknown"
+evidence = "deterministic"
+effect = "state-changing"
+network = true
+interaction = "noninteractive"
+platforms = []
+executable = "bash"
+source = "internal:phase-01@fab5848"
+verified_at = "2026-07-17T04:59:27Z"

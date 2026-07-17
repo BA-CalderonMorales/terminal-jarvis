@@ -52,13 +52,13 @@ use terminal_jarvis::contracts::Capability;
     assert!(error.contains("usage"));
 }
 #[rustfmt::skip]
-#[test] fn help_in_any_position_after_subcommand() {
-    assert_eq!(parse(["tj", "plan", "yolo", "--help"]).unwrap(), Action::Help);
-    assert_eq!(parse(["tj", "plan", "download", "--help"]).unwrap(), Action::Help);
-    assert_eq!(parse(["tj", "show", "opencode", "--help"]).unwrap(), Action::Help);
-    assert_eq!(parse(["tj", "use", "opencode", "--help"]).unwrap(), Action::Help);
-    assert_eq!(parse(["tj", "install", "opencode", "--help"]).unwrap(), Action::Help);
-    assert_eq!(parse(["tj", "security", "status", "--help"]).unwrap(), Action::Help);
+#[test] fn help_does_not_hide_unexpected_arguments() {
+    assert!(parse(["tj", "plan", "yolo", "--help"]).is_err());
+    assert!(parse(["tj", "plan", "download", "--help"]).is_err());
+    assert!(parse(["tj", "show", "opencode", "--help"]).is_err());
+    assert!(parse(["tj", "use", "opencode", "--help"]).is_err());
+    assert!(parse(["tj", "install", "opencode", "--help"]).is_err());
+    assert!(parse(["tj", "security", "status", "--help"]).is_err());
 }
 #[rustfmt::skip]
 #[test] fn run_forwards_help_to_harness_when_not_at_position_1() {

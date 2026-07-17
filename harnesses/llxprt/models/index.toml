@@ -1,3 +1,12 @@
 summary = "Review LLXPRT model selection command surface."
 command = "llxprt"
 args = ["--help"]
+support = "stub"
+evidence = "deterministic"
+effect = "read-only"
+network = false
+interaction = "noninteractive"
+platforms = ["linux-x64-gnu"]
+executable = "llxprt"
+source = "internal:phase-01@fab5848"
+verified_at = "2026-07-17T04:59:27Z"

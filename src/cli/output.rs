@@ -1,5 +1,9 @@
 #[path = "output_catalog.rs"]
 mod catalog;
+#[path = "output_diagnostics.rs"]
+mod diagnostics;
+#[path = "output_readiness.rs"]
+mod readiness;
 #[path = "output_summary.rs"]
 mod summary;
 
@@ -7,7 +11,9 @@ use super::{style, table};
 use crate::contracts::Harness;
 use crate::{context::Session, security};
 
-pub use catalog::{list, plan, show};
+pub use catalog::{list, plan, plan_with_extra, show};
+pub use diagnostics::diagnostics;
+pub use readiness::is_harness_ready;
 pub use summary::{audit, status};
 
 pub fn help() -> String {
@@ -73,10 +79,6 @@ fn plain_checks(harnesses: &[Harness]) -> String {
         out.push_str(&format!("{} binary={} env={}\n", harness.name, binary, env));
     }
     out
-}
-
-pub fn is_harness_ready(h: &Harness) -> bool {
-    security::command_on_path(&h.binary) && security::missing_env(h).is_empty()
 }
 
 fn env_status(harness: &Harness, missing: &[String]) -> String {

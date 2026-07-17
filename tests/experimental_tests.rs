@@ -12,7 +12,7 @@ fn output(enabled: bool) -> std::process::Output {
 #[test]
 fn dashboard_requires_the_feature_wall() {
     let output = output(false);
-    assert_eq!(output.status.code(), Some(2));
+    assert_eq!(output.status.code(), Some(4));
     assert!(String::from_utf8_lossy(&output.stderr).contains("EXPERIMENTAL_UI=1"));
 }
 

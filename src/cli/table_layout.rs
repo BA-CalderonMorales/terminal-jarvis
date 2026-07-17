@@ -76,8 +76,11 @@ fn wrap(value: &str, limit: usize) -> Vec<String> {
 fn chunks(word: &str, limit: usize, lines: &mut Vec<String>) {
     let mut chunk = String::new();
     for character in word.chars() {
+        if !chunk.is_empty() && width(&chunk) + character_width(character) > limit {
+            lines.push(std::mem::take(&mut chunk));
+        }
         chunk.push(character);
-        if width(&chunk) == limit {
+        if width(&chunk) >= limit {
             lines.push(std::mem::take(&mut chunk));
         }
     }
@@ -86,15 +89,5 @@ fn chunks(word: &str, limit: usize, lines: &mut Vec<String>) {
     }
 }
 
-fn width(value: &str) -> usize {
-    value.chars().count()
-}
-
-pub(super) fn terminal_width() -> usize {
-    std::env::var("COLUMNS")
-        .ok()
-        .and_then(|value| value.parse::<usize>().ok())
-        .filter(|width| *width >= 40)
-        .unwrap_or(100)
-        .min(120)
-}
+pub(super) use super::width::terminal_width;
+use super::width::{character_width, display_width as width};

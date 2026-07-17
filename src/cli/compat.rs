@@ -41,10 +41,6 @@ pub fn config(
     }
 }
 
-pub fn legacy(command: &str) -> String {
-    config_output::legacy(command)
-}
-
 fn auth_for(name: &str, harnesses: &[Harness]) -> Result<String, String> {
     auth_detail(
         name,

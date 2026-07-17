@@ -2,7 +2,7 @@
 id: "03"
 target: v0.1.13
 title: Conformance Evidence
-status: proposed
+status: in-progress
 owner: core-maintainer
 starts_after: ["01"]
 completion_requires: ["01"]
@@ -76,6 +76,33 @@ layout obeys width constraints; byte-preserved child streams do not get rewritte
 - Record upstream drift separately from Terminal Jarvis regressions.
 - Keep Docker/VM definitions baseline environments that users may extend; do
   not turn them into installers for all harness dependencies.
+
+## WIP Checkpoint - 2026-07-17
+
+Implemented in the current branch checkpoint:
+
+- a catalog-driven deterministic walk that records all 225 unique rows in a
+  226-line TSV with support, evidence, guard, result, and tested-ref fields;
+- fake-child proof for exact boundary argv, cwd, allowlisted environment name,
+  matching streams, exit status, signal behavior, and zero pre-spawn effects;
+- 24 passing Phase 03 tests covering canonical surfaces, compatibility aliases,
+  help forms, option positions, child boundaries, invalid input, JSON errors,
+  exit classes 2/3/4/5/126/127, TTY/color decisions, widths, long text, and Unicode.
+
+Remaining before this phase can become evidence-ready:
+
+1. Drive safe fake-executable execution and declared guard outcomes from every
+   descriptor, with missing/empty/malformed state, permission, path shadow,
+   checksum, architecture, timeout, and attempted-side-effect injection.
+2. Prove seeded-secret and sensitive-path redaction across rich, plain, JSON,
+   stderr, debug, child-failure, and generated support artifacts.
+3. Record reproducible manual or unsupported treatment for every row that
+   cannot receive safe automation, and make a data-derived promotion or
+   non-promotion decision for all five first-class candidates.
+4. Add only the bounded disposable-real smoke justified by those decisions;
+   never submit prompts, authenticate, mutate a repository, or use credentials.
+5. Run the same fixture against the development binary and a locally staged
+   package, then commit the report and populate the evidence table on one ref.
 
 ## Work
 

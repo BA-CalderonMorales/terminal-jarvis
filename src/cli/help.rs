@@ -1,48 +1,8 @@
-use super::{style, table};
-const PLAIN: &str = "Terminal Jarvis\n\
-     Headless command center for coding-agent harnesses\n\n\
-     usage:\n\
-       terminal-jarvis [harness] [args...]\n\
-       terminal-jarvis run [harness] [capability] [args...]\n\
-       terminal-jarvis version [--verbose|--info|-v]\n\
-       terminal-jarvis list\n\
-       terminal-jarvis check\n\
-       terminal-jarvis use <harness>\n\
-       terminal-jarvis current\n\
-       terminal-jarvis show <harness>\n\
-       terminal-jarvis plan [harness] <capability>\n\
-       terminal-jarvis install <harness>\n\
-       terminal-jarvis update [harness]\n\
-       terminal-jarvis auth help <harness>\n\
-       terminal-jarvis config show\n\
-       terminal-jarvis cache status\n\
-       terminal-jarvis security [status|audit|harness]\n\
-       terminal-jarvis gate [status|list|enable [trivy]|disable|run [trivy]]\n\n\
-      global flags:\n\
-        --help, -h      show this help\n\
-        --version, -v   print the version (plain)\n\
-        --info          print version with provenance (same as version --verbose)\n\
-        --update [--dry-run]\n\
-                        self-update terminal-jarvis or print its package-manager command\n\
-        --plain         stable line-oriented output for automation\n\
-        --no-color      disable terminal color\n\n\
-      capabilities:\n\
-       download update headless version stats models security yolo ui\n\n\
-     examples:\n\
-       terminal-jarvis use opencode\n\
-       terminal-jarvis plan codex headless\n\
-       terminal-jarvis run opencode fix failing tests\n\
-       terminal-jarvis gate enable trivy\n\n\
-     experimental:\n\
-       TERMINAL_JARVIS_EXPERIMENTAL_UI=1 terminal-jarvis experimental dashboard\n\n\
-     legacy aliases:\n\
-       tools -> list, status -> check, info <harness> -> show <harness>\n\
-       install <harness> -> run <harness> download\n\
-       update <harness> -> run <harness> update\n";
+use super::{help_text, style, table};
 
 pub fn text() -> String {
     if style::plain() {
-        return PLAIN.to_string();
+        return help_text::PLAIN.to_string();
     }
     let rows = vec![
         vec![
@@ -88,6 +48,19 @@ pub fn text() -> String {
                 "Stable line-oriented output for automation".into(),
             ),
             ("--NO-COLOR", "Disable terminal color".into()),
+            ("--JSON", "Emit one versioned JSON document".into()),
+            ("--VERBOSE", "Expand check or version diagnostics".into()),
+            (
+                "--DRY-RUN",
+                "Preview lifecycle operations without effects".into(),
+            ),
+            ("--NO-INPUT", "Guarantee that no prompt is opened".into()),
+            ("--CONFIRM=OP:TARGET", "Bind noninteractive intent".into()),
+            (
+                "--ALLOW-DANGEROUS",
+                "Separately opt in to dangerous execution".into(),
+            ),
+            ("--", "Forward following flags to a child".into()),
             ("--INFO", "Show version provenance".into()),
             (
                 "--UPDATE --DRY-RUN",

@@ -1,3 +1,12 @@
 summary = "Print or verify the installed Cursor Agent version."
 command = "sh"
 args = ["-c", "cursor-agent --help"]
+support = "stub"
+evidence = "deterministic"
+effect = "read-only"
+network = false
+interaction = "noninteractive"
+platforms = ["linux-x64-gnu"]
+executable = "sh"
+source = "internal:phase-01@fab5848"
+verified_at = "2026-07-17T04:59:27Z"

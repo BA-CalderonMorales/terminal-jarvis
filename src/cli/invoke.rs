@@ -23,32 +23,25 @@ pub fn capability(
     let plan = find(harnesses, harness)?
         .plan(capability)
         .ok_or_else(|| format!("{harness} lacks {capability}"))?;
-    runtime::run_command(plan, extra)
-        .map(|(code, output)| {
-            if code == 0 {
-                (0, output)
-            } else {
-                (
-                    code,
-                    diagnostic(harness, capability, &plan.command, code, &output),
-                )
-            }
-        })
-        .map_err(|error| command_error(harness, plan.command.command.as_str(), error))
+    match runtime::run_command(plan, extra) {
+        Ok(0) => Ok((0, String::new())),
+        Ok(code) => {
+            eprintln!("{}", diagnostic(harness, capability, &plan.command, code));
+            Ok((code, String::new()))
+        }
+        Err(error) => {
+            let (code, message) = command_error(harness, plan.command.command.as_str(), error);
+            eprintln!("{message}");
+            Ok((code, String::new()))
+        }
+    }
 }
 
-fn diagnostic(
-    harness: &str,
-    capability: Capability,
-    command: &CommandPlan,
-    code: i32,
-    output: &str,
-) -> String {
-    let mut body = format!("harness '{harness}' capability '{capability}' failed with exit {code}\n  command: {}\n  stderr: {output}", command.render());
-    if output.contains("pipefail") || output.contains("Illegal option") {
-        body.push_str("\n  hint: the script uses `set -o pipefail`, which `sh` (dash) does not support; set the harness command to `bash -c ...` in the registry.");
-    }
-    body
+fn diagnostic(harness: &str, capability: Capability, command: &CommandPlan, code: i32) -> String {
+    format!(
+        "harness '{harness}' capability '{capability}' failed with exit {code}\n  command: {}",
+        command.render()
+    )
 }
 
 fn find<'a>(harnesses: &'a [Harness], name: &str) -> Result<&'a Harness, String> {
@@ -58,11 +51,14 @@ fn find<'a>(harnesses: &'a [Harness], name: &str) -> Result<&'a Harness, String>
         .ok_or_else(|| format!("unknown harness '{name}'"))
 }
 
-fn command_error(harness: &str, binary: &str, error: std::io::Error) -> String {
-    if error.kind() == std::io::ErrorKind::NotFound {
-        return format!("{harness} binary '{binary}' was not found on PATH; run `terminal-jarvis install {harness}` or `terminal-jarvis plan {harness} download`");
+fn command_error(harness: &str, binary: &str, error: std::io::Error) -> (i32, String) {
+    match error.kind() {
+        std::io::ErrorKind::NotFound => (127, format!("{harness} binary '{binary}' was not found on PATH; run `terminal-jarvis install {harness}` or `terminal-jarvis plan {harness} download`")),
+        std::io::ErrorKind::PermissionDenied => {
+            (126, format!("{harness} binary '{binary}' is not executable; fix its permissions or reinstall {harness}"))
+        }
+        _ => (3, format!("failed to start {harness} binary '{binary}': {error}")),
     }
-    error.to_string()
 }
 
 #[cfg(test)]

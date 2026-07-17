@@ -1,6 +1,10 @@
 use std::cell::Cell;
 use std::io::IsTerminal;
 
+#[path = "style_diagnostics.rs"]
+mod diagnostics;
+pub use diagnostics::decisions as diagnostic_decisions;
+
 #[derive(Clone, Copy)]
 pub struct Options {
     plain: bool,
@@ -40,7 +44,10 @@ pub fn warning(value: &str) -> String {
 }
 
 pub fn error(value: &str) -> String {
-    format!("{}\n", paint(&format!("error: {value}"), "1;31"))
+    format!(
+        "{}\n",
+        paint_for(&format!("error: {value}"), "1;31", Stream::Stderr)
+    )
 }
 
 pub fn banner(title: &str, subtitle: &str) -> String {
@@ -51,9 +58,23 @@ pub fn banner(title: &str, subtitle: &str) -> String {
 }
 
 fn paint(value: &str, code: &str) -> String {
+    paint_for(value, code, Stream::Stdout)
+}
+
+#[derive(Clone, Copy)]
+enum Stream {
+    Stdout,
+    Stderr,
+}
+
+fn paint_for(value: &str, code: &str, stream: Stream) -> String {
     let term = std::env::var("TERM").ok();
+    let terminal = match stream {
+        Stream::Stdout => std::io::stdout().is_terminal(),
+        Stream::Stderr => std::io::stderr().is_terminal(),
+    };
     if color_enabled_for(
-        std::io::stdout().is_terminal(),
+        terminal,
         OPTIONS.with(|cell| cell.get().no_color),
         std::env::var_os("NO_COLOR").is_some(),
         term_is_dumb(term.as_deref()),

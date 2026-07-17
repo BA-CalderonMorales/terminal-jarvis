@@ -1,3 +1,12 @@
 summary = "Install Mistral Vibe from its documented distribution channel."
 command = "bash"
 args = ["-c", "curl -LsSf https://mistral.ai/vibe/install.sh | bash"]
+support = "unknown"
+evidence = "deterministic"
+effect = "state-changing"
+network = true
+interaction = "noninteractive"
+platforms = []
+executable = "bash"
+source = "internal:phase-01@fab5848"
+verified_at = "2026-07-17T04:59:27Z"

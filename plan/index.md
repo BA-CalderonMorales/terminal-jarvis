@@ -95,6 +95,35 @@ and 03 are complete. This separates permission to start from permission to ship.
 The status in each phase's frontmatter is authoritative. Run
 `ruby scripts/check-plan.rb` for the derived overall status.
 
+## WIP Handoff - 2026-07-17
+
+This branch contains an intentional Phase 02/03 implementation checkpoint. It
+is not accepted evidence, does not authorize Phase 04 promotion, and remains
+subject to the evidence contract and all hard gates below.
+
+| Phase | Current implementation state | Remaining gate |
+|---|---|---|
+| 01 | Complete at `fab5848`; contract and baseline are frozen. | None. Do not weaken the frozen contract. |
+| 02 | In progress: all 225 rows are truth-classified; strict catalog validation, canonical diagnostics, parser/output contracts, execution guards, lifecycle intent, stream/exit preservation, and distribution normalization are implemented with focused tests. | Finish npm cache integrity and architecture revalidation; canonical self-update help; support-aware update guidance; removal of the duplicate check route; generated 225-row public truth and derived 5/5 first-class decisions; documentation correction; interactive PTY evidence; exact-ref evidence. |
+| 03 | In progress: the catalog-driven 225-row report, fake-child argv/cwd/environment capture, and 24-test CLI boundary/help/option/output/TTY/exit matrix pass locally. | Complete descriptor execution/failure injection, timeout and side-effect coverage, redaction across every output channel, manual/unsupported procedures, bounded disposable-real first-class decisions, development/staged-package parity, and exact-ref evidence. |
+| 04 | Proposed only; no candidate, release, or publication mutation has begun. | Wait for accepted Phase 02 and 03 evidence, then execute the full native/delivery matrix, version/docs closure, CI gates, rollback rehearsal, and independent human review. |
+
+Resume in this order:
+
+1. Close the remaining Phase 02 truth and npm cache-integrity gaps without
+   promoting any current catalog row.
+2. Complete the Phase 03 deterministic fixture and evidence tiers, then run it
+   against both the development binary and a locally staged package.
+3. Record Phase 02/03 evidence on one immutable ref and only then begin Phase 04
+   candidate closure.
+
+Checkpoint verification: `cargo test --no-fail-fast` passes all 224 tests,
+including the 24 Phase 03 matrix tests; the npm wrapper passes 28/28 tests; the
+catalog report contains all 225 rows; support-report drift and `git diff --check`
+pass; and the plan checker reports four phases, 38 criteria, and overall
+`in-progress`. These working-tree results are useful WIP evidence only; phase
+evidence must be rerun and recorded against the final committed refs.
+
 ## Former Plan Crosswalk
 
 | Former pages | Current disposition |

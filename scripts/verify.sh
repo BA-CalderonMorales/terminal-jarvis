@@ -10,22 +10,22 @@ fail() {
   exit 1
 }
 
-echo "[1/10] format"
+echo "[1/12] format"
 cargo fmt --all -- --check
 
-echo "[2/10] lint"
+echo "[2/12] lint"
 cargo clippy --all-targets -- -D warnings
 
-echo "[3/10] tests"
+echo "[3/12] tests"
 cargo test
 
-echo "[4/10] rust file length"
+echo "[4/12] rust file length"
 over_limit=$(find src tests -name '*.rs' -print0 |
   xargs -0 wc -l |
   awk -v max="$line_limit" '$1 > max && $2 != "total" {print}')
 test -z "$over_limit" || fail "Rust files over ${line_limit} lines:\n$over_limit"
 
-echo "[5/10] harness catalog shape"
+echo "[5/12] harness catalog shape"
 harnesses=$(find harnesses -mindepth 1 -maxdepth 1 -type d | wc -l | tr -d ' ')
 indexes=$(find harnesses -path '*/index.toml' | wc -l | tr -d ' ')
 expected=$((harnesses * 10))
@@ -33,20 +33,23 @@ test "$harnesses" -gt 0 || fail "no harnesses found"
 test "$indexes" -eq "$expected" ||
   fail "expected $expected harness index files, found $indexes"
 
-echo "[6/11] cli smoke"
+echo "[6/12] generated support report"
+scripts/generate-support-report.sh --check
+
+echo "[7/12] cli smoke"
 cargo run -- --plain list >/tmp/terminal-jarvis-list.txt
 cargo run -- --plain plan codex headless >/tmp/terminal-jarvis-plan.txt
 TERMINAL_JARVIS_HOME=/tmp/terminal-jarvis-verify cargo run -- --plain use codex >/dev/null
 TERMINAL_JARVIS_HOME=/tmp/terminal-jarvis-verify cargo run -- --plain current |
   grep 'active harness = codex' >/dev/null
 
-echo "[7/11] integration hardening"
+echo "[8/12] integration hardening"
 scripts/integration-hardening.sh
 
-echo "[8/11] security"
+echo "[9/12] security"
 scripts/security-check.sh
 
-echo "[9/11] distribution smoke"
+echo "[10/12] distribution smoke"
 scripts/release-preflight.sh
 if command -v node >/dev/null 2>&1 && command -v npm >/dev/null 2>&1; then
   npm --prefix npm/terminal-jarvis test
@@ -63,14 +66,14 @@ else
 fi
 scripts/package-release.sh --check
 
-echo "[10/11] coverage"
+echo "[11/12] coverage"
 if command -v cargo-llvm-cov >/dev/null 2>&1; then
   cargo llvm-cov --fail-under-lines "$coverage_target"
 else
   echo "cargo-llvm-cov not installed; skipping ${coverage_target}% line coverage gate"
 fi
 
-echo "[11/11] mutation"
+echo "[12/12] mutation"
 if command -v cargo-mutants >/dev/null 2>&1 && test "${TJ_MUTATION:-0}" = "1"; then
   cargo mutants --config mutants.toml --minimum-test-timeout 30 --jobs 2
 else

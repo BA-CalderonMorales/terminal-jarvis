@@ -1,15 +1,8 @@
 use super::*;
-use crate::contracts::{Capability, CapabilityPlan, CommandPlan, EnvMode, Harness};
+use crate::contracts::{Capability, CapabilityPlan, EnvMode, Harness};
 
 fn cap(c: Capability) -> CapabilityPlan {
-    CapabilityPlan {
-        capability: c,
-        summary: c.as_str().to_string(),
-        command: CommandPlan::new(
-            "sh".to_string(),
-            vec!["-c".to_string(), "exit 0".to_string()],
-        ),
-    }
+    crate::cli::test_support::plan(c, "sh", vec!["-c".into(), "exit 0".into()])
 }
 fn harness(name: &str) -> Harness {
     Harness {
@@ -25,31 +18,47 @@ fn harness(name: &str) -> Harness {
 fn paths() -> (&'static std::path::Path, &'static std::path::Path) {
     (std::path::Path::new("/cat"), std::path::Path::new("/home"))
 }
+fn d(
+    action: Action,
+    harnesses: &[Harness],
+    catalog: &std::path::Path,
+    home: &std::path::Path,
+) -> crate::cli::error::Result<(i32, String)> {
+    dispatch(
+        action,
+        &crate::cli::args::Options::default(),
+        harnesses,
+        catalog,
+        home,
+    )
+}
 
 #[test]
 fn list_check_help_legacy() {
     let hs = [harness("opencode")];
     let (p, h) = paths();
-    assert_eq!(dispatch(Action::List, &hs, p, h).unwrap().0, 0);
-    assert_eq!(dispatch(Action::Check, &hs, p, h).unwrap().0, 0);
-    assert_eq!(dispatch(Action::Help, &hs, p, h).unwrap().0, 0);
-    let out = dispatch(Action::Legacy("templates".to_string()), &hs, p, h)
-        .unwrap()
-        .1;
-    assert!(out.contains("Legacy Command"));
+    assert_eq!(d(Action::List, &hs, p, h).unwrap().0, 0);
+    assert_eq!(d(Action::Check, &hs, p, h).unwrap().0, 0);
+    assert_eq!(d(Action::Help, &hs, p, h).unwrap().0, 0);
+    assert_eq!(
+        d(Action::Legacy("templates".to_string()), &hs, p, h)
+            .unwrap_err()
+            .exit_code,
+        4
+    );
 }
 #[test]
 fn security_routes() {
     let hs = [harness("opencode")];
     let (p, h) = paths();
-    assert!(dispatch(Action::Security(vec![]), &hs, p, h).is_ok());
-    assert!(dispatch(Action::Security(vec!["status".to_string()]), &hs, p, h).is_ok());
-    assert!(dispatch(Action::Security(vec!["audit".to_string()]), &hs, p, h).is_ok());
-    let out = dispatch(Action::Security(vec!["opencode".to_string()]), &hs, p, h)
+    assert!(d(Action::Security(vec![]), &hs, p, h).is_ok());
+    assert!(d(Action::Security(vec!["status".to_string()]), &hs, p, h).is_ok());
+    assert!(d(Action::Security(vec!["audit".to_string()]), &hs, p, h).is_ok());
+    let out = d(Action::Security(vec!["opencode".to_string()]), &hs, p, h)
         .unwrap()
         .1;
     assert!(out.contains("opencode"));
-    assert!(dispatch(
+    assert!(d(
         Action::Security(vec!["a".to_string(), "b".to_string()]),
         &hs,
         p,
@@ -61,17 +70,17 @@ fn security_routes() {
 fn auth_update_install() {
     let hs = [harness("opencode")];
     let (p, h) = paths();
-    assert!(dispatch(Action::Auth(vec![]), &hs, p, h).is_ok());
-    let (_, up) = dispatch(Action::Update(None), &hs, p, h).unwrap();
+    assert!(d(Action::Auth(vec![]), &hs, p, h).is_ok());
+    let (_, up) = d(Action::Update(None), &hs, p, h).unwrap();
     assert!(up.contains("opencode"));
-    assert!(dispatch(Action::Install("opencode".to_string()), &hs, p, h).is_ok());
-    assert!(dispatch(Action::Update(Some("opencode".to_string())), &hs, p, h).is_ok());
+    assert!(d(Action::Install("opencode".to_string()), &hs, p, h).is_err());
+    assert!(d(Action::Update(Some("opencode".to_string())), &hs, p, h).is_err());
 }
 #[test]
 fn direct_and_cache() {
     let hs = [harness("opencode")];
     let (p, h) = paths();
-    assert!(dispatch(
+    assert!(d(
         Action::Direct {
             harness: "opencode".to_string(),
             extra: vec![]
@@ -80,6 +89,6 @@ fn direct_and_cache() {
         p,
         h
     )
-    .is_ok());
-    assert!(dispatch(Action::Cache(vec![]), &hs, p, h).is_ok());
+    .is_err());
+    assert!(d(Action::Cache(vec![]), &hs, p, h).is_ok());
 }

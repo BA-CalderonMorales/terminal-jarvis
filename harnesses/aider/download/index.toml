@@ -1,3 +1,12 @@
 summary = "Install Aider from its documented distribution channel."
 command = "uv"
 args = ["tool", "install", "--force", "--python", "python3.12", "--with", "pip", "aider-chat@latest"]
+support = "unknown"
+evidence = "deterministic"
+effect = "state-changing"
+network = true
+interaction = "noninteractive"
+platforms = []
+executable = "uv"
+source = "internal:phase-01@fab5848"
+verified_at = "2026-07-17T04:59:27Z"

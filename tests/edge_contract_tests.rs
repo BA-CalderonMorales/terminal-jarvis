@@ -1,11 +1,32 @@
-use terminal_jarvis::contracts::{Capability, CapabilityPlan, CommandPlan, EnvMode, Harness};
+use terminal_jarvis::contracts::{
+    Capability, CapabilityPlan, CommandPlan, Effect, EnvMode, EvidenceMode, Harness, Interaction,
+    SupportState,
+};
 use terminal_jarvis::{catalog, security};
 
 fn plan(capability: Capability, summary: &str, command: &str) -> CapabilityPlan {
+    let effect = match capability {
+        Capability::Download | Capability::Update | Capability::Ui => Effect::StateChanging,
+        Capability::Yolo => Effect::Dangerous,
+        _ => Effect::ReadOnly,
+    };
     CapabilityPlan {
         capability,
         summary: summary.to_string(),
         command: CommandPlan::new(command.to_string(), Vec::new()),
+        support: SupportState::Unknown,
+        evidence: EvidenceMode::Deterministic,
+        effect,
+        network: effect != Effect::ReadOnly,
+        interaction: if capability == Capability::Ui {
+            Interaction::Interactive
+        } else {
+            Interaction::Noninteractive
+        },
+        platforms: Vec::new(),
+        executable: command.to_string(),
+        source: "internal:test".to_string(),
+        verified_at: "2026-07-17T00:00:00Z".to_string(),
     }
 }
 

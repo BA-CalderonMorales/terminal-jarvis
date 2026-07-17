@@ -12,7 +12,13 @@ pub fn parse(input: &str) -> Result<Fields, String> {
         let (key, value) = line
             .split_once('=')
             .ok_or_else(|| format!("line {} is missing '='", index + 1))?;
-        fields.insert(key.trim().to_string(), value.trim().to_string());
+        let key = key.trim().to_string();
+        if fields
+            .insert(key.clone(), value.trim().to_string())
+            .is_some()
+        {
+            return Err(format!("duplicate key '{key}' on line {}", index + 1));
+        }
     }
     Ok(fields)
 }

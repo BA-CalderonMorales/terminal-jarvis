@@ -1,3 +1,12 @@
 summary = "Update the npm-installed OpenCode package without interactive auth."
 command = "npm"
 args = ["update", "-g", "opencode-ai"]
+support = "unknown"
+evidence = "deterministic"
+effect = "state-changing"
+network = true
+interaction = "noninteractive"
+platforms = []
+executable = "npm"
+source = "internal:phase-01@fab5848"
+verified_at = "2026-07-17T04:59:27Z"

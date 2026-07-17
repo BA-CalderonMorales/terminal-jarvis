@@ -84,7 +84,7 @@ fn missing_catalog_error_names_catalog_path() {
         .env("TERMINAL_JARVIS_CATALOG", nocat())
         .output()
         .unwrap();
-    assert_eq!(o.status.code(), Some(2));
+    assert_eq!(o.status.code(), Some(3));
     assert!(
         se(&o).contains("harness catalog is missing at")
             && se(&o).contains("TERMINAL_JARVIS_CATALOG")
