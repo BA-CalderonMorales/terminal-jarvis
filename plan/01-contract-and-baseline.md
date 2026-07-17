@@ -2,7 +2,7 @@
 id: "01"
 target: v0.1.13
 title: Contract and Baseline
-status: proposed
+status: in-progress
 owner: core-maintainer
 starts_after: []
 completion_requires: []
@@ -92,36 +92,36 @@ never compatible behavior.
 
 ## Work
 
-- [ ] Reproduce the baseline on the exact branch ref and record passed, failed,
+- [x] Reproduce the baseline on the exact branch ref and record passed, failed,
   and unavailable checks without converting unavailable checks into passes.
-- [ ] Inventory every public command, alias, option, exit class, output mode,
+- [x] Inventory every public command, alias, option, exit class, output mode,
   state-changing operation, install channel, and claimed platform.
-- [ ] Freeze the support states, evidence modes, side-effect classes, freshness
+- [x] Freeze the support states, evidence modes, side-effect classes, freshness
   policy, and first-class-harness definition.
-- [ ] Freeze the CLI and diagnostic contract, including stable JSON and stream rules.
-- [ ] Define the exact native, shell, libc, container, and distribution matrix;
+- [x] Freeze the CLI and diagnostic contract, including stable JSON and stream rules.
+- [x] Define the exact native, shell, libc, container, and distribution matrix;
   mark Termux, musl, WSL, and other undecided combinations explicitly.
-- [ ] Define numeric success and abort thresholds for every acceptance criterion.
-- [ ] Map the remaining open work in issue #135 to Phases 02-04 and record what
+- [x] Define numeric success and abort thresholds for every acceptance criterion.
+- [x] Map the remaining open work in issue #135 to Phases 02-04 and record what
   v0.1.12 already satisfies.
-- [ ] Confirm zero-host, zero-provider, zero-secret, and USD 0 maintainer spend
+- [x] Confirm zero-host, zero-provider, zero-secret, and USD 0 maintainer spend
   for this release.
 
 ## Acceptance Criteria
 
-- [ ] `CTR-01` The recorded baseline identifies the tested ref, environment,
+- [x] `CTR-01` The recorded baseline identifies the tested ref, environment,
   commands, results, and every skipped or unavailable check.
-- [ ] `CTR-02` Every public CLI surface maps to one defined success/error,
+- [x] `CTR-02` Every public CLI surface maps to one defined success/error,
   stream, exit, and rich/plain/JSON behavior.
-- [ ] `CTR-03` Support states and evidence modes cannot present unknown, stubbed,
+- [x] `CTR-03` Support states and evidence modes cannot present unknown, stubbed,
   manual, unsupported, or disabled behavior as verified.
-- [ ] `CTR-04` The exact platform, architecture, libc, shell, and distribution
+- [x] `CTR-04` The exact platform, architecture, libc, shell, and distribution
   claims are explicit; every other combination has deterministic handling.
-- [ ] `CTR-05` First-class status has a capability-level guarantee and does not
+- [x] `CTR-05` First-class status has a capability-level guarantee and does not
   require unsafe execution or credentials on a maintainer machine.
-- [ ] `CTR-06` Success and abort thresholds are numeric, and issue #135 has no
+- [x] `CTR-06` Success and abort thresholds are numeric, and issue #135 has no
   unmapped release-confidence requirement.
-- [ ] `CTR-07` v0.1.13 contains no hosted execution/provider scope and requires
+- [x] `CTR-07` v0.1.13 contains no hosted execution/provider scope and requires
   no account, credential, paid service, or publication action to validate.
 
 ## Evidence
