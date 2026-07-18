@@ -23,6 +23,7 @@ run() {
   local id=$1 treatment=$2 command
   shift 2
   printf -v command '%q ' "$@"
+  command=${command% }
   printf 'phase03-adversarial: %s\n' "$id" >&2
   (cd "$root" && "$@")
   printf '1\t%s\t%s\t%s\tpass\t%s\n' "$tested_ref" "$id" "$treatment" "$command" >>"$tmp"

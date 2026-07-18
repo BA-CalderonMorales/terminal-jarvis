@@ -1,0 +1,14 @@
+schema_version	tested_ref	case	treatment	result	command
+1	4ec142fe954cd998df92775a38240a9a523d1547	descriptor-guards	deterministic	pass	cargo test --quiet --test phase03_catalog_walk_tests -- --exact catalog_walk_records_all_rows_once_without_effects
+1	4ec142fe954cd998df92775a38240a9a523d1547	missing-and-permission	deterministic	pass	cargo test --quiet --test phase03_cli_exit_matrix --test phase02_diagnostics_readonly
+1	4ec142fe954cd998df92775a38240a9a523d1547	empty-and-malformed-state	deterministic	pass	cargo test --quiet --test cli_session_tests --test phase02_diagnostics_states
+1	4ec142fe954cd998df92775a38240a9a523d1547	side-effect-injection	deterministic	pass	cargo test --quiet --test phase02_lifecycle_contract_tests --test phase02_dangerous_contract_tests --test phase02_support_guard_contract_tests
+1	4ec142fe954cd998df92775a38240a9a523d1547	stream-signal-nonutf8	deterministic	pass	cargo test --quiet --test phase02_stream_contract_tests
+1	4ec142fe954cd998df92775a38240a9a523d1547	redaction-all-channels	deterministic	pass	cargo test --quiet --test phase02_diagnostics_redaction --test phase03_redaction_channels
+1	4ec142fe954cd998df92775a38240a9a523d1547	cache-checksum-architecture-shadow-recovery	deterministic	pass	node --test npm/terminal-jarvis/test-wrapper.js
+1	4ec142fe954cd998df92775a38240a9a523d1547	support-artifact-redaction	deterministic	pass	env TJ_SUPPORT_SECRET_SENTINEL=TJ_SUPPORT_SECRET_SENTINEL_6c82 scripts/generate-support-report.sh --check
+1	4ec142fe954cd998df92775a38240a9a523d1547	timeout	frozen-contract-not-applicable	pass	no v0.1.13 timeout surface
+1	4ec142fe954cd998df92775a38240a9a523d1547	debug-output	frozen-contract-not-applicable	pass	no v0.1.13 debug surface
+1	4ec142fe954cd998df92775a38240a9a523d1547	disposable-real	data-derived-not-promoted	pass	five candidates have zero promoted guarantees
+1	4ec142fe954cd998df92775a38240a9a523d1547	manual-rows	deterministic-empty-denominator	pass	catalog contains zero manual rows
+1	4ec142fe954cd998df92775a38240a9a523d1547	unsupported-rows	deterministic-empty-denominator	pass	catalog contains zero unsupported rows

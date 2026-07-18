@@ -106,36 +106,36 @@ Remaining before this phase can become evidence-ready:
 
 ## Work
 
-- [ ] Build one catalog-driven fake-executable fixture and coverage report.
-- [ ] Generate deterministic conformance for every capability row and support state.
-- [ ] Generate the complete CLI/output/error/diagnostic contract matrix.
-- [ ] Add adversarial redaction, path, permission, corruption, stream, signal,
+- [x] Build one catalog-driven fake-executable fixture and coverage report.
+- [x] Generate deterministic conformance for every capability row and support state.
+- [x] Generate the complete CLI/output/error/diagnostic contract matrix.
+- [x] Add adversarial redaction, path, permission, corruption, stream, signal,
   timeout, and side-effect tests.
-- [ ] Add disposable real smoke for each approved first-class guarantee.
-- [ ] Define manual procedures and deterministic unsupported cases for every row
+- [x] Add disposable real smoke for each approved first-class guarantee.
+- [x] Define manual procedures and deterministic unsupported cases for every row
   that cannot safely receive real automation.
-- [ ] Run the fixture against a development binary and one locally staged package.
+- [x] Run the fixture against a development binary and one locally staged package.
 - [ ] Optionally generate the safe offline transcript from the same fixture.
 
 ## Acceptance Criteria
 
-- [ ] `EVD-01` The coverage report contains every one of the 225 catalog rows
+- [x] `EVD-01` The coverage report contains every one of the 225 catalog rows
   exactly once with support state, evidence tier, result, and tested ref.
-- [ ] `EVD-02` Fake-executable tests verify planned argv and guarded execution
+- [x] `EVD-02` Fake-executable tests verify planned argv and guarded execution
   without network access, external writes, credentials, or real agent actions.
-- [ ] `EVD-03` Every CLI command, alias, option, error class, output mode, width,
+- [x] `EVD-03` Every CLI command, alias, option, error class, output mode, width,
   stream, and exit category in Phase 01 has deterministic coverage.
-- [ ] `EVD-04` Stubbed, disabled, unsupported, manual, dangerous, and unknown
+- [x] `EVD-04` Stubbed, disabled, unsupported, manual, dangerous, and unknown
   rows take their declared path and cannot accidentally spawn an operational command.
-- [ ] `EVD-05` Seeded-secret and sensitive-path tests emit no protected value in
+- [x] `EVD-05` Seeded-secret and sensitive-path tests emit no protected value in
   rich, plain, JSON, stderr, debug, child-failure, or support artifacts.
-- [ ] `EVD-06` Child success, failure, signal, timeout, stdout, stderr, and
+- [x] `EVD-06` Child success, failure, signal, timeout, stdout, stderr, and
   non-UTF8-safe cases preserve the Phase 01 contract.
-- [ ] `EVD-07` Disposable real smoke covers every first-class guarantee without
+- [x] `EVD-07` Disposable real smoke covers every first-class guarantee without
   a provider secret, prompt submission, repository mutation, or maintainer-machine execution.
-- [ ] `EVD-08` Manual and unsupported rows have reproducible procedures or
+- [x] `EVD-08` Manual and unsupported rows have reproducible procedures or
   negative tests and are never counted as automated passes.
-- [ ] `EVD-09` A locally staged package passes the same fixture used for the
+- [x] `EVD-09` A locally staged package passes the same fixture used for the
   development binary with matching version and catalog identity.
 - [ ] `EVD-10` If generated, the offline transcript is pinned, self-contained,
   visibly simulated, noninteractive, text-accessible, secret-free, and
@@ -145,7 +145,9 @@ Remaining before this phase can become evidence-ready:
 
 | Covers | Method | Artifact | Ref | UTC | Result | Verified by |
 |---|---|---|---|---|---|---|
-| pending | pending | pending | pending | pending | pending | pending |
+| EVD-01, EVD-02, EVD-04, EVD-08 | 225 exact descriptor guard probes | `plan/evidence/phase-03/parity/dev.tsv` | 4ec142f | 2026-07-18T22:19:51Z | pass | Codex |
+| EVD-03, EVD-05, EVD-06, EVD-07 | exact-command adversarial gate | `plan/evidence/phase-03/adversarial.tsv` | 4ec142f | 2026-07-18T22:19:51Z | pass | Codex |
+| EVD-09 | identical dev/staged fixture and identity comparison | `plan/evidence/phase-03/parity/identity.tsv` | 4ec142f | 2026-07-18T22:19:51Z | pass | Codex |
 
 ## Exit
 
