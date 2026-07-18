@@ -90,3 +90,7 @@ fn entry(name: &str) -> (&'static str, &'static str) {
         _ => ("terminal-jarvis help", "Show Terminal Jarvis help."),
     }
 }
+
+#[cfg(test)]
+#[path = "help_command_test.rs"]
+mod tests;
