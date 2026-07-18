@@ -17,7 +17,8 @@ impl Report {
 
     pub fn tsv(&self) -> String {
         let header = "schema_version\ttested_ref\tharness\tcapability\tsupport\t\
-                      evidence\tguard\targv\teffect\tresult";
+                      evidence\tguard\targv\teffect\tplatforms\texecutable\t\
+                      source\tverified_at\tsummary\tresult";
         let mut lines = vec![header.to_string()];
         lines.extend(self.rows.iter().map(|row| row.tsv(&self.tested_ref)));
         format!("{}\n", lines.join("\n"))

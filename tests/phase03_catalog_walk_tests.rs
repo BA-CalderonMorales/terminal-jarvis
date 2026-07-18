@@ -23,6 +23,11 @@ fn catalog_walk_records_all_rows_once_without_effects() {
         assert_eq!(row.guard, format!("blocked:{}:exit-4", row.support));
         assert_eq!(row.result, "pass");
         assert!(!row.argv.is_empty());
+        assert!(!row.platforms.is_empty());
+        assert!(!row.executable.is_empty());
+        assert!(!row.source.is_empty());
+        assert!(!row.verified_at.is_empty());
+        assert!(!row.summary.is_empty());
     }
     assert_eq!(harnesses.len(), 25);
     assert!(per_harness.values().all(|count| *count == 9));
@@ -43,7 +48,7 @@ fn catalog_walk_records_all_rows_once_without_effects() {
     assert!(rendered
         .lines()
         .skip(1)
-        .all(|line| line.split('\t').count() == 10));
+        .all(|line| line.split('\t').count() == 15));
     if let Some(path) = std::env::var_os("TJ_PHASE03_REPORT_PATH") {
         std::fs::write(path, &rendered).expect("coverage report is writable");
     }

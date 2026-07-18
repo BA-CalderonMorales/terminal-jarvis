@@ -8,6 +8,11 @@ pub struct Row {
     pub guard: String,
     pub argv: String,
     pub effect: String,
+    pub platforms: String,
+    pub executable: String,
+    pub source: String,
+    pub verified_at: String,
+    pub summary: String,
     pub result: String,
 }
 
@@ -26,6 +31,15 @@ impl Row {
                 plan.network,
                 plan.interaction.as_str()
             ),
+            platforms: if plan.platforms.is_empty() {
+                "none".to_string()
+            } else {
+                plan.platforms.join(",")
+            },
+            executable: plan.executable.clone(),
+            source: plan.source.clone(),
+            verified_at: plan.verified_at.clone(),
+            summary: plan.summary.clone(),
             result: "pass".to_string(),
         }
     }
@@ -41,6 +55,11 @@ impl Row {
             &self.guard,
             &self.argv,
             &self.effect,
+            &self.platforms,
+            &self.executable,
+            &self.source,
+            &self.verified_at,
+            &self.summary,
             &self.result,
         ];
         values.map(clean).join("\t")

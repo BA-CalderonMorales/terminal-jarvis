@@ -2,10 +2,12 @@
 
 # Terminal Jarvis
 
-**Unified command center for AI coding tools**
+**Catalog-driven command center for AI coding tools**
 
-Manage Claude, Gemini, Qwen, and 22 more AI assistants from one terminal
-interface.
+Inspect and safely gate catalog descriptors for Claude, Gemini, Qwen, and 22
+other AI assistants from one terminal interface. Catalog presence does not mean
+that a capability is supported; each capability reports its own evidence-backed
+state.
 
 [![NPM Version](https://img.shields.io/npm/v/terminal-jarvis.svg?logo=npm&style=flat-square)](https://www.npmjs.com/package/terminal-jarvis)
 [![Crates.io](https://img.shields.io/crates/v/terminal-jarvis.svg?logo=rust&style=flat-square)](https://crates.io/crates/terminal-jarvis)
@@ -30,9 +32,9 @@ interface.
 
 ---
 
-A data-driven harness switcher for AI coding agents. Maps **25 coding-agent
-CLIs** through a shared **9-capability contract** -- one interface to
-download, run, update, and inspect any agent tool.
+A data-driven harness catalog for AI coding agents. It maps **25 coding-agent
+CLIs** through a shared **9-capability contract** and fails closed unless a
+capability's declared support, evidence, platform, and freshness permit it.
 
 ## Install
 
@@ -118,7 +120,7 @@ Auth stays with each harness -- terminal-jarvis never retains credentials.
 | `security [status\|audit\|harness]` | Security posture |
 | `gate [status\|list\|enable\|disable\|run]` | Optional local security gate |
 | `version [--verbose]` / `--version` / `-v` / `--info` | Version info |
-| `--update [--dry-run]` | Update Terminal Jarvis or print the update command |
+| `self-update [--dry-run]` / `--update` | Update Terminal Jarvis or print the update command |
 | `config show` | Active config state |
 | `auth help <harness>` | Credential setup guidance |
 | `[harness] [args...]` | Pass-through to harness binary |
@@ -142,6 +144,7 @@ TERMINAL_JARVIS_EXPERIMENTAL_UI=1 terminal-jarvis experimental dashboard
 | Document | What |
 |---|---|
 | [Capability contract](docs/harness-capability-contract.md) | Full breakdown of the 9 capabilities |
-| [Supported agents](docs/supported-agents.md) | All 25 coding agents |
+| [Cataloged agents](docs/supported-agents.md) | All 25 descriptors and support caveat |
+| [Support matrix](docs/support-matrix.md) | All 225 capability truth rows |
 | [Security gates](docs/security-gates.md) | Optional Trivy scan behavior and configuration |
 | [Development](docs/development.md) | Architecture, verification, and release artifacts |

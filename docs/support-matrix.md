@@ -2,44 +2,246 @@
 
 Generated from the validated harness catalog. Do not edit by hand.
 
-| Harness | Capability states | Description |
-|---|---|---|
-| aider | verified=0,expected=0,manual=0,stub=4,unsupported=0,disabled=1,unknown=4 | AI pair programming assistant that edits code in your local git repository |
-| amp | verified=0,expected=0,manual=0,stub=4,unsupported=0,disabled=1,unknown=4 | Sourcegraph's AI-powered code assistant with advanced context awareness |
-| claude | verified=0,expected=0,manual=0,stub=4,unsupported=0,disabled=1,unknown=4 | Anthropic's Claude for code assistance |
-| code | verified=0,expected=0,manual=0,stub=4,unsupported=0,disabled=1,unknown=4 | Fork of Codex AI - multi-provider coding agent |
-| codex | verified=0,expected=0,manual=0,stub=3,unsupported=0,disabled=0,unknown=6 | OpenAI coding agent CLI |
-| copilot | verified=0,expected=0,manual=0,stub=4,unsupported=0,disabled=1,unknown=4 | GitHub Copilot CLI - AI pair programming directly in your terminal |
-| crush | verified=0,expected=0,manual=0,stub=4,unsupported=0,disabled=1,unknown=4 | Charm's multi-model AI assistant with LSP |
-| cursor-agent | verified=0,expected=0,manual=0,stub=5,unsupported=0,disabled=1,unknown=3 | AI agent replicating Cursor's capabilities in the CLI |
-| droid | verified=0,expected=0,manual=0,stub=4,unsupported=0,disabled=1,unknown=4 | Factory AI's Droid - Automated coding engineer |
-| eca | verified=0,expected=0,manual=0,stub=4,unsupported=0,disabled=1,unknown=4 | Editor Code Assistant |
-| forge | verified=0,expected=0,manual=0,stub=4,unsupported=0,disabled=1,unknown=4 | AI-Enhanced Terminal Development Environment |
-| gemini | verified=0,expected=0,manual=0,stub=4,unsupported=0,disabled=1,unknown=4 | Google's Gemini CLI tool |
-| goose | verified=0,expected=0,manual=0,stub=4,unsupported=0,disabled=1,unknown=4 | Block's AI-powered coding assistant with developer toolkit integration |
-| hermes | verified=0,expected=0,manual=0,stub=4,unsupported=0,disabled=1,unknown=4 | Nous Research's terminal AI agent with CLI, TUI, tools, skills, and messaging gateway support |
-| jules | verified=0,expected=0,manual=0,stub=4,unsupported=0,disabled=1,unknown=4 | Google's asynchronous coding agent in the terminal |
-| kilocode | verified=0,expected=0,manual=0,stub=4,unsupported=0,disabled=1,unknown=4 | Open-source AI coding agent |
-| letta | verified=0,expected=0,manual=0,stub=4,unsupported=0,disabled=1,unknown=4 | Memory-first coding agent |
-| llxprt | verified=0,expected=0,manual=0,stub=4,unsupported=0,disabled=1,unknown=4 | Multi-provider AI coding assistant |
-| nanocoder | verified=0,expected=0,manual=0,stub=4,unsupported=0,disabled=1,unknown=4 | Local-first coding agent |
-| ollama | verified=0,expected=0,manual=0,stub=4,unsupported=0,disabled=1,unknown=4 | Get up and running with large language models locally |
-| openclaw | verified=0,expected=0,manual=0,stub=4,unsupported=0,disabled=1,unknown=4 | Open-source AI coding assistant and multi-channel local gateway |
-| opencode | verified=0,expected=0,manual=0,stub=3,unsupported=0,disabled=0,unknown=6 | Terminal-based AI coding agent |
-| pi | verified=0,expected=0,manual=0,stub=4,unsupported=0,disabled=1,unknown=4 | Terminal-based coding agent |
-| qwen | verified=0,expected=0,manual=0,stub=4,unsupported=0,disabled=1,unknown=4 | Qwen coding assistant |
-| vibe | verified=0,expected=0,manual=0,stub=4,unsupported=0,disabled=1,unknown=4 | Minimal CLI coding agent by Mistral AI |
+Catalog presence is not a support claim. Each row reports its own guard state and primary evidence tier.
+
+| Harness | Capability | Support | Evidence | Effect | Network | Interaction | Platforms | Executable | Source | Freshness |
+|---|---|---|---|---|---|---|---|---|---|---|
+| aider | download | unknown | deterministic | state-changing | true | noninteractive | none | `uv` | `internal:phase-01@fab5848` | 2026-07-17T04:59:27Z |
+| aider | headless | stub | deterministic | read-only | false | noninteractive | linux-x64-gnu | `aider` | `internal:phase-01@fab5848` | 2026-07-17T04:59:27Z |
+| aider | models | stub | deterministic | read-only | false | noninteractive | linux-x64-gnu | `aider` | `internal:phase-01@fab5848` | 2026-07-17T04:59:27Z |
+| aider | security | stub | deterministic | read-only | false | noninteractive | linux-x64-gnu | `aider` | `internal:phase-01@fab5848` | 2026-07-17T04:59:27Z |
+| aider | stats | stub | deterministic | read-only | false | noninteractive | linux-x64-gnu | `aider` | `internal:phase-01@fab5848` | 2026-07-17T04:59:27Z |
+| aider | ui | unknown | deterministic | state-changing | true | interactive | none | `aider` | `internal:phase-01@fab5848` | 2026-07-17T04:59:27Z |
+| aider | update | unknown | deterministic | state-changing | true | noninteractive | none | `uv` | `internal:phase-01@fab5848` | 2026-07-17T04:59:27Z |
+| aider | version | unknown | deterministic | read-only | false | noninteractive | none | `sh` | `internal:phase-01@fab5848` | 2026-07-17T04:59:27Z |
+| aider | yolo | disabled | deterministic | dangerous | true | noninteractive | linux-x64-gnu | `sh` | `internal:phase-01@fab5848` | 2026-07-17T04:59:27Z |
+| amp | download | unknown | deterministic | state-changing | true | noninteractive | none | `npm` | `internal:phase-01@fab5848` | 2026-07-17T04:59:27Z |
+| amp | headless | stub | deterministic | read-only | false | noninteractive | linux-x64-gnu | `amp` | `internal:phase-01@fab5848` | 2026-07-17T04:59:27Z |
+| amp | models | stub | deterministic | read-only | false | noninteractive | linux-x64-gnu | `amp` | `internal:phase-01@fab5848` | 2026-07-17T04:59:27Z |
+| amp | security | stub | deterministic | read-only | false | noninteractive | linux-x64-gnu | `amp` | `internal:phase-01@fab5848` | 2026-07-17T04:59:27Z |
+| amp | stats | stub | deterministic | read-only | false | noninteractive | linux-x64-gnu | `amp` | `internal:phase-01@fab5848` | 2026-07-17T04:59:27Z |
+| amp | ui | unknown | deterministic | state-changing | true | interactive | none | `amp` | `internal:phase-01@fab5848` | 2026-07-17T04:59:27Z |
+| amp | update | unknown | deterministic | state-changing | true | noninteractive | none | `npm` | `internal:phase-01@fab5848` | 2026-07-17T04:59:27Z |
+| amp | version | unknown | deterministic | read-only | false | noninteractive | none | `sh` | `internal:phase-01@fab5848` | 2026-07-17T04:59:27Z |
+| amp | yolo | disabled | deterministic | dangerous | true | noninteractive | linux-x64-gnu | `sh` | `internal:phase-01@fab5848` | 2026-07-17T04:59:27Z |
+| claude | download | unknown | deterministic | state-changing | true | noninteractive | none | `sh` | `internal:phase-01@fab5848` | 2026-07-17T04:59:27Z |
+| claude | headless | stub | deterministic | read-only | false | noninteractive | linux-x64-gnu | `claude` | `internal:phase-01@fab5848` | 2026-07-17T04:59:27Z |
+| claude | models | stub | deterministic | read-only | false | noninteractive | linux-x64-gnu | `claude` | `internal:phase-01@fab5848` | 2026-07-17T04:59:27Z |
+| claude | security | stub | deterministic | read-only | false | noninteractive | linux-x64-gnu | `claude` | `internal:phase-01@fab5848` | 2026-07-17T04:59:27Z |
+| claude | stats | stub | deterministic | read-only | false | noninteractive | linux-x64-gnu | `claude` | `internal:phase-01@fab5848` | 2026-07-17T04:59:27Z |
+| claude | ui | unknown | deterministic | state-changing | true | interactive | none | `claude` | `internal:phase-01@fab5848` | 2026-07-17T04:59:27Z |
+| claude | update | unknown | deterministic | state-changing | true | noninteractive | none | `claude` | `internal:phase-01@fab5848` | 2026-07-17T04:59:27Z |
+| claude | version | unknown | deterministic | read-only | false | noninteractive | none | `sh` | `internal:phase-01@fab5848` | 2026-07-17T04:59:27Z |
+| claude | yolo | disabled | deterministic | dangerous | true | noninteractive | linux-x64-gnu | `sh` | `internal:phase-01@fab5848` | 2026-07-17T04:59:27Z |
+| code | download | unknown | deterministic | state-changing | true | noninteractive | none | `npm` | `internal:phase-01@fab5848` | 2026-07-17T04:59:27Z |
+| code | headless | stub | deterministic | read-only | false | noninteractive | linux-x64-gnu | `coder` | `internal:phase-01@fab5848` | 2026-07-17T04:59:27Z |
+| code | models | stub | deterministic | read-only | false | noninteractive | linux-x64-gnu | `coder` | `internal:phase-01@fab5848` | 2026-07-17T04:59:27Z |
+| code | security | stub | deterministic | read-only | false | noninteractive | linux-x64-gnu | `coder` | `internal:phase-01@fab5848` | 2026-07-17T04:59:27Z |
+| code | stats | stub | deterministic | read-only | false | noninteractive | linux-x64-gnu | `coder` | `internal:phase-01@fab5848` | 2026-07-17T04:59:27Z |
+| code | ui | unknown | deterministic | state-changing | true | interactive | none | `coder` | `internal:phase-01@fab5848` | 2026-07-17T04:59:27Z |
+| code | update | unknown | deterministic | state-changing | true | noninteractive | none | `npm` | `internal:phase-01@fab5848` | 2026-07-17T04:59:27Z |
+| code | version | unknown | deterministic | read-only | false | noninteractive | none | `sh` | `internal:phase-01@fab5848` | 2026-07-17T04:59:27Z |
+| code | yolo | disabled | deterministic | dangerous | true | noninteractive | linux-x64-gnu | `sh` | `internal:phase-01@fab5848` | 2026-07-17T04:59:27Z |
+| codex | download | unknown | deterministic | state-changing | true | noninteractive | none | `npm` | `internal:phase-01@fab5848` | 2026-07-17T04:59:27Z |
+| codex | headless | unknown | deterministic | dangerous | true | noninteractive | none | `codex` | `internal:phase-01@fab5848` | 2026-07-17T04:59:27Z |
+| codex | models | stub | deterministic | read-only | false | noninteractive | linux-x64-gnu | `codex` | `internal:phase-01@fab5848` | 2026-07-17T04:59:27Z |
+| codex | security | stub | deterministic | read-only | false | noninteractive | linux-x64-gnu | `codex` | `internal:phase-01@fab5848` | 2026-07-17T04:59:27Z |
+| codex | stats | stub | deterministic | read-only | false | noninteractive | linux-x64-gnu | `codex` | `internal:phase-01@fab5848` | 2026-07-17T04:59:27Z |
+| codex | ui | unknown | deterministic | state-changing | true | interactive | none | `codex` | `internal:phase-01@fab5848` | 2026-07-17T04:59:27Z |
+| codex | update | unknown | deterministic | state-changing | true | noninteractive | none | `npm` | `internal:phase-01@fab5848` | 2026-07-17T04:59:27Z |
+| codex | version | unknown | deterministic | read-only | false | noninteractive | none | `codex` | `internal:phase-01@fab5848` | 2026-07-17T04:59:27Z |
+| codex | yolo | unknown | deterministic | dangerous | true | interactive | none | `codex` | `internal:phase-01@fab5848` | 2026-07-17T04:59:27Z |
+| copilot | download | unknown | deterministic | state-changing | true | noninteractive | none | `npm` | `internal:phase-01@fab5848` | 2026-07-17T04:59:27Z |
+| copilot | headless | stub | deterministic | read-only | false | noninteractive | linux-x64-gnu | `copilot` | `internal:phase-01@fab5848` | 2026-07-17T04:59:27Z |
+| copilot | models | stub | deterministic | read-only | false | noninteractive | linux-x64-gnu | `copilot` | `internal:phase-01@fab5848` | 2026-07-17T04:59:27Z |
+| copilot | security | stub | deterministic | read-only | false | noninteractive | linux-x64-gnu | `copilot` | `internal:phase-01@fab5848` | 2026-07-17T04:59:27Z |
+| copilot | stats | stub | deterministic | read-only | false | noninteractive | linux-x64-gnu | `copilot` | `internal:phase-01@fab5848` | 2026-07-17T04:59:27Z |
+| copilot | ui | unknown | deterministic | state-changing | true | interactive | none | `copilot` | `internal:phase-01@fab5848` | 2026-07-17T04:59:27Z |
+| copilot | update | unknown | deterministic | state-changing | true | noninteractive | none | `npm` | `internal:phase-01@fab5848` | 2026-07-17T04:59:27Z |
+| copilot | version | unknown | deterministic | read-only | false | noninteractive | none | `sh` | `internal:phase-01@fab5848` | 2026-07-17T04:59:27Z |
+| copilot | yolo | disabled | deterministic | dangerous | true | noninteractive | linux-x64-gnu | `sh` | `internal:phase-01@fab5848` | 2026-07-17T04:59:27Z |
+| crush | download | unknown | deterministic | state-changing | true | noninteractive | none | `npm` | `internal:phase-01@fab5848` | 2026-07-17T04:59:27Z |
+| crush | headless | stub | deterministic | read-only | false | noninteractive | linux-x64-gnu | `crush` | `internal:phase-01@fab5848` | 2026-07-17T04:59:27Z |
+| crush | models | stub | deterministic | read-only | false | noninteractive | linux-x64-gnu | `crush` | `internal:phase-01@fab5848` | 2026-07-17T04:59:27Z |
+| crush | security | stub | deterministic | read-only | false | noninteractive | linux-x64-gnu | `crush` | `internal:phase-01@fab5848` | 2026-07-17T04:59:27Z |
+| crush | stats | stub | deterministic | read-only | false | noninteractive | linux-x64-gnu | `crush` | `internal:phase-01@fab5848` | 2026-07-17T04:59:27Z |
+| crush | ui | unknown | deterministic | state-changing | true | interactive | none | `crush` | `internal:phase-01@fab5848` | 2026-07-17T04:59:27Z |
+| crush | update | unknown | deterministic | state-changing | true | noninteractive | none | `npm` | `internal:phase-01@fab5848` | 2026-07-17T04:59:27Z |
+| crush | version | unknown | deterministic | read-only | false | noninteractive | none | `sh` | `internal:phase-01@fab5848` | 2026-07-17T04:59:27Z |
+| crush | yolo | disabled | deterministic | dangerous | true | noninteractive | linux-x64-gnu | `sh` | `internal:phase-01@fab5848` | 2026-07-17T04:59:27Z |
+| cursor-agent | download | unknown | deterministic | state-changing | true | noninteractive | none | `pip` | `internal:phase-01@fab5848` | 2026-07-17T04:59:27Z |
+| cursor-agent | headless | stub | deterministic | read-only | false | noninteractive | linux-x64-gnu | `cursor-agent` | `internal:phase-01@fab5848` | 2026-07-17T04:59:27Z |
+| cursor-agent | models | stub | deterministic | read-only | false | noninteractive | linux-x64-gnu | `cursor-agent` | `internal:phase-01@fab5848` | 2026-07-17T04:59:27Z |
+| cursor-agent | security | stub | deterministic | read-only | false | noninteractive | linux-x64-gnu | `cursor-agent` | `internal:phase-01@fab5848` | 2026-07-17T04:59:27Z |
+| cursor-agent | stats | stub | deterministic | read-only | false | noninteractive | linux-x64-gnu | `cursor-agent` | `internal:phase-01@fab5848` | 2026-07-17T04:59:27Z |
+| cursor-agent | ui | unknown | deterministic | state-changing | true | interactive | none | `cursor-agent` | `internal:phase-01@fab5848` | 2026-07-17T04:59:27Z |
+| cursor-agent | update | unknown | deterministic | state-changing | true | noninteractive | none | `pip` | `internal:phase-01@fab5848` | 2026-07-17T04:59:27Z |
+| cursor-agent | version | stub | deterministic | read-only | false | noninteractive | linux-x64-gnu | `sh` | `internal:phase-01@fab5848` | 2026-07-17T04:59:27Z |
+| cursor-agent | yolo | disabled | deterministic | dangerous | true | noninteractive | linux-x64-gnu | `sh` | `internal:phase-01@fab5848` | 2026-07-17T04:59:27Z |
+| droid | download | unknown | deterministic | state-changing | true | noninteractive | none | `sh` | `internal:phase-01@fab5848` | 2026-07-17T04:59:27Z |
+| droid | headless | stub | deterministic | read-only | false | noninteractive | linux-x64-gnu | `droid` | `internal:phase-01@fab5848` | 2026-07-17T04:59:27Z |
+| droid | models | stub | deterministic | read-only | false | noninteractive | linux-x64-gnu | `droid` | `internal:phase-01@fab5848` | 2026-07-17T04:59:27Z |
+| droid | security | stub | deterministic | read-only | false | noninteractive | linux-x64-gnu | `droid` | `internal:phase-01@fab5848` | 2026-07-17T04:59:27Z |
+| droid | stats | stub | deterministic | read-only | false | noninteractive | linux-x64-gnu | `droid` | `internal:phase-01@fab5848` | 2026-07-17T04:59:27Z |
+| droid | ui | unknown | deterministic | state-changing | true | interactive | none | `droid` | `internal:phase-01@fab5848` | 2026-07-17T04:59:27Z |
+| droid | update | unknown | deterministic | state-changing | true | noninteractive | none | `droid` | `internal:phase-01@fab5848` | 2026-07-17T04:59:27Z |
+| droid | version | unknown | deterministic | read-only | false | noninteractive | none | `sh` | `internal:phase-01@fab5848` | 2026-07-17T04:59:27Z |
+| droid | yolo | disabled | deterministic | dangerous | true | noninteractive | linux-x64-gnu | `sh` | `internal:phase-01@fab5848` | 2026-07-17T04:59:27Z |
+| eca | download | unknown | deterministic | state-changing | true | noninteractive | none | `sh` | `internal:phase-01@fab5848` | 2026-07-17T04:59:27Z |
+| eca | headless | stub | deterministic | read-only | false | noninteractive | linux-x64-gnu | `eca` | `internal:phase-01@fab5848` | 2026-07-17T04:59:27Z |
+| eca | models | stub | deterministic | read-only | false | noninteractive | linux-x64-gnu | `eca` | `internal:phase-01@fab5848` | 2026-07-17T04:59:27Z |
+| eca | security | stub | deterministic | read-only | false | noninteractive | linux-x64-gnu | `eca` | `internal:phase-01@fab5848` | 2026-07-17T04:59:27Z |
+| eca | stats | stub | deterministic | read-only | false | noninteractive | linux-x64-gnu | `eca` | `internal:phase-01@fab5848` | 2026-07-17T04:59:27Z |
+| eca | ui | unknown | deterministic | state-changing | true | interactive | none | `eca` | `internal:phase-01@fab5848` | 2026-07-17T04:59:27Z |
+| eca | update | unknown | deterministic | state-changing | true | noninteractive | none | `eca` | `internal:phase-01@fab5848` | 2026-07-17T04:59:27Z |
+| eca | version | unknown | deterministic | read-only | false | noninteractive | none | `sh` | `internal:phase-01@fab5848` | 2026-07-17T04:59:27Z |
+| eca | yolo | disabled | deterministic | dangerous | true | noninteractive | linux-x64-gnu | `sh` | `internal:phase-01@fab5848` | 2026-07-17T04:59:27Z |
+| forge | download | unknown | deterministic | state-changing | true | noninteractive | none | `npm` | `internal:phase-01@fab5848` | 2026-07-17T04:59:27Z |
+| forge | headless | stub | deterministic | read-only | false | noninteractive | linux-x64-gnu | `forge` | `internal:phase-01@fab5848` | 2026-07-17T04:59:27Z |
+| forge | models | stub | deterministic | read-only | false | noninteractive | linux-x64-gnu | `forge` | `internal:phase-01@fab5848` | 2026-07-17T04:59:27Z |
+| forge | security | stub | deterministic | read-only | false | noninteractive | linux-x64-gnu | `forge` | `internal:phase-01@fab5848` | 2026-07-17T04:59:27Z |
+| forge | stats | stub | deterministic | read-only | false | noninteractive | linux-x64-gnu | `forge` | `internal:phase-01@fab5848` | 2026-07-17T04:59:27Z |
+| forge | ui | unknown | deterministic | state-changing | true | interactive | none | `forge` | `internal:phase-01@fab5848` | 2026-07-17T04:59:27Z |
+| forge | update | unknown | deterministic | state-changing | true | noninteractive | none | `npm` | `internal:phase-01@fab5848` | 2026-07-17T04:59:27Z |
+| forge | version | unknown | deterministic | read-only | false | noninteractive | none | `sh` | `internal:phase-01@fab5848` | 2026-07-17T04:59:27Z |
+| forge | yolo | disabled | deterministic | dangerous | true | noninteractive | linux-x64-gnu | `sh` | `internal:phase-01@fab5848` | 2026-07-17T04:59:27Z |
+| gemini | download | unknown | deterministic | state-changing | true | noninteractive | none | `npm` | `internal:phase-01@fab5848` | 2026-07-17T04:59:27Z |
+| gemini | headless | stub | deterministic | read-only | false | noninteractive | linux-x64-gnu | `gemini` | `internal:phase-01@fab5848` | 2026-07-17T04:59:27Z |
+| gemini | models | stub | deterministic | read-only | false | noninteractive | linux-x64-gnu | `gemini` | `internal:phase-01@fab5848` | 2026-07-17T04:59:27Z |
+| gemini | security | stub | deterministic | read-only | false | noninteractive | linux-x64-gnu | `gemini` | `internal:phase-01@fab5848` | 2026-07-17T04:59:27Z |
+| gemini | stats | stub | deterministic | read-only | false | noninteractive | linux-x64-gnu | `gemini` | `internal:phase-01@fab5848` | 2026-07-17T04:59:27Z |
+| gemini | ui | unknown | deterministic | state-changing | true | interactive | none | `gemini` | `internal:phase-01@fab5848` | 2026-07-17T04:59:27Z |
+| gemini | update | unknown | deterministic | state-changing | true | noninteractive | none | `npm` | `internal:phase-01@fab5848` | 2026-07-17T04:59:27Z |
+| gemini | version | unknown | deterministic | read-only | false | noninteractive | none | `sh` | `internal:phase-01@fab5848` | 2026-07-17T04:59:27Z |
+| gemini | yolo | disabled | deterministic | dangerous | true | noninteractive | linux-x64-gnu | `sh` | `internal:phase-01@fab5848` | 2026-07-17T04:59:27Z |
+| goose | download | unknown | deterministic | state-changing | true | noninteractive | none | `sh` | `internal:phase-01@fab5848` | 2026-07-17T04:59:27Z |
+| goose | headless | stub | deterministic | read-only | false | noninteractive | linux-x64-gnu | `goose` | `internal:phase-01@fab5848` | 2026-07-17T04:59:27Z |
+| goose | models | stub | deterministic | read-only | false | noninteractive | linux-x64-gnu | `goose` | `internal:phase-01@fab5848` | 2026-07-17T04:59:27Z |
+| goose | security | stub | deterministic | read-only | false | noninteractive | linux-x64-gnu | `goose` | `internal:phase-01@fab5848` | 2026-07-17T04:59:27Z |
+| goose | stats | stub | deterministic | read-only | false | noninteractive | linux-x64-gnu | `goose` | `internal:phase-01@fab5848` | 2026-07-17T04:59:27Z |
+| goose | ui | unknown | deterministic | state-changing | true | interactive | none | `goose` | `internal:phase-01@fab5848` | 2026-07-17T04:59:27Z |
+| goose | update | unknown | deterministic | state-changing | true | noninteractive | none | `goose` | `internal:phase-01@fab5848` | 2026-07-17T04:59:27Z |
+| goose | version | unknown | deterministic | read-only | false | noninteractive | none | `sh` | `internal:phase-01@fab5848` | 2026-07-17T04:59:27Z |
+| goose | yolo | disabled | deterministic | dangerous | true | noninteractive | linux-x64-gnu | `sh` | `internal:phase-01@fab5848` | 2026-07-17T04:59:27Z |
+| hermes | download | unknown | deterministic | state-changing | true | noninteractive | none | `bash` | `internal:phase-01@fab5848` | 2026-07-17T04:59:27Z |
+| hermes | headless | stub | deterministic | read-only | false | noninteractive | linux-x64-gnu | `hermes` | `internal:phase-01@fab5848` | 2026-07-17T04:59:27Z |
+| hermes | models | stub | deterministic | read-only | false | noninteractive | linux-x64-gnu | `hermes` | `internal:phase-01@fab5848` | 2026-07-17T04:59:27Z |
+| hermes | security | stub | deterministic | read-only | false | noninteractive | linux-x64-gnu | `hermes` | `internal:phase-01@fab5848` | 2026-07-17T04:59:27Z |
+| hermes | stats | stub | deterministic | read-only | false | noninteractive | linux-x64-gnu | `hermes` | `internal:phase-01@fab5848` | 2026-07-17T04:59:27Z |
+| hermes | ui | unknown | deterministic | state-changing | true | interactive | none | `hermes` | `internal:phase-01@fab5848` | 2026-07-17T04:59:27Z |
+| hermes | update | unknown | deterministic | state-changing | true | noninteractive | none | `hermes` | `internal:phase-01@fab5848` | 2026-07-17T04:59:27Z |
+| hermes | version | unknown | deterministic | read-only | false | noninteractive | none | `sh` | `internal:phase-01@fab5848` | 2026-07-17T04:59:27Z |
+| hermes | yolo | disabled | deterministic | dangerous | true | noninteractive | linux-x64-gnu | `sh` | `internal:phase-01@fab5848` | 2026-07-17T04:59:27Z |
+| jules | download | unknown | deterministic | state-changing | true | noninteractive | none | `npm` | `internal:phase-01@fab5848` | 2026-07-17T04:59:27Z |
+| jules | headless | stub | deterministic | read-only | false | noninteractive | linux-x64-gnu | `jules` | `internal:phase-01@fab5848` | 2026-07-17T04:59:27Z |
+| jules | models | stub | deterministic | read-only | false | noninteractive | linux-x64-gnu | `jules` | `internal:phase-01@fab5848` | 2026-07-17T04:59:27Z |
+| jules | security | stub | deterministic | read-only | false | noninteractive | linux-x64-gnu | `jules` | `internal:phase-01@fab5848` | 2026-07-17T04:59:27Z |
+| jules | stats | stub | deterministic | read-only | false | noninteractive | linux-x64-gnu | `jules` | `internal:phase-01@fab5848` | 2026-07-17T04:59:27Z |
+| jules | ui | unknown | deterministic | state-changing | true | interactive | none | `jules` | `internal:phase-01@fab5848` | 2026-07-17T04:59:27Z |
+| jules | update | unknown | deterministic | state-changing | true | noninteractive | none | `npm` | `internal:phase-01@fab5848` | 2026-07-17T04:59:27Z |
+| jules | version | unknown | deterministic | read-only | false | noninteractive | none | `sh` | `internal:phase-01@fab5848` | 2026-07-17T04:59:27Z |
+| jules | yolo | disabled | deterministic | dangerous | true | noninteractive | linux-x64-gnu | `sh` | `internal:phase-01@fab5848` | 2026-07-17T04:59:27Z |
+| kilocode | download | unknown | deterministic | state-changing | true | noninteractive | none | `npm` | `internal:phase-01@fab5848` | 2026-07-17T04:59:27Z |
+| kilocode | headless | stub | deterministic | read-only | false | noninteractive | linux-x64-gnu | `kilocode` | `internal:phase-01@fab5848` | 2026-07-17T04:59:27Z |
+| kilocode | models | stub | deterministic | read-only | false | noninteractive | linux-x64-gnu | `kilocode` | `internal:phase-01@fab5848` | 2026-07-17T04:59:27Z |
+| kilocode | security | stub | deterministic | read-only | false | noninteractive | linux-x64-gnu | `kilocode` | `internal:phase-01@fab5848` | 2026-07-17T04:59:27Z |
+| kilocode | stats | stub | deterministic | read-only | false | noninteractive | linux-x64-gnu | `kilocode` | `internal:phase-01@fab5848` | 2026-07-17T04:59:27Z |
+| kilocode | ui | unknown | deterministic | state-changing | true | interactive | none | `kilocode` | `internal:phase-01@fab5848` | 2026-07-17T04:59:27Z |
+| kilocode | update | unknown | deterministic | state-changing | true | noninteractive | none | `npm` | `internal:phase-01@fab5848` | 2026-07-17T04:59:27Z |
+| kilocode | version | unknown | deterministic | read-only | false | noninteractive | none | `sh` | `internal:phase-01@fab5848` | 2026-07-17T04:59:27Z |
+| kilocode | yolo | disabled | deterministic | dangerous | true | noninteractive | linux-x64-gnu | `sh` | `internal:phase-01@fab5848` | 2026-07-17T04:59:27Z |
+| letta | download | unknown | deterministic | state-changing | true | noninteractive | none | `npm` | `internal:phase-01@fab5848` | 2026-07-17T04:59:27Z |
+| letta | headless | stub | deterministic | read-only | false | noninteractive | linux-x64-gnu | `letta` | `internal:phase-01@fab5848` | 2026-07-17T04:59:27Z |
+| letta | models | stub | deterministic | read-only | false | noninteractive | linux-x64-gnu | `letta` | `internal:phase-01@fab5848` | 2026-07-17T04:59:27Z |
+| letta | security | stub | deterministic | read-only | false | noninteractive | linux-x64-gnu | `letta` | `internal:phase-01@fab5848` | 2026-07-17T04:59:27Z |
+| letta | stats | stub | deterministic | read-only | false | noninteractive | linux-x64-gnu | `letta` | `internal:phase-01@fab5848` | 2026-07-17T04:59:27Z |
+| letta | ui | unknown | deterministic | state-changing | true | interactive | none | `letta` | `internal:phase-01@fab5848` | 2026-07-17T04:59:27Z |
+| letta | update | unknown | deterministic | state-changing | true | noninteractive | none | `npm` | `internal:phase-01@fab5848` | 2026-07-17T04:59:27Z |
+| letta | version | unknown | deterministic | read-only | false | noninteractive | none | `sh` | `internal:phase-01@fab5848` | 2026-07-17T04:59:27Z |
+| letta | yolo | disabled | deterministic | dangerous | true | noninteractive | linux-x64-gnu | `sh` | `internal:phase-01@fab5848` | 2026-07-17T04:59:27Z |
+| llxprt | download | unknown | deterministic | state-changing | true | noninteractive | none | `npm` | `internal:phase-01@fab5848` | 2026-07-17T04:59:27Z |
+| llxprt | headless | stub | deterministic | read-only | false | noninteractive | linux-x64-gnu | `llxprt` | `internal:phase-01@fab5848` | 2026-07-17T04:59:27Z |
+| llxprt | models | stub | deterministic | read-only | false | noninteractive | linux-x64-gnu | `llxprt` | `internal:phase-01@fab5848` | 2026-07-17T04:59:27Z |
+| llxprt | security | stub | deterministic | read-only | false | noninteractive | linux-x64-gnu | `llxprt` | `internal:phase-01@fab5848` | 2026-07-17T04:59:27Z |
+| llxprt | stats | stub | deterministic | read-only | false | noninteractive | linux-x64-gnu | `llxprt` | `internal:phase-01@fab5848` | 2026-07-17T04:59:27Z |
+| llxprt | ui | unknown | deterministic | state-changing | true | interactive | none | `llxprt` | `internal:phase-01@fab5848` | 2026-07-17T04:59:27Z |
+| llxprt | update | unknown | deterministic | state-changing | true | noninteractive | none | `npm` | `internal:phase-01@fab5848` | 2026-07-17T04:59:27Z |
+| llxprt | version | unknown | deterministic | read-only | false | noninteractive | none | `sh` | `internal:phase-01@fab5848` | 2026-07-17T04:59:27Z |
+| llxprt | yolo | disabled | deterministic | dangerous | true | noninteractive | linux-x64-gnu | `sh` | `internal:phase-01@fab5848` | 2026-07-17T04:59:27Z |
+| nanocoder | download | unknown | deterministic | state-changing | true | noninteractive | none | `npm` | `internal:phase-01@fab5848` | 2026-07-17T04:59:27Z |
+| nanocoder | headless | stub | deterministic | read-only | false | noninteractive | linux-x64-gnu | `nanocoder` | `internal:phase-01@fab5848` | 2026-07-17T04:59:27Z |
+| nanocoder | models | stub | deterministic | read-only | false | noninteractive | linux-x64-gnu | `nanocoder` | `internal:phase-01@fab5848` | 2026-07-17T04:59:27Z |
+| nanocoder | security | stub | deterministic | read-only | false | noninteractive | linux-x64-gnu | `nanocoder` | `internal:phase-01@fab5848` | 2026-07-17T04:59:27Z |
+| nanocoder | stats | stub | deterministic | read-only | false | noninteractive | linux-x64-gnu | `nanocoder` | `internal:phase-01@fab5848` | 2026-07-17T04:59:27Z |
+| nanocoder | ui | unknown | deterministic | state-changing | true | interactive | none | `nanocoder` | `internal:phase-01@fab5848` | 2026-07-17T04:59:27Z |
+| nanocoder | update | unknown | deterministic | state-changing | true | noninteractive | none | `npm` | `internal:phase-01@fab5848` | 2026-07-17T04:59:27Z |
+| nanocoder | version | unknown | deterministic | read-only | false | noninteractive | none | `sh` | `internal:phase-01@fab5848` | 2026-07-17T04:59:27Z |
+| nanocoder | yolo | disabled | deterministic | dangerous | true | noninteractive | linux-x64-gnu | `sh` | `internal:phase-01@fab5848` | 2026-07-17T04:59:27Z |
+| ollama | download | unknown | deterministic | state-changing | true | noninteractive | none | `sh` | `internal:phase-01@fab5848` | 2026-07-17T04:59:27Z |
+| ollama | headless | stub | deterministic | read-only | false | noninteractive | linux-x64-gnu | `ollama` | `internal:phase-01@fab5848` | 2026-07-17T04:59:27Z |
+| ollama | models | stub | deterministic | read-only | false | noninteractive | linux-x64-gnu | `ollama` | `internal:phase-01@fab5848` | 2026-07-17T04:59:27Z |
+| ollama | security | stub | deterministic | read-only | false | noninteractive | linux-x64-gnu | `ollama` | `internal:phase-01@fab5848` | 2026-07-17T04:59:27Z |
+| ollama | stats | stub | deterministic | read-only | false | noninteractive | linux-x64-gnu | `ollama` | `internal:phase-01@fab5848` | 2026-07-17T04:59:27Z |
+| ollama | ui | unknown | deterministic | state-changing | true | interactive | none | `ollama` | `internal:phase-01@fab5848` | 2026-07-17T04:59:27Z |
+| ollama | update | unknown | deterministic | state-changing | true | noninteractive | none | `sh` | `internal:phase-01@fab5848` | 2026-07-17T04:59:27Z |
+| ollama | version | unknown | deterministic | read-only | false | noninteractive | none | `sh` | `internal:phase-01@fab5848` | 2026-07-17T04:59:27Z |
+| ollama | yolo | disabled | deterministic | dangerous | true | noninteractive | linux-x64-gnu | `sh` | `internal:phase-01@fab5848` | 2026-07-17T04:59:27Z |
+| openclaw | download | unknown | deterministic | state-changing | true | noninteractive | none | `npm` | `internal:phase-01@fab5848` | 2026-07-17T04:59:27Z |
+| openclaw | headless | stub | deterministic | read-only | false | noninteractive | linux-x64-gnu | `openclaw` | `internal:phase-01@fab5848` | 2026-07-17T04:59:27Z |
+| openclaw | models | stub | deterministic | read-only | false | noninteractive | linux-x64-gnu | `openclaw` | `internal:phase-01@fab5848` | 2026-07-17T04:59:27Z |
+| openclaw | security | stub | deterministic | read-only | false | noninteractive | linux-x64-gnu | `openclaw` | `internal:phase-01@fab5848` | 2026-07-17T04:59:27Z |
+| openclaw | stats | stub | deterministic | read-only | false | noninteractive | linux-x64-gnu | `openclaw` | `internal:phase-01@fab5848` | 2026-07-17T04:59:27Z |
+| openclaw | ui | unknown | deterministic | state-changing | true | interactive | none | `openclaw` | `internal:phase-01@fab5848` | 2026-07-17T04:59:27Z |
+| openclaw | update | unknown | deterministic | state-changing | true | noninteractive | none | `openclaw` | `internal:phase-01@fab5848` | 2026-07-17T04:59:27Z |
+| openclaw | version | unknown | deterministic | read-only | false | noninteractive | none | `sh` | `internal:phase-01@fab5848` | 2026-07-17T04:59:27Z |
+| openclaw | yolo | disabled | deterministic | dangerous | true | noninteractive | linux-x64-gnu | `sh` | `internal:phase-01@fab5848` | 2026-07-17T04:59:27Z |
+| opencode | download | unknown | deterministic | state-changing | true | noninteractive | none | `npm` | `internal:phase-01@fab5848` | 2026-07-17T04:59:27Z |
+| opencode | headless | unknown | deterministic | dangerous | true | noninteractive | none | `opencode` | `internal:phase-01@fab5848` | 2026-07-17T04:59:27Z |
+| opencode | models | stub | deterministic | read-only | false | noninteractive | linux-x64-gnu | `opencode` | `internal:phase-01@fab5848` | 2026-07-17T04:59:27Z |
+| opencode | security | stub | deterministic | read-only | false | noninteractive | linux-x64-gnu | `opencode` | `internal:phase-01@fab5848` | 2026-07-17T04:59:27Z |
+| opencode | stats | stub | deterministic | read-only | false | noninteractive | linux-x64-gnu | `opencode` | `internal:phase-01@fab5848` | 2026-07-17T04:59:27Z |
+| opencode | ui | unknown | deterministic | state-changing | true | interactive | none | `opencode` | `internal:phase-01@fab5848` | 2026-07-17T04:59:27Z |
+| opencode | update | unknown | deterministic | state-changing | true | noninteractive | none | `npm` | `internal:phase-01@fab5848` | 2026-07-17T04:59:27Z |
+| opencode | version | unknown | deterministic | read-only | false | noninteractive | none | `opencode` | `internal:phase-01@fab5848` | 2026-07-17T04:59:27Z |
+| opencode | yolo | unknown | deterministic | dangerous | true | interactive | none | `opencode` | `internal:phase-01@fab5848` | 2026-07-17T04:59:27Z |
+| pi | download | unknown | deterministic | state-changing | true | noninteractive | none | `npm` | `internal:phase-01@fab5848` | 2026-07-17T04:59:27Z |
+| pi | headless | stub | deterministic | read-only | false | noninteractive | linux-x64-gnu | `pi` | `internal:phase-01@fab5848` | 2026-07-17T04:59:27Z |
+| pi | models | stub | deterministic | read-only | false | noninteractive | linux-x64-gnu | `pi` | `internal:phase-01@fab5848` | 2026-07-17T04:59:27Z |
+| pi | security | stub | deterministic | read-only | false | noninteractive | linux-x64-gnu | `pi` | `internal:phase-01@fab5848` | 2026-07-17T04:59:27Z |
+| pi | stats | stub | deterministic | read-only | false | noninteractive | linux-x64-gnu | `pi` | `internal:phase-01@fab5848` | 2026-07-17T04:59:27Z |
+| pi | ui | unknown | deterministic | state-changing | true | interactive | none | `pi` | `internal:phase-01@fab5848` | 2026-07-17T04:59:27Z |
+| pi | update | unknown | deterministic | state-changing | true | noninteractive | none | `npm` | `internal:phase-01@fab5848` | 2026-07-17T04:59:27Z |
+| pi | version | unknown | deterministic | read-only | false | noninteractive | none | `sh` | `internal:phase-01@fab5848` | 2026-07-17T04:59:27Z |
+| pi | yolo | disabled | deterministic | dangerous | true | noninteractive | linux-x64-gnu | `sh` | `internal:phase-01@fab5848` | 2026-07-17T04:59:27Z |
+| qwen | download | unknown | deterministic | state-changing | true | noninteractive | none | `npm` | `internal:phase-01@fab5848` | 2026-07-17T04:59:27Z |
+| qwen | headless | stub | deterministic | read-only | false | noninteractive | linux-x64-gnu | `qwen` | `internal:phase-01@fab5848` | 2026-07-17T04:59:27Z |
+| qwen | models | stub | deterministic | read-only | false | noninteractive | linux-x64-gnu | `qwen` | `internal:phase-01@fab5848` | 2026-07-17T04:59:27Z |
+| qwen | security | stub | deterministic | read-only | false | noninteractive | linux-x64-gnu | `qwen` | `internal:phase-01@fab5848` | 2026-07-17T04:59:27Z |
+| qwen | stats | stub | deterministic | read-only | false | noninteractive | linux-x64-gnu | `qwen` | `internal:phase-01@fab5848` | 2026-07-17T04:59:27Z |
+| qwen | ui | unknown | deterministic | state-changing | true | interactive | none | `qwen` | `internal:phase-01@fab5848` | 2026-07-17T04:59:27Z |
+| qwen | update | unknown | deterministic | state-changing | true | noninteractive | none | `npm` | `internal:phase-01@fab5848` | 2026-07-17T04:59:27Z |
+| qwen | version | unknown | deterministic | read-only | false | noninteractive | none | `sh` | `internal:phase-01@fab5848` | 2026-07-17T04:59:27Z |
+| qwen | yolo | disabled | deterministic | dangerous | true | noninteractive | linux-x64-gnu | `sh` | `internal:phase-01@fab5848` | 2026-07-17T04:59:27Z |
+| vibe | download | unknown | deterministic | state-changing | true | noninteractive | none | `bash` | `internal:phase-01@fab5848` | 2026-07-17T04:59:27Z |
+| vibe | headless | stub | deterministic | read-only | false | noninteractive | linux-x64-gnu | `vibe` | `internal:phase-01@fab5848` | 2026-07-17T04:59:27Z |
+| vibe | models | stub | deterministic | read-only | false | noninteractive | linux-x64-gnu | `vibe` | `internal:phase-01@fab5848` | 2026-07-17T04:59:27Z |
+| vibe | security | stub | deterministic | read-only | false | noninteractive | linux-x64-gnu | `vibe` | `internal:phase-01@fab5848` | 2026-07-17T04:59:27Z |
+| vibe | stats | stub | deterministic | read-only | false | noninteractive | linux-x64-gnu | `vibe` | `internal:phase-01@fab5848` | 2026-07-17T04:59:27Z |
+| vibe | ui | unknown | deterministic | state-changing | true | interactive | none | `vibe` | `internal:phase-01@fab5848` | 2026-07-17T04:59:27Z |
+| vibe | update | unknown | deterministic | state-changing | true | noninteractive | none | `vibe` | `internal:phase-01@fab5848` | 2026-07-17T04:59:27Z |
+| vibe | version | unknown | deterministic | read-only | false | noninteractive | none | `sh` | `internal:phase-01@fab5848` | 2026-07-17T04:59:27Z |
+| vibe | yolo | disabled | deterministic | dangerous | true | noninteractive | linux-x64-gnu | `sh` | `internal:phase-01@fab5848` | 2026-07-17T04:59:27Z |
 
 ## First-class decisions
 
-No candidate is promoted by v0.1.13 catalog evidence.
+Promotion is fail-closed. Catalog data may prove a candidate is not eligible; it cannot replace the required Phase 03 deterministic and disposable-real evidence.
 
-| Candidate | Decision |
-|---|---|
-| opencode | not promoted; zero verified capability guarantees |
-| codex | not promoted; zero verified capability guarantees |
-| claude | not promoted; zero verified capability guarantees |
-| gemini | not promoted; zero verified capability guarantees |
-| hermes | not promoted; zero verified capability guarantees |
+| Candidate | Rows | Verified | Disposable-real | Blocking states | Decision |
+|---|---:|---:|---:|---:|---|
+| opencode | 9 | 0 | 0 | 9 | not promoted; catalog prerequisites fail |
+| codex | 9 | 0 | 0 | 9 | not promoted; catalog prerequisites fail |
+| claude | 9 | 0 | 0 | 9 | not promoted; catalog prerequisites fail |
+| gemini | 9 | 0 | 0 | 9 | not promoted; catalog prerequisites fail |
+| hermes | 9 | 0 | 0 | 9 | not promoted; catalog prerequisites fail |
 
-Capability-level evidence, source, platform scope, and freshness are shown by `terminal-jarvis show <harness>` and `terminal-jarvis plan <harness> <capability>`.
+The five decisions above are derived from current catalog rows. Fake execution alone never promotes a candidate.
