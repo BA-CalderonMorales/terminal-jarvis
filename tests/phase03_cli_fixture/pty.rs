@@ -1,6 +1,6 @@
 use std::ffi::CStr;
 use std::fs::{File, OpenOptions};
-use std::io::Read;
+use std::io::{Read, Write};
 use std::os::fd::FromRawFd;
 use std::process::{Command, ExitStatus, Stdio};
 
@@ -11,13 +11,23 @@ unsafe extern "C" {
     fn ptsname(fd: i32) -> *mut std::ffi::c_char;
 }
 
-pub fn run_pty(mut command: Command) -> (ExitStatus, Vec<u8>) {
+pub fn run_pty(command: Command) -> (ExitStatus, Vec<u8>) {
+    run_pty_input(command, &[])
+}
+
+pub fn run_pty_input(mut command: Command, input: &[u8]) -> (ExitStatus, Vec<u8>) {
     let (master, slave) = open_pair();
     command
+        .stdin(Stdio::from(slave.try_clone().unwrap()))
         .stdout(Stdio::from(slave.try_clone().unwrap()))
         .stderr(Stdio::from(slave));
     let mut child = command.spawn().expect("CLI starts in pseudo-terminal");
     drop(command);
+    let mut writer = master.try_clone().expect("pseudo-terminal writer clones");
+    writer
+        .write_all(input)
+        .expect("pseudo-terminal input writes");
+    drop(writer);
     let reader = std::thread::spawn(move || read_master(master));
     let status = child.wait().expect("CLI exits in pseudo-terminal");
     let bytes = reader.join().expect("pseudo-terminal reader joins");

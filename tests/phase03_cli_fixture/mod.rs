@@ -6,7 +6,7 @@ mod pty;
 
 pub use output::{assert_json_document, assert_width, text};
 #[cfg(unix)]
-pub use pty::run_pty;
+pub use pty::{run_pty, run_pty_input};
 
 use std::path::{Path, PathBuf};
 use std::process::{Command, Output};
