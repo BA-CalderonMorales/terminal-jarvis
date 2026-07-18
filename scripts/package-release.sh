@@ -121,6 +121,7 @@ cp npm/terminal-jarvis/package.json "$npm_stage/"
 cp npm/terminal-jarvis/postinstall.js "$npm_stage/"
 cp README.md "$npm_stage/"
 cp npm/terminal-jarvis/bin/README.txt "$npm_stage/bin/"
+cp npm/terminal-jarvis/bin/cache-integrity.js "$npm_stage/bin/"
 cp npm/terminal-jarvis/bin/terminal-jarvis "$npm_stage/bin/"
 chmod +x "$npm_stage/bin/terminal-jarvis"
 

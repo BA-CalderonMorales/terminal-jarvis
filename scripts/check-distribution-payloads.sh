@@ -25,6 +25,8 @@ test -n "$npm_stage" || { usage; exit 2; }
 test -d "$npm_stage" || fail "npm stage missing: $npm_stage"
 test -x "$npm_stage/bin/terminal-jarvis" ||
   fail "npm package must include executable bin/terminal-jarvis"
+test -f "$npm_stage/bin/cache-integrity.js" ||
+  fail "npm package must include bin/cache-integrity.js"
 test -f "$npm_stage/bin/README.txt" ||
   fail "npm package must include bin/README.txt guidance"
 

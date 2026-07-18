@@ -55,6 +55,19 @@ ok() {
   tj "$@" >"$tmp/$label.out" 2>"$tmp/$label.err" || fail "$label failed: $(cat "$tmp/$label.err")"
 }
 
+outcome() {
+  label=$1
+  expected_code=$2
+  shift 2
+  if tj "$@" >"$tmp/$label.out" 2>"$tmp/$label.err"; then
+    actual_code=0
+  else
+    actual_code=$?
+  fi
+  test "$actual_code" = "$expected_code" ||
+    fail "$label exited $actual_code, expected $expected_code: $(cat "$tmp/$label.err")"
+}
+
 bad() {
   label=$1
   shift
@@ -96,8 +109,8 @@ table tools
 plain list >"$tmp/plain-list.out"
 test "$(wc -l <"$tmp/plain-list.out" | tr -d ' ')" = "$expected" || fail "plain list count changed"
 
-ok check check
-ok status status
+outcome check 4 check
+outcome status 4 status
 table check
 table status
 ok current-before current
@@ -127,27 +140,27 @@ table update-summary
 ok auth auth
 ok auth-manage auth manage
 ok auth-help auth help codex
-ok auth-set auth set codex
+outcome auth-set 4 auth set codex
 table auth
 table auth-manage
 table auth-help
-table auth-set
+contains "$tmp/auth-set.err" "does not persist credentials"
 ok config config
 ok config-show config show
 ok config-path config path
-ok config-reset config reset
+outcome config-reset 4 config reset
 table config
 table config-show
 table config-path
-table config-reset
+contains "$tmp/config-reset.err" "guidance-only"
 ok cache cache
 ok cache-status cache status
-ok cache-clear cache clear
-ok cache-refresh cache refresh
+outcome cache-clear 4 cache clear
+outcome cache-refresh 4 cache refresh
 table cache
 table cache-status
-table cache-clear
-table cache-refresh
+contains "$tmp/cache-clear.err" "guidance-only"
+contains "$tmp/cache-refresh.err" "guidance-only"
 
 ok security security
 ok security-status security status
@@ -180,10 +193,10 @@ TERMINAL_JARVIS_CATALOG="$catalog" TERMINAL_JARVIS_HOME="$home" \
   TERMINAL_JARVIS_EXPERIMENTAL_UI=1 "$binary" experimental dashboard >"$tmp/experimental.out"
 contains "$tmp/experimental.out" "Dashboard"
 contains "$tmp/experimental.out" "+"
-ok templates templates
-ok db db
-table templates
-table db
+outcome templates 4 templates
+outcome db 4 db
+contains "$tmp/templates.err" "removed"
+contains "$tmp/db.err" "removed"
 
 TERMINAL_JARVIS_CATALOG="$tmp/missing" TERMINAL_JARVIS_HOME="$home" \
   TERMINAL_JARVIS_DISTRIBUTION=source "$binary" --update --dry-run >"$tmp/update-dry-run.out"
