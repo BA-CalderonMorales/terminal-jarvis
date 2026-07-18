@@ -24,6 +24,35 @@ env:
   CARGO_TERM_COLOR: always
 
 jobs:
+  conformance:
+    name: Phase 02/03 Conformance
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      - uses: dtolnay/rust-toolchain@stable
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 20
+
+      - name: Run exact-ref adversarial evidence
+        run: |
+          mkdir -p evidence
+          scripts/phase03-adversarial-report.sh \
+            --output evidence/phase03-adversarial.tsv \
+            --tested-ref "${{ github.sha }}"
+
+      - uses: actions/upload-artifact@v7
+        with:
+          name: phase03-adversarial-${{ github.sha }}
+          path: evidence/phase03-adversarial.tsv
+          retention-days: 7
+          if-no-files-found: error
+
   verify:
     name: Verify
     runs-on: ubuntu-latest
