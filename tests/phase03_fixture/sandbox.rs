@@ -40,18 +40,21 @@ impl Sandbox {
     }
 
     pub fn verify_guards(&self, samples: &[(String, Capability, SupportState)]) {
-        assert_eq!(
-            samples.len(),
-            3,
-            "expected disabled, stub, and unknown samples"
-        );
-        for (harness, capability, state) in samples {
-            let output = self.probe(harness, *capability);
-            assert_eq!(output.status.code(), Some(4));
-            assert!(output.stdout.is_empty());
-            let diagnostic = String::from_utf8_lossy(&output.stderr);
-            assert!(diagnostic.contains(&format!(" is {};", state.as_str())));
-        }
+        assert_eq!(samples.len(), 225, "every descriptor must be probed");
+        std::thread::scope(|scope| {
+            for chunk in samples.chunks(29) {
+                let sandbox = self;
+                scope.spawn(move || {
+                    for (harness, capability, state) in chunk {
+                        let output = sandbox.probe(harness, *capability);
+                        assert_eq!(output.status.code(), Some(4));
+                        assert!(output.stdout.is_empty());
+                        let diagnostic = String::from_utf8_lossy(&output.stderr);
+                        assert!(diagnostic.contains(&format!(" is {};", state.as_str())));
+                    }
+                });
+            }
+        });
     }
 
     pub fn assert_zero_effects(&self) {
