@@ -34,13 +34,17 @@ mkdir -p "$output"
   --tested-ref "$ref" >/dev/null
 cmp "$output/dev.tsv" "$output/staged.tsv"
 
-"$dev" --plain version --verbose >"$output/dev.version"
-"$staged/bin/terminal-jarvis" --plain version --verbose >"$output/staged.version"
-grep -F "git commit: $ref" "$output/dev.version" >/dev/null
-grep -F "git commit: $ref" "$output/staged.version" >/dev/null
-dev_version=$(sed -n '1p' "$output/dev.version")
-staged_version=$(sed -n '1p' "$output/staged.version")
+dev_verbose=$("$dev" --plain version --verbose)
+staged_verbose=$("$staged/bin/terminal-jarvis" --plain version --verbose)
+dev_version=$(printf '%s\n' "$dev_verbose" | sed -n '1s/^terminal-jarvis //p')
+staged_version=$(printf '%s\n' "$staged_verbose" | sed -n '1s/^terminal-jarvis //p')
+dev_ref=$(printf '%s\n' "$dev_verbose" | sed -n 's/^git commit: //p')
+staged_ref=$(printf '%s\n' "$staged_verbose" | sed -n 's/^git commit: //p')
 [[ "$dev_version" == "$staged_version" ]] || { printf 'version mismatch\n' >&2; exit 4; }
+[[ "$dev_ref" == "$ref" && "$staged_ref" == "$ref" ]] || {
+  printf 'embedded ref mismatch\n' >&2
+  exit 4
+}
 
 tree_digest "$root/harnesses" >"$output/dev.catalog.sha256"
 tree_digest "$staged/harnesses" >"$output/staged.catalog.sha256"
@@ -49,8 +53,15 @@ tree_digest "$staged/gates" >"$output/staged.gates.sha256"
 cmp "$output/dev.catalog.sha256" "$output/staged.catalog.sha256"
 cmp "$output/dev.gates.sha256" "$output/staged.gates.sha256"
 
+printf 'schema_version\trole\tversion\tref\tcatalog_sha256\tgates_sha256\n' >"$output/identity.tsv"
+for role in development staged-package; do
+  printf '1\t%s\t%s\t%s\t%s\t%s\n' "$role" "$dev_version" "$ref" \
+    "$(sha_file "$output/dev.catalog.sha256")" "$(sha_file "$output/dev.gates.sha256")" \
+    >>"$output/identity.tsv"
+done
+
 printf 'schema_version\tref\tversion\treport_sha256\tcatalog_sha256\tgates_sha256\tresult\n' >"$output/summary.tsv"
-printf '1\t%s\t%s\t%s\t%s\t%s\tpass\n' "$ref" "${dev_version##* }" \
+printf '1\t%s\t%s\t%s\t%s\t%s\tpass\n' "$ref" "$dev_version" \
   "$(sha_file "$output/dev.tsv")" "$(sha_file "$output/dev.catalog.sha256")" \
   "$(sha_file "$output/dev.gates.sha256")" >>"$output/summary.tsv"
 printf 'phase03 parity: ok (%s)\n' "$ref"
