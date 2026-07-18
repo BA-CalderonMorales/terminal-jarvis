@@ -62,14 +62,18 @@ pub fn run(parsed: args::Parsed, catalog_root: &Path, home: &Path) -> error::Res
 }
 
 fn catalog_error(path: &Path, cause: std::io::Error) -> error::Failure {
-    let (code, message) = match cause.kind() {
+    let safe_path = crate::diagnostics::redact_process_path(path);
+    let kind = cause.kind();
+    let cause = crate::diagnostics::redact_process_text(&cause.to_string())
+        .replace(&path.to_string_lossy().to_string(), &safe_path);
+    let (code, message) = match kind {
         std::io::ErrorKind::NotFound => (
             "catalog_missing",
-            format!("harness catalog is missing at {}", path.display()),
+            format!("harness catalog is missing at {safe_path}"),
         ),
         std::io::ErrorKind::PermissionDenied => (
             "catalog_permission_denied",
-            format!("harness catalog is not readable at {}", path.display()),
+            format!("harness catalog is not readable at {safe_path}"),
         ),
         std::io::ErrorKind::InvalidData => (
             "catalog_invalid",
@@ -77,10 +81,7 @@ fn catalog_error(path: &Path, cause: std::io::Error) -> error::Failure {
         ),
         _ => (
             "catalog_unreadable",
-            format!(
-                "failed to load harness catalog at {}: {cause}",
-                path.display()
-            ),
+            format!("failed to load harness catalog at {safe_path}: {cause}"),
         ),
     };
     error::Failure::state(

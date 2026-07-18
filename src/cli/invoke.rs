@@ -38,10 +38,10 @@ pub fn capability(
 }
 
 fn diagnostic(harness: &str, capability: Capability, command: &CommandPlan, code: i32) -> String {
-    format!(
+    crate::diagnostics::redact_process_text(&format!(
         "harness '{harness}' capability '{capability}' failed with exit {code}\n  command: {}",
         command.render()
-    )
+    ))
 }
 
 fn find<'a>(harnesses: &'a [Harness], name: &str) -> Result<&'a Harness, String> {
@@ -52,13 +52,14 @@ fn find<'a>(harnesses: &'a [Harness], name: &str) -> Result<&'a Harness, String>
 }
 
 fn command_error(harness: &str, binary: &str, error: std::io::Error) -> (i32, String) {
-    match error.kind() {
+    let (code, message) = match error.kind() {
         std::io::ErrorKind::NotFound => (127, format!("{harness} binary '{binary}' was not found on PATH; run `terminal-jarvis install {harness}` or `terminal-jarvis plan {harness} download`")),
         std::io::ErrorKind::PermissionDenied => {
             (126, format!("{harness} binary '{binary}' is not executable; fix its permissions or reinstall {harness}"))
         }
         _ => (3, format!("failed to start {harness} binary '{binary}': {error}")),
-    }
+    };
+    (code, crate::diagnostics::redact_process_text(&message))
 }
 
 #[cfg(test)]

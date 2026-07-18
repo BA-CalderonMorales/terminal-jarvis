@@ -23,6 +23,12 @@ fn failing_command_preserves_exit_without_crossing_streams() {
     let (code, body) = capability(&plans, "vibe", Capability::Download, &[]).unwrap();
     assert_eq!(code, 3);
     assert!(body.is_empty());
+
+    let home = std::env::var("HOME").unwrap();
+    let command = CommandPlan::new(format!("{home}/private-child/fixture"), vec![]);
+    let rendered = diagnostic("vibe", Capability::Download, &command, 3);
+    assert!(!rendered.contains(&home));
+    assert!(rendered.contains("~/private-child/fixture"));
 }
 
 #[test]

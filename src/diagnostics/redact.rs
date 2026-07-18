@@ -49,7 +49,7 @@ pub fn clean(value: &str) -> String {
         .collect()
 }
 
-fn prefixed(path: &Path, prefix: Option<&Path>, label: &str) -> Option<String> {
+pub(super) fn prefixed(path: &Path, prefix: Option<&Path>, label: &str) -> Option<String> {
     let rest = path.strip_prefix(prefix?).ok()?;
     if rest.as_os_str().is_empty() {
         return Some(label.to_string());

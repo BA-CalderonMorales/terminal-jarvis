@@ -45,11 +45,13 @@ impl Failure {
         message: impl Into<String>,
         next_action: impl Into<String>,
     ) -> Self {
+        let message = crate::diagnostics::redact_process_text(&message.into());
+        let next_action = crate::diagnostics::redact_process_text(&next_action.into());
         Self {
             exit_code,
             code,
-            message: message.into(),
-            next_action: next_action.into(),
+            message,
+            next_action,
         }
     }
 }

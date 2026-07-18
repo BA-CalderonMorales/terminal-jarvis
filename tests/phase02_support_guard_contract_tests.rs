@@ -75,9 +75,11 @@ fn set_field(fixture: &Fixture, capability: &str, key: &str, value: &str) {
     let updated = source
         .lines()
         .map(|line| {
-            line.starts_with(&prefix)
-                .then(|| format!("{prefix}{value}"))
-                .unwrap_or_else(|| line.to_string())
+            if line.starts_with(&prefix) {
+                format!("{prefix}{value}")
+            } else {
+                line.to_string()
+            }
         })
         .collect::<Vec<_>>()
         .join("\n");
