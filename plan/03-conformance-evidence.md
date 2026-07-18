@@ -145,9 +145,9 @@ Remaining before this phase can become evidence-ready:
 
 | Covers | Method | Artifact | Ref | UTC | Result | Verified by |
 |---|---|---|---|---|---|---|
-| EVD-01, EVD-02, EVD-04, EVD-08 | 225 exact descriptor guard probes | `plan/evidence/phase-03/parity/dev.tsv` | 4ec142f | 2026-07-18T22:19:51Z | pass | Codex |
-| EVD-03, EVD-05, EVD-06, EVD-07 | exact-command adversarial gate | `plan/evidence/phase-03/adversarial.tsv` | 4ec142f | 2026-07-18T22:19:51Z | pass | Codex |
-| EVD-09 | identical dev/staged fixture and identity comparison | `plan/evidence/phase-03/parity/identity.tsv` | 4ec142f | 2026-07-18T22:19:51Z | pass | Codex |
+| EVD-01, EVD-02, EVD-04, EVD-08 | 225 exact descriptor guard probes | plan/evidence/phase-03/parity/dev.tsv | ddc23b6 | 2026-07-18T22:19:51Z | pass | Codex |
+| EVD-03, EVD-05, EVD-06, EVD-07 | exact-command adversarial gate | plan/evidence/phase-03/adversarial.tsv | ddc23b6 | 2026-07-18T22:19:51Z | pass | Codex |
+| EVD-09 | identical dev/staged fixture and identity comparison | plan/evidence/phase-03/parity/identity.tsv | ddc23b6 | 2026-07-18T22:19:51Z | pass | Codex |
 
 ## Exit
 
