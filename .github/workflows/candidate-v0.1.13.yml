@@ -1,0 +1,202 @@
+name: v0.1.13 Nonpublishing Candidate
+
+on:
+  workflow_dispatch:
+    inputs:
+      candidate_sha:
+        description: Exact 40-character commit SHA to evaluate
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+env:
+  CARGO_TERM_COLOR: always
+  CARGO_NET_OFFLINE: "true"
+  VERSION: 0.1.13
+  RUST_VERSION: 1.95.0
+  NODE_VERSION: 20.19.5
+
+jobs:
+  metadata:
+    runs-on: ubuntu-24.04
+    outputs:
+      sha: ${{ steps.verify.outputs.sha }}
+      epoch: ${{ steps.verify.outputs.epoch }}
+      created: ${{ steps.verify.outputs.created }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ inputs.candidate_sha }}
+          fetch-depth: 1
+          persist-credentials: false
+      - id: verify
+        env:
+          REQUESTED_SHA: ${{ inputs.candidate_sha }}
+        run: |
+          set -euo pipefail
+          [[ "$REQUESTED_SHA" =~ ^[0-9a-f]{40}$ ]]
+          test "$(git rev-parse HEAD)" = "$REQUESTED_SHA"
+          test "$(sed -n 's/^version = "\([^"]*\)"/\1/p' Cargo.toml | head -1)" = "$VERSION"
+          epoch=$(git show -s --format=%ct HEAD)
+          created=$(date -u -d "@$epoch" '+%Y-%m-%dT%H:%M:%SZ')
+          echo "sha=$REQUESTED_SHA" >>"$GITHUB_OUTPUT"
+          echo "epoch=$epoch" >>"$GITHUB_OUTPUT"
+          echo "created=$created" >>"$GITHUB_OUTPUT"
+
+  native-candidate:
+    needs: metadata
+    timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - platform: linux-x64-gnu
+            os: ubuntu-24.04
+            target: x86_64-unknown-linux-gnu
+            binary: terminal-jarvis
+          - platform: linux-arm64-gnu
+            os: ubuntu-24.04-arm
+            target: aarch64-unknown-linux-gnu
+            binary: terminal-jarvis
+          - platform: macos-x64
+            os: macos-15-intel
+            target: x86_64-apple-darwin
+            binary: terminal-jarvis
+          - platform: macos-arm64
+            os: macos-15
+            target: aarch64-apple-darwin
+            binary: terminal-jarvis
+          - platform: win32-x64
+            os: windows-2025
+            target: x86_64-pc-windows-msvc
+            binary: terminal-jarvis.exe
+    runs-on: ${{ matrix.os }}
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ needs.metadata.outputs.sha }}
+          persist-credentials: false
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: ${{ env.RUST_VERSION }}
+          targets: ${{ matrix.target }}
+      - uses: actions/setup-node@v6
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+      - name: Build exact native package
+        env:
+          CARGO_BUILD_TARGET: ${{ matrix.target }}
+          SOURCE_DATE_EPOCH: ${{ needs.metadata.outputs.epoch }}
+        run: scripts/package-release.sh build candidate-dist
+      - name: Run native conformance fixture
+        env:
+          PLATFORM: ${{ matrix.platform }}
+          BINARY: ${{ matrix.binary }}
+          SHA: ${{ needs.metadata.outputs.sha }}
+        run: |
+          set -euo pipefail
+          stage="candidate-dist/$VERSION/$PLATFORM/package/terminal-jarvis-$VERSION-$PLATFORM"
+          scripts/phase03-catalog-report.sh --output "$RUNNER_TEMP/native.tsv" \
+            --binary "$stage/bin/$BINARY" --catalog "$stage/harnesses" --tested-ref "$SHA"
+          scripts/integration-hardening.sh --binary "$stage/bin/$BINARY" --catalog "$stage/harnesses"
+          "$stage/bin/$BINARY" --plain version --verbose | grep -F "git commit: $SHA"
+      - name: Record bounded native evidence
+        env:
+          PLATFORM: ${{ matrix.platform }}
+          BINARY: ${{ matrix.binary }}
+          SHA: ${{ needs.metadata.outputs.sha }}
+          TARGET_TRIPLE: ${{ matrix.target }}
+          IMAGE_VERSION: ${{ env.ImageVersion }}
+        run: |
+          python3 - "$PLATFORM" "$BINARY" "$SHA" "$TARGET_TRIPLE" "$IMAGE_VERSION" <<'PY'
+          import hashlib,json,os,pathlib,sys
+          platform,binary,ref,target,image=sys.argv[1:]
+          root=pathlib.Path.cwd(); dist=root/'candidate-dist'/os.environ['VERSION']/platform
+          source=dist/'package'/f"terminal-jarvis-{os.environ['VERSION']}-{platform}"
+          def sha(path): return hashlib.sha256(path.read_bytes()).hexdigest()
+          def tree(path):
+            h=hashlib.sha256()
+            for item in sorted(p for p in path.rglob('*') if p.is_file()):
+              h.update(item.relative_to(path).as_posix().encode()+b'\0'+bytes.fromhex(sha(item)))
+            return h.hexdigest()
+          out=root/'candidate-upload'/platform; out.mkdir(parents=True)
+          payload=source/'bin'/binary
+          (out/binary).write_bytes(payload.read_bytes())
+          record={'schema_version':1,'target':platform,'target_triple':target,
+            'version':os.environ['VERSION'],'ref':ref,'binary_sha256':sha(payload),
+            'catalog_sha256':tree(source/'harnesses'),'gates_sha256':tree(source/'gates'),
+            'fixture_sha256':sha(pathlib.Path(os.environ['RUNNER_TEMP'])/'native.tsv'),
+            'native_fixture':'pass','public_launcher':'pending','runner_image':image,
+            'rustc':os.popen('rustc -Vv').read().strip(),'node':os.popen('node --version').read().strip()}
+          (out/'native-evidence-v1.json').write_text(json.dumps(record,sort_keys=True,separators=(',',':'))+'\n')
+          PY
+      - uses: actions/upload-artifact@v7
+        with:
+          name: candidate-${{ matrix.platform }}
+          path: candidate-upload/${{ matrix.platform }}
+          retention-days: 7
+          if-no-files-found: error
+
+  assemble-kit:
+    needs: [metadata, native-candidate]
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ needs.metadata.outputs.sha }}
+          persist-credentials: false
+      - uses: actions/download-artifact@v8
+        with:
+          pattern: candidate-*
+          path: candidates
+      - name: Assemble twice and require identical bytes
+        run: |
+          set -euo pipefail
+          args="--candidates candidates --repository . --repository-url https://github.com/${GITHUB_REPOSITORY} --version $VERSION --ref ${{ needs.metadata.outputs.sha }} --epoch ${{ needs.metadata.outputs.epoch }} --created ${{ needs.metadata.outputs.created }}"
+          scripts/assemble-evaluation-kit.py $args --out-dir first
+          scripts/assemble-evaluation-kit.py $args --out-dir second
+          cmp first/terminal-jarvis-$VERSION-evaluation-kit.zip second/terminal-jarvis-$VERSION-evaluation-kit.zip
+          TJ_EVALUATION_SECRET_SENTINEL=TJ_EVALUATION_SECRET_SENTINEL_9f1d \
+            scripts/verify-evaluation-kit.py first/terminal-jarvis-$VERSION-evaluation-kit.zip
+          sha256sum first/terminal-jarvis-$VERSION-evaluation-kit.zip >first/terminal-jarvis-$VERSION-evaluation-kit.zip.sha256
+      - uses: actions/upload-artifact@v7
+        with:
+          name: terminal-jarvis-0.1.13-evaluation-kit
+          path: first/*
+          retention-days: 7
+          if-no-files-found: error
+
+  native-launcher:
+    needs: [metadata, assemble-kit]
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-24.04, ubuntu-24.04-arm, macos-15-intel, macos-15, windows-2025]
+    runs-on: ${{ matrix.os }}
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/download-artifact@v8
+        with:
+          name: terminal-jarvis-0.1.13-evaluation-kit
+          path: kit
+      - name: Verify and unpack exact kit
+        run: |
+          set -euo pipefail
+          cd kit
+          sha256sum -c terminal-jarvis-$VERSION-evaluation-kit.zip.sha256
+          python3 -m zipfile -e terminal-jarvis-$VERSION-evaluation-kit.zip unpacked
+      - name: Exercise public launcher
+        shell: pwsh
+        if: runner.os == 'Windows'
+        run: kit/unpacked/terminal-jarvis-${{ env.VERSION }}-evaluation-kit/run.ps1 --report
+      - name: Exercise public launcher
+        if: runner.os != 'Windows'
+        run: kit/unpacked/terminal-jarvis-$VERSION-evaluation-kit/run.sh --report
