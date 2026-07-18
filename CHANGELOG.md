@@ -1,5 +1,22 @@
 # Changelog
 
+## [0.1.13] - 2026-07-18
+
+- Replaces broad harness claims with a generated 225-row support matrix whose
+  support state, evidence, platform, freshness, and side effects come directly
+  from the packaged catalog; no first-class harness is promoted without current
+  disposable-real evidence.
+- Makes `check` the sole diagnostic surface, adds canonical `self-update` intent
+  and PTY confirmation behavior, and withholds executable update commands for
+  guarded capability rows.
+- Hardens the npm native cache with target, architecture, archive, binary,
+  catalog, gate, checksum, and source identity plus atomic staged recovery.
+- Adds exact-ref development/staged parity, all-descriptor pre-spawn guard,
+  redaction, stream/signal, lifecycle, corruption, and recovery evidence.
+- Adds a read-only, nonpublishing five-native-target candidate workflow and a
+  deterministic offline simulated evaluation kit; publication remains a
+  separate explicit operator decision.
+
 ## [0.1.12] - 2026-07-09
 
 - Restores non-blocking global npm upgrades when an older Cargo or manual
