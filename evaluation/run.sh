@@ -15,6 +15,7 @@ case $(uname -s):$(uname -m) in
   Linux:aarch64 | Linux:arm64) target=linux-arm64-gnu ;;
   Darwin:x86_64 | Darwin:amd64) target=macos-x64 ;;
   Darwin:arm64 | Darwin:aarch64) target=macos-arm64 ;;
+  MINGW*:x86_64 | MSYS*:x86_64 | CYGWIN*:x86_64) target=win32-x64 ;;
   *) cat "$root/unsupported-transcript.txt"; exit 3 ;;
 esac
 
@@ -26,6 +27,7 @@ cleanup() {
 }
 trap cleanup EXIT HUP INT TERM
 binary=$root/payloads/$target/terminal-jarvis
+test "$target" != win32-x64 || binary=$binary.exe
 test -x "$binary" || { echo "evaluation: verified payload missing for $target" >&2; exit 4; }
 export TERMINAL_JARVIS_HOME=$tmp/home
 export TERMINAL_JARVIS_CATALOG=$root/catalogs/harnesses

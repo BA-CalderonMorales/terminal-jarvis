@@ -135,6 +135,16 @@ jobs:
             'rustc':os.popen('rustc -Vv').read().strip(),'node':os.popen('node --version').read().strip()}
           (out/'native-evidence-v1.json').write_text(json.dumps(record,sort_keys=True,separators=(',',':'))+'\n')
           PY
+      - name: Run staged delivery cells
+        env:
+          PLATFORM: ${{ matrix.platform }}
+          SHA: ${{ needs.metadata.outputs.sha }}
+        run: |
+          scripts/delivery-matrix.sh \
+            --platform "$PLATFORM" \
+            --dist "candidate-dist/$VERSION/$PLATFORM" \
+            --output "candidate-upload/$PLATFORM/delivery.tsv" \
+            --ref "$SHA"
       - uses: actions/upload-artifact@v7
         with:
           name: candidate-${{ matrix.platform }}
@@ -157,6 +167,7 @@ jobs:
       - name: Assemble twice and require identical bytes
         run: |
           set -euo pipefail
+          scripts/check-delivery-matrix.py candidates
           args="--candidates candidates --repository . --repository-url https://github.com/${GITHUB_REPOSITORY} --version $VERSION --ref ${{ needs.metadata.outputs.sha }} --epoch ${{ needs.metadata.outputs.epoch }} --created ${{ needs.metadata.outputs.created }}"
           scripts/assemble-evaluation-kit.py $args --out-dir first
           scripts/assemble-evaluation-kit.py $args --out-dir second
@@ -198,5 +209,16 @@ jobs:
         if: runner.os == 'Windows'
         run: kit/unpacked/terminal-jarvis-${{ env.VERSION }}-evaluation-kit/run.ps1 --report
       - name: Exercise public launcher
-        if: runner.os != 'Windows'
+        shell: cmd
+        if: runner.os == 'Windows'
+        run: call kit\unpacked\terminal-jarvis-${{ env.VERSION }}-evaluation-kit\run.cmd --report
+      - name: Exercise public launcher in Git Bash
+        if: runner.os == 'Windows'
+        run: kit/unpacked/terminal-jarvis-$VERSION-evaluation-kit/run.sh --report
+      - name: Exercise public launcher in Bash
+        if: runner.os == 'Linux'
+        run: kit/unpacked/terminal-jarvis-$VERSION-evaluation-kit/run.sh --report
+      - name: Exercise public launcher in default macOS shell
+        shell: zsh {0}
+        if: runner.os == 'macOS'
         run: kit/unpacked/terminal-jarvis-$VERSION-evaluation-kit/run.sh --report
