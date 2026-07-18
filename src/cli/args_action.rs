@@ -35,6 +35,11 @@ pub(super) fn parse(
         "run" => return child_parser::run(&words[1..], child, boundary),
         "install" => one(words, "install").map(Action::Install)?,
         "update" => optional_one(words, "update").map(Action::Update)?,
+        "self-update" => exact(
+            words,
+            Action::SelfUpdate { dry_run: false },
+            "terminal-jarvis self-update",
+        )?,
         "--update" => exact(
             words,
             Action::SelfUpdate { dry_run: false },

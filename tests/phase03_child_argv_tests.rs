@@ -18,6 +18,9 @@ printf 'env-name=<TJ_PHASE02_MARKER>\n'
 #[test]
 fn fake_child_receives_exact_boundary_argv_cwd_and_allowlisted_env_name() {
     let fixture = Fixture::new("expected", "expected", ARGV_RECORDER);
+    let cwd = std::env::var_os("PWD")
+        .map(std::path::PathBuf::from)
+        .unwrap_or_else(|| std::env::current_dir().unwrap());
     let output = fixture.run(&[
         "--plain",
         "run",
@@ -31,7 +34,7 @@ fn fake_child_receives_exact_boundary_argv_cwd_and_allowlisted_env_name() {
     let expected = format!(
         "cwd=<{}>\nargc=<3>\narg=<alpha>\narg=<two words>\narg=<--json>\n\
          env-name=<TJ_PHASE02_MARKER>\n",
-        env!("CARGO_MANIFEST_DIR")
+        cwd.display()
     );
     assert_eq!(output.status.code(), Some(0));
     assert_eq!(output.stdout, expected.as_bytes());

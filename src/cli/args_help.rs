@@ -36,6 +36,7 @@ fn canonical(value: &str) -> Option<String> {
         "run",
         "install",
         "update",
+        "self-update",
         "auth",
         "config",
         "cache",

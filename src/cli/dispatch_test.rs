@@ -38,7 +38,6 @@ fn list_check_help_legacy() {
     let hs = [harness("opencode")];
     let (p, h) = paths();
     assert_eq!(d(Action::List, &hs, p, h).unwrap().0, 0);
-    assert_eq!(d(Action::Check, &hs, p, h).unwrap().0, 0);
     assert_eq!(d(Action::Help, &hs, p, h).unwrap().0, 0);
     assert_eq!(
         d(Action::Legacy("templates".to_string()), &hs, p, h)

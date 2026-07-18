@@ -15,7 +15,7 @@ pub fn dispatch(
 ) -> error::Result<(i32, String)> {
     match action {
         Action::List => Ok((0, output::list(harnesses))),
-        Action::Check => Ok((0, output::checks(harnesses))),
+        Action::Check => unreachable!("check handled by the canonical diagnostics route"),
         Action::Current => Ok((0, output::current(dispatch_support::session(home)?))),
         Action::Use(name) => {
             dispatch_support::find(harnesses, &name)?;

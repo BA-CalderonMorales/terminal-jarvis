@@ -21,15 +21,21 @@ fn noninteractive_self_update_requires_exact_bound_intent_without_hanging() {
 
     let wrong = tj(&["--update", "--no-input", "--confirm=update:terminal-jarvis"]);
     assert_eq!(wrong.status.code(), Some(5));
+
+    let canonical = tj(&["self-update", "--no-input"]);
+    assert_eq!(canonical.status.code(), Some(5));
 }
 
 #[test]
 fn self_update_dry_run_is_local_and_side_effect_free() {
-    let output = tj(&["--update", "--dry-run", "--plain"]);
+    let output = tj(&["self-update", "--dry-run", "--plain"]);
     assert!(output.status.success());
     let stdout = String::from_utf8_lossy(&output.stdout);
     assert!(stdout.contains("terminal-jarvis update plan: cargo install terminal-jarvis"));
     assert!(output.stderr.is_empty());
+
+    let alias = tj(&["--update", "--dry-run", "--plain"]);
+    assert_eq!(alias.stdout, output.stdout);
 }
 
 #[test]

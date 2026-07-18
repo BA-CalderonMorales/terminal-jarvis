@@ -1,5 +1,5 @@
 use super::super::{style, table};
-use crate::contracts::{Capability, Harness};
+use crate::contracts::{Capability, Harness, SupportState};
 
 pub fn updates(version: &str, harnesses: &[Harness]) -> String {
     if style::plain() {
@@ -7,7 +7,7 @@ pub fn updates(version: &str, harnesses: &[Harness]) -> String {
         out.push_str("run `terminal-jarvis update <harness>` to execute one update\n");
         for harness in harnesses {
             let plan = harness.plan(Capability::Update).expect("validated update");
-            out.push_str(&format!("{}: {}\n", harness.name, plan.command.render()));
+            out.push_str(&format!("{}: {}\n", harness.name, update_truth(plan)));
         }
         return out;
     }
@@ -15,7 +15,7 @@ pub fn updates(version: &str, harnesses: &[Harness]) -> String {
         .iter()
         .map(|harness| {
             let plan = harness.plan(Capability::Update).expect("validated update");
-            vec![harness.name.clone(), plan.command.render()]
+            vec![harness.name.clone(), update_truth(plan)]
         })
         .collect::<Vec<_>>();
     format!(
@@ -27,8 +27,19 @@ pub fn updates(version: &str, harnesses: &[Harness]) -> String {
                 ("NEXT STEP", "terminal-jarvis update <harness>".to_string()),
             ],
         ),
-        table::render("Update Commands", &["HARNESS", "COMMAND"], &rows)
+        table::render("Harness Update Truth", &["HARNESS", "UPDATE"], &rows)
     )
+}
+
+fn update_truth(plan: &crate::contracts::CapabilityPlan) -> String {
+    match plan.support {
+        SupportState::Verified | SupportState::Expected => plan.command.render(),
+        state => format!(
+            "support={} evidence={} command=withheld",
+            state.as_str(),
+            plan.evidence.as_str()
+        ),
+    }
 }
 
 pub fn auth_notice(version: &str) -> String {

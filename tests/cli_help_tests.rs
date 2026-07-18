@@ -25,6 +25,7 @@ fn help_lists_every_public_command() {
         "terminal-jarvis plan [harness] <capability>",
         "terminal-jarvis install <harness>",
         "terminal-jarvis update [harness]",
+        "terminal-jarvis self-update",
         "terminal-jarvis auth help <harness>",
         "terminal-jarvis config show",
         "terminal-jarvis cache status",

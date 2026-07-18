@@ -12,6 +12,7 @@ pub const PLAIN: &str = "Terminal Jarvis\n\
        terminal-jarvis plan [harness] <capability>\n\
        terminal-jarvis install <harness> [lifecycle options]\n\
        terminal-jarvis update [harness] [lifecycle options]\n\
+       terminal-jarvis self-update [lifecycle options]\n\
        terminal-jarvis auth help <harness>\n\
        terminal-jarvis config show\n\
        terminal-jarvis cache status\n\
@@ -32,7 +33,7 @@ pub const PLAIN: &str = "Terminal Jarvis\n\
         --allow-dangerous\n\
                         separately opt in to dangerous execution\n\
         --              forward following flags to run/direct children\n\
-        --update        self-update (confirm=self-update:terminal-jarvis)\n\n\
+        --update        compatibility alias for self-update\n\n\
       capabilities:\n\
        download update headless version stats models security yolo ui\n\n\
      examples:\n\

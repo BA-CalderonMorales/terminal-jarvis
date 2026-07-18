@@ -7,6 +7,7 @@ const { spawnSync } = require("node:child_process");
 const test = require("node:test");
 const pkg = require("./package.json");
 const wrapper = require("./bin/terminal-jarvis");
+const cacheIntegrity = require("./bin/cache-integrity");
 
 function tempDir() {
   return fs.mkdtempSync(path.join(os.tmpdir(), "terminal-jarvis-wrapper-"));
@@ -18,46 +19,86 @@ function writeExecutable(file, content) {
   fs.chmodSync(file, 0o755);
 }
 
-test("cached binary validation rejects text files", () => {
-  const file = path.join(tempDir(), "terminal-jarvis");
-  fs.writeFileSync(file, "not a release binary\n");
-  fs.chmodSync(file, 0o755);
-  assert.equal(wrapper.cachedBinaryUsable(file), false);
-});
+function nativeBinary(format, arch) {
+  if (format === "elf") {
+    const binary = Buffer.alloc(64);
+    Buffer.from([0x7f, 0x45, 0x4c, 0x46]).copy(binary);
+    binary.writeUInt16LE(arch === "arm64" ? 183 : 62, 18);
+    return binary;
+  }
+  if (format === "pe") {
+    const binary = Buffer.alloc(128);
+    binary.write("MZ", 0, "ascii");
+    binary.writeUInt32LE(64, 60);
+    Buffer.from([0x50, 0x45, 0x00, 0x00]).copy(binary, 64);
+    binary.writeUInt16LE(arch === "arm64" ? 0xaa64 : 0x8664, 68);
+    return binary;
+  }
+  const binary = Buffer.alloc(32);
+  Buffer.from([0xcf, 0xfa, 0xed, 0xfe]).copy(binary);
+  binary.writeUInt32LE(arch === "arm64" ? 0x0100000c : 0x01000007, 4);
+  return binary;
+}
 
-test("cached binary validation accepts Windows PE files", () => {
-  const file = path.join(tempDir(), "terminal-jarvis.exe");
-  fs.writeFileSync(file, Buffer.from([0x4d, 0x5a, 0x90, 0x00]));
-  fs.chmodSync(file, 0o755);
-  assert.equal(wrapper.cachedBinaryUsable(file), true);
-});
+function fakeReleaseOptions(cache, overrides = {}) {
+  const arch = overrides.arch || "x64";
+  const target = arch === "arm64" ? "linux-arm64-gnu" : "linux-x64-gnu";
+  return {
+    platform: "linux",
+    arch,
+    runtime: { android: false, libc: "gnu" },
+    cache,
+    env: overrides.env || {},
+    releaseBase: overrides.releaseBase || `https://example.invalid/v${pkg.version}`,
+    fetchFile: overrides.fetchFile || (async (_url, destination) => {
+      fs.writeFileSync(destination, overrides.archiveBytes || "fixture archive");
+    }),
+    verifyChecksum: overrides.verifyChecksum || (async () => {}),
+    unpack: overrides.unpack || ((_archive, extractionRoot) => {
+      const bundle = path.join(extractionRoot, `${pkg.name}-${pkg.version}-${target}`);
+      const binary = path.join(bundle, "bin", "terminal-jarvis");
+      fs.mkdirSync(path.dirname(binary), { recursive: true });
+      fs.writeFileSync(binary, nativeBinary("elf", overrides.binaryArch || arch));
+      for (const directory of ["harnesses", "gates"]) {
+        fs.mkdirSync(path.join(bundle, directory));
+        fs.writeFileSync(path.join(bundle, directory, "index.toml"), "name='fixture'\n");
+      }
+    }),
+  };
+}
 
-test("cached release validation requires binary and catalog", () => {
+test("binary identity rejects text and distinguishes native architectures", () => {
   const root = tempDir();
-  const binary = path.join(root, "bin", "terminal-jarvis");
-  const catalog = path.join(root, "harnesses");
-  fs.mkdirSync(path.dirname(binary), { recursive: true });
-  fs.writeFileSync(binary, Buffer.from([0x7f, 0x45, 0x4c, 0x46]));
-  assert.equal(wrapper.cachedReleaseUsable(binary, catalog), false);
-  fs.writeFileSync(catalog, "not a catalog directory\n");
-  assert.equal(wrapper.cachedReleaseUsable(binary, catalog), false);
-  fs.rmSync(catalog);
-  fs.mkdirSync(catalog);
-  assert.equal(wrapper.cachedReleaseUsable(binary, catalog), true);
+  for (const [name, bytes, expected] of [
+    ["text", Buffer.from("not a binary"), { format: "unknown", arch: "unknown" }],
+    ["elf-x64", nativeBinary("elf", "x64"), { format: "elf", arch: "x64" }],
+    ["elf-arm64", nativeBinary("elf", "arm64"), { format: "elf", arch: "arm64" }],
+    ["pe-x64", nativeBinary("pe", "x64"), { format: "pe", arch: "x64" }],
+    ["mach-arm64", nativeBinary("mach-o", "arm64"), { format: "mach-o", arch: "arm64" }],
+  ]) {
+    const file = path.join(root, name);
+    fs.writeFileSync(file, bytes);
+    assert.deepEqual(cacheIntegrity.binaryIdentity(file), expected);
+  }
 });
 
 test("child environment pins wrapper cache and release catalog", () => {
   const cache = path.join(tempDir(), "cache");
   const catalog = path.join(tempDir(), "harnesses");
+  const gates = path.join(tempDir(), "gates");
   const env = wrapper.childEnv({
     binary: "/tmp/terminal-jarvis",
     source: "github-release-cache",
     releaseUrl: "https://example.invalid/release.tgz",
     cache,
     catalog,
+    gates,
+    checksum: "cache-integrity-verified",
   });
   assert.equal(env.TERMINAL_JARVIS_CACHE, cache);
   assert.equal(env.TERMINAL_JARVIS_CATALOG, catalog);
+  assert.equal(env.TERMINAL_JARVIS_GATES, gates);
+  assert.equal(env.TERMINAL_JARVIS_CHECKSUM, "cache-integrity-verified");
   assert.equal(env.TERMINAL_JARVIS_DISTRIBUTION, "github-release-cache");
 });
 
@@ -247,6 +288,7 @@ test("corrupt cache is replaced once and the recovered release is reused", async
   const bundle = path.join(root, `${pkg.name}-${pkg.version}-${target}`);
   const binary = path.join(bundle, "bin", "terminal-jarvis");
   const catalog = path.join(bundle, "harnesses");
+  const gates = path.join(bundle, "gates");
   const stale = path.join(root, "stale-partial-download");
   fs.mkdirSync(path.dirname(binary), { recursive: true });
   fs.writeFileSync(binary, "corrupt\n");
@@ -266,16 +308,23 @@ test("corrupt cache is replaced once and the recovered release is reused", async
       fs.writeFileSync(destination, "fixture archive");
     },
     verifyChecksum: async () => { checksums += 1; },
-    unpack: () => {
+    unpack: (_archive, extractionRoot) => {
       extractions += 1;
-      fs.mkdirSync(path.dirname(binary), { recursive: true });
-      fs.writeFileSync(binary, Buffer.from([0x7f, 0x45, 0x4c, 0x46]));
-      fs.mkdirSync(catalog);
+      const stagedBundle = path.join(extractionRoot, `${pkg.name}-${pkg.version}-${target}`);
+      const stagedBinary = path.join(stagedBundle, "bin", "terminal-jarvis");
+      fs.mkdirSync(path.dirname(stagedBinary), { recursive: true });
+      fs.writeFileSync(stagedBinary, nativeBinary("elf", "x64"));
+      fs.mkdirSync(path.join(stagedBundle, "harnesses"));
+      fs.writeFileSync(path.join(stagedBundle, "harnesses", "index.toml"), "name='fixture'\n");
+      fs.mkdirSync(path.join(stagedBundle, "gates"));
+      fs.writeFileSync(path.join(stagedBundle, "gates", "index.toml"), "name='fixture'\n");
     },
   };
   const recovered = await wrapper.downloadRelease(options);
   assert.equal(recovered.source, "github-release");
-  assert.equal(wrapper.cachedReleaseUsable(binary, catalog), true);
+  assert.equal(recovered.gates, gates);
+  assert.equal(recovered.checksum, "cache-integrity-verified");
+  assert.equal(fs.existsSync(path.join(root, cacheIntegrity.METADATA_FILE)), true);
   assert.equal(fs.existsSync(stale), false);
   assert.deepEqual([fetches, checksums, extractions], [1, 1, 1]);
   const reused = await wrapper.downloadRelease({
@@ -285,9 +334,128 @@ test("corrupt cache is replaced once and the recovered release is reused", async
     unpack: () => assert.fail("cache reuse must not extract"),
   });
   assert.equal(reused.source, "github-release-cache");
+  assert.equal(reused.checksum, "cache-integrity-verified");
 });
 
-test("failed cache recovery removes the partial release", async () => {
+test("cache metadata binds target archive binary catalog and gates", async () => {
+  const cache = tempDir();
+  await wrapper.downloadRelease(fakeReleaseOptions(cache));
+  const root = path.join(cache, pkg.version, "linux-x64-gnu");
+  const metadata = JSON.parse(
+    fs.readFileSync(path.join(root, cacheIntegrity.METADATA_FILE), "utf8")
+  );
+  assert.equal(metadata.schema_version, 1);
+  assert.deepEqual(metadata.package, { name: pkg.name, version: pkg.version });
+  assert.deepEqual(metadata.target, { id: "linux-x64-gnu", platform: "linux", arch: "x64" });
+  assert.match(metadata.release.archive, /linux-x64-gnu\.tar\.gz$/);
+  for (const field of [metadata.release, ...Object.values(metadata.payload)]) {
+    assert.match(field.sha256, /^[a-f0-9]{64}$/);
+  }
+  assert.deepEqual(metadata.payload.binary, {
+    ...metadata.payload.binary,
+    format: "elf",
+    arch: "x64",
+  });
+});
+
+test("valid read-only cache is reused without repair writes", async () => {
+  const cache = tempDir();
+  const options = fakeReleaseOptions(cache);
+  const installed = await wrapper.downloadRelease(options);
+  const root = path.join(cache, pkg.version, "linux-x64-gnu");
+  const metadata = path.join(root, cacheIntegrity.METADATA_FILE);
+  const modified = fs.statSync(metadata).mtimeMs;
+  for (const directory of [installed.catalog, installed.gates, path.dirname(installed.binary), root]) {
+    fs.chmodSync(directory, 0o555);
+  }
+  fs.chmodSync(metadata, 0o444);
+  fs.chmodSync(installed.binary, 0o555);
+  const reused = await wrapper.downloadRelease({
+    ...options,
+    env: { TERMINAL_JARVIS_NO_DOWNLOAD: "1" },
+    fetchFile: async () => assert.fail("read-only cache reuse must not fetch"),
+    verifyChecksum: async () => assert.fail("read-only cache reuse must not recheck"),
+    unpack: () => assert.fail("read-only cache reuse must not extract"),
+  });
+  assert.equal(reused.source, "github-release-cache");
+  assert.equal(fs.statSync(metadata).mtimeMs, modified);
+});
+
+test("wrong-architecture payload rejects before cache promotion", async () => {
+  const cache = tempDir();
+  const root = path.join(cache, pkg.version, "linux-x64-gnu");
+  await assert.rejects(
+    wrapper.downloadRelease(fakeReleaseOptions(cache, { binaryArch: "arm64" })),
+    /release binary target is not usable/
+  );
+  assert.equal(fs.existsSync(root), false);
+  assert.deepEqual(fs.readdirSync(path.dirname(root)).filter((name) => name.includes(".stage-")), []);
+});
+
+test("tampered archive binary catalog gates or metadata trigger staged repair", async () => {
+  for (const component of ["archive", "binary", "catalog", "gates", "metadata"]) {
+    const cache = tempDir();
+    const options = fakeReleaseOptions(cache);
+    const installed = await wrapper.downloadRelease(options);
+    const root = path.join(cache, pkg.version, "linux-x64-gnu");
+    const paths = {
+      archive: path.join(root, wrapper.archiveName("linux", "x64", { libc: "gnu" })),
+      binary: installed.binary,
+      catalog: path.join(installed.catalog, "index.toml"),
+      gates: path.join(installed.gates, "index.toml"),
+      metadata: path.join(root, cacheIntegrity.METADATA_FILE),
+    };
+    if (component === "metadata") fs.chmodSync(paths[component], 0o644);
+    fs.appendFileSync(paths[component], "tampered");
+    let fetches = 0;
+    const repaired = await wrapper.downloadRelease({
+      ...options,
+      fetchFile: async (_url, destination) => {
+        fetches += 1;
+        fs.writeFileSync(destination, "fixture archive");
+      },
+    });
+    assert.equal(fetches, 1, component);
+    assert.equal(repaired.source, "github-release", component);
+    assert.equal(
+      fs.readFileSync(path.join(repaired.catalog, "index.toml"), "utf8"),
+      "name='fixture'\n"
+    );
+  }
+});
+
+test("failed staged repair preserves the prior invalid cache", async () => {
+  const cache = tempDir();
+  const root = path.join(cache, pkg.version, "linux-x64-gnu");
+  fs.mkdirSync(root, { recursive: true });
+  const marker = path.join(root, "prior-invalid-cache");
+  fs.writeFileSync(marker, "preserve until replacement is verified\n");
+  await assert.rejects(
+    wrapper.downloadRelease(fakeReleaseOptions(cache, {
+      verifyChecksum: async () => { throw new Error("checksum mismatch"); },
+    })),
+    /checksum mismatch/
+  );
+  assert.equal(fs.readFileSync(marker, "utf8"), "preserve until replacement is verified\n");
+  assert.deepEqual(fs.readdirSync(path.dirname(root)).filter((name) => name.includes(".stage-")), []);
+});
+
+test("release source identity change invalidates the old cache", async () => {
+  const cache = tempDir();
+  await wrapper.downloadRelease(fakeReleaseOptions(cache));
+  let fetches = 0;
+  const changed = await wrapper.downloadRelease(fakeReleaseOptions(cache, {
+    releaseBase: `https://mirror.example.invalid/v${pkg.version}`,
+    fetchFile: async (_url, destination) => {
+      fetches += 1;
+      fs.writeFileSync(destination, "fixture archive");
+    },
+  }));
+  assert.equal(fetches, 1);
+  assert.match(changed.releaseUrl, /mirror\.example\.invalid/);
+});
+
+test("failed cache recovery leaves no staged partial release", async () => {
   const cache = tempDir();
   const target = "linux-x64-gnu";
   const root = path.join(cache, pkg.version, target);
@@ -305,6 +473,7 @@ test("failed cache recovery removes the partial release", async () => {
     /failed to download.*checksum mismatch/
   );
   assert.equal(fs.existsSync(root), false);
+  assert.deepEqual(fs.readdirSync(path.dirname(root)).filter((name) => name.includes(".stage-")), []);
 });
 
 test("incomplete extraction is rejected and removed", async () => {

@@ -18,9 +18,21 @@ fn harness(name: &str) -> Harness {
 
 #[test]
 fn update_summary_lists_harnesses() {
-    let out = update_summary(&[harness("opencode")]);
+    let mut guarded = harness("opencode");
+    let out = update_summary(&[guarded.clone()]);
     assert!(out.contains("opencode"));
-    assert!(out.contains("Harness Updates"));
+    assert!(out.contains("support=unknown evidence=deterministic command=withheld"));
+    assert!(!out.contains("opencode: update"));
+
+    let update = guarded
+        .capabilities
+        .iter_mut()
+        .find(|plan| plan.capability == Capability::Update)
+        .unwrap();
+    update.support = crate::contracts::SupportState::Verified;
+    update.command.command = "fixture-update".to_string();
+    let verified = update_summary(&[guarded]);
+    assert!(verified.contains("fixture-update"));
 }
 #[test]
 fn auth_routes() {

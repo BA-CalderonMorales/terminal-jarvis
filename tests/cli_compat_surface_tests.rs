@@ -40,7 +40,8 @@ mod unix {
         let home = temp_home();
         let update = stdout(&tj(&["update"], &home, None));
         assert!(update.contains("updates are per harness"));
-        assert!(update.contains("opencode: npm update -g opencode-ai"));
+        assert!(update.contains("opencode: support=unknown"));
+        assert!(!update.contains("npm update -g opencode-ai"));
 
         assert!(stdout(&tj(&["info", "opencode"], &home, None)).contains("OpenCode"));
         assert!(stdout(&tj(&["auth"], &home, None)).contains("credential manager"));

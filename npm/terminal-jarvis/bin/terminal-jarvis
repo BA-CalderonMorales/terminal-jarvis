@@ -5,6 +5,7 @@ const os = require("node:os");
 const path = require("node:path");
 const crypto = require("node:crypto");
 const { spawnSync } = require("node:child_process");
+const cacheIntegrity = require("./cache-integrity");
 
 const args = process.argv.slice(2);
 const here = __dirname;
@@ -35,6 +36,8 @@ function childEnv(resolved) {
   if (resolved.releaseUrl) env.TERMINAL_JARVIS_RELEASE_URL = resolved.releaseUrl;
   if (resolved.cache) env.TERMINAL_JARVIS_CACHE = resolved.cache;
   if (resolved.catalog) env.TERMINAL_JARVIS_CATALOG = resolved.catalog;
+  if (resolved.gates) env.TERMINAL_JARVIS_GATES = resolved.gates;
+  if (resolved.checksum) env.TERMINAL_JARVIS_CHECKSUM = resolved.checksum;
   return env;
 }
 
@@ -84,66 +87,55 @@ async function downloadRelease(options = {}) {
   const checksum = options.verifyChecksum || verifyChecksum;
   const extract = options.unpack || unpack;
   const root = path.join(cache, pkg.version, platform);
-  const unpacked = path.join(root, `${pkg.name}-${pkg.version}-${platform}`);
-  const binary = path.join(unpacked, "bin", executableName(hostPlatform));
-  const catalog = path.join(unpacked, "harnesses");
-  if (cachedReleaseUsable(binary, catalog)) {
-    fs.chmodSync(binary, 0o755);
-    return { binary, source: "github-release-cache", releaseUrl, cache, catalog };
+  const identity = {
+    name: pkg.name,
+    version: pkg.version,
+    target: platform,
+    platform: hostPlatform,
+    arch: hostArch,
+    archive,
+    binaryName: executableName(hostPlatform),
+    releaseUrl,
+  };
+  const cached = cacheIntegrity.inspect(root, identity);
+  if (cached) {
+    return resolvedRelease(cached, "github-release-cache", releaseUrl, cache);
   }
   if (env.TERMINAL_JARVIS_NO_DOWNLOAD) {
-    if (fs.existsSync(binary) || fs.existsSync(catalog)) {
+    if (fs.existsSync(root)) {
       throw new Error(`cached release is not usable: ${root}`);
     }
-    throw new Error(`release binary is not cached: ${binary}`);
+    throw new Error(`release binary is not cached: ${root}`);
   }
-  fs.rmSync(root, { recursive: true, force: true });
-  fs.mkdirSync(root, { recursive: true });
-  const archivePath = path.join(root, archive);
+  const stage = cacheIntegrity.stagePath(root);
+  fs.mkdirSync(stage, { recursive: true });
+  const staged = cacheIntegrity.payloadPaths(stage, identity);
   try {
-    await fetch(releaseUrl, archivePath);
-    await checksum(checksumUrl, archivePath);
-    extract(archivePath, root, hostPlatform);
-    if (!fs.existsSync(binary)) throw new Error(`release archive missing ${binary}`);
-    if (!fs.existsSync(catalog)) throw new Error(`release archive missing ${catalog}`);
-    if (!cachedBinaryUsable(binary)) throw new Error(`release binary is not usable: ${binary}`);
+    await fetch(releaseUrl, staged.archive);
+    await checksum(checksumUrl, staged.archive);
+    extract(staged.archive, stage, hostPlatform);
+    if (fs.existsSync(staged.binary)) fs.chmodSync(staged.binary, 0o755);
+    cacheIntegrity.writeMetadata(stage, cacheIntegrity.createMetadata(stage, identity));
+    cacheIntegrity.promote(stage, root);
   } catch (error) {
-    fs.rmSync(root, { recursive: true, force: true });
+    fs.rmSync(stage, { recursive: true, force: true });
     throw downloadFailure(releaseUrl, error);
   }
-  fs.chmodSync(binary, 0o755);
-  return { binary, source: "github-release", releaseUrl, cache, catalog };
+  const installed = cacheIntegrity.inspect(root, identity);
+  if (!installed) throw downloadFailure(releaseUrl, new Error("staged cache validation failed"));
+  return resolvedRelease(installed, "github-release", releaseUrl, cache);
 }
 
-function cachedReleaseUsable(binary, catalog) {
-  try {
-    return cachedBinaryUsable(binary) && fs.statSync(catalog).isDirectory();
-  } catch {
-    return false;
-  }
-}
-
-function cachedBinaryUsable(binary) {
-  try {
-    if (!fs.statSync(binary).isFile()) return false;
-    const header = Buffer.alloc(4);
-    const fd = fs.openSync(binary, "r");
-    try {
-      if (fs.readSync(fd, header, 0, 4, 0) !== 4) return false;
-    } finally {
-      fs.closeSync(fd);
-    }
-    return hasNativeBinaryMagic(header);
-  } catch {
-    return false;
-  }
-}
-
-function hasNativeBinaryMagic(header) {
-  const hex = header.toString("hex");
-  return hex.startsWith("4d5a") ||
-    ["7f454c46", "cffaedfe", "cefaedfe", "feedfacf", "feedface", "cafebabe"]
-      .includes(hex);
+function resolvedRelease(files, source, releaseUrl, cache) {
+  return {
+    binary: files.binary,
+    source,
+    releaseUrl,
+    cache,
+    catalog: files.catalog,
+    gates: files.gates,
+    checksum: "cache-integrity-verified",
+  };
 }
 
 function downloadFailure(releaseUrl, error) {
@@ -388,8 +380,6 @@ function fetchFile(url, destination, redirects = 0) {
 module.exports = {
   cacheRoot,
   cacheRootFor,
-  cachedBinaryUsable,
-  cachedReleaseUsable,
   childEnv,
   downloadRelease,
   downloadFailure,

@@ -38,6 +38,7 @@ fn every_named_command_has_matching_help_forms() {
         "run",
         "install",
         "update",
+        "self-update",
         "auth",
         "config",
         "cache",

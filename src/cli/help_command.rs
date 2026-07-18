@@ -55,6 +55,10 @@ fn entry(name: &str) -> (&'static str, &'static str) {
             "terminal-jarvis update [harness] [lifecycle options]",
             "Inspect or confirm a harness update.",
         ),
+        "self-update" => (
+            "terminal-jarvis self-update [lifecycle options]",
+            "Preview or confirm a Terminal Jarvis update.",
+        ),
         "auth" => (
             "terminal-jarvis auth [help|set] <harness>",
             "Inspect credential-name requirements without values.",
