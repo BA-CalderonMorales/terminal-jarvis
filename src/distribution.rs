@@ -39,8 +39,15 @@ mod tests {
 
     #[test]
     fn raw_channels_are_normalized_without_passthrough_claims() {
-        assert_eq!(normalize("github-release-cache"), Some("npm"));
-        assert_eq!(normalize("env"), Some("source"));
+        for raw in ["env", "source"] {
+            assert_eq!(normalize(raw), Some("source"));
+        }
+        for raw in ["github-release", "github-release-cache", "npm"] {
+            assert_eq!(normalize(raw), Some("npm"));
+        }
+        for raw in ["homebrew", "cargo", "direct"] {
+            assert_eq!(normalize(raw), Some(raw));
+        }
         assert_eq!(normalize("custom"), None);
     }
 }
