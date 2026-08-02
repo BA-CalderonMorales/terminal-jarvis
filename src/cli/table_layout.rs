@@ -91,3 +91,7 @@ fn chunks(word: &str, limit: usize, lines: &mut Vec<String>) {
 
 pub(super) use super::width::terminal_width;
 use super::width::{character_width, display_width as width};
+
+#[cfg(test)]
+#[path = "table_layout_props.rs"]
+mod props;

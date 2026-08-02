@@ -59,3 +59,7 @@ pub(super) fn prefixed(path: &Path, prefix: Option<&Path>, label: &str) -> Optio
         clean(&rest.to_string_lossy()).trim_start_matches(['/', '\\'])
     ))
 }
+
+#[cfg(test)]
+#[path = "redact_props.rs"]
+mod props;

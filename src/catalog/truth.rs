@@ -81,3 +81,7 @@ fn required(prefix: &str, name: &str, value: &str, errors: &mut Vec<String>) {
         errors.push(format!("{prefix} has an empty {name}"));
     }
 }
+
+#[cfg(test)]
+#[path = "truth_props.rs"]
+mod props;

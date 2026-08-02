@@ -27,3 +27,7 @@ fn shell_word(value: &str) -> String {
         format!("'{}'", value.replace('\'', "'\\''"))
     }
 }
+
+#[cfg(test)]
+#[path = "command_props.rs"]
+mod props;

@@ -43,3 +43,7 @@ fn unsafe_pipe(command: &str) -> bool {
 fn placeholder(command: &str) -> bool {
     command.contains("not configured") && command.contains("exit 1")
 }
+
+#[cfg(test)]
+#[path = "command_truth_props.rs"]
+mod props;

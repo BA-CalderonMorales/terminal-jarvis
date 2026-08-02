@@ -36,3 +36,7 @@ pub fn validate(prefix: &str, plan: &CapabilityPlan, errors: &mut Vec<String>) {
         errors.push(format!("{prefix} manual support must be interactive"));
     }
 }
+
+#[cfg(test)]
+#[path = "effect_truth_props.rs"]
+mod props;

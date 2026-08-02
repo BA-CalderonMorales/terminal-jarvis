@@ -52,3 +52,7 @@ mod tests {
         assert_eq!(output.lines().count(), 1);
     }
 }
+
+#[cfg(test)]
+#[path = "json_props.rs"]
+mod props;

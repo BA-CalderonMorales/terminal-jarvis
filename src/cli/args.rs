@@ -76,6 +76,9 @@ where
 #[path = "mutation_test.rs"]
 mod mutation_tests;
 #[cfg(test)]
+#[path = "args_props.rs"]
+mod props;
+#[cfg(test)]
 #[path = "args_test.rs"]
 mod tests;
 #[cfg(test)]

@@ -79,5 +79,8 @@ fn nonempty_env(name: &str) -> bool {
 }
 
 #[cfg(test)]
+#[path = "checks_props.rs"]
+mod props;
+#[cfg(test)]
 #[path = "checks_test.rs"]
 mod tests;

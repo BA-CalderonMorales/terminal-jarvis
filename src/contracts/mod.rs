@@ -11,3 +11,10 @@ pub use effect::{Effect, Interaction};
 pub use environment::EnvMode;
 pub use harness::{CapabilityPlan, Harness};
 pub use support::{EvidenceMode, SupportState};
+
+#[cfg(test)]
+#[path = "props_arbitrary.rs"]
+mod props_arbitrary;
+#[cfg(test)]
+#[path = "props_test.rs"]
+mod props_test;

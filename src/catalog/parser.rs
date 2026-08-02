@@ -92,3 +92,6 @@ mod tests {
         );
     }
 }
+#[cfg(test)]
+#[path = "parser_props.rs"]
+mod props;

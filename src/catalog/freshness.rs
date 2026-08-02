@@ -78,3 +78,7 @@ fn valid_range(value: &str, start: usize, end: usize, min: u8, max: u8) -> bool 
         .parse::<u8>()
         .is_ok_and(|part| (min..=max).contains(&part))
 }
+
+#[cfg(test)]
+#[path = "freshness_props.rs"]
+mod props;
