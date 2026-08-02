@@ -38,6 +38,11 @@
 - Prefer data in `harnesses/*/*/index.toml` over Rust branches.
 - Do not add a second Go ADK or another runtime beside the Rust CLI.
 - Use no external Rust dependencies unless the tradeoff is documented first.
+  **Approved exception: `quickcheck` (property-based testing) is a
+  `[dev-dependencies]`-only crate. It never ships in the release binary — the
+  std-only runtime is unchanged. Tradeoff: deterministic, quantifiable
+  red/green coverage for the headless CLI's pure logic beats a zero-dependency
+  test-only rule. Do not promote quickcheck to a production dependency.**
 - Keep docs concise and tied to migration, architecture, testing, or release notes.
 - Do not reintroduce a `current/` snapshot.
 - Do not tag, publish, or upload release assets from local scripts without an

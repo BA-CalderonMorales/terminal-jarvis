@@ -33,3 +33,6 @@ name = "terminal_jarvis"
 path = "src/lib.rs"
 
 [dependencies]
+
+[dev-dependencies]
+quickcheck = "1"

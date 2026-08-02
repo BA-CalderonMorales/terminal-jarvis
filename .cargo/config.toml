@@ -1,0 +1,2 @@
+[env]
+LLVM_PROFILE_FILE = "target/llvm-cov-target/default_%p_%m.profraw"
