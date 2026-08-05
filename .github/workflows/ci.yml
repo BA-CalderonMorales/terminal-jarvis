@@ -25,7 +25,7 @@ env:
 
 jobs:
   conformance:
-    name: Phase 02/03 Conformance
+    name: Adversarial Conformance
     runs-on: ubuntu-24.04
     timeout-minutes: 20
     steps:
@@ -43,13 +43,13 @@ jobs:
         run: |
           mkdir -p evidence
           scripts/bash/catalog/index.sh adversarial-report \
-            --output evidence/phase03-adversarial.tsv \
+            --output evidence/adversarial.tsv \
             --tested-ref "${{ github.sha }}"
 
       - uses: actions/upload-artifact@v7
         with:
-          name: phase03-adversarial-${{ github.sha }}
-          path: evidence/phase03-adversarial.tsv
+          name: adversarial-${{ github.sha }}
+          path: evidence/adversarial.tsv
           retention-days: 7
           if-no-files-found: error
 

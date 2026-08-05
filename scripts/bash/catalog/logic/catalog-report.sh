@@ -73,7 +73,7 @@ export CARGO_NET_OFFLINE=true
 
 printf 'Generating catalog report for %s\n' "$tested_ref" >&2
 cargo test --quiet --manifest-path "$root/Cargo.toml" \
-  --test phase03_catalog_walk_tests -- --exact catalog_walk_records_all_rows_once_without_effects
+  --test catalog -- --exact tests::walk::catalog_walk_records_all_rows_once_without_effects
 mv -- "$temporary" "$output"
 trap - EXIT
 printf '%s\n' "$output"

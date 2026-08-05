@@ -31,18 +31,27 @@ run() {
 
 printf 'schema_version\ttested_ref\tcase\ttreatment\tresult\tcommand\n' >"$tmp"
 run descriptor-guards deterministic cargo test --quiet \
-  --test phase03_catalog_walk_tests -- --exact catalog_walk_records_all_rows_once_without_effects
+  --test catalog -- --exact tests::walk::catalog_walk_records_all_rows_once_without_effects
 run missing-and-permission deterministic cargo test --quiet \
-  --test phase03_cli_exit_matrix --test phase02_diagnostics_readonly
+  --test cli tests::exit::
+run missing-and-permission deterministic cargo test --quiet \
+  --test diagnostics tests::readonly::
 run empty-and-malformed-state deterministic cargo test --quiet \
-  --test cli_session_tests --test phase02_diagnostics_states
+  --test context tests::session::
+run empty-and-malformed-state deterministic cargo test --quiet \
+  --test diagnostics tests::states::
 run side-effect-injection deterministic cargo test --quiet \
-  --test phase02_lifecycle_contract_tests --test phase02_dangerous_contract_tests \
-  --test phase02_support_guard_contract_tests
+  --test cli tests::lifecycle::
+run side-effect-injection deterministic cargo test --quiet \
+  --test cli tests::dangerous::
+run side-effect-injection deterministic cargo test --quiet \
+  --test cli tests::support_guard::
 run stream-signal-nonutf8 deterministic cargo test --quiet \
-  --test phase02_stream_contract_tests
+  --test cli tests::stream::
 run redaction-all-channels deterministic cargo test --quiet \
-  --test phase02_diagnostics_redaction --test phase03_redaction_channels
+  --test diagnostics tests::redaction::
+run redaction-all-channels deterministic cargo test --quiet \
+  --test diagnostics tests::redaction_channels::
 run cache-checksum-architecture-shadow-recovery deterministic \
   node --test npm/terminal-jarvis/test-wrapper.js
 run support-artifact-redaction deterministic env \
