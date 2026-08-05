@@ -38,5 +38,5 @@ pub fn validate(prefix: &str, plan: &CapabilityPlan, errors: &mut Vec<String>) {
 }
 
 #[cfg(test)]
-#[path = "effect_truth_props.rs"]
+#[path = "../tests/effect_truth_props.rs"]
 mod props;

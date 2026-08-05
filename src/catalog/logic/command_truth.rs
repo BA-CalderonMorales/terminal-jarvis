@@ -45,5 +45,5 @@ fn placeholder(command: &str) -> bool {
 }
 
 #[cfg(test)]
-#[path = "command_truth_props.rs"]
+#[path = "../tests/command_truth_props.rs"]
 mod props;

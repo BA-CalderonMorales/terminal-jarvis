@@ -2,10 +2,8 @@ use crate::contracts::{Capability, CapabilityPlan, Harness};
 use std::collections::BTreeMap;
 use std::io;
 
-use super::{
-    metadata,
-    parser::{self, Fields},
-};
+use crate::catalog::logic::parser::{self, Fields};
+use crate::catalog::structs::metadata;
 
 include!(concat!(env!("OUT_DIR"), "/embedded_catalog.rs"));
 
@@ -53,5 +51,5 @@ fn invalid(message: String) -> io::Error {
 }
 
 #[cfg(test)]
-#[path = "embedded_test.rs"]
+#[path = "../tests/embedded_test.rs"]
 mod tests;

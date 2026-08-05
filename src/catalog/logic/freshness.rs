@@ -80,5 +80,5 @@ fn valid_range(value: &str, start: usize, end: usize, min: u8, max: u8) -> bool 
 }
 
 #[cfg(test)]
-#[path = "freshness_props.rs"]
+#[path = "../tests/freshness_props.rs"]
 mod props;

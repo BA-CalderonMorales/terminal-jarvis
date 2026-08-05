@@ -83,5 +83,5 @@ fn required(prefix: &str, name: &str, value: &str, errors: &mut Vec<String>) {
 }
 
 #[cfg(test)]
-#[path = "truth_props.rs"]
+#[path = "../tests/truth_props.rs"]
 mod props;

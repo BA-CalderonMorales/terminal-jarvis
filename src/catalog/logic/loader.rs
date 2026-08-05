@@ -4,10 +4,9 @@ use std::fs;
 use std::io;
 use std::path::{Path, PathBuf};
 
-use super::{
-    embedded, metadata,
-    parser::{self, Fields},
-};
+use super::embedded;
+use crate::catalog::logic::parser::{self, Fields};
+use crate::catalog::structs::metadata;
 
 pub fn load(root: &Path) -> io::Result<Vec<Harness>> {
     if should_use_embedded(root) {

@@ -3,7 +3,7 @@ use crate::contracts::{
     SupportState,
 };
 
-use super::parser::{self, Fields};
+use crate::catalog::logic::parser::{self, Fields};
 
 const HARNESS_KEYS: [&str; 6] = [
     "name",
@@ -85,5 +85,5 @@ fn boolean(fields: &Fields, key: &str) -> Result<bool, String> {
 }
 
 #[cfg(test)]
-#[path = "metadata_test.rs"]
+#[path = "../tests/metadata_test.rs"]
 mod tests;
