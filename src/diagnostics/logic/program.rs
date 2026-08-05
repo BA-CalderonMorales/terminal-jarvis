@@ -35,8 +35,7 @@ pub fn collect(input: &DiagnosticInput, redact: &Redactor<'_>) -> (Record, Recor
             .as_ref()
             .is_some_and(|path| !same(path, current));
     let path = if shadowed {
-        Record::new("tj.path", Code::Conflicting, Severity::Error, "shadowed")
-            .action("remove stale or shadowing PATH entries")
+        shadowed_record(redact, &resolved, current)
     } else {
         Record::new(
             "tj.path",
@@ -50,6 +49,32 @@ pub fn collect(input: &DiagnosticInput, redact: &Redactor<'_>) -> (Record, Recor
         )
     };
     (executable, path, direct.code == Code::Ready && !shadowed)
+}
+
+fn shadowed_record(
+    redact: &Redactor<'_>,
+    resolved: &super::resolve::Resolution,
+    current: &std::path::Path,
+) -> Record {
+    let value = if resolved.matches > 1 {
+        format!("shadowed ({} matches)", resolved.matches)
+    } else {
+        "shadowed".to_string()
+    };
+    let others = resolved
+        .paths
+        .iter()
+        .filter(|path| !same(path, current))
+        .take(3)
+        .map(|path| redact.full(path))
+        .collect::<Vec<_>>()
+        .join(", ");
+    let action = if others.is_empty() {
+        "remove stale or shadowing PATH entries".to_string()
+    } else {
+        format!("remove stale or shadowing PATH entries: {others}")
+    };
+    Record::new("tj.path", Code::Conflicting, Severity::Error, value).action(action)
 }
 
 fn same(left: &std::path::Path, right: &std::path::Path) -> bool {

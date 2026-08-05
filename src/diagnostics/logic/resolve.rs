@@ -6,12 +6,12 @@ use std::path::{Path, PathBuf};
 pub struct Resolution {
     pub code: Code,
     pub path: Option<PathBuf>,
+    pub paths: Vec<PathBuf>,
     pub matches: usize,
 }
-
 pub fn binary(name: &str, input: &DiagnosticInput) -> Resolution {
     if name.trim().is_empty() {
-        return result(Code::Malformed, None, 0);
+        return result(Code::Malformed, None, Vec::new(), 0);
     }
     if name.contains('/') || name.contains('\\') {
         return direct(Path::new(name));
@@ -31,19 +31,21 @@ pub fn binary(name: &str, input: &DiagnosticInput) -> Resolution {
     }
     let mut unique = BTreeSet::new();
     found.retain(|path| unique.insert(fs::canonicalize(path).unwrap_or_else(|_| path.clone())));
-    match found.len() {
-        0 if denied => result(Code::PermissionDenied, None, 0),
-        0 => result(Code::Missing, None, 0),
-        1 => result(Code::Ready, found.pop(), 1),
-        count => result(Code::Conflicting, found.into_iter().next(), count),
+    let paths = found.clone();
+    match paths.len() {
+        0 if denied => result(Code::PermissionDenied, None, paths, 0),
+        0 => result(Code::Missing, None, paths, 0),
+        1 => result(Code::Ready, paths.first().cloned(), paths, 1),
+        count => result(Code::Conflicting, paths.first().cloned(), paths, count),
     }
 }
 
 pub fn direct(path: &Path) -> Resolution {
+    let owned = path.to_path_buf();
     match executable(path) {
-        Ok(true) => result(Code::Ready, Some(path.to_path_buf()), 1),
-        Ok(false) => result(Code::PermissionDenied, Some(path.to_path_buf()), 0),
-        Err(code) => result(code, Some(path.to_path_buf()), 0),
+        Ok(true) => result(Code::Ready, Some(owned.clone()), vec![owned], 1),
+        Ok(false) => result(Code::PermissionDenied, Some(owned), Vec::new(), 0),
+        Err(code) => result(code, Some(owned), Vec::new(), 0),
     }
 }
 
@@ -74,20 +76,17 @@ fn candidates(name: &str, input: &DiagnosticInput) -> Vec<String> {
         .environment
         .text("PATHEXT")
         .unwrap_or(".COM;.EXE;.BAT;.CMD");
-    std::iter::once(name.to_string())
-        .chain(
-            extensions
-                .split(';')
-                .filter(|e| !e.is_empty())
-                .map(|e| format!("{name}{e}")),
-        )
+    extensions
+        .split(';')
+        .filter(|ext| !ext.is_empty())
+        .map(|ext| format!("{name}{ext}"))
         .collect()
 }
-
-fn result(code: Code, path: Option<PathBuf>, matches: usize) -> Resolution {
+fn result(code: Code, path: Option<PathBuf>, paths: Vec<PathBuf>, matches: usize) -> Resolution {
     Resolution {
         code,
         path,
+        paths,
         matches,
     }
 }

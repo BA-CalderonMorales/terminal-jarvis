@@ -78,7 +78,7 @@ fn cache_status_suppresses_empty_release_url() {
 }
 
 #[test]
-fn cache_status_treats_empty_distribution_as_unknown() {
+fn cache_status_treats_dev_binary_as_source_channel() {
     let output = base_command()
         .args(["cache", "status"])
         .env("TERMINAL_JARVIS_CACHE", temp_path("cache"))
@@ -86,7 +86,7 @@ fn cache_status_treats_empty_distribution_as_unknown() {
         .output()
         .expect("terminal-jarvis runs");
     assert!(output.status.success());
-    assert!(stdout(&output).contains("distribution: unknown"));
+    assert!(stdout(&output).contains("distribution: source"));
 }
 
 #[test]

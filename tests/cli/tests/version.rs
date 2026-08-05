@@ -18,7 +18,7 @@ fn version_flags_do_not_require_catalog() {
     );
 }
 #[test]
-fn plain_version_omits_channel_without_distribution_env() {
+fn plain_version_identifies_source_channel_without_distribution_env() {
     let o = Command::new(env!("CARGO_BIN_EXE_terminal-jarvis"))
         .args(["--plain", "--version"])
         .env_clear()
@@ -26,7 +26,10 @@ fn plain_version_omits_channel_without_distribution_env() {
         .unwrap();
     assert!(o.status.success());
     let b = String::from_utf8_lossy(&o.stdout);
-    assert!(b.starts_with("terminal-jarvis ") && !b.contains('('));
+    assert!(
+        b.starts_with("terminal-jarvis ") && b.contains("(source)"),
+        "dev-workspace binaries classify themselves as the source channel: {b}"
+    );
 }
 #[test]
 fn plain_version_reports_source_channel() {
@@ -72,7 +75,7 @@ fn verbose_version_ignores_empty_wrapper_env_values() {
     assert!(o.status.success());
     let b = String::from_utf8_lossy(&o.stdout);
     assert!(
-        b.contains("distribution: unknown")
+        b.contains("distribution: source")
             && b.contains("release: https://github.com")
             && b.contains("cache: unavailable")
     );

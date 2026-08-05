@@ -22,11 +22,24 @@ pub fn channel() -> Option<&'static str> {
     {
         return Some("npm");
     }
+    if let Some(raw) =
+        option_env!("TERMINAL_JARVIS_DISTRIBUTION_STAMPED").filter(|value| !value.trim().is_empty())
+    {
+        return Some(normalize(raw).unwrap_or("unknown"));
+    }
     let executable = std::env::current_exe()
         .ok()
         .map(|path| path.to_string_lossy().to_string())
         .unwrap_or_default();
+    if source_build(&executable) {
+        return Some("source");
+    }
     homebrew_path(&executable).then_some("homebrew")
+}
+
+pub fn source_build(path: &str) -> bool {
+    !path.contains("/deps/")
+        && (path.contains("/target/debug/") || path.contains("/target/release/"))
 }
 
 pub fn homebrew_path(path: &str) -> bool {
@@ -49,5 +62,14 @@ mod tests {
             assert_eq!(normalize(raw), Some(raw));
         }
         assert_eq!(normalize("custom"), None);
+    }
+
+    #[test]
+    fn source_build_classifies_workspace_binaries_only() {
+        assert!(source_build("/srv/target/debug/terminal-jarvis"));
+        assert!(source_build("/srv/target/release/tj"));
+        assert!(!source_build("/srv/target/debug/deps/lib-test"));
+        assert!(!source_build("/home/caldo/.cargo/bin/terminal-jarvis"));
+        assert!(!source_build(""));
     }
 }

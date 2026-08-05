@@ -47,6 +47,9 @@ pub fn collect(
 fn cache(input: &DiagnosticInput, redact: &Redactor<'_>) -> Record {
     let state = input.environment.state("TERMINAL_JARVIS_CACHE");
     if state != ValueState::Present {
+        if crate::context::distribution::channel() != Some("npm") {
+            return Record::new("state.cache", Code::Ready, Severity::Info, "not-applicable");
+        }
         return Record::new(
             "state.cache",
             state.code(),
