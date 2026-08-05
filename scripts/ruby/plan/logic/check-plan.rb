@@ -6,7 +6,7 @@ require "set"
 require "time"
 require "yaml"
 
-ROOT = File.expand_path("..", __dir__)
+ROOT = File.expand_path("../../../..", __dir__)
 PLAN_DIR = File.join(ROOT, "plan")
 PHASE_PATTERN = /\A(\d{2})-[a-z0-9]+(?:-[a-z0-9]+)*\.md\z/
 ALLOWED_STATUSES = %w[proposed in-progress blocked evidence-ready complete].freeze
@@ -31,7 +31,7 @@ end
 
 def usage
   <<~TEXT
-    usage: ruby scripts/check-plan.rb
+    usage: ruby scripts/ruby/plan/index.rb plan
 
     Validates the v0.1.13 phase graph, checklists, and completed evidence.
   TEXT

@@ -59,12 +59,12 @@ names may change only when the same contract is preserved and the evidence
 records the replacement.
 
 ```sh
-ruby scripts/check-plan.rb
-scripts/verify.sh
-scripts/local-ci.sh --strict --mutation
-scripts/package-release.sh --check
-scripts/package-release.sh build /tmp/terminal-jarvis-0.1.13
-scripts/local-cd.sh --out-dir /tmp/terminal-jarvis-0.1.13-cd
+ruby scripts/ruby/plan/index.rb plan
+scripts/bash/verify/index.sh verify
+scripts/bash/verify/index.sh local-ci --strict --mutation
+scripts/bash/release/index.sh package --check
+scripts/bash/release/index.sh package build /tmp/terminal-jarvis-0.1.13
+scripts/bash/release/index.sh local-cd --out-dir /tmp/terminal-jarvis-0.1.13-cd
 git diff --check
 git status --short
 ```

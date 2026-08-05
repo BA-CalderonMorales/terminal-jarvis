@@ -9,15 +9,16 @@ and `src/runtime/` executes a selected command. Harness and gate policy live in
 ## Verification
 
 ```bash
-scripts/verify.sh
-scripts/local-ci.sh
-scripts/package-release.sh build /tmp/terminal-jarvis-package
-scripts/local-cd.sh --check-auth
+scripts/bash/verify/index.sh verify
+scripts/bash/verify/index.sh local-ci
+scripts/bash/release/index.sh package build /tmp/terminal-jarvis-package
+scripts/bash/release/index.sh local-cd --check-auth
 ```
 
-`scripts/verify.sh` runs format, lint, tests, catalog checks, security checks,
-npm wrapper tests, and package metadata checks. Package builds run both the
-artifact integration hardening suite and `scripts/core-command-matrix.sh`.
+`scripts/bash/verify/index.sh verify` runs format, lint, tests, catalog
+checks, security checks, npm wrapper tests, and package metadata checks.
+Package builds run both the artifact integration hardening suite and
+`scripts/bash/verify/index.sh core-command-matrix`.
 The matrix exercises every public command on the host-native binary while
 leaving third-party agent installation, update, and interactive launch paths
 unexecuted.

@@ -93,7 +93,7 @@ and 03 are complete. This separates permission to start from permission to ship.
 | 04 | [Release candidate](04-release-candidate.md) | 01 | 02, 03 |
 
 The status in each phase's frontmatter is authoritative. Run
-`ruby scripts/check-plan.rb` for the derived overall status.
+`ruby scripts/ruby/plan/index.rb plan` for the derived overall status.
 
 ## WIP Handoff - 2026-07-17
 

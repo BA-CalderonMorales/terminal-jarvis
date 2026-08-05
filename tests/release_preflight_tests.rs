@@ -3,11 +3,16 @@ use std::{fs, path::Path, process::Command};
 fn make_root(name: &str) -> std::path::PathBuf {
     let root = std::env::temp_dir().join(format!("terminal-jarvis-{name}-{}", std::process::id()));
     let _ = fs::remove_dir_all(&root);
-    fs::create_dir_all(root.join("scripts")).unwrap();
+    fs::create_dir_all(root.join("scripts/bash/release/logic")).unwrap();
     fs::create_dir_all(root.join("npm/terminal-jarvis")).unwrap();
     fs::copy(
-        Path::new(env!("CARGO_MANIFEST_DIR")).join("scripts/release-preflight.sh"),
-        root.join("scripts/release-preflight.sh"),
+        Path::new(env!("CARGO_MANIFEST_DIR")).join("scripts/bash/release/index.sh"),
+        root.join("scripts/bash/release/index.sh"),
+    )
+    .unwrap();
+    fs::copy(
+        Path::new(env!("CARGO_MANIFEST_DIR")).join("scripts/bash/release/logic/release-preflight.sh"),
+        root.join("scripts/bash/release/logic/release-preflight.sh"),
     )
     .unwrap();
     root
@@ -30,7 +35,8 @@ fn write_metadata(root: &Path, cargo: &str, npm: &str, lock: &str) {
 
 fn run_preflight(root: &Path, args: &[&str]) -> std::process::Output {
     Command::new("sh")
-        .arg("scripts/release-preflight.sh")
+        .arg("scripts/bash/release/index.sh")
+        .arg("preflight")
         .args(args)
         .current_dir(root)
         .output()

@@ -9,6 +9,7 @@ coverage/
 cobertura.xml
 lcov.info
 *.profraw
+__pycache__/
 .env
 .env.*
 !.env.example

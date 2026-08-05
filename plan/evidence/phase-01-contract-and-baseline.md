@@ -31,7 +31,7 @@ Host and tools:
 
 | Command or probe | Result |
 |---|---|
-| `scripts/verify.sh` | pass; format, clippy, 150 Rust tests, file length, catalog shape, CLI smoke, integration hardening, security, distribution smoke, and coverage completed |
+| `scripts/bash/verify/index.sh verify` | pass; format, clippy, 150 Rust tests, file length, catalog shape, CLI smoke, integration hardening, security, distribution smoke, and coverage completed |
 | catalog shape | pass; 25 harnesses, 225 capability descriptors, 9 capabilities per harness |
 | npm wrapper suite | pass; 17/17 tests |
 | release preflight | pass; Cargo/npm metadata aligned at 0.1.12 |

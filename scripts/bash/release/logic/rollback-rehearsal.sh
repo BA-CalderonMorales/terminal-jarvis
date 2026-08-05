@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-root=$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)
+root=$(cd "$(dirname "${BASH_SOURCE[0]}")/../../../../" && pwd)
 output=
 current_ref=$(git -C "$root" rev-parse HEAD)
 baseline_ref=$(git -C "$root" rev-parse v0.1.12^{commit})

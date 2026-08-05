@@ -7,7 +7,7 @@ package=1
 
 usage() {
   cat <<'EOF'
-usage: scripts/local-ci.sh [--strict] [--mutation] [--no-package]
+usage: scripts/bash/verify/index.sh local-ci [--strict] [--mutation] [--no-package]
 
 Runs the local pre-PR gate without committing, tagging, pushing, or publishing.
 
@@ -35,7 +35,7 @@ while [ "$#" -gt 0 ]; do
   shift
 done
 
-cd "$(dirname "$0")/.."
+cd "$(dirname "$0")/../../../../"
 
 step() {
   printf '\n[%s] %s\n' "$1" "$2"
@@ -56,7 +56,7 @@ skip_or_fail() {
 }
 
 check_versions() {
-  scripts/release-preflight.sh
+  scripts/bash/release/index.sh preflight
 }
 
 check_ignores() {
@@ -128,7 +128,7 @@ step 2 "workflow lint"
 run_workflow_lint
 
 step 3 "standard verification"
-TJ_REQUIRE_SECURITY_TOOLS=$strict scripts/verify.sh
+TJ_REQUIRE_SECURITY_TOOLS=$strict scripts/bash/verify/index.sh verify
 
 step 4 "secret and supply-chain scans"
 run_gitleaks
@@ -136,7 +136,7 @@ run_socket
 
 step 5 "release package smoke"
 if [ "$package" = "1" ]; then
-  scripts/package-release.sh
+  scripts/bash/release/index.sh package
   rm -rf dist
 else
   echo "skip: package smoke disabled"

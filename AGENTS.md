@@ -9,7 +9,9 @@
 - `docs/` holds architecture, ADRs, testing, migration, and release notes;
   `docs/anti-patterns/{type}/index.md` is the ledger of recurring agent
   mistakes and their fixes.
-- `scripts/` is the local release-prep and verification path.
+- `scripts/` holds local automation bucketed as
+  `scripts/{language}/{domain}/{role}/`, with a public `index.{ext}` per
+  domain; callers never reach into `logic/` directly.
 - The pre-rewrite implementation is pruned; use Git history for legacy reference.
 
 ## Key Sections
@@ -59,8 +61,9 @@ built and verified.
   `CLAUDE.md`) skip CI automatically via `paths-ignore`. Trigger manually with
   `workflow_dispatch` when needed.
 - **Plan-only PRs** run the lightweight `Plan Validation` workflow instead of
-  the Rust/package/security/mutation jobs. Run `ruby scripts/check-plan.rb`
-  locally; mixed plan and product changes still run both.
+  the Rust/package/security/mutation jobs. Run
+  `ruby scripts/ruby/plan/index.rb plan` locally; mixed plan and product
+  changes still run both.
 - The harness capability contract lives in
   [docs/harness-capability-contract.md](docs/harness-capability-contract.md).
   Keep it in sync when adding capabilities or commands.

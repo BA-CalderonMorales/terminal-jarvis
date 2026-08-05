@@ -178,9 +178,9 @@ ARGS.repository = ARGS.repository.resolve()
 ARGS.candidates = ARGS.candidates.resolve()
 if ARGS.version != "0.1.13" or len(ARGS.ref) != 40 or ARGS.epoch < 0:
     fail("version must be 0.1.13, ref must be a full SHA, and epoch must be nonnegative")
-configured = ARGS.repository.joinpath("scripts/release.toml").read_text()
+configured = ARGS.repository.joinpath("scripts/config/release/constants/release.toml").read_text()
 if 'release_platforms = ["' + '", "'.join(PLATFORMS) + '"]' not in configured:
-    fail("scripts/release.toml target denominator differs from the evaluation contract")
+    fail("scripts/config/release/constants/release.toml target denominator differs from the evaluation contract")
 ARGS.out_dir.mkdir(parents=True, exist_ok=True)
 output = ARGS.out_dir / f"terminal-jarvis-{ARGS.version}-evaluation-kit.zip"
 with tempfile.TemporaryDirectory() as temporary:

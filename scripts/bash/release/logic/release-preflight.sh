@@ -1,7 +1,7 @@
 #!/usr/bin/env sh
 set -eu
 
-cd "$(dirname "$0")/.."
+cd "$(dirname "$0")/../../../../"
 
 tag=
 expected_main_ref=
@@ -13,7 +13,7 @@ fail() {
 
 usage() {
   cat <<'EOF'
-usage: scripts/release-preflight.sh [--tag vX.Y.Z] [--expected-main-ref REF]
+usage: scripts/bash/release/index.sh preflight [--tag vX.Y.Z] [--expected-main-ref REF]
 
 Checks release metadata before packaging or publishing.
 EOF

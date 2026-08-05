@@ -9,7 +9,7 @@ fail() {
 }
 
 usage() {
-  echo "usage: scripts/check-distribution-payloads.sh --npm-stage PATH" >&2
+  echo "usage: scripts/bash/verify/index.sh distribution-payloads --npm-stage PATH" >&2
 }
 
 while [ "$#" -gt 0 ]; do

@@ -68,7 +68,7 @@ test -d harnesses || fail "harnesses directory missing"
 test -d gates || fail "gates directory missing"
 test -x npm/terminal-jarvis/bin/terminal-jarvis || fail "npm wrapper missing"
 
-scripts/release-preflight.sh
+scripts/bash/release/index.sh preflight
 
 if command -v ruby >/dev/null 2>&1; then
   ruby -c homebrew/Formula/terminal-jarvis.rb >/dev/null
@@ -78,7 +78,7 @@ if test "$mode" = "--check"; then
   echo "$name $version $platform ($target)"
   exit 0
 fi
-test "$mode" = "build" || fail "usage: scripts/package-release.sh [--check|build] [out-dir]"
+test "$mode" = "build" || fail "usage: scripts/bash/release/index.sh package [--check|build] [out-dir]"
 
 git_sha=$(git rev-parse HEAD 2>/dev/null || echo unknown)
 if test "$target_explicit" = "1"; then
@@ -150,7 +150,7 @@ fi
 if command -v ruby >/dev/null 2>&1; then
   ruby -c "$formula_dir/terminal-jarvis.rb" >/dev/null
 fi
-scripts/check-distribution-payloads.sh --npm-stage "$npm_stage"
+scripts/bash/verify/index.sh distribution-payloads --npm-stage "$npm_stage"
 
 tmp=$(mktemp -d)
 trap 'rm -rf "$tmp"' EXIT
@@ -176,12 +176,12 @@ if test "$target" = "$host_target"; then
       node "$npm_stage_abs/bin/terminal-jarvis" --plain list >/dev/null
   fi
 
-  scripts/integration-hardening.sh \
+  scripts/bash/verify/index.sh integration-hardening \
     --binary "$stage/bin/$binary_name" \
     --catalog "$stage/harnesses" \
     --npm-wrapper "$npm_stage/bin/terminal-jarvis" \
     --homebrew-formula "$formula_dir/terminal-jarvis.rb"
-  scripts/core-command-matrix.sh \
+  scripts/bash/verify/index.sh core-command-matrix \
     --binary "$stage/bin/$binary_name" \
     --catalog "$stage/harnesses"
 else

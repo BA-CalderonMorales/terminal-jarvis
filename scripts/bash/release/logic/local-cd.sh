@@ -1,13 +1,13 @@
 #!/usr/bin/env sh
 set -eu
 
-config=scripts/release.toml
+config=scripts/config/release/constants/release.toml
 out_root=${TJ_LOCAL_CD_OUT:-}
 auth=0
 
 usage() {
   cat <<'EOF'
-usage: scripts/local-cd.sh [--out-dir PATH] [--check-auth]
+usage: scripts/bash/release/index.sh local-cd [--out-dir PATH] [--check-auth]
 
 Builds the local release package shape without tagging, pushing, or publishing.
 Artifacts default to the workspace testing/ area when this checkout is there.
@@ -88,7 +88,7 @@ while [ "$#" -gt 0 ]; do
   shift
 done
 
-cd "$(dirname "$0")/.."
+cd "$(dirname "$0")/../../../../"
 
 name=$(package_name)
 test -n "$name" || fail "Cargo.toml name missing"
@@ -108,7 +108,7 @@ version=$(version)
 test -n "$version" || fail "Cargo.toml version missing"
 tag=v$version
 
-scripts/package-release.sh build "$out_root"
+scripts/bash/release/index.sh package build "$out_root"
 
 asset_dir=$out_root/release-assets/$tag
 rm -rf "$asset_dir"

@@ -58,7 +58,7 @@ implementation detail. A structural, exact-envelope equality was chosen because
 it is deterministic, stronger, and sound for all inputs.
 
 **Consequence:** The gate is deterministic again. `tj` lowers the cost of daily
-use. `scripts/harness-risk.py` scores each harness from its own manifests
+use. `scripts/python/catalog/index.py harness-risk` scores each harness from its own manifests
 (dangerous/network surface only, so the report ranks rather than paints
 everything the same color) and stays opt-in behind `TJ_HARNESS_RISK=1` until
 it proves value. No root-level Rust scripts remain; the build script lives in

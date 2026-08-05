@@ -42,7 +42,7 @@ jobs:
       - name: Run exact-ref adversarial evidence
         run: |
           mkdir -p evidence
-          scripts/phase03-adversarial-report.sh \
+          scripts/bash/catalog/index.sh adversarial-report \
             --output evidence/phase03-adversarial.tsv \
             --tested-ref "${{ github.sha }}"
 
@@ -89,7 +89,7 @@ jobs:
           command -v cargo-llvm-cov >/dev/null || cargo install cargo-llvm-cov --locked
 
       - name: Run branch verification
-        run: scripts/verify.sh
+        run: scripts/bash/verify/index.sh verify
         env:
           TJ_REQUIRE_SECURITY_TOOLS: "1"
 
@@ -118,7 +118,7 @@ jobs:
           restore-keys: cargo-package-${{ runner.os }}-
 
       - name: Build release package
-        run: scripts/package-release.sh
+        run: scripts/bash/release/index.sh package
 
       - uses: actions/upload-artifact@v7
         with:

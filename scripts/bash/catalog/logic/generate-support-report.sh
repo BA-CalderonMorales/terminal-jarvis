@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-root=$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)
+root=$(cd "$(dirname "${BASH_SOURCE[0]}")/../../../../" && pwd)
 mode=write
 if [[ ${1:-} == --check ]]; then
   mode=check
@@ -11,7 +11,7 @@ output=${1:-"$root/docs/support-matrix.md"}
 tmp=$(mktemp)
 report=$(mktemp)
 trap 'rm -f "$tmp" "$report"' EXIT
-"$root/scripts/phase03-catalog-report.sh" \
+"$root/scripts/bash/catalog/index.sh" catalog-report \
   --output "$report" --tested-ref support-matrix >/dev/null
 
 render() {
@@ -53,7 +53,7 @@ render >"$tmp"
 if [[ $mode == check ]]; then
   if ! cmp -s "$tmp" "$output"; then
     diff -u "$output" "$tmp" || true
-    printf 'support report is stale; run scripts/generate-support-report.sh\n' >&2
+    printf 'support report is stale; run scripts/bash/catalog/index.sh support-report\n' >&2
     exit 1
   fi
   printf 'support report matches the catalog\n'

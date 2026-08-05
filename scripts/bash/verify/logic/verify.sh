@@ -34,7 +34,7 @@ test "$indexes" -eq "$expected" ||
   fail "expected $expected harness index files, found $indexes"
 
 echo "[6/12] generated support report"
-scripts/generate-support-report.sh --check
+scripts/bash/catalog/index.sh support-report --check
 
 echo "[7/12] cli smoke"
 cargo run -- --plain list >/tmp/terminal-jarvis-list.txt
@@ -44,17 +44,17 @@ TERMINAL_JARVIS_HOME=/tmp/terminal-jarvis-verify cargo run -- --plain current |
   grep 'active harness = codex' >/dev/null
 
 echo "[8/12] integration hardening"
-scripts/integration-hardening.sh
+scripts/bash/verify/index.sh integration-hardening
 
 echo "[9/12] security"
-scripts/security-check.sh
+scripts/bash/verify/index.sh security-check
 
 echo "[10/12] distribution smoke"
-scripts/release-preflight.sh
+scripts/bash/release/index.sh preflight
 if command -v node >/dev/null 2>&1 && command -v npm >/dev/null 2>&1; then
   npm --prefix npm/terminal-jarvis test
   npm --prefix npm/terminal-jarvis run smoke
-  scripts/check-distribution-payloads.sh --npm-stage npm/terminal-jarvis
+  scripts/bash/verify/index.sh distribution-payloads --npm-stage npm/terminal-jarvis
 else
   echo "node/npm not installed; skipping npm wrapper smoke"
 fi
@@ -64,7 +64,7 @@ if command -v ruby >/dev/null 2>&1; then
 else
   echo "ruby not installed; skipping Homebrew formula syntax check"
 fi
-scripts/package-release.sh --check
+scripts/bash/release/index.sh package --check
 
 echo "[11/12] coverage"
 if command -v cargo-llvm-cov >/dev/null 2>&1; then
@@ -76,9 +76,9 @@ fi
 echo "[11b/12] harness risk"
 if command -v python3 >/dev/null 2>&1; then
   if test "${TJ_HARNESS_RISK:-0}" = "1"; then
-    python3 scripts/harness-risk.py --check high
+    python3 scripts/python/catalog/index.py harness-risk --check high
   else
-    python3 scripts/harness-risk.py
+    python3 scripts/python/catalog/index.py harness-risk
   fi
 else
   echo "python3 not installed; skipping harness risk report"

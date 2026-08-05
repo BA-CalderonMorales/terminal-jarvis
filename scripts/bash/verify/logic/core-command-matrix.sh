@@ -6,7 +6,7 @@ catalog=harnesses
 
 usage() {
   cat <<'EOF'
-usage: scripts/core-command-matrix.sh [--binary PATH] [--catalog PATH]
+usage: scripts/bash/verify/index.sh core-command-matrix [--binary PATH] [--catalog PATH]
 
 Exercises every public Terminal Jarvis command without installing, updating, or
 launching third-party coding agents. It validates rich default output and the

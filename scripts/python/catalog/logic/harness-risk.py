@@ -29,7 +29,7 @@ import sys
 import tomllib
 from pathlib import Path
 
-ROOT = Path(__file__).resolve().parent.parent
+ROOT = Path(__file__).resolve().parent.parent.parent.parent.parent
 HARNESSES = ROOT / "harnesses"
 NPM_WRAPPER = ROOT / "npm" / "terminal-jarvis"
 

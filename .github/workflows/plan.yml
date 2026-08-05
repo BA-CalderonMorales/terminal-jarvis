@@ -5,14 +5,14 @@ on:
     branches: [main, develop]
     paths:
       - 'plan/**'
-      - 'scripts/check-plan.rb'
+      - 'scripts/ruby/plan/**'
       - '.github/workflows/plan.yml'
   push:
     branches:
       - 'release/**'
     paths:
       - 'plan/**'
-      - 'scripts/check-plan.rb'
+      - 'scripts/ruby/plan/**'
       - '.github/workflows/plan.yml'
   workflow_dispatch:
 
@@ -34,4 +34,4 @@ jobs:
           fetch-depth: 0
 
       - name: Validate plan structure
-        run: ruby scripts/check-plan.rb
+        run: ruby scripts/ruby/plan/index.rb plan

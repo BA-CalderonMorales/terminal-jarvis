@@ -1,11 +1,12 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-root=$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)
+root=$(cd "$(dirname "${BASH_SOURCE[0]}")/../../../../" && pwd)
 ref=${TJ_PHASE03_REF:-$(git -C "$root" rev-parse HEAD)}
-dev=${1:?usage: phase03-parity.sh DEV-BINARY STAGED-ROOT OUTPUT-DIR}
-staged=${2:?usage: phase03-parity.sh DEV-BINARY STAGED-ROOT OUTPUT-DIR}
-output=${3:?usage: phase03-parity.sh DEV-BINARY STAGED-ROOT OUTPUT-DIR}
+usage="scripts/bash/catalog/index.sh parity-catalog DEV-BINARY STAGED-ROOT OUTPUT-DIR"
+dev=${1:?usage: $usage}
+staged=${2:?usage: $usage}
+output=${3:?usage: $usage}
 
 sha_file() {
   if command -v sha256sum >/dev/null 2>&1; then
@@ -27,9 +28,9 @@ tree_digest() {
 [[ -d "$staged/harnesses" && -d "$staged/gates" ]] || { printf 'staged catalogs are missing\n' >&2; exit 4; }
 mkdir -p "$output"
 
-"$root/scripts/phase03-catalog-report.sh" --output "$output/dev.tsv" \
+"$root/scripts/bash/catalog/index.sh" catalog-report --output "$output/dev.tsv" \
   --binary "$dev" --catalog "$root/harnesses" --tested-ref "$ref" >/dev/null
-"$root/scripts/phase03-catalog-report.sh" --output "$output/staged.tsv" \
+"$root/scripts/bash/catalog/index.sh" catalog-report --output "$output/staged.tsv" \
   --binary "$staged/bin/terminal-jarvis" --catalog "$staged/harnesses" \
   --tested-ref "$ref" >/dev/null
 cmp "$output/dev.tsv" "$output/staged.tsv"
@@ -64,4 +65,4 @@ printf 'schema_version\tref\tversion\treport_sha256\tcatalog_sha256\tgates_sha25
 printf '1\t%s\t%s\t%s\t%s\t%s\tpass\n' "$ref" "$dev_version" \
   "$(sha_file "$output/dev.tsv")" "$(sha_file "$output/dev.catalog.sha256")" \
   "$(sha_file "$output/dev.gates.sha256")" >>"$output/summary.tsv"
-printf 'phase03 parity: ok (%s)\n' "$ref"
+printf 'parity-catalog: ok (%s)\n' "$ref"

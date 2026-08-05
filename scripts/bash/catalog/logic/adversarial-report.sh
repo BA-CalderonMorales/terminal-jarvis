@@ -1,19 +1,19 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-root=$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)
+root=$(cd "$(dirname "${BASH_SOURCE[0]}")/../../../../" && pwd)
 output=
 tested_ref=
 while (($#)); do
   case "$1" in
     --output) output=${2:?missing output}; shift 2 ;;
     --tested-ref) tested_ref=${2:?missing ref}; shift 2 ;;
-    *) printf 'phase03-adversarial: unknown option %s\n' "$1" >&2; exit 2 ;;
+    *) printf 'adversarial-report: unknown option %s\n' "$1" >&2; exit 2 ;;
   esac
 done
-[[ -n "$output" ]] || { printf 'phase03-adversarial: --output is required\n' >&2; exit 2; }
+[[ -n "$output" ]] || { printf 'adversarial-report: --output is required\n' >&2; exit 2; }
 [[ -n "$tested_ref" ]] || tested_ref=$(git -C "$root" rev-parse HEAD)
-[[ -d $(dirname "$output") ]] || { printf 'phase03-adversarial: output parent missing\n' >&2; exit 4; }
+[[ -d $(dirname "$output") ]] || { printf 'adversarial-report: output parent missing\n' >&2; exit 4; }
 
 tmp=$(mktemp "${output}.tmp.XXXXXX")
 trap 'rm -f -- "$tmp"' EXIT
@@ -24,7 +24,7 @@ run() {
   shift 2
   printf -v command '%q ' "$@"
   command=${command% }
-  printf 'phase03-adversarial: %s\n' "$id" >&2
+  printf 'adversarial-report: %s\n' "$id" >&2
   (cd "$root" && "$@")
   printf '1\t%s\t%s\t%s\tpass\t%s\n' "$tested_ref" "$id" "$treatment" "$command" >>"$tmp"
 }
@@ -47,7 +47,7 @@ run cache-checksum-architecture-shadow-recovery deterministic \
   node --test npm/terminal-jarvis/test-wrapper.js
 run support-artifact-redaction deterministic env \
   TJ_SUPPORT_SECRET_SENTINEL=TJ_SUPPORT_SECRET_SENTINEL_6c82 \
-  scripts/generate-support-report.sh --check
+  scripts/bash/catalog/index.sh support-report --check
 
 printf '1\t%s\ttimeout\tfrozen-contract-not-applicable\tpass\tno v0.1.13 timeout surface\n' "$tested_ref" >>"$tmp"
 printf '1\t%s\tdebug-output\tfrozen-contract-not-applicable\tpass\tno v0.1.13 debug surface\n' "$tested_ref" >>"$tmp"
@@ -56,4 +56,4 @@ printf '1\t%s\tmanual-rows\tdeterministic-empty-denominator\tpass\tcatalog conta
 printf '1\t%s\tunsupported-rows\tdeterministic-empty-denominator\tpass\tcatalog contains zero unsupported rows\n' "$tested_ref" >>"$tmp"
 mv -- "$tmp" "$output"
 trap - EXIT
-printf 'phase03-adversarial: ok (%s)\n' "$tested_ref"
+printf 'adversarial-report: ok (%s)\n' "$tested_ref"

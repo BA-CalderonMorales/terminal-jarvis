@@ -9,10 +9,10 @@ files. Treat every harness descriptor as executable policy.
 cargo fmt --all -- --check
 cargo clippy --all-targets -- -D warnings
 cargo test
-scripts/security-check.sh
+scripts/bash/verify/index.sh security-check
 ```
 
-`scripts/security-check.sh` uses `cargo audit` and `cargo deny` when they are
+`scripts/bash/verify/index.sh security-check` uses `cargo audit` and `cargo deny` when they are
 installed. They are optional for local development, but release work should run
 both before publishing.
 

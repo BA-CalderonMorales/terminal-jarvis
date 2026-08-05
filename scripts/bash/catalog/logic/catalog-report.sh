@@ -3,9 +3,9 @@ set -euo pipefail
 
 usage() {
   cat <<'EOF'
-Usage: scripts/phase03-catalog-report.sh --output PATH [options]
+Usage: scripts/bash/catalog/index.sh catalog-report --output PATH [options]
 
-Generate the deterministic Phase 03 catalog coverage report.
+Generate the deterministic catalog coverage report.
 
 Options:
   --output PATH      Required TSV destination; replaced atomically.
@@ -55,7 +55,7 @@ done
   exit 4
 }
 
-root=$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)
+root=$(cd "$(dirname "${BASH_SOURCE[0]}")/../../../../" && pwd)
 if [[ -z "$tested_ref" ]]; then
   tested_ref=$(git -C "$root" rev-parse --verify HEAD)
   [[ -z $(git -C "$root" status --porcelain) ]] || tested_ref+="-dirty"
@@ -71,7 +71,7 @@ export CARGO_NET_OFFLINE=true
 [[ -z "$binary" ]] || export TJ_PHASE03_BIN=$binary
 [[ -z "$catalog" ]] || export TJ_PHASE03_CATALOG=$catalog
 
-printf 'Generating Phase 03 catalog report for %s\n' "$tested_ref" >&2
+printf 'Generating catalog report for %s\n' "$tested_ref" >&2
 cargo test --quiet --manifest-path "$root/Cargo.toml" \
   --test phase03_catalog_walk_tests -- --exact catalog_walk_records_all_rows_once_without_effects
 mv -- "$temporary" "$output"

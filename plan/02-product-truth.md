@@ -144,7 +144,7 @@ Remaining before this phase can become evidence-ready:
 | Covers | Method | Artifact | Ref | UTC | Result | Verified by |
 |---|---|---|---|---|---|---|
 | TRU-01, TRU-02, TRU-08, TRU-11 | exact-ref 225-row walk and generated drift check | plan/evidence/phase-03/parity/dev.tsv | ddc23b6 | 2026-07-18T22:19:51Z | pass | Codex |
-| TRU-03, TRU-04, TRU-05, TRU-06, TRU-07, TRU-09 | `scripts/phase03-adversarial-report.sh` | plan/evidence/phase-03/adversarial.tsv | ddc23b6 | 2026-07-18T22:19:51Z | pass | Codex |
+| TRU-03, TRU-04, TRU-05, TRU-06, TRU-07, TRU-09 | `scripts/bash/catalog/index.sh adversarial-report` | plan/evidence/phase-03/adversarial.tsv | ddc23b6 | 2026-07-18T22:19:51Z | pass | Codex |
 | TRU-10 | exact-ref development/staged identity plus npm wrapper suite | plan/evidence/phase-03/parity/identity.tsv | ddc23b6 | 2026-07-18T22:19:51Z | pass | Codex |
 
 ## Exit

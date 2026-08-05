@@ -9,7 +9,7 @@ capabilities="download update headless version stats models security yolo ui"
 
 usage() {
   cat <<'EOF'
-usage: scripts/integration-hardening.sh [--binary PATH] [--catalog PATH]
+usage: scripts/bash/verify/index.sh integration-hardening [--binary PATH] [--catalog PATH]
                                       [--npm-wrapper PATH]
                                       [--homebrew-formula PATH]
 
