@@ -61,5 +61,5 @@ pub(super) fn prefixed(path: &Path, prefix: Option<&Path>, label: &str) -> Optio
 }
 
 #[cfg(test)]
-#[path = "redact_props.rs"]
+#[path = "../tests/redact_props.rs"]
 mod props;
