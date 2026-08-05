@@ -1,7 +1,7 @@
 summary = "Run Codex in a headless command mode when the CLI supports it."
 command = "codex"
 args = ["exec"]
-support = "unknown"
+support = "expected"
 evidence = "deterministic"
 effect = "dangerous"
 network = true
@@ -9,4 +9,4 @@ interaction = "noninteractive"
 platforms = []
 executable = "codex"
 source = "internal:phase-01@fab5848"
-verified_at = "2026-07-17T04:59:27Z"
+verified_at = "2026-08-05T00:00:00Z"

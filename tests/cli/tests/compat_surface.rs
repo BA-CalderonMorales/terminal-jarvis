@@ -40,8 +40,8 @@ mod unix {
         let home = temp_home();
         let update = stdout(&tj(&["update"], &home, None));
         assert!(update.contains("updates are per harness"));
-        assert!(update.contains("opencode: support=unknown"));
-        assert!(!update.contains("npm update -g opencode-ai"));
+        assert!(update.contains("npm update -g opencode-ai"));
+        assert!(update.contains("ollama: support=unknown evidence=deterministic command=withheld"));
 
         assert!(stdout(&tj(&["info", "opencode"], &home, None)).contains("OpenCode"));
         assert!(stdout(&tj(&["auth"], &home, None)).contains("credential manager"));
@@ -71,15 +71,29 @@ mod unix {
     fn unverified_catalog_rows_fail_closed_before_catalog_commands() {
         let home = temp_home();
         for args in [
-            &["install", "opencode"][..],
-            &["update", "opencode"],
-            &["run", "opencode"],
-            &["run", "opencode", "headless", "yo"],
+            &["install", "vibe"][..],
+            &["update", "ollama"],
+            &["run", "vibe", "headless", "yo"],
         ] {
             let output = tj(args, &home, None);
             assert_eq!(output.status.code(), Some(4));
             assert!(stdout(&output).is_empty());
-            assert!(stderr(&output).contains("unknown"));
+            assert!(stderr(&output).contains("is "));
+        }
+    }
+
+    #[test]
+    fn supported_catalog_rows_require_explicit_intent() {
+        let home = temp_home();
+        for args in [
+            &["install", "opencode"][..],
+            &["update", "opencode"],
+            &["run", "opencode"],
+        ] {
+            let output = tj(args, &home, None);
+            assert_eq!(output.status.code(), Some(5));
+            assert!(stdout(&output).is_empty());
+            assert!(stderr(&output).contains("review"));
         }
     }
 }

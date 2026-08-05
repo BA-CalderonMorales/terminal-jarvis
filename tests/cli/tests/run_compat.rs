@@ -50,31 +50,30 @@ mod unix {
     }
 
     #[test]
-    fn unknown_run_rows_do_not_launch_fake_tools() {
+    fn supported_run_rows_gate_before_launching_fake_tools() {
         let home = temp_home();
         let (bin, old_path) = fake_bin("opencode");
         let path = format!("{bin}:{old_path}");
 
         let launch = tj(&["run", "opencode"], &home, &path);
-        assert_eq!(launch.status.code(), Some(4));
+        assert_eq!(launch.status.code(), Some(5));
         assert!(stdout(&launch).is_empty());
-        assert!(stderr(&launch).contains("unknown"));
 
         let prompt = tj(&["run", "opencode", "yo!", "fix", "this"], &home, &path);
-        assert_eq!(prompt.status.code(), Some(4));
+        assert_eq!(prompt.status.code(), Some(5));
         assert!(stdout(&prompt).is_empty());
     }
 
     #[test]
-    fn direct_tool_help_is_parsed_but_unknown_support_blocks_launch() {
+    fn direct_tool_invocation_reaches_the_intent_gate() {
         let home = temp_home();
         let (bin, old_path) = fake_bin("opencode");
         let path = format!("{bin}:{old_path}");
 
         let output = tj(&["opencode", "--help"], &home, &path);
-        assert_eq!(output.status.code(), Some(4));
+        assert_eq!(output.status.code(), Some(5));
         assert!(stdout(&output).is_empty());
-        assert!(stderr(&output).contains("opencode:ui is unknown"));
+        assert!(stderr(&output).contains("terminal"));
     }
 
     #[test]
@@ -83,9 +82,13 @@ mod unix {
         let empty = std::path::PathBuf::from(temp_home()).join("bin");
         fs::create_dir_all(&empty).unwrap();
 
-        let output = tj(&["run", "opencode"], &home, &empty.to_string_lossy());
+        let output = tj(
+            &["run", "vibe", "headless", "yo"],
+            &home,
+            &empty.to_string_lossy(),
+        );
 
         assert_eq!(output.status.code(), Some(4));
-        assert!(stderr(&output).contains("opencode:ui is unknown"));
+        assert!(stderr(&output).contains("vibe:headless is stub"));
     }
 }

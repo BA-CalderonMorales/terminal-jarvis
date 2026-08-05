@@ -23,17 +23,25 @@ fn temp_home() -> String {
 }
 
 #[test]
-fn install_known_harness_is_red() {
-    for harness in ["aider", "opencode", "codex", "claude", "code"] {
+fn install_known_harness_requires_explicit_intent() {
+    for harness in ["aider", "opencode", "codex", "code"] {
+        let (code, _, stderr) = run(&["install", harness]);
+        assert_eq!(code, 5, "install {harness} must be intent-gated");
+        assert!(
+            stderr.contains("confirm=download:"),
+            "install {harness} should demand the download intent token"
+        );
+    }
+}
+
+#[test]
+fn install_unguarded_harness_is_red() {
+    for harness in ["ollama", "vibe"] {
         let (code, _, stderr) = run(&["install", harness]);
         assert_eq!(code, 4, "install {harness} should exit 4");
         assert!(
             stderr.contains("is unknown; Install"),
             "install {harness} should say capability is unknown"
-        );
-        assert!(
-            stderr.contains(&format!("plan {harness} download")),
-            "install {harness} should suggest plan {harness} download"
         );
     }
 }

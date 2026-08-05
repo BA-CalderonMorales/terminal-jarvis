@@ -3,6 +3,13 @@ use super::guard_policy_support::*;
 use crate::contracts::SupportState;
 
 #[test]
+fn empty_platforms_are_unrestricted() {
+    let harness = dummy_harness();
+    let plan = dummy_plan(SupportState::Expected, "2026-08-05T00:00:00Z", Vec::new());
+    assert!(check(&harness, &plan).is_ok());
+}
+
+#[test]
 fn rejects_platform_incompatible() {
     let harness = dummy_harness();
     // Use a different platform than the current one

@@ -3,10 +3,23 @@ use terminal_jarvis::catalog;
 use terminal_jarvis::contracts::SupportState;
 
 #[test]
-fn catalog_policy_rows_report_candidate_review_freshness() {
+fn catalog_rows_report_freshness_matching_their_support() {
     let harnesses = catalog::load(Path::new("harnesses")).unwrap();
     for plan in harnesses.iter().flat_map(|harness| &harness.capabilities) {
-        assert_eq!(catalog::freshness_status(plan), "policy-reviewed");
+        let supported = matches!(
+            plan.support,
+            SupportState::Verified | SupportState::Expected | SupportState::Manual
+        );
+        let status = catalog::freshness_status(plan);
+        if supported {
+            assert_eq!(
+                status, "fresh",
+                "{}:{:?} revision must be fresh",
+                plan.capability, plan.support
+            );
+        } else {
+            assert_eq!(status, "policy-reviewed");
+        }
     }
 }
 

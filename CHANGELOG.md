@@ -1,5 +1,23 @@
 # Changelog
 
+## [Unreleased] - 2026-08-05
+
+- Elevates the harness catalog out of the fail-closed checkpoint: determined
+  documented commands become expected claims, the six locally installed
+  harnesses carry verified version probes with disposable-real evidence,
+  `--help` fallback probes stay stubs, curl-pipe installers stay unknown, and
+  every yolo row is disabled. Freshness evidence is re-stamped to the catalog
+  revision date.
+- Treats an empty platform claim as unrestricted, so package-manager-driven
+  capabilities stop being rejected on every platform while explicit claims
+  are still enforced.
+- Identifies source-tree builds as the `source` channel (including coverage
+  target dirs), reports update.route as cargo, lists shadowing PATH binaries,
+  and marks state.cache not-applicable outside the npm launcher.
+- Renders tables legibly: proportional column floors, separator-aware
+  wrapping for paths and keys, wrapped headers, and compact support summaries
+  in `list`.
+
 ## [0.1.13] - 2026-07-18
 
 - Replaces broad harness claims with a generated 225-row support matrix whose

@@ -1,7 +1,7 @@
 summary = "Update Nanocoder without interactive setup flows."
 command = "npm"
 args = ["update", "-g", "@nanocollective/nanocoder"]
-support = "unknown"
+support = "expected"
 evidence = "deterministic"
 effect = "state-changing"
 network = true
@@ -9,4 +9,4 @@ interaction = "noninteractive"
 platforms = []
 executable = "npm"
 source = "internal:phase-01@fab5848"
-verified_at = "2026-07-17T04:59:27Z"
+verified_at = "2026-08-05T00:00:00Z"

@@ -38,8 +38,21 @@ pub fn channel() -> Option<&'static str> {
 }
 
 pub fn source_build(path: &str) -> bool {
-    !path.contains("/deps/")
-        && (path.contains("/target/debug/") || path.contains("/target/release/"))
+    let Some(index) = path.find("/target/") else {
+        return false;
+    };
+    let rest = &path[index + "/target/".len()..];
+    if rest.contains("/deps/") {
+        return false;
+    }
+    let in_build = rest.starts_with("debug/")
+        || rest.starts_with("release/")
+        || rest.contains("/debug/")
+        || rest.contains("/release/");
+    in_build
+        && std::path::Path::new(&path[..index])
+            .join("Cargo.toml")
+            .is_file()
 }
 
 pub fn homebrew_path(path: &str) -> bool {
@@ -66,9 +79,17 @@ mod tests {
 
     #[test]
     fn source_build_classifies_workspace_binaries_only() {
-        assert!(source_build("/srv/target/debug/terminal-jarvis"));
-        assert!(source_build("/srv/target/release/tj"));
+        let root = std::env::current_dir().unwrap();
+        let root = root.to_string_lossy();
+        assert!(source_build(&format!(
+            "{root}/target/debug/terminal-jarvis"
+        )));
+        assert!(source_build(&format!("{root}/target/release/tj")));
+        assert!(source_build(&format!(
+            "{root}/target/llvm-cov-target/debug/tj"
+        )));
         assert!(!source_build("/srv/target/debug/deps/lib-test"));
+        assert!(!source_build("/srv/target/debug/terminal-jarvis"));
         assert!(!source_build("/home/caldo/.cargo/bin/terminal-jarvis"));
         assert!(!source_build(""));
     }

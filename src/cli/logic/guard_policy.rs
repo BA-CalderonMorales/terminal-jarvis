@@ -34,7 +34,7 @@ pub fn check(harness: &Harness, plan: &CapabilityPlan) -> error::Result<()> {
             "use a claimed native target or follow the upstream manual procedure",
         ));
     };
-    if !plan.platforms.iter().any(|candidate| candidate == platform) {
+    if !plan.platforms.is_empty() && !plan.platforms.iter().any(|candidate| candidate == platform) {
         return Err(error::Failure::unavailable(
             "platform_incompatible",
             format!(

@@ -9,4 +9,4 @@ interaction = "noninteractive"
 platforms = ["linux-x64-gnu"]
 executable = "qwen"
 source = "internal:phase-01@fab5848"
-verified_at = "2026-07-17T04:59:27Z"
+verified_at = "2026-08-05T00:00:00Z"

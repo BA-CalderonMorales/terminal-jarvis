@@ -13,7 +13,12 @@ fn all_catalog_rows_have_honest_truth_metadata() {
         rows += 1;
         *states.entry(plan.support).or_insert(0) += 1;
         *effects.entry(plan.effect).or_insert(0) += 1;
-        assert_eq!(plan.evidence, EvidenceMode::Deterministic);
+        let expected_evidence = if plan.support == SupportState::Verified {
+            EvidenceMode::DisposableReal
+        } else {
+            EvidenceMode::Deterministic
+        };
+        assert_eq!(plan.evidence, expected_evidence);
         assert!(!plan.executable.is_empty());
         assert!(!plan.source.is_empty());
         assert!(plan.verified_at.ends_with('Z'));
@@ -24,8 +29,10 @@ fn all_catalog_rows_have_honest_truth_metadata() {
     assert_eq!(harnesses.len(), 25);
     assert_eq!(rows, 225);
     assert_eq!(states[&SupportState::Stub], 99);
-    assert_eq!(states[&SupportState::Disabled], 23);
-    assert_eq!(states[&SupportState::Unknown], 103);
+    assert_eq!(states[&SupportState::Disabled], 25);
+    assert_eq!(states[&SupportState::Unknown], 8);
+    assert_eq!(states[&SupportState::Expected], 87);
+    assert_eq!(states[&SupportState::Verified], 6);
     assert_eq!(effects[&Effect::ReadOnly], 123);
     assert_eq!(effects[&Effect::StateChanging], 75);
     assert_eq!(effects[&Effect::Dangerous], 27);

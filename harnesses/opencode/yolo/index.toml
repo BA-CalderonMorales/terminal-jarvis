@@ -1,7 +1,7 @@
 summary = "Dangerous mode: run OpenCode with local safeguards disabled if supported."
 command = "opencode"
 args = ["--dangerously-disable-safeguards"]
-support = "unknown"
+support = "disabled"
 evidence = "deterministic"
 effect = "dangerous"
 network = true
@@ -9,4 +9,4 @@ interaction = "interactive"
 platforms = []
 executable = "opencode"
 source = "internal:phase-01@fab5848"
-verified_at = "2026-07-17T04:59:27Z"
+verified_at = "2026-08-05T00:00:00Z"

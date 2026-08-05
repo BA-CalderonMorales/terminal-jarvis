@@ -35,14 +35,14 @@ fn temp_home() -> String {
 #[rustfmt::skip] fn stdout(output: &Output) -> String { String::from_utf8_lossy(&output.stdout).to_string() }
 #[rustfmt::skip] fn stderr(output: &Output) -> String { String::from_utf8_lossy(&output.stderr).to_string() }
 #[test]
-fn list_outputs_catalog_truth_without_promotion_claims() {
+fn list_outputs_catalog_truth_with_live_claims() {
     let output = tj(&["list"]);
     assert!(output.status.success());
     let body = stdout(&output);
     assert_eq!(body.lines().count(), 25);
     assert!(body.contains("codex support="));
     assert!(body.contains("vibe support="));
-    assert!(!body.contains("verified=1"));
+    assert!(body.contains("verified=1"));
 }
 
 #[test]
@@ -51,9 +51,9 @@ fn show_includes_setup_and_capability_truth() {
     assert!(output.status.success());
     let body = stdout(&output);
     assert!(body.contains("setup: set one of:"));
-    assert!(body.contains("capability=download support=unknown"));
+    assert!(body.contains("capability=download support=expected"));
     assert!(body.contains("summary=Install Aider"));
-    assert!(body.contains("capability=ui support=unknown"));
+    assert!(body.contains("capability=ui support=expected"));
 }
 
 #[test]

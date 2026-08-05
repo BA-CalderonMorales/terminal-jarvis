@@ -2,7 +2,7 @@ use crate::contracts::{CapabilityPlan, SupportState};
 
 const AS_OF: &str = match option_env!("TERMINAL_JARVIS_EVIDENCE_AS_OF") {
     Some(value) => value,
-    None => "2026-07-17T04:59:27Z",
+    None => "2026-08-05T00:00:00Z",
 };
 
 pub fn valid_utc(value: &str) -> bool {

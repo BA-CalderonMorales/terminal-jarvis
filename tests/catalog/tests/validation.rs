@@ -44,7 +44,6 @@ fn rejects_truth_contradictions_and_duplicate_rows() {
     let errors = catalog::validate(&[bad]).join("\n");
     for expected in [
         "support and evidence contradict",
-        "support claim has no platform",
         "executable must match command",
         "verified_at must be a UTC timestamp",
         "duplicate capability",

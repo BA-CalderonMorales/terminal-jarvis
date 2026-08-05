@@ -60,13 +60,6 @@ fn validate_platforms(prefix: &str, plan: &CapabilityPlan, errors: &mut Vec<Stri
             errors.push(format!("{prefix} has duplicate platform {platform}"));
         }
     }
-    let claims_support = matches!(
-        plan.support,
-        SupportState::Verified | SupportState::Expected | SupportState::Manual
-    );
-    if claims_support && plan.platforms.is_empty() {
-        errors.push(format!("{prefix} support claim has no platform"));
-    }
     if matches!(
         plan.support,
         SupportState::Unsupported | SupportState::Unknown

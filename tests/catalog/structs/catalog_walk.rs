@@ -19,12 +19,17 @@ pub fn walk_catalog() -> Report {
             assert!(keys.insert(key), "catalog row was visited twice");
             sandbox.add_fake(&plan.command.command);
             states.insert(plan.support);
-            probes.push((harness.name.clone(), plan.capability, plan.support));
+            probes.push((
+                harness.name.clone(),
+                plan.capability,
+                plan.support,
+                plan.effect,
+            ));
             rows.push(Row::from_plan(harness, plan));
         }
     }
     assert_eq!(keys.len(), 225, "catalog denominator changed");
-    assert_eq!(states.len(), 3, "support-state denominator changed");
+    assert_eq!(states.len(), 5, "support-state denominator changed");
     sandbox.verify_guards(&probes);
     sandbox.assert_zero_effects();
     Report::new(rows)

@@ -17,11 +17,22 @@ fn catalog_walk_records_all_rows_once_without_effects() {
         *support.entry(row.support.as_str()).or_insert(0) += 1;
         let effect = row.effect.split(';').next().unwrap();
         *effects.entry(effect).or_insert(0) += 1;
-        assert_eq!(row.evidence, "deterministic");
-        assert_eq!(row.guard, format!("blocked:{}:exit-4", row.support));
+        let seen = format!("{}/{}", row.support, row.evidence);
+        if row.support == "verified" {
+            assert_eq!(seen, "verified/disposable-real");
+        } else {
+            assert_eq!(row.evidence, "deterministic");
+        }
+        if matches!(row.support.as_str(), "verified" | "expected") {
+            assert_eq!(row.guard, "policy-and-platform-check");
+        } else {
+            assert_eq!(row.guard, format!("blocked:{}:exit-4", row.support));
+        }
         assert_eq!(row.result, "pass");
         assert!(!row.argv.is_empty());
-        assert!(!row.platforms.is_empty());
+        if row.support == "unknown" {
+            assert_eq!(row.platforms, "none");
+        }
         assert!(!row.executable.is_empty());
         assert!(!row.source.is_empty());
         assert!(!row.verified_at.is_empty());
@@ -31,7 +42,13 @@ fn catalog_walk_records_all_rows_once_without_effects() {
     assert!(per_harness.values().all(|count| *count == 9));
     assert_eq!(
         support,
-        BTreeMap::from([("disabled", 23), ("stub", 99), ("unknown", 103)])
+        BTreeMap::from([
+            ("disabled", 25),
+            ("expected", 87),
+            ("stub", 99),
+            ("unknown", 8),
+            ("verified", 6),
+        ])
     );
     assert_eq!(
         effects,

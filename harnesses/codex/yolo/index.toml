@@ -1,7 +1,7 @@
 summary = "Dangerous mode: bypass Codex approvals and sandboxing."
 command = "codex"
 args = ["--dangerously-bypass-approvals-and-sandbox"]
-support = "unknown"
+support = "disabled"
 evidence = "deterministic"
 effect = "dangerous"
 network = true
@@ -9,4 +9,4 @@ interaction = "interactive"
 platforms = []
 executable = "codex"
 source = "internal:phase-01@fab5848"
-verified_at = "2026-07-17T04:59:27Z"
+verified_at = "2026-08-05T00:00:00Z"
