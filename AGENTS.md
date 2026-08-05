@@ -115,6 +115,38 @@ built and verified.
   (<https://rust-unofficial.github.io/patterns/>) for the idiomatic scheme to
   lean on; record the chosen trade-off in `docs/architecture-decision-records/`
   so the reasoning survives.
+
+## Design Principles
+
+North star from the Rust patterns book
+(<https://rust-unofficial.github.io/patterns/additional_resources/design-principles.html>),
+mapped onto this repo's existing shape:
+
+- SRP -- one responsibility per domain; one index face per domain.
+- OCP -- extend by adding a domain or capability, not by widening an existing
+  face; data lands in `harnesses/*/*/index.toml`.
+- LSP/ISP -- a domain's `structs/` contract is what consumers rely on; keep
+  interfaces narrow and substitutable (clean-api's swappable client idea).
+- DIP -- depend on the domain's index abstraction, never on `logic/` internals.
+- Composition over inheritance -- structure by composition: role buckets
+  (`structs/`, `logic/`, `constants/`, `tests/`) inside a domain folder.
+- DRY -- one authoritative home per piece of knowledge: one generator store
+  (`src/contracts/tests/`), one data plane, one index per domain.
+- KISS -- std-only runtime, 100-line files, delete before adding; boring beats
+  novel.
+- Law of Demeter -- domains know the index of other domains, not their
+  internals.
+- Design by contract -- a domain's face is its contract; preconditions and
+  invariants are witnessed by its `tests/`.
+- Encapsulation -- methods sit behind the face; `logic/` is implementation.
+- CQS -- separate pure queries from state-changing commands; the CLI's
+  read-only vs state-changing/dangerous effect split is this principle.
+- POLA -- behavior must not astonish: durable names, exact usage errors, no
+  surprising side effects from plain commands.
+- Single-Choice -- exhaustive alternatives live in one module (e.g. effect
+  classification, platform normalization in `context::platform`).
+- Self-Documentation -- durable-purpose names and the anti-patterns ledger are
+  part of every module's information.
 - Do not reintroduce a `current/` snapshot.
 - Do not tag, publish, or upload release assets from local scripts without an
   explicit operator decision.

@@ -2,7 +2,7 @@
 set -euo pipefail
 
 root=$(cd "$(dirname "${BASH_SOURCE[0]}")/../../../../" && pwd)
-ref=${TJ_PHASE03_REF:-$(git -C "$root" rev-parse HEAD)}
+ref=${TJ_CATALOG_REF:-$(git -C "$root" rev-parse HEAD)}
 usage="scripts/bash/catalog/index.sh parity-catalog DEV-BINARY STAGED-ROOT OUTPUT-DIR"
 dev=${1:?usage: $usage}
 staged=${2:?usage: $usage}

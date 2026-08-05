@@ -33,6 +33,34 @@ path = "src/main.rs"
 name = "terminal_jarvis"
 path = "src/lib.rs"
 
+[[test]]
+name = "cli"
+path = "tests/cli/index.rs"
+
+[[test]]
+name = "catalog"
+path = "tests/catalog/index.rs"
+
+[[test]]
+name = "gates"
+path = "tests/gates/index.rs"
+
+[[test]]
+name = "diagnostics"
+path = "tests/diagnostics/index.rs"
+
+[[test]]
+name = "context"
+path = "tests/context/index.rs"
+
+[[test]]
+name = "runtime"
+path = "tests/runtime/index.rs"
+
+[[test]]
+name = "release"
+path = "tests/release/index.rs"
+
 [dependencies]
 
 [dev-dependencies]

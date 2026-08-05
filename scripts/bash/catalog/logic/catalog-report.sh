@@ -65,11 +65,11 @@ parent=$(dirname "$output")
 temporary=$(mktemp "${output}.tmp.XXXXXX")
 trap 'rm -f -- "$temporary"' EXIT
 
-export TJ_PHASE03_TESTED_REF=$tested_ref
-export TJ_PHASE03_REPORT_PATH=$temporary
+export TJ_CATALOG_TESTED_REF=$tested_ref
+export TJ_CATALOG_REPORT_PATH=$temporary
 export CARGO_NET_OFFLINE=true
-[[ -z "$binary" ]] || export TJ_PHASE03_BIN=$binary
-[[ -z "$catalog" ]] || export TJ_PHASE03_CATALOG=$catalog
+[[ -z "$binary" ]] || export TJ_CATALOG_BIN=$binary
+[[ -z "$catalog" ]] || export TJ_CATALOG_ROOT=$catalog
 
 printf 'Generating catalog report for %s\n' "$tested_ref" >&2
 cargo test --quiet --manifest-path "$root/Cargo.toml" \
