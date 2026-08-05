@@ -1,4 +1,4 @@
-use super::*;
+use crate::contracts::*;
 
 fn unquote(value: &str) -> String {
     let mut out = String::new();

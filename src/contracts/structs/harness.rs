@@ -1,4 +1,8 @@
-use super::{Capability, CommandPlan, Effect, EnvMode, EvidenceMode, Interaction, SupportState};
+use super::capability::Capability;
+use super::command::CommandPlan;
+use super::effect::{Effect, Interaction};
+use super::environment::EnvMode;
+use super::support::{EvidenceMode, SupportState};
 
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct CapabilityPlan {

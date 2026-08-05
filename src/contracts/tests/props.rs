@@ -1,4 +1,4 @@
-use super::*;
+use crate::contracts::*;
 
 fn capability_roundtrip(value: Capability) -> bool {
     Capability::parse(value.as_str()) == Some(value) && format!("{value}") == value.as_str()

@@ -1,4 +1,4 @@
-use super::*;
+use crate::contracts::*;
 use quickcheck::{Arbitrary, Gen};
 
 pub(super) fn choose<T: Copy>(gen: &mut Gen, values: &[T]) -> T {
