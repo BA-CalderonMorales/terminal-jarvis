@@ -1,4 +1,5 @@
-use super::{load, selected, Gate};
+use crate::gates::logic::loader::{load, Gate};
+use crate::gates::structs::state::selected;
 use crate::{context, security};
 use std::path::Path;
 use std::process::{Command, Stdio};
@@ -52,5 +53,5 @@ pub fn run(gate: &Gate) -> Result<(i32, String), String> {
 }
 
 #[cfg(test)]
-#[path = "runner_test.rs"]
-mod tests;
+#[path = "../tests/runner.rs"]
+mod gates_runner_tests;

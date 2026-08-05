@@ -10,13 +10,13 @@ pub fn normalize(raw: &str) -> Option<&'static str> {
 }
 
 pub fn channel() -> Option<&'static str> {
-    if let Some(raw) = std::env::var("TERMINAL_JARVIS_DISTRIBUTION")
+    if let Some(raw) = std::env::var(crate::context::constants::env::DISTRIBUTION)
         .ok()
         .filter(|value| !value.trim().is_empty())
     {
         return Some(normalize(&raw).unwrap_or("unknown"));
     }
-    if std::env::var("TERMINAL_JARVIS_WRAPPER")
+    if std::env::var(crate::context::constants::env::WRAPPER)
         .ok()
         .is_some_and(|value| !value.trim().is_empty())
     {

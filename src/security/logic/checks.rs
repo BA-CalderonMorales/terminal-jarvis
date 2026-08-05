@@ -79,8 +79,9 @@ fn nonempty_env(name: &str) -> bool {
 }
 
 #[cfg(test)]
-#[path = "checks_props.rs"]
-mod props;
+#[path = "../tests/checks.rs"]
+mod security_checks_tests;
+
 #[cfg(test)]
-#[path = "checks_test.rs"]
-mod tests;
+#[path = "../tests/props.rs"]
+mod props;

@@ -2,7 +2,9 @@ use std::env;
 use std::path::PathBuf;
 
 pub fn gates_root() -> PathBuf {
-    if let Some(path) = env::var_os("TERMINAL_JARVIS_GATES").filter(|path| !path.is_empty()) {
+    if let Some(path) =
+        env::var_os(crate::context::constants::env::GATES).filter(|path| !path.is_empty())
+    {
         return PathBuf::from(path);
     }
     candidates()
@@ -29,5 +31,5 @@ fn candidates() -> Vec<PathBuf> {
 }
 
 #[cfg(test)]
-#[path = "gates_test.rs"]
-mod tests;
+#[path = "../tests/gates.rs"]
+mod context_gates_tests;

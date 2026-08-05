@@ -1,22 +1,19 @@
+use crate::context::constants::env as env_const;
+use crate::context::structs::session::Session;
 use std::env;
 use std::fs;
 use std::io;
 use std::path::{Path, PathBuf};
 
-#[derive(Clone, Debug, Eq, PartialEq)]
-pub struct Session {
-    pub active_harness: String,
-}
-
 pub fn default_home() -> PathBuf {
-    if let Some(value) = env::var_os("TERMINAL_JARVIS_HOME").filter(|value| !value.is_empty()) {
+    if let Some(value) = env::var_os(env_const::HOME).filter(|value| !value.is_empty()) {
         return PathBuf::from(value);
     }
     config_home().join("terminal-jarvis")
 }
 
 fn config_home() -> PathBuf {
-    if let Some(value) = env::var_os("XDG_CONFIG_HOME").filter(|value| !value.is_empty()) {
+    if let Some(value) = env::var_os(env_const::XDG_CONFIG_HOME).filter(|value| !value.is_empty()) {
         return PathBuf::from(value);
     }
     if let Some(value) = env::var_os("HOME").filter(|value| !value.is_empty()) {
@@ -26,7 +23,7 @@ fn config_home() -> PathBuf {
 }
 
 pub fn catalog_root() -> PathBuf {
-    if let Some(path) = env::var_os("TERMINAL_JARVIS_CATALOG").filter(|path| !path.is_empty()) {
+    if let Some(path) = env::var_os(env_const::CATALOG).filter(|path| !path.is_empty()) {
         return PathBuf::from(path);
     }
     catalog_candidates()

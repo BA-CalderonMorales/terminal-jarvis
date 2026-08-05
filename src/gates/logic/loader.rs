@@ -3,7 +3,7 @@ use std::fs;
 use std::io;
 use std::path::{Path, PathBuf};
 
-const EMBEDDED_TRIVY: &str = include_str!("../../gates/trivy/index.toml");
+const EMBEDDED_TRIVY: &str = include_str!("../../../gates/trivy/index.toml");
 
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct Gate {
@@ -72,5 +72,5 @@ fn invalid(message: String) -> io::Error {
 }
 
 #[cfg(test)]
-#[path = "loader_test.rs"]
-mod tests;
+#[path = "../tests/loader.rs"]
+mod gates_loader_tests;
