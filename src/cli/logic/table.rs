@@ -13,8 +13,10 @@ pub fn render(title: &str, headers: &[&str], rows: &[Vec<String>]) -> String {
         .collect::<Vec<_>>();
     let mut out = format!("{}\n", style::heading(title));
     out.push_str(&border(&widths));
-    out.push_str(&style::label(&row(&header, &widths)));
-    out.push('\n');
+    for line in layout::lines(&header, &widths) {
+        out.push_str(&style::label(&row(&line, &widths)));
+        out.push('\n');
+    }
     out.push_str(&border(&widths));
     for values in rows {
         for line in layout::lines(values, &widths) {

@@ -10,18 +10,23 @@ pub fn support_summary(harness: &Harness) -> String {
         SupportState::Disabled,
         SupportState::Unknown,
     ];
-    states
+    let summary = states
         .iter()
-        .map(|state| {
+        .filter_map(|state| {
             let count = harness
                 .capabilities
                 .iter()
                 .filter(|plan| plan.support == *state)
                 .count();
-            format!("{}={count}", state.as_str())
+            (count > 0).then(|| format!("{}={count}", state.as_str()))
         })
         .collect::<Vec<_>>()
-        .join(",")
+        .join(",");
+    if summary.is_empty() {
+        "unclaimed".to_string()
+    } else {
+        summary
+    }
 }
 
 pub fn capability_row(plan: &CapabilityPlan) -> Vec<String> {

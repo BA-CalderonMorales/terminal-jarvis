@@ -16,7 +16,7 @@ fn with_columns<T>(value: &str, test: impl FnOnce() -> T) -> T {
 }
 
 #[test]
-fn widths_respect_exact_budget_and_header_floors() {
+fn widths_respect_exact_budget_and_proportional_floors() {
     with_columns("48", || {
         let headers = ["AAAAAAAAAAAAAAAAAAAA", "BBBBBBBBBBBBBBBBBBBB"];
         let rows = [vec!["123456789012345678901".to_string(), "x".to_string()]];
@@ -27,7 +27,27 @@ fn widths_respect_exact_budget_and_header_floors() {
             "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
             "BBBBBBBBBBBBBBBBBBBBBBBBBBBBBB",
         ];
-        assert_eq!(layout::widths(&headers, &[]), [30, 30]);
+        assert_eq!(
+            layout::widths(&headers, &[]),
+            [16, 17],
+            "rows shrink proportionally down to the column floor, never overflowing the terminal"
+        );
+    });
+    with_columns("40", || {
+        let headers = [
+            "AAAAAAAAAAAAAAAAAAAA",
+            "BBBBBBBBBBBBBBBBBBBB",
+            "CCCCCCCCCCCCCCCCCCCC",
+            "DDDDDDDDDDDDDDDDDDDD",
+            "EEEEEEEEEEEEEEEEEEEE",
+        ];
+        for column in layout::widths(&headers, &[]) {
+            assert_eq!(
+                column,
+                layout::MIN_COLUMN,
+                "columns stop shrinking at the floor even when the table must overflow"
+            );
+        }
     });
 }
 
