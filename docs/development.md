@@ -15,6 +15,25 @@ scripts/bash/release/index.sh package build /tmp/terminal-jarvis-package
 scripts/bash/release/index.sh local-cd --check-auth
 ```
 
+## Domain shape
+
+Every Rust domain mirrors the scripts/ bucketing: `src/<domain>/index.rs` is
+the domain's public face, with `structs/` (data shapes), `logic/` (behavior),
+`constants/` (fixed values), and `tests/` (cfg(test)-only trees pulled by
+their subject modules) inside. Integration tests live in
+`tests/<domain>/` -- one `[[test]]` binary per domain in `Cargo.toml` -- so a
+failure names the domain:
+
+```bash
+cargo test --test cli        # cli domain only
+cargo test --test diagnostics # diagnostics domain only
+```
+
+A domain is imported through its face (`crate::context::platform::...`), never
+through `logic/` internals, so blast radius is witnessable per domain before
+an agent touches `logic/`. `evaluation/` is the sanctioned exception: it is
+the evaluation domain's shipped kit payload (see `evaluation/EVALUATION.md`).
+
 `scripts/bash/verify/index.sh verify` runs format, lint, tests, catalog
 checks, security checks, npm wrapper tests, and package metadata checks.
 Package builds run both the artifact integration hardening suite and

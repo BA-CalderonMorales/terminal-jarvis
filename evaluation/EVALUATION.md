@@ -1,5 +1,13 @@
 # Terminal Jarvis 0.1.13 Evaluation Kit
 
+This directory is the evaluation domain's `model` role: the shipped kit payload.
+The launcher names (`run.sh`, `run.ps1`, `run.cmd`) and files are the kit
+contract -- CI runs them at the kit root and `verify-evaluation-kit.py`
+whitelists `run.sh`/`run.cmd` -- so their layout is fixed. The assembly and
+verification logic lives in `scripts/python/evaluation`, and the domain rules
+are recorded in `docs/anti-patterns/structure/index.md`; do not re-bucket this
+directory.
+
 This kit is an offline, visibly simulated evaluation. It selects only the exact
 payload matching one of five allowlisted targets and runs fixed read-only product
 queries. It never runs a coding-agent harness, accepts a command, uses a network,
