@@ -69,5 +69,5 @@ pub fn dispatch(
 }
 
 #[cfg(test)]
-#[path = "dispatch_test.rs"]
+#[path = "../tests/dispatch_test.rs"]
 mod tests;

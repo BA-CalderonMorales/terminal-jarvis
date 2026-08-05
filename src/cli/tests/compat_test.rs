@@ -2,7 +2,7 @@ use super::*;
 use crate::contracts::{Capability, CapabilityPlan, EnvMode, Harness};
 
 fn cap(c: Capability) -> CapabilityPlan {
-    crate::cli::test_support::plan(c, c.as_str(), vec![])
+    crate::cli::logic::test_support::plan(c, c.as_str(), vec![])
 }
 fn harness(name: &str) -> Harness {
     Harness {

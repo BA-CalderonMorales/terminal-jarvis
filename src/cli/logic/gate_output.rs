@@ -1,7 +1,7 @@
-use super::super::{style, table};
+use crate::cli::logic::{style, table};
 use crate::gates::Gate;
 #[cfg(test)]
-#[path = "gate_output_test.rs"]
+#[path = "../tests/gate_output_test.rs"]
 mod tests;
 pub fn disabled_status(available: &str) -> String {
     if style::plain() {

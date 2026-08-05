@@ -62,5 +62,5 @@ fn auth_detail(name: &str, harnesses: &[Harness], note: &str) -> Result<String, 
 }
 
 #[cfg(test)]
-#[path = "compat_test.rs"]
+#[path = "../tests/compat_test.rs"]
 mod tests;

@@ -92,5 +92,5 @@ fn entry(name: &str) -> (&'static str, &'static str) {
 }
 
 #[cfg(test)]
-#[path = "help_command_test.rs"]
+#[path = "../tests/help_command_test.rs"]
 mod tests;

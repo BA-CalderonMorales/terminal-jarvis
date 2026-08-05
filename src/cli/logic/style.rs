@@ -94,5 +94,5 @@ fn color_enabled_for(terminal: bool, no_color: bool, env_no_color: bool, dumb: b
 }
 
 #[cfg(test)]
-#[path = "style_test.rs"]
+#[path = "../tests/style_test.rs"]
 mod tests;

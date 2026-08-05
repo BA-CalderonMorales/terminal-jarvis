@@ -72,29 +72,29 @@ where
     })
 }
 #[cfg(test)]
-#[path = "args_matrix.rs"]
+#[path = "../tests/args_matrix.rs"]
 mod matrix;
 #[cfg(test)]
-#[path = "args_red.rs"]
+#[path = "../tests/args_red.rs"]
 mod matrix_red;
 #[cfg(test)]
-#[path = "mutation_test.rs"]
+#[path = "../tests/mutation_test.rs"]
 mod mutation_tests;
 #[cfg(test)]
-#[path = "args_props.rs"]
+#[path = "../tests/args_props.rs"]
 mod props;
 #[cfg(test)]
-#[path = "args_red_green.rs"]
+#[path = "../tests/args_red_green.rs"]
 mod red_green;
 #[cfg(test)]
-#[path = "args_rules.rs"]
+#[path = "../tests/args_rules.rs"]
 mod rules;
 #[cfg(test)]
-#[path = "args_test.rs"]
+#[path = "../tests/args_test.rs"]
 mod tests;
 #[cfg(test)]
-#[path = "args_test_extra.rs"]
+#[path = "../tests/args_test_extra.rs"]
 mod tests_extra;
 #[cfg(test)]
-#[path = "args_test_gate.rs"]
+#[path = "../tests/args_test_gate.rs"]
 mod tests_gate;

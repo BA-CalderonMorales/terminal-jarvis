@@ -82,5 +82,5 @@ fn success_output(command: &str) -> String {
 }
 
 #[cfg(test)]
-#[path = "self_update_test.rs"]
+#[path = "../tests/self_update_test.rs"]
 mod tests;

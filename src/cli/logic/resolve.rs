@@ -94,5 +94,5 @@ fn invocation(harness: String, capability: Capability, extra: Vec<String>) -> In
 }
 
 #[cfg(test)]
-#[path = "resolve_test.rs"]
+#[path = "../tests/resolve_test.rs"]
 mod tests;

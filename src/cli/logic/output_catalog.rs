@@ -1,4 +1,4 @@
-use super::super::{output_plan, output_truth, style, table};
+use crate::cli::logic::{output_plan, output_truth, style, table};
 use crate::contracts::{Capability, CommandPlan, Harness};
 
 pub fn list(harnesses: &[Harness]) -> String {

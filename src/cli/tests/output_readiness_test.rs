@@ -14,7 +14,7 @@ fn harness(state: SupportState, verified_at: &str, platform: &str) -> Harness {
         std::fs::set_permissions(&path, std::fs::Permissions::from_mode(0o700)).unwrap();
     }
     let binary = path.to_string_lossy().to_string();
-    let mut plan = crate::cli::test_support::plan(Capability::Version, &binary, vec![]);
+    let mut plan = crate::cli::logic::test_support::plan(Capability::Version, &binary, vec![]);
     plan.support = state;
     plan.verified_at = verified_at.into();
     plan.platforms = vec![platform.into()];

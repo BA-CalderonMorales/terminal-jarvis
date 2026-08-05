@@ -9,7 +9,7 @@ fn harness(command: &str, args: Vec<String>) -> Vec<Harness> {
         binary: command.into(),
         env_mode: EnvMode::None,
         env: vec![],
-        capabilities: vec![crate::cli::test_support::plan(
+        capabilities: vec![crate::cli::logic::test_support::plan(
             Capability::Download,
             command,
             args,

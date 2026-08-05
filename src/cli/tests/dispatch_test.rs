@@ -2,7 +2,7 @@ use super::*;
 use crate::contracts::{Capability, CapabilityPlan, EnvMode, Harness};
 
 fn cap(c: Capability) -> CapabilityPlan {
-    crate::cli::test_support::plan(c, "sh", vec!["-c".into(), "exit 0".into()])
+    crate::cli::logic::test_support::plan(c, "sh", vec!["-c".into(), "exit 0".into()])
 }
 fn harness(name: &str) -> Harness {
     Harness {
@@ -23,7 +23,7 @@ fn d(
     harnesses: &[Harness],
     catalog: &std::path::Path,
     home: &std::path::Path,
-) -> crate::cli::error::Result<(i32, String)> {
+) -> crate::cli::structs::error::Result<(i32, String)> {
     dispatch(
         action,
         &crate::cli::args::Options::default(),

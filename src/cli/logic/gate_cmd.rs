@@ -65,5 +65,5 @@ fn names(available: &[gates::Gate]) -> String {
 }
 
 #[cfg(test)]
-#[path = "gate_cmd_test.rs"]
+#[path = "../tests/gate_cmd_test.rs"]
 mod tests;

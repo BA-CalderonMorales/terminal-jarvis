@@ -13,9 +13,9 @@ fn gate() -> Gate {
 }
 
 fn plain<T>(render: impl FnOnce() -> T) -> T {
-    let previous = super::super::super::style::set(true, true);
+    let previous = crate::cli::logic::style::set(true, true);
     let result = render();
-    super::super::super::style::restore(previous);
+    crate::cli::logic::style::restore(previous);
     result
 }
 

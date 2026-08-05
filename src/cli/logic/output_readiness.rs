@@ -16,5 +16,5 @@ fn executable_support(plan: &CapabilityPlan) -> bool {
 }
 
 #[cfg(test)]
-#[path = "output_readiness_test.rs"]
+#[path = "../tests/output_readiness_test.rs"]
 mod tests;

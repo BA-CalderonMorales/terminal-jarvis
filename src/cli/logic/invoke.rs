@@ -63,5 +63,5 @@ fn command_error(harness: &str, binary: &str, error: std::io::Error) -> (i32, St
 }
 
 #[cfg(test)]
-#[path = "invoke_test.rs"]
+#[path = "../tests/invoke_test.rs"]
 mod tests;

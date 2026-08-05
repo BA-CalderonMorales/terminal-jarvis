@@ -65,5 +65,5 @@ fn row<T: AsRef<str>>(values: &[T], widths: &[usize]) -> String {
 }
 
 #[cfg(test)]
-#[path = "table_test.rs"]
+#[path = "../tests/table_test.rs"]
 mod tests;

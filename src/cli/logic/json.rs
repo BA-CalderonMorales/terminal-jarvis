@@ -54,5 +54,5 @@ mod tests {
 }
 
 #[cfg(test)]
-#[path = "json_props.rs"]
+#[path = "../tests/json_props.rs"]
 mod props;

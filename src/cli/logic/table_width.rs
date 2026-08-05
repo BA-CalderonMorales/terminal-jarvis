@@ -59,5 +59,5 @@ fn wide(value: u32) -> bool {
 }
 
 #[cfg(test)]
-#[path = "table_width_props.rs"]
+#[path = "../tests/table_width_props.rs"]
 mod props;

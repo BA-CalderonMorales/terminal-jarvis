@@ -1,5 +1,6 @@
-use super::super::{style, table};
-use super::{checks, is_harness_ready};
+use crate::cli::logic::output::checks;
+use crate::cli::logic::output_readiness::is_harness_ready;
+use crate::cli::logic::{style, table};
 use crate::contracts::Harness;
 
 pub fn status(harnesses: &[Harness]) -> String {

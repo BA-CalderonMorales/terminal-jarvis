@@ -22,7 +22,7 @@ fn mock_binary_on_path(tmpdir: &Path) -> String {
 }
 
 fn mock_harness(binary: &str, env_mode: EnvMode, env: Vec<String>) -> Harness {
-    let mut plan = crate::cli::test_support::plan(
+    let mut plan = crate::cli::logic::test_support::plan(
         crate::contracts::Capability::Version,
         binary,
         vec!["--version".into()],
