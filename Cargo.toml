@@ -10,10 +10,11 @@ homepage = "https://github.com/BA-CalderonMorales/terminal-jarvis"
 readme = "README.md"
 keywords = ["cli", "ai", "agents", "harness"]
 categories = ["command-line-utilities", "development-tools"]
+build = "build/build.rs"
 include = [
   "/Cargo.toml",
   "/Cargo.lock",
-  "/build.rs",
+  "/build/**",
   "/src/**",
   "/harnesses/**",
   "/gates/**",

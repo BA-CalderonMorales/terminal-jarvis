@@ -17,3 +17,7 @@ lcov.info
 *.log
 *.tmp
 /scratch/
+GOAL.md
+
+# tool writes flow through a local symlink to .agents/ (never tracked)
+/.claude/
