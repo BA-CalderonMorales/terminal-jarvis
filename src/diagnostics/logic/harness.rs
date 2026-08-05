@@ -1,5 +1,5 @@
 use super::redact::{segment, Redactor};
-use super::{Code, DiagnosticInput, Record, Severity};
+use super::{Code, DiagnosticInput, HarnessInput, Record, Severity};
 use std::collections::BTreeSet;
 use std::path::Path;
 
@@ -17,13 +17,8 @@ pub fn collect(input: &DiagnosticInput, redact: &Redactor<'_>) -> HarnessResult 
         let base = format!("harness.{}", segment(&harness.name));
         let (support, support_ready) = super::harness_support::collect(harness, &base);
         records.push(support);
-        records.push(Record::new(
-            format!("{base}.version"),
-            Code::Unknown,
-            Severity::Info,
-            "unknown:not-probed",
-        ));
         let resolution = super::resolve::binary(&harness.binary, input);
+        records.push(version_record(&base, harness, &resolution));
         let value = if matches!(resolution.code, Code::Ready | Code::Conflicting) {
             resolution
                 .path
@@ -73,4 +68,22 @@ pub fn collect(input: &DiagnosticInput, redact: &Redactor<'_>) -> HarnessResult 
         }
     }
     HarnessResult { records, ready }
+}
+
+fn version_record(
+    base: &str,
+    harness: &HarnessInput,
+    resolution: &super::resolve::Resolution,
+) -> Record {
+    let key = format!("{base}.version");
+    if resolution.code != Code::Ready {
+        return Record::new(key, Code::Unknown, Severity::Info, "unknown:not-probed");
+    }
+    let Some((command, args)) = &harness.version else {
+        return Record::new(key, Code::Unknown, Severity::Info, "unknown:not-probed");
+    };
+    match super::probe::version(command, args) {
+        Some(value) => Record::new(key, Code::Ready, Severity::Info, value),
+        None => Record::new(key, Code::Unknown, Severity::Info, "unknown:probe-failed"),
+    }
 }

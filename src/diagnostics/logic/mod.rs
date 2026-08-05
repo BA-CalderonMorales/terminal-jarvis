@@ -9,6 +9,7 @@ pub mod inspect;
 pub mod json;
 pub mod local;
 pub mod platform_target;
+pub mod probe;
 pub mod program;
 pub mod redact;
 pub mod redact_process;

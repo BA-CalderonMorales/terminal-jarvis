@@ -51,6 +51,7 @@ fn stable_codes_keep_failure_classes_distinct() {
                 "BROKEN_TOKEN".into(),
             ],
             support: vec![("headless".into(), "unknown".into(), false)],
+            version: None,
         }],
         platform: PlatformInput {
             os: "linux".into(),

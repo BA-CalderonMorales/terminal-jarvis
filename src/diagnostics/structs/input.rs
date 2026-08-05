@@ -18,6 +18,7 @@ pub struct HarnessInput {
     pub env_mode: EnvMode,
     pub env: Vec<String>,
     pub support: Vec<(String, String, bool)>,
+    pub version: Option<(String, Vec<String>)>,
 }
 
 #[derive(Clone, Debug, Eq, PartialEq)]

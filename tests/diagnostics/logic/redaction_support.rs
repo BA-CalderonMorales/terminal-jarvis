@@ -57,6 +57,7 @@ fn harness(name: &str, binary: &str) -> HarnessInput {
             "MISSING_TOKEN".into(),
         ],
         support: vec![("headless".into(), "expected".into(), true)],
+        version: None,
     }
 }
 

@@ -28,12 +28,23 @@ impl From<&Harness> for HarnessInput {
                 )
             })
             .collect();
+        let version = harness
+            .plan(crate::contracts::Capability::Version)
+            .filter(|plan| {
+                matches!(
+                    plan.support,
+                    crate::contracts::SupportState::Verified
+                        | crate::contracts::SupportState::Expected
+                )
+            })
+            .map(|plan| (plan.command.command.clone(), plan.command.args.clone()));
         Self {
             name: harness.name.clone(),
             binary: harness.binary.clone(),
             env_mode: harness.env_mode,
             env: harness.env.clone(),
             support,
+            version,
         }
     }
 }
