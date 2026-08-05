@@ -6,7 +6,9 @@
 - `harnesses/` is the data plane: `harnesses/<agent>/<capability>/index.toml`.
 - `gates/` holds optional local security gate data (Trivy by default).
 - `build/build.rs` is the build script; no root-level Rust scripts.
-- `docs/` holds architecture, ADRs, testing, migration, and release notes.
+- `docs/` holds architecture, ADRs, testing, migration, and release notes;
+  `docs/anti-patterns/{type}/index.md` is the ledger of recurring agent
+  mistakes and their fixes.
 - `scripts/` is the local release-prep and verification path.
 - The pre-rewrite implementation is pruned; use Git history for legacy reference.
 
@@ -20,6 +22,7 @@
 | Verification, artifacts, release flow | `docs/development.md` |
 | Optional Trivy gate behavior | `docs/security-gates.md` |
 | Catalog support truth | `docs/supported-agents.md`, `docs/support-matrix.md` |
+| Recurring agent mistakes to avoid | `docs/anti-patterns/index.md` (naming/ structure/ tooling/) |
 | Everything else | `README.md`, then this file again |
 
 Lost in the woods? Start with `docs/architecture-decision-records/README.md`
@@ -79,6 +82,18 @@ built and verified.
   `develop` or `main`, and a merge to `develop` always carries an ADR.
 - Keep docs concise and tied to migration, architecture, testing, or release
   notes.
+- Use `rg` (ripgrep) for content search when available; fall back to plain
+  `grep` only when `rg` is not installed.
+- Use `fzf` for interactive fuzzy selection (files, lines, history) when
+  available; do not hand-roll a picker (`rg <pattern> | fzf`).
+- Name committed files by durable purpose, never by ephemeral phase counters
+  (`phase03_*`, `phase-01-*`).
+- Bucket scripts as `scripts/{language}/{domain}/{role}/` -- role is `logic`,
+  `constants`, `model`, or `index`; callers invoke only the domain
+  `index.{ext}`, never files inside `logic/` directly. No loose files at the
+  `scripts/` root.
+- When you observe a new recurring mistake in committed work, record it under
+  `docs/anti-patterns/{type}/index.md` before carrying it forward.
 - Do not reintroduce a `current/` snapshot.
 - Do not tag, publish, or upload release assets from local scripts without an
   explicit operator decision.
