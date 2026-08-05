@@ -2,7 +2,9 @@
 
 ## Current Shape
 
-- `src/` is the slim std-only Rust CLI for the harness catalog model.
+- `src/` is the slim std-only Rust CLI for the harness catalog model, bucketed
+  per domain as `src/<domain>/{index.rs, structs/, logic/, constants/, tests/}`
+  with an `index.rs` public face per domain.
 - `harnesses/` is the data plane: `harnesses/<agent>/<capability>/index.toml`.
 - `gates/` holds optional local security gate data (Trivy by default).
 - `build/build.rs` is the build script; no root-level Rust scripts.
@@ -71,7 +73,15 @@ built and verified.
 ## Rules
 
 - Keep Rust source files at 100 lines or fewer.
-- Keep module contracts in `src/contracts/`.
+- Bucket Rust domains as `src/<domain>/` and integration tests as
+  `tests/<domain>/`, each with `index.rs` as the domain's public face, plus
+  `structs/` (data shapes), `logic/` (behavior), `constants/` (fixed values),
+  and `tests/` (in-domain unit/property/mutation trees). Callers import through
+  the domain path (`crate::context::platform::*`); no loose modules at the
+  `src/` root. Each `tests/<domain>/` registers its own `[[test]]` binary.
+- Keep module contracts in `src/contracts/`; quickcheck `Arbitrary` generators
+  live once in `src/contracts/tests/` and are imported by consumers, never
+  duplicated per module.
 - Prefer data in `harnesses/*/*/index.toml` over Rust branches.
 - Do not add a second Go ADK or another runtime beside the Rust CLI.
 - Use no external Rust dependencies unless the tradeoff is documented first.
@@ -90,7 +100,8 @@ built and verified.
 - Use `fzf` for interactive fuzzy selection (files, lines, history) when
   available; do not hand-roll a picker (`rg <pattern> | fzf`).
 - Name committed files by durable purpose, never by ephemeral phase counters
-  (`phase03_*`, `phase-01-*`).
+  (`phase03_*`, `phase-01-*`) -- files, fixtures, CI job names, and artifact
+  names alike.
 - Bucket scripts as `scripts/{language}/{domain}/{role}/` -- role is `logic`,
   `constants`, `model`, or `index`; callers invoke only the domain
   `index.{ext}`, never files inside `logic/` directly. No loose files at the

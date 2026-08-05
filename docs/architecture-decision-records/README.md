@@ -39,6 +39,39 @@ it, and anything future work must respect.
 
 ## Records
 
+### Bucket Rust domains with index faces (release/0.1.13 -> 2026-08-05)
+
+**Decision:** Extend the scripts/ bucketing discipline to Rust: every `src/`
+domain and every integration test domain becomes a folder of the shape
+`{index.rs, structs/, logic/, constants/, tests/}` with a single public index
+face, per-domain `[[test]]` binaries for `tests/`, and property generators
+owned once by `src/contracts/tests/`. The loose `platform.rs` and
+`distribution.rs` root modules folded into `src/context/`, so every caller now
+reads `crate::context::platform::*` and the owning domain is visible at each
+import site.
+
+**Context:** `src/` was ~150 flat snake-named files with no structural signal
+about role or domain; `tests/` still carried 31 `phase02_*`/`phase03_*` names
+and four phase-scattered fixture homes; `cargo test` was a single 60-file blob.
+The scripts/ ledger already declared this shape wrong, but the rule applied
+only to scripts. The clean-api layering (bucket with a base face, swappable
+implementation, tapped types, consistent error) is the same separation of
+concerns at the file level, and this decision applies it to the core trees.
+
+**Considered:** Keeping flat snake_named files where the name carries the
+meaning -- rejected: nothing tells a reader (or an agent) which domain a file
+belongs to, how it is consumed, or where a change's blast radius ends.
+Folding `platform`/`distribution` into a new synthetic domain -- rejected:
+`context` already owns environment detection (`default_home`, `catalog_root`,
+`gates_root`), so it is the natural home and keeps the file count down.
+
+**Consequence:** A domain is consumed through its `index.rs` face and invoked
+as `crate::<domain>::...`, so imports are self-documenting provenance. A
+`tests/<domain>/` binary isolates failures to a domain (`cargo test --test
+cli`), making blast radius witnessable before an agent touches `logic/`.
+New files must conform to the bucketed shape and the 100-line limit; the
+anti-patterns ledger and `AGENTS.md` enforce it.
+
 ### Fix unsound quickcheck property and harden the release gate (release/0.1.13 -> 2026-08-04)
 
 **Decision:** Replace the flaky `outcome_json_fields` quickcheck property with
