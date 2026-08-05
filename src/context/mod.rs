@@ -1,4 +1,6 @@
+pub mod distribution;
 mod gates;
+pub mod platform;
 mod session;
 
 pub use gates::gates_root;

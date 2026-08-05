@@ -8,8 +8,8 @@ impl PlatformInput {
         Self {
             os: std::env::consts::OS.to_string(),
             arch: std::env::consts::ARCH.to_string(),
-            libc: crate::platform::libc().to_string(),
-            wsl: crate::platform::wsl().to_string(),
+            libc: crate::context::platform::libc().to_string(),
+            wsl: crate::context::platform::wsl().to_string(),
         }
     }
 }
@@ -43,7 +43,7 @@ fn executable_support(plan: &crate::contracts::CapabilityPlan) -> bool {
         plan.support,
         crate::contracts::SupportState::Verified | crate::contracts::SupportState::Expected
     ) && crate::catalog::freshness_status(plan) == "fresh"
-        && crate::platform::id()
+        && crate::context::platform::id()
             .is_some_and(|platform| plan.platforms.iter().any(|candidate| candidate == platform))
 }
 

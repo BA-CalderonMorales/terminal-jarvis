@@ -17,7 +17,7 @@ pub fn collect(input: &DiagnosticInput) -> (Record, bool) {
         .environment
         .text("TERMINAL_JARVIS_DISTRIBUTION")
         .unwrap_or_default();
-    let channel = crate::distribution::normalize(value);
+    let channel = crate::context::distribution::normalize(value);
     let conflict = input.environment.state("TERMINAL_JARVIS_WRAPPER") == ValueState::Present
         && channel.is_some_and(|value| value != "npm");
     match (channel, conflict) {

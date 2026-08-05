@@ -24,7 +24,7 @@ fn stale_executable_support_claims_fail_catalog_validation() {
     let mut harnesses = catalog::load(Path::new("harnesses")).unwrap();
     let plan = &mut harnesses[0].capabilities[0];
     plan.support = SupportState::Expected;
-    plan.platforms = vec![terminal_jarvis::platform::id().unwrap().into()];
+    plan.platforms = vec![terminal_jarvis::context::platform::id().unwrap().into()];
     plan.verified_at = "2000-01-01T00:00:00Z".into();
     let errors = catalog::validate(&harnesses).join("\n");
     assert!(errors.contains("evidence must be fresh"), "{errors}");

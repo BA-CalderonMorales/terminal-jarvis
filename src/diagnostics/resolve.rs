@@ -113,8 +113,8 @@ mod tests {
             platform: PlatformInput {
                 os: std::env::consts::OS.into(),
                 arch: std::env::consts::ARCH.into(),
-                libc: crate::platform::libc().into(),
-                wsl: crate::platform::wsl().into(),
+                libc: crate::context::platform::libc().into(),
+                wsl: crate::context::platform::wsl().into(),
             },
             environment: Environment::process(),
             runtime: RuntimeInput {

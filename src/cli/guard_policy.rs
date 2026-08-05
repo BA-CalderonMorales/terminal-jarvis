@@ -20,7 +20,7 @@ pub fn check(harness: &Harness, plan: &CapabilityPlan) -> error::Result<()> {
             "refresh the upstream evidence before execution",
         ));
     }
-    let Some(platform) = crate::platform::id() else {
+    let Some(platform) = crate::context::platform::id() else {
         return Err(error::Failure::unavailable(
             "platform_unsupported",
             format!(
@@ -29,7 +29,7 @@ pub fn check(harness: &Harness, plan: &CapabilityPlan) -> error::Result<()> {
                 plan.capability,
                 std::env::consts::OS,
                 std::env::consts::ARCH,
-                crate::platform::libc()
+                crate::context::platform::libc()
             ),
             "use a claimed native target or follow the upstream manual procedure",
         ));

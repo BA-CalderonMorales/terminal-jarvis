@@ -6,7 +6,7 @@ const REPO: &str = "https://github.com/BA-CalderonMorales/terminal-jarvis";
 pub fn text(verbose: bool, catalog: &Path, home: &Path) -> String {
     let version = env!("CARGO_PKG_VERSION");
     if !verbose {
-        let suffix = crate::distribution::channel()
+        let suffix = crate::context::distribution::channel()
             .map(|channel| format!(" ({channel})"))
             .unwrap_or_default();
         return format!("terminal-jarvis {version}{suffix}\n");
@@ -15,7 +15,7 @@ pub fn text(verbose: bool, catalog: &Path, home: &Path) -> String {
         .map(|path| path.display().to_string())
         .unwrap_or_else(|_| "unknown".to_string());
     let git_sha = option_env!("TERMINAL_JARVIS_GIT_SHA").unwrap_or("unknown");
-    let distribution = crate::distribution::channel()
+    let distribution = crate::context::distribution::channel()
         .unwrap_or("unknown")
         .to_string();
     let wrapper = std::env::var("TERMINAL_JARVIS_WRAPPER").unwrap_or_default();

@@ -13,7 +13,7 @@ impl RuntimeInput {
             .ok()
             .filter(|value| !value.trim().is_empty())
             .unwrap_or_else(|| {
-                if crate::distribution::channel() == Some("npm") {
+                if crate::context::distribution::channel() == Some("npm") {
                     "unknown".into()
                 } else {
                     "not-applicable".into()

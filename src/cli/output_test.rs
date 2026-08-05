@@ -28,7 +28,7 @@ fn mock_harness(binary: &str, env_mode: EnvMode, env: Vec<String>) -> Harness {
         vec!["--version".into()],
     );
     plan.support = crate::contracts::SupportState::Expected;
-    plan.platforms = vec![crate::platform::id().unwrap().into()];
+    plan.platforms = vec![crate::context::platform::id().unwrap().into()];
     Harness {
         name: "x".into(),
         display: "X".into(),

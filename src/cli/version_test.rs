@@ -64,9 +64,9 @@ fn verbose_text_reports_fields() {
 }
 #[test]
 fn homebrew_path_detection() {
-    assert!(crate::distribution::homebrew_path("/opt/homebrew/bin/tj"));
-    assert!(crate::distribution::homebrew_path("/usr/local/Cellar/tj"));
-    assert!(!crate::distribution::homebrew_path("/usr/local/bin/tj"));
+    assert!(crate::context::distribution::homebrew_path("/opt/homebrew/bin/tj"));
+    assert!(crate::context::distribution::homebrew_path("/usr/local/Cellar/tj"));
+    assert!(!crate::context::distribution::homebrew_path("/usr/local/bin/tj"));
 }
 
 #[test]

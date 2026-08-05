@@ -1,5 +1,5 @@
 use crate::contracts::{CapabilityPlan, Harness, SupportState};
-use crate::{catalog, platform, security};
+use crate::{catalog, context::platform, security};
 
 pub fn is_harness_ready(harness: &Harness) -> bool {
     security::command_on_path(&harness.binary)

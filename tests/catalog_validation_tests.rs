@@ -57,7 +57,7 @@ fn rejects_truth_contradictions_and_duplicate_rows() {
 #[test]
 fn support_claims_reject_fallbacks_and_unsafe_installers() {
     let mut plans = Capability::ALL.map(plan).to_vec();
-    let platform = terminal_jarvis::platform::id().unwrap().to_string();
+    let platform = terminal_jarvis::context::platform::id().unwrap().to_string();
     let download = plans
         .iter_mut()
         .find(|plan| plan.capability == Capability::Download)

@@ -15,7 +15,7 @@ pub fn selected() -> Route {
     if wrapper_path().is_some() {
         return npm();
     }
-    match crate::distribution::channel() {
+    match crate::context::distribution::channel() {
         Some("npm") => npm(),
         Some("homebrew") => command("homebrew", "brew", &["upgrade", "terminal-jarvis"]),
         Some("cargo" | "source") => command("cargo", "cargo", &["install", "terminal-jarvis"]),
@@ -59,5 +59,5 @@ pub(super) fn wrapper_path() -> Option<std::path::PathBuf> {
 
 #[cfg(test)]
 pub(super) fn homebrew_path(path: &str) -> bool {
-    crate::distribution::homebrew_path(path)
+    crate::context::distribution::homebrew_path(path)
 }

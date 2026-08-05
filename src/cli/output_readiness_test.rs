@@ -31,7 +31,7 @@ fn harness(state: SupportState, verified_at: &str, platform: &str) -> Harness {
 
 #[test]
 fn support_freshness_and_platform_are_part_of_readiness() {
-    let platform = crate::platform::id().unwrap();
+    let platform = crate::context::platform::id().unwrap();
     let other = if platform == "windows-x64-msvc" {
         "linux-x64-gnu"
     } else {

@@ -54,7 +54,7 @@ fn cache_path() -> Option<String> {
 }
 
 fn distribution() -> String {
-    crate::distribution::channel()
+    crate::context::distribution::channel()
         .unwrap_or("unknown")
         .to_string()
 }
