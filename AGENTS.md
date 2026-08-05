@@ -27,6 +27,7 @@
 | Optional Trivy gate behavior | `docs/security-gates.md` |
 | Catalog support truth | `docs/supported-agents.md`, `docs/support-matrix.md` |
 | Recurring agent mistakes to avoid | `docs/anti-patterns/index.md` (naming/ structure/ tooling/) |
+| Patterns & trade-off reference | <https://rust-unofficial.github.io/patterns/> |
 | Everything else | `README.md`, then this file again |
 
 Lost in the woods? Start with `docs/architecture-decision-records/README.md`
@@ -108,6 +109,12 @@ built and verified.
   `scripts/` root.
 - When you observe a new recurring mistake in committed work, record it under
   `docs/anti-patterns/{type}/index.md` before carrying it forward.
+- When a design trade-off is needed to reconcile the domain-bucket rules with
+  the vast scenarios this repo holds (spanning Rust, scripts, harness data,
+  and release flows), consult the Rust patterns reference
+  (<https://rust-unofficial.github.io/patterns/>) for the idiomatic scheme to
+  lean on; record the chosen trade-off in `docs/architecture-decision-records/`
+  so the reasoning survives.
 - Do not reintroduce a `current/` snapshot.
 - Do not tag, publish, or upload release assets from local scripts without an
   explicit operator decision.
