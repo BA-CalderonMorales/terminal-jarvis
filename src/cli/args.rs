@@ -71,13 +71,24 @@ where
         action => action,
     })
 }
-
+#[cfg(test)]
+#[path = "args_matrix.rs"]
+mod matrix;
+#[cfg(test)]
+#[path = "args_red.rs"]
+mod matrix_red;
 #[cfg(test)]
 #[path = "mutation_test.rs"]
 mod mutation_tests;
 #[cfg(test)]
 #[path = "args_props.rs"]
 mod props;
+#[cfg(test)]
+#[path = "args_red_green.rs"]
+mod red_green;
+#[cfg(test)]
+#[path = "args_rules.rs"]
+mod rules;
 #[cfg(test)]
 #[path = "args_test.rs"]
 mod tests;

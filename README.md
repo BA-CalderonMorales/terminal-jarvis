@@ -41,9 +41,13 @@ capability's declared support, evidence, platform, and freshness permit it.
 ```bash
 # Cargo
 cargo install terminal-jarvis
+# Cargo binary name is terminal-jarvis; add an alias if you want a short call:
+#   echo 'alias tj=terminal-jarvis' >> ~/.bashrc
 
 # npm
 npm install -g terminal-jarvis
+# The npm package also installs a tj shim, so you can call either:
+#   terminal-jarvis list   # or  tj list
 
 # Homebrew
 brew install BA-CalderonMorales/homebrew-terminal-jarvis/terminal-jarvis
@@ -52,7 +56,9 @@ brew install BA-CalderonMorales/homebrew-terminal-jarvis/terminal-jarvis
 Cargo builds the Rust CLI from the crates.io source package. The npm package is
 a Node launcher that downloads the matching Terminal Jarvis GitHub Release
 asset, verifies its `.sha256` file, caches it, and then executes it. Homebrew
-installs the matching platform release archive from the tap.
+installs the matching platform release archive from the tap. The npm install
+links both `terminal-jarvis` and the shorter `tj` entry point to the same
+launcher, so either command name works; `tj` keeps daily use fast.
 
 Supported prebuilt assets are `linux-x64-gnu`, `linux-arm64-gnu`,
 `macos-x64`, `macos-arm64`, and `win32-x64`. Native Windows npm installs use

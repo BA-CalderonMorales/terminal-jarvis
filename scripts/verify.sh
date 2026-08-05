@@ -73,6 +73,17 @@ else
   echo "cargo-llvm-cov not installed; skipping ${coverage_target}% line coverage gate"
 fi
 
+echo "[11b/12] harness risk"
+if command -v python3 >/dev/null 2>&1; then
+  if test "${TJ_HARNESS_RISK:-0}" = "1"; then
+    python3 scripts/harness-risk.py --check high
+  else
+    python3 scripts/harness-risk.py
+  fi
+else
+  echo "python3 not installed; skipping harness risk report"
+fi
+
 echo "[12/12] mutation"
 if command -v cargo-mutants >/dev/null 2>&1 && test "${TJ_MUTATION:-0}" = "1"; then
   cargo mutants --config mutants.toml --minimum-test-timeout 30 --jobs 2

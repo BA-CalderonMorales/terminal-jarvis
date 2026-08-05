@@ -50,11 +50,15 @@ pub fn direct(
             "unknown command or harness '{harness}'; run `terminal-jarvis list`"
         ));
     }
-    Ok(invocation(
-        harness.to_string(),
-        Capability::Ui,
-        extra.to_vec(),
-    ))
+    // Parse capability from extra args if present
+    let (capability, remaining_extra) = match extra.split_first() {
+        None => (Capability::Ui, Vec::new()),
+        Some((first, rest)) => match Capability::parse(first) {
+            Some(capability) => (capability, rest.to_vec()),
+            None => (Capability::Ui, extra.to_vec()),
+        },
+    };
+    Ok(invocation(harness.to_string(), capability, remaining_extra))
 }
 
 fn for_harness(harness: &str, rest: &[String]) -> Invocation {

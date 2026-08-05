@@ -510,6 +510,11 @@ test("npm pack ships wrapper guidance without native binaries", () => {
   assert.ok(!files.some((file) => file.startsWith("harnesses/")));
 });
 
+test("bin map exposes both long and short entry points", () => {
+  assert.equal(pkg.bin["terminal-jarvis"], "bin/terminal-jarvis");
+  assert.equal(pkg.bin["tj"], "bin/terminal-jarvis");
+});
+
 test("wrapper forwards --version to the resolved binary", () => {
   const fake = path.join(tempDir(), "terminal-jarvis");
   writeExecutable(fake, "#!/usr/bin/env node\nconsole.log('fake ' + process.argv.slice(2).join(' '));\n");

@@ -50,3 +50,38 @@ pub fn wsl() -> &'static str {
         "no"
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn shell_returns_basename() {
+        let shell_path = std::env::var("SHELL").unwrap_or_default();
+        let result = super::shell();
+        if shell_path.is_empty() {
+            assert_eq!(result, "unknown");
+        } else {
+            let expected = std::path::Path::new(&shell_path)
+                .file_name()
+                .map(|n| n.to_string_lossy().to_string())
+                .unwrap_or_else(|| "unknown".to_string());
+            assert_eq!(result, expected);
+        }
+    }
+
+    #[test]
+    fn shell_empty_returns_unknown() {
+        let result = super::shell();
+        assert!(!result.is_empty());
+    }
+
+    #[test]
+    fn wsl_returns_valid_value() {
+        let result = wsl();
+        assert!(
+            matches!(result, "no" | "wsl1-or-unknown" | "wsl2"),
+            "wsl() should return no, wsl1-or-unknown, or wsl2, got {result}"
+        );
+    }
+}

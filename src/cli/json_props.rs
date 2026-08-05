@@ -37,10 +37,12 @@ fn escape_has_no_low_control_characters(value: String) -> bool {
 }
 
 fn outcome_json_fields(value: String) -> bool {
-    let output = super::outcome("cmd", 0, &value);
-    output.contains("\\n") == value.contains('\n')
-        && output.lines().count() == 1
-        && output.starts_with("{\"schema_version\":1,\"command\":\"cmd\"")
+    let escaped = super::escape(&value);
+    let expected = format!(
+        "{{\"schema_version\":1,\"command\":\"cmd\",\"ok\":true,\"exit_code\":0,\"data\":{{\"text\":\"{}\"}},\"error\":null}}\n",
+        escaped
+    );
+    super::outcome("cmd", 0, &value) == expected
 }
 
 #[test]

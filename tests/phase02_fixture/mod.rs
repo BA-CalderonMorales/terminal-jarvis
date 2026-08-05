@@ -13,6 +13,7 @@ pub struct Fixture {
     gate_marker: PathBuf,
 }
 
+#[allow(dead_code)]
 impl Fixture {
     pub fn new(download: &str, yolo: &str, script: &str) -> Self {
         let root = std::env::temp_dir().join(format!(
@@ -63,6 +64,14 @@ impl Fixture {
 
     pub fn gate_spawned(&self) -> bool {
         self.gate_marker.exists()
+    }
+
+    pub fn marker_path(&self) -> &PathBuf {
+        &self.marker
+    }
+
+    pub fn gate_marker_path(&self) -> &PathBuf {
+        &self.gate_marker
     }
 }
 

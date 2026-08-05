@@ -3,7 +3,8 @@
   "version": "0.1.13",
   "description": "Data-driven harness switcher for AI coding agents",
   "bin": {
-    "terminal-jarvis": "bin/terminal-jarvis"
+    "terminal-jarvis": "bin/terminal-jarvis",
+    "tj": "bin/terminal-jarvis"
   },
   "files": [
     "bin/",
