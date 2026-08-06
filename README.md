@@ -162,22 +162,23 @@ command runs the same guarded surface as headless automation.
 
 ## Interactive demo
 
-Seventy seconds of the switcher, recorded with
-[VHS](https://github.com/charmbracelet/vhs) from `scripts/demo/tui.tape`:
+The switcher, recorded with [VHS](https://github.com/charmbracelet/vhs) from
+`scripts/demo/tui.tape`:
 
 ![The switcher in action](docs/demo-tui.gif)
 
-The session shows the numbered picker, an instant switch, the pristine home
-frame, the readiness dashboard, a name switch, and a guarded launch declined
-before any agent runs. Chatting with a real agent (saying `hi` inside Pi or
-Codex) needs that agent's credentials: re-record with your environment loaded,
+The demo above walks the switcher's surface: boot the tui, browse the numbered
+picker, switch by number, return to the welcome frame, and read the readiness
+dashboard. `scripts/demo/tui.tape` carries the full story -- launch Codex and
+hand over the terminal, exit Codex cleanly, launch Pi and chat with it, exit
+Pi, then leave the switcher. Agent beats need your agent credentials; with
+them loaded, re-record from the repository root,
 
 ```bash
 vhs scripts/demo/tui.tape
 ```
 
-then replace `docs/demo-tui.gif`. Agent exit gestures vary (Ctrl+C, `/exit`,
-or an agent menu); the switcher always survives.
+and replace `docs/demo-tui.gif`.
 
 ## Docs
 

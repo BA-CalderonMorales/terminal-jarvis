@@ -60,10 +60,7 @@ fn run_action(
             true
         }
         args::Action::Check => {
-            match crate::cli::status(catalog_root, state_home, harnesses) {
-                Ok(body) => print!("{body}"),
-                Err(message) => eprintln!("{}", style::error(&message)),
-            }
+            print!("{}", super::status::render(harnesses, catalog_root, state_home));
             false
         }
         action => super::canonical::run(action, options, harnesses, catalog_root, state_home),

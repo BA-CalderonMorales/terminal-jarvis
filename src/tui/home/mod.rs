@@ -17,7 +17,7 @@ pub fn render(harnesses: &[Harness], catalog_root: &Path, state_home: &Path) {
         "{}",
         style::banner(
             "Terminal Jarvis",
-            "Headless command center for coding-agent harnesses -- now with a TUI"
+            "Headless command center for coding-agent harnesses"
         )
     );
     println!(

@@ -70,7 +70,7 @@ pub fn check(
     } else {
         Err(error::Failure::safety(
             "confirmation_declined",
-            "operation was not confirmed",
+            "cancelled; nothing was run",
             "review the plan and retry when ready",
         ))
     }

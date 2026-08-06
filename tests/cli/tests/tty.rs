@@ -63,7 +63,7 @@ fn lifecycle_pty_confirmation_executes_the_visible_plan() {
 fn lifecycle_pty_rejection_fails_closed() {
     let (status, output) = lifecycle(b"no\n");
     assert_eq!(status.code(), Some(5));
-    assert!(output.contains("operation was not confirmed"));
+    assert!(output.contains("cancelled; nothing was run"));
     assert!(output.contains("review the plan and retry when ready"));
 }
 
@@ -71,5 +71,5 @@ fn lifecycle_pty_rejection_fails_closed() {
 fn lifecycle_pty_eof_cancellation_fails_closed() {
     let (status, output) = lifecycle(b"\x04");
     assert_eq!(status.code(), Some(5));
-    assert!(output.contains("operation was not confirmed"));
+    assert!(output.contains("cancelled; nothing was run"));
 }

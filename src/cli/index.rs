@@ -4,34 +4,14 @@
 //! or tap `cli::args` for the parse surface. The domain's internals live in
 //! `logic/`; structs/ holds the data shapes produced by parsing.
 
-use crate::cli::logic::{entry, execute, json, output, self_update, table};
+use crate::cli::logic::{entry, execute, json};
 use crate::cli::structs::response::Response;
-use crate::diagnostics;
 use std::path::Path;
 
 pub use crate::cli::logic::args;
 pub use crate::cli::logic::canonical;
 pub use crate::cli::logic::output_truth;
 pub use crate::cli::logic::style;
-
-/// The tui's `check` rendering as a String, without version probes.
-pub fn status(
-    catalog_root: &Path,
-    home: &Path,
-    harnesses: &[crate::contracts::Harness],
-) -> Result<String, String> {
-    let (stdout_tty, stderr_tty, color) = style::diagnostic_decisions();
-    let mut runtime = diagnostics::RuntimeInput::local(
-        stdout_tty,
-        stderr_tty,
-        color,
-        table::terminal_width(),
-        self_update::route_name(),
-    );
-    runtime.probes = false;
-    let input = diagnostics::DiagnosticInput::local(catalog_root, home, None, harnesses, runtime);
-    Ok(output::diagnostics(&diagnostics::collect(&input)))
-}
 
 pub fn dispatch(
     action: args::Action,

@@ -9,6 +9,8 @@ use std::path::Path;
 mod canonical;
 #[path = "./handle.rs"]
 mod handle;
+#[path = "./status.rs"]
+mod status;
 pub use handle::handle;
 
 pub fn run(harnesses: &[Harness], catalog_root: &Path, state_home: &Path, options: &args::Options) {
