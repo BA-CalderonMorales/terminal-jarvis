@@ -1,6 +1,15 @@
 # Legacy Notes
 
-Compatibility surface and behavior notes for humans and scripts.
+<img src="promo-image.png" alt="The Terminal Jarvis origin drawing" width="60%">
+
+This repository started as a one-off shell experiment; the drawing above is
+that origin story. Terminal Jarvis today is shaped for the workday -- pair
+sessions, CI pipelines, and long refactors -- where switching between Claude,
+Codex, Pi, and the rest takes one keystroke instead of a shell dance. For
+scripts and automation, `terminal-jarvis --plain` keeps output stable and
+prompt-free.
+
+Compatibility surface and behavior notes for humans and scripts follow.
 
 ## Legacy aliases
 

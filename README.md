@@ -22,8 +22,7 @@ other AI assistants from one terminal interface.
 [![Docs](https://img.shields.io/badge/docs-latest-blue.svg?style=flat-square)](https://ba-calderonmorales.github.io/my-life-as-a-dev/latest/projects/active/terminal-jarvis/)
 [![Coverage](https://img.shields.io/badge/coverage-report-green.svg?style=flat-square)](https://github.com/BA-CalderonMorales/terminal-jarvis/actions/workflows/ci.yml?query=branch%3Adevelop)
 
-<img src="docs/promo-image.png" alt="Terminal Jarvis interface" width="49%">
-<img src="docs/demo-tui.gif" alt="Terminal Jarvis switcher in action" width="49%">
+<img src="docs/demo-tui.gif" alt="Terminal Jarvis switcher in action" width="60%">
 
 </div>
 
