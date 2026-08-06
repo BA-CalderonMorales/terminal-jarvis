@@ -1,6 +1,6 @@
 # Legacy Notes
 
-<img src="promo-image.png" alt="The Terminal Jarvis origin drawing" width="60%">
+<img src="promo-image.png" alt="The Terminal Jarvis origin drawing" width="100%">
 
 This repository started as a one-off shell experiment; the drawing above is
 that origin story. Terminal Jarvis today is shaped for the workday -- pair
