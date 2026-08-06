@@ -98,6 +98,21 @@ terminal-jarvis gate status
 
 For development builds, replace `terminal-jarvis` with `cargo run --`.
 
+## Two ways to run
+
+| Mode | Invocation | Best for |
+|---|---|---|
+| **Headless** | `terminal-jarvis <command>` / `tj <command>` | Scripts, CI, one-shot tasks |
+| **Interactive** | `tj tui` (bare `tj` on a terminal) | Switching between coding agents live |
+
+Headless runs one command per invocation, prints stable line-oriented output
+with `--plain`, and never opens a prompt. The interactive tui is a chat-style
+switcher: `list` shows the numbered picker, a number or an agent name switches
+instantly, `status` shows readiness, `home` resets the frame, and `exit`
+leaves. A slashed name (`/codex`) launches an agent behind the same guarded
+plan-plus-confirm as headless. Ctrl+C aimed at a running agent never kills the
+switcher.
+
 ### Layout
 
 ```text
@@ -144,6 +159,26 @@ line-oriented output; `--no-color` keeps the structured layout without color.
 The interactive switcher (`terminal-jarvis tui`) doubles as the live dashboard
 -- readiness, active harness, and the numbered picker -- and every slash
 command runs the same guarded surface as headless automation.
+
+## Interactive demo
+
+Seventy seconds of the switcher, recorded with
+[VHS](https://github.com/charmbracelet/vhs) from `scripts/demo/tui.tape`:
+
+![The switcher in action](docs/demo-tui.gif)
+
+The session shows the numbered picker, an instant switch, the pristine home
+frame, the readiness dashboard, a name switch, and a guarded launch declined
+before any agent runs. Chatting with a real agent (saying `hi` inside Pi or
+Codex) needs that agent's credentials: re-record with your environment loaded,
+
+```bash
+vhs scripts/demo/tui.tape
+```
+
+then replace `docs/demo-tui.gif`. Agent exit gestures vary (Ctrl+C, `/exit`,
+or an agent menu); the switcher always survives.
+
 ## Docs
 
 | Document | What |
