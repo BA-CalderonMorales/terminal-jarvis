@@ -118,19 +118,48 @@ experiments live in the [Legacy notes](docs/legacy-notes.md).
 
 ## Layout
 
+The repository is a few small planes, and every Rust domain is bucketed the
+same way -- once you can read one, you can read them all.
+
 ```text
-harnesses/<agent>/
-├── index.toml              # name, display, binary, env requirements
-├── download/index.toml     # install without sudo
-├── update/index.toml       # upgrade without interactive auth
-├── headless/index.toml     # non-interactive command mode
-├── version/index.toml      # print installed agent version
-├── stats/index.toml        # local agent statistics
-├── models/index.toml       # list available models
-├── security/index.toml     # sandbox and approval settings
-├── ui/index.toml           # interactive terminal UI
-└── yolo/index.toml         # bypass safeguards (dangerous)
+src/                            # the std-only Rust CLI
+├── main.rs                     # entry point; lib.rs is the crate root
+├── contracts/                  # the shared data model (Harness, capabilities)
+├── cli/                        # parsing, guards, dispatch, tables, help
+├── catalog/                    # loads and validates the data plane
+├── context/                    # platform, distribution, active-harness state
+├── diagnostics/                # readiness reports, probes, PATH resolution
+├── gates/                      # optional local security gate (Trivy)
+├── runtime/                    # executes harness capability commands
+├── security/                   # credential and effect posture
+└── tui/                        # the interactive switcher (chat-style shell)
 ```
+
+```text
+harnesses/<agent>/              # the data plane: one folder per coding agent
+├── index.toml                  # name, display, binary, env requirements
+├── download/index.toml         # install without sudo
+├── update/index.toml           # upgrade without interactive auth
+├── headless/index.toml         # non-interactive command mode
+├── version/index.toml          # print installed agent version
+├── stats/index.toml            # local agent statistics
+├── models/index.toml           # list available models
+├── security/index.toml         # sandbox and approval settings
+├── ui/index.toml               # interactive terminal UI
+└── yolo/index.toml             # bypass safeguards (dangerous)
+```
+
+```text
+tests/                          # integration tests, one binary per domain
+scripts/bash/                   # automation: catalog, delivery, release, verify
+docs/                           # decisions, contracts, usage, demo, legacy
+build/                          # the build script only
+npm/  homebrew/                 # distribution launchers and formulae
+```
+
+Each Rust domain inside `src/` keeps the same shape: `index.rs` as the public
+face, `logic/` for behavior, `structs/` for data, `tests/` for proof, and
+every file stays at 100 lines or fewer.
 
 Auth stays with each harness -- terminal-jarvis never retains credentials.
 
