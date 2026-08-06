@@ -77,13 +77,13 @@ invocation, for scripts, CI, and one-shot tasks:
 | Command | Purpose |
 |---|---|
 | `list` | Show all coding agents |
+| `check` | Report binary + env readiness |
 | `show <harness>` | Inspect a harness's capabilities |
-| `use <harness>` / `current` | Select / show active harness |
-| `plan [harness] <capability>` | Preview the shell command |
-| `run [harness] [capability] [args...]` | Execute a capability |
 | `install <harness>` | Install a harness |
 | `update [<harness>]` | Upgrade a harness |
-| `check` | Report binary + env readiness |
+| `plan [harness] <capability>` | Preview the shell command |
+| `use <harness>` / `current` | Select / show active harness |
+| `run [harness] [capability] [args...]` | Execute a capability |
 | `security [status\|audit\|harness]` | Security posture |
 | `gate [status\|list\|enable\|disable\|run]` | Optional local security gate |
 | `version [--verbose]` / `--version` / `-v` / `--info` | Version info |
