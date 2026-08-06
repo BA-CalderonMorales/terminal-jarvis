@@ -70,15 +70,24 @@ jobs:
 
       - name: Run mutation tests on pull request diff
         if: github.event_name == 'pull_request'
+        env:
+          SHARD_FILES: ${{ matrix.files }}
         run: |
           set -eu
+          shard_args=()
+          for f in $SHARD_FILES; do shard_args+=(--file "$f"); done
           if ! git diff "origin/${{ github.base_ref }}..HEAD" > git.diff 2>/dev/null || [ ! -s git.diff ]; then
             echo "Base ref unavailable or empty diff; running full suite instead"
-            cargo mutants --config mutants.toml --minimum-test-timeout 30 --jobs 4 --no-shuffle -f ${{ matrix.files }}
+            cargo mutants --config mutants.toml --minimum-test-timeout 30 --jobs 4 --no-shuffle "${shard_args[@]}"
           else
-            cargo mutants --config mutants.toml --minimum-test-timeout 30 --jobs 4 --no-shuffle --in-diff git.diff -f ${{ matrix.files }}
+            cargo mutants --config mutants.toml --minimum-test-timeout 30 --jobs 4 --no-shuffle --in-diff git.diff "${shard_args[@]}"
           fi
 
       - name: Run full mutation suite
         if: github.event_name != 'pull_request'
-        run: cargo mutants --config mutants.toml --minimum-test-timeout 30 --jobs 4 --no-shuffle -f ${{ matrix.files }}
+        env:
+          SHARD_FILES: ${{ matrix.files }}
+        run: |
+          shard_args=()
+          for f in $SHARD_FILES; do shard_args+=(--file "$f"); done
+          cargo mutants --config mutants.toml --minimum-test-timeout 30 --jobs 4 --no-shuffle "${shard_args[@]}"

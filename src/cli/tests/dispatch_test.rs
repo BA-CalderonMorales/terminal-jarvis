@@ -46,7 +46,10 @@ fn face_dispatch_pins_exit_code_and_output() {
     )
     .expect("list dispatches cleanly");
     assert_eq!(code, 0);
-    assert!(body.contains("opencode"), "list output names installed harnesses");
+    assert!(
+        body.contains("opencode"),
+        "list output names installed harnesses"
+    );
 }
 
 #[test]
