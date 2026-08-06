@@ -170,28 +170,3 @@ jobs:
           findings="$(node -e "const fs=require('fs'); const s=JSON.parse(fs.readFileSync(process.argv[1], 'utf8')); console.log((s.runs || []).reduce((n, run) => n + ((run.results || []).length), 0));" "$sarif_file")"
           echo "Grype findings: $findings"
           test "$findings" -eq 0
-
-  mutation:
-    name: Mutation
-    runs-on: ubuntu-latest
-    timeout-minutes: 25
-    steps:
-      - uses: actions/checkout@v7
-
-      - uses: dtolnay/rust-toolchain@stable
-
-      - uses: actions/cache@v6
-        with:
-          path: |
-            ~/.cargo/bin/cargo-mutants
-            ~/.cargo/git
-            ~/.cargo/registry
-            target
-          key: cargo-mutation-${{ runner.os }}-${{ hashFiles('Cargo.lock') }}-v1
-          restore-keys: cargo-mutation-${{ runner.os }}-
-
-      - name: Install cargo-mutants
-        run: command -v cargo-mutants >/dev/null || cargo install cargo-mutants --locked
-
-      - name: Run mutation tests
-        run: cargo mutants --config mutants.toml --minimum-test-timeout 30 --jobs 2

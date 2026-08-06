@@ -1,0 +1,44 @@
+name: Mutation
+
+on:
+  pull_request:
+    branches: [develop, main]
+  schedule:
+    - cron: '0 3 * * *'
+  workflow_dispatch:
+
+concurrency:
+  group: mutation-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  mutation:
+    name: Mutation
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: dtolnay/rust-toolchain@stable
+
+      - uses: actions/cache@v6
+        with:
+          path: |
+            ~/.cargo/bin/cargo-mutants
+            ~/.cargo/git
+            ~/.cargo/registry
+            target
+          key: cargo-mutation-${{ runner.os }}-${{ hashFiles('Cargo.lock') }}-v1
+          restore-keys: cargo-mutation-${{ runner.os }}-
+
+      - name: Install cargo-mutants
+        run: command -v cargo-mutants >/dev/null || cargo install cargo-mutants --locked
+
+      - name: Run mutation tests
+        run: cargo mutants --config mutants.toml --minimum-test-timeout 30 --jobs 2
