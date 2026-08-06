@@ -17,8 +17,8 @@ failures=0
 notes=0
 for file in $staged; do
   case "$file" in
-    default_* | *.profraw | mutants.out* | GOAL.md | scratch/*)
-      echo "pre-commit: refuse to commit build junk '$file'" >&2
+    default_* | *.profraw | mutants.out* | GOAL.md | scratch/* | node_modules/ | *.tgz | *.zip | *.deb | *.rpm | *.log | .DS_Store | dist/ | coverage/ | lcov.info | cobertura.xml | homebrew/release/)
+      echo "pre-commit: refuse to commit build or package junk '$file'" >&2
       failures=$((failures + 1))
       ;;
     plan/*)
