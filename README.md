@@ -130,21 +130,14 @@ The interactive switcher (`terminal-jarvis tui`) doubles as the live dashboard
 -- readiness, active harness, and the numbered picker -- and every slash
 command runs the same guarded surface as headless automation.
 
-## Interactive demo
-
-The session above was recorded with [VHS](https://github.com/charmbracelet/vhs)
-from `scripts/demo/tui.tape`: boot the switcher, browse the numbered picker,
-switch by number and by name, read the readiness dashboard. Re-recording it
-with agent launches and chat, and the full walkthrough, live in
-[Usage](docs/usage.md).
-
 ## Docs
 
 | Document | What |
 |---|---|
 | [Capability contract](docs/harness-capability-contract.md) | Full breakdown of the 9 capabilities |
 | [Installation](docs/installation.md) | Package mechanics, supported platforms, update behavior |
-| [Usage](docs/usage.md) | Headless vs interactive, demo walkthrough and re-recording |
+| [Usage](docs/usage.md) | Headless vs interactive, launch guards |
+| [Demo](docs/demo.md) | The recording, the agent-handover script, making new demos |
 | [Legacy notes](docs/legacy-notes.md) | Aliases, plain output behavior, removed experiments |
 | [Cataloged agents](docs/supported-agents.md) | All 25 descriptors and support caveat |
 | [Support matrix](docs/support-matrix.md) | All 225 capability truth rows |
