@@ -26,10 +26,6 @@ other AI assistants from one terminal interface.
 
 </div>
 
----
-
-What this is for, and the catalog truth behind it: [What is this?](docs/what-is-this.md).
-
 ## Install
 
 ```bash
@@ -131,15 +127,16 @@ Auth stays with each harness -- terminal-jarvis never retains credentials.
 
 ## Docs
 
+What this is for, and the catalog truth behind it: [What is this?](docs/what-is-this.md).
+
 | Document | What |
 |---|---|
-| [What is this?](docs/what-is-this.md) | The catalog truth and why the tool exists |
-| [Capability contract](docs/harness-capability-contract.md) | Full breakdown of the 9 capabilities |
 | [Installation](docs/installation.md) | Package mechanics, supported platforms, update behavior |
 | [Usage](docs/usage.md) | Headless vs interactive, launch guards |
-| [Demo](docs/demo.md) | The recording, the agent-handover script, making new demos |
-| [Legacy notes](docs/legacy-notes.md) | Aliases, plain output behavior, removed experiments |
+| [Capability contract](docs/harness-capability-contract.md) | Full breakdown of the 9 capabilities |
+| [Security gates](docs/security-gates.md) | Optional Trivy scan behavior and configuration |
 | [Cataloged agents](docs/supported-agents.md) | All 25 descriptors and support caveat |
 | [Support matrix](docs/support-matrix.md) | All 225 capability truth rows |
-| [Security gates](docs/security-gates.md) | Optional Trivy scan behavior and configuration |
 | [Development](docs/development.md) | Architecture, verification, and release artifacts |
+| [Demo](docs/demo.md) | The recording, the agent-handover script, making new demos |
+| [Legacy notes](docs/legacy-notes.md) | Aliases, plain output behavior, removed experiments |
