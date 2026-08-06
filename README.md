@@ -5,9 +5,14 @@
 **Command center for orchestrating context switching between coding-agent harnesses**
 
 Inspect and safely gate catalog descriptors for Claude, Gemini, Qwen, and 22
-other AI assistants from one terminal interface. Catalog presence does not mean
-that a capability is supported; each capability reports its own evidence-backed
-state.
+other AI assistants from one terminal interface.
+
+> **Safe Testing Recommended**: Terminal Jarvis is a harness for AI coding tools
+> that can modify files and execute commands. For the safest experience, test in
+> a remote development environment such as
+> [GitHub Codespaces](https://github.com/codespaces),
+> [Coder](https://coder.com/), [DevPod](https://devpod.sh/), or
+> [Google Colab](https://colab.research.google.com/).
 
 [![NPM Version](https://img.shields.io/npm/v/terminal-jarvis.svg?logo=npm&style=flat-square)](https://www.npmjs.com/package/terminal-jarvis)
 [![Crates.io](https://img.shields.io/crates/v/terminal-jarvis.svg?logo=rust&style=flat-square)](https://crates.io/crates/terminal-jarvis)
@@ -24,18 +29,11 @@ state.
 
 ---
 
-> **Safe Testing Recommended**: Terminal Jarvis is a harness for AI coding tools
-> that can modify files and execute commands. For the safest experience, test in
-> a remote development environment such as
-> [GitHub Codespaces](https://github.com/codespaces),
-> [Coder](https://coder.com/), [DevPod](https://devpod.sh/), or
-> [Google Colab](https://colab.research.google.com/).
-
----
-
-A data-driven harness catalog for AI coding agents. It maps **25 coding-agent
-CLIs** through a shared **9-capability contract** and fails closed unless a
-capability's declared support, evidence, platform, and freshness permit it.
+> **Catalog truth**: A data-driven harness catalog for AI coding agents. It maps
+> **25 coding-agent CLIs** through a shared **9-capability contract** and fails
+> closed unless a capability's declared support, evidence, platform, and
+> freshness permit it. Catalog presence does not mean that a capability is
+> supported; each capability reports its own evidence-backed state.
 
 ## Install
 
