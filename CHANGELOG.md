@@ -1,6 +1,12 @@
 # Changelog
 
-## [Unreleased] - 2026-08-05
+## [0.1.13] - 2026-08-06
+
+- Interactive switcher, instant boot, and live readiness: `terminal-jarvis
+  tui` (or bare `tj` on a terminal) opens a chat-style harness switcher where
+  names and numbers switch agents, `home`/`clear` reset the frame, `status`
+  shows a two-line fleet dashboard, and Ctrl+C aimed at a running agent never
+  kills the session. Full command tables and the demo are in `docs/`.
 
 - Brings back the interactive TUI as a small, line-based harness switcher:
   `terminal-jarvis tui` (or bare `tj` on a terminal) opens a clean welcome --

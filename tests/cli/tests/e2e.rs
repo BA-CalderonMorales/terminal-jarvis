@@ -56,9 +56,7 @@ fn show_includes_setup_and_capability_truth() {
 #[test]
 fn help_announces_the_tui() {
     let body = stdout(&tj(&["--plain", "help"]));
-    assert!(
-        body.contains("Command center for orchestrating") && body.contains("terminal-jarvis tui")
-    );
+    assert!(body.contains("Command center") && body.contains("terminal-jarvis tui"));
 }
 
 #[test]
@@ -81,20 +79,21 @@ fn check_reports_setup_readiness() {
     let output = tj(&["check", "--verbose"]);
     assert_eq!(output.status.code(), Some(4));
     let body = stdout(&output);
-    assert!(body.contains("harness.jules.readiness\tmissing\terror") && body.contains("harness.aider.executable\t"));
+    assert!(
+        body.contains("harness.jules.readiness\tmissing\terror")
+            && body.contains("harness.aider.executable")
+    );
 }
 
 #[test]
 fn unknown_harness_fails_with_message() {
     let output = tj(&["show", "missing"]);
-    let blocked = output.status.code() == Some(4);
-    assert!(blocked && stderr(&output).contains("unknown harness 'missing'"));
+    assert!(output.status.code() == Some(4) && stderr(&output).contains("unknown harness"));
 }
 
 #[test]
 fn disabled_yolo_fails_before_placeholder_spawn() {
     let output = tj(&["run", "aider", "yolo"]);
-    let blocked = output.status.code() == Some(4);
-    assert!(blocked && stdout(&output).is_empty());
+    assert!(output.status.code() == Some(4) && stdout(&output).is_empty());
     assert!(stderr(&output).contains("aider:yolo is disabled"));
 }

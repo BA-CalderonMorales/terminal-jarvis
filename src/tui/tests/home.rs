@@ -30,7 +30,10 @@ fn cwd_label_roots_at_home() {
         cwd_label_for("/home/caldo/work/terminal-jarvis", Some("/home/caldo")),
         "~/work/terminal-jarvis"
     );
-    assert_eq!(cwd_label_for("/usr/local/bin", Some("/home/caldo")), "/usr/local/bin");
+    assert_eq!(
+        cwd_label_for("/usr/local/bin", Some("/home/caldo")),
+        "/usr/local/bin"
+    );
 }
 
 #[test]

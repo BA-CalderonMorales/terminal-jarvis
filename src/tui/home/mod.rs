@@ -25,11 +25,7 @@ pub fn render(harnesses: &[Harness], catalog_root: &Path, state_home: &Path) {
         style::label("ACTIVE"),
         active.as_deref().unwrap_or("none")
     );
-    println!(
-        "{}  {}",
-        style::label("CWD"),
-        cwd_label()
-    );
+    println!("{}  {}", style::label("CWD"), cwd_label());
     let ready = readiness(harnesses, catalog_root, state_home, active.as_deref());
     println!(
         "{}  {} / {} ready",
