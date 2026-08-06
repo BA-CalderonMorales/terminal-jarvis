@@ -4,9 +4,6 @@
 
 **Command center for orchestrating context switching between coding-agent harnesses**
 
-Inspect and safely gate catalog descriptors for Claude, Gemini, Qwen, and 22
-other AI assistants from one terminal interface.
-
 > **Safe Testing Recommended**: Terminal Jarvis is a harness for AI coding tools
 > that can modify files and execute commands. For the safest experience, test in
 > a remote development environment such as
@@ -28,6 +25,8 @@ other AI assistants from one terminal interface.
 
 ## Install
 
+Package mechanics, supported platforms, and update behavior: [Installation](docs/installation.md).
+
 ```bash
 # Cargo
 cargo install terminal-jarvis
@@ -43,10 +42,9 @@ npm install -g terminal-jarvis
 brew install BA-CalderonMorales/homebrew-terminal-jarvis/terminal-jarvis
 ```
 
-Package mechanics, supported platforms, and update behavior:
-[Installation](docs/installation.md).
-
 ## Quick Start
+
+Inspect and safely gate catalog descriptors for Claude, Gemini, Qwen, Pi, Droid and a variety of other AI assistants from one terminal interface. The modes, the launch guards, and the full command surface: [Usage](docs/usage.md).
 
 ```bash
 # Open the interactive switcher (bare tj on a terminal does the same)
@@ -70,8 +68,6 @@ terminal-jarvis check
 terminal-jarvis gate enable trivy
 terminal-jarvis gate status
 ```
-
-For development builds, replace `terminal-jarvis` with `cargo run --`.
 
 ## Commands
 
@@ -107,7 +103,7 @@ headless command above also works here, plus:
 Compatibility aliases, plain output behavior, and notes on removed
 experiments live in the [Legacy notes](docs/legacy-notes.md).
 
-### Layout
+## Layout
 
 ```text
 harnesses/<agent>/
