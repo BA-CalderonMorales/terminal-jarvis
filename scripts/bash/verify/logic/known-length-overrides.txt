@@ -1,0 +1,9 @@
+# Scripts that predate the file-length gate. Refactor them under 100 lines
+# and delete their line here; the gate fails on any NEW over-limit file.
+scripts/ruby/plan/logic/check-plan.rb
+scripts/bash/verify/logic/core-command-matrix.sh
+scripts/bash/release/logic/package-release.sh
+scripts/bash/verify/logic/integration-hardening.sh
+scripts/bash/verify/logic/local-ci.sh
+scripts/bash/release/logic/local-cd.sh
+scripts/bash/verify/logic/verify.sh

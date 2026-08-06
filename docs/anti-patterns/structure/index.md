@@ -5,6 +5,27 @@ be called.
 
 ## Entries
 
+### Dual module entry: mod.rs and index.rs in every domain (src/<domain>/)
+
+**Pattern:** Every Rust domain folder carries both `mod.rs` and `index.rs`.
+The parent declares `pub mod <domain>;`, so `mod.rs` is the real entry; it
+lines up `mod index; mod logic; mod structs;` and finishes with
+`pub use index::*;`, re-exporting a second file that is itself only re-exports.
+Two files with near-identical names hold the domain's public face, and the
+chain entry -> index.rs adds a hop for no content.
+
+**Why it is wrong:** One face per domain is the rule; two entry-looking files
+make agents and maintainers guess which is real, and the `index.rs` name
+collides with the index.rs the repo uses as the canonical face elsewhere.
+`mod.rs` wins by necessity (the parent needs it), so `index.rs` should fold
+its re-exports into `mod.rs` and disappear.
+
+**Fix:** For each domain, move `index.rs`'s re-exports into `mod.rs`, drop the
+`mod index; pub use index::*;` indirection, and delete `index.rs`. Re-exports
+keep the same paths, so callers do not change. Do it as its own cleanup PR;
+do not fold it into a release branch.
+
+
 ### Flat, snake-named Rust domains and phase-scattered test fixtures (src/, tests/)
 
 **Pattern:** `src/` kept ~150 flat snake-named files where the filename carried

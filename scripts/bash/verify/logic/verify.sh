@@ -25,7 +25,17 @@ over_limit=$(find src tests -name '*.rs' -print0 |
   awk -v max="$line_limit" '$1 > max && $2 != "total" {print}')
 test -z "$over_limit" || fail "Rust files over ${line_limit} lines:\n$over_limit"
 
-echo "[5/12] harness catalog shape"
+echo "[5/12] script file length"
+overrides="$here/known-length-overrides.txt"
+over_limit=$(find scripts -name '*.sh' -o -name '*.rb' | sort |
+  while read -r script; do
+    grep -qxF "$script" "$overrides" && continue
+    lines=$(grep -c '' "$script" 2>/dev/null || echo 0)
+    [ "$lines" -gt "$line_limit" ] && echo "$lines $script"
+  done)
+test -z "$over_limit" || fail "Scripts over ${line_limit} lines (drop them from $overrides after refactor):\n$over_limit"
+
+echo "[6/12] harness catalog shape"
 harnesses=$(find harnesses -mindepth 1 -maxdepth 1 -type d | wc -l | tr -d ' ')
 indexes=$(find harnesses -path '*/index.toml' | wc -l | tr -d ' ')
 expected=$((harnesses * 10))
@@ -33,23 +43,23 @@ test "$harnesses" -gt 0 || fail "no harnesses found"
 test "$indexes" -eq "$expected" ||
   fail "expected $expected harness index files, found $indexes"
 
-echo "[6/12] generated support report"
+echo "[7/12] generated support report"
 scripts/bash/catalog/index.sh support-report --check
 
-echo "[7/12] cli smoke"
+echo "[8/12] cli smoke"
 cargo run -- --plain list >/tmp/terminal-jarvis-list.txt
 cargo run -- --plain plan codex headless >/tmp/terminal-jarvis-plan.txt
 TERMINAL_JARVIS_HOME=/tmp/terminal-jarvis-verify cargo run -- --plain use codex >/dev/null
 TERMINAL_JARVIS_HOME=/tmp/terminal-jarvis-verify cargo run -- --plain current |
   grep 'active harness = codex' >/dev/null
 
-echo "[8/12] integration hardening"
+echo "[9/12] integration hardening"
 scripts/bash/verify/index.sh integration-hardening
 
-echo "[9/12] security"
+echo "[10/12] security"
 scripts/bash/verify/index.sh security-check
 
-echo "[10/12] distribution smoke"
+echo "[11/12] distribution smoke"
 scripts/bash/release/index.sh preflight
 if command -v node >/dev/null 2>&1 && command -v npm >/dev/null 2>&1; then
   npm --prefix npm/terminal-jarvis test
@@ -66,7 +76,7 @@ else
 fi
 scripts/bash/release/index.sh package --check
 
-echo "[11/12] coverage"
+echo "[12/12] coverage"
 if command -v cargo-llvm-cov >/dev/null 2>&1; then
   cargo llvm-cov --fail-under-lines "$coverage_target"
 else
@@ -84,7 +94,7 @@ else
   echo "python3 not installed; skipping harness risk report"
 fi
 
-echo "[12/12] mutation"
+echo "[13/12] mutation"
 if command -v cargo-mutants >/dev/null 2>&1 && test "${TJ_MUTATION:-0}" = "1"; then
   cargo mutants --config mutants.toml --minimum-test-timeout 30 --jobs 2
 else
