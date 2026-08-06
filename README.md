@@ -81,6 +81,8 @@ invocation, for scripts, CI, and one-shot tasks:
 | `use <harness>` / `current` | Select / show active harness |
 | `plan [harness] <capability>` | Preview the shell command |
 | `run [harness] [capability] [args...]` | Execute a capability |
+| `install <harness>` | Install a harness |
+| `update [<harness>]` | Upgrade a harness |
 | `check` | Report binary + env readiness |
 | `security [status\|audit\|harness]` | Security posture |
 | `gate [status\|list\|enable\|disable\|run]` | Optional local security gate |
