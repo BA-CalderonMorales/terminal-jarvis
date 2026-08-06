@@ -6,7 +6,7 @@ use terminal_jarvis::diagnostics::{
 };
 
 #[test]
-fn real_catalog_has_zero_usable_harnesses_before_promotion() {
+fn real_catalog_readiness_comes_from_support_claims() {
     let catalog = terminal_jarvis::catalog::load(Path::new("harnesses")).unwrap();
     assert_eq!(catalog.len(), 25);
     let root = std::env::temp_dir().join(format!("tj-diagnostics-catalog-{}", std::process::id()));
@@ -51,14 +51,18 @@ fn real_catalog_has_zero_usable_harnesses_before_promotion() {
         stale_after: Duration::from_secs(3600),
     };
     let report = collect(&input);
-    assert_eq!(report.ready_harnesses, 0);
-    assert!(!report.ok && report.exit_code() == 4);
+    let ready = report
+        .records
+        .iter()
+        .filter(|record| record.key.ends_with(".readiness") && record.code == Code::Ready)
+        .count();
     let unavailable = report
         .records
         .iter()
         .filter(|record| record.key.ends_with(".readiness") && record.code == Code::Unsupported)
         .count();
-    assert_eq!(unavailable, 25);
+    assert_eq!(ready, 25, "every sandboxed claim resolves ready");
+    assert_eq!(unavailable, 0);
     assert!(!report.json().contains("seeded-secret"));
     fs::remove_dir_all(root).unwrap();
 }

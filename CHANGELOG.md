@@ -2,6 +2,19 @@
 
 ## [Unreleased] - 2026-08-05
 
+- Brings back the interactive TUI as a small, line-based harness switcher:
+  `terminal-jarvis tui` (or bare `tj` on a terminal) opens a clean welcome --
+  banner, active harness, readiness, no tool dump -- over a `[>_]` prompt
+  whose dimmed `Waiting for input...` hint sits below the line and disappears
+  the moment a command commits. Slash commands parse with the exact headless
+  grammar (`/list`, `/status`, `/use`, `/plan`, `/install`, ...), bare text
+  runs the active harness headless, and a bare number selects a tool after
+  `/list` shows it. All commands share the headless intent, dangerous, and
+  interactive guards, and the terminal-control sequences come from a new
+  std-only `tui::term` layer instead of an external crate.
+- Status and diagnostics report live installed harness versions from bounded
+  read-only probes, and empty platform claims count as unrestricted in
+  readiness the same way they do in the execution guard.
 - Elevates the harness catalog out of the fail-closed checkpoint: determined
   documented commands become expected claims, the six locally installed
   harnesses carry verified version probes with disposable-real evidence,

@@ -11,14 +11,20 @@ pub struct HarnessResult {
 pub fn collect(input: &DiagnosticInput, redact: &Redactor<'_>) -> HarnessResult {
     let mut harnesses = input.harnesses.iter().collect::<Vec<_>>();
     harnesses.sort_by(|left, right| left.name.cmp(&right.name));
+    let index = super::dir_index::DirIndex::from_paths(&input.environment.paths());
     let mut records = Vec::new();
     let mut ready = BTreeSet::new();
     for harness in harnesses {
         let base = format!("harness.{}", segment(&harness.name));
         let (support, support_ready) = super::harness_support::collect(harness, &base);
         records.push(support);
-        let resolution = super::resolve::binary(&harness.binary, input);
-        records.push(version_record(&base, harness, &resolution));
+        let resolution = super::resolve::binary_with(&harness.binary, input, &index);
+        records.push(version_record(
+            &base,
+            harness,
+            &resolution,
+            input.runtime.probes,
+        ));
         let value = if matches!(resolution.code, Code::Ready | Code::Conflicting) {
             resolution
                 .path
@@ -74,9 +80,10 @@ fn version_record(
     base: &str,
     harness: &HarnessInput,
     resolution: &super::resolve::Resolution,
+    probes: bool,
 ) -> Record {
     let key = format!("{base}.version");
-    if resolution.code != Code::Ready {
+    if resolution.code != Code::Ready || !probes {
         return Record::new(key, Code::Unknown, Severity::Info, "unknown:not-probed");
     }
     let Some((command, args)) = &harness.version else {

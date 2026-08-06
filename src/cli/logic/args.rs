@@ -1,5 +1,7 @@
 pub use super::action::Action;
 
+pub use option_parser::{Options, OutputMode, Parsed};
+
 #[path = "args_action.rs"]
 mod action_parser;
 #[path = "args_child.rs"]
@@ -12,31 +14,6 @@ mod option_parser;
 mod validators;
 #[path = "args_values.rs"]
 mod values;
-
-#[derive(Clone, Copy, Debug, Default, Eq, PartialEq)]
-pub enum OutputMode {
-    #[default]
-    Rich,
-    Plain,
-    Json,
-}
-
-#[derive(Clone, Debug, Default, Eq, PartialEq)]
-pub struct Options {
-    pub output: OutputMode,
-    pub no_color: bool,
-    pub verbose: bool,
-    pub dry_run: bool,
-    pub no_input: bool,
-    pub confirm: Option<String>,
-    pub allow_dangerous: bool,
-}
-
-#[derive(Debug, Eq, PartialEq)]
-pub struct Parsed {
-    pub action: Action,
-    pub options: Options,
-}
 
 pub fn parse_cli<I>(args: I) -> Result<Parsed, String>
 where
@@ -52,6 +29,9 @@ where
     } = option_parser::extract(words)?;
     let mut action = action_parser::parse(&words, child, boundary)?;
     validators::validate_options(&action, &options)?;
+    if action_parser::bare_launch(&words, &options) {
+        action = Action::Tui;
+    }
     if let Action::Version { verbose } = &mut action {
         *verbose |= options.verbose;
     }
@@ -66,11 +46,12 @@ where
     I: IntoIterator,
     I::Item: Into<String>,
 {
-    parse_cli(args).map(|parsed| match parsed.action {
+    Ok(match parse_cli(args)?.action {
         Action::CommandHelp(_) => Action::Help,
         action => action,
     })
 }
+
 #[cfg(test)]
 #[path = "../tests/args_matrix.rs"]
 mod matrix;

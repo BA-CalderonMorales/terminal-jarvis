@@ -6,6 +6,7 @@ pub enum Action {
     CommandHelp(String),
     List,
     Check,
+    Tui,
     Current,
     Version {
         verbose: bool,
@@ -31,6 +32,5 @@ pub enum Action {
     Cache(Vec<String>),
     Security(Vec<String>),
     Gate(Vec<String>),
-    Experimental(Vec<String>),
     Legacy(String),
 }

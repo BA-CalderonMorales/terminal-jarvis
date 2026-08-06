@@ -1,4 +1,27 @@
-use super::{Options, OutputMode};
+#[derive(Clone, Copy, Debug, Default, Eq, PartialEq)]
+pub enum OutputMode {
+    #[default]
+    Rich,
+    Plain,
+    Json,
+}
+
+#[derive(Clone, Debug, Default, Eq, PartialEq)]
+pub struct Options {
+    pub output: OutputMode,
+    pub no_color: bool,
+    pub verbose: bool,
+    pub dry_run: bool,
+    pub no_input: bool,
+    pub confirm: Option<String>,
+    pub allow_dangerous: bool,
+}
+
+#[derive(Debug, Eq, PartialEq)]
+pub struct Parsed {
+    pub action: super::Action,
+    pub options: Options,
+}
 
 pub(super) struct Extracted {
     pub words: Vec<String>,

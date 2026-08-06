@@ -16,7 +16,9 @@ fn check_is_canonical_in_plain_rich_and_json_modes() {
     assert!(plain.stderr.is_empty());
     let text = String::from_utf8(plain.stdout).unwrap();
     assert!(text.contains("tj.version\tready\tinfo"));
-    assert!(text.contains("harness.codex.support\tunsupported\terror"));
+    assert!(text.contains("harness.codex.readiness\tmissing\terror"));
+    let verbose = tj(&["--plain", "check", "--verbose"], &home);
+    assert!(String::from_utf8_lossy(&verbose.stdout).contains("harness.codex.support\tready\tinfo"));
 
     let rich = tj(&["--no-color", "check"], &home);
     assert_eq!(rich.status.code(), Some(4));

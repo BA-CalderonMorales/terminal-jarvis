@@ -5,6 +5,7 @@ const COMMANDS: [&str; 20] = [
     "version",
     "list",
     "check",
+    "tui",
     "current",
     "use",
     "show",
@@ -18,7 +19,6 @@ const COMMANDS: [&str; 20] = [
     "cache",
     "security",
     "gate",
-    "experimental",
     "templates",
     "unknown",
 ];

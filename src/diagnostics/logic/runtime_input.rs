@@ -27,6 +27,7 @@ impl RuntimeInput {
             width,
             update_route: update_route.into(),
             checksum,
+            probes: true,
         }
     }
 }
@@ -41,6 +42,7 @@ impl Default for RuntimeInput {
             width: 100,
             update_route: "cargo".into(),
             checksum: "not-applicable".into(),
+            probes: true,
         }
     }
 }

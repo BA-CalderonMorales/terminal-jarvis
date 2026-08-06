@@ -70,9 +70,5 @@ fn every_action_variant_roundtrips_green() {
         &["tj", "gate", "status"],
         Action::Gate(vec!["status".into()]),
     );
-    g(
-        &["tj", "experimental", "dashboard"],
-        Action::Experimental(vec!["dashboard".into()]),
-    );
     g(&["tj", "templates"], Action::Legacy("templates".into()));
 }

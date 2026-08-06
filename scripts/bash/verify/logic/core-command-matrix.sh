@@ -188,11 +188,6 @@ if TERMINAL_JARVIS_CATALOG="$catalog" TERMINAL_JARVIS_HOME="$home" PATH="" \
 fi
 contains "$tmp/gate-run.err" "optional gate 'trivy'"
 
-bad experimental-disabled experimental dashboard
-TERMINAL_JARVIS_CATALOG="$catalog" TERMINAL_JARVIS_HOME="$home" \
-  TERMINAL_JARVIS_EXPERIMENTAL_UI=1 "$binary" experimental dashboard >"$tmp/experimental.out"
-contains "$tmp/experimental.out" "Dashboard"
-contains "$tmp/experimental.out" "+"
 outcome templates 4 templates
 outcome db 4 db
 contains "$tmp/templates.err" "removed"

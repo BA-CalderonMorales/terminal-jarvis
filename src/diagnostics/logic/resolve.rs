@@ -1,4 +1,4 @@
-use super::{Code, DiagnosticInput};
+use super::{dir_index::DirIndex, Code, DiagnosticInput};
 use std::collections::BTreeSet;
 use std::fs;
 use std::path::{Path, PathBuf};
@@ -10,6 +10,11 @@ pub struct Resolution {
     pub matches: usize,
 }
 pub fn binary(name: &str, input: &DiagnosticInput) -> Resolution {
+    let index = DirIndex::from_paths(&input.environment.paths());
+    binary_with(name, input, &index)
+}
+
+pub(crate) fn binary_with(name: &str, input: &DiagnosticInput, index: &DirIndex) -> Resolution {
     if name.trim().is_empty() {
         return result(Code::Malformed, None, Vec::new(), 0);
     }
@@ -18,15 +23,12 @@ pub fn binary(name: &str, input: &DiagnosticInput) -> Resolution {
     }
     let mut found = Vec::new();
     let mut denied = false;
-    for directory in input.environment.paths() {
-        for candidate in candidates(name, input) {
-            let path = directory.join(candidate);
-            match executable(&path) {
-                Ok(true) => found.push(path),
-                Ok(false) => denied = true,
-                Err(Code::PermissionDenied) => denied = true,
-                Err(_) => {}
-            }
+    for path in index.locate(&candidates(name, input)) {
+        match executable(&path) {
+            Ok(true) => found.push(path),
+            Ok(false) => denied = true,
+            Err(Code::PermissionDenied) => denied = true,
+            Err(_) => {}
         }
     }
     let mut unique = BTreeSet::new();
@@ -56,7 +58,6 @@ fn executable(path: &Path) -> Result<bool, Code> {
     }
     Ok(executable_mode(&metadata))
 }
-
 #[cfg(unix)]
 fn executable_mode(metadata: &fs::Metadata) -> bool {
     use std::os::unix::fs::PermissionsExt;

@@ -30,6 +30,10 @@ fn entry(name: &str) -> (&'static str, &'static str) {
             "terminal-jarvis check [--verbose]",
             "Diagnose local Terminal Jarvis and harness readiness.",
         ),
+        "tui" => (
+            "terminal-jarvis tui",
+            "Open the interactive harness switcher on a terminal.",
+        ),
         "current" => ("terminal-jarvis current", "Show the active harness."),
         "use" => (
             "terminal-jarvis use <harness>",
@@ -78,10 +82,6 @@ fn entry(name: &str) -> (&'static str, &'static str) {
         "gate" => (
             "terminal-jarvis gate [status|list|enable [name]|disable|run [name]]",
             "Inspect or control optional local gates.",
-        ),
-        "experimental" => (
-            "terminal-jarvis experimental dashboard",
-            "Use an explicitly enabled experimental surface.",
         ),
         "templates" | "db" => (
             "terminal-jarvis help",

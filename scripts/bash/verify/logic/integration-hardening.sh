@@ -82,8 +82,8 @@ contains "$tmp/version-info" "catalog:"
 run_tj list >"$tmp/list"
 line_count_is "$tmp/list" "$expected"
 
-if run_tj check >"$tmp/check" 2>"$tmp/check.err"; then
-  fail "zero-ready catalog diagnostics unexpectedly succeeded"
+if run_tj check --verbose >"$tmp/check" 2>"$tmp/check.err"; then
+  fail "unauthenticated catalog diagnostics unexpectedly succeeded"
 else
   code=$?
 fi

@@ -4,14 +4,44 @@
 //! or tap `cli::args` for the parse surface. The domain's internals live in
 //! `logic/`; structs/ holds the data shapes produced by parsing.
 
-use crate::cli::logic::entry;
-use crate::cli::logic::execute;
-use crate::cli::logic::json;
-use crate::cli::logic::style;
+use crate::cli::logic::{entry, execute, json, output, self_update, table};
 use crate::cli::structs::response::Response;
+use crate::diagnostics;
 use std::path::Path;
 
 pub use crate::cli::logic::args;
+pub use crate::cli::logic::output_truth;
+pub use crate::cli::logic::style;
+
+/// The tui's canonical diagnostics route: same collection and rendering as
+/// the headless `check`, as a String, without reaching into `cli::logic`.
+pub fn status(
+    catalog_root: &Path,
+    home: &Path,
+    harnesses: &[crate::contracts::Harness],
+) -> Result<String, String> {
+    let (stdout_tty, stderr_tty, color) = style::diagnostic_decisions();
+    let runtime = diagnostics::RuntimeInput::local(
+        stdout_tty,
+        stderr_tty,
+        color,
+        table::terminal_width(),
+        self_update::route_name(),
+    );
+    let input = diagnostics::DiagnosticInput::local(catalog_root, home, None, harnesses, runtime);
+    Ok(output::diagnostics(&diagnostics::collect(&input)))
+}
+
+pub fn dispatch(
+    action: args::Action,
+    options: &args::Options,
+    harnesses: &[crate::contracts::Harness],
+    catalog_root: &Path,
+    home: &Path,
+) -> Result<(i32, String), String> {
+    crate::cli::logic::dispatch::dispatch(action, options, harnesses, catalog_root, home)
+        .map_err(|failure| format!("{}: {}", failure.message, failure.next_action))
+}
 
 pub fn run<I>(args: I, catalog_root: &Path, home: &Path) -> i32
 where

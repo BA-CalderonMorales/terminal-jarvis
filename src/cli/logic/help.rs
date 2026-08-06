@@ -6,6 +6,10 @@ pub fn text() -> String {
     }
     let rows = vec![
         vec![
+            "tui | bare terminal-jarvis".into(),
+            "Open the interactive harness switcher".into(),
+        ],
+        vec![
             "list | show <harness> | check".into(),
             "Inspect harnesses and readiness".into(),
         ],
@@ -36,7 +40,7 @@ pub fn text() -> String {
     ];
     let mut out = style::banner(
         "Terminal Jarvis",
-        "Headless command center for coding-agent harnesses",
+        "Headless command center for coding-agent harnesses, along with a way to kick off terminal-jarvis (tj) in tui mode",
     );
     out.push_str(&table::render("Commands", &["COMMAND", "PURPOSE"], &rows));
     out.push('\n');
@@ -68,6 +72,6 @@ pub fn text() -> String {
             ),
         ],
     ));
-    out.push_str("\nExamples\n  terminal-jarvis use opencode\n  terminal-jarvis plan codex headless\n  terminal-jarvis gate enable trivy\n");
+    out.push_str("\nExamples\n  terminal-jarvis tui\n  terminal-jarvis use opencode\n  terminal-jarvis plan codex headless\n  terminal-jarvis gate enable trivy\n");
     out
 }

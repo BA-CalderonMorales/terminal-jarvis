@@ -43,6 +43,10 @@ pub fn warning(value: &str) -> String {
     paint(value, "1;33")
 }
 
+pub fn dim(value: &str) -> String {
+    paint(value, "2")
+}
+
 pub fn error(value: &str) -> String {
     format!(
         "{}\n",
@@ -77,16 +81,12 @@ fn paint_for(value: &str, code: &str, stream: Stream) -> String {
         terminal,
         OPTIONS.with(|cell| cell.get().no_color),
         std::env::var_os("NO_COLOR").is_some(),
-        term_is_dumb(term.as_deref()),
+        term.as_deref() == Some("dumb"),
     ) {
         format!("\x1b[{code}m{value}\x1b[0m")
     } else {
         value.to_string()
     }
-}
-
-fn term_is_dumb(term: Option<&str>) -> bool {
-    term == Some("dumb")
 }
 
 fn color_enabled_for(terminal: bool, no_color: bool, env_no_color: bool, dumb: bool) -> bool {

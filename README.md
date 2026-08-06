@@ -74,6 +74,9 @@ the newly installed command.
 ## Quick Start
 
 ```bash
+# Open the interactive switcher (bare tj on a terminal does the same)
+terminal-jarvis tui
+
 # List every coding agent
 terminal-jarvis list
 
@@ -138,13 +141,9 @@ Human-facing commands use width-aware structured output and color only on an
 interactive terminal. For scripts, put `--plain` before the command for stable
 line-oriented output; `--no-color` keeps the structured layout without color.
 
-The experimental dashboard is intentionally behind a feature wall and remains
-noninteractive:
-
-```bash
-TERMINAL_JARVIS_EXPERIMENTAL_UI=1 terminal-jarvis experimental dashboard
-```
-
+The interactive switcher (`terminal-jarvis tui`) doubles as the live dashboard
+-- readiness, active harness, and the numbered picker -- and every slash
+command runs the same guarded surface as headless automation.
 ## Docs
 
 | Document | What |

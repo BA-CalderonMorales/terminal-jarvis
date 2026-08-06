@@ -4,16 +4,6 @@ pub(super) fn at_most_one(words: &[String], command: &str) -> Result<Vec<String>
         .ok_or_else(|| format!("usage: terminal-jarvis {command} [value]"))
 }
 
-pub(super) fn exact_value(
-    words: &[String],
-    value: &str,
-    command: &str,
-) -> Result<Vec<String>, String> {
-    (words == [value])
-        .then(|| words.to_vec())
-        .ok_or_else(|| format!("usage: terminal-jarvis {command} {value}"))
-}
-
 pub(super) fn valid_choice(
     words: &[String],
     command: &str,

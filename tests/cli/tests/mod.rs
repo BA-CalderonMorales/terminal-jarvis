@@ -8,8 +8,6 @@ mod dangerous;
 mod e2e;
 mod edge_contract;
 mod exit;
-mod experimental;
-mod experimental_coverage;
 mod green;
 mod guard_intent;
 mod guard_intent_confirm;

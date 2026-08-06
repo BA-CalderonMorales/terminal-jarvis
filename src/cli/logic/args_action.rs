@@ -1,8 +1,9 @@
 use super::child_parser;
 use super::help_parser::{command_help, help};
-use super::validators::{at_most_one, exact_value, valid_auth, valid_choice, valid_gate};
+use super::validators::{at_most_one, valid_auth, valid_choice, valid_gate};
 use super::values::{exact, one, optional_one, plan, version};
 use super::Action;
+use std::io::IsTerminal;
 
 pub(super) fn parse(
     words: &[String],
@@ -28,6 +29,7 @@ pub(super) fn parse(
         )?,
         "list" | "tools" => exact(words, Action::List, "terminal-jarvis list")?,
         "check" | "status" => exact(words, Action::Check, "terminal-jarvis check")?,
+        "tui" => exact(words, Action::Tui, "terminal-jarvis tui")?,
         "current" => exact(words, Action::Current, "terminal-jarvis current")?,
         "use" => one(words, "use").map(Action::Use)?,
         "show" | "info" => one(words, words[0].as_str()).map(Action::Show)?,
@@ -58,9 +60,6 @@ pub(super) fn parse(
         )?),
         "security" => Action::Security(at_most_one(&words[1..], "security")?),
         "gate" => Action::Gate(valid_gate(&words[1..])?),
-        "experimental" => {
-            Action::Experimental(exact_value(&words[1..], "dashboard", "experimental")?)
-        }
         "templates" | "db" => exact(
             words,
             Action::Legacy(words[0].clone()),
@@ -86,4 +85,11 @@ fn no_child(action: Action, child: Vec<String>, boundary: bool) -> Result<Action
     } else {
         Ok(action)
     }
+}
+
+pub(super) fn bare_launch(words: &[String], options: &super::Options) -> bool {
+    words.is_empty()
+        && options == &super::Options::default()
+        && std::io::stdout().is_terminal()
+        && std::io::stdin().is_terminal()
 }

@@ -20,7 +20,8 @@ pub fn capability(
     capability: Capability,
     extra: &[String],
 ) -> Result<(i32, String), String> {
-    let plan = find(harnesses, harness)?
+    let selected = find(harnesses, harness)?;
+    let plan = selected
         .plan(capability)
         .ok_or_else(|| format!("{harness} lacks {capability}"))?;
     match runtime::run_command(plan, extra) {
@@ -30,7 +31,7 @@ pub fn capability(
             Ok((code, String::new()))
         }
         Err(error) => {
-            let (code, message) = command_error(harness, plan.command.command.as_str(), error);
+            let (code, message) = command_error(selected, plan.command.command.as_str(), error);
             eprintln!("{message}");
             Ok((code, String::new()))
         }
@@ -51,13 +52,23 @@ fn find<'a>(harnesses: &'a [Harness], name: &str) -> Result<&'a Harness, String>
         .ok_or_else(|| format!("unknown harness '{name}'"))
 }
 
-fn command_error(harness: &str, binary: &str, error: std::io::Error) -> (i32, String) {
+fn command_error(harness: &Harness, binary: &str, error: std::io::Error) -> (i32, String) {
+    let name = &harness.name;
     let (code, message) = match error.kind() {
-        std::io::ErrorKind::NotFound => (127, format!("{harness} binary '{binary}' was not found on PATH; run `terminal-jarvis install {harness}` or `terminal-jarvis plan {harness} download`")),
-        std::io::ErrorKind::PermissionDenied => {
-            (126, format!("{harness} binary '{binary}' is not executable; fix its permissions or reinstall {harness}"))
+        std::io::ErrorKind::NotFound => {
+            let advice = if harness.plan(Capability::Download).is_some() {
+                format!("; run `terminal-jarvis install {name}` or `terminal-jarvis plan {name} download`")
+            } else {
+                "; its download plan is undocumented; see `terminal-jarvis plan ".to_string()
+                    + name
+                    + "`"
+            };
+            (127, format!("{name} binary '{binary}' was not found on PATH{advice}"))
         }
-        _ => (3, format!("failed to start {harness} binary '{binary}': {error}")),
+        std::io::ErrorKind::PermissionDenied => {
+            (126, format!("{name} binary '{binary}' is not executable; fix its permissions or reinstall {name}"))
+        }
+        _ => (3, format!("failed to start {} binary '{binary}': {error}", harness.name)),
     };
     (code, crate::diagnostics::redact_process_text(&message))
 }

@@ -30,6 +30,7 @@ pub struct RuntimeInput {
     pub width: usize,
     pub update_route: String,
     pub checksum: String,
+    pub probes: bool,
 }
 
 #[derive(Clone, Debug)]

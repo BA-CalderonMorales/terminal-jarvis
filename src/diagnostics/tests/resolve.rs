@@ -29,6 +29,7 @@ fn dummy_input() -> DiagnosticInput {
             width: 80,
             update_route: "source".into(),
             checksum: "".into(),
+            probes: true,
         },
         now: SystemTime::now(),
         stale_after: Duration::from_secs(300),

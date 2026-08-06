@@ -1,4 +1,4 @@
-use super::{color_enabled_for, term_is_dumb, OPTIONS};
+use super::{color_enabled_for, OPTIONS};
 use std::cell::Cell;
 use std::io::IsTerminal;
 
@@ -7,7 +7,7 @@ pub fn decisions() -> (bool, bool, bool) {
     let stderr = std::io::stderr().is_terminal();
     let options = OPTIONS.with(Cell::get);
     let no_color = std::env::var_os("NO_COLOR").is_some();
-    let dumb = term_is_dumb(std::env::var("TERM").ok().as_deref());
+    let dumb = std::env::var("TERM").ok().as_deref() == Some("dumb");
     (
         stdout,
         stderr,

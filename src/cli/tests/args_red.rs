@@ -29,7 +29,6 @@ fn every_action_variant_rejects_malformed_red() {
     red(&["tj", "cache", "bogus"]);
     red(&["tj", "security", "a", "b"]);
     red(&["tj", "gate", "bogus"]);
-    red(&["tj", "experimental", "bogus"]);
     red(&["tj", "templates", "x"]);
     red(&["tj", "--bogus"]);
     red(&["tj", "run", "--bogus"]);

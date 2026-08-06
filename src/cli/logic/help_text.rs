@@ -1,6 +1,7 @@
 pub const PLAIN: &str = "Terminal Jarvis\n\
-     Headless command center for coding-agent harnesses\n\n\
+     Headless command center for coding-agent harnesses, along with a way to kick off terminal-jarvis (tj) in tui mode\n\n\
      usage:\n\
+       terminal-jarvis tui\n\
        terminal-jarvis [harness] [args...] [-- child-args...]\n\
        terminal-jarvis run [harness] [capability] [args...] [-- child-args...]\n\
        terminal-jarvis version [--verbose|--info|-v]\n\
@@ -41,8 +42,6 @@ pub const PLAIN: &str = "Terminal Jarvis\n\
        terminal-jarvis plan codex headless\n\
        terminal-jarvis run opencode headless --dry-run\n\
        terminal-jarvis gate enable trivy\n\n\
-     experimental:\n\
-       TERMINAL_JARVIS_EXPERIMENTAL_UI=1 terminal-jarvis experimental dashboard\n\n\
      legacy aliases:\n\
        tools -> list, status -> check, info <harness> -> show <harness>\n\
        install <harness> -> run <harness> download\n\

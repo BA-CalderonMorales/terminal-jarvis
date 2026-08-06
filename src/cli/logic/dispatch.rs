@@ -1,7 +1,6 @@
 use super::{
     args::{Action, Options},
-    compat, dispatch_compat, dispatch_security, dispatch_support, error, experimental, gate_cmd,
-    guard, output,
+    compat, dispatch_compat, dispatch_security, dispatch_support, error, gate_cmd, guard, output,
 };
 use crate::contracts::{Capability, Harness};
 use std::path::Path;
@@ -16,6 +15,7 @@ pub fn dispatch(
     match action {
         Action::List => Ok((0, output::list(harnesses))),
         Action::Check => unreachable!("check handled by the canonical diagnostics route"),
+        Action::Tui => unreachable!("tui handled before catalog dispatch"),
         Action::Current => Ok((0, output::current(dispatch_support::session(home)?))),
         Action::Use(name) => {
             dispatch_support::find(harnesses, &name)?;
@@ -54,9 +54,6 @@ pub fn dispatch(
         Action::Gate(words) => gate_cmd::handle(&words, home).map_err(|message| {
             error::Failure::safety("gate_blocked", message, "run `terminal-jarvis gate status`")
         }),
-        Action::Experimental(words) => experimental::run(&words, harnesses, home)
-            .map(|body| (0, body))
-            .map_err(dispatch_support::experimental_error),
         Action::Legacy(command) => Err(error::Failure::unavailable(
             "removed_command",
             format!("{command} was removed with the v0.1 catalog rewrite"),

@@ -47,6 +47,19 @@ fn install_unguarded_harness_is_red() {
 }
 
 #[test]
+fn tui_requires_an_interactive_terminal() {
+    let (code, _, stderr) = run(&["tui"]);
+    assert_eq!(code, 4, "noninteractive tui must fail closed");
+    assert!(stderr.contains("interactive terminal"));
+}
+
+#[test]
+fn tui_with_lifecycle_flags_fails_closed() {
+    let (code, _, _) = run(&["tui", "--dry-run"]);
+    assert_eq!(code, 2, "lifecycle options are not valid for the tui");
+}
+
+#[test]
 fn install_unknown_harness_is_red() {
     for unknown in ["nonexistent", "xyz", "foo-bar"] {
         let (code, _, stderr) = run(&["install", unknown]);

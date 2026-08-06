@@ -14,50 +14,6 @@ impl PlatformInput {
     }
 }
 
-impl From<&Harness> for HarnessInput {
-    fn from(harness: &Harness) -> Self {
-        let support = harness
-            .capabilities
-            .iter()
-            .filter(|plan| !plan.executable.trim().is_empty())
-            .map(|plan| {
-                (
-                    plan.capability.as_str().to_string(),
-                    plan.support.as_str().to_string(),
-                    executable_support(plan),
-                )
-            })
-            .collect();
-        let version = harness
-            .plan(crate::contracts::Capability::Version)
-            .filter(|plan| {
-                matches!(
-                    plan.support,
-                    crate::contracts::SupportState::Verified
-                        | crate::contracts::SupportState::Expected
-                )
-            })
-            .map(|plan| (plan.command.command.clone(), plan.command.args.clone()));
-        Self {
-            name: harness.name.clone(),
-            binary: harness.binary.clone(),
-            env_mode: harness.env_mode,
-            env: harness.env.clone(),
-            support,
-            version,
-        }
-    }
-}
-
-fn executable_support(plan: &crate::contracts::CapabilityPlan) -> bool {
-    matches!(
-        plan.support,
-        crate::contracts::SupportState::Verified | crate::contracts::SupportState::Expected
-    ) && crate::catalog::freshness_status(plan) == "fresh"
-        && crate::context::platform::id()
-            .is_some_and(|platform| plan.platforms.iter().any(|candidate| candidate == platform))
-}
-
 impl DiagnosticInput {
     pub fn local(
         catalog: &Path,

@@ -25,7 +25,4 @@ fn color_requires_every_enabling_condition() {
     assert!(!color_enabled_for(true, true, false, false));
     assert!(!color_enabled_for(true, false, true, false));
     assert!(!color_enabled_for(true, false, false, true));
-    assert!(term_is_dumb(Some("dumb")));
-    assert!(!term_is_dumb(Some("xterm")));
-    assert!(!term_is_dumb(None));
 }

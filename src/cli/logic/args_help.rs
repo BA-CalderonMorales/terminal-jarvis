@@ -42,7 +42,6 @@ fn canonical(value: &str) -> Option<String> {
         "cache",
         "security",
         "gate",
-        "experimental",
         "templates",
         "db",
     ];

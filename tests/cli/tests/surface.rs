@@ -45,7 +45,6 @@ fn every_canonical_surface_has_a_deterministic_safe_outcome() {
         &["--plain", "run", "fixture", "headless"][..],
         &["--plain", "install", "fixture", "--dry-run"],
         &["--plain", "update", "fixture", "--dry-run"],
-        &["--plain", "experimental", "dashboard"],
         &["--plain", "fixture", "--help"],
         &["--plain", "templates"],
         &["--plain", "db"],

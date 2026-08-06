@@ -1,9 +1,11 @@
 pub mod active;
 pub mod collect;
 pub mod config;
+pub mod dir_index;
 pub mod distribution;
 pub mod harness;
 pub mod harness_env;
+pub mod harness_input;
 pub mod harness_support;
 pub mod inspect;
 pub mod json;

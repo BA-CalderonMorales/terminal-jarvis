@@ -56,14 +56,3 @@ pub fn state_error(message: String) -> error::Failure {
 pub fn unavailable_error(message: String) -> error::Failure {
     error::Failure::unavailable("unavailable", message, "run `terminal-jarvis check`")
 }
-
-pub fn experimental_error(message: String) -> error::Failure {
-    if message.contains("disabled") {
-        return error::Failure::unavailable(
-            "feature_disabled",
-            message,
-            "set TERMINAL_JARVIS_EXPERIMENTAL_UI=1 to opt in",
-        );
-    }
-    state_error(message)
-}
