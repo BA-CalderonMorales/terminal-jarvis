@@ -16,7 +16,7 @@
 [![Homebrew](https://img.shields.io/badge/Homebrew-Available-blue.svg?logo=homebrew&style=flat-square)](https://github.com/BA-CalderonMorales/homebrew-terminal-jarvis)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square)](https://opensource.org/licenses/MIT)
 [![Mentioned in Awesome](https://img.shields.io/badge/Mentioned%20in-Awesome-6f42c1?style=flat-square)](https://github.com/Piebald-AI/awesome-gemini-cli)
-[![Docs](https://img.shields.io/badge/docs-latest-blue.svg?style=flat-square)](https://ba-calderonmorales.github.io/my-life-as-a-dev/latest/projects/active/terminal-jarvis/)
+[![Docs](https://img.shields.io/badge/docs-latest-blue.svg?style=flat-square)](https://github.com/BA-CalderonMorales/terminal-jarvis/tree/main/docs)
 [![Coverage](https://img.shields.io/badge/coverage-report-green.svg?style=flat-square)](https://github.com/BA-CalderonMorales/terminal-jarvis/actions/workflows/ci.yml?query=branch%3Adevelop)
 
 <img src="docs/demo-tui.gif" alt="Terminal Jarvis switcher in action" width="100%">
@@ -135,7 +135,8 @@ every file stays at 100 lines or fewer.
 
 ## Docs
 
-What this is for, and the catalog truth behind it: [What is this?](docs/what-is-this.md).
+Browse the whole folder from the [docs index](docs/index.md). What this is
+for, and the catalog truth behind it: [What is this?](docs/what-is-this.md).
 
 | Document | What |
 |---|---|
