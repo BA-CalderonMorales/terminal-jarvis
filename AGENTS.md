@@ -60,8 +60,7 @@ built and verified.
 - Runs on every PR against `develop` or `main`.
 - `plan/`, `scratch/`, and `GOAL.md` are developer-local: gitignored,
   refused by the pre-commit gate on `develop`/`main`, and never merge into
-  `develop` or `main`. Validate a local `plan/` ledger with
-  `ruby scripts/ruby/plan/index.rb plan`.
+  `develop` or `main`.
 - **Docs-only PRs** (changes limited to `docs/`, `README.md`, `AGENTS.md`,
   `CLAUDE.md`) skip CI automatically via `paths-ignore`. Trigger manually with
   `workflow_dispatch` when needed.
