@@ -77,6 +77,11 @@ terminal-jarvis gate status
 
 ## Commands
 
+Every command below is the same command whatever the invocation style:
+`terminal-jarvis list`, `tj list`, `npx terminal-jarvis list`, and
+`cargo run -- list` are all the same thing. First time here? No install
+needed -- `npx terminal-jarvis tui` opens the switcher directly.
+
 **Headless** (`terminal-jarvis <command>` / `tj <command>`) -- one command per
 invocation, for scripts, CI, and one-shot tasks:
 
