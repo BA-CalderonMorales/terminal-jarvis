@@ -28,11 +28,7 @@ other AI assistants from one terminal interface.
 
 ---
 
-> **Catalog truth**: A data-driven harness catalog for AI coding agents. It maps
-> **25 coding-agent CLIs** through a shared **9-capability contract** and fails
-> closed unless a capability's declared support, evidence, platform, and
-> freshness permit it. Catalog presence does not mean that a capability is
-> supported; each capability reports its own evidence-backed state.
+What this is for, and the catalog truth behind it: [What is this?](docs/what-is-this.md).
 
 ## Install
 
@@ -137,6 +133,7 @@ Auth stays with each harness -- terminal-jarvis never retains credentials.
 
 | Document | What |
 |---|---|
+| [What is this?](docs/what-is-this.md) | The catalog truth and why the tool exists |
 | [Capability contract](docs/harness-capability-contract.md) | Full breakdown of the 9 capabilities |
 | [Installation](docs/installation.md) | Package mechanics, supported platforms, update behavior |
 | [Usage](docs/usage.md) | Headless vs interactive, launch guards |
