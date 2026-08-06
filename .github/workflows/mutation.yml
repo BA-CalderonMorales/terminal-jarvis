@@ -1,4 +1,4 @@
-name: Mutation
+name: CI Mutation
 
 on:
   pull_request:
@@ -21,7 +21,7 @@ jobs:
   mutation:
     name: Mutation
     runs-on: ubuntu-latest
-    timeout-minutes: 25
+    timeout-minutes: 60
     steps:
       - uses: actions/checkout@v7
 
@@ -41,4 +41,4 @@ jobs:
         run: command -v cargo-mutants >/dev/null || cargo install cargo-mutants --locked
 
       - name: Run mutation tests
-        run: cargo mutants --config mutants.toml --minimum-test-timeout 30 --jobs 2
+        run: cargo mutants --config mutants.toml --minimum-test-timeout 30 --jobs 4

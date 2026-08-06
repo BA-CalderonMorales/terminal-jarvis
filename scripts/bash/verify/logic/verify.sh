@@ -1,6 +1,8 @@
 #!/usr/bin/env sh
 set -eu
 
+here=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
+
 line_limit=100
 coverage_target=90
 mutation_target=90
