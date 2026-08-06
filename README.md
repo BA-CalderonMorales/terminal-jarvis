@@ -109,6 +109,7 @@ Auth stays with each harness -- terminal-jarvis never retains credentials.
 
 | Command | Purpose |
 |---|---|
+| `tui` | Open the interactive switcher (a bare `tj` on a terminal starts it too) |
 | `list` | Show all coding agents |
 | `show <harness>` | Inspect a harness's capabilities |
 | `use <harness>` / `current` | Select / show active harness |
@@ -122,13 +123,14 @@ Auth stays with each harness -- terminal-jarvis never retains credentials.
 | `config show` | Active config state |
 | `auth help <harness>` | Credential setup guidance |
 | `[harness] [args...]` | Pass-through to harness binary |
+| `home` | In the switcher: back to the welcome frame (works as `clear` too) |
+| `exit` | In the switcher: leave it |
+
+Every command above runs inside the switcher with the same guards as
+headless automation; the numbered picker and readiness dashboard live there.
 
 Compatibility aliases, plain output behavior, and notes on removed
 experiments live in the [Legacy notes](docs/legacy-notes.md).
-
-The interactive switcher (`terminal-jarvis tui`) doubles as the live dashboard
--- readiness, active harness, and the numbered picker -- and every slash
-command runs the same guarded surface as headless automation.
 
 ## Docs
 
