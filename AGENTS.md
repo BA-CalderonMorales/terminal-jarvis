@@ -58,15 +58,13 @@ built and verified.
 ## CI
 
 - Runs on every PR against `develop` or `main`.
-- `plan.yml` validates the `plan/` structure on `plan/**` changes; `plan/` is
-  developer space and never merges into `develop`/`main`.
+- `plan/`, `scratch/`, and `GOAL.md` are developer-local: gitignored,
+  refused by the pre-commit gate on `develop`/`main`, and never merge into
+  `develop` or `main`. Validate a local `plan/` ledger with
+  `ruby scripts/ruby/plan/index.rb plan`.
 - **Docs-only PRs** (changes limited to `docs/`, `README.md`, `AGENTS.md`,
   `CLAUDE.md`) skip CI automatically via `paths-ignore`. Trigger manually with
   `workflow_dispatch` when needed.
-- **Plan-only PRs** run the lightweight `Plan Validation` workflow instead of
-  the Rust/package/security/mutation jobs. Run
-  `ruby scripts/ruby/plan/index.rb plan` locally; mixed plan and product
-  changes still run both.
 - The harness capability contract lives in
   [docs/harness-capability-contract.md](docs/harness-capability-contract.md).
   Keep it in sync when adding capabilities or commands.

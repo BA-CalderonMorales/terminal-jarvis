@@ -17,11 +17,21 @@ failures=0
 notes=0
 for file in $staged; do
   case "$file" in
-    default_* | *.profraw | mutants.out* | GOAL.md | scratch/* | node_modules/ | *.tgz | *.zip | *.deb | *.rpm | *.log | .DS_Store | dist/ | coverage/ | lcov.info | cobertura.xml | homebrew/release/)
+    default_* | *.profraw | mutants.out* | *GOAL.md | *.tgz | *.zip | *.deb | *.rpm | *.log | .DS_Store | lcov.info | cobertura.xml)
       echo "pre-commit: refuse to commit build or package junk '$file'" >&2
       failures=$((failures + 1))
       ;;
-    plan/*)
+  esac
+  for prefix in dist/ coverage/ node_modules/ homebrew/release/ scratch/; do
+    case "$file" in
+      "$prefix"*)
+        echo "pre-commit: refuse to commit build or package junk '$file'" >&2
+        failures=$((failures + 1))
+        ;;
+    esac
+  done
+  case "$file" in
+    plan/ | plan/*)
       if $deploy; then
         echo "pre-commit: refuse to commit developer-local '$file' on $branch" >&2
         failures=$((failures + 1))
