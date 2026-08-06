@@ -42,6 +42,12 @@ npm install -g terminal-jarvis
 brew install BA-CalderonMorales/homebrew-terminal-jarvis/terminal-jarvis
 ```
 
+| Environment | Invoke with |
+|---|---|
+| Global install (`npm install -g` / `brew install` / `cargo install`) | `terminal-jarvis list` or `tj list` |
+| No install -- run on demand from anywhere | `npx terminal-jarvis list` |
+| Built from source (this repository) | `cargo run -- list` |
+
 ## Quick Start
 
 Inspect and safely gate catalog descriptors for Claude, Gemini, Qwen, Pi, Droid and a variety of other AI assistants from one terminal interface. The modes, the launch guards, and the full command surface: [Usage](docs/usage.md).
