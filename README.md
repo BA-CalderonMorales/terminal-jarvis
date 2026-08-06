@@ -81,11 +81,39 @@ terminal-jarvis gate status
 
 For development builds, replace `terminal-jarvis` with `cargo run --`.
 
-## Modes
+## Commands
 
-Everything above runs headless (`terminal-jarvis <command>`) or inside the
-interactive switcher (`terminal-jarvis tui`) -- the difference, and the demo
-script, are covered in [Usage](docs/usage.md).
+**Headless** (`terminal-jarvis <command>` / `tj <command>`) -- one command per
+invocation, for scripts, CI, and one-shot tasks:
+
+| Command | Purpose |
+|---|---|
+| `list` | Show all coding agents |
+| `show <harness>` | Inspect a harness's capabilities |
+| `use <harness>` / `current` | Select / show active harness |
+| `plan [harness] <capability>` | Preview the shell command |
+| `run [harness] [capability] [args...]` | Execute a capability |
+| `check` | Report binary + env readiness |
+| `security [status\|audit\|harness]` | Security posture |
+| `gate [status\|list\|enable\|disable\|run]` | Optional local security gate |
+| `version [--verbose]` / `--version` / `-v` / `--info` | Version info |
+| `self-update [--dry-run]` / `--update` | Update Terminal Jarvis or print the update command |
+| `config show` | Active config state |
+| `auth help <harness>` | Credential setup guidance |
+| `[harness] [args...]` | Pass-through to harness binary |
+
+**Interactive** (`terminal-jarvis tui` / bare `tj` on a terminal) -- the
+chat-style switcher with the numbered picker and readiness dashboard. Every
+headless command above also works here, plus:
+
+| Command | Purpose |
+|---|---|
+| `tui` | Open the switcher |
+| `home` | Back to the welcome frame (works as `clear` too) |
+| `exit` | Leave the switcher |
+
+Compatibility aliases, plain output behavior, and notes on removed
+experiments live in the [Legacy notes](docs/legacy-notes.md).
 
 ### Layout
 
@@ -104,33 +132,6 @@ harnesses/<agent>/
 ```
 
 Auth stays with each harness -- terminal-jarvis never retains credentials.
-
-## Commands
-
-| Command | Purpose |
-|---|---|
-| `tui` | Open the interactive switcher (a bare `tj` on a terminal starts it too) |
-| `list` | Show all coding agents |
-| `show <harness>` | Inspect a harness's capabilities |
-| `use <harness>` / `current` | Select / show active harness |
-| `plan [harness] <capability>` | Preview the shell command |
-| `run [harness] [capability] [args...]` | Execute a capability |
-| `check` | Report binary + env readiness |
-| `security [status\|audit\|harness]` | Security posture |
-| `gate [status\|list\|enable\|disable\|run]` | Optional local security gate |
-| `version [--verbose]` / `--version` / `-v` / `--info` | Version info |
-| `self-update [--dry-run]` / `--update` | Update Terminal Jarvis or print the update command |
-| `config show` | Active config state |
-| `auth help <harness>` | Credential setup guidance |
-| `[harness] [args...]` | Pass-through to harness binary |
-| `home` | In the switcher: back to the welcome frame (works as `clear` too) |
-| `exit` | In the switcher: leave it |
-
-Every command above runs inside the switcher with the same guards as
-headless automation; the numbered picker and readiness dashboard live there.
-
-Compatibility aliases, plain output behavior, and notes on removed
-experiments live in the [Legacy notes](docs/legacy-notes.md).
 
 ## Docs
 
