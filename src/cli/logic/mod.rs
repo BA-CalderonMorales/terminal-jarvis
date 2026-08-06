@@ -4,6 +4,7 @@ pub(crate) use crate::cli::structs::response;
 
 pub mod args;
 pub(crate) mod cache;
+pub mod canonical;
 pub(crate) mod compat;
 pub(crate) mod compat_support;
 pub(crate) mod dispatch;

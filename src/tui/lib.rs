@@ -9,6 +9,7 @@ pub mod home;
 pub mod input;
 pub mod palette;
 pub mod shell;
+pub mod sigint;
 pub mod switcher;
 pub mod term;
 

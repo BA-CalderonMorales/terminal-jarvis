@@ -1,12 +1,12 @@
-//! Shell: the read-prompt-respond loop in chat style -- the input box is
-//! always the last thing on screen, results print above it. Slash lines and
-//! bare verbs parse like headless argv; bare numbers and names switch tools;
-//! `home`/`clear` reset the frame; anything else runs the active harness.
+//! Shell: the chat-style read-prompt-respond loop -- results print above the
+//! input box. Bare verbs, numbers, and names switch tools.
 
 use crate::cli::args;
 use crate::contracts::Harness;
 use std::path::Path;
 
+#[path = "./canonical.rs"]
+mod canonical;
 #[path = "./handle.rs"]
 mod handle;
 pub use handle::handle;
@@ -14,7 +14,9 @@ pub use handle::handle;
 pub fn run(harnesses: &[Harness], catalog_root: &Path, state_home: &Path, options: &args::Options) {
     let mut hint = modeline(state_home, false);
     while let Some(input) = super::input::read_line(&hint) {
-        match handle(harnesses, catalog_root, state_home, options, &input) {
+        let next =
+            super::sigint::guarded(|| handle(harnesses, catalog_root, state_home, options, &input));
+        match next {
             Next::Exit => break,
             Next::Again { picker_shown } => {
                 hint = modeline(state_home, picker_shown);
@@ -43,11 +45,10 @@ pub fn resolve(input: &str, harnesses: &[Harness]) -> Resolved {
     if input.is_empty() {
         return Resolved::Empty;
     }
-    if matches!(input, "/exit" | "/quit" | "exit" | "quit") {
-        return Resolved::Exit;
-    }
-    if matches!(input, "/home" | "/clear" | "home" | "clear") {
-        return Resolved::Home;
+    match input {
+        "/exit" | "/quit" | "exit" | "quit" => return Resolved::Exit,
+        "/home" | "/clear" | "home" | "clear" => return Resolved::Home,
+        _ => {}
     }
     if let Some(rest) = input.strip_prefix('/') {
         return match super::palette::parse(rest) {

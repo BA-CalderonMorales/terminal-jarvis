@@ -10,24 +10,25 @@ use crate::diagnostics;
 use std::path::Path;
 
 pub use crate::cli::logic::args;
+pub use crate::cli::logic::canonical;
 pub use crate::cli::logic::output_truth;
 pub use crate::cli::logic::style;
 
-/// The tui's canonical diagnostics route: same collection and rendering as
-/// the headless `check`, as a String, without reaching into `cli::logic`.
+/// The tui's `check` rendering as a String, without version probes.
 pub fn status(
     catalog_root: &Path,
     home: &Path,
     harnesses: &[crate::contracts::Harness],
 ) -> Result<String, String> {
     let (stdout_tty, stderr_tty, color) = style::diagnostic_decisions();
-    let runtime = diagnostics::RuntimeInput::local(
+    let mut runtime = diagnostics::RuntimeInput::local(
         stdout_tty,
         stderr_tty,
         color,
         table::terminal_width(),
         self_update::route_name(),
     );
+    runtime.probes = false;
     let input = diagnostics::DiagnosticInput::local(catalog_root, home, None, harnesses, runtime);
     Ok(output::diagnostics(&diagnostics::collect(&input)))
 }

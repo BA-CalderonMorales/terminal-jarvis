@@ -4,8 +4,7 @@
 //! dispatches through the same guards as the headless cli.
 
 use super::Resolved;
-use crate::cli::args;
-use crate::cli::{self, dispatch, style};
+use crate::cli::{args, style};
 use crate::contracts::Harness;
 use std::path::Path;
 
@@ -61,37 +60,13 @@ fn run_action(
             true
         }
         args::Action::Check => {
-            match cli::status(catalog_root, state_home, harnesses) {
+            match crate::cli::status(catalog_root, state_home, harnesses) {
                 Ok(body) => print!("{body}"),
                 Err(message) => eprintln!("{}", style::error(&message)),
             }
             false
         }
-        _ => dispatch_action(action, options, harnesses, catalog_root, state_home),
-    }
-}
-
-fn dispatch_action(
-    action: args::Action,
-    options: &args::Options,
-    harnesses: &[Harness],
-    catalog_root: &Path,
-    state_home: &Path,
-) -> bool {
-    match dispatch(action, options, harnesses, catalog_root, state_home) {
-        Ok((_, body)) => {
-            if !body.is_empty() {
-                print!("{body}");
-                if !body.ends_with('\n') {
-                    println!();
-                }
-            }
-            false
-        }
-        Err(message) => {
-            eprintln!("{message}");
-            false
-        }
+        action => super::canonical::run(action, options, harnesses, catalog_root, state_home),
     }
 }
 

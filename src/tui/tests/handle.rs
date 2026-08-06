@@ -51,6 +51,25 @@ fn handle_dispatch_exit_empty_home_and_actions() {
 }
 
 #[test]
+fn actions_the_headless_cli_pre_routes_never_panic() {
+    let previous = crate::cli::style::set(true, true);
+    let (catalog_root, state_home) = local();
+    let harnesses = [harness("alpha")];
+    for input in ["version", "/version", "help run", "self-update", "tui"] {
+        assert!(
+            matches!(
+                handle(&harnesses, &catalog_root, &state_home, &options(), input),
+                Next::Again {
+                    picker_shown: false
+                }
+            ),
+            "{input}"
+        );
+    }
+    crate::cli::style::restore(previous);
+}
+
+#[test]
 fn handle_marks_picker_shown_only_after_list() {
     let previous = crate::cli::style::set(true, true);
     let (catalog_root, state_home) = local();
