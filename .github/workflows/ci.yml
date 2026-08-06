@@ -40,6 +40,8 @@ jobs:
           node-version: 20
 
       - name: Run exact-ref adversarial evidence
+        env:
+          CARGO_NET_OFFLINE: "false"
         run: |
           mkdir -p evidence
           scripts/bash/catalog/index.sh adversarial-report \

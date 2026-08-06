@@ -17,7 +17,9 @@ done
 
 tmp=$(mktemp "${output}.tmp.XXXXXX")
 trap 'rm -f -- "$tmp"' EXIT
-export CARGO_NET_OFFLINE=true
+# Offline by default for local determinism; CI overrides to false because
+# a fresh runner has no pre-warmed registry cache for dev-dependencies.
+export CARGO_NET_OFFLINE=${CARGO_NET_OFFLINE:-true}
 
 run() {
   local id=$1 treatment=$2 command
