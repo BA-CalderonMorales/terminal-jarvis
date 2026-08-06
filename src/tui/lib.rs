@@ -48,8 +48,5 @@ pub fn guard(plain: bool, stdin_terminal: bool, stdout_terminal: bool) -> Result
 }
 
 #[cfg(test)]
-#[path = "tests/home.rs"]
-mod home_tests;
-#[cfg(test)]
 #[path = "tests/guard.rs"]
 mod tests;

@@ -28,9 +28,7 @@ pub fn render(harnesses: &[Harness], catalog_root: &Path, state_home: &Path) {
     println!(
         "{}  {}",
         style::label("CWD"),
-        std::env::current_dir()
-            .map(|path| path.display().to_string())
-            .unwrap_or_else(|_| "unknown".to_string())
+        cwd_label()
     );
     let ready = readiness(harnesses, catalog_root, state_home, active.as_deref());
     println!(
@@ -41,6 +39,41 @@ pub fn render(harnesses: &[Harness], catalog_root: &Path, state_home: &Path) {
     );
     println!();
 }
+
+fn cwd_label() -> String {
+    let full = std::env::current_dir()
+        .map(|path| path.display().to_string())
+        .unwrap_or_else(|_| "unknown".to_string());
+    cwd_label_for(&full, std::env::var("HOME").ok().as_deref())
+}
+
+/// Roots the path at `~` when it lives under HOME, then left-ellipsizes to
+/// at most 32 columns, cutting at component boundaries.
+fn cwd_label_for(full: &str, home: Option<&str>) -> String {
+    let rooted = home
+        .and_then(|home| full.strip_prefix(home).map(|rest| format!("~{rest}")))
+        .unwrap_or_else(|| full.to_string());
+    if rooted.chars().count() <= 32 {
+        return rooted;
+    }
+    const BUDGET: usize = 32 - 4;
+    let mut tail: Vec<&str> = Vec::new();
+    let mut length = 0;
+    for component in rooted.split('/').rev() {
+        let joins = tail.len();
+        if !tail.is_empty() && length + joins + component.chars().count() > BUDGET {
+            break;
+        }
+        tail.push(component);
+        length += component.chars().count();
+    }
+    tail.reverse();
+    format!(".../{}", tail.join("/"))
+}
+
+#[cfg(test)]
+#[path = "../tests/home.rs"]
+mod tests;
 
 fn readiness(
     harnesses: &[Harness],
