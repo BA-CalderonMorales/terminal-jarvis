@@ -22,3 +22,4 @@ GOAL.md
 
 # tool writes flow through a local symlink to .agents/ (never tracked)
 /.claude/
+/plan/
