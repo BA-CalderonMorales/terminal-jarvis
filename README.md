@@ -71,22 +71,47 @@ terminal-jarvis gate status
 
 ## Commands
 
-Commands run in one of two modes: headless (`terminal-jarvis <command>`) or
-inside the interactive switcher (`terminal-jarvis tui`). The invocation style
-depends only on how you reached the tool:
+Commands run in one of two ways: headless (`terminal-jarvis <command>`) or
+inside the interactive switcher (`terminal-jarvis tui`), and every command is
+the same however you reached the tool:
 
 - Installed globally (npm, Homebrew, or Cargo): `terminal-jarvis list` / `tj list`
 - No install -- run on demand from anywhere: `npx terminal-jarvis list`
 - Built from source (this repository): `cargo run -- list`
 
-| Environment | Invoke with |
-|---|---|
-| Global install (`npm install -g` / `brew install` / `cargo install`) | `terminal-jarvis list` or `tj list` |
-| No install -- run on demand from anywhere | `npx terminal-jarvis list` |
-| Built from source (this repository) | `cargo run -- list` |
+First time here? No install needed -- `npx terminal-jarvis tui` opens the
+switcher directly.
 
-Every command in the [Maintainer guide](docs/maintainer.md) works through any
-of these styles.
+**Headless** (`terminal-jarvis <command>` / `tj <command>`) -- one command per
+invocation, for scripts, CI, and one-shot tasks:
+
+| Command | Purpose |
+|---|---|
+| `list` | Show all coding agents |
+| `check` | Report binary + env readiness |
+| `show <harness>` | Inspect a harness's capabilities |
+| `install <harness>` | Install a harness |
+| `update [<harness>]` | Upgrade a harness |
+| `plan [harness] <capability>` | Preview the shell command |
+| `use <harness>` / `current` | Select / show active harness |
+| `run [harness] [capability] [args...]` | Execute a capability |
+| `security [status\|audit\|harness]` | Security posture |
+| `gate [status\|list\|enable\|disable\|run]` | Optional local security gate |
+| `version [--verbose]` / `--version` / `-v` / `--info` | Version info |
+| `self-update [--dry-run]` / `--update` | Update Terminal Jarvis or print the update command |
+| `config show` | Active config state |
+| `auth help <harness>` | Credential setup guidance |
+| `[harness] [args...]` | Pass-through to harness binary |
+
+**Interactive** (`terminal-jarvis tui` / bare `tj` on a terminal) -- the
+chat-style switcher with the numbered picker and readiness dashboard. Every
+headless command above also works here, plus:
+
+| Command | Purpose |
+|---|---|
+| `tui` | Open the switcher |
+| `home` | Back to the welcome frame (works as `clear` too) |
+| `exit` | Leave the switcher |
 
 ## Layout
 
@@ -140,7 +165,7 @@ for, and the catalog truth behind it: [What is this?](docs/what-is-this.md).
 
 | Document | What |
 |---|---|
-| [Maintainer guide](docs/maintainer.md) | The command surface, mode by mode; the security model |
+| [Maintainer guide](docs/maintainer.md) | The security model and maintainer notes |
 | [Installation](docs/installation.md) | Package mechanics, supported platforms, update behavior |
 | [Usage](docs/usage.md) | Headless vs interactive, launch guards |
 | [Capability contract](docs/harness-capability-contract.md) | Full breakdown of the 9 capabilities |

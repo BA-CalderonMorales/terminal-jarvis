@@ -18,7 +18,7 @@ the tool exists.
 |---|---|
 | [Installation](installation.md) | Package mechanics, supported platforms, update behavior |
 | [Usage](usage.md) | Headless vs interactive, launch guards |
-| [Maintainer guide](maintainer.md) | The command surface, mode by mode; the security model |
+| [Maintainer guide](maintainer.md) | The security model and maintainer notes |
 | [Demo](demo.md) | The recording, the agent-handover script, making new demos |
 | [Legacy notes](legacy-notes.md) | Aliases, plain output behavior, removed experiments |
 
