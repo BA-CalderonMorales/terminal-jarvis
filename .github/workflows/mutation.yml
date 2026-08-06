@@ -3,6 +3,12 @@ name: CI
 on:
   pull_request:
     branches: [develop, main]
+    paths-ignore:
+      - 'docs/**'
+      - 'plan/**'
+      - 'README.md'
+      - 'AGENTS.md'
+      - 'CLAUDE.md'
   schedule:
     - cron: '0 3 * * *'
   workflow_dispatch:
@@ -24,21 +30,42 @@ jobs:
     timeout-minutes: 60
     steps:
       - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
 
       - uses: dtolnay/rust-toolchain@stable
 
-      - uses: actions/cache@v6
+      - name: Cache cargo tools and registry
+        uses: actions/cache@v6
         with:
           path: |
             ~/.cargo/bin/cargo-mutants
             ~/.cargo/git
             ~/.cargo/registry
-            target
-          key: cargo-mutation-${{ runner.os }}-${{ hashFiles('Cargo.lock') }}-v1
-          restore-keys: cargo-mutation-${{ runner.os }}-
+          key: cargo-mutants-env-${{ runner.os }}-${{ hashFiles('Cargo.lock') }}-v1
+          restore-keys: cargo-mutants-env-${{ runner.os }}-
+
+      - name: Cache baseline debug build
+        uses: actions/cache@v6
+        with:
+          path: target/debug
+          key: cargo-mutants-debug-${{ runner.os }}-${{ hashFiles('Cargo.lock') }}-v1
+          restore-keys: cargo-mutants-debug-${{ runner.os }}-
 
       - name: Install cargo-mutants
         run: command -v cargo-mutants >/dev/null || cargo install cargo-mutants --locked
 
-      - name: Run mutation tests
-        run: cargo mutants --config mutants.toml --minimum-test-timeout 30 --jobs 4
+      - name: Run mutation tests on pull request diff
+        if: github.event_name == 'pull_request'
+        run: |
+          set -eu
+          if ! git diff "origin/${{ github.base_ref }}..HEAD" > git.diff 2>/dev/null || [ ! -s git.diff ]; then
+            echo "Base ref unavailable or empty diff; running full suite instead"
+            cargo mutants --config mutants.toml --minimum-test-timeout 30 --jobs 4 --no-shuffle
+          else
+            cargo mutants --config mutants.toml --minimum-test-timeout 30 --jobs 4 --no-shuffle --in-diff git.diff
+          fi
+
+      - name: Run full mutation suite
+        if: github.event_name != 'pull_request'
+        run: cargo mutants --config mutants.toml --minimum-test-timeout 30 --jobs 4 --no-shuffle
