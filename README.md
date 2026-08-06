@@ -75,47 +75,6 @@ terminal-jarvis gate enable trivy
 terminal-jarvis gate status
 ```
 
-## Commands
-
-Every command below is the same command whatever the invocation style:
-`terminal-jarvis list`, `tj list`, `npx terminal-jarvis list`, and
-`cargo run -- list` are all the same thing. First time here? No install
-needed -- `npx terminal-jarvis tui` opens the switcher directly.
-
-**Headless** (`terminal-jarvis <command>` / `tj <command>`) -- one command per
-invocation, for scripts, CI, and one-shot tasks:
-
-| Command | Purpose |
-|---|---|
-| `list` | Show all coding agents |
-| `check` | Report binary + env readiness |
-| `show <harness>` | Inspect a harness's capabilities |
-| `install <harness>` | Install a harness |
-| `update [<harness>]` | Upgrade a harness |
-| `plan [harness] <capability>` | Preview the shell command |
-| `use <harness>` / `current` | Select / show active harness |
-| `run [harness] [capability] [args...]` | Execute a capability |
-| `security [status\|audit\|harness]` | Security posture |
-| `gate [status\|list\|enable\|disable\|run]` | Optional local security gate |
-| `version [--verbose]` / `--version` / `-v` / `--info` | Version info |
-| `self-update [--dry-run]` / `--update` | Update Terminal Jarvis or print the update command |
-| `config show` | Active config state |
-| `auth help <harness>` | Credential setup guidance |
-| `[harness] [args...]` | Pass-through to harness binary |
-
-**Interactive** (`terminal-jarvis tui` / bare `tj` on a terminal) -- the
-chat-style switcher with the numbered picker and readiness dashboard. Every
-headless command above also works here, plus:
-
-| Command | Purpose |
-|---|---|
-| `tui` | Open the switcher |
-| `home` | Back to the welcome frame (works as `clear` too) |
-| `exit` | Leave the switcher |
-
-Compatibility aliases, plain output behavior, and notes on removed
-experiments live in the [Legacy notes](docs/legacy-notes.md).
-
 ## Layout
 
 The repository is a few small planes, and every Rust domain is bucketed the
@@ -161,15 +120,18 @@ Each Rust domain inside `src/` keeps the same shape: `index.rs` as the public
 face, `logic/` for behavior, `structs/` for data, `tests/` for proof, and
 every file stays at 100 lines or fewer.
 
-Auth stays with each harness -- terminal-jarvis never retains credentials.
-
 ## Docs
 
 What this is for, and the catalog truth behind it: [What is this?](docs/what-is-this.md).
 
+Compatibility aliases, plain output behavior, and notes on removed
+experiments live in [Legacy notes](docs/legacy-notes.md).
+
 | Document | What |
 |---|---|
+| [Maintainer guide](docs/maintainer.md) | The command surface, mode by mode; the security model |
 | [Installation](docs/installation.md) | Package mechanics, supported platforms, update behavior |
+| [Usage](docs/usage.md) | Headless vs interactive, launch guards |
 | [Usage](docs/usage.md) | Headless vs interactive, launch guards |
 | [Capability contract](docs/harness-capability-contract.md) | Full breakdown of the 9 capabilities |
 | [Security gates](docs/security-gates.md) | Optional Trivy scan behavior and configuration |
