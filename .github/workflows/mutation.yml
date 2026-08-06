@@ -25,9 +25,22 @@ env:
 
 jobs:
   mutation:
-    name: Mutation
+    name: Mutation (${{ matrix.domain }})
     runs-on: ubuntu-latest
     timeout-minutes: 60
+    strategy:
+      fail-fast: false
+      matrix:
+        domain: [cli, catalog-runtime, diagnostics-gates, tui-context]
+        include:
+          - domain: cli
+            files: src/cli
+          - domain: catalog-runtime
+            files: src/catalog src/runtime src/lib.rs src/main.rs
+          - domain: diagnostics-gates
+            files: src/diagnostics src/gates
+          - domain: tui-context
+            files: src/tui src/context src/contracts src/security
     steps:
       - uses: actions/checkout@v7
         with:
@@ -61,11 +74,11 @@ jobs:
           set -eu
           if ! git diff "origin/${{ github.base_ref }}..HEAD" > git.diff 2>/dev/null || [ ! -s git.diff ]; then
             echo "Base ref unavailable or empty diff; running full suite instead"
-            cargo mutants --config mutants.toml --minimum-test-timeout 30 --jobs 4 --no-shuffle
+            cargo mutants --config mutants.toml --minimum-test-timeout 30 --jobs 4 --no-shuffle -f ${{ matrix.files }}
           else
-            cargo mutants --config mutants.toml --minimum-test-timeout 30 --jobs 4 --no-shuffle --in-diff git.diff
+            cargo mutants --config mutants.toml --minimum-test-timeout 30 --jobs 4 --no-shuffle --in-diff git.diff -f ${{ matrix.files }}
           fi
 
       - name: Run full mutation suite
         if: github.event_name != 'pull_request'
-        run: cargo mutants --config mutants.toml --minimum-test-timeout 30 --jobs 4 --no-shuffle
+        run: cargo mutants --config mutants.toml --minimum-test-timeout 30 --jobs 4 --no-shuffle -f ${{ matrix.files }}

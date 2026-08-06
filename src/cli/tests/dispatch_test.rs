@@ -34,6 +34,22 @@ fn d(
 }
 
 #[test]
+fn face_dispatch_pins_exit_code_and_output() {
+    let hs = [harness("opencode")];
+    let (p, h) = paths();
+    let (code, body) = crate::cli::dispatch(
+        Action::List,
+        &crate::cli::args::Options::default(),
+        &hs,
+        p,
+        h,
+    )
+    .expect("list dispatches cleanly");
+    assert_eq!(code, 0);
+    assert!(body.contains("opencode"), "list output names installed harnesses");
+}
+
+#[test]
 fn list_check_help_legacy() {
     let hs = [harness("opencode")];
     let (p, h) = paths();
