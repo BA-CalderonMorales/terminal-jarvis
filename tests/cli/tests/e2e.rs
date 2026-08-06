@@ -56,7 +56,9 @@ fn show_includes_setup_and_capability_truth() {
 #[test]
 fn help_announces_the_tui() {
     let body = stdout(&tj(&["--plain", "help"]));
-    assert!(body.contains("tui mode") && body.contains("terminal-jarvis tui"));
+    assert!(
+        body.contains("Command center for orchestrating") && body.contains("terminal-jarvis tui")
+    );
 }
 
 #[test]

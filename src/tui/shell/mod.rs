@@ -1,5 +1,4 @@
-//! Shell: the chat-style read-prompt-respond loop -- results print above the
-//! input box. Bare verbs, numbers, and names switch tools.
+//! Shell: the chat-style read-prompt loop -- results print above the input box.
 
 use crate::cli::args;
 use crate::contracts::Harness;
@@ -44,19 +43,17 @@ pub enum Next {
 
 pub fn resolve(input: &str, harnesses: &[Harness]) -> Resolved {
     let input = input.trim();
-    if input.is_empty() {
-        return Resolved::Empty;
-    }
     match input {
+        "" => return Resolved::Empty,
         "/exit" | "/quit" | "exit" | "quit" => return Resolved::Exit,
         "/home" | "/clear" | "home" | "clear" => return Resolved::Home,
+        rest if rest.starts_with('/') => {
+            return match super::palette::parse(&rest[1..]) {
+                Ok(action) => Resolved::Run(action),
+                Err(message) => Resolved::Error(message),
+            };
+        }
         _ => {}
-    }
-    if let Some(rest) = input.strip_prefix('/') {
-        return match super::palette::parse(rest) {
-            Ok(action) => Resolved::Run(action),
-            Err(message) => Resolved::Error(message),
-        };
     }
     if let Ok(number) = input.parse::<usize>() {
         return match super::switcher::select(input, harnesses) {

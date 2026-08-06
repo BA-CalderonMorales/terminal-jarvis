@@ -40,7 +40,7 @@ pub fn text() -> String {
     ];
     let mut out = style::banner(
         "Terminal Jarvis",
-        "Headless command center for coding-agent harnesses, along with a way to kick off terminal-jarvis (tj) in tui mode",
+        "Command center for orchestrating context switching between coding-agent harnesses",
     );
     out.push_str(&table::render("Commands", &["COMMAND", "PURPOSE"], &rows));
     out.push('\n');

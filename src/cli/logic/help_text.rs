@@ -1,5 +1,5 @@
 pub const PLAIN: &str = "Terminal Jarvis\n\
-     Headless command center for coding-agent harnesses, along with a way to kick off terminal-jarvis (tj) in tui mode\n\n\
+     Command center for orchestrating context switching between coding-agent harnesses\n\n\
      usage:\n\
        terminal-jarvis tui\n\
        terminal-jarvis [harness] [args...] [-- child-args...]\n\

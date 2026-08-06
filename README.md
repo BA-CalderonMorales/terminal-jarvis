@@ -2,7 +2,7 @@
 
 # Terminal Jarvis
 
-**Catalog-driven command center for AI coding tools**
+**Command center for orchestrating context switching between coding-agent harnesses**
 
 Inspect and safely gate catalog descriptors for Claude, Gemini, Qwen, and 22
 other AI assistants from one terminal interface. Catalog presence does not mean
@@ -149,12 +149,8 @@ Auth stays with each harness -- terminal-jarvis never retains credentials.
 | `auth help <harness>` | Credential setup guidance |
 | `[harness] [args...]` | Pass-through to harness binary |
 
-Legacy aliases remain available: `tools -> list`, `status -> check`,
-`info <harness> -> show <harness>`, `install <harness> -> run <harness> download`, and `update <harness> -> run <harness> update`.
-
-Human-facing commands use width-aware structured output and color only on an
-interactive terminal. For scripts, put `--plain` before the command for stable
-line-oriented output; `--no-color` keeps the structured layout without color.
+Compatibility aliases, plain output behavior, and notes on removed
+experiments live in the [Legacy notes](docs/legacy-notes.md).
 
 The interactive switcher (`terminal-jarvis tui`) doubles as the live dashboard
 -- readiness, active harness, and the numbered picker -- and every slash
@@ -185,6 +181,7 @@ and replace `docs/demo-tui.gif`.
 | Document | What |
 |---|---|
 | [Capability contract](docs/harness-capability-contract.md) | Full breakdown of the 9 capabilities |
+| [Legacy notes](docs/legacy-notes.md) | Aliases, plain output behavior, removed experiments |
 | [Cataloged agents](docs/supported-agents.md) | All 25 descriptors and support caveat |
 | [Support matrix](docs/support-matrix.md) | All 225 capability truth rows |
 | [Security gates](docs/security-gates.md) | Optional Trivy scan behavior and configuration |

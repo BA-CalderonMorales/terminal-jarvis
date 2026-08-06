@@ -12,7 +12,8 @@ use std::path::Path;
 pub fn render(harnesses: &[Harness], catalog_root: &Path, state_home: &Path) -> String {
     let mut runtime = diagnostics::RuntimeInput::local(false, false, false, 100, "tui");
     runtime.probes = false;
-    let input = diagnostics::DiagnosticInput::local(catalog_root, state_home, None, harnesses, runtime);
+    let input =
+        diagnostics::DiagnosticInput::local(catalog_root, state_home, None, harnesses, runtime);
     let report = diagnostics::collect(&input);
     let active = context::load(state_home)
         .ok()

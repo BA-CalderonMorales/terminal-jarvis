@@ -60,7 +60,10 @@ fn run_action(
             true
         }
         args::Action::Check => {
-            print!("{}", super::status::render(harnesses, catalog_root, state_home));
+            print!(
+                "{}",
+                super::status::render(harnesses, catalog_root, state_home)
+            );
             false
         }
         action => super::canonical::run(action, options, harnesses, catalog_root, state_home),
