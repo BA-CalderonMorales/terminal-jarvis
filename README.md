@@ -124,14 +124,10 @@ every file stays at 100 lines or fewer.
 
 What this is for, and the catalog truth behind it: [What is this?](docs/what-is-this.md).
 
-Compatibility aliases, plain output behavior, and notes on removed
-experiments live in [Legacy notes](docs/legacy-notes.md).
-
 | Document | What |
 |---|---|
 | [Maintainer guide](docs/maintainer.md) | The command surface, mode by mode; the security model |
 | [Installation](docs/installation.md) | Package mechanics, supported platforms, update behavior |
-| [Usage](docs/usage.md) | Headless vs interactive, launch guards |
 | [Usage](docs/usage.md) | Headless vs interactive, launch guards |
 | [Capability contract](docs/harness-capability-contract.md) | Full breakdown of the 9 capabilities |
 | [Security gates](docs/security-gates.md) | Optional Trivy scan behavior and configuration |
