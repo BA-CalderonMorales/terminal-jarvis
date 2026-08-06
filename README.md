@@ -17,7 +17,8 @@ state.
 [![Docs](https://img.shields.io/badge/docs-latest-blue.svg?style=flat-square)](https://ba-calderonmorales.github.io/my-life-as-a-dev/latest/projects/active/terminal-jarvis/)
 [![Coverage](https://img.shields.io/badge/coverage-report-green.svg?style=flat-square)](https://github.com/BA-CalderonMorales/terminal-jarvis/actions/workflows/ci.yml?query=branch%3Adevelop)
 
-<img src="https://raw.githubusercontent.com/BA-CalderonMorales/terminal-jarvis/main/docs/promo-image.png" alt="Terminal Jarvis Interface" width="100%">
+<img src="docs/promo-image.png" alt="Terminal Jarvis interface" width="49%">
+<img src="docs/demo-tui.gif" alt="Terminal Jarvis switcher in action" width="49%">
 
 </div>
 
@@ -53,23 +54,8 @@ npm install -g terminal-jarvis
 brew install BA-CalderonMorales/homebrew-terminal-jarvis/terminal-jarvis
 ```
 
-Cargo builds the Rust CLI from the crates.io source package. The npm package is
-a Node launcher that downloads the matching Terminal Jarvis GitHub Release
-asset, verifies its `.sha256` file, caches it, and then executes it. Homebrew
-installs the matching platform release archive from the tap. The npm install
-links both `terminal-jarvis` and the shorter `tj` entry point to the same
-launcher, so either command name works; `tj` keeps daily use fast.
-
-Supported prebuilt assets are `linux-x64-gnu`, `linux-arm64-gnu`,
-`macos-x64`, `macos-arm64`, and `win32-x64`. Native Windows npm installs use
-the `win32-x64` ZIP bundle and work from Command Prompt, PowerShell, or Git
-Bash. Every release also includes a direct native executable for each platform;
-downloaded Linux and macOS executables may need `chmod +x` before use.
-
-An older Cargo or manual install can still win `PATH` resolution after a global
-npm upgrade. The npm install now completes and prints the path-order fix rather
-than blocking the upgrade; place the npm prefix before the stale location to run
-the newly installed command.
+Package mechanics, supported platforms, and update behavior:
+[Installation](docs/installation.md).
 
 ## Quick Start
 
@@ -98,20 +84,11 @@ terminal-jarvis gate status
 
 For development builds, replace `terminal-jarvis` with `cargo run --`.
 
-## Two ways to run
+## Modes
 
-| Mode | Invocation | Best for |
-|---|---|---|
-| **Headless** | `terminal-jarvis <command>` / `tj <command>` | Scripts, CI, one-shot tasks |
-| **Interactive** | `tj tui` (bare `tj` on a terminal) | Switching between coding agents live |
-
-Headless runs one command per invocation, prints stable line-oriented output
-with `--plain`, and never opens a prompt. The interactive tui is a chat-style
-switcher: `list` shows the numbered picker, a number or an agent name switches
-instantly, `status` shows readiness, `home` resets the frame, and `exit`
-leaves. A slashed name (`/codex`) launches an agent behind the same guarded
-plan-plus-confirm as headless. Ctrl+C aimed at a running agent never kills the
-switcher.
+Everything above runs headless (`terminal-jarvis <command>`) or inside the
+interactive switcher (`terminal-jarvis tui`) -- the difference, and the demo
+script, are covered in [Usage](docs/usage.md).
 
 ### Layout
 
@@ -158,29 +135,19 @@ command runs the same guarded surface as headless automation.
 
 ## Interactive demo
 
-The switcher, recorded with [VHS](https://github.com/charmbracelet/vhs) from
-`scripts/demo/tui.tape`:
-
-![The switcher in action](docs/demo-tui.gif)
-
-The demo above walks the switcher's surface: boot the tui, browse the numbered
-picker, switch by number, return to the welcome frame, and read the readiness
-dashboard. `scripts/demo/tui.tape` carries the full story -- launch Codex and
-hand over the terminal, exit Codex cleanly, launch Pi and chat with it, exit
-Pi, then leave the switcher. Agent beats need your agent credentials; with
-them loaded, re-record from the repository root,
-
-```bash
-vhs scripts/demo/tui.tape
-```
-
-and replace `docs/demo-tui.gif`.
+The session above was recorded with [VHS](https://github.com/charmbracelet/vhs)
+from `scripts/demo/tui.tape`: boot the switcher, browse the numbered picker,
+switch by number and by name, read the readiness dashboard. Re-recording it
+with agent launches and chat, and the full walkthrough, live in
+[Usage](docs/usage.md).
 
 ## Docs
 
 | Document | What |
 |---|---|
 | [Capability contract](docs/harness-capability-contract.md) | Full breakdown of the 9 capabilities |
+| [Installation](docs/installation.md) | Package mechanics, supported platforms, update behavior |
+| [Usage](docs/usage.md) | Headless vs interactive, demo walkthrough and re-recording |
 | [Legacy notes](docs/legacy-notes.md) | Aliases, plain output behavior, removed experiments |
 | [Cataloged agents](docs/supported-agents.md) | All 25 descriptors and support caveat |
 | [Support matrix](docs/support-matrix.md) | All 225 capability truth rows |
