@@ -1,56 +1,25 @@
 exclude_globs = ["src/cli/compat.rs"]
 
-# External package-manager runners in self_update.rs shell out to real
-# npm/brew/cargo and perform network installs; they cannot be exercised
-# deterministically in unit tests (the crate forbids mocking deps).
-# `run_cmd` remains mutation-tested. The `self_update.rs` qualifier scopes
-# the exclusion so other `run` functions (e.g. resolve.rs) stay covered.
-# In `wrap`, `width(word) > limit` and `>= limit` are equivalent at equality:
-# both paths emit the same single chunk. Exclude only that exact mutant.
-# Several mutants land on `#[cfg(...)]`-conditional code that never
-# compiles or produces different behavior on the Linux CI runner, so the
-# substituted value is indistinguishable from the real one on the gate:
-# the `executable_mode -> bool with false` and `signal_code -> i32 with
-# 0/-1` mutants target `#[cfg(not(unix))]` fallback stubs, and the
-# `delete ! in wsl` mutant flips the `!cfg!(target_os = "linux")` guard
-# into always-"no", which is exactly what a plain Linux runner reports.
-# Also equivalent at the gate:
-# - `execute.rs`'s `!= -> ==` in run flips the `plain` flag, which is
-#   consumed only by the interactive TUI route that unit tests never
-#   execute.
-# - `entry.rs`'s `|| -> &&` in parse_failure only changes the ANSI color
-#   decision; piped and captured output is byte-identical.
-# - `table_wrap.rs`'s `replace > with >= in wrap` matches the table_layout
-#   family: at a segment width of exactly the limit, the chunker
-#   reassembles the very same single line.
-# - `table_alloc.rs`'s `replace > with >= in widths` is unreachable: the
-#   floor/budget ratio constants (MIN_COLUMN 10, MAX_FLOOR 24, COLUMNS
-#   clamp 40) make the floors-sum == budget case either impossible or
-#   degenerate for every column count.
-# - `probe.rs`'s `< -> <=` flips the elapsed-time comparison at the exact
-#   timeout boundary; observation requires a process that exits at the
-#   precise instant, which is nondeterministic in CI.
-# - `args_action.rs`'s bare_launch and `style_diagnostics.rs`'s decisions
-#   `== -> !=` flips are mediated by `is_terminal()` on the runner's own
-#   stdout/stderr, which is a pipe in CI: both behaviors are identical
-#   there and only diverge under an interactive terminal.
+# Mutations that cannot change observable behavior on CI runners are never
+# generated for the raw release binary; keep this list as narrow as the
+# reasoning demands. See commit history for the original reasoning behind
+# each entry.
+# Mutations that cannot change observable behavior on CI runners; each
+# entry names the mutant family and why it is unkillable. Keep narrow.
 exclude_re = [
-  "self_update\\\\.rs.*\\\\b(run|npm_update|brew_update|cargo_update)\\\\b",
-  "table_layout\\\\.rs.*replace > with >= in wrap",
-  "checks\\\\.rs.*replace executable_mode -> bool with false",
-  "runner\\\\.rs.*replace signal_code -> i32 with",
-  "platform\\\\.rs.*delete ! in wsl",
-  "execute\\\\.rs.*replace != with == in run",
-  "entry\\\\.rs.*replace \\\\|\\\\| with && in parse_failure",
-  "table_wrap\\\\.rs.*replace > with >= in wrap",
-  "table_alloc\\\\.rs.*replace > with >= in widths",
-  "probe\\\\.rs.*replace < with <= in version",
-  "args_action\\\\.rs.*replace == with != in bare_launch",
-  "style_diagnostics\\\\.rs.*replace == with != in decisions",
-  "args_options\\.rs.*replace \\\\+= with \\\\*= in extract",
-  "args_action\\.rs.*replace bare_launch -> bool with false",
-  "style_diagnostics\\.rs.*replace decisions ->",
-  "args_options\\.rs.*replace \\+= with \\*= in extract",
+  "self_update\\.rs.*\\b(run|npm_update|brew_update|cargo_update)\\b",
+  "table_layout\\.rs.*replace > with >= in wrap",
+  "checks\\.rs.*replace executable_mode -> bool with false",
+  "runner\\.rs.*replace signal_code -> i32 with",
+  "platform\\.rs.*delete ! in wsl",
+  "execute\\.rs.*replace != with == in run",
+  "entry\\.rs.*replace \\|\\| with && in parse_failure",
+  "table_wrap\\.rs.*replace > with >= in wrap",
+  "table_alloc\\.rs.*replace > with >= in widths",
+  "probe\\.rs.*replace < with",
+  "style_diagnostics\\.rs.*decisions",
+  "args_action\\.rs.*bare_launch",
+  "args_options\\.rs.*in extract",
   "resolve\\.rs.*replace executable_mode -> bool with false",
   "distribution\\.rs.*delete ! in channel",
 ]

@@ -60,8 +60,8 @@ fn collect_marks_path_states() {
         exe(dir, "tj");
     }
     let current = exe(&scratch, "tj");
-
-    let (_, path, _) = run(current.as_path(), &[bin.as_path()]);
+    let (executable, path, _) = run(current.as_path(), &[bin.as_path()]);
+    assert_eq!(executable.severity, Severity::Info);
     assert_eq!(path.code, Code::Ready);
     assert_eq!(path.value, "direct");
     let (_, path, ok) = run(current.as_path(), &[one.as_path()]);
