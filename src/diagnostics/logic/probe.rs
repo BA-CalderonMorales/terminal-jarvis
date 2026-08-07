@@ -92,4 +92,9 @@ mod tests {
             None
         );
     }
+
+    #[test]
+    fn probes_finishing_within_the_timeout_still_report_output() {
+        assert_eq!(run("sleep 1; printf 'v1.2.3\n'").as_deref(), Some("v1.2.3"));
+    }
 }
