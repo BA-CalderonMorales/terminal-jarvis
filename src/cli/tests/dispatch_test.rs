@@ -21,35 +21,19 @@ fn paths() -> (&'static std::path::Path, &'static std::path::Path) {
 fn d(
     action: Action,
     harnesses: &[Harness],
-    catalog: &std::path::Path,
-    home: &std::path::Path,
+    catalog: &Path,
+    home: &Path,
 ) -> crate::cli::structs::error::Result<(i32, String)> {
-    dispatch(
-        action,
-        &crate::cli::args::Options::default(),
-        harnesses,
-        catalog,
-        home,
-    )
+    dispatch(action, &Options::default(), harnesses, catalog, home)
 }
 
 #[test]
 fn face_dispatch_pins_exit_code_and_output() {
     let hs = [harness("opencode")];
     let (p, h) = paths();
-    let (code, body) = crate::cli::dispatch(
-        Action::List,
-        &crate::cli::args::Options::default(),
-        &hs,
-        p,
-        h,
-    )
-    .expect("list dispatches cleanly");
-    assert_eq!(code, 0);
-    assert!(
-        body.contains("opencode"),
-        "list output names installed harnesses"
-    );
+    let (code, body) = crate::cli::dispatch(Action::List, &Options::default(), &hs, p, h)
+        .expect("list dispatches cleanly");
+    assert_eq!((code, body.contains("opencode")), (0, true));
 }
 
 #[test]
