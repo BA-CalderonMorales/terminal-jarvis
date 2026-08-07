@@ -37,7 +37,7 @@
   wrapping for paths and keys, wrapped headers, and compact support summaries
   in `list`.
 
-## [0.1.13] - 2026-07-18
+## [0.1.13] - 2026-08-06 (continued)
 
 - Replaces broad harness claims with a generated 225-row support matrix whose
   support state, evidence, platform, freshness, and side effects come directly
