@@ -2,9 +2,12 @@ pub mod catalog;
 pub mod cli;
 pub mod context;
 pub mod contracts;
+pub mod diagnostics;
 pub mod gates;
 pub mod runtime;
 pub mod security;
+#[path = "tui/lib.rs"]
+pub mod tui;
 
 #[cfg(test)]
 pub static ENV_LOCK: std::sync::Mutex<()> = std::sync::Mutex::new(());

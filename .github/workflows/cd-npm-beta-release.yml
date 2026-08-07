@@ -44,7 +44,7 @@ jobs:
           restore-keys: cargo-npm-beta-${{ runner.os }}-
 
       - name: Build npm package stage
-        run: scripts/package-release.sh build dist/npm-release
+        run: scripts/bash/release/index.sh package build dist/npm-release
 
       - name: Publish or retag beta
         env:

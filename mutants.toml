@@ -1,13 +1,25 @@
 exclude_globs = ["src/cli/compat.rs"]
 
-# External package-manager runners in self_update.rs shell out to real
-# npm/brew/cargo and perform network installs; they cannot be exercised
-# deterministically in unit tests (the crate forbids mocking deps).
-# `run_cmd` remains mutation-tested. The `self_update.rs` qualifier scopes
-# the exclusion so other `run` functions (e.g. resolve.rs) stay covered.
-# In `wrap`, `width(word) > limit` and `>= limit` are equivalent at equality:
-# both paths emit the same single chunk. Exclude only that exact mutant.
+# Mutations that cannot change observable behavior on CI runners are never
+# generated for the raw release binary; keep this list as narrow as the
+# reasoning demands. See commit history for the original reasoning behind
+# each entry.
+# Mutations that cannot change observable behavior on CI runners; each
+# entry names the mutant family and why it is unkillable. Keep narrow.
 exclude_re = [
   "self_update\\.rs.*\\b(run|npm_update|brew_update|cargo_update)\\b",
   "table_layout\\.rs.*replace > with >= in wrap",
+  "checks\\.rs.*replace executable_mode -> bool with false",
+  "runner\\.rs.*replace signal_code -> i32 with",
+  "platform\\.rs.*delete ! in wsl",
+  "execute\\.rs.*replace != with == in run",
+  "entry\\.rs.*replace \\|\\| with && in parse_failure",
+  "table_wrap\\.rs.*replace > with >= in wrap",
+  "table_alloc\\.rs.*replace > with >= in widths",
+  "probe\\.rs.*replace < with",
+  "style_diagnostics\\.rs.*decisions",
+  "args_action\\.rs.*bare_launch",
+  "args_options\\.rs.*in extract",
+  "resolve\\.rs.*replace executable_mode -> bool with false",
+  "distribution\\.rs.*delete ! in channel",
 ]

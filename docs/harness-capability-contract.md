@@ -68,7 +68,7 @@ mkdir -p harnesses/<agent>/{download,update,headless,version,stats,models,securi
 Write `index.toml` for the harness root and each capability. Each
 capability `index.toml` contains a `summary`, `command`, and `args`.
 
-Run `scripts/verify.sh` to validate the contract is met.
+Run `scripts/bash/verify/index.sh verify` to validate the contract is met.
 
 ## Optional Security Gate
 

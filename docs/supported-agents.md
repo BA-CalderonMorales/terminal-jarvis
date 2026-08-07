@@ -1,6 +1,10 @@
-# Supported Agents
+# Cataloged Agents
 
-25 coding-agent CLIs, all mapped through the same 9-capability contract.
+Terminal Jarvis catalogs 25 coding-agent CLIs through the same 9-capability
+contract. Inclusion here is discovery metadata, not blanket support. Consult
+the generated [support matrix](support-matrix.md) for the support state,
+evidence tier, side effects, platform scope, source, and freshness of each of
+the 225 capability rows.
 
 | Agent | Description |
 |---|---|

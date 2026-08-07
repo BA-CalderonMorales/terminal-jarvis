@@ -1,9 +1,6 @@
-mod capability;
-mod command;
-mod environment;
-mod harness;
+mod index;
+mod structs;
+pub use index::*;
 
-pub use capability::Capability;
-pub use command::CommandPlan;
-pub use environment::EnvMode;
-pub use harness::{CapabilityPlan, Harness};
+#[cfg(test)]
+mod tests;

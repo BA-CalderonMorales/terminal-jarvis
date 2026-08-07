@@ -13,6 +13,13 @@ Supported npm release assets are `linux-x64-gnu`, `linux-arm64-gnu`,
 Command Prompt, PowerShell, and Git Bash use the `win32-x64` ZIP asset and the
 local application-data cache directory.
 
+Linux assets require GNU libc. The wrapper checks the runtime before any
+download and rejects musl/Alpine, Android/Termux, unidentified libc, and
+unlisted architectures with the five supported asset names in its recovery
+message. WSL2 with GNU libc selects the matching Linux GNU asset; that asset
+selection is compatibility mapping, not a claim that the WSL environment was
+verified. WSL1 is not claimed. The launcher requires Node 18.17 or newer.
+
 The wrapper guidance shipped at `bin/README.txt` is included in the npm package
 so installed copies can explain the package behavior without relying on the
 source checkout.
