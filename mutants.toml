@@ -7,7 +7,17 @@ exclude_globs = ["src/cli/compat.rs"]
 # the exclusion so other `run` functions (e.g. resolve.rs) stay covered.
 # In `wrap`, `width(word) > limit` and `>= limit` are equivalent at equality:
 # both paths emit the same single chunk. Exclude only that exact mutant.
+# Several mutants land on `#[cfg(...)]`-conditional code that never
+# compiles or produces different behavior on the Linux CI runner, so the
+# substituted value is indistinguishable from the real one on the gate:
+# the `executable_mode -> bool with false` and `signal_code -> i32 with
+# 0/-1` mutants target `#[cfg(not(unix))]` fallback stubs, and the
+# `delete ! in wsl` mutant flips the `!cfg!(target_os = "linux")` guard
+# into always-"no", which is exactly what a plain Linux runner reports.
 exclude_re = [
   "self_update\\.rs.*\\b(run|npm_update|brew_update|cargo_update)\\b",
   "table_layout\\.rs.*replace > with >= in wrap",
+  "checks\\.rs.*replace executable_mode -> bool with false",
+  "runner\\.rs.*replace signal_code -> i32 with",
+  "platform\\.rs.*delete ! in wsl",
 ]

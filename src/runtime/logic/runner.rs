@@ -24,3 +24,24 @@ fn signal_code(status: &std::process::ExitStatus) -> i32 {
 fn signal_code(_status: &std::process::ExitStatus) -> i32 {
     1
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn code_of(script: &str) -> i32 {
+        let status = std::process::Command::new("sh")
+            .arg("-c")
+            .arg(script)
+            .status()
+            .unwrap();
+        status_code(status)
+    }
+
+    #[test]
+    fn maps_exit_codes_and_signal_terms() {
+        assert_eq!(code_of("exit 0"), 0);
+        assert_eq!(code_of("exit 7"), 7);
+        assert_eq!(code_of("kill -TERM $$"), 143);
+    }
+}

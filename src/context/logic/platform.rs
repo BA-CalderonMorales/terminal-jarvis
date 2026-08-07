@@ -1,5 +1,9 @@
 pub fn id() -> Option<&'static str> {
-    match (std::env::consts::OS, std::env::consts::ARCH, libc()) {
+    id_for(std::env::consts::OS, std::env::consts::ARCH, libc())
+}
+
+fn id_for(os: &str, arch: &str, libc: &str) -> Option<&'static str> {
+    match (os, arch, libc) {
         ("linux", "x86_64", "gnu") => Some("linux-x64-gnu"),
         ("linux", "aarch64", "gnu") => Some("linux-arm64-gnu"),
         ("macos", "x86_64", _) => Some("macos-x64"),
@@ -78,10 +82,17 @@ mod tests {
 
     #[test]
     fn wsl_returns_valid_value() {
-        let result = wsl();
-        assert!(
-            matches!(result, "no" | "wsl1-or-unknown" | "wsl2"),
-            "wsl() should return no, wsl1-or-unknown, or wsl2, got {result}"
-        );
+        assert!(matches!(wsl(), "no" | "wsl1-or-unknown" | "wsl2"));
+    }
+
+    #[test]
+    fn id_maps_every_known_platform() {
+        assert_eq!(id_for("linux", "x86_64", "gnu"), Some("linux-x64-gnu"));
+        assert_eq!(id_for("linux", "aarch64", "gnu"), Some("linux-arm64-gnu"));
+        assert_eq!(id_for("macos", "x86_64", "n/a"), Some("macos-x64"));
+        assert_eq!(id_for("macos", "aarch64", "n/a"), Some("macos-arm64"));
+        assert_eq!(id_for("windows", "x86_64", "n/a"), Some("windows-x64-msvc"));
+        assert_eq!(id_for("linux", "x86_64", "musl"), None);
+        assert_eq!(id_for("freebsd", "x86_64", "n/a"), None);
     }
 }
