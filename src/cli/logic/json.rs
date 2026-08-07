@@ -51,6 +51,12 @@ mod tests {
         assert!(output.contains("a\\n\\\"b\\\\c"));
         assert_eq!(output.lines().count(), 1);
     }
+
+    #[test]
+    fn escape_keeps_space_and_escapes_subunit_controls() {
+        assert_eq!(escape("a b"), "a b");
+        assert_eq!(escape("\u{1f}"), "\\u001f");
+    }
 }
 
 #[cfg(test)]

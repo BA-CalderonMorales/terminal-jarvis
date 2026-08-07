@@ -52,3 +52,7 @@ fn intent(harness: &Harness, plan: &CapabilityPlan) -> String {
         ),
     }
 }
+
+#[cfg(test)]
+#[path = "../tests/output_plan_test.rs"]
+mod tests;

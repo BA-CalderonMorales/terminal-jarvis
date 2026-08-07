@@ -84,4 +84,12 @@ mod tests {
             Some(48)
         );
     }
+
+    #[test]
+    fn slow_probes_time_out() {
+        assert_eq!(
+            version("sh", &["-c".to_string(), "sleep 5".to_string()]),
+            None
+        );
+    }
 }

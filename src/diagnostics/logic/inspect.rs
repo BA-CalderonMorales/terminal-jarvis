@@ -79,3 +79,7 @@ fn is_stale(metadata: &fs::Metadata, now: SystemTime, limit: Option<Duration>) -
     };
     now.duration_since(modified).is_ok_and(|age| age > limit)
 }
+
+#[cfg(test)]
+#[path = "../tests/inspect.rs"]
+mod tests;

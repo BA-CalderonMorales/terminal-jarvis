@@ -44,3 +44,7 @@ pub fn collect(
         (record.action("repair active harness readiness"), false)
     }
 }
+
+#[cfg(test)]
+#[path = "../tests/active.rs"]
+mod tests;

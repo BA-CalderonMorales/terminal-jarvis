@@ -1,3 +1,5 @@
+use std::io::IsTerminal;
+
 use super::*;
 
 fn a(args: &[&str]) -> Action {
@@ -33,6 +35,38 @@ fn version_variants() {
     );
     assert_eq!(a(&["tj", "--info"]), Action::Version { verbose: true });
 }
+#[test]
+fn version_non_flag_rejects_with_exact_usage() {
+    assert_eq!(
+        super::values::version(&["bogus".into()]),
+        Err("usage: terminal-jarvis version [--verbose|--info|-v]".into())
+    );
+    assert_eq!(
+        super::values::version(&["-x".into()]),
+        Err("unknown flag '-x'; usage: terminal-jarvis version [--verbose|--info|-v]".into())
+    );
+    assert_eq!(
+        super::values::version(&["-v".into()]),
+        Ok(Action::Version { verbose: false })
+    );
+    assert_eq!(
+        super::values::version(&["--info".into()]),
+        Ok(Action::Version { verbose: true })
+    );
+}
+
+#[test]
+fn bare_launch_mirrors_stdin_stdout_terminals() {
+    assert_eq!(
+        super::action_parser::bare_launch(&[], &super::Options::default()),
+        std::io::stdout().is_terminal() && std::io::stdin().is_terminal()
+    );
+    assert!(!super::action_parser::bare_launch(
+        &["list".into()],
+        &super::Options::default()
+    ));
+}
+
 #[test]
 fn version_rejects_extra() {
     assert!(e(&["tj", "--version", "bogus"]).is_err());

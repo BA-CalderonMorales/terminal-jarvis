@@ -79,3 +79,7 @@ fn widest_above_floor(widths: &[usize], floors: &[usize]) -> Option<usize> {
 }
 
 use super::{terminal_width, MIN_COLUMN};
+
+#[cfg(test)]
+#[path = "../tests/table_alloc_test.rs"]
+mod tests;

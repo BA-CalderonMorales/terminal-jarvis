@@ -94,3 +94,7 @@ fn version_record(
         None => Record::new(key, Code::Unknown, Severity::Info, "unknown:probe-failed"),
     }
 }
+
+#[cfg(test)]
+#[path = "../tests/harness.rs"]
+mod tests;

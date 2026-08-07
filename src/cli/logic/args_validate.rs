@@ -78,3 +78,7 @@ fn json_spawns_child(action: &Action, dry_run: bool) -> bool {
         _ => false,
     }
 }
+
+#[cfg(test)]
+#[path = "../tests/args_validate_test.rs"]
+mod tests;

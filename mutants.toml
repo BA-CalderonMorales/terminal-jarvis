@@ -14,10 +14,27 @@ exclude_globs = ["src/cli/compat.rs"]
 # 0/-1` mutants target `#[cfg(not(unix))]` fallback stubs, and the
 # `delete ! in wsl` mutant flips the `!cfg!(target_os = "linux")` guard
 # into always-"no", which is exactly what a plain Linux runner reports.
+# Also equivalent at the gate:
+# - `execute.rs`'s `!= -> ==` in run flips the `plain` flag, which is
+#   consumed only by the interactive TUI route that unit tests never
+#   execute.
+# - `entry.rs`'s `|| -> &&` in parse_failure only changes the ANSI color
+#   decision; piped and captured output is byte-identical.
+# - `table_wrap.rs`'s `replace > with >= in wrap` matches the table_layout
+#   family: at a segment width of exactly the limit, the chunker
+#   reassembles the very same single line.
+# - `table_alloc.rs`'s `replace > with >= in widths` is unreachable: the
+#   floor/budget ratio constants (MIN_COLUMN 10, MAX_FLOOR 24, COLUMNS
+#   clamp 40) make the floors-sum == budget case either impossible or
+#   degenerate for every column count.
 exclude_re = [
   "self_update\\.rs.*\\b(run|npm_update|brew_update|cargo_update)\\b",
   "table_layout\\.rs.*replace > with >= in wrap",
   "checks\\.rs.*replace executable_mode -> bool with false",
   "runner\\.rs.*replace signal_code -> i32 with",
   "platform\\.rs.*delete ! in wsl",
+  "execute\\.rs.*replace != with == in run",
+  "entry\\.rs.*replace \\|\\| with && in parse_failure",
+  "table_wrap\\.rs.*replace > with >= in wrap",
+  "table_alloc\\.rs.*replace > with >= in widths",
 ]

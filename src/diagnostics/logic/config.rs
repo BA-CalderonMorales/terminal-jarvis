@@ -92,3 +92,7 @@ fn record(code: Code, value: String) -> Record {
         record
     }
 }
+
+#[cfg(test)]
+#[path = "../tests/config.rs"]
+mod tests;

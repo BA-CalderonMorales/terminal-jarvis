@@ -50,3 +50,7 @@ fn prefix(environment: &Environment, name: &str) -> Option<PathBuf> {
         .filter(|value| !value.trim().is_empty())
         .map(PathBuf::from)
 }
+
+#[cfg(test)]
+#[path = "../tests/local.rs"]
+mod tests;

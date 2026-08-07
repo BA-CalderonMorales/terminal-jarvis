@@ -82,3 +82,19 @@ fn valid_range(value: &str, start: usize, end: usize, min: u8, max: u8) -> bool 
 #[cfg(test)]
 #[path = "../tests/freshness_props.rs"]
 mod props;
+
+#[cfg(test)]
+mod tests {
+    use super::{age_days, valid_utc};
+    #[test]
+    fn positional_checks_are_independent() {
+        assert!(!valid_utc("2026-07x17T04:59:27Z"));
+        assert!(!valid_utc("2026-07-17X04:59:27Z"));
+        assert!(!valid_utc("2026-07-17T04x59:27Z"));
+        assert!(!valid_utc("2026-07-17T04:59x27Z"));
+    }
+    #[test]
+    fn age_days_requires_valid_operands() {
+        assert!(age_days("2026-01-01T00:00:00Z", "2026-13-01T00:00:00Z").is_none());
+    }
+}

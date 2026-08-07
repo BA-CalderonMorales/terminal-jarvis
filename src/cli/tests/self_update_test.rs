@@ -37,6 +37,24 @@ fn run_cmd_reports_failure() {
 }
 
 #[test]
+fn route_names_follow_the_distribution_channel() {
+    let _g = crate::ENV_LOCK.lock().unwrap_or_else(|e| e.into_inner());
+    std::env::remove_var("TERMINAL_JARVIS_WRAPPER");
+    for (channel, expected) in [
+        ("homebrew", "homebrew"),
+        ("cargo", "cargo"),
+        ("npm", "npm"),
+        ("direct", "direct"),
+        ("edge", "unknown"),
+    ] {
+        std::env::set_var("TERMINAL_JARVIS_DISTRIBUTION", channel);
+        assert_eq!(route_name(), expected);
+        assert_eq!(route::name(), expected);
+    }
+    std::env::remove_var("TERMINAL_JARVIS_DISTRIBUTION");
+}
+
+#[test]
 fn homebrew_paths_cover_both_install_layouts() {
     assert!(homebrew_path("/opt/homebrew/bin/terminal-jarvis"));
     assert!(homebrew_path(

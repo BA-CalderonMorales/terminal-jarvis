@@ -27,6 +27,29 @@ fn reject_irrelevant_errors_on_lifecycle_options() {
 }
 
 #[test]
+fn reject_irrelevant_errors_for_dry_run_only() {
+    let opts = options(true, false, false, None);
+    let err = reject_irrelevant(&opts).unwrap_err();
+    assert_eq!(err.exit_code, 2);
+}
+
+#[test]
+fn reject_irrelevant_errors_for_confirm_token_only() {
+    let opts = options(false, false, false, Some("cap:h".to_string()));
+    let err = reject_irrelevant(&opts).unwrap_err();
+    assert_eq!(err.exit_code, 2);
+    assert!(err.message.contains("lifecycle options are not valid"));
+}
+
+#[test]
+fn reject_irrelevant_errors_for_allow_dangerous_only() {
+    let opts = options(false, false, true, None);
+    let err = reject_irrelevant(&opts).unwrap_err();
+    assert_eq!(err.exit_code, 2);
+    assert!(err.message.contains("lifecycle options are not valid"));
+}
+
+#[test]
 fn reject_irrelevant_ok_when_no_options() {
     let opts = options(false, false, false, None);
     assert!(reject_irrelevant(&opts).is_ok());

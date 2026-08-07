@@ -83,3 +83,7 @@ fn same(left: &std::path::Path, right: &std::path::Path) -> bool {
         .zip(fs::canonicalize(right).ok())
         .is_some_and(|(a, b)| a == b)
 }
+
+#[cfg(test)]
+#[path = "../tests/program.rs"]
+mod tests;

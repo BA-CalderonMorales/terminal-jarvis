@@ -77,3 +77,7 @@ fn chunks(word: &str, limit: usize, lines: &mut Vec<String>) {
         lines.push(chunk);
     }
 }
+
+#[cfg(test)]
+#[path = "../tests/table_wrap_test.rs"]
+mod tests;

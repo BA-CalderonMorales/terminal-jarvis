@@ -59,3 +59,41 @@ fn quoted(value: &str) -> String {
     out.push('"');
     out
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::diagnostics::logic::{Code, Record, Report, Severity};
+
+    #[test]
+    fn data_serializes_records_and_actions() {
+        let mut first = Record::new("a", Code::Ready, Severity::Info, "b");
+        first.action = Some("c".into());
+        let report = Report {
+            records: vec![
+                first,
+                Record::new("d", Code::Missing, Severity::Warning, "e"),
+            ],
+            ready_harnesses: 1,
+            ok: true,
+        };
+        assert_eq!(
+            data(&report),
+            "{\"ready_harnesses\":1,\"diagnostics\":[{\"key\":\"a\",\"code\":\"ready\",\"severity\":\"info\",\"value\":\"b\",\"action\":\"c\"},{\"key\":\"d\",\"code\":\"missing\",\"severity\":\"warning\",\"value\":\"e\",\"action\":null}]}"
+        );
+    }
+
+    #[test]
+    fn quoted_escapes_and_keeps_other_chars() {
+        assert_eq!(quoted("ab"), "\"ab\"");
+        assert_eq!(quoted("a\"b"), "\"a\\\"b\"");
+        assert_eq!(quoted("a\\b"), "\"a\\\\b\"");
+        assert_eq!(quoted("a\nb"), "\"a\\nb\"");
+        assert_eq!(quoted("a\rb"), "\"a\\rb\"");
+        assert_eq!(quoted("a\tb"), "\"a\\tb\"");
+        assert_eq!(quoted("a\u{1}b"), "\"a\\u0001b\"");
+        assert_eq!(quoted("a b"), "\"a b\"");
+        assert_eq!(quoted("a\u{1f}b"), "\"a\\u001fb\"");
+        assert_eq!(quoted("a\u{7f}b"), "\"a\u{7f}b\"");
+    }
+}

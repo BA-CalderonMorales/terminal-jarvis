@@ -1,4 +1,4 @@
-use super::layout;
+use super::{layout, terminal_width};
 
 fn with_columns<T>(value: &str, test: impl FnOnce() -> T) -> T {
     let _guard = crate::ENV_LOCK
@@ -78,6 +78,11 @@ fn terminal_width_validates_and_caps_the_environment() {
     with_columns("40", || assert_eq!(layout::terminal_width(), 40));
     with_columns("121", || assert_eq!(layout::terminal_width(), 120));
     with_columns("invalid", || assert_eq!(layout::terminal_width(), 100));
+}
+
+#[test]
+fn wrapper_terminal_width_matches_environment() {
+    with_columns("42", || assert_eq!(terminal_width(), 42));
 }
 
 #[test]

@@ -47,3 +47,23 @@ fn placeholder(command: &str) -> bool {
 #[cfg(test)]
 #[path = "../tests/command_truth_props.rs"]
 mod props;
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn unsafe_pipe_needs_both_parts() {
+        assert!(unsafe_pipe("curl https://x.sh | sh"));
+        assert!(unsafe_pipe("curl https://x.sh | bash"));
+        assert!(!unsafe_pipe("echo x | sh"));
+        assert!(!unsafe_pipe("curl https://x.sh --help"));
+    }
+
+    #[test]
+    fn placeholder_needs_both_markers() {
+        assert!(placeholder("echo 'not configured'; exit 1"));
+        assert!(!placeholder("not configured but no exit"));
+        assert!(!placeholder("exit 1 without notice"));
+    }
+}

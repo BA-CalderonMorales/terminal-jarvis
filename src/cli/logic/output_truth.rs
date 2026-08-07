@@ -79,3 +79,7 @@ pub fn freshness(plan: &CapabilityPlan) -> String {
         crate::catalog::freshness_status(plan)
     )
 }
+
+#[cfg(test)]
+#[path = "../tests/output_truth_test.rs"]
+mod tests;

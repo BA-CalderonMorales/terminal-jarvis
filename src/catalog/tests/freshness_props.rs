@@ -77,3 +77,22 @@ fn valid_utc_accepts_known_timestamps() {
     assert!(!valid_utc("2026-01-01T24:00:00Z"));
     assert!(!valid_utc("2026-01-01T00:00:61Z"));
 }
+
+#[test]
+fn epoch_day_fixed_points() {
+    let cases: [(i64, i64, i64, i64); 10] = [
+        (1970, 1, 1, 0),
+        (1969, 12, 31, -1),
+        (2000, 3, 1, 11_017),
+        (2024, 2, 15, 19_768),
+        (2024, 4, 10, 19_823),
+        (2024, 6, 15, 19_889),
+        (0, 6, 15, -719_362),
+        (400, 3, 1, -573_371),
+        (-1, 3, 1, -719_834),
+        (-400, 3, 1, -865_565),
+    ];
+    for (year, month, day, want) in cases {
+        assert_eq!(epoch_day(year, month, day), want);
+    }
+}

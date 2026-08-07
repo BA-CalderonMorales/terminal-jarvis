@@ -87,3 +87,7 @@ fn resolve_error(message: String) -> error::Failure {
     }
     error::Failure::unavailable("harness_unknown", message, "run `terminal-jarvis list`")
 }
+
+#[cfg(test)]
+#[path = "../tests/guard_test.rs"]
+mod tests;

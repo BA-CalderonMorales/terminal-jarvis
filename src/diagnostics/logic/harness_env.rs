@@ -63,3 +63,7 @@ fn aggregate(states: &[ValueState]) -> Code {
         Code::Missing
     }
 }
+
+#[cfg(test)]
+#[path = "../tests/harness_env.rs"]
+mod tests;

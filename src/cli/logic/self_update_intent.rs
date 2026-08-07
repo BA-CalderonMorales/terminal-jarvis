@@ -56,3 +56,43 @@ fn prompt_error(cause: std::io::Error) -> error::Failure {
         "retry with --no-input and an exact --confirm token",
     )
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn token_confirm_decides_ok_and_error() {
+        let opts = Options {
+            no_input: true,
+            confirm: Some(TOKEN.to_string()),
+            ..Options::default()
+        };
+        assert!(check(&opts, "preview").is_ok());
+        let wrong = Options {
+            no_input: true,
+            confirm: Some("other:token".to_string()),
+            ..Options::default()
+        };
+        let err = check(&wrong, "preview").unwrap_err();
+        assert_eq!(err.code, "explicit_intent_required");
+        assert_eq!(err.exit_code, 5);
+        assert!(err.message.contains(TOKEN));
+    }
+
+    #[test]
+    fn dry_run_skips_confirmation_and_allow_dangerous_is_rejected() {
+        let dry = Options {
+            dry_run: true,
+            ..Options::default()
+        };
+        assert!(check(&dry, "preview").is_ok());
+        let allow = Options {
+            allow_dangerous: true,
+            confirm: Some(TOKEN.to_string()),
+            ..Options::default()
+        };
+        let err = check(&allow, "preview").unwrap_err();
+        assert_eq!(err.code, "option_not_applicable");
+    }
+}
