@@ -18,5 +18,22 @@ pub fn collect(input: &DiagnosticInput, redact: &Redactor<'_>) -> (Vec<Record>, 
         path,
     ];
     records.append(&mut platform);
-    (records, distribution_ok && executable_ok && platform_ok)
+    (records, all_ok(distribution_ok, executable_ok, platform_ok))
+}
+
+fn all_ok(distribution: bool, executable: bool, platform: bool) -> bool {
+    distribution && executable && platform
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn every_report_must_be_ok() {
+        assert!(all_ok(true, true, true));
+        assert!(!all_ok(false, true, true));
+        assert!(!all_ok(true, false, true));
+        assert!(!all_ok(true, true, false));
+    }
 }

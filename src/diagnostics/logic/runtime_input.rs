@@ -46,3 +46,7 @@ impl Default for RuntimeInput {
         }
     }
 }
+
+#[cfg(test)]
+#[path = "../tests/runtime_input.rs"]
+mod tests;

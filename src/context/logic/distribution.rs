@@ -60,37 +60,6 @@ pub fn homebrew_path(path: &str) -> bool {
 }
 
 #[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn raw_channels_are_normalized_without_passthrough_claims() {
-        for raw in ["env", "source"] {
-            assert_eq!(normalize(raw), Some("source"));
-        }
-        for raw in ["github-release", "github-release-cache", "npm"] {
-            assert_eq!(normalize(raw), Some("npm"));
-        }
-        for raw in ["homebrew", "cargo", "direct"] {
-            assert_eq!(normalize(raw), Some(raw));
-        }
-        assert_eq!(normalize("custom"), None);
-    }
-
-    #[test]
-    fn source_build_classifies_workspace_binaries_only() {
-        let root = std::env::current_dir().unwrap();
-        let root = root.to_string_lossy();
-        assert!(source_build(&format!(
-            "{root}/target/debug/terminal-jarvis"
-        )));
-        assert!(source_build(&format!("{root}/target/release/tj")));
-        assert!(source_build(&format!(
-            "{root}/target/llvm-cov-target/debug/tj"
-        )));
-        assert!(!source_build("/srv/target/debug/deps/lib-test"));
-        assert!(!source_build("/srv/target/debug/terminal-jarvis"));
-        assert!(!source_build("/home/caldo/.cargo/bin/terminal-jarvis"));
-        assert!(!source_build(""));
-    }
-}
+#[cfg(test)]
+#[path = "../tests/distribution.rs"]
+mod tests;

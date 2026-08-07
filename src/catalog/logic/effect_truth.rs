@@ -76,6 +76,7 @@ mod tests {
             (C::Ui, E::StateChanging, false, I::Interactive),
             (C::Ui, E::StateChanging, true, I::Noninteractive),
             (C::Ui, E::ReadOnly, true, I::Interactive),
+            (C::Download, E::StateChanging, false, I::Noninteractive),
             (C::Yolo, E::ReadOnly, true, I::Noninteractive),
             (C::Yolo, E::Dangerous, false, I::Noninteractive),
         ];

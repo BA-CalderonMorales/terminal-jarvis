@@ -88,7 +88,7 @@ mod tests {
     #[test]
     fn slow_probes_time_out() {
         assert_eq!(
-            version("sh", &["-c".to_string(), "sleep 5".to_string()]),
+            version("sh", &["-c".to_string(), "echo hi; sleep 4".to_string()]),
             None
         );
     }

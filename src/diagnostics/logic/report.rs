@@ -40,3 +40,7 @@ impl Report {
         }
     }
 }
+
+#[cfg(test)]
+#[path = "../tests/report.rs"]
+mod tests;

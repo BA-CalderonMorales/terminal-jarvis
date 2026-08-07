@@ -78,3 +78,7 @@ fn wsl(input: &DiagnosticInput) -> Record {
         _ => Record::new("platform.wsl", Code::Malformed, Severity::Error, "unknown"),
     }
 }
+
+#[cfg(test)]
+#[path = "../tests/platform_records.rs"]
+mod tests;

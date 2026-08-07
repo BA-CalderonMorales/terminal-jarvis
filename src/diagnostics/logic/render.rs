@@ -31,3 +31,7 @@ fn field(value: &str) -> String {
     }
     out
 }
+
+#[cfg(test)]
+#[path = "../tests/render.rs"]
+mod tests;

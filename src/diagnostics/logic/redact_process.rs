@@ -42,3 +42,7 @@ fn replace_prefix(value: &str, prefix: &str, label: &str) -> String {
         value.to_string()
     }
 }
+
+#[cfg(test)]
+#[path = "../tests/redact_process.rs"]
+mod tests;

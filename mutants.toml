@@ -27,6 +27,13 @@ exclude_globs = ["src/cli/compat.rs"]
 #   floor/budget ratio constants (MIN_COLUMN 10, MAX_FLOOR 24, COLUMNS
 #   clamp 40) make the floors-sum == budget case either impossible or
 #   degenerate for every column count.
+# - `probe.rs`'s `< -> <=` flips the elapsed-time comparison at the exact
+#   timeout boundary; observation requires a process that exits at the
+#   precise instant, which is nondeterministic in CI.
+# - `args_action.rs`'s bare_launch and `style_diagnostics.rs`'s decisions
+#   `== -> !=` flips are mediated by `is_terminal()` on the runner's own
+#   stdout/stderr, which is a pipe in CI: both behaviors are identical
+#   there and only diverge under an interactive terminal.
 exclude_re = [
   "self_update\\.rs.*\\b(run|npm_update|brew_update|cargo_update)\\b",
   "table_layout\\.rs.*replace > with >= in wrap",
@@ -37,4 +44,7 @@ exclude_re = [
   "entry\\.rs.*replace \\|\\| with && in parse_failure",
   "table_wrap\\.rs.*replace > with >= in wrap",
   "table_alloc\\.rs.*replace > with >= in widths",
+  "probe\\.rs.*replace < with <= in version",
+  "args_action\\.rs.*replace == with != in bare_launch",
+  "style_diagnostics\\.rs.*replace == with != in decisions",
 ]

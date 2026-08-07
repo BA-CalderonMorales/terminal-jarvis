@@ -95,3 +95,6 @@ fn severity(code: Code) -> Severity {
         _ => Severity::Error,
     }
 }
+#[cfg(test)]
+#[path = "../tests/storage.rs"]
+mod tests;

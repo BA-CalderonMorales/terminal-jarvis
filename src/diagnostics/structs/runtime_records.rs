@@ -85,3 +85,7 @@ fn status_code(key: &str, code: Code, value: impl Into<String>, action: &str) ->
         Record::new(key, code, Severity::Error, value).action(action)
     }
 }
+
+#[cfg(test)]
+#[path = "../tests/runtime_records.rs"]
+mod tests;
