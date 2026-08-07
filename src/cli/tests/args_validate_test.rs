@@ -10,12 +10,17 @@ fn gate_pair_requires_enable_or_run() {
 
 #[test]
 fn lifecycle_flags_only_on_lifecycle_actions() {
-    let mut options = Options::default();
-    options.confirm = Some("install:all".to_string());
+    let options = Options {
+        confirm: Some("install:all".to_string()),
+        ..Default::default()
+    };
     assert!(validate_options(&Action::Run(vec![]), &options).is_ok());
     assert!(validate_options(&Action::List, &options).is_err());
-    options.confirm = None;
-    options.allow_dangerous = true;
+    let options = Options {
+        confirm: None,
+        allow_dangerous: true,
+        ..Default::default()
+    };
     assert!(validate_options(&Action::Run(vec![]), &options).is_ok());
     assert!(validate_options(&Action::List, &options).is_err());
 }

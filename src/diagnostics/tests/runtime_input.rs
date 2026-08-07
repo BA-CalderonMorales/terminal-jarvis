@@ -1,7 +1,5 @@
 use super::*;
 
-use super::*;
-
 fn envs(values: &[(&str, Option<&str>)]) -> RuntimeInput {
     let _guard = crate::ENV_LOCK.lock().unwrap_or_else(|e| e.into_inner());
     let old: Vec<_> = values

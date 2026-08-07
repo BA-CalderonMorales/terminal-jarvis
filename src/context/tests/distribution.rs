@@ -1,7 +1,5 @@
 use super::*;
 
-use super::*;
-
 #[test]
 fn raw_channels_are_normalized_without_passthrough_claims() {
     for raw in ["env", "source"] {
@@ -73,6 +71,15 @@ fn channel_is_npm_only_from_a_non_blank_wrapper_variable() {
         || {
             clear_companions();
             assert_ne!(channel(), Some("npm"));
+        },
+    );
+    with_env(
+        crate::context::constants::env::DISTRIBUTION,
+        Some(" \t "),
+        || {
+            clear_companions();
+            std::env::set_var(crate::context::constants::env::DISTRIBUTION, " \t ");
+            assert_ne!(channel(), Some("unknown"));
         },
     )
 }

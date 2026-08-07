@@ -1,4 +1,3 @@
-use super::*;
 use crate::diagnostics::{Record, Severity};
 
 fn report(records: Vec<Record>) -> super::Report {
@@ -39,6 +38,12 @@ fn concise_drops_plain_harness_records_and_keeps_active_readiness_and_errors() {
     assert!(keys.contains(&"harness.delta"));
     assert!(keys.contains(&"state.catalog"));
     assert!(!keys.contains(&"harness.beta"));
+}
+
+#[test]
+fn json_data_embeds_the_records() {
+    let out = report(vec![record("state.catalog", Severity::Info)]).json_data();
+    assert!(out.contains("state.catalog"));
 }
 
 #[test]

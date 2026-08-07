@@ -47,6 +47,25 @@ fn status_code_pins_ready_and_error_records() {
 }
 
 #[test]
+fn unknown_checksum_is_marked_not_clear() {
+    let gates = gate_dir();
+    let input = input(
+        gates.clone(),
+        RuntimeInput {
+            checksum: "unknown".into(),
+            ..RuntimeInput::default()
+        },
+    );
+    let (records, ok) = collect(&input, &Redactor::new(None, None));
+    assert!(ok);
+    let record = records
+        .iter()
+        .find(|r| r.key == "distribution.checksum")
+        .unwrap();
+    assert_eq!(record.code, Code::Unknown);
+}
+
+#[test]
 fn every_health_flag_must_be_true_for_a_clean_report() {
     let gates = gate_dir();
     let healthy = RuntimeInput::default();

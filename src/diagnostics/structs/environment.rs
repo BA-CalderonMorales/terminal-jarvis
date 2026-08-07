@@ -79,3 +79,7 @@ impl Environment {
             .collect()
     }
 }
+
+#[cfg(test)]
+#[path = "../tests/environment.rs"]
+mod tests;

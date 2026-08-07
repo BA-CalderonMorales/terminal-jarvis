@@ -51,7 +51,7 @@ fn input(active: Option<&str>, names: &[&str]) -> DiagnosticInput {
 fn known_harness_is_ready() {
     let ready = BTreeSet::from(["xh".to_string()]);
     let (record, usable) = collect(&input(Some("xh"), &["xh"]), None, &ready);
-    assert_eq!(usable, true);
+    assert!(usable);
     assert_eq!(record.code, Code::Ready);
     assert_eq!(record.severity, Severity::Info);
 }
@@ -61,7 +61,7 @@ fn unknown_harness_is_malformed() {
     let (record, usable) = collect(&input(Some("nope"), &["xh"]), None, &BTreeSet::new());
     assert_eq!(record.code, Code::Malformed);
     assert_eq!(record.severity, Severity::Error);
-    assert_eq!(usable, false);
+    assert!(!usable);
 }
 
 #[test]
@@ -69,7 +69,7 @@ fn active_from_config_when_unset_in_input() {
     let ready = BTreeSet::from(["xh".to_string()]);
     let (record, usable) = collect(&input(None, &["xh"]), Some("xh".into()), &ready);
     assert_eq!(record.code, Code::Ready);
-    assert_eq!(usable, true);
+    assert!(usable);
 }
 
 #[test]
@@ -77,7 +77,7 @@ fn no_active_harness_reports_missing() {
     let (record, usable) = collect(&input(None, &["xh"]), None, &BTreeSet::new());
     assert_eq!(record.code, Code::Missing);
     assert_eq!(record.value, "none");
-    assert_eq!(usable, false);
+    assert!(!usable);
 }
 
 #[test]
@@ -88,5 +88,5 @@ fn known_but_not_ready_harness_gets_action() {
         record.action.as_deref(),
         Some("repair active harness readiness")
     );
-    assert_eq!(usable, false);
+    assert!(!usable);
 }

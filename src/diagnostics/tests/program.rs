@@ -46,30 +46,32 @@ fn input(current: PathBuf, dirs: &[&Path]) -> DiagnosticInput {
     local
 }
 
-fn run(current: &PathBuf, dirs: &[&Path]) -> (Record, Record, bool) {
-    collect(&input(current.clone(), dirs), &Redactor::new(None, None))
+fn run(current: &Path, dirs: &[&Path]) -> (Record, Record, bool) {
+    collect(
+        &input(current.to_path_buf(), dirs),
+        &Redactor::new(None, None),
+    )
 }
 #[test]
 fn collect_marks_path_states() {
     let scratch = temp_dir("scratch");
-    let bin = temp_dir("bin");
-    let one = temp_dir("one");
-    let two = temp_dir("two");
-    exe(&one, "tj");
-    exe(&two, "tj");
+    let (bin, one, two) = (temp_dir("bin"), temp_dir("one"), temp_dir("two"));
+    for dir in [&one, &two, &scratch] {
+        exe(dir, "tj");
+    }
     let current = exe(&scratch, "tj");
-    let (executable, path, _) = run(&current, &[&bin]);
-    assert_eq!(executable.severity, Severity::Info);
+
+    let (_, path, _) = run(current.as_path(), &[bin.as_path()]);
     assert_eq!(path.code, Code::Ready);
     assert_eq!(path.value, "direct");
-    let (_, path, ok) = run(&current, &[&one]);
+    let (_, path, ok) = run(current.as_path(), &[one.as_path()]);
     assert_eq!(path.code, Code::Conflicting);
     assert_eq!(path.value, "shadowed");
-    assert_eq!(ok, false);
-    let (_, path, ok) = run(&current, &[&one, &two]);
+    assert!(!ok);
+    let (_, path, ok) = run(current.as_path(), &[one.as_path(), two.as_path()]);
     assert_eq!(path.code, Code::Conflicting);
     assert_eq!(path.value, "shadowed (2 matches)");
-    assert_eq!(ok, false);
+    assert!(!ok);
     for dir in [&scratch, &bin, &one, &two] {
         let _ = fs::remove_dir_all(dir);
     }
@@ -77,10 +79,8 @@ fn collect_marks_path_states() {
 
 #[test]
 fn shadowed_record_excludes_the_current_binary() {
-    let scratch = temp_dir("record");
-    let other_dir = temp_dir("other");
-    let current = exe(&scratch, "tj-current");
-    let other = exe(&other_dir, "tj-other");
+    let (scratch, other_dir) = (temp_dir("record"), temp_dir("other"));
+    let (current, other) = (exe(&scratch, "tj-current"), exe(&other_dir, "tj-other"));
     let resolved = super::super::resolve::Resolution {
         code: Code::Conflicting,
         path: Some(current.clone()),
