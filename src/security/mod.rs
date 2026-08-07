@@ -1,3 +1,3 @@
-mod checks;
-
-pub use checks::{command_on_path, missing_env};
+mod index;
+mod logic;
+pub use index::*;

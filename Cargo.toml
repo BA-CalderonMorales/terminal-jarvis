@@ -1,6 +1,6 @@
 [package]
 name = "terminal-jarvis"
-version = "0.1.12"
+version = "0.1.13"
 edition = "2021"
 description = "A data-driven harness switcher for AI coding agents"
 authors = ["BA-CalderonMorales"]
@@ -10,10 +10,11 @@ homepage = "https://github.com/BA-CalderonMorales/terminal-jarvis"
 readme = "README.md"
 keywords = ["cli", "ai", "agents", "harness"]
 categories = ["command-line-utilities", "development-tools"]
+build = "build/build.rs"
 include = [
   "/Cargo.toml",
   "/Cargo.lock",
-  "/build.rs",
+  "/build/**",
   "/src/**",
   "/harnesses/**",
   "/gates/**",
@@ -32,4 +33,35 @@ path = "src/main.rs"
 name = "terminal_jarvis"
 path = "src/lib.rs"
 
+[[test]]
+name = "cli"
+path = "tests/cli/index.rs"
+
+[[test]]
+name = "catalog"
+path = "tests/catalog/index.rs"
+
+[[test]]
+name = "gates"
+path = "tests/gates/index.rs"
+
+[[test]]
+name = "diagnostics"
+path = "tests/diagnostics/index.rs"
+
+[[test]]
+name = "context"
+path = "tests/context/index.rs"
+
+[[test]]
+name = "runtime"
+path = "tests/runtime/index.rs"
+
+[[test]]
+name = "release"
+path = "tests/release/index.rs"
+
 [dependencies]
+
+[dev-dependencies]
+quickcheck = "1"

@@ -1,0 +1,68 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+root=$(cd "$(dirname "${BASH_SOURCE[0]}")/../../../../" && pwd)
+ref=${TJ_CATALOG_REF:-$(git -C "$root" rev-parse HEAD)}
+usage="scripts/bash/catalog/index.sh parity-catalog DEV-BINARY STAGED-ROOT OUTPUT-DIR"
+dev=${1:?usage: $usage}
+staged=${2:?usage: $usage}
+output=${3:?usage: $usage}
+
+sha_file() {
+  if command -v sha256sum >/dev/null 2>&1; then
+    sha256sum "$1" | cut -d ' ' -f 1
+  else
+    shasum -a 256 "$1" | cut -d ' ' -f 1
+  fi
+}
+
+tree_digest() {
+  local base=$1 file
+  while IFS= read -r file; do
+    printf '%s\t%s\n' "${file#"$base"/}" "$(sha_file "$file")"
+  done < <(find "$base" -type f | LC_ALL=C sort)
+}
+
+[[ -x "$dev" ]] || { printf 'dev binary is not executable: %s\n' "$dev" >&2; exit 4; }
+[[ -x "$staged/bin/terminal-jarvis" ]] || { printf 'staged binary is missing\n' >&2; exit 4; }
+[[ -d "$staged/harnesses" && -d "$staged/gates" ]] || { printf 'staged catalogs are missing\n' >&2; exit 4; }
+mkdir -p "$output"
+
+"$root/scripts/bash/catalog/index.sh" catalog-report --output "$output/dev.tsv" \
+  --binary "$dev" --catalog "$root/harnesses" --tested-ref "$ref" >/dev/null
+"$root/scripts/bash/catalog/index.sh" catalog-report --output "$output/staged.tsv" \
+  --binary "$staged/bin/terminal-jarvis" --catalog "$staged/harnesses" \
+  --tested-ref "$ref" >/dev/null
+cmp "$output/dev.tsv" "$output/staged.tsv"
+
+dev_verbose=$("$dev" --plain version --verbose)
+staged_verbose=$("$staged/bin/terminal-jarvis" --plain version --verbose)
+dev_version=$(printf '%s\n' "$dev_verbose" | sed -n '1s/^terminal-jarvis //p')
+staged_version=$(printf '%s\n' "$staged_verbose" | sed -n '1s/^terminal-jarvis //p')
+dev_ref=$(printf '%s\n' "$dev_verbose" | sed -n 's/^git commit: //p')
+staged_ref=$(printf '%s\n' "$staged_verbose" | sed -n 's/^git commit: //p')
+[[ "$dev_version" == "$staged_version" ]] || { printf 'version mismatch\n' >&2; exit 4; }
+[[ "$dev_ref" == "$ref" && "$staged_ref" == "$ref" ]] || {
+  printf 'embedded ref mismatch\n' >&2
+  exit 4
+}
+
+tree_digest "$root/harnesses" >"$output/dev.catalog.sha256"
+tree_digest "$staged/harnesses" >"$output/staged.catalog.sha256"
+tree_digest "$root/gates" >"$output/dev.gates.sha256"
+tree_digest "$staged/gates" >"$output/staged.gates.sha256"
+cmp "$output/dev.catalog.sha256" "$output/staged.catalog.sha256"
+cmp "$output/dev.gates.sha256" "$output/staged.gates.sha256"
+
+printf 'schema_version\trole\tversion\tref\tcatalog_sha256\tgates_sha256\n' >"$output/identity.tsv"
+for role in development staged-package; do
+  printf '1\t%s\t%s\t%s\t%s\t%s\n' "$role" "$dev_version" "$ref" \
+    "$(sha_file "$output/dev.catalog.sha256")" "$(sha_file "$output/dev.gates.sha256")" \
+    >>"$output/identity.tsv"
+done
+
+printf 'schema_version\tref\tversion\treport_sha256\tcatalog_sha256\tgates_sha256\tresult\n' >"$output/summary.tsv"
+printf '1\t%s\t%s\t%s\t%s\t%s\tpass\n' "$ref" "$dev_version" \
+  "$(sha_file "$output/dev.tsv")" "$(sha_file "$output/dev.catalog.sha256")" \
+  "$(sha_file "$output/dev.gates.sha256")" >>"$output/summary.tsv"
+printf 'parity-catalog: ok (%s)\n' "$ref"

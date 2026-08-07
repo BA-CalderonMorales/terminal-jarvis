@@ -2,24 +2,7 @@
 
 # Terminal Jarvis
 
-**Unified command center for AI coding tools**
-
-Manage Claude, Gemini, Qwen, and 22 more AI assistants from one terminal
-interface.
-
-[![NPM Version](https://img.shields.io/npm/v/terminal-jarvis.svg?logo=npm&style=flat-square)](https://www.npmjs.com/package/terminal-jarvis)
-[![Crates.io](https://img.shields.io/crates/v/terminal-jarvis.svg?logo=rust&style=flat-square)](https://crates.io/crates/terminal-jarvis)
-[![Homebrew](https://img.shields.io/badge/Homebrew-Available-blue.svg?logo=homebrew&style=flat-square)](https://github.com/BA-CalderonMorales/homebrew-terminal-jarvis)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square)](https://opensource.org/licenses/MIT)
-[![Mentioned in Awesome](https://img.shields.io/badge/Mentioned%20in-Awesome-6f42c1?style=flat-square)](https://github.com/Piebald-AI/awesome-gemini-cli)
-[![Docs](https://img.shields.io/badge/docs-latest-blue.svg?style=flat-square)](https://ba-calderonmorales.github.io/my-life-as-a-dev/latest/projects/active/terminal-jarvis/)
-[![Coverage](https://img.shields.io/badge/coverage-report-green.svg?style=flat-square)](https://github.com/BA-CalderonMorales/terminal-jarvis/actions/workflows/ci.yml?query=branch%3Adevelop)
-
-<img src="https://raw.githubusercontent.com/BA-CalderonMorales/terminal-jarvis/main/docs/promo-image.png" alt="Terminal Jarvis Interface" width="100%">
-
-</div>
-
----
+**Command center for orchestrating context switching between coding-agent harnesses**
 
 > **Safe Testing Recommended**: Terminal Jarvis is a harness for AI coding tools
 > that can modify files and execute commands. For the safest experience, test in
@@ -28,44 +11,45 @@ interface.
 > [Coder](https://coder.com/), [DevPod](https://devpod.sh/), or
 > [Google Colab](https://colab.research.google.com/).
 
----
+[![NPM Version](https://img.shields.io/npm/v/terminal-jarvis.svg?logo=npm&style=flat-square)](https://www.npmjs.com/package/terminal-jarvis)
+[![Crates.io](https://img.shields.io/crates/v/terminal-jarvis.svg?logo=rust&style=flat-square)](https://crates.io/crates/terminal-jarvis)
+[![Homebrew](https://img.shields.io/badge/Homebrew-Available-blue.svg?logo=homebrew&style=flat-square)](https://github.com/BA-CalderonMorales/homebrew-terminal-jarvis)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square)](https://opensource.org/licenses/MIT)
+[![Mentioned in Awesome](https://img.shields.io/badge/Mentioned%20in-Awesome-6f42c1?style=flat-square)](https://github.com/Piebald-AI/awesome-gemini-cli)
+[![Docs](https://img.shields.io/badge/docs-latest-blue.svg?style=flat-square)](https://github.com/BA-CalderonMorales/terminal-jarvis/blob/main/docs/index.md)
+[![Coverage](https://img.shields.io/badge/coverage-report-green.svg?style=flat-square)](https://github.com/BA-CalderonMorales/terminal-jarvis/actions/workflows/ci.yml?query=branch%3Adevelop)
 
-A data-driven harness switcher for AI coding agents. Maps **25 coding-agent
-CLIs** through a shared **9-capability contract** -- one interface to
-download, run, update, and inspect any agent tool.
+<img src="docs/demo-tui.gif" alt="Terminal Jarvis switcher in action" width="100%">
+
+</div>
 
 ## Install
+
+Package mechanics, supported platforms, and update behavior: [Installation](docs/installation.md).
 
 ```bash
 # Cargo
 cargo install terminal-jarvis
+# Cargo binary name is terminal-jarvis; add an alias if you want a short call:
+#   echo 'alias tj=terminal-jarvis' >> ~/.bashrc
 
 # npm
 npm install -g terminal-jarvis
+# The npm package also installs a tj shim, so you can call either:
+#   terminal-jarvis list   # or  tj list
 
 # Homebrew
 brew install BA-CalderonMorales/homebrew-terminal-jarvis/terminal-jarvis
 ```
 
-Cargo builds the Rust CLI from the crates.io source package. The npm package is
-a Node launcher that downloads the matching Terminal Jarvis GitHub Release
-asset, verifies its `.sha256` file, caches it, and then executes it. Homebrew
-installs the matching platform release archive from the tap.
-
-Supported prebuilt assets are `linux-x64-gnu`, `linux-arm64-gnu`,
-`macos-x64`, `macos-arm64`, and `win32-x64`. Native Windows npm installs use
-the `win32-x64` ZIP bundle and work from Command Prompt, PowerShell, or Git
-Bash. Every release also includes a direct native executable for each platform;
-downloaded Linux and macOS executables may need `chmod +x` before use.
-
-An older Cargo or manual install can still win `PATH` resolution after a global
-npm upgrade. The npm install now completes and prints the path-order fix rather
-than blocking the upgrade; place the npm prefix before the stale location to run
-the newly installed command.
-
 ## Quick Start
 
+Inspect and safely gate catalog descriptors for Claude, Gemini, Qwen, Pi, Droid and a variety of other AI assistants from one terminal interface. The modes, the launch guards, and the full command surface: [Usage](docs/usage.md).
+
 ```bash
+# Open the interactive switcher (bare tj on a terminal does the same)
+terminal-jarvis tui
+
 # List every coding agent
 terminal-jarvis list
 
@@ -85,63 +69,109 @@ terminal-jarvis gate enable trivy
 terminal-jarvis gate status
 ```
 
-For development builds, replace `terminal-jarvis` with `cargo run --`.
-
-### Layout
-
-```text
-harnesses/<agent>/
-├── index.toml              # name, display, binary, env requirements
-├── download/index.toml     # install without sudo
-├── update/index.toml       # upgrade without interactive auth
-├── headless/index.toml     # non-interactive command mode
-├── version/index.toml      # print installed agent version
-├── stats/index.toml        # local agent statistics
-├── models/index.toml       # list available models
-├── security/index.toml     # sandbox and approval settings
-├── ui/index.toml           # interactive terminal UI
-└── yolo/index.toml         # bypass safeguards (dangerous)
-```
-
-Auth stays with each harness -- terminal-jarvis never retains credentials.
-
 ## Commands
+
+Commands run in one of two ways: headless (`terminal-jarvis <command>`) or
+inside the interactive switcher (`terminal-jarvis tui`), and every command is
+the same however you reached the tool:
+
+- Installed globally (npm, Homebrew, or Cargo): `terminal-jarvis list` / `tj list`
+- No install -- run on demand from anywhere: `npx terminal-jarvis list`
+- Built from source (this repository): `cargo run -- list`
+
+First time here? No install needed -- `npx terminal-jarvis tui` opens the
+switcher directly.
+
+**Headless** (`terminal-jarvis <command>` / `tj <command>`) -- one command per
+invocation, for scripts, CI, and one-shot tasks:
 
 | Command | Purpose |
 |---|---|
 | `list` | Show all coding agents |
-| `show <harness>` | Inspect a harness's capabilities |
-| `use <harness>` / `current` | Select / show active harness |
-| `plan [harness] <capability>` | Preview the shell command |
-| `run [harness] [capability] [args...]` | Execute a capability |
 | `check` | Report binary + env readiness |
+| `show <harness>` | Inspect a harness's capabilities |
+| `install <harness>` | Install a harness |
+| `update [<harness>]` | Upgrade a harness |
+| `plan [harness] <capability>` | Preview the shell command |
+| `use <harness>` / `current` | Select / show active harness |
+| `run [harness] [capability] [args...]` | Execute a capability |
 | `security [status\|audit\|harness]` | Security posture |
 | `gate [status\|list\|enable\|disable\|run]` | Optional local security gate |
 | `version [--verbose]` / `--version` / `-v` / `--info` | Version info |
-| `--update [--dry-run]` | Update Terminal Jarvis or print the update command |
+| `self-update [--dry-run]` / `--update` | Update Terminal Jarvis or print the update command |
 | `config show` | Active config state |
 | `auth help <harness>` | Credential setup guidance |
 | `[harness] [args...]` | Pass-through to harness binary |
 
-Legacy aliases remain available: `tools -> list`, `status -> check`,
-`info <harness> -> show <harness>`, `install <harness> -> run <harness> download`, and `update <harness> -> run <harness> update`.
+**Interactive** (`terminal-jarvis tui` / bare `tj` on a terminal) -- the
+chat-style switcher with the numbered picker and readiness dashboard. Every
+headless command above also works here, plus:
 
-Human-facing commands use width-aware structured output and color only on an
-interactive terminal. For scripts, put `--plain` before the command for stable
-line-oriented output; `--no-color` keeps the structured layout without color.
+| Command | Purpose |
+|---|---|
+| `tui` | Open the switcher |
+| `home` | Back to the welcome frame (works as `clear` too) |
+| `exit` | Leave the switcher |
 
-The experimental dashboard is intentionally behind a feature wall and remains
-noninteractive:
+## Layout
 
-```bash
-TERMINAL_JARVIS_EXPERIMENTAL_UI=1 terminal-jarvis experimental dashboard
+The repository is a few small planes, and every Rust domain is bucketed the
+same way -- once you can read one, you can read them all.
+
+```text
+src/                            # the std-only Rust CLI
+├── main.rs                     # entry point; lib.rs is the crate root
+├── contracts/                  # the shared data model (Harness, capabilities)
+├── cli/                        # parsing, guards, dispatch, tables, help
+├── catalog/                    # loads and validates the data plane
+├── context/                    # platform, distribution, active-harness state
+├── diagnostics/                # readiness reports, probes, PATH resolution
+├── gates/                      # optional local security gate (Trivy)
+├── runtime/                    # executes harness capability commands
+├── security/                   # credential and effect posture
+└── tui/                        # the interactive switcher (chat-style shell)
 ```
+
+```text
+harnesses/<agent>/              # the data plane: one folder per coding agent
+├── index.toml                  # name, display, binary, env requirements
+├── download/index.toml         # install without sudo
+├── update/index.toml           # upgrade without interactive auth
+├── headless/index.toml         # non-interactive command mode
+├── version/index.toml          # print installed agent version
+├── stats/index.toml            # local agent statistics
+├── models/index.toml           # list available models
+├── security/index.toml         # sandbox and approval settings
+├── ui/index.toml               # interactive terminal UI
+└── yolo/index.toml             # bypass safeguards (dangerous)
+```
+
+```text
+tests/                          # integration tests, one binary per domain
+scripts/bash/                   # automation: catalog, delivery, release, verify
+docs/                           # decisions, contracts, usage, demo, legacy
+build/                          # the build script only
+npm/  homebrew/                 # distribution launchers and formulae
+```
+
+Each Rust domain inside `src/` keeps the same shape: `index.rs` as the public
+face, `logic/` for behavior, `structs/` for data, `tests/` for proof, and
+every file stays at 100 lines or fewer.
 
 ## Docs
 
+Browse the whole folder from the [docs index](docs/index.md). What this is
+for, and the catalog truth behind it: [What is this?](docs/what-is-this.md).
+
 | Document | What |
 |---|---|
+| [Maintainer guide](docs/maintainer.md) | The security model and maintainer notes |
+| [Installation](docs/installation.md) | Package mechanics, supported platforms, update behavior |
+| [Usage](docs/usage.md) | Headless vs interactive, launch guards |
 | [Capability contract](docs/harness-capability-contract.md) | Full breakdown of the 9 capabilities |
-| [Supported agents](docs/supported-agents.md) | All 25 coding agents |
 | [Security gates](docs/security-gates.md) | Optional Trivy scan behavior and configuration |
+| [Cataloged agents](docs/supported-agents.md) | All 25 descriptors and support caveat |
+| [Support matrix](docs/support-matrix.md) | All 225 capability truth rows |
 | [Development](docs/development.md) | Architecture, verification, and release artifacts |
+| [Demo](docs/demo.md) | The recording, the agent-handover script, making new demos |
+| [Legacy notes](docs/legacy-notes.md) | Aliases, plain output behavior, removed experiments |

@@ -19,6 +19,12 @@ Supported downloaded assets:
 - macos-arm64
 - win32-x64
 
+Linux downloads require GNU libc. The launcher rejects musl/Alpine,
+Android/Termux, unidentified libc, and unlisted architectures before download.
+WSL2 with GNU libc selects the matching Linux GNU asset, but asset selection is
+not a verified-environment claim. WSL1 is not claimed. Node 18.17 or newer is
+required.
+
 Native Windows npm installs use the win32-x64 asset from Command Prompt,
 PowerShell, or Git Bash. If npm reports a stale terminal-jarvis binary earlier
 on PATH, the install still completes; move the npm prefix earlier in PATH to

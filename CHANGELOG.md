@@ -1,5 +1,59 @@
 # Changelog
 
+## [0.1.13] - 2026-08-06
+
+- Interactive switcher, instant boot, and live readiness: `terminal-jarvis
+  tui` (or bare `tj` on a terminal) opens a chat-style harness switcher where
+  names and numbers switch agents, `home`/`clear` reset the frame, `status`
+  shows a two-line fleet dashboard, and Ctrl+C aimed at a running agent never
+  kills the session. Full command tables and the demo are in `docs/`.
+
+- Brings back the interactive TUI as a small, line-based harness switcher:
+  `terminal-jarvis tui` (or bare `tj` on a terminal) opens a clean welcome --
+  banner, active harness, readiness, no tool dump -- over a `[>_]` prompt
+  whose dimmed `Waiting for input...` hint sits below the line and disappears
+  the moment a command commits. Slash commands parse with the exact headless
+  grammar (`/list`, `/status`, `/use`, `/plan`, `/install`, ...), bare text
+  runs the active harness headless, and a bare number selects a tool after
+  `/list` shows it. All commands share the headless intent, dangerous, and
+  interactive guards, and the terminal-control sequences come from a new
+  std-only `tui::term` layer instead of an external crate.
+- Status and diagnostics report live installed harness versions from bounded
+  read-only probes, and empty platform claims count as unrestricted in
+  readiness the same way they do in the execution guard.
+- Elevates the harness catalog out of the fail-closed checkpoint: determined
+  documented commands become expected claims, the six locally installed
+  harnesses carry verified version probes with disposable-real evidence,
+  `--help` fallback probes stay stubs, curl-pipe installers stay unknown, and
+  every yolo row is disabled. Freshness evidence is re-stamped to the catalog
+  revision date.
+- Treats an empty platform claim as unrestricted, so package-manager-driven
+  capabilities stop being rejected on every platform while explicit claims
+  are still enforced.
+- Identifies source-tree builds as the `source` channel (including coverage
+  target dirs), reports update.route as cargo, lists shadowing PATH binaries,
+  and marks state.cache not-applicable outside the npm launcher.
+- Renders tables legibly: proportional column floors, separator-aware
+  wrapping for paths and keys, wrapped headers, and compact support summaries
+  in `list`.
+
+## [0.1.13] - 2026-07-18
+
+- Replaces broad harness claims with a generated 225-row support matrix whose
+  support state, evidence, platform, freshness, and side effects come directly
+  from the packaged catalog; no first-class harness is promoted without current
+  disposable-real evidence.
+- Makes `check` the sole diagnostic surface, adds canonical `self-update` intent
+  and PTY confirmation behavior, and withholds executable update commands for
+  guarded capability rows.
+- Hardens the npm native cache with target, architecture, archive, binary,
+  catalog, gate, checksum, and source identity plus atomic staged recovery.
+- Adds exact-ref development/staged parity, all-descriptor pre-spawn guard,
+  redaction, stream/signal, lifecycle, corruption, and recovery evidence.
+- Adds a read-only, nonpublishing five-native-target candidate workflow and a
+  deterministic offline simulated evaluation kit; publication remains a
+  separate explicit operator decision.
+
 ## [0.1.12] - 2026-07-09
 
 - Restores non-blocking global npm upgrades when an older Cargo or manual

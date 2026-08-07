@@ -9,6 +9,7 @@ coverage/
 cobertura.xml
 lcov.info
 *.profraw
+__pycache__/
 .env
 .env.*
 !.env.example
@@ -17,3 +18,12 @@ lcov.info
 *.log
 *.tmp
 /scratch/
+GOAL.md
+
+# tool writes flow through a local symlink to .agents/ (never tracked)
+/.claude/
+/plan/
+*.zip
+*.deb
+*.rpm
+default_*

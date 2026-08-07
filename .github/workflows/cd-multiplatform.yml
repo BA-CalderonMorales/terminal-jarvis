@@ -45,7 +45,7 @@ jobs:
           git fetch --force --no-tags origin "+refs/heads/main:refs/remotes/origin/main"
           git fetch --force --no-tags origin "+refs/tags/$tag:refs/tags/$tag"
           git checkout --detach "refs/tags/$tag"
-          scripts/release-preflight.sh --tag "$tag" --expected-main-ref refs/remotes/origin/main
+          scripts/bash/release/index.sh preflight --tag "$tag" --expected-main-ref refs/remotes/origin/main
           version="${tag#v}"
           echo "tag=$tag" >> "$GITHUB_OUTPUT"
           echo "version=$version" >> "$GITHUB_OUTPUT"
@@ -104,7 +104,7 @@ jobs:
       - name: Build package
         env:
           CARGO_BUILD_TARGET: ${{ matrix.target }}
-        run: scripts/package-release.sh
+        run: scripts/bash/release/index.sh package
 
       - name: Verify platform package shape
         env:
@@ -209,7 +209,7 @@ jobs:
             test "$expected" = "$actual"
           }
           platforms="$(
-            sed -n 's/^release_platforms = \[\(.*\)\]/\1/p' scripts/release.toml |
+            sed -n 's/^release_platforms = \[\(.*\)\]/\1/p' scripts/config/release/constants/release.toml |
               tr ',' '\n' |
               tr -d ' "'
           )"

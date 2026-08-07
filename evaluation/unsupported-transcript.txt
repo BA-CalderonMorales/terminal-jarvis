@@ -1,0 +1,7 @@
+TERMINAL JARVIS v0.1.13 — SIMULATED EVALUATION
+
+This machine is not one of the five evaluation targets. No payload was selected,
+no coding-agent harness was executed, and no network or host state was changed.
+
+Supported targets: linux-x64-gnu, linux-arm64-gnu, macos-x64, macos-arm64,
+win32-x64. See EVALUATION.md for checksum and provenance verification.

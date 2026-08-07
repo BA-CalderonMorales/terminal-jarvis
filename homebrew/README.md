@@ -18,5 +18,5 @@ Local checks:
 ruby -c homebrew/Formula/terminal-jarvis.rb
 ```
 
-Run `scripts/local-cd.sh` to generate and verify versioned archive checksums
+Run `scripts/bash/release/index.sh local-cd` to generate and verify versioned archive checksums
 before promoting a release formula.

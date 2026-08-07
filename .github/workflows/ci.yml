@@ -5,6 +5,7 @@ on:
     branches: [main, develop]
     paths-ignore:
       - 'docs/**'
+      - 'plan/**'
       - 'README.md'
       - 'AGENTS.md'
       - 'CLAUDE.md'
@@ -23,6 +24,37 @@ env:
   CARGO_TERM_COLOR: always
 
 jobs:
+  conformance:
+    name: Adversarial Conformance
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      - uses: dtolnay/rust-toolchain@stable
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 20
+
+      - name: Run exact-ref adversarial evidence
+        env:
+          CARGO_NET_OFFLINE: "false"
+        run: |
+          mkdir -p evidence
+          scripts/bash/catalog/index.sh adversarial-report \
+            --output evidence/adversarial.tsv \
+            --tested-ref "${{ github.sha }}"
+
+      - uses: actions/upload-artifact@v7
+        with:
+          name: adversarial-${{ github.sha }}
+          path: evidence/adversarial.tsv
+          retention-days: 7
+          if-no-files-found: error
+
   verify:
     name: Verify
     runs-on: ubuntu-latest
@@ -59,7 +91,7 @@ jobs:
           command -v cargo-llvm-cov >/dev/null || cargo install cargo-llvm-cov --locked
 
       - name: Run branch verification
-        run: scripts/verify.sh
+        run: scripts/bash/verify/index.sh verify
         env:
           TJ_REQUIRE_SECURITY_TOOLS: "1"
 
@@ -88,7 +120,7 @@ jobs:
           restore-keys: cargo-package-${{ runner.os }}-
 
       - name: Build release package
-        run: scripts/package-release.sh
+        run: scripts/bash/release/index.sh package
 
       - uses: actions/upload-artifact@v7
         with:
@@ -138,28 +170,3 @@ jobs:
           findings="$(node -e "const fs=require('fs'); const s=JSON.parse(fs.readFileSync(process.argv[1], 'utf8')); console.log((s.runs || []).reduce((n, run) => n + ((run.results || []).length), 0));" "$sarif_file")"
           echo "Grype findings: $findings"
           test "$findings" -eq 0
-
-  mutation:
-    name: Mutation
-    runs-on: ubuntu-latest
-    timeout-minutes: 25
-    steps:
-      - uses: actions/checkout@v7
-
-      - uses: dtolnay/rust-toolchain@stable
-
-      - uses: actions/cache@v6
-        with:
-          path: |
-            ~/.cargo/bin/cargo-mutants
-            ~/.cargo/git
-            ~/.cargo/registry
-            target
-          key: cargo-mutation-${{ runner.os }}-${{ hashFiles('Cargo.lock') }}-v1
-          restore-keys: cargo-mutation-${{ runner.os }}-
-
-      - name: Install cargo-mutants
-        run: command -v cargo-mutants >/dev/null || cargo install cargo-mutants --locked
-
-      - name: Run mutation tests
-        run: cargo mutants --config mutants.toml --minimum-test-timeout 30 --jobs 2
