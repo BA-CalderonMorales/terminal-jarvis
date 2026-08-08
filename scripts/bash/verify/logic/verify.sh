@@ -98,7 +98,10 @@ fi
 
 echo "[13/12] mutation"
 if command -v cargo-mutants >/dev/null 2>&1 && test "${TJ_MUTATION:-0}" = "1"; then
-  cargo mutants --config mutants.toml --minimum-test-timeout 30 --jobs 2
+  for domain in $(scripts/bash/mutation/index.sh list); do
+    echo "mutation: running $domain shard"
+    scripts/bash/mutation/index.sh run "$domain"
+  done
 else
   echo "cargo-mutants not run; install it and set TJ_MUTATION=1 for ${mutation_target}% mutation work"
 fi
