@@ -4,6 +4,9 @@
 //! or tap `cli::args` for the parse surface. The domain's internals live in
 //! `logic/`; structs/ holds the data shapes produced by parsing.
 
+mod logic;
+mod structs;
+
 use crate::cli::logic::{entry, execute, json};
 use crate::cli::structs::response::Response;
 use std::path::Path;

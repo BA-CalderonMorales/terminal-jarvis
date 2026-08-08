@@ -4,6 +4,10 @@
 //! `context::{platform, distribution}` helpers; internals stay behind
 //! `logic/` and `structs/`.
 
+mod constants;
+mod logic;
+mod structs;
+
 pub use crate::context::logic::distribution;
 pub use crate::context::logic::gates::gates_root;
 pub use crate::context::logic::platform;
