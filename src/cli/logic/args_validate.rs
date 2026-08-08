@@ -50,8 +50,11 @@ pub(super) fn validate_options(action: &Action, options: &Options) -> Result<(),
     if options.verbose && !matches!(action, Action::Check | Action::Version { .. }) {
         return Err("--verbose is valid only with check or version".into());
     }
-    let lifecycle =
-        options.dry_run || options.no_input || options.confirm.is_some() || options.allow_dangerous;
+    let gate_accepts_no_input = matches!(action, Action::Gate(_)) && options.no_input;
+    let lifecycle = options.dry_run
+        || options.confirm.is_some()
+        || options.allow_dangerous
+        || (options.no_input && !gate_accepts_no_input);
     if lifecycle
         && !matches!(
             action,

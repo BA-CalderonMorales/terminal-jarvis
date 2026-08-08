@@ -9,6 +9,17 @@ fn gate_pair_requires_enable_or_run() {
 }
 
 #[test]
+fn gate_accepts_no_input_as_a_no_op() {
+    let options = Options {
+        no_input: true,
+        ..Default::default()
+    };
+    assert!(validate_options(&Action::Gate(vec!["enable".into()]), &options).is_ok());
+    assert!(validate_options(&Action::Gate(vec!["run".into(), "trivy".into()]), &options).is_ok());
+    assert!(validate_options(&Action::List, &options).is_err());
+}
+
+#[test]
 fn lifecycle_flags_only_on_lifecycle_actions() {
     let options = Options {
         confirm: Some("install:all".to_string()),
