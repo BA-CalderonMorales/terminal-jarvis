@@ -76,5 +76,20 @@ fn required(prefix: &str, name: &str, value: &str, errors: &mut Vec<String>) {
 }
 
 #[cfg(test)]
+mod tests {
+    use super::required;
+
+    #[test]
+    fn empty_and_blank_values_are_flagged_but_present_pass() {
+        let mut errors = Vec::new();
+        required("h", "executable", "codex", &mut errors);
+        required("h", "executable", "", &mut errors);
+        required("h", "source", "   ", &mut errors);
+        assert_eq!(errors.len(), 2);
+        assert!(errors.iter().all(|e| e.contains("has an empty")));
+    }
+}
+
+#[cfg(test)]
 #[path = "../tests/truth_props.rs"]
 mod props;

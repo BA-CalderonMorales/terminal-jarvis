@@ -64,3 +64,7 @@ fn release_url() -> Option<String> {
         .ok()
         .filter(|value| !value.is_empty())
 }
+
+#[cfg(test)]
+#[path = "../tests/cache_test.rs"]
+mod tests;
