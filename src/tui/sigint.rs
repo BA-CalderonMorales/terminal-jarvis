@@ -1,8 +1,10 @@
 //! Sigint: scoped SIGINT suppression around child-spawning actions. Children
 //! share the tui's process group, so Ctrl+C aimed at a running agent would
 //! also kill the shell. While a guarded action runs, the tui ignores SIGINT
-//! -- the agent tree, in the same group, still receives the signal and dies
-//! naturally -- and the default disposition returns once the action ends.
+//! in its own process, and the default disposition returns once the action
+//! ends. Children are not left silenced: the spawn site (runtime runner)
+//! installs a pre-exec reset of SIGINT to SIG_DFL, so an agent still dies on
+//! Ctrl+C while the shell survives.
 //! Std-only: the `signal` symbol is declared directly, no libc crate.
 
 pub fn guarded<T>(body: impl FnOnce() -> T) -> T {
