@@ -1,6 +1,6 @@
 #![cfg(unix)]
 
-use crate::logic::matrix::{run_pty, run_pty_input, text, Fixture, State};
+use crate::logic::matrix::{run_pty, run_pty_input, run_pty_probe, text, Fixture, State};
 use std::process::Command;
 
 fn tty(mut command: Command, args: &[&str]) -> Vec<u8> {
@@ -72,4 +72,20 @@ fn lifecycle_pty_eof_cancellation_fails_closed() {
     let (status, output) = lifecycle(b"\x04");
     assert_eq!(status.code(), Some(5));
     assert!(output.contains("cancelled; nothing was run"));
+}
+
+#[test]
+fn tui_idle_ctrl_c_leaves_the_session_open() {
+    let fixture = Fixture::new(State::Expected);
+    let mut command = fixture.command();
+    command.args(["tui"]);
+    let stages: [(&[u8], Option<&[u8]>); 2] = [(b"\x03", Some(b"[>_]")), (b"exit\n", None)];
+    let (status, output) = run_pty_probe(command, &stages);
+    assert_eq!(status.code(), Some(0), "idle Ctrl+C must not kill the tui");
+    let body = text(&output);
+    assert!(body.contains("Command center"), "banner missing: {body}");
+    assert!(
+        body.contains("list, status, help"),
+        "modeline missing: {body}"
+    );
 }

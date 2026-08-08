@@ -13,18 +13,19 @@ mod status;
 pub use handle::handle;
 
 pub fn run(harnesses: &[Harness], catalog_root: &Path, state_home: &Path, options: &args::Options) {
-    let mut hint = modeline(state_home, false);
-    while let Some(input) = super::input::read_line(&hint) {
-        let next =
-            super::sigint::guarded(|| handle(harnesses, catalog_root, state_home, options, &input));
-        match next {
-            Next::Exit => break,
-            Next::Again { picker_shown } => {
-                hint = modeline(state_home, picker_shown);
-                println!();
+    super::sigint::guarded(|| {
+        let mut hint = modeline(state_home, false);
+        while let Some(input) = super::input::read_line(&hint) {
+            let next = handle(harnesses, catalog_root, state_home, options, &input);
+            match next {
+                Next::Exit => break,
+                Next::Again { picker_shown } => {
+                    hint = modeline(state_home, picker_shown);
+                    println!();
+                }
             }
         }
-    }
+    });
     println!();
 }
 

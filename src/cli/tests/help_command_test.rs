@@ -41,7 +41,7 @@ const PURPOSE: [(&str, &str); 20] = [
     ),
     (
         "tui",
-        "Open the interactive harness switcher on a terminal.",
+        "Interactive switcher; Ctrl+C interrupts a running agent and leaves the session open.",
     ),
     ("current", "Show the active harness."),
     ("use", "Select the active harness."),
