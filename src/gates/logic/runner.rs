@@ -25,8 +25,10 @@ pub fn preflight(home: &Path) -> Result<(), String> {
         );
         return Ok(());
     }
+    eprintln!("running security gate '{}' ...", gate.name);
     let (code, output) = run(gate)?;
     if code == 0 {
+        eprintln!("security gate '{}' passed", gate.name);
         return Ok(());
     }
     Err(format!(

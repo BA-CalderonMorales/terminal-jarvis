@@ -12,9 +12,16 @@ fn child_bytes_stay_on_matching_streams_and_exit_is_exact() {
     let output = fixture.run(&["--plain", "run", "fixture", "headless", "--", "payload"]);
     assert_eq!(output.status.code(), Some(37));
     assert_eq!(output.stdout, b"out\xff\n");
-    assert!(output.stderr.starts_with(b"err\xfe\n"));
-    let diagnostic = String::from_utf8_lossy(&output.stderr[b"err\xfe\n".len()..]);
-    assert!(diagnostic.contains("capability 'headless' failed with exit 37"));
+    let stderr = String::from_utf8_lossy(&output.stderr);
+    assert!(stderr.contains("running security gate 'acceptance'"));
+    assert!(output.stderr.windows(5).any(|w| w == b"err\xfe\n"));
+    let child = output
+        .stderr
+        .windows(5)
+        .position(|w| w == b"err\xfe\n")
+        .unwrap();
+    let diagnostic = stderr.find("exit 37").unwrap();
+    assert!(child < diagnostic);
     assert!(!fixture.spawned());
     assert!(fixture.gate_spawned());
 }
@@ -29,7 +36,10 @@ fn successful_child_stderr_is_not_discarded_or_crossed() {
     let output = fixture.run(&["--plain", "run", "fixture", "headless"]);
     assert_eq!(output.status.code(), Some(0));
     assert_eq!(output.stdout, b"primary\n");
-    assert_eq!(output.stderr, b"warning\n");
+    let stderr = String::from_utf8_lossy(&output.stderr);
+    assert!(stderr.contains("running security gate 'acceptance'"));
+    assert!(stderr.ends_with("warning\n"));
+    assert!(!stderr.contains("primary"));
 }
 
 #[test]
@@ -42,6 +52,8 @@ fn unix_signal_exit_is_preserved_with_a_parent_diagnostic() {
     let output = fixture.run(&["--plain", "run", "fixture", "headless"]);
     assert_eq!(output.status.code(), Some(143));
     assert_eq!(output.stdout, b"before\n");
-    assert!(output.stderr.starts_with(b"signal\n"));
-    assert!(String::from_utf8_lossy(&output.stderr).contains("failed with exit 143"));
+    let stderr = String::from_utf8_lossy(&output.stderr);
+    assert!(stderr.contains("running security gate 'acceptance'"));
+    assert!(stderr.contains("signal\n"));
+    assert!(stderr.contains("failed with exit 143"));
 }

@@ -24,6 +24,13 @@ pub fn capability(
     let plan = selected
         .plan(capability)
         .ok_or_else(|| format!("{harness} lacks {capability}"))?;
+    if matches!(capability, Capability::Download | Capability::Update) {
+        eprintln!(
+            "{} {harness}: {} ...",
+            verb(capability),
+            plan.command.render()
+        );
+    }
     match runtime::run_command(plan, extra) {
         Ok(0) => Ok((0, String::new())),
         Ok(code) => {
@@ -35,6 +42,14 @@ pub fn capability(
             eprintln!("{message}");
             Ok((code, String::new()))
         }
+    }
+}
+
+fn verb(capability: Capability) -> &'static str {
+    if capability == Capability::Download {
+        "installing"
+    } else {
+        "updating"
     }
 }
 
