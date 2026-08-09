@@ -4,8 +4,11 @@
 //! `context::{platform, distribution}` helpers; internals stay behind
 //! `logic/` and `structs/`.
 
+#[path = "constants/mod.rs"]
 mod constants;
+#[path = "logic/mod.rs"]
 mod logic;
+#[path = "structs/mod.rs"]
 mod structs;
 
 pub use crate::context::logic::distribution;
