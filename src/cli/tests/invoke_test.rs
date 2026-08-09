@@ -38,3 +38,11 @@ fn missing_binary_maps_to_shell_not_found_exit() {
     assert_eq!(code, 127);
     assert!(body.is_empty());
 }
+
+#[test]
+fn narration_verb_matches_the_capability() {
+    assert_eq!(verb(Capability::Download), "installing");
+    assert_eq!(verb(Capability::Update), "updating");
+    assert_eq!(verb(Capability::Headless), "updating");
+    assert_eq!(verb(Capability::Yolo), "updating");
+}
