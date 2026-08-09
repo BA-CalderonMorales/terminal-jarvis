@@ -24,6 +24,7 @@ fn plan(
         executable,
         source,
         verified_at: "2026-07-17T04:59:27Z".into(),
+        package: None,
     }
 }
 

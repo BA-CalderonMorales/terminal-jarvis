@@ -27,6 +27,7 @@ const PLAN_KEYS: [&str; 12] = [
     "source",
     "verified_at",
 ];
+const OPTIONAL_PLAN_KEYS: [&str; 1] = ["package"];
 
 pub fn harness(fields: &Fields, capabilities: Vec<CapabilityPlan>) -> Result<Harness, String> {
     exact_keys(fields, &HARNESS_KEYS)?;
@@ -42,7 +43,7 @@ pub fn harness(fields: &Fields, capabilities: Vec<CapabilityPlan>) -> Result<Har
 }
 
 pub fn capability(fields: &Fields, capability: Capability) -> Result<CapabilityPlan, String> {
-    exact_keys(fields, &PLAN_KEYS)?;
+    plan_keys(fields)?;
     let command = parser::string(fields, "command")?;
     Ok(CapabilityPlan {
         capability,
@@ -57,6 +58,7 @@ pub fn capability(fields: &Fields, capability: Capability) -> Result<CapabilityP
         executable: parser::string(fields, "executable")?,
         source: parser::string(fields, "source")?,
         verified_at: parser::string(fields, "verified_at")?,
+        package: parser::optional_string(fields, "package")?,
     })
 }
 
@@ -71,6 +73,33 @@ fn exact_keys(fields: &Fields, expected: &[&str]) -> Result<(), String> {
             "metadata keys must be exactly {}; found {}",
             expected.join(", "),
             actual.join(", ")
+        ))
+    }
+}
+
+fn plan_keys(fields: &Fields) -> Result<(), String> {
+    let required = PLAN_KEYS
+        .iter()
+        .copied()
+        .collect::<std::collections::BTreeSet<_>>();
+    let allowed = PLAN_KEYS
+        .iter()
+        .chain(OPTIONAL_PLAN_KEYS.iter())
+        .copied()
+        .collect::<std::collections::BTreeSet<_>>();
+    let actual = fields
+        .keys()
+        .map(String::as_str)
+        .collect::<std::collections::BTreeSet<_>>();
+    let missing = required.difference(&actual).copied().collect::<Vec<_>>();
+    let unknown = actual.difference(&allowed).copied().collect::<Vec<_>>();
+    if missing.is_empty() && unknown.is_empty() {
+        Ok(())
+    } else {
+        Err(format!(
+            "plan keys must be the required set plus optional keys; missing {}, unknown {}",
+            missing.join(", "),
+            unknown.join(", ")
         ))
     }
 }

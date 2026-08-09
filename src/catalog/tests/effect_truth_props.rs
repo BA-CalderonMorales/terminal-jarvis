@@ -20,6 +20,7 @@ fn plan(
         executable: "tj".into(),
         source: "test".into(),
         verified_at: "2026-07-17T04:59:27Z".into(),
+        package: None,
     }
 }
 

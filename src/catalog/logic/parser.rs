@@ -28,6 +28,13 @@ pub fn string(fields: &Fields, key: &str) -> Result<String, String> {
     strip_quotes(value.trim())
 }
 
+pub fn optional_string(fields: &Fields, key: &str) -> Result<Option<String>, String> {
+    let Some(value) = fields.get(key) else {
+        return Ok(None);
+    };
+    strip_quotes(value.trim()).map(Some)
+}
+
 pub fn list(fields: &Fields, key: &str) -> Result<Vec<String>, String> {
     let Some(value) = fields.get(key) else {
         return Ok(Vec::new());

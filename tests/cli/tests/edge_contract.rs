@@ -27,6 +27,7 @@ fn plan(capability: Capability, summary: &str, command: &str) -> CapabilityPlan 
         executable: command.to_string(),
         source: "internal:test".to_string(),
         verified_at: "2026-07-17T00:00:00Z".to_string(),
+        package: None,
     }
 }
 

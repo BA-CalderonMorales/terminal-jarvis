@@ -77,6 +77,6 @@ fn loader_rejects_duplicate_and_unknown_metadata() {
     assert!(catalog::load(&root)
         .unwrap_err()
         .to_string()
-        .contains("metadata keys must be exactly"));
+        .contains("unknown future"));
     fs::remove_dir_all(root).unwrap();
 }

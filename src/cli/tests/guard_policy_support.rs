@@ -30,6 +30,7 @@ pub fn dummy_plan(
         executable: "test".into(),
         source: "test".into(),
         verified_at: verified_at.into(),
+        package: None,
     }
 }
 

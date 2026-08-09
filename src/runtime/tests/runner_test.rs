@@ -25,6 +25,7 @@ fn plan(script: &str) -> CapabilityPlan {
         executable: String::new(),
         source: String::new(),
         verified_at: String::new(),
+        package: None,
     }
 }
 
