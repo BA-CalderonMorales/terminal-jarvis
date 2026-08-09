@@ -39,3 +39,26 @@ fn preflight_accepts_success_and_reports_blocking_exit() {
     }
     let _ = std::fs::remove_dir_all(root);
 }
+
+#[cfg(unix)]
+#[test]
+fn preflight_warns_and_continues_when_binary_is_missing() {
+    let _guard = crate::ENV_LOCK
+        .lock()
+        .unwrap_or_else(|error| error.into_inner());
+    let root = std::env::temp_dir().join(format!("tj-preflight-missing-{}", std::process::id()));
+    let home = root.join("home");
+    let catalog = root.join("catalog");
+    let _ = std::fs::remove_dir_all(&root);
+    write_gate(&catalog, "phantom", "definitely-not-a-real-binary-xyz");
+    let previous = std::env::var_os("TERMINAL_JARVIS_GATES");
+    std::env::set_var("TERMINAL_JARVIS_GATES", &catalog);
+    crate::gates::enable(&home, "phantom").unwrap();
+    assert!(preflight(&home).is_ok());
+    if let Some(value) = previous {
+        std::env::set_var("TERMINAL_JARVIS_GATES", value);
+    } else {
+        std::env::remove_var("TERMINAL_JARVIS_GATES");
+    }
+    let _ = std::fs::remove_dir_all(root);
+}

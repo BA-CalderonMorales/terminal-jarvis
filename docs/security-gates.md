@@ -25,8 +25,11 @@ to see the scanner output without launching a harness.
 Install Trivy through the official method for your operating system. The
 [Trivy installation guide](https://trivy.dev/docs/latest/getting-started/installation/)
 covers Linux, macOS, and Windows. If Trivy is missing while the gate is enabled,
-Terminal Jarvis blocks harness execution with the installation link and a
-disable command; it does not attempt an install.
+Terminal Jarvis warns on stderr and continues without scanning; it does not
+block harness execution (a scanner that cannot run protects nothing) and never
+attempts an install. The warning repeats so the setup path stays discoverable
+until you install Trivy or run `terminal-jarvis gate disable`. `gate run trivy`
+still reports the missing binary explicitly when you ask for a scan.
 
 ## Configuration
 

@@ -18,6 +18,13 @@ pub fn preflight(home: &Path) -> Result<(), String> {
                 selection.name
             )
         })?;
+    if !security::command_on_path(&gate.binary) {
+        eprintln!(
+            "warning: optional gate '{}' is enabled but '{}' is not on PATH; {} Run `terminal-jarvis gate disable` to stop the warning, or install the scanner to start scanning.",
+            gate.name, gate.binary, gate.install_hint
+        );
+        return Ok(());
+    }
     let (code, output) = run(gate)?;
     if code == 0 {
         return Ok(());
