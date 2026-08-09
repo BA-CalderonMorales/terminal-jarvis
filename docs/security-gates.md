@@ -2,7 +2,26 @@
 
 Terminal Jarvis can run an optional local gate before it executes a coding-agent
 harness. Gates are off by default and Terminal Jarvis never installs a scanner
-or sends workspace data anywhere on its own.
+or sends workspace data anywhere on its own. With a gate enabled, `install` and
+`update` also get a pre-install vulnerability check of the package behind the
+tool.
+
+## Pre-install package check
+
+When a gate is enabled and the tool's plan carries a `package` key (the npm
+registry tools), `install <tool>` and `update <tool>` resolve the package's
+dependency tree into a lockfile (`npm install --package-lock-only`) in a
+temporary directory and scan that lockfile with trivy. A clean verdict proceeds
+silently. HIGH/CRITICAL findings print the trivy report and ask
+"Continue installing/updating anyway? [y/N]" (default no); noninteractive runs
+fail closed unless `--no-input --confirm=package-<capability>:<tool>` is given.
+The package is downloaded only after a clean verdict or explicit override.
+
+With no gate enabled, installs warn that they are not vulnerability-checked.
+Tools installed by custom scripts (curl|bash, pip, uv) cannot be pre-scanned;
+with a gate on, this is stated and the install continues. The package check
+needs both `npm` and `trivy` on PATH; if either is missing it warns and
+continues.
 
 ## Trivy
 

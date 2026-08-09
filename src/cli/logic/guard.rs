@@ -68,6 +68,7 @@ fn execute(
     gates::preflight(home).map_err(|message| {
         error::Failure::safety("gate_blocked", message, "run `terminal-jarvis gate status`")
     })?;
+    super::package_advisory::check(harness, plan, options, home)?;
     invoke::invocation(invocation, harnesses).map_err(dispatch_support::unavailable_error)
 }
 

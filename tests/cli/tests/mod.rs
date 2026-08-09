@@ -23,6 +23,7 @@ mod lifecycle;
 mod option;
 mod options;
 mod output;
+mod package_check;
 mod plan;
 mod presentation;
 mod red;
