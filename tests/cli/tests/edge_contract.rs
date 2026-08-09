@@ -86,7 +86,6 @@ fn security_checks_cover_path_and_env_modes() {
     ));
     assert_eq!(missing, vec!["__TERMINAL_JARVIS_MISSING_ENV__"]);
 }
-
 #[test]
 fn setup_hints_cover_all_env_modes() {
     assert_eq!(

@@ -1,7 +1,6 @@
 use crate::contracts::{
     Capability, CapabilityPlan, CommandPlan, Effect, EvidenceMode, Interaction, SupportState,
 };
-
 const KNOWN: &str = "linux-x64-gnu linux-arm64-gnu macos-x64 macos-arm64 windows-x64-msvc";
 
 fn plan(

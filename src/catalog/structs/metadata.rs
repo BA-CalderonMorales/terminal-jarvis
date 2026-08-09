@@ -4,33 +4,10 @@ use crate::contracts::{
 };
 
 use crate::catalog::logic::parser::{self, Fields};
-
-const HARNESS_KEYS: [&str; 6] = [
-    "name",
-    "display",
-    "description",
-    "binary",
-    "env_mode",
-    "env",
-];
-const PLAN_KEYS: [&str; 12] = [
-    "summary",
-    "command",
-    "args",
-    "support",
-    "evidence",
-    "effect",
-    "network",
-    "interaction",
-    "platforms",
-    "executable",
-    "source",
-    "verified_at",
-];
-const OPTIONAL_PLAN_KEYS: [&str; 1] = ["package"];
+use crate::catalog::structs::keys;
 
 pub fn harness(fields: &Fields, capabilities: Vec<CapabilityPlan>) -> Result<Harness, String> {
-    exact_keys(fields, &HARNESS_KEYS)?;
+    keys::exact_fields(fields, keys::harness_keys())?;
     Ok(Harness {
         name: parser::string(fields, "name")?,
         display: parser::string(fields, "display")?,
@@ -43,7 +20,7 @@ pub fn harness(fields: &Fields, capabilities: Vec<CapabilityPlan>) -> Result<Har
 }
 
 pub fn capability(fields: &Fields, capability: Capability) -> Result<CapabilityPlan, String> {
-    plan_keys(fields)?;
+    keys::plan_keys(fields)?;
     let command = parser::string(fields, "command")?;
     Ok(CapabilityPlan {
         capability,
@@ -60,48 +37,6 @@ pub fn capability(fields: &Fields, capability: Capability) -> Result<CapabilityP
         verified_at: parser::string(fields, "verified_at")?,
         package: parser::optional_string(fields, "package")?,
     })
-}
-
-fn exact_keys(fields: &Fields, expected: &[&str]) -> Result<(), String> {
-    let actual = fields.keys().map(String::as_str).collect::<Vec<_>>();
-    let mut expected = expected.to_vec();
-    expected.sort_unstable();
-    if actual == expected {
-        Ok(())
-    } else {
-        Err(format!(
-            "metadata keys must be exactly {}; found {}",
-            expected.join(", "),
-            actual.join(", ")
-        ))
-    }
-}
-
-fn plan_keys(fields: &Fields) -> Result<(), String> {
-    let required = PLAN_KEYS
-        .iter()
-        .copied()
-        .collect::<std::collections::BTreeSet<_>>();
-    let allowed = PLAN_KEYS
-        .iter()
-        .chain(OPTIONAL_PLAN_KEYS.iter())
-        .copied()
-        .collect::<std::collections::BTreeSet<_>>();
-    let actual = fields
-        .keys()
-        .map(String::as_str)
-        .collect::<std::collections::BTreeSet<_>>();
-    let missing = required.difference(&actual).copied().collect::<Vec<_>>();
-    let unknown = actual.difference(&allowed).copied().collect::<Vec<_>>();
-    if missing.is_empty() && unknown.is_empty() {
-        Ok(())
-    } else {
-        Err(format!(
-            "plan keys must be the required set plus optional keys; missing {}, unknown {}",
-            missing.join(", "),
-            unknown.join(", ")
-        ))
-    }
 }
 
 fn boolean(fields: &Fields, key: &str) -> Result<bool, String> {
