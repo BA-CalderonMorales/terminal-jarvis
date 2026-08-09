@@ -18,6 +18,7 @@ cli-core src/cli/logic/execute.rs
 cli-core src/cli/logic/canonical.rs
 cli-core src/cli/logic/catalog_load.rs
 cli-core src/cli/logic/cache.rs
+cli-core src/cli/logic/resolve.rs
 cli-args src/cli/logic/args.rs
 cli-args src/cli/logic/args_action.rs
 cli-args src/cli/logic/args_child.rs
@@ -31,7 +32,6 @@ cli-args src/cli/logic/compat.rs
 cli-args src/cli/logic/compat_config.rs
 cli-args src/cli/logic/compat_output.rs
 cli-args src/cli/logic/compat_support.rs
-cli-args src/cli/logic/resolve.rs
 cli-args src/cli/logic/version.rs
 cli-args src/cli/logic/invoke.rs
 cli-args src/cli/logic/output_diagnostics.rs
