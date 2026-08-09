@@ -80,3 +80,11 @@ fn scoped_dir() -> Option<PathBuf> {
     std::fs::create_dir_all(&dir).ok()?;
     Some(dir)
 }
+
+#[cfg(test)]
+#[path = "../tests/package_check_harness.rs"]
+mod pkgcheck_harness;
+
+#[cfg(test)]
+#[path = "../tests/package_check_test.rs"]
+mod tests;
