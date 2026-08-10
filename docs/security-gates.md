@@ -26,8 +26,14 @@ continues.
 ## Trivy
 
 The bundled `trivy` gate scans the current working directory with Trivy's
-filesystem scanner. It enables vulnerability, secret, and misconfiguration
-scanners and blocks on HIGH or CRITICAL findings.
+filesystem scanner. It enables vulnerability and misconfiguration scanners and
+blocks on HIGH or CRITICAL findings. Secret scanning (Trivy's slowest scanner,
+with the least to say about a tool download) is left off; dependency, vendored,
+and build output directories (`node_modules`, `target`, `.git`, `dist`, `build`,
+`vendor`, `.venv`, `venv`, `npm`, `mutants.out*`, `graphify-out`) are skipped
+so a large workspace does not turn the pre-command scan into a minutes-long
+wall. Scanner output streams to the terminal as it runs, and a blocked scan
+reports only the meaningful tail instead of the whole log.
 
 ```bash
 terminal-jarvis gate status
