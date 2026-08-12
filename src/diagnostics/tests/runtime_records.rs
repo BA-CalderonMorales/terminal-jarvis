@@ -14,7 +14,7 @@ fn gate_dir() -> PathBuf {
 
 fn input(gate: PathBuf, runtime: RuntimeInput) -> DiagnosticInput {
     DiagnosticInput {
-        version: "v0.1.13".into(),
+        version: "v0.1.14".into(),
         executable: None,
         catalog: gate.clone(),
         home: gate.clone(),

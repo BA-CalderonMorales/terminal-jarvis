@@ -7,7 +7,7 @@ use std::time::{Duration, SystemTime};
 static COUNTER: AtomicU64 = AtomicU64::new(0);
 fn dummy_input() -> DiagnosticInput {
     DiagnosticInput {
-        version: "0.1.13".into(),
+        version: "0.1.14".into(),
         executable: None,
         catalog: PathBuf::from("/tmp/catalog"),
         home: PathBuf::from("/tmp/home"),
