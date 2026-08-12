@@ -19,7 +19,8 @@
 [![Docs](https://img.shields.io/badge/docs-latest-blue.svg?style=flat-square)](https://github.com/BA-CalderonMorales/terminal-jarvis/blob/main/docs/index.md)
 [![Coverage](https://img.shields.io/badge/coverage-report-green.svg?style=flat-square)](https://github.com/BA-CalderonMorales/terminal-jarvis/actions/workflows/ci.yml?query=branch%3Adevelop)
 
-<img src="docs/demo-tui.gif" alt="Terminal Jarvis switcher in action" width="100%">
+> Visuals: run `vhs scripts/demo/tui.tape` to render `docs/demo-tui.gif`
+> (see [docs/demo.md](docs/demo.md)); the tape is the source of truth.
 
 </div>
 

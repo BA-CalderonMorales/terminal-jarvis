@@ -1,5 +1,47 @@
 # Changelog
 
+## Up next: 0.1.15 (roadmap, not yet started)
+
+- `status` will surface previously-blocked installs and why they were
+  blocked, with a drillable view into the decision (finding details).
+- A fast `uninstall|prune [harness]` verb to locate and remove a harness and
+  its installed version on disk.
+- Horizontal rules will divide the TUI frame into header, main, and footer
+  sections so the layout reads as distinct zones.
+
+## [0.1.14] - 2026-08-12
+
+- TUI clean frame: right-aligned one-row status (active harness, CWD,
+  readiness) on the banner line; a `[>_]::[tj:0.1.14]::[harness:<name>]`
+  context indicator that carries the version and agent (plus a `::[debug]`
+  slot); home no longer dumps the tool list.
+- Live install/update beats rewrite in place: `security scan (trivy)`/`
+  package check` lines collapse to `: passed` / `: clean`, installs show a
+  progress line, and every lifecycle ends in a green verdict card with
+  timing -- including honest `binary not on PATH` warnings.
+- A passed gate scan is memoized for the session, so `install` +
+  immediately-after `run` performs exactly one scan (invalidated on
+  `gate enable/disable`); the verdict also persists the binary-on-PATH
+  check across processes.
+- Unknown (curl-pipe) installers now install with an interactive intent
+  prompt in the TUI instead of failing closed, with an explicit
+  "cannot be pre-scanned" advisory; headless mode stays fail-closed.
+- Session bracket: `── run <agent> ──` opens around a launch and exits with
+  a recap (elapsed time, exit status) or the error, before the prompt
+  redraws. Ctrl+C at idle redraws the prompt without a stray `^C`;
+  a stuck gate scanner is hard-killed so the terminal always returns.
+- `/debug on|off` toggles the narrated raw view, `help` documents the
+  switcher in-terminal, and the prompt honors an empty response by staying
+  put.
+- Acceptance oracle: a pty harness with a tiny ANSI screen model now asserts
+  six end-to-end scenarios -- badge layout, idle Ctrl+C, clean
+  install+adopt, single-scan memoization, scanner interruption, and debug
+  toggle -- while unit tests cover the remainder; 511 tests total.
+- Demo pipeline: `scripts/demo/tui.tape` re-records `docs/demo-tui.gif`
+  (animated, README primary) and `scripts/demo/capture_frame.sh` +
+  `render_frame.go` produce the registry still `docs/demo-tui.png` with the
+  stock Windows Terminal (Campbell) palette; both reflect the 0.1.14 frame.
+
 ## [0.1.13] - 2026-08-06
 
 - Interactive switcher, instant boot, and live readiness: `terminal-jarvis
