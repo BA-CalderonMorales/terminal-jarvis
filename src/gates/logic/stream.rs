@@ -5,7 +5,7 @@ use std::process::{Command, ExitStatus, Stdio};
 
 /// The scan's numeric outcome: the real exit code, or 128 + the signal on
 /// unix when a scan was killed outright. Windows has no signal model.
-pub fn exit_code(status: &ExitStatus) -> i32 {
+fn exit_code(status: &ExitStatus) -> i32 {
     #[cfg(unix)]
     {
         use std::os::unix::process::ExitStatusExt;
