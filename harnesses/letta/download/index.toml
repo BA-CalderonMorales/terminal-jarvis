@@ -10,3 +10,4 @@ platforms = []
 executable = "npm"
 source = "internal:phase-01@fab5848"
 verified_at = "2026-08-05T00:00:00Z"
+package = "@letta-ai/letta-code"

@@ -4,6 +4,7 @@ fn tj(args: &[&str], home: &std::path::Path) -> Output {
     Command::new(env!("CARGO_BIN_EXE_terminal-jarvis"))
         .args(args)
         .env("TERMINAL_JARVIS_HOME", home)
+        .env("PATH", "")
         .output()
         .expect("terminal-jarvis runs")
 }

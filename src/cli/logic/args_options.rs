@@ -6,7 +6,7 @@ pub enum OutputMode {
     Json,
 }
 
-#[derive(Clone, Debug, Default, Eq, PartialEq)]
+#[derive(Clone, Debug, Eq, PartialEq)]
 pub struct Options {
     pub output: OutputMode,
     pub no_color: bool,
@@ -15,6 +15,9 @@ pub struct Options {
     pub no_input: bool,
     pub confirm: Option<String>,
     pub allow_dangerous: bool,
+    /** Success-path stage narration. Default true keeps headless output;
+    false silences chatter only -- warnings and failures always print. */
+    pub narrate: bool,
 }
 
 #[derive(Debug, Eq, PartialEq)]
@@ -37,7 +40,12 @@ pub(super) fn extract(input: Vec<String>) -> Result<Extracted, String> {
     while index < input.len() {
         let word = &input[index];
         if word == "--" {
-            return finish(words, input[index + 1..].to_vec(), true, options);
+            return Ok(Extracted {
+                words,
+                child: input[index + 1..].to_vec(),
+                boundary: true,
+                options,
+            });
         }
         match word.as_str() {
             "--plain" => set_output(&mut options, OutputMode::Plain)?,
@@ -52,19 +60,10 @@ pub(super) fn extract(input: Vec<String>) -> Result<Extracted, String> {
         }
         index += 1;
     }
-    finish(words, Vec::new(), false, options)
-}
-
-fn finish(
-    words: Vec<String>,
-    child: Vec<String>,
-    boundary: bool,
-    options: Options,
-) -> Result<Extracted, String> {
     Ok(Extracted {
         words,
-        child,
-        boundary,
+        child: Vec::new(),
+        boundary: false,
         options,
     })
 }

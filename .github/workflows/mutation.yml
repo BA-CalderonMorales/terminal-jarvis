@@ -1,4 +1,5 @@
-name: CI
+name: Mutations
+run-name: Mutations (${{ github.event_name }})
 
 on:
   pull_request:
@@ -31,74 +32,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        domain: [cli-core, cli-logic, diagnostics, catalog, env-aux]
-        include:
-          - domain: cli-core
-            files: |
-              src/cli/index.rs
-              src/cli/logic/gate_cmd.rs
-              src/cli/logic/table_wrap.rs
-              src/cli/logic/args_validate.rs
-              src/cli/logic/table_alloc.rs
-              src/cli/logic/compat.rs
-              src/cli/logic/guard.rs
-              src/cli/logic/style.rs
-              src/cli/logic/invoke.rs
-              src/cli/logic/args_options.rs
-              src/cli/logic/cache.rs
-              src/cli/logic/canonical.rs
-              src/cli/logic/dispatch.rs
-              src/cli/logic/execute.rs
-          - domain: cli-logic
-            files: |
-              src/cli/logic/args.rs
-              src/cli/logic/args_action.rs
-              src/cli/logic/args_child.rs
-              src/cli/logic/args_help.rs
-              src/cli/logic/args_values.rs
-              src/cli/logic/catalog_load.rs
-              src/cli/logic/compat_config.rs
-              src/cli/logic/compat_output.rs
-              src/cli/logic/compat_support.rs
-              src/cli/logic/dispatch_compat.rs
-              src/cli/logic/dispatch_security.rs
-              src/cli/logic/dispatch_support.rs
-              src/cli/logic/entry.rs
-              src/cli/logic/gate_output.rs
-              src/cli/logic/guard_intent.rs
-              src/cli/logic/guard_policy.rs
-              src/cli/logic/help.rs
-              src/cli/logic/help_command.rs
-              src/cli/logic/json.rs
-              src/cli/logic/output.rs
-              src/cli/logic/output_catalog.rs
-              src/cli/logic/output_diagnostics.rs
-              src/cli/logic/output_plan.rs
-              src/cli/logic/output_readiness.rs
-              src/cli/logic/output_summary.rs
-              src/cli/logic/output_truth.rs
-              src/cli/logic/resolve.rs
-              src/cli/logic/self_update.rs
-              src/cli/logic/self_update_intent.rs
-              src/cli/logic/self_update_route.rs
-              src/cli/logic/style_diagnostics.rs
-              src/cli/logic/table.rs
-              src/cli/logic/table_layout.rs
-              src/cli/logic/table_width.rs
-              src/cli/logic/version.rs
-          - domain: diagnostics
-            files: src/diagnostics/**/*.rs
-          - domain: catalog
-            files: src/catalog/**/*.rs
-          - domain: env-aux
-            files: |
-              src/context/**/*.rs
-              src/contracts/**/*.rs
-              src/security/**/*.rs
-              src/gates/**/*.rs
-              src/runtime/**/*.rs
-              src/tui/**/*.rs
-              src/lib.rs
+        domain: [cli-core, cli-args, cli-output, diagnostics-core, diagnostics-report, catalog, env-aux]
     steps:
       - uses: actions/checkout@v7
         with:
@@ -128,24 +62,15 @@ jobs:
 
       - name: Run mutation tests on pull request diff
         if: github.event_name == 'pull_request'
-        env:
-          SHARD_FILES: ${{ matrix.files }}
         run: |
           set -eu
-          shard_args=()
-          for f in $SHARD_FILES; do shard_args+=(--file "$f"); done
           if ! git diff "origin/${{ github.base_ref }}..HEAD" > git.diff 2>/dev/null || [ ! -s git.diff ]; then
             echo "Base ref unavailable or empty diff; running full suite instead"
-            cargo mutants --config mutants.toml --minimum-test-timeout 30 --jobs 4 --no-shuffle "${shard_args[@]}"
+            scripts/bash/mutation/index.sh run "${{ matrix.domain }}"
           else
-            cargo mutants --config mutants.toml --minimum-test-timeout 30 --jobs 4 --no-shuffle --in-diff git.diff "${shard_args[@]}"
+            scripts/bash/mutation/index.sh run "${{ matrix.domain }}" --in-diff git.diff
           fi
 
       - name: Run full mutation suite
         if: github.event_name != 'pull_request'
-        env:
-          SHARD_FILES: ${{ matrix.files }}
-        run: |
-          shard_args=()
-          for f in $SHARD_FILES; do shard_args+=(--file "$f"); done
-          cargo mutants --config mutants.toml --minimum-test-timeout 30 --jobs 4 --no-shuffle "${shard_args[@]}"
+        run: scripts/bash/mutation/index.sh run "${{ matrix.domain }}"

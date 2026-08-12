@@ -1,11 +1,13 @@
 use super::*;
 use crate::diagnostics::{Environment, PlatformInput, RuntimeInput};
 use std::path::Path;
+use std::sync::atomic::{AtomicU64, Ordering};
 use std::time::{Duration, SystemTime};
 
+static COUNTER: AtomicU64 = AtomicU64::new(0);
 fn dummy_input() -> DiagnosticInput {
     DiagnosticInput {
-        version: "0.1.13".into(),
+        version: "0.1.14".into(),
         executable: None,
         catalog: PathBuf::from("/tmp/catalog"),
         home: PathBuf::from("/tmp/home"),
@@ -36,10 +38,9 @@ fn dummy_input() -> DiagnosticInput {
     }
 }
 
-#[test]
-fn direct_with_existing_executable_file() {
-    let temp_dir = std::env::temp_dir();
-    let test_file = temp_dir.join("test_executable");
+fn temp_executable() -> std::path::PathBuf {
+    let n = COUNTER.fetch_add(1, Ordering::Relaxed);
+    let test_file = std::env::temp_dir().join(format!("resolve_test_binary_{n}"));
     std::fs::write(&test_file, "").unwrap();
     #[cfg(unix)]
     {
@@ -48,47 +49,46 @@ fn direct_with_existing_executable_file() {
         perms.set_mode(0o755);
         std::fs::set_permissions(&test_file, perms).unwrap();
     }
+    test_file
+}
 
-    let result = direct(&test_file);
+fn assert_ready(result: &Resolution) {
     assert_eq!(result.code, Code::Ready);
     assert_eq!(result.matches, 1);
     assert!(result.path.is_some());
+}
 
+#[test]
+fn direct_with_existing_executable_file() {
+    let test_file = temp_executable();
+    assert_ready(&direct(&test_file));
     let _ = std::fs::remove_file(&test_file);
 }
 
 #[test]
-fn direct_with_nonexistent_file() {
-    let result = direct(Path::new("/nonexistent/path/to/file"));
-    assert_eq!(result.code, Code::Missing);
-    assert_eq!(result.matches, 0);
+fn direct_rejects_missing_paths_and_directories() {
+    let missing = direct(Path::new("/nonexistent/path/to/file"));
+    assert_eq!(missing.code, Code::Missing);
+    assert_eq!(missing.matches, 0);
+    let directory = direct(&std::env::temp_dir());
+    assert_eq!(directory.code, Code::Malformed);
 }
 
 #[test]
-fn direct_with_directory() {
-    let temp_dir = std::env::temp_dir();
-    let result = direct(&temp_dir);
-    assert_eq!(result.code, Code::Malformed);
-}
-
-#[test]
-fn binary_empty_name() {
-    let result = binary("", &dummy_input());
-    assert_eq!(result.code, Code::Malformed);
+fn binary_rejects_empty_and_unknown_names() {
+    let empty = binary("", &dummy_input());
+    assert_eq!(empty.code, Code::Malformed);
+    let missing = binary("nonexistent_command_12345", &dummy_input());
+    assert_eq!(missing.code, Code::Missing);
+    assert_eq!(missing.matches, 0);
 }
 
 #[test]
 fn binary_with_path_separators() {
-    let result = binary("/usr/bin/echo", &dummy_input());
-    assert_eq!(result.code, Code::Ready);
-    assert!(result.path.is_some());
-}
-
-#[test]
-fn binary_not_found() {
-    let result = binary("nonexistent_command_12345", &dummy_input());
-    assert_eq!(result.code, Code::Missing);
-    assert_eq!(result.matches, 0);
+    let test_file = temp_executable();
+    let result = binary(&test_file.to_string_lossy(), &dummy_input());
+    assert_ready(&result);
+    let _ = std::fs::remove_file(&test_file);
 }
 
 #[test]

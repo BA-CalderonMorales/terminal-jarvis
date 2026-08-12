@@ -18,6 +18,7 @@ fn tj(args: &[&str], home: &str) -> Output {
     Command::new(env!("CARGO_BIN_EXE_terminal-jarvis"))
         .args(args)
         .env("TERMINAL_JARVIS_HOME", home)
+        .env("PATH", "")
         .env_remove("COLUMNS")
         .output()
         .expect("terminal-jarvis runs")

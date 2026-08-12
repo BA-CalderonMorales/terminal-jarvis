@@ -20,7 +20,7 @@ fn harness(command: &str, args: Vec<String>) -> Vec<Harness> {
 #[test]
 fn failing_command_preserves_exit_without_crossing_streams() {
     let plans = harness("sh", vec!["-c".into(), "exit 3".into()]);
-    let (code, body) = capability(&plans, "vibe", Capability::Download, &[]).unwrap();
+    let (code, body) = capability(&plans, "vibe", Capability::Download, &[], true).unwrap();
     assert_eq!(code, 3);
     assert!(body.is_empty());
 
@@ -34,7 +34,15 @@ fn failing_command_preserves_exit_without_crossing_streams() {
 #[test]
 fn missing_binary_maps_to_shell_not_found_exit() {
     let plans = harness("terminal-jarvis-definitely-missing", vec![]);
-    let (code, body) = capability(&plans, "vibe", Capability::Download, &[]).unwrap();
+    let (code, body) = capability(&plans, "vibe", Capability::Download, &[], true).unwrap();
     assert_eq!(code, 127);
     assert!(body.is_empty());
+}
+
+#[test]
+fn narration_verb_matches_the_capability() {
+    assert_eq!(verb(Capability::Download), "installing");
+    assert_eq!(verb(Capability::Update), "updating");
+    assert_eq!(verb(Capability::Headless), "updating");
+    assert_eq!(verb(Capability::Yolo), "updating");
 }

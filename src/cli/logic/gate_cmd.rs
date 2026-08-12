@@ -45,7 +45,7 @@ fn enable(available: &[gates::Gate], home: &Path, name: &str) -> Result<(i32, St
 }
 
 fn run(gate: &gates::Gate) -> Result<(i32, String), String> {
-    let (code, body) = gates::run(gate)?;
+    let (code, body) = gates::run(gate, true)?;
     Ok((code, output::run_result(&gate.name, code, &body)))
 }
 

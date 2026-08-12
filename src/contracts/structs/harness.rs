@@ -18,6 +18,7 @@ pub struct CapabilityPlan {
     pub executable: String,
     pub source: String,
     pub verified_at: String,
+    pub package: Option<String>,
 }
 
 #[derive(Clone, Debug, Eq, PartialEq)]

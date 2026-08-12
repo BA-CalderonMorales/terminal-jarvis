@@ -1,16 +1,21 @@
 use super::error;
 use crate::contracts::{CapabilityPlan, Harness, SupportState};
 
-pub fn check(harness: &Harness, plan: &CapabilityPlan) -> error::Result<()> {
+pub fn check(harness: &Harness, plan: &CapabilityPlan, terminal: bool) -> error::Result<()> {
+    // An unknown claim (curl-pipe installers, custom procedures) still gets a
+    // path: an interactive session consents through the intent prompt and the
+    // advisory's cannot-be-pre-scanned warning; headless stays fail-closed.
+    let consented = terminal && plan.support == SupportState::Unknown;
     match plan.support {
         SupportState::Verified | SupportState::Expected => {}
         SupportState::Manual => return guarded(harness, plan, "manual_procedure_required"),
         SupportState::Stub => return guarded(harness, plan, "capability_stub"),
         SupportState::Unsupported => return guarded(harness, plan, "capability_unsupported"),
         SupportState::Disabled => return guarded(harness, plan, "capability_disabled"),
+        SupportState::Unknown if consented => {}
         SupportState::Unknown => return guarded(harness, plan, "capability_unknown"),
     }
-    if crate::catalog::freshness_status(plan) != "fresh" {
+    if !consented && crate::catalog::freshness_status(plan) != "fresh" {
         return Err(error::Failure::unavailable(
             "evidence_stale",
             format!(

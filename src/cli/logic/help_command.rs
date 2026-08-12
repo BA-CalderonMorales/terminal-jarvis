@@ -32,7 +32,7 @@ fn entry(name: &str) -> (&'static str, &'static str) {
         ),
         "tui" => (
             "terminal-jarvis tui",
-            "Open the interactive harness switcher on a terminal.",
+            "Interactive switcher; Ctrl+C interrupts a running agent and leaves the session open.",
         ),
         "current" => ("terminal-jarvis current", "Show the active harness."),
         "use" => (

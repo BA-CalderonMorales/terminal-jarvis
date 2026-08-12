@@ -47,6 +47,16 @@ fn auth_routes() {
     assert!(auth(&["a".to_string(), "b".to_string(), "c".to_string()], &hs).is_err());
 }
 #[test]
+fn auth_help_and_set_report_distinct_notes() {
+    let hs = [harness("opencode")];
+    let help = auth(&["help".to_string(), "opencode".to_string()], &hs).unwrap();
+    assert!(help.contains("credential storage is not active"));
+    let set = auth(&["set".to_string(), "opencode".to_string()], &hs).unwrap();
+    assert!(set.contains("does not persist credentials"));
+    assert!(auth(&["bogus".to_string(), "opencode".to_string()], &hs).is_err());
+}
+
+#[test]
 fn config_routes() {
     let p = std::path::Path::new("/cat");
     let h = std::path::Path::new("/home");

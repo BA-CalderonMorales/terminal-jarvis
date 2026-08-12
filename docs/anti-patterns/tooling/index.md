@@ -28,3 +28,21 @@ produces a worse interaction for the reader.
 **Fix:** Leverage `fzf` (fuzzy finder) for interactive selection of files,
 lines, git objects, and history when it is present -- commonly piped from `rg`
 (e.g. `rg <pattern> | fzf`). Write a custom picker only when `fzf` is absent.
+
+### let-command-status leak kills set -eu pipelines (scripts/)
+
+**Pattern:** `var=$(find ... | sort | while read -r x; do ...; done)`
+where what looks like a failure-path-only exit (a trailing
+`[ cond ] && echo` whose condition is false, or `read` hitting EOF)
+becomes the loop's exit status, which becomes the whole command
+substitution's status, which `set -eu` treats as a hard abort.
+
+**Why it is wrong:** The script dies silently between two stages with no
+error text; the failure is content-dependent (it passed until the last
+sorted file in the tree happened to sit under the guard line). This one
+ate half the verify pipeline in 0.1.14 pre-PR.
+
+**Fix:** End the pipeline with `done || true` when the while body's last
+command is conditionally non-zero, or make the body's final statement
+unconditionally succeed. Reproduce deliberately when diagnosing invisible
+`set -e` exits: the loop body's last command is the loop's status.

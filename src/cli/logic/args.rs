@@ -6,6 +6,8 @@ pub use option_parser::{Options, OutputMode, Parsed};
 mod action_parser;
 #[path = "args_child.rs"]
 mod child_parser;
+#[path = "args_default.rs"]
+mod defaults;
 #[path = "args_help.rs"]
 mod help_parser;
 #[path = "args_options.rs"]

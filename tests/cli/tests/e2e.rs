@@ -8,6 +8,7 @@ fn tj(args: &[&str]) -> Output {
         .args(["--plain"])
         .args(args)
         .env("TERMINAL_JARVIS_HOME", temp_home())
+        .env("PATH", "")
         .output()
         .expect("terminal-jarvis runs")
 }

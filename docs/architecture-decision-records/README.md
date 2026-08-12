@@ -96,3 +96,32 @@ use. `scripts/python/catalog/index.py harness-risk` scores each harness from its
 everything the same color) and stays opt-in behind `TJ_HARNESS_RISK=1` until
 it proves value. No root-level Rust scripts remain; the build script lives in
 `build/build.rs` and the `build =` key in `Cargo.toml` points there.
+
+### Ship the TUI command center and its demo pipeline (release/0.1.14 -> 2026-08-12)
+
+**Decision:** Land 0.1.14: the TUI as a context command center -- a clean
+frame (one-row banner status, `[>_]::[tj:<ver>]::[harness:<name>]` indicator,
+`/debug` toggle, in-terminal `help`), live in-place lifecycle beats ending in
+honest verdict cards, a session scope-memoized scan gate, interactive consent
+for unknown installers, and a session bracket around every launch. Demo
+assets split into a primary animated gif (recorded from `scripts/demo/
+tui.tape`) and a registry still png (rendered by `capture_frame.sh` +
+`render_frame.go` in the stock Windows Terminal palette).
+
+**Context:** The 0.1.13 switcher dumped raw tool output, hid verdicts behind
+redraws, rescanned on every run, and failed closed on curl-pipe installers
+with no path forward. The README demo was a recorded script tied to a stale
+frame. All 0.1.14 work accumulated on `release/0.1.14` unshipped.
+
+**Considered:** Shipping a structured TUI library (curses/ratatui) -- rejected,
+the std-only 100-line-per-file discipline is the project's identity and the
+line-based frame already carries the surface. A png overlay generated from a
+mock layout -- rejected, the capture/render pipeline renders the real binary's
+frame, so the artwork can never drift from the product.
+
+**Consequence:** The terminal is always returned to an interactive prompt --
+idle Ctrl+C redraws cleanly, a stuck gate scanner is hard-killed. Installs
+reproduce one scan per session; unknown installers keep an explicit human
+gate. `status` shows `1 of N ready`. The 0.1.15 roadmap (CHANGELOG) carries
+blocked-install drill-down, `uninstall|prune`, and header/main/footer section
+rules. Operator still tags and publishes after final review.

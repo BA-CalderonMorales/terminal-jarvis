@@ -7,8 +7,33 @@ pub fn run_command(plan: &CapabilityPlan, extra: &[String]) -> io::Result<i32> {
     command.args(&plan.command.args).args(extra);
     command.stdout(Stdio::inherit());
     command.stderr(Stdio::inherit());
+    #[cfg(unix)]
+    reset_sigint_in_child(&mut command);
     command.status().map(status_code)
 }
+
+#[cfg(unix)]
+fn reset_sigint_in_child(command: &mut Command) {
+    use std::os::unix::process::CommandExt;
+    unsafe {
+        command.pre_exec(|| {
+            signal(SIGINT, SIG_DFL);
+            Ok(())
+        });
+    }
+}
+
+#[cfg(unix)]
+extern "C" {
+    fn signal(signum: i32, handler: usize) -> usize;
+}
+
+#[cfg(unix)]
+const SIGINT: i32 = 2;
+#[cfg(all(unix, test))]
+const SIG_IGN: usize = 1;
+#[cfg(unix)]
+const SIG_DFL: usize = 0;
 
 fn status_code(status: std::process::ExitStatus) -> i32 {
     status.code().unwrap_or_else(|| signal_code(&status))
@@ -26,22 +51,5 @@ fn signal_code(_status: &std::process::ExitStatus) -> i32 {
 }
 
 #[cfg(test)]
-mod tests {
-    use super::*;
-
-    fn code_of(script: &str) -> i32 {
-        let status = std::process::Command::new("sh")
-            .arg("-c")
-            .arg(script)
-            .status()
-            .unwrap();
-        status_code(status)
-    }
-
-    #[test]
-    fn maps_exit_codes_and_signal_terms() {
-        assert_eq!(code_of("exit 0"), 0);
-        assert_eq!(code_of("exit 7"), 7);
-        assert_eq!(code_of("kill -TERM $$"), 143);
-    }
-}
+#[path = "../tests/runner_test.rs"]
+mod tests;

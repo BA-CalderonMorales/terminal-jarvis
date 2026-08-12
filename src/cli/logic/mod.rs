@@ -25,6 +25,8 @@ pub(crate) mod json;
 pub(crate) mod output;
 pub(crate) mod output_plan;
 pub mod output_truth;
+pub(crate) mod package_advisory;
+pub(crate) mod prompt_lead;
 pub(crate) mod resolve;
 pub(crate) mod self_update;
 pub(crate) mod self_update_intent;

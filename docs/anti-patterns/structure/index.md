@@ -17,13 +17,16 @@ chain entry -> index.rs adds a hop for no content.
 **Why it is wrong:** One face per domain is the rule; two entry-looking files
 make agents and maintainers guess which is real, and the `index.rs` name
 collides with the index.rs the repo uses as the canonical face elsewhere.
-`mod.rs` wins by necessity (the parent needs it), so `index.rs` should fold
-its re-exports into `mod.rs` and disappear.
+The `mod.rs` shim exists only to satisfy the parent's plain
+`pub mod <domain>;`; it must not outlive that convenience.
 
-**Fix:** For each domain, move `index.rs`'s re-exports into `mod.rs`, drop the
-`mod index; pub use index::*;` indirection, and delete `index.rs`. Re-exports
-keep the same paths, so callers do not change. Do it as its own cleanup PR;
-do not fold it into a release branch.
+**Fix (landed in 0.1.14):** Keep `index.rs` as the single face, delete
+`mod.rs`. `src/lib.rs` declares each domain with
+`#[path = "<domain>/index.rs"] pub mod <domain>;` (the established tui
+pattern), and each `index.rs` declares its own `mod logic; mod structs;`.
+Re-export paths and the mutation shard `--file` lists do not change; only
+the redundant `mod.rs` files disappear. Do this as its own cleanup commit;
+do not fold unrelated changes into it.
 
 
 ### Flat, snake-named Rust domains and phase-scattered test fixtures (src/, tests/)

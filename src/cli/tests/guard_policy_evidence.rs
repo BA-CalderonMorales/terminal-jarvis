@@ -10,7 +10,7 @@ fn accepts_verified_support_with_fresh_evidence_and_matching_platform() {
         "2026-07-17T04:59:27Z",
         vec![platform_str().into()],
     );
-    let result = check(&harness, &plan);
+    let result = check(&harness, &plan, false);
     assert!(result.is_ok());
 }
 
@@ -22,7 +22,7 @@ fn accepts_expected_support_with_fresh_evidence_and_matching_platform() {
         "2026-07-17T04:59:27Z",
         vec![platform_str().into()],
     );
-    let result = check(&harness, &plan);
+    let result = check(&harness, &plan, false);
     assert!(result.is_ok());
 }
 
@@ -35,7 +35,7 @@ fn rejects_stale_evidence() {
         "2024-01-01T00:00:00Z",
         vec![platform_str().into()],
     );
-    let result = check(&harness, &plan);
+    let result = check(&harness, &plan, false);
     assert!(result.is_err());
     let err = result.unwrap_err();
     assert_eq!(err.code, "evidence_stale");
