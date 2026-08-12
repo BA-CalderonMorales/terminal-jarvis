@@ -34,7 +34,7 @@ over_limit=$(find scripts -name '*.sh' -o -name '*.rb' | sort |
     grep -qxF "$script" "$overrides" && continue
     lines=$(grep -c '' "$script" 2>/dev/null || echo 0)
     [ "$lines" -gt "$line_limit" ] && echo "$lines $script"
-  done)
+  done || true)
 test -z "$over_limit" || fail "Scripts over ${line_limit} lines (drop them from $overrides after refactor):\n$over_limit"
 
 echo "[6/12] harness catalog shape"

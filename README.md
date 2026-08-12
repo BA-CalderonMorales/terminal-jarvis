@@ -19,8 +19,11 @@
 [![Docs](https://img.shields.io/badge/docs-latest-blue.svg?style=flat-square)](https://github.com/BA-CalderonMorales/terminal-jarvis/blob/main/docs/index.md)
 [![Coverage](https://img.shields.io/badge/coverage-report-green.svg?style=flat-square)](https://github.com/BA-CalderonMorales/terminal-jarvis/actions/workflows/ci.yml?query=branch%3Adevelop)
 
-> Visuals: run `vhs scripts/demo/tui.tape` to render `docs/demo-tui.gif`
-> (see [docs/demo.md](docs/demo.md)); the tape is the source of truth.
+<img src="docs/demo-tui.gif" alt="Terminal Jarvis command center in action" width="100%">
+
+<i>Registries that don't animate GIFs render the static frame
+<a href="docs/demo-tui.png">docs/demo-tui.png</a>; see
+<a href="docs/demo.md">docs/demo.md</a> for how both are recorded.</i>
 
 </div>
 
