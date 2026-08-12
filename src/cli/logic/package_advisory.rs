@@ -36,13 +36,17 @@ pub fn check(
             harness.name
         ));
     }
-    eprintln!("checking {package} for known vulnerabilities ...");
+    if options.narrate {
+        eprintln!("checking {package} for known vulnerabilities ...");
+    }
     match security::package_check(package) {
         None => warn_ok(&format!(
             "cannot pre-check {package} (npm and trivy must be on PATH); continuing without a package scan"
         )),
         Some(verdict) if verdict.clean => {
-            eprintln!("no HIGH/CRITICAL findings for {package}");
+            if options.narrate {
+                eprintln!("no HIGH/CRITICAL findings for {package}");
+            }
             Ok(())
         }
         Some(verdict) => {
@@ -60,7 +64,7 @@ fn uncheckable(harness: &Harness, plan: &CapabilityPlan, gate_on: bool) -> error
     let (why, tail) = if gate_on {
         (
             "uses a custom installer",
-            "that cannot be pre-scanned; continuing",
+            " that cannot be pre-scanned; continuing",
         )
     } else {
         (

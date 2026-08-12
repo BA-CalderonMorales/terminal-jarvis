@@ -5,12 +5,14 @@ use crate::runtime;
 pub fn invocation(
     invocation: resolve::Invocation,
     harnesses: &[Harness],
+    narrate: bool,
 ) -> Result<(i32, String), String> {
     capability(
         harnesses,
         &invocation.harness,
         invocation.capability,
         &invocation.extra,
+        narrate,
     )
 }
 
@@ -19,12 +21,13 @@ pub fn capability(
     harness: &str,
     capability: Capability,
     extra: &[String],
+    narrate: bool,
 ) -> Result<(i32, String), String> {
     let selected = find(harnesses, harness)?;
     let plan = selected
         .plan(capability)
         .ok_or_else(|| format!("{harness} lacks {capability}"))?;
-    if matches!(capability, Capability::Download | Capability::Update) {
+    if matches!(capability, Capability::Download | Capability::Update) && narrate {
         eprintln!(
             "{} {harness}: {} ...",
             verb(capability),

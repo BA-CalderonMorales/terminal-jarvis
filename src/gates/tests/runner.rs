@@ -46,9 +46,9 @@ fn preflight_accepts_success_and_reports_blocking_exit() {
     let previous = std::env::var_os("TERMINAL_JARVIS_GATES");
     std::env::set_var("TERMINAL_JARVIS_GATES", &catalog);
     crate::gates::enable(&home, "pass").unwrap();
-    assert!(preflight(&home).is_ok());
+    assert!(preflight(&home, true).is_ok());
     crate::gates::enable(&home, "block").unwrap();
-    let error = preflight(&home).unwrap_err();
+    let error = preflight(&home, true).unwrap_err();
     assert!(error.contains("blocked harness execution (exit 1)"));
     restore_gates_env(previous);
     let _ = std::fs::remove_dir_all(root);
@@ -74,7 +74,7 @@ fn run_streams_gate_output_and_captures_it() {
         args: vec![],
         install_hint: "install".to_string(),
     };
-    let (code, body) = run(&gate).unwrap();
+    let (code, body) = run(&gate, true).unwrap();
     assert_eq!(code, 0);
     assert!(body.contains("streamed-1"));
     assert!(body.contains("streamed-2"));
@@ -94,7 +94,7 @@ fn preflight_warns_and_continues_when_binary_is_missing() {
     let previous = std::env::var_os("TERMINAL_JARVIS_GATES");
     std::env::set_var("TERMINAL_JARVIS_GATES", &catalog);
     crate::gates::enable(&home, "phantom").unwrap();
-    assert!(preflight(&home).is_ok());
+    assert!(preflight(&home, true).is_ok());
     restore_gates_env(previous);
     let _ = std::fs::remove_dir_all(root);
 }
