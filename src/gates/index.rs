@@ -19,5 +19,8 @@ mod interrupt_tests;
 #[path = "tests/narrate.rs"]
 mod narrate_tests;
 #[cfg(test)]
+#[path = "tests/stream.rs"]
+mod stream_tests;
+#[cfg(test)]
 #[path = "tests/util.rs"]
 mod tests_util;
