@@ -1,10 +1,21 @@
 use crate::gates::logic::loader::Gate;
 use crate::security;
 use std::io::{Read, Write};
-use std::process::{Command, Stdio};
+use std::process::{Command, ExitStatus, Stdio};
 
-#[cfg(unix)]
-use std::os::unix::process::ExitStatusExt;
+/// The scan's numeric outcome: the real exit code, or 128 + the signal on
+/// unix when a scan was killed outright. Windows has no signal model.
+fn exit_code(status: &ExitStatus) -> i32 {
+    #[cfg(unix)]
+    {
+        use std::os::unix::process::ExitStatusExt;
+        status.code().unwrap_or(128 + status.signal().unwrap_or(9))
+    }
+    #[cfg(not(unix))]
+    {
+        status.code().unwrap_or(128)
+    }
+}
 
 /// Copies a child gate's pipe to stderr (live, tee-style) while capturing
 /// the full bytes for the caller. The stderr copy is success-path narration:
@@ -59,8 +70,7 @@ pub fn run(gate: &Gate, narrate: bool) -> Result<(i32, String), String> {
         .filter_map(Result::ok)
         .collect::<Vec<_>>()
         .join("\n");
-    let code = status.code().unwrap_or(128 + status.signal().unwrap_or(9));
-    Ok((code, joined.trim().to_string()))
+    Ok((exit_code(&status), joined.trim().to_string()))
 }
 
 /// The meaningful tail of a failed scan report: drops trivy's INFO chatter
