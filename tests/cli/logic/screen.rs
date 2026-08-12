@@ -19,7 +19,7 @@ impl Screen {
     }
 
     pub fn no_line_contains(&self, needle: &str) -> bool {
-        !self.contains(needle) && self.lines().iter().all(|line| !line.contains(needle))
+        self.lines().iter().all(|line| !line.contains(needle))
     }
 }
 

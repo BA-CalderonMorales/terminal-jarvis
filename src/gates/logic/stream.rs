@@ -15,7 +15,9 @@ pub fn tee(pipe: &mut dyn Read, narrate: bool) -> String {
     let mut chunk = [0u8; 4096];
     loop {
         match pipe.read(&mut chunk) {
-            Ok(0) | Err(_) => break,
+            Ok(0) => break,
+            Err(error) if error.kind() == std::io::ErrorKind::Interrupted => continue,
+            Err(_) => break,
             Ok(read) => {
                 if narrate {
                     let _ = std::io::stderr().write_all(&chunk[..read]);
