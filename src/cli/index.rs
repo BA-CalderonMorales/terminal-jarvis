@@ -4,6 +4,11 @@
 //! or tap `cli::args` for the parse surface. The domain's internals live in
 //! `logic/`; structs/ holds the data shapes produced by parsing.
 
+#[path = "logic/mod.rs"]
+mod logic;
+#[path = "structs/mod.rs"]
+mod structs;
+
 use crate::cli::logic::{entry, execute, json};
 use crate::cli::structs::response::Response;
 use std::path::Path;
@@ -21,7 +26,7 @@ pub fn dispatch(
     home: &Path,
 ) -> Result<(i32, String), String> {
     crate::cli::logic::dispatch::dispatch(action, options, harnesses, catalog_root, home)
-        .map_err(|failure| format!("{}: {}", failure.message, failure.next_action))
+        .map_err(|failure| failure.rendered())
 }
 
 pub fn run<I>(args: I, catalog_root: &Path, home: &Path) -> i32

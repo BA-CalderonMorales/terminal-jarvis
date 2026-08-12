@@ -6,7 +6,7 @@ use crate::contracts::SupportState;
 fn empty_platforms_are_unrestricted() {
     let harness = dummy_harness();
     let plan = dummy_plan(SupportState::Expected, "2026-08-05T00:00:00Z", Vec::new());
-    assert!(check(&harness, &plan).is_ok());
+    assert!(check(&harness, &plan, false).is_ok());
 }
 
 #[test]
@@ -23,7 +23,7 @@ fn rejects_platform_incompatible() {
         "2026-07-17T04:59:27Z",
         vec![other_platform.into()],
     );
-    let result = check(&harness, &plan);
+    let result = check(&harness, &plan, false);
     assert!(result.is_err());
     let err = result.unwrap_err();
     assert_eq!(err.code, "platform_incompatible");

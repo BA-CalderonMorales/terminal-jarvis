@@ -1,99 +1,57 @@
 //! Shell: the chat-style read-prompt loop -- results print above the input box.
-
-use crate::cli::args;
-use crate::contracts::Harness;
+use crate::{cli::args, contracts::Harness};
 use std::path::Path;
 
 #[path = "./canonical.rs"]
 mod canonical;
 #[path = "./handle.rs"]
 mod handle;
+#[path = "./help.rs"]
+mod help;
+#[path = "./session.rs"]
+mod session;
 #[path = "./status.rs"]
 mod status;
+#[path = "./verdict.rs"]
+mod verdict;
 pub use handle::handle;
 
-pub fn run(harnesses: &[Harness], catalog_root: &Path, state_home: &Path, options: &args::Options) {
-    let mut hint = modeline(state_home, false);
-    while let Some(input) = super::input::read_line(&hint) {
-        let next =
-            super::sigint::guarded(|| handle(harnesses, catalog_root, state_home, options, &input));
-        match next {
-            Next::Exit => break,
-            Next::Again { picker_shown } => {
-                hint = modeline(state_home, picker_shown);
-                println!();
+pub fn run(
+    harnesses: &[Harness],
+    catalog_root: &Path,
+    state_home: &Path,
+    mut options: args::Options,
+) {
+    let mut debug = false;
+    let mut indicator = super::input::Indicator {
+        active: "none".into(),
+        debug: false,
+    };
+    super::sigint::guarded(|| {
+        let mut hint = status::modeline(state_home, false, debug);
+        status::refresh_indicator(&mut indicator, state_home, debug);
+        while let Some(input) = super::input::read_line(&indicator, &hint) {
+            let next = handle(harnesses, catalog_root, state_home, &options, &input);
+            match next {
+                Next::Exit => break,
+                Next::Again { picker_shown } => {
+                    hint = status::modeline(state_home, picker_shown, debug);
+                    status::refresh_indicator(&mut indicator, state_home, debug);
+                    println!();
+                }
+                Next::Debug(toggle) => {
+                    debug = toggle.unwrap_or(!debug);
+                    options.narrate = debug;
+                    hint = status::modeline(state_home, false, debug);
+                    status::refresh_indicator(&mut indicator, state_home, debug);
+                    println!("debug view {}", if debug { "on" } else { "off" });
+                }
             }
         }
-    }
+    });
     println!();
 }
 
-pub enum Resolved {
-    Empty,
-    Exit,
-    Home,
-    Run(args::Action),
-    Error(String),
-}
-
-pub enum Next {
-    Exit,
-    Again { picker_shown: bool },
-}
-
-pub fn resolve(input: &str, harnesses: &[Harness]) -> Resolved {
-    let input = input.trim();
-    match input {
-        "" => return Resolved::Empty,
-        "/exit" | "/quit" | "exit" | "quit" => return Resolved::Exit,
-        "/home" | "/clear" | "home" | "clear" => return Resolved::Home,
-        rest if rest.starts_with('/') => {
-            return match super::palette::parse(&rest[1..]) {
-                Ok(action) => Resolved::Run(action),
-                Err(message) => Resolved::Error(message),
-            };
-        }
-        _ => {}
-    }
-    if let Ok(number) = input.parse::<usize>() {
-        return match super::switcher::select(input, harnesses) {
-            Some(selection) => Resolved::Run(selection),
-            None => Resolved::Error(format!(
-                "no harness at position {number}; /list shows the numbered tools"
-            )),
-        };
-    }
-    if harnesses.iter().any(|harness| harness.name == input) {
-        return Resolved::Run(args::Action::Use(input.to_string()));
-    }
-    match super::palette::parse(input) {
-        Ok(args::Action::Direct { harness, .. })
-            if !harnesses.iter().any(|h| h.name == harness) =>
-        {
-            Resolved::Run(args::Action::Run(
-                input.split_whitespace().map(String::from).collect(),
-            ))
-        }
-        Ok(action) => Resolved::Run(action),
-        Err(message) => Resolved::Error(message),
-    }
-}
-
-fn modeline(state_home: &Path, picker_shown: bool) -> String {
-    if picker_shown {
-        return "pick a number to switch agents, or type 'home' to go back".to_string();
-    }
-    let active = crate::context::load(state_home)
-        .ok()
-        .flatten()
-        .map(|session| session.active_harness)
-        .unwrap_or_else(|| "none".to_string());
-    format!("active: {active} | a number or name switches, list, status, help, home, exit")
-}
-
-#[cfg(test)]
-#[path = "../tests/shell_props.rs"]
-mod props;
-#[cfg(test)]
-#[path = "../tests/shell.rs"]
-mod tests;
+#[path = "./parse.rs"]
+mod parse;
+pub use parse::{resolve, Next, Resolved};

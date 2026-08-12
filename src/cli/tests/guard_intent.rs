@@ -15,6 +15,7 @@ fn options(
         no_input,
         confirm,
         allow_dangerous,
+        narrate: true,
     }
 }
 

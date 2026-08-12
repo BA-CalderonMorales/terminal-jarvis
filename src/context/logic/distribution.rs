@@ -60,6 +60,5 @@ pub fn homebrew_path(path: &str) -> bool {
 }
 
 #[cfg(test)]
-#[cfg(test)]
 #[path = "../tests/distribution.rs"]
 mod tests;

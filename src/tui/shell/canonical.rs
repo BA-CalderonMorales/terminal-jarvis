@@ -52,19 +52,42 @@ fn dispatch_action(
     catalog_root: &Path,
     state_home: &Path,
 ) -> bool {
-    match dispatch(action, options, harnesses, catalog_root, state_home) {
-        Ok((_, body)) => {
-            if !body.is_empty() {
-                print!("{body}");
-                if !body.ends_with('\n') {
-                    println!();
-                }
+    let started = std::time::Instant::now();
+    let lifecycle = match &action {
+        crate::cli::args::Action::Install(name) => Some((name.clone(), "installed")),
+        crate::cli::args::Action::Update(Some(name)) => Some((name.clone(), "updated")),
+        _ => None,
+    };
+    crate::tui::sigint::child_running(true);
+    let outcome = dispatch(action, options, harnesses, catalog_root, state_home);
+    crate::tui::sigint::child_running(false);
+    match &outcome {
+        Ok((_, body)) if !body.is_empty() => {
+            print!("{body}");
+            if !body.ends_with('\n') {
+                println!();
             }
-            false
         }
         Err(message) => {
             eprintln!("{message}");
-            false
+        }
+        _ => {}
+    }
+    if !options.narrate {
+        if let Some((name, verb)) = &lifecycle {
+            let binary_on_path = harnesses
+                .iter()
+                .find(|harness| harness.name == *name)
+                .is_some_and(|harness| crate::security::command_on_path(&harness.binary));
+            super::verdict::settle(
+                name,
+                verb,
+                binary_on_path,
+                &outcome,
+                started.elapsed(),
+                state_home,
+            );
         }
     }
+    false
 }

@@ -27,6 +27,7 @@ fn plan(capability: Capability, summary: &str, command: &str) -> CapabilityPlan 
         executable: command.to_string(),
         source: "internal:test".to_string(),
         verified_at: "2026-07-17T00:00:00Z".to_string(),
+        package: None,
     }
 }
 
@@ -85,7 +86,6 @@ fn security_checks_cover_path_and_env_modes() {
     ));
     assert_eq!(missing, vec!["__TERMINAL_JARVIS_MISSING_ENV__"]);
 }
-
 #[test]
 fn setup_hints_cover_all_env_modes() {
     assert_eq!(

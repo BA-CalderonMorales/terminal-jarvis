@@ -65,17 +65,17 @@ fn loader_reads_gate_directory_and_rejects_bad_data() {
 
 #[test]
 fn preflight_is_noop_without_selection_and_errors_on_unknown_gate() {
-    assert!(gates::preflight(&home()).is_ok());
+    assert!(gates::preflight(&home(), true).is_ok());
 
     let h = home();
     gates::enable(&h, "ghost").unwrap();
-    let err = gates::preflight(&h).unwrap_err();
+    let err = gates::preflight(&h, true).unwrap_err();
     assert!(err.contains("not in the gate catalog"));
 }
 
 #[test]
 fn run_reports_missing_binary_and_succeeds_with_present_binary() {
-    let err = gates::run(&gate()).unwrap_err();
+    let err = gates::run(&gate(), true).unwrap_err();
     assert!(err.contains("not on PATH"));
 
     let (bin, args) = if cfg!(windows) {
@@ -94,6 +94,6 @@ fn run_reports_missing_binary_and_succeeds_with_present_binary() {
         args,
         install_hint: "h".to_string(),
     };
-    let (code, _) = gates::run(&present).unwrap();
+    let (code, _) = gates::run(&present, true).unwrap();
     assert_eq!(code, 0);
 }

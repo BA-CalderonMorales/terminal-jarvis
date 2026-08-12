@@ -17,6 +17,7 @@ fn plan(support: SupportState, platforms: Vec<String>) -> CapabilityPlan {
         executable: "probe".into(),
         source: "probe".into(),
         verified_at: "2026-08-05T00:00:00Z".into(),
+        package: None,
     }
 }
 

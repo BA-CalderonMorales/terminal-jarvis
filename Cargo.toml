@@ -1,12 +1,14 @@
 [package]
 name = "terminal-jarvis"
-version = "0.1.13"
+version = "0.1.14"
 edition = "2021"
 description = "A data-driven harness switcher for AI coding agents"
 authors = ["BA-CalderonMorales"]
 license = "MIT"
 repository = "https://github.com/BA-CalderonMorales/terminal-jarvis"
 homepage = "https://github.com/BA-CalderonMorales/terminal-jarvis"
+documentation = "https://docs.rs/terminal-jarvis"
+rust-version = "1.82"
 readme = "README.md"
 keywords = ["cli", "ai", "agents", "harness"]
 categories = ["command-line-utilities", "development-tools"]

@@ -4,7 +4,7 @@ use crate::logic::child;
 use crate::logic::pty;
 use crate::structs::catalog_matrix;
 #[cfg(unix)]
-pub use pty::{run_pty, run_pty_input};
+pub use pty::{run_pty, run_pty_input, run_pty_probe};
 
 use std::path::{Path, PathBuf};
 use std::process::{Command, Output};

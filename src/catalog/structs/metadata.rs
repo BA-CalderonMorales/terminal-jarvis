@@ -4,32 +4,10 @@ use crate::contracts::{
 };
 
 use crate::catalog::logic::parser::{self, Fields};
-
-const HARNESS_KEYS: [&str; 6] = [
-    "name",
-    "display",
-    "description",
-    "binary",
-    "env_mode",
-    "env",
-];
-const PLAN_KEYS: [&str; 12] = [
-    "summary",
-    "command",
-    "args",
-    "support",
-    "evidence",
-    "effect",
-    "network",
-    "interaction",
-    "platforms",
-    "executable",
-    "source",
-    "verified_at",
-];
+use crate::catalog::structs::keys;
 
 pub fn harness(fields: &Fields, capabilities: Vec<CapabilityPlan>) -> Result<Harness, String> {
-    exact_keys(fields, &HARNESS_KEYS)?;
+    keys::exact_fields(fields, keys::harness_keys())?;
     Ok(Harness {
         name: parser::string(fields, "name")?,
         display: parser::string(fields, "display")?,
@@ -42,7 +20,7 @@ pub fn harness(fields: &Fields, capabilities: Vec<CapabilityPlan>) -> Result<Har
 }
 
 pub fn capability(fields: &Fields, capability: Capability) -> Result<CapabilityPlan, String> {
-    exact_keys(fields, &PLAN_KEYS)?;
+    keys::plan_keys(fields)?;
     let command = parser::string(fields, "command")?;
     Ok(CapabilityPlan {
         capability,
@@ -57,22 +35,8 @@ pub fn capability(fields: &Fields, capability: Capability) -> Result<CapabilityP
         executable: parser::string(fields, "executable")?,
         source: parser::string(fields, "source")?,
         verified_at: parser::string(fields, "verified_at")?,
+        package: parser::optional_string(fields, "package")?,
     })
-}
-
-fn exact_keys(fields: &Fields, expected: &[&str]) -> Result<(), String> {
-    let actual = fields.keys().map(String::as_str).collect::<Vec<_>>();
-    let mut expected = expected.to_vec();
-    expected.sort_unstable();
-    if actual == expected {
-        Ok(())
-    } else {
-        Err(format!(
-            "metadata keys must be exactly {}; found {}",
-            expected.join(", "),
-            actual.join(", ")
-        ))
-    }
 }
 
 fn boolean(fields: &Fields, key: &str) -> Result<bool, String> {

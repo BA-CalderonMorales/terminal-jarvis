@@ -34,11 +34,13 @@ pub fn selected(home: &Path) -> io::Result<Option<Selection>> {
 }
 
 pub fn enable(home: &Path, name: &str) -> io::Result<()> {
+    super::super::logic::interrupt::memo_clear();
     fs::create_dir_all(home)?;
     fs::write(home.join("gate.toml"), format!("enabled = \"{name}\"\n"))
 }
 
 pub fn disable(home: &Path) -> io::Result<()> {
+    super::super::logic::interrupt::memo_clear();
     let path = home.join("gate.toml");
     if path.exists() {
         fs::remove_file(path)?;

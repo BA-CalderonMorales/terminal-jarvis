@@ -91,3 +91,10 @@ fn status_adds_readiness_summary_absent_from_checks() {
     assert!(!checks.contains("harnesses ready"));
     assert!(status.contains("Security Status") && status.contains("1/1 harnesses"));
 }
+
+#[test]
+fn env_status_names_missing_vars_when_required() {
+    let h = mock_harness("mock-harness", EnvMode::All, vec!["TJ_MISSING_TEST".into()]);
+    let rendered = env_status(&h, &["TJ_MISSING_TEST".to_string()]);
+    assert!(rendered.contains("missing TJ_MISSING_TEST"));
+}

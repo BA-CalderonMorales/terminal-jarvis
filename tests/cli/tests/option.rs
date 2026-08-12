@@ -78,6 +78,7 @@ fn combined_globals_are_order_independent_before_the_boundary() {
             no_input: true,
             confirm: Some("yolo:fixture".into()),
             allow_dangerous: true,
+            narrate: true,
         }
     );
 }

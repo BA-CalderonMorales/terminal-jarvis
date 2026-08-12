@@ -45,7 +45,7 @@ fn fake_child_receives_exact_boundary_argv_cwd_and_allowlisted_env_name() {
         "argc=<3>\narg=<alpha>\narg=<two words>\narg=<--json>\n\
          env-name=<TJ_FIXTURE_MARKER>\n"
     );
-    assert!(output.stderr.is_empty());
+    assert!(String::from_utf8_lossy(&output.stderr).contains("running security gate 'acceptance'"));
     assert!(fixture.spawned());
     assert!(fixture.gate_spawned());
 }

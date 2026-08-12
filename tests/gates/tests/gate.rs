@@ -36,21 +36,28 @@ fn gate_is_disabled_by_default_and_can_be_enabled() {
 }
 
 #[test]
-fn enabled_missing_trivy_blocks_harness_execution_with_guidance() {
+fn enabled_missing_trivy_warns_and_runs_the_harness() {
     let root = home();
     let home = format!("{root}/home");
     let catalog_root = std::path::Path::new(&root).join("catalog");
+    let bin = std::path::Path::new(&root).join("bin");
+    std::fs::create_dir_all(&bin).unwrap();
+    let child = bin.join("fixture-child");
+    std::fs::write(&child, "#!/bin/sh\n").unwrap();
+    let mut permissions = std::fs::metadata(&child).unwrap().permissions();
+    std::os::unix::fs::PermissionsExt::set_mode(&mut permissions, 0o755);
+    std::fs::set_permissions(&child, permissions).unwrap();
     catalog::write(&catalog_root, "expected", "expected");
     assert!(tj(&["gate", "enable", "trivy"], &home).status.success());
     let output = Command::new(env!("CARGO_BIN_EXE_terminal-jarvis"))
         .args(["--plain", "run", "fixture", "headless"])
         .env("TERMINAL_JARVIS_HOME", home)
         .env("TERMINAL_JARVIS_CATALOG", catalog_root)
-        .env("PATH", "")
+        .env("PATH", bin)
         .output()
         .expect("terminal-jarvis runs");
-    assert_eq!(output.status.code(), Some(5));
+    assert_eq!(output.status.code(), Some(0));
     let stderr = String::from_utf8_lossy(&output.stderr);
-    assert!(stderr.contains("optional gate 'trivy' is enabled"));
+    assert!(stderr.contains("warning: optional gate 'trivy' is enabled"));
     assert!(stderr.contains("trivy.dev/docs/latest/getting-started/installation"));
 }

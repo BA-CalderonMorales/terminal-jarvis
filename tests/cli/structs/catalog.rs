@@ -5,6 +5,10 @@ const CAPABILITIES: [&str; 9] = [
 ];
 
 pub fn write(root: &Path, download: &str, yolo: &str) {
+    write_with_package(root, download, yolo, None)
+}
+
+pub fn write_with_package(root: &Path, download: &str, yolo: &str, package: Option<&str>) {
     let harness = root.join("fixture");
     std::fs::create_dir_all(&harness).unwrap();
     std::fs::write(
@@ -25,11 +29,11 @@ pub fn write(root: &Path, download: &str, yolo: &str) {
             "yolo" => yolo,
             _ => "expected",
         };
-        write_capability(&harness, capability, support);
+        write_capability(&harness, capability, support, package);
     }
 }
 
-fn write_capability(root: &Path, capability: &str, support: &str) {
+fn write_capability(root: &Path, capability: &str, support: &str, package: Option<&str>) {
     let directory = root.join(capability);
     std::fs::create_dir_all(&directory).unwrap();
     let (effect, network, interaction) = behavior(capability);
@@ -44,6 +48,10 @@ fn write_capability(root: &Path, capability: &str, support: &str) {
     } else {
         "[]".to_string()
     };
+    let package_line = package
+        .filter(|_| capability == "download")
+        .map(|package| format!("package = \"{package}\"\n"))
+        .unwrap_or_default();
     let summary = if capability == "yolo" {
         "Dangerous disposable fixture capability"
     } else {
@@ -54,7 +62,7 @@ fn write_capability(root: &Path, capability: &str, support: &str) {
 support = \"{support}\"\nevidence = \"{evidence}\"\neffect = \"{effect}\"\n\
 network = {network}\ninteraction = \"{interaction}\"\nplatforms = {platforms}\n\
 executable = \"fixture-child\"\nsource = \"internal:test\"\n\
-verified_at = \"2026-07-17T00:00:00Z\"\n"
+verified_at = \"2026-07-17T00:00:00Z\"\n{package_line}"
     );
     std::fs::write(directory.join("index.toml"), body).unwrap();
 }

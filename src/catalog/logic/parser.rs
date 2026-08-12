@@ -28,6 +28,13 @@ pub fn string(fields: &Fields, key: &str) -> Result<String, String> {
     strip_quotes(value.trim())
 }
 
+pub fn optional_string(fields: &Fields, key: &str) -> Result<Option<String>, String> {
+    let Some(value) = fields.get(key) else {
+        return Ok(None);
+    };
+    strip_quotes(value.trim()).map(Some)
+}
+
 pub fn list(fields: &Fields, key: &str) -> Result<Vec<String>, String> {
     let Some(value) = fields.get(key) else {
         return Ok(Vec::new());
@@ -76,22 +83,9 @@ fn strip_quotes(value: &str) -> Result<String, String> {
 }
 
 #[cfg(test)]
-mod tests {
-    use super::{list, Fields};
+#[path = "../tests/parser_test.rs"]
+mod tests;
 
-    #[test]
-    fn list_preserves_commas_inside_quoted_values() {
-        let mut fields = Fields::new();
-        fields.insert(
-            "args".to_string(),
-            "[\"--scanners\", \"vuln,secret,misconfig\"]".to_string(),
-        );
-        assert_eq!(
-            list(&fields, "args").unwrap(),
-            ["--scanners", "vuln,secret,misconfig"]
-        );
-    }
-}
 #[cfg(test)]
 #[path = "../tests/parser_props.rs"]
 mod props;
