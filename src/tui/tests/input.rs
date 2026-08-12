@@ -1,11 +1,18 @@
 use super::*;
 
+fn fixture() -> Indicator {
+    Indicator {
+        active: "codex".into(),
+        debug: false,
+    }
+}
+
 #[test]
-fn compose_puts_the_given_hint_below_the_prompt() {
+fn compose_puts_the_given_hint_below_the_prompt_with_the_indicator() {
     let previous = crate::cli::style::set(true, true);
     assert_eq!(
-        compose(true, "active: alpha | list, home, exit"),
-        "[>_] \nactive: alpha | list, home, exit\x1b[1A\r[>_] "
+        compose(true, &fixture(), "active: codex | list, home, exit"),
+        "[>_]::[tj:0.1.14]::[harness:codex]: \nactive: codex | list, home, exit\x1b[1A\r[>_]::[tj:0.1.14]::[harness:codex]: "
     );
     crate::cli::style::restore(previous);
 }
@@ -13,7 +20,31 @@ fn compose_puts_the_given_hint_below_the_prompt() {
 #[test]
 fn compose_stays_plain_without_ansi() {
     let previous = crate::cli::style::set(true, true);
-    assert_eq!(compose(false, "pick a number"), "[>_] pick a number\n[>_] ");
+    assert_eq!(
+        compose(false, &fixture(), "pick a number"),
+        "[>_]::[tj:0.1.14]::[harness:codex]: pick a number\n[>_]::[tj:0.1.14]::[harness:codex]: "
+    );
+    crate::cli::style::restore(previous);
+}
+
+#[test]
+fn indicator_marks_harness_and_debug_and_survives_roundtrips() {
+    let previous = crate::cli::style::set(true, true);
+    let plain = Indicator {
+        active: "none".into(),
+        debug: true,
+    };
+    assert!(Indicator {
+        active: "codex".into(),
+        debug: false
+    }
+    .raw()
+    .contains("[harness:codex]"));
+    assert_eq!(plain.raw(), "[>_]::[tj:0.1.14]::[harness:none]::[debug]:");
+    assert_eq!(
+        plain.render(false),
+        "[>_]::[tj:0.1.14]::[harness:none]::[debug]: "
+    );
     crate::cli::style::restore(previous);
 }
 
@@ -21,13 +52,16 @@ fn compose_stays_plain_without_ansi() {
 fn retire_clears_the_box_and_keeps_the_committed_line_above() {
     let previous = crate::cli::style::set(true, true);
     assert_eq!(
-        retire("use opencode", true, "pick a number"),
+        retire("use opencode", true, "pick a number", &fixture()),
         "\x1b[1B\x1b[2K\x1b[1A\n"
     );
     assert_eq!(
-        retire("", true, "pick a number"),
-        "\r[>_] \npick a number\x1b[1A\r[>_] "
+        retire("", true, "pick a number", &fixture()),
+        "\r\x1b[2K[>_]::[tj:0.1.14]::[harness:codex]: "
     );
-    assert_eq!(retire("use opencode", false, "pick a number"), "\n");
+    assert_eq!(
+        retire("use opencode", false, "pick a number", &fixture()),
+        "\n"
+    );
     crate::cli::style::restore(previous);
 }

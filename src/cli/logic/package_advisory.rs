@@ -7,6 +7,8 @@ use std::path::Path;
 
 #[path = "package_prompt.rs"]
 mod prompt_impl;
+#[path = "package_report.rs"]
+mod report;
 
 pub fn check(
     harness: &Harness,
@@ -30,29 +32,36 @@ pub fn check(
         return uncheckable(harness, plan, gate_on);
     };
     if !gate_on {
-        return warn_ok(&format!(
+        return report::warn_ok(&format!(
             "{} {} without a vulnerability check; `terminal-jarvis gate enable trivy` scans installs",
-            verb(plan.capability),
+            report::verb(plan.capability),
             harness.name
         ));
     }
     if options.narrate {
         eprintln!("checking {package} for known vulnerabilities ...");
+    } else {
+        eprint!("package check ...");
     }
     match security::package_check(package) {
-        None => warn_ok(&format!(
-            "cannot pre-check {package} (npm and trivy must be on PATH); continuing without a package scan"
-        )),
+        None => {
+            report::quiet_done(options, "skipped");
+            report::warn_ok(&format!(
+                "cannot pre-check {package} (npm and trivy must be on PATH); continuing without a package scan"
+            ))
+        }
         Some(verdict) if verdict.clean => {
             if options.narrate {
                 eprintln!("no HIGH/CRITICAL findings for {package}");
+            } else {
+                report::quiet_done(options, "clean");
             }
             Ok(())
         }
         Some(verdict) => {
+            let v = report::verb(plan.capability);
             eprintln!(
-                "HIGH/CRITICAL findings for {package} before {}:\n{}",
-                verb(plan.capability),
+                "HIGH/CRITICAL findings for {package} before {v}:\n{}",
                 verdict.detail
             );
             prompt_impl::continue_prompt(harness, plan, package, options)
@@ -60,36 +69,18 @@ pub fn check(
     }
 }
 
+/// Rewrites the live "package check ..." line with the outcome.
 fn uncheckable(harness: &Harness, plan: &CapabilityPlan, gate_on: bool) -> error::Result<()> {
-    let (why, tail) = if gate_on {
-        (
-            "uses a custom installer",
-            " that cannot be pre-scanned; continuing",
-        )
+    let tail = if gate_on {
+        "uses a custom installer that cannot be pre-scanned; continuing"
     } else {
-        (
-            "runs without a vulnerability check",
-            "; `terminal-jarvis gate enable trivy` scans installs",
-        )
+        "runs without a vulnerability check; `terminal-jarvis gate enable trivy` scans installs"
     };
-    warn_ok(&format!(
-        "{}'s {} {why}{tail}",
+    report::warn_ok(&format!(
+        "{}'s {} {tail}",
         harness.name,
-        verb(plan.capability)
+        report::verb(plan.capability)
     ))
-}
-
-fn verb(capability: Capability) -> &'static str {
-    if capability == Capability::Download {
-        "installing"
-    } else {
-        "updating"
-    }
-}
-
-fn warn_ok(message: &str) -> error::Result<()> {
-    eprintln!("warning: {message}");
-    Ok(())
 }
 
 #[cfg(test)]

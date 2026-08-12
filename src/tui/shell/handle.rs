@@ -22,6 +22,12 @@ pub fn handle(
             picker_shown: false,
         },
         Resolved::Exit => Next::Exit,
+        Resolved::Help => {
+            print!("{}", super::help::text());
+            Next::Again {
+                picker_shown: false,
+            }
+        }
         Resolved::Home => {
             print!("{}", crate::tui::term::clear_screen());
             crate::tui::home::render(harnesses, catalog_root, state_home);
@@ -33,6 +39,7 @@ pub fn handle(
             let picker_shown = run_action(action, options, harnesses, catalog_root, state_home);
             Next::Again { picker_shown }
         }
+        Resolved::Debug(toggle) => Next::Debug(toggle),
         Resolved::Error(message) => {
             eprintln!("{}", style::error(&message));
             Next::Again {
@@ -66,7 +73,7 @@ fn run_action(
             );
             false
         }
-        action => super::canonical::run(action, options, harnesses, catalog_root, state_home),
+        action => super::session::run(action, options, harnesses, catalog_root, state_home),
     }
 }
 

@@ -26,9 +26,12 @@ fn narrate_probe() {
 }
 
 #[test]
-fn quiet_preflight_is_silent_and_loud_narrates_the_stages() {
+fn quiet_preflight_reports_the_scan_in_one_line_and_loud_narrates() {
     let exe = std::env::current_exe().unwrap();
-    assert_eq!(probe(&exe, "quiet"), "");
+    assert_eq!(
+        probe(&exe, "quiet"),
+        "security scan (pass) ...\rsecurity scan (pass): passed \n"
+    );
     assert_eq!(probe(&exe, "loud"), NARRATED);
 }
 

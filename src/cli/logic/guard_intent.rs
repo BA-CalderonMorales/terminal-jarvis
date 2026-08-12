@@ -1,4 +1,5 @@
-use super::{args::Options, error, output};
+use super::{args::Options, error};
+use crate::cli::logic::prompt_lead;
 use crate::contracts::{CapabilityPlan, Effect, Harness, Interaction};
 use std::io::{IsTerminal, Write};
 
@@ -47,24 +48,15 @@ pub fn check(
         return Err(confirm_error(&token));
     }
     eprint!(
-        "{}Continue with {token}? [y/N] ",
-        output::plan_with_extra(harness, plan.capability, extra)
+        "{}",
+        prompt_lead::confirm_lead(options, harness, plan, extra)
     );
-    std::io::stderr().flush().map_err(|cause| {
-        error::Failure::state(
-            "prompt_failed",
-            cause.to_string(),
-            "retry with --no-input and --confirm",
-        )
-    })?;
+    eprint!("Continue with {token}? [y/N] ");
+    std::io::stderr().flush().map_err(prompt_failed)?;
     let mut answer = String::new();
-    std::io::stdin().read_line(&mut answer).map_err(|cause| {
-        error::Failure::state(
-            "prompt_failed",
-            cause.to_string(),
-            "retry with --no-input and --confirm",
-        )
-    })?;
+    std::io::stdin()
+        .read_line(&mut answer)
+        .map_err(prompt_failed)?;
     if matches!(answer.trim().to_ascii_lowercase().as_str(), "y" | "yes") {
         Ok(())
     } else {
@@ -74,6 +66,14 @@ pub fn check(
             "review the plan and retry when ready",
         ))
     }
+}
+
+fn prompt_failed(cause: std::io::Error) -> error::Failure {
+    error::Failure::state(
+        "prompt_failed",
+        cause.to_string(),
+        "retry with --no-input and --confirm",
+    )
 }
 
 fn reject_irrelevant(options: &Options) -> error::Result<()> {

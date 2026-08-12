@@ -29,9 +29,12 @@ pub fn run(
         std::io::stdin().is_terminal(),
         std::io::stdout().is_terminal(),
     )?;
-    let options = cli::args::Options::default();
+    let options = cli::args::Options {
+        narrate: false,
+        ..cli::args::Options::default()
+    };
     home::render(harnesses, catalog_root, state_home);
-    shell::run(harnesses, catalog_root, state_home, &options);
+    shell::run(harnesses, catalog_root, state_home, options);
     Ok((0, String::new()))
 }
 

@@ -26,7 +26,7 @@ pub fn dispatch(
     home: &Path,
 ) -> Result<(i32, String), String> {
     crate::cli::logic::dispatch::dispatch(action, options, harnesses, catalog_root, home)
-        .map_err(|failure| format!("{}: {}", failure.message, failure.next_action))
+        .map_err(|failure| failure.rendered())
 }
 
 pub fn run<I>(args: I, catalog_root: &Path, home: &Path) -> i32

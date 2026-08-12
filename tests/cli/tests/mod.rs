@@ -37,5 +37,8 @@ mod stream;
 mod support_guard;
 mod surface;
 mod tty;
+mod tui_acceptance;
+mod tui_acceptance_interrupt;
+mod tui_acceptance_security;
 mod update_dry_run;
 mod version;

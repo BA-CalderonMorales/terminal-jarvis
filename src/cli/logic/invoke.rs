@@ -27,12 +27,16 @@ pub fn capability(
     let plan = selected
         .plan(capability)
         .ok_or_else(|| format!("{harness} lacks {capability}"))?;
-    if matches!(capability, Capability::Download | Capability::Update) && narrate {
-        eprintln!(
-            "{} {harness}: {} ...",
-            verb(capability),
-            plan.command.render()
-        );
+    if matches!(capability, Capability::Download | Capability::Update) {
+        if narrate {
+            eprintln!(
+                "{} {harness}: {} ...",
+                verb(capability),
+                plan.command.render()
+            );
+        } else {
+            eprintln!("{} {harness} ...", verb(capability));
+        }
     }
     match runtime::run_command(plan, extra) {
         Ok(0) => Ok((0, String::new())),

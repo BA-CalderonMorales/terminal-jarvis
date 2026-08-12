@@ -3,6 +3,7 @@ use super::{
 };
 use crate::contracts::{Capability, Harness};
 use crate::gates;
+use std::io::IsTerminal;
 use std::path::Path;
 
 pub fn run(
@@ -57,7 +58,7 @@ fn execute(
             "repair the harness catalog",
         )
     })?;
-    guard_policy::check(harness, plan)?;
+    guard_policy::check(harness, plan, std::io::stdin().is_terminal())?;
     guard_intent::check(harness, plan, &invocation.extra, options, explicit)?;
     if options.dry_run {
         return Ok((

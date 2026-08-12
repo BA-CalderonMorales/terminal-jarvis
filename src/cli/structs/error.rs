@@ -54,6 +54,22 @@ impl Failure {
             next_action,
         }
     }
+
+    /// Renders the failure for the terminal. The seam never doubles
+    /// punctuation: a message ending in ".", ":", "!" or "?" joins with a
+    /// single space, everything else with the classic "message: next" gap.
+    pub fn rendered(&self) -> String {
+        let gap = if self.message.ends_with(['.', ':', '!', '?']) {
+            " "
+        } else {
+            ": "
+        };
+        format!("{}{}{}", self.message, gap, self.next_action)
+    }
 }
 
 pub type Result<T> = std::result::Result<T, Failure>;
+
+#[cfg(test)]
+#[path = "../tests/error_render_test.rs"]
+mod tests;

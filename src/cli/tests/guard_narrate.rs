@@ -7,9 +7,7 @@ fn chain_narrate_probe() {
     let Some(narration) = chain_mode() else {
         return;
     };
-    let _guard = crate::ENV_LOCK
-        .lock()
-        .unwrap_or_else(|error| error.into_inner());
+    let _guard = crate::ENV_LOCK.lock().unwrap_or_else(|e| e.into_inner());
     let root = std::env::temp_dir().join(format!("tj-chain-{}", std::process::id()));
     let (home, catalog) = (root.join("home"), root.join("catalog"));
     let _ = std::fs::remove_dir_all(&root);
@@ -30,12 +28,14 @@ fn chain_narrate_probe() {
 }
 
 #[test]
-fn quiet_mode_keeps_only_warnings_and_loud_narrates_every_stage() {
+fn quiet_mode_reports_phases_in_one_line_each_and_loud_narrates() {
     let exe = std::env::current_exe().unwrap();
     assert_eq!(
         probe(&exe, "quiet"),
         format!(
-            "warning: vibe's installing {WARNING_TAIL} that cannot be pre-scanned; continuing\n"
+            "security scan (pass) ...\rsecurity scan (pass): passed \n\
+             warning: vibe's installing {WARNING_TAIL} that cannot be pre-scanned; continuing\n\
+             installing vibe ...\n"
         )
     );
     assert_eq!(
