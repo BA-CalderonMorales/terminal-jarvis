@@ -1,5 +1,14 @@
-use crate::gates::logic::heartbeat::{live_line, live_width, Heartbeat, TICK};
+use crate::gates::logic::heartbeat::{live_line, live_width, should_tick, Heartbeat, TICK};
 use crate::gates::tests_util::{lock, scan_gate};
+
+#[test]
+fn ticks_happen_only_on_whole_five_second_boundaries() {
+    quickcheck::quickcheck(should_tick_spec as fn(u64) -> bool);
+    fn should_tick_spec(secs: u64) -> bool {
+        let expected = secs >= 5 && secs % 5 == 0;
+        should_tick(secs) == expected
+    }
+}
 
 #[test]
 fn live_line_starts_on_cr_and_names_the_scan() {
@@ -69,14 +78,16 @@ fn narrating_scans_never_redraw_themselves() {
 #[cfg(unix)]
 #[test]
 fn heartbeat_stops_promptly_when_the_scan_ends() {
-    let pump = Heartbeat::start("security scan (pump) ...");
+    let mut pump = Heartbeat::start("security scan (pump) ...");
     let deadline = std::time::Instant::now() + TICK + TICK;
     while !pump.fired() && std::time::Instant::now() < deadline {
         std::thread::sleep(std::time::Duration::from_millis(100));
     }
     assert!(pump.fired(), "a first tick must arrive within two ticks");
+    assert!(!pump.stopped(), "a running heartbeat is never stopped");
     let started = std::time::Instant::now();
     pump.stop();
+    assert!(pump.stopped(), "stop must flip the stopped flag");
     assert!(
         started.elapsed() < TICK,
         "stop must not wait for the next tick"

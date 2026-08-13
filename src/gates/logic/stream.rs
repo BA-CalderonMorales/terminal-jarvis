@@ -60,14 +60,14 @@ pub fn run(gate: &Gate, narrate: bool) -> Result<Scan, String> {
     super::interrupt::track(child.id() as i32);
     let stdout_reader = std::thread::spawn(move || tee(&mut stdout, narrate));
     let stderr_reader = std::thread::spawn(move || tee(&mut stderr, narrate));
-    let heartbeat =
+    let mut heartbeat =
         (!narrate).then(|| Heartbeat::start(&format!("security scan ({}) ...", gate.name)));
     let status = child
         .wait()
         .map_err(|error| format!("gate scan failed: {error}"))?;
     super::interrupt::track(0);
     let fired = heartbeat.as_ref().is_some_and(|tick| tick.fired());
-    if let Some(tick) = heartbeat {
+    if let Some(tick) = &mut heartbeat {
         tick.stop();
     }
     let joined = [stdout_reader.join(), stderr_reader.join()]

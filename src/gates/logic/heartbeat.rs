@@ -1,8 +1,6 @@
 //! Heartbeat: while a slow gate scan runs, the clean view redraws a
-//! fixed-width progress line every few seconds so the user knows the scan is
-//! alive and why it takes time, instead of staring at one static line. The
-//! line drawing is a pure function so the redraw contract is
-//! property-tested; the thread is a small racy-free wrapper around it.
+//! fixed-width progress line every few seconds so the user knows the scan
+//! is alive and why it takes time; line drawing is pure, property-tested.
 
 use std::io::Write;
 use std::sync::atomic::{AtomicBool, Ordering};
@@ -30,22 +28,24 @@ pub fn live_width(prefix: &str) -> usize {
     prefix.len() + 1 + 4 + 1 + TAIL.len()
 }
 
-/// A finished scan: its outcome, its captured output, and whether the user
-/// saw live heartbeat ticks while it ran (the outcome line overpads past
-/// those ticks so no residue survives).
+/// Whether a tick is due at this elapsed second: five-second boundaries.
+pub fn should_tick(elapsed_secs: u64) -> bool {
+    elapsed_secs >= TICK.as_secs() && elapsed_secs % TICK.as_secs() == 0
+}
+
+/// A finished scan: outcome, captured output, heartbeat visibility.
 #[derive(Debug)]
 pub struct Scan {
     pub code: i32,
     pub output: String,
     pub heartbeat: bool,
 }
-
-/// The background redraw loop for one scan. Stop it before printing anything
-/// after the scan so a late tick cannot race the outcome line.
+/// The background redraw loop for one scan. Stop it before printing
+/// anything after the scan so a late tick cannot race the outcome line.
 pub struct Heartbeat {
     stop: Arc<AtomicBool>,
     fired: Arc<AtomicBool>,
-    handle: JoinHandle<()>,
+    handle: Option<JoinHandle<()>>,
 }
 
 impl Heartbeat {
@@ -59,15 +59,12 @@ impl Heartbeat {
         let handle = thread::spawn(move || {
             let started = Instant::now();
             loop {
-                if stop_loop.load(Ordering::Relaxed) {
-                    break;
-                }
                 thread::sleep(POLL);
                 if stop_loop.load(Ordering::Relaxed) {
                     break;
                 }
                 let secs = started.elapsed().as_secs();
-                if secs >= TICK.as_secs() && secs % TICK.as_secs() == 0 {
+                if should_tick(secs) {
                     fired_flag.store(true, Ordering::Relaxed);
                     eprint!("{}", live_line(&line, secs));
                     let _ = std::io::stderr().flush();
@@ -77,7 +74,7 @@ impl Heartbeat {
         Self {
             stop,
             fired,
-            handle,
+            handle: Some(handle),
         }
     }
 
@@ -85,9 +82,16 @@ impl Heartbeat {
         self.fired.load(Ordering::Relaxed)
     }
 
-    pub fn stop(self) {
+    #[cfg(test)]
+    pub fn stopped(&self) -> bool {
+        self.stop.load(Ordering::Relaxed)
+    }
+
+    pub fn stop(&mut self) {
         self.stop.store(true, Ordering::Relaxed);
-        let _ = self.handle.join();
+        if let Some(handle) = self.handle.take() {
+            let _ = handle.join();
+        }
     }
 }
 

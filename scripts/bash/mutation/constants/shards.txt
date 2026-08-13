@@ -6,6 +6,7 @@
 cli-core src/cli/index.rs
 cli-core src/cli/logic/gate_cmd.rs
 cli-core src/cli/logic/gate_output.rs
+cli-core src/cli/logic/gate_skip.rs
 cli-core src/cli/logic/dispatch.rs
 cli-core src/cli/logic/dispatch_compat.rs
 cli-core src/cli/logic/dispatch_security.rs
