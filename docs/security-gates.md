@@ -32,7 +32,8 @@ with the least to say about a tool download) is left off; dependency, vendored,
 and build output directories (`node_modules`, `target`, `.git`, `dist`, `build`,
 `vendor`, `.venv`, `venv`, `npm`, `mutants.out*`, `graphify-out`) are skipped
 so a large workspace does not turn the pre-command scan into a minutes-long
-wall. Scanner output streams to the terminal as it runs, and a blocked scan
+wall. Windows delete-pending entries (names starting with `~`, which list but
+cannot be opened from WSL) are skipped so the walk cannot crash on them. Scanner output streams to the terminal as it runs, and a blocked scan
 reports only the meaningful tail instead of the whole log.
 
 ```bash
