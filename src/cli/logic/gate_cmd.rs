@@ -45,8 +45,11 @@ fn enable(available: &[gates::Gate], home: &Path, name: &str) -> Result<(i32, St
 }
 
 fn run(gate: &gates::Gate) -> Result<(i32, String), String> {
-    let (code, body) = gates::run(gate, true)?;
-    Ok((code, output::run_result(&gate.name, code, &body)))
+    let scan = gates::run(gate, true)?;
+    Ok((
+        scan.code,
+        output::run_result(&gate.name, scan.code, &scan.output),
+    ))
 }
 
 fn find<'a>(available: &'a [gates::Gate], name: &str) -> Result<&'a gates::Gate, String> {

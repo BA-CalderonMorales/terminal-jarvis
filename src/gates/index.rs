@@ -10,6 +10,7 @@ pub use crate::gates::logic::interrupt::active_pid as active_child_pid;
 pub use crate::gates::logic::loader::{load, Gate};
 pub use crate::gates::logic::runner::preflight;
 pub use crate::gates::logic::stream::run;
+pub use crate::gates::logic::verdict::{interrupted_message, verdict_for, Verdict};
 pub use crate::gates::structs::state::{disable, enable, selected, Selection};
 
 #[cfg(test)]

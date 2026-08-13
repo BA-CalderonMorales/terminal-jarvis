@@ -66,9 +66,10 @@ fn execute(
             output::plan_with_extra(harness, invocation.capability, &invocation.extra),
         ));
     }
-    gates::preflight(home, options.narrate).map_err(|message| {
-        error::Failure::safety("gate_blocked", message, "run `terminal-jarvis gate status`")
-    })?;
+    let target = format!("{}:{}", invocation.capability, invocation.harness);
+    gates::preflight(home, options.narrate)
+        .map_err(|m| error::Failure::safety("gate_blocked", m, "run `terminal-jarvis gate status`"))
+        .and_then(|verdict| super::gate_skip::route(options, verdict, &target))?;
     super::package_advisory::check(harness, plan, options, home)?;
     invoke::invocation(invocation, harnesses, options.narrate)
         .map_err(dispatch_support::unavailable_error)

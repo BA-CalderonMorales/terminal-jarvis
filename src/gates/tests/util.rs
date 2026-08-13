@@ -16,6 +16,22 @@ pub fn write_executable(path: &Path, script: &str) {
     std::fs::set_permissions(path, permissions).unwrap();
 }
 
+/// A runnable gate fixture: an executable scanner under `root` plus the
+/// loader shape it needs, ready for `stream::run`.
+pub fn scan_gate(root: &Path, name: &str, script: &str) -> crate::gates::logic::loader::Gate {
+    std::fs::create_dir_all(root).unwrap();
+    let bin = root.join(format!("{name}-scan"));
+    write_executable(&bin, script);
+    crate::gates::logic::loader::Gate {
+        name: name.to_string(),
+        display: name.to_string(),
+        description: "test".to_string(),
+        binary: bin.to_string_lossy().into_owned(),
+        args: vec![],
+        install_hint: "install".to_string(),
+    }
+}
+
 pub fn restore_gates_env(previous: Option<std::ffi::OsString>) {
     match previous {
         Some(value) => std::env::set_var("TERMINAL_JARVIS_GATES", value),

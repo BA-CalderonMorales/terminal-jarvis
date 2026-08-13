@@ -22,4 +22,11 @@ exclude_re = [
   "args_options\\.rs.*in extract",
   "resolve\\.rs.*replace executable_mode -> bool with false",
   "distribution\\.rs.*delete ! in channel",
+  # The cfg(not(unix)) exit_code variant never compiles on CI runners; the
+  # unix variant is witnessed by the preflight signal tests.
+  "stream\\.rs:18.*replace exit_code -> i32 with",
+  # The non-heartbeat outcome floor (prefix.len() + 1) is always shorter
+  # than the outcome text, so -1/*1 produce byte-identical lines for every
+  # real state; the same family at the pad line (91:50) is caught.
+  "runner\\.rs:89:22.*replace \\+ with",
 ]
