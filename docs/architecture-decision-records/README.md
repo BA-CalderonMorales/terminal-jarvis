@@ -97,6 +97,33 @@ everything the same color) and stays opt-in behind `TJ_HARNESS_RISK=1` until
 it proves value. No root-level Rust scripts remain; the build script lives in
 `build/build.rs` and the `build =` key in `Cargo.toml` points there.
 
+### Gate scans: heartbeat progress and interactive skip consent (fix/gate-scan-hang -> 2026-08-12)
+
+**Decision:** Catch `develop` up to the shipped 0.1.14 state (0.1.14 landed on
+`main` directly) and land the gate-scan fix: a slow scan redraws a
+fixed-width heartbeat every five seconds, and an interrupted scan asks the
+interactive user for conscious skip consent instead of hard-cancelling the
+command. Findings still block (nothing vulnerable is ever downloaded),
+`--no-input` and piped runs still abort.
+
+**Context:** On OneDrive-backed mounts the trivy workspace walk legitimately
+takes 5-23 minutes (measured), while the clean view showed one static line
+with no feedback and no escape: Ctrl+C killed the scanner but cancelled the
+install. `develop` had stalled at the 0.1.13 release while 0.1.14 shipped
+straight to `main`, so the two histories needed to rejoin.
+
+**Considered:** A hard scan deadline that auto-kills and prompts -- rejected,
+the user is the only judge of when a scan is too long. A session-wide skip
+memo -- rejected, one-action consent keeps the gate honest for every command.
+
+**Consequence:** install/update/run for every harness become bounded and
+engaged: heartbeat at 5s, Ctrl+C then `y` proceeds in seconds, exit 5 on
+refusal, and a property-tested verdict contract (passed / blocked-with-
+findings / interrupted) witnessed by pty acceptance tests. The 0.1.15
+roadmap (CHANGELOG) carries blocked-install drill-down, `uninstall|prune`,
+and header/main/footer section rules. Operator still tags and publishes
+after final review.
+
 ### Ship the TUI command center and its demo pipeline (release/0.1.14 -> 2026-08-12)
 
 **Decision:** Land 0.1.14: the TUI as a context command center -- a clean
