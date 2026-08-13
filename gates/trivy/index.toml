@@ -1,6 +1,6 @@
 name = "trivy"
 display = "Trivy filesystem gate"
-description = "Scans the current workspace for high and critical vulnerabilities and misconfigurations before a harness command runs. Secret scanning is off (slowest scanner, lowest download risk); dependency and build directories are skipped so the walk stays fast."
+description = "Scans the current workspace for high and critical vulnerabilities and misconfigurations before a harness command runs. Secret scanning is off (slowest scanner, lowest download risk); dependency and build directories are skipped so the walk stays fast, and Windows delete-pending entries (names starting with '~') are skipped so the walk cannot crash on them."
 binary = "trivy"
-args = ["fs", "--scanners", "vuln,misconfig", "--severity", "HIGH,CRITICAL", "--exit-code", "1", "--skip-dirs", "node_modules", "--skip-dirs", "target", "--skip-dirs", ".git", "--skip-dirs", "dist", "--skip-dirs", "build", "--skip-dirs", "vendor", "--skip-dirs", ".venv", "--skip-dirs", "venv", "--skip-dirs", "npm", "--skip-dirs", "mutants.out", "--skip-dirs", "mutants.out.old", "--skip-dirs", "graphify-out", "."]
+args = ["fs", "--scanners", "vuln,misconfig", "--severity", "HIGH,CRITICAL", "--exit-code", "1", "--skip-dirs", "node_modules", "--skip-dirs", "target", "--skip-dirs", ".git", "--skip-dirs", "dist", "--skip-dirs", "build", "--skip-dirs", "vendor", "--skip-dirs", ".venv", "--skip-dirs", "venv", "--skip-dirs", "npm", "--skip-dirs", "mutants.out", "--skip-dirs", "mutants.out.old", "--skip-dirs", "graphify-out", "--skip-dirs", "**/~*", "."]
 install_hint = "Install Trivy from https://trivy.dev/docs/latest/getting-started/installation/ or run `terminal-jarvis gate disable`."
