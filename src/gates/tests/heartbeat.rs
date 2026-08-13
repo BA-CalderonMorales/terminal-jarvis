@@ -1,5 +1,5 @@
-use crate::gates::logic::heartbeat::{live_line, live_width, should_tick, Heartbeat, TICK};
-use crate::gates::tests_util::{lock, scan_gate};
+use crate::gates::logic::heartbeat::{live_line, live_width, should_tick, Heartbeat, Scan, TICK};
+use crate::gates::tests_util::scan_gate;
 
 #[test]
 fn ticks_happen_only_on_whole_five_second_boundaries() {
@@ -36,52 +36,49 @@ fn the_elapsed_seconds_are_always_visible() {
 }
 
 #[cfg(unix)]
+fn run_scan(name: &str, script: &str, narrate: bool) -> Scan {
+    let root = std::env::temp_dir().join(format!("tj-hb-{name}-{}", std::process::id()));
+    let _ = std::fs::remove_dir_all(&root);
+    let gate = scan_gate(&root, name, script);
+    let scan = crate::gates::logic::stream::run(&gate, narrate).unwrap();
+    let _ = std::fs::remove_dir_all(&root);
+    scan
+}
+
+#[cfg(unix)]
 #[test]
 fn a_fast_scan_never_takes_a_heartbeat_tick() {
-    let _guard = lock();
-    let root = std::env::temp_dir().join(format!("tj-hb-fast-{}", std::process::id()));
-    let _ = std::fs::remove_dir_all(&root);
-    let gate = scan_gate(&root, "fast", "#!/bin/sh\n");
-    let scan = crate::gates::logic::stream::run(&gate, false).unwrap();
+    let scan = run_scan("fast", "#!/bin/sh\n", false);
     assert!(!scan.heartbeat, "a sub-tick scan must not redraw");
     assert_eq!(scan.code, 0);
-    let _ = std::fs::remove_dir_all(&root);
 }
 
 #[cfg(unix)]
 #[test]
 fn a_slow_scan_redraws_until_it_finishes() {
-    let _guard = lock();
-    let root = std::env::temp_dir().join(format!("tj-hb-slow-{}", std::process::id()));
-    let _ = std::fs::remove_dir_all(&root);
     let seconds = TICK.as_secs() + 1;
-    let gate = scan_gate(&root, "slow", &format!("#!/bin/sh\nsleep {seconds}\n"));
-    let scan = crate::gates::logic::stream::run(&gate, false).unwrap();
+    let scan = run_scan("slow", &format!("#!/bin/sh\nsleep {seconds}\n"), false);
     assert!(scan.heartbeat, "a scan past the first tick must redraw");
     assert_eq!(scan.code, 0);
-    let _ = std::fs::remove_dir_all(&root);
 }
 
 #[cfg(unix)]
 #[test]
 fn narrating_scans_never_redraw_themselves() {
-    let _guard = lock();
-    let root = std::env::temp_dir().join(format!("tj-hb-narrate-{}", std::process::id()));
-    let _ = std::fs::remove_dir_all(&root);
     let seconds = TICK.as_secs() + 1;
-    let gate = scan_gate(&root, "loud", &format!("#!/bin/sh\nsleep {seconds}\n"));
-    let scan = crate::gates::logic::stream::run(&gate, true).unwrap();
+    let scan = run_scan("loud", &format!("#!/bin/sh\nsleep {seconds}\n"), true);
     assert!(!scan.heartbeat, "the narrated view streams, never redraws");
-    let _ = std::fs::remove_dir_all(&root);
 }
 
 #[cfg(unix)]
 #[test]
 fn heartbeat_stops_promptly_when_the_scan_ends() {
     let mut pump = Heartbeat::start("security scan (pump) ...");
-    let deadline = std::time::Instant::now() + TICK + TICK;
-    while !pump.fired() && std::time::Instant::now() < deadline {
-        std::thread::sleep(std::time::Duration::from_millis(100));
+    for _ in 0..40 {
+        if pump.fired() {
+            break;
+        }
+        std::thread::sleep(std::time::Duration::from_millis(250));
     }
     assert!(pump.fired(), "a first tick must arrive within two ticks");
     assert!(!pump.stopped(), "a running heartbeat is never stopped");

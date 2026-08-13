@@ -2,9 +2,8 @@
 
 use crate::logic::cli_driver::Fixture;
 use crate::logic::pty;
-use std::io::{IsTerminal, Write};
 use std::os::unix::fs::PermissionsExt;
-use std::process::{Command, Stdio};
+use std::process::Command;
 
 const MARKER_SCRIPT: &str = "#!/bin/sh\n: > \"$TJ_FIXTURE_MARKER\"\n";
 const INSTALL: [&str; 3] = ["--plain", "install", "fixture"];
@@ -76,22 +75,25 @@ fn no_input_on_a_terminal_never_opens_the_skip_prompt() {
 }
 
 #[test]
-fn interrupted_scan_on_a_terminal_can_be_skipped_and_the_install_proceeds() {
-    if !std::io::stdin().is_terminal() {
-        return;
-    }
+fn an_interrupted_scan_can_be_skipped_and_the_install_proceeds() {
     let fixture = killed_fixture();
-    let (stdin, stdout, stderr) = (Stdio::piped(), Stdio::piped(), Stdio::piped());
-    let mut child = Command::new(env!("CARGO_BIN_EXE_terminal-jarvis"))
-        .args(INSTALL)
-        .envs(envs(&fixture))
-        .stdin(stdin)
-        .stdout(stdout)
-        .stderr(stderr)
-        .spawn()
-        .expect("terminal-jarvis spawns");
-    child.stdin.as_mut().unwrap().write_all(b"y\n").unwrap();
-    let output = child.wait_with_output().expect("wait");
-    assert_eq!(output.status.code(), Some(0), "skipped install succeeds");
+    let mut command = Command::new(env!("CARGO_BIN_EXE_terminal-jarvis"));
+    command.args(INSTALL).envs(envs(&fixture));
+    let (status, _) = pty::run_pty_probe(
+        command,
+        &[
+            (
+                b"",
+                Some(b"Continue with download:fixture? [y/N]".as_slice()),
+            ),
+            (b"y\n", None),
+            (
+                b"",
+                Some(b"Skip the scan and continue with download:fixture? [y/N]".as_slice()),
+            ),
+            (b"y\n", None),
+        ],
+    );
+    assert_eq!(status.code(), Some(0), "skipped install succeeds");
     assert!(fixture.spawned());
 }

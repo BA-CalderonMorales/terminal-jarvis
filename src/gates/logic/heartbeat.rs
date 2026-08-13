@@ -1,6 +1,6 @@
 //! Heartbeat: while a slow gate scan runs, the clean view redraws a
-//! fixed-width progress line every few seconds so the user knows the scan
-//! is alive and why it takes time; line drawing is pure, property-tested.
+//! fixed-width progress line so the user knows the scan is alive and why;
+//! drawing is pure, property-tested.
 
 use std::io::Write;
 use std::sync::atomic::{AtomicBool, Ordering};
@@ -12,8 +12,7 @@ pub const TICK: Duration = Duration::from_secs(5);
 const POLL: Duration = Duration::from_millis(250);
 const TAIL: &str = " · scanning workspace; this can take a minute or more";
 
-/// The live line for an elapsed scan time: CR, fixed-width seconds, the
-/// patience note, then padding so every tick is the same width.
+/// The live line for an elapsed scan time: CR, fixed-width seconds, padding.
 pub fn live_line(prefix: &str, secs: u64) -> String {
     let body = format!("{prefix} {secs:>4}s{TAIL}");
     format!(
@@ -22,13 +21,11 @@ pub fn live_line(prefix: &str, secs: u64) -> String {
     )
 }
 
-/// The stable width every live line is padded to, so ticks never leave
-/// residue and the final outcome rewrite can overpad past them.
+/// The stable width every live line is padded to, so ticks leave no residue.
 pub fn live_width(prefix: &str) -> usize {
     prefix.len() + 1 + 4 + 1 + TAIL.len()
 }
 
-/// Whether a tick is due at this elapsed second: five-second boundaries.
 pub fn should_tick(elapsed_secs: u64) -> bool {
     elapsed_secs >= TICK.as_secs() && elapsed_secs % TICK.as_secs() == 0
 }
@@ -40,8 +37,7 @@ pub struct Scan {
     pub output: String,
     pub heartbeat: bool,
 }
-/// The background redraw loop for one scan. Stop it before printing
-/// anything after the scan so a late tick cannot race the outcome line.
+/// The background redraw loop for one scan; stop it before printing anything
 pub struct Heartbeat {
     stop: Arc<AtomicBool>,
     fired: Arc<AtomicBool>,
@@ -50,21 +46,21 @@ pub struct Heartbeat {
 
 impl Heartbeat {
     pub fn start(prefix: &str) -> Self {
-        let (stop, fired) = (
-            Arc::new(AtomicBool::new(false)),
-            Arc::new(AtomicBool::new(false)),
-        );
+        let stop = Arc::new(AtomicBool::new(false));
+        let fired = Arc::new(AtomicBool::new(false));
         let (stop_loop, fired_flag) = (stop.clone(), fired.clone());
         let line = prefix.to_string();
         let handle = thread::spawn(move || {
             let started = Instant::now();
+            let mut drawn = 0;
             loop {
                 thread::sleep(POLL);
                 if stop_loop.load(Ordering::Relaxed) {
                     break;
                 }
                 let secs = started.elapsed().as_secs();
-                if should_tick(secs) {
+                if should_tick(secs) && secs != drawn {
+                    drawn = secs;
                     fired_flag.store(true, Ordering::Relaxed);
                     eprint!("{}", live_line(&line, secs));
                     let _ = std::io::stderr().flush();
@@ -95,6 +91,9 @@ impl Heartbeat {
     }
 }
 
+#[cfg(test)]
+#[path = "../tests/heartbeat_probe.rs"]
+mod heartbeat_probe_tests;
 #[cfg(test)]
 #[path = "../tests/heartbeat.rs"]
 mod heartbeat_tests;
