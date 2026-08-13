@@ -14,6 +14,7 @@ pub(crate) mod dispatch_support;
 pub(crate) mod entry;
 pub(crate) mod execute;
 pub(crate) mod gate_cmd;
+pub(crate) mod gate_skip;
 pub(crate) mod guard;
 pub(crate) mod guard_intent;
 pub(crate) mod guard_policy;

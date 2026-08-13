@@ -8,6 +8,7 @@ mod dangerous;
 mod e2e;
 mod edge_contract;
 mod exit;
+mod gate_skip;
 mod green;
 mod guard_intent;
 mod guard_intent_confirm;
