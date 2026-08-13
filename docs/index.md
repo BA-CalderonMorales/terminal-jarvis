@@ -19,6 +19,7 @@ the tool exists.
 | [Installation](installation.md) | Package mechanics, supported platforms, update behavior |
 | [Usage](usage.md) | Headless vs interactive, launch guards |
 | [Maintainer guide](maintainer.md) | The security model and maintainer notes |
+| [Troubleshooting](troubleshooting/index.md) | Triage blocked scans, failed installs, and local issues fast |
 | [Demo](demo.md) | The recording, the agent-handover script, making new demos |
 | [Legacy notes](legacy-notes.md) | Aliases, plain output behavior, removed experiments |
 

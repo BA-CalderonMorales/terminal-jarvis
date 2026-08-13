@@ -174,6 +174,7 @@ for, and the catalog truth behind it: [What is this?](docs/what-is-this.md).
 | [Usage](docs/usage.md) | Headless vs interactive, launch guards |
 | [Capability contract](docs/harness-capability-contract.md) | Full breakdown of the 9 capabilities |
 | [Security gates](docs/security-gates.md) | Optional Trivy scan behavior and configuration |
+| [Troubleshooting](docs/troubleshooting/index.md) | Triage blocked scans, failed installs, and local issues fast |
 | [Cataloged agents](docs/supported-agents.md) | All 25 descriptors and support caveat |
 | [Support matrix](docs/support-matrix.md) | All 225 capability truth rows |
 | [Development](docs/development.md) | Architecture, verification, and release artifacts |
