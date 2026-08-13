@@ -1,6 +1,6 @@
-use crate::gates::logic::loader::Gate;
 use crate::gates::logic::runner::preflight;
 use crate::gates::logic::stream::run;
+use crate::gates::logic::verdict::Verdict;
 
 use crate::gates::tests_util::*;
 
@@ -9,11 +9,11 @@ use crate::gates::tests_util::*;
 fn block_summary_drops_info_lines_and_keeps_the_signal_tail() {
     let verbatim = "2026 INFO [vuln] enabled\n2026 WARN spam\n2026 INFO secret\n2026 FATAL fs scan error: stat file: no such file\n";
     assert_eq!(
-        crate::gates::logic::stream::block_summary(verbatim),
+        crate::gates::logic::verdict::block_summary(verbatim),
         "2026 WARN spam\n2026 FATAL fs scan error: stat file: no such file"
     );
     assert_eq!(
-        crate::gates::logic::stream::block_summary("2026 INFO [vuln] enabled\n"),
+        crate::gates::logic::verdict::block_summary("2026 INFO [vuln] enabled\n"),
         "2026 INFO [vuln] enabled"
     );
 }
@@ -30,10 +30,15 @@ fn preflight_accepts_success_and_reports_blocking_exit() {
     let previous = std::env::var_os("TERMINAL_JARVIS_GATES");
     std::env::set_var("TERMINAL_JARVIS_GATES", &catalog);
     crate::gates::enable(&home, "pass").unwrap();
-    assert!(preflight(&home, true).is_ok());
+    assert_eq!(preflight(&home, true).unwrap(), Verdict::Passed);
     crate::gates::enable(&home, "block").unwrap();
-    let error = preflight(&home, true).unwrap_err();
-    assert!(error.contains("blocked harness execution (exit 1)"));
+    let verdict = preflight(&home, true).unwrap();
+    match verdict {
+        Verdict::Blocked(message) => {
+            assert!(message.contains("blocked harness execution (exit 1)"))
+        }
+        other => panic!("expected a blocked verdict, got {other:?}"),
+    }
     restore_gates_env(previous);
     let _ = std::fs::remove_dir_all(root);
 }
@@ -43,21 +48,11 @@ fn run_streams_gate_output_and_captures_it() {
     let script = "#!/bin/sh\nprintf 'streamed-1\\n'\nprintf 'streamed-2\\n' >&2\n";
     let dir = std::env::temp_dir().join(format!("tj-gate-stream-{}", std::process::id()));
     let _ = std::fs::remove_dir_all(&dir);
-    std::fs::create_dir_all(&dir).unwrap();
-    let bin = dir.join("scan");
-    write_executable(&bin, script);
-    let gate = Gate {
-        name: "scan".to_string(),
-        display: "Scan".to_string(),
-        description: "test".to_string(),
-        binary: bin.to_string_lossy().into_owned(),
-        args: vec![],
-        install_hint: "install".to_string(),
-    };
-    let (code, body) = run(&gate, true).unwrap();
-    assert_eq!(code, 0);
-    assert!(body.contains("streamed-1"));
-    assert!(body.contains("streamed-2"));
+    let gate = scan_gate(&dir, "scan", script);
+    let scan = run(&gate, true).unwrap();
+    assert_eq!(scan.code, 0);
+    assert!(scan.output.contains("streamed-1"));
+    assert!(scan.output.contains("streamed-2"));
     let _ = std::fs::remove_dir_all(&dir);
 }
 #[cfg(unix)]
@@ -87,14 +82,19 @@ fn preflight_reports_exit_128_as_blocked_and_signals_as_interrupted() {
     let previous = std::env::var_os("TERMINAL_JARVIS_GATES");
     std::env::set_var("TERMINAL_JARVIS_GATES", &catalog);
     crate::gates::enable(&home, "hundred").unwrap();
-    let error = preflight(&home, true).unwrap_err();
-    assert!(
-        error.contains("blocked harness execution (exit 128)"),
-        "{error}"
-    );
+    let verdict = preflight(&home, true).unwrap();
+    match verdict {
+        Verdict::Blocked(message) => {
+            assert!(message.contains("blocked harness execution (exit 128)"))
+        }
+        other => panic!("expected a blocked verdict, got {other:?}"),
+    }
     crate::gates::enable(&home, "hung").unwrap();
-    let error = preflight(&home, false).unwrap_err();
-    assert!(error.contains("was interrupted (Ctrl+C)"), "{error}");
+    let verdict = preflight(&home, false).unwrap();
+    match verdict {
+        Verdict::Interrupted { gate } => assert_eq!(gate, "hung"),
+        other => panic!("expected an interrupted verdict, got {other:?}"),
+    }
     restore_gates_env(previous);
     let _ = std::fs::remove_dir_all(root);
 }

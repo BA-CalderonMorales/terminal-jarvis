@@ -94,6 +94,6 @@ fn run_reports_missing_binary_and_succeeds_with_present_binary() {
         args,
         install_hint: "h".to_string(),
     };
-    let (code, _) = gates::run(&present, true).unwrap();
-    assert_eq!(code, 0);
+    let scan = gates::run(&present, true).unwrap();
+    assert_eq!(scan.code, 0);
 }

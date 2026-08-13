@@ -26,8 +26,8 @@ fn scan_memo_remembers_and_clears() {
 
 #[test]
 fn outcome_helpers_report_lines_only_when_clean() {
-    let blocked = outcome_line_for("scan", "blocked", false).unwrap_or_default();
-    let interrupted = outcome_line_for("scan", "interrupted", false).unwrap_or_default();
+    let blocked = outcome_line_for("scan", "blocked", false, false).unwrap_or_default();
+    let interrupted = outcome_line_for("scan", "interrupted", false, false).unwrap_or_default();
     assert!(
         blocked.contains("security scan (scan): blocked"),
         "{blocked:?}"
@@ -36,8 +36,20 @@ fn outcome_helpers_report_lines_only_when_clean() {
         interrupted.contains("security scan (scan): interrupted"),
         "{interrupted:?}"
     );
-    assert_eq!(outcome_line_for("scan", "blocked", true), None);
-    assert_eq!(outcome_line_for("scan", "interrupted", true), None);
+    assert_eq!(outcome_line_for("scan", "blocked", true, false), None);
+    assert_eq!(outcome_line_for("scan", "interrupted", true, false), None);
+}
+
+#[test]
+fn outcome_line_overpads_past_seen_heartbeat_ticks() {
+    let plain = outcome_line_for("scan", "blocked", false, false).unwrap();
+    let ticked = outcome_line_for("scan", "blocked", false, true).unwrap();
+    assert!(
+        ticked.len() > plain.len(),
+        "a heartbeat-aware outcome must pad past the ticks"
+    );
+    assert!(plain.ends_with("blocked "), "{plain:?}");
+    assert!(ticked.ends_with(' '), "{ticked:?}");
 }
 
 #[cfg(unix)]
@@ -52,7 +64,10 @@ fn preflight_warns_and_continues_when_binary_is_missing() {
     let previous = std::env::var_os("TERMINAL_JARVIS_GATES");
     std::env::set_var("TERMINAL_JARVIS_GATES", &catalog);
     crate::gates::enable(&home, "phantom").unwrap();
-    assert!(preflight(&home, true).is_ok());
+    assert_eq!(
+        preflight(&home, true).unwrap(),
+        crate::gates::logic::verdict::Verdict::Passed
+    );
     restore_gates_env(previous);
     let _ = std::fs::remove_dir_all(root);
 }
