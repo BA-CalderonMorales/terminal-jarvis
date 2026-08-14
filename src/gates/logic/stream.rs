@@ -19,8 +19,7 @@ fn exit_code(status: &ExitStatus) -> i32 {
 }
 
 /// Copies a child gate's pipe to stderr (live, tee-style) while capturing
-/// the full bytes for the caller; the copy only happens when narrating, so
-/// a quiet tui never sees the raw stream but the capture stays intact.
+/// the full bytes for the caller; narrate controls the live copy.
 pub fn tee(pipe: &mut dyn Read, narrate: bool) -> String {
     let mut captured = Vec::new();
     let mut chunk = [0u8; 4096];
@@ -41,9 +40,8 @@ pub fn tee(pipe: &mut dyn Read, narrate: bool) -> String {
     String::from_utf8_lossy(&captured).trim().to_string()
 }
 
-/// Spawns a gate scan and waits for it (with a headless deadline), streaming
-/// live when asked and redrawing a heartbeat in the quiet view; Ctrl+C
-/// SIGKILLs via the tracker.
+/// Spawns a gate scan and waits for it (deadline-bounded), streaming live
+/// when asked and redrawing a heartbeat; Ctrl+C SIGKILLs via the tracker.
 pub fn run(gate: &Gate, narrate: bool) -> Result<Scan, String> {
     if !security::command_on_path(&gate.binary) {
         return Err(format!(
@@ -71,16 +69,16 @@ pub fn run(gate: &Gate, narrate: bool) -> Result<Scan, String> {
     if let Some(tick) = &mut heartbeat {
         tick.stop();
     }
-    let joined = [stdout_reader.join(), stderr_reader.join()]
-        .into_iter()
-        .filter_map(Result::ok)
-        .collect::<Vec<_>>()
-        .join("\n");
+    let joined =
+        super::interrupt::bounded_join(vec![stdout_reader, stderr_reader], timed_out).join("\n");
     let mut output = joined.trim().to_string();
     if timed_out {
+        if !output.is_empty() {
+            output.push('\n');
+        }
+        let name = &gate.name;
         output.push_str(&format!(
-            "\nsecurity gate '{}' timed out after {limit}s and was killed",
-            gate.name
+            "security gate '{name}' timed out after {limit}s and was killed"
         ));
     }
     Ok(Scan {

@@ -36,3 +36,27 @@ pub fn memo_set(gate: &str, workspace: &str) {
 pub fn memo_clear() {
     *MEMO.lock().unwrap() = None;
 }
+
+/// Joins gate reader threads, bounded after a timeout so a pipe-holding
+/// descendant of a killed scanner cannot deadlock the scan: the readers get
+/// a short grace period, then unfinished ones are abandoned.
+pub fn bounded_join(handles: Vec<std::thread::JoinHandle<String>>, timed_out: bool) -> Vec<String> {
+    let grace = std::time::Instant::now() + std::time::Duration::from_millis(500);
+    if timed_out {
+        while !handles.iter().all(std::thread::JoinHandle::is_finished)
+            && std::time::Instant::now() < grace
+        {
+            std::thread::sleep(std::time::Duration::from_millis(50));
+        }
+    }
+    handles
+        .into_iter()
+        .filter_map(|handle| {
+            if handle.is_finished() {
+                handle.join().ok()
+            } else {
+                None
+            }
+        })
+        .collect()
+}
