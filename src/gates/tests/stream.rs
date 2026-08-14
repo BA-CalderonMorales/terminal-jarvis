@@ -1,3 +1,4 @@
+use crate::gates::logic::interrupt::bounded_join;
 use crate::gates::logic::stream::tee;
 use std::io;
 
@@ -36,10 +37,6 @@ fn interrupted() -> io::Result<Vec<u8>> {
     Err(io::Error::new(io::ErrorKind::Interrupted, "eintr"))
 }
 
-fn other() -> io::Result<Vec<u8>> {
-    Err(io::Error::other("boom"))
-}
-
 #[test]
 fn tee_retries_an_interrupted_read_and_keeps_the_payload() {
     let mut reader = Scripted {
@@ -52,8 +49,52 @@ fn tee_retries_an_interrupted_read_and_keeps_the_payload() {
 #[test]
 fn tee_stops_on_a_real_error_and_forgets_nothing_read() {
     let mut reader = Scripted {
-        steps: vec![Ok(b"seen".to_vec()), other(), Ok(b"ghost".to_vec())],
+        steps: vec![
+            Ok(b"seen".to_vec()),
+            Err(io::Error::other("boom")),
+            Ok(b"ghost".to_vec()),
+        ],
         cursor: 0,
     };
     assert_eq!(tee(&mut reader, false), "seen");
+}
+
+#[cfg(unix)]
+#[test]
+fn a_hung_scan_with_a_pipe_holding_descendant_returns_bounded() {
+    let _guard = crate::gates::tests_util::lock();
+    let previous = std::env::var_os("TERMINAL_JARVIS_GATE_TIMEOUT_SECS");
+    std::env::set_var("TERMINAL_JARVIS_GATE_TIMEOUT_SECS", "1");
+    let root = std::env::temp_dir().join(format!("tj-hang-{}", std::process::id()));
+    let _ = std::fs::remove_dir_all(&root);
+    let gate = crate::gates::tests_util::scan_gate(
+        &root,
+        "hang",
+        "#!/bin/sh\nprintf marker\nsleep 60 &\nsleep 60\n",
+    );
+    let started = std::time::Instant::now();
+    let scan = crate::gates::logic::stream::run(&gate, false).unwrap();
+    assert!(started.elapsed() < std::time::Duration::from_secs(15));
+    assert_ne!(scan.code, 0);
+    assert!(scan
+        .output
+        .starts_with("security gate 'hang' timed out after 1s and was killed"));
+    assert!(matches!(
+        crate::gates::verdict_for(&gate.name, scan.code, &scan.output),
+        crate::gates::Verdict::Interrupted { .. }
+    ));
+    match previous {
+        Some(value) => std::env::set_var("TERMINAL_JARVIS_GATE_TIMEOUT_SECS", value),
+        None => std::env::remove_var("TERMINAL_JARVIS_GATE_TIMEOUT_SECS"),
+    }
+    let _ = std::fs::remove_dir_all(root);
+}
+
+#[test]
+fn bounded_join_waits_the_grace_before_dropping_unfinished_readers() {
+    let reader = std::thread::spawn(|| {
+        std::thread::sleep(std::time::Duration::from_millis(100));
+        "kept".to_string()
+    });
+    assert_eq!(bounded_join(vec![reader], true), vec!["kept"]);
 }
