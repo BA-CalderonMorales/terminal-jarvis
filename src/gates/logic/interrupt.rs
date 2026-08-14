@@ -37,26 +37,25 @@ pub fn memo_clear() {
     *MEMO.lock().unwrap() = None;
 }
 
-/// Joins gate reader threads, bounded after a timeout so a pipe-holding
-/// descendant of a killed scanner cannot deadlock the scan: the readers get
-/// a short grace period, then unfinished ones are abandoned.
+/// Joins gate reader threads: a normal finish drains every pipe fully (the
+/// scanner reaped itself, so EOF is guaranteed). Only a killed scanner needs
+/// the bound — a pipe-holding descendant would otherwise block the join
+/// forever — so the grace period applies solely to the timeout path.
 pub fn bounded_join(handles: Vec<std::thread::JoinHandle<String>>, timed_out: bool) -> Vec<String> {
+    if !timed_out {
+        return handles
+            .into_iter()
+            .filter_map(|handle| handle.join().ok())
+            .collect();
+    }
     let grace = std::time::Instant::now() + std::time::Duration::from_millis(500);
-    if timed_out {
-        while !handles.iter().all(std::thread::JoinHandle::is_finished)
-            && std::time::Instant::now() < grace
-        {
-            std::thread::sleep(std::time::Duration::from_millis(50));
-        }
+    while !handles.iter().all(std::thread::JoinHandle::is_finished)
+        && std::time::Instant::now() < grace
+    {
+        std::thread::sleep(std::time::Duration::from_millis(50));
     }
     handles
         .into_iter()
-        .filter_map(|handle| {
-            if handle.is_finished() {
-                handle.join().ok()
-            } else {
-                None
-            }
-        })
+        .filter_map(|handle| handle.is_finished().then(|| handle.join().ok()).flatten())
         .collect()
 }
