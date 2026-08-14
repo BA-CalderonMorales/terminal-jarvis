@@ -23,10 +23,19 @@ pub fn selected(home: &Path) -> io::Result<Option<Selection>> {
     }
     let name = fs::read_to_string(path)?
         .lines()
-        .find_map(|line| line.trim().strip_prefix("enabled = "))
-        .and_then(|value| value.strip_prefix('"'))
-        .and_then(|value| value.strip_suffix('"'))
-        .map(str::to_string);
+        .map(str::trim)
+        .filter(|line| !line.is_empty() && !line.starts_with('#'))
+        .find_map(|line| {
+            let (key, value) = line.split_once('=')?;
+            (key.trim() == "enabled").then_some(
+                value
+                    .trim()
+                    .strip_prefix('"')
+                    .and_then(|value| value.strip_suffix('"'))
+                    .map(str::to_string),
+            )
+        })
+        .flatten();
     Ok(name.map(|name| Selection {
         name,
         source: "config",
