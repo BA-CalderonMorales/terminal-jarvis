@@ -23,16 +23,10 @@ pub fn inspect(input: &DiagnosticInput, redact: &Redactor<'_>) -> ConfigResult {
             };
         }
     };
-    if data.trim().is_empty() {
-        return ConfigResult {
-            record: record(Code::Empty, value),
-            active: None,
-            valid: true,
-        };
-    }
     let parsed = parse(&data);
     let (code, active) = match parsed {
-        Ok(active)
+        Ok(None) => (Code::Empty, None),
+        Ok(Some(active))
             if input
                 .active_harness
                 .as_ref()
@@ -40,43 +34,22 @@ pub fn inspect(input: &DiagnosticInput, redact: &Redactor<'_>) -> ConfigResult {
         {
             (Code::Conflicting, Some(active))
         }
-        Ok(active) => (Code::Ready, Some(active)),
+        Ok(Some(active)) => (Code::Ready, Some(active)),
         Err(code) => (code, None),
     };
     ConfigResult {
         record: record(code, value),
         active,
-        valid: code == Code::Ready,
+        valid: matches!(code, Code::Ready | Code::Empty),
     }
 }
 
-fn parse(data: &str) -> Result<String, Code> {
-    let mut values = Vec::new();
-    for line in data
-        .lines()
-        .map(str::trim)
-        .filter(|line| !line.is_empty() && !line.starts_with('#'))
-    {
-        let (key, value) = line.split_once('=').ok_or(Code::Malformed)?;
-        if key.trim() != "active_harness" {
-            return Err(Code::Malformed);
-        }
-        let value = value
-            .trim()
-            .strip_prefix('"')
-            .and_then(|v| v.strip_suffix('"'))
-            .filter(|v| !v.trim().is_empty())
-            .ok_or(Code::Malformed)?;
-        values.push(value.to_string());
-    }
-    let Some(first) = values.first().cloned() else {
-        return Err(Code::Malformed);
-    };
-    if values.iter().any(|value| value != &first) {
-        Err(Code::Conflicting)
-    } else {
-        Ok(first)
-    }
+fn parse(data: &str) -> Result<Option<String>, Code> {
+    use crate::context::ParseError;
+    crate::context::parse_session(data).map_err(|error| match error {
+        ParseError::Malformed => Code::Malformed,
+        ParseError::Conflicting => Code::Conflicting,
+    })
 }
 
 fn record(code: Code, value: String) -> Record {

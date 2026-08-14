@@ -3,15 +3,23 @@ use super::{parse, record, Code, Severity};
 #[test]
 fn parse_reads_quoted_active_harness() {
     let data = "\n# comment\n\nactive_harness = \"xh\"\n";
-    assert_eq!(parse(data), Ok("xh".to_string()));
-    assert_eq!(parse("active_harness = \"xh\"\n"), Ok("xh".to_string()));
+    assert_eq!(parse(data), Ok(Some("xh".to_string())));
+    assert_eq!(
+        parse("active_harness = \"xh\"\n"),
+        Ok(Some("xh".to_string()))
+    );
+}
+
+#[test]
+fn parse_treats_empty_input_as_no_session() {
+    assert_eq!(parse(""), Ok(None));
+    assert_eq!(parse("# comment\n\n"), Ok(None));
 }
 
 #[test]
 fn parse_rejects_unquoted_or_foreign_keys() {
     assert_eq!(parse("active_harness = xh\n"), Err(Code::Malformed));
     assert_eq!(parse("other = \"xh\"\n"), Err(Code::Malformed));
-    assert_eq!(parse(""), Err(Code::Malformed));
     assert_eq!(parse("active_harness = \"\"\n"), Err(Code::Malformed));
 }
 

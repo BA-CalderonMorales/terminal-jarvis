@@ -1,9 +1,13 @@
 use crate::context::constants::env as env_const;
+use crate::context::logic::session_parse::{parse, ParseError};
 use crate::context::structs::session::Session;
 use std::env;
 use std::fs;
 use std::io;
 use std::path::{Path, PathBuf};
+use std::sync::atomic::{AtomicUsize, Ordering};
+
+static STAGED_SEQ: AtomicUsize = AtomicUsize::new(0);
 
 pub fn default_home() -> PathBuf {
     if let Some(value) = env::var_os(env_const::HOME).filter(|value| !value.is_empty()) {
@@ -49,12 +53,30 @@ fn catalog_candidates() -> Vec<PathBuf> {
     candidates
 }
 
+/// Writes the session through a pid+nonce staged sibling file so a crash or
+/// interrupted write can never leave an empty or partial session behind and
+/// concurrent writers never collide. On windows, where rename cannot replace
+/// an existing file, the destination is removed only after staging succeeds.
 pub fn save(home: &Path, harness: &str) -> io::Result<()> {
+    if harness.contains(['"', '\n']) {
+        return Err(io::Error::other("unsafe harness name"));
+    }
     fs::create_dir_all(home)?;
-    fs::write(
-        home.join("session.toml"),
-        format!("active_harness = \"{harness}\"\n"),
-    )
+    let path = home.join("session.toml");
+    let seq = STAGED_SEQ.fetch_add(1, Ordering::Relaxed);
+    let staged = home.join(format!("session.toml.{}.{seq}.tmp", std::process::id()));
+    fs::write(&staged, format!("active_harness = \"{harness}\"\n"))?;
+    match fs::rename(&staged, &path) {
+        Ok(()) => Ok(()),
+        Err(error) if error.kind() == io::ErrorKind::AlreadyExists => {
+            fs::remove_file(&path)?;
+            fs::rename(&staged, &path)
+        }
+        Err(error) => {
+            let _ = fs::remove_file(&staged);
+            Err(error)
+        }
+    }
 }
 
 pub fn load(home: &Path) -> io::Result<Option<Session>> {
@@ -63,23 +85,16 @@ pub fn load(home: &Path) -> io::Result<Option<Session>> {
         return Ok(None);
     }
     let data = fs::read_to_string(path)?;
-    let result = parse_active(&data).map(|active_harness| Session { active_harness });
-    if result.is_none() && !data.trim().is_empty() {
-        eprintln!("warning: session.toml could not be parsed; using defaults");
+    match parse(&data) {
+        Ok(Some(active_harness)) => Ok(Some(Session { active_harness })),
+        Ok(None) => Ok(None),
+        Err(_) => {
+            eprintln!("warning: session.toml could not be parsed; using defaults");
+            Ok(None)
+        }
     }
-    Ok(result)
 }
 
-fn parse_active(data: &str) -> Option<String> {
-    data.lines().find_map(|line| {
-        let (key, value) = line.split_once('=')?;
-        if key.trim() != "active_harness" {
-            return None;
-        }
-        value
-            .trim()
-            .strip_prefix('"')
-            .and_then(|value| value.strip_suffix('"'))
-            .map(str::to_string)
-    })
-}
+#[cfg(test)]
+#[path = "../tests/session.rs"]
+mod tests;
