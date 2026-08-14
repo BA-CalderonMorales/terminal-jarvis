@@ -1,6 +1,6 @@
 summary = "Print or verify the installed Jules version."
 command = "sh"
-args = ["-c", "jules --version"]
+args = ["-c", "jules version"]
 support = "expected"
 evidence = "deterministic"
 effect = "read-only"
