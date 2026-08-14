@@ -58,7 +58,7 @@ pub fn save(home: &Path, harness: &str) -> io::Result<()> {
     if harness.contains(['"', '\n']) {
         return Err(io::Error::new(
             io::ErrorKind::InvalidInput,
-            "harness name must be a plain word",
+            "unsafe harness name",
         ));
     }
     fs::create_dir_all(home)?;
