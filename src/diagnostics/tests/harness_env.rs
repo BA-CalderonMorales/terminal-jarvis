@@ -38,15 +38,11 @@ fn input(environment: Environment) -> DiagnosticInput {
 fn ready_requires_presence_by_mode() {
     assert!(ready(EnvMode::None, &[]));
     assert!(!ready(EnvMode::None, &[ValueState::Missing]));
-    assert!(ready(EnvMode::Optional, &[ValueState::Missing]));
-    assert!(ready(EnvMode::Optional, &[]));
+    assert!(ready(EnvMode::Optional, &[ValueState::Missing]) && ready(EnvMode::Optional, &[]));
     assert!(!ready(EnvMode::Any, &[ValueState::Missing]));
     assert!(ready(EnvMode::Any, &[ValueState::Present]));
     assert!(!ready(EnvMode::All, &[]));
-    assert!(ready(
-        EnvMode::All,
-        &[ValueState::Present, ValueState::Present]
-    ));
+    assert!(ready(EnvMode::All, &[ValueState::Present; 2]));
     assert!(!ready(
         EnvMode::All,
         &[ValueState::Present, ValueState::Missing]
