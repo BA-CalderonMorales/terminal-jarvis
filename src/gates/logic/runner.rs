@@ -7,8 +7,7 @@ use crate::{context, security};
 use std::path::Path;
 
 /// Runs the enabled gate before a guarded action. A passed scan is memoized
-/// for the session; a blocked scan carries its message; an interrupted scan
-/// is a verdict the caller may let an interactive user consciously skip.
+/// per scanned workspace; blocked carries its message.
 pub fn preflight(home: &Path, narrate: bool) -> Result<Verdict, String> {
     let Some(selection) = selected(home).map_err(|error| error.to_string())? else {
         return Ok(Verdict::Passed);
@@ -23,8 +22,11 @@ pub fn preflight(home: &Path, narrate: bool) -> Result<Verdict, String> {
                 selection.name
             )
         })?;
-    if memo_hit(&gate.name) {
-        return Ok(Verdict::Passed);
+    let workspace = std::env::current_dir().ok();
+    let workspace = workspace.map(|path| path.display().to_string());
+    match workspace.as_deref() {
+        Some(workspace) if memo_hit(&gate.name, workspace) => return Ok(Verdict::Passed),
+        _ => {}
     }
     if !security::command_on_path(&gate.binary) {
         eprintln!(
@@ -40,7 +42,9 @@ pub fn preflight(home: &Path, narrate: bool) -> Result<Verdict, String> {
     }
     let scan = super::stream::run(gate, narrate)?;
     if scan.code == 0 {
-        memo_set(&gate.name);
+        if let Some(workspace) = &workspace {
+            memo_set(&gate.name, workspace);
+        }
         if narrate {
             eprintln!("security gate '{}' passed", gate.name);
         } else if let Some(line) = outcome_line_for(&gate.name, "passed", narrate, scan.heartbeat) {
@@ -70,11 +74,7 @@ pub(crate) fn outcome_line_for(
     narrate: bool,
     heartbeat: bool,
 ) -> Option<String> {
-    if narrate {
-        None
-    } else {
-        Some(outcome_line(gate, state, heartbeat))
-    }
+    (!narrate).then(|| outcome_line(gate, state, heartbeat))
 }
 
 /// Rewrites the live "… running …" line in place: CR, the outcome, then

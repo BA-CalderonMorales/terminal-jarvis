@@ -1,5 +1,5 @@
 use crate::gates::logic::heartbeat::{live_line, live_width, should_tick, Heartbeat, Scan, TICK};
-use crate::gates::tests_util::scan_gate;
+use crate::gates::tests_util::{lock, scan_gate};
 
 #[test]
 fn ticks_happen_only_on_whole_five_second_boundaries() {
@@ -37,6 +37,7 @@ fn the_elapsed_seconds_are_always_visible() {
 
 #[cfg(unix)]
 fn run_scan(name: &str, script: &str, narrate: bool) -> Scan {
+    let _guard = lock();
     let root = std::env::temp_dir().join(format!("tj-hb-{name}-{}", std::process::id()));
     let _ = std::fs::remove_dir_all(&root);
     let gate = scan_gate(&root, name, script);

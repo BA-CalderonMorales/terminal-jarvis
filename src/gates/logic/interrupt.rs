@@ -18,17 +18,19 @@ pub fn active_pid() -> i32 {
 /// GWINSZ-grade waits on slow mounts), and its verdict covers every action in
 /// this session, so a passed scan is not repeated. Critical: the memo is
 /// process-global, which means headless one-shot invocations never hit it and
-/// the tui's install-then-run flow stops scanning twice.
+/// the tui's install-then-run flow stops scanning twice. The memo is keyed by
+/// the workspace that was scanned (the gate scans the current directory), so
+/// switching projects always rescans.
 use std::sync::Mutex;
 
-static MEMO: Mutex<Option<String>> = Mutex::new(None);
+static MEMO: Mutex<Option<(String, String)>> = Mutex::new(None);
 
-pub fn memo_hit(gate: &str) -> bool {
-    MEMO.lock().unwrap().as_deref() == Some(gate)
+pub fn memo_hit(gate: &str, workspace: &str) -> bool {
+    *MEMO.lock().unwrap() == Some((gate.to_string(), workspace.to_string()))
 }
 
-pub fn memo_set(gate: &str) {
-    *MEMO.lock().unwrap() = Some(gate.to_string());
+pub fn memo_set(gate: &str, workspace: &str) {
+    *MEMO.lock().unwrap() = Some((gate.to_string(), workspace.to_string()));
 }
 
 pub fn memo_clear() {

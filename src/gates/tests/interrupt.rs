@@ -1,5 +1,6 @@
 use crate::gates::logic::interrupt::{active_pid, memo_clear, memo_hit, memo_set, track};
 use crate::gates::logic::runner::{outcome_line_for, preflight};
+use crate::gates::logic::verdict::Verdict;
 
 use crate::gates::tests_util::*;
 
@@ -16,26 +17,21 @@ fn interrupt_track_and_active_pid_round_trip() {
 #[test]
 fn scan_memo_remembers_and_clears() {
     memo_clear();
-    assert!(!memo_hit("acceptance"));
-    memo_set("acceptance");
-    assert!(memo_hit("acceptance"));
-    assert!(!memo_hit("other"));
+    assert!(!memo_hit("acceptance", "/one"));
+    memo_set("acceptance", "/one");
+    assert!(memo_hit("acceptance", "/one"));
+    assert!(!memo_hit("other", "/one"));
+    assert!(!memo_hit("acceptance", "/two"));
     memo_clear();
-    assert!(!memo_hit("acceptance"));
+    assert!(!memo_hit("acceptance", "/one"));
 }
 
 #[test]
 fn outcome_helpers_report_lines_only_when_clean() {
     let blocked = outcome_line_for("scan", "blocked", false, false).unwrap_or_default();
     let interrupted = outcome_line_for("scan", "interrupted", false, false).unwrap_or_default();
-    assert!(
-        blocked.contains("security scan (scan): blocked"),
-        "{blocked:?}"
-    );
-    assert!(
-        interrupted.contains("security scan (scan): interrupted"),
-        "{interrupted:?}"
-    );
+    assert!(blocked.contains("security scan (scan): blocked"));
+    assert!(interrupted.contains("security scan (scan): interrupted"));
     assert_eq!(outcome_line_for("scan", "blocked", true, false), None);
     assert_eq!(outcome_line_for("scan", "interrupted", true, false), None);
 }
@@ -64,10 +60,39 @@ fn preflight_warns_and_continues_when_binary_is_missing() {
     let previous = std::env::var_os("TERMINAL_JARVIS_GATES");
     std::env::set_var("TERMINAL_JARVIS_GATES", &catalog);
     crate::gates::enable(&home, "phantom").unwrap();
-    assert_eq!(
-        preflight(&home, true).unwrap(),
-        crate::gates::logic::verdict::Verdict::Passed
-    );
+    assert_eq!(preflight(&home, true).unwrap(), Verdict::Passed);
     restore_gates_env(previous);
+    let _ = std::fs::remove_dir_all(root);
+}
+
+#[cfg(unix)]
+#[test]
+fn memo_rescans_after_workspace_change_and_fails_open_without_cwd() {
+    let _guard = lock();
+    let root = std::env::temp_dir().join(format!("tj-memo-{}", std::process::id()));
+    let home = root.join("home");
+    let catalog = root.join("catalog");
+    let count = root.join("count.txt");
+    let workspaces = [root.join("a"), root.join("b"), root.join("lost")];
+    for dir in &workspaces {
+        std::fs::create_dir_all(dir).unwrap();
+    }
+    counter_gate(&catalog, "counter", &count);
+    let previous = std::env::var_os("TERMINAL_JARVIS_GATES");
+    std::env::set_var("TERMINAL_JARVIS_GATES", &catalog);
+    let original_cwd = std::env::current_dir().unwrap();
+    crate::gates::enable(&home, "counter").unwrap();
+    std::env::set_current_dir(&workspaces[0]).unwrap();
+    preflight(&home, true).unwrap();
+    preflight(&home, true).unwrap();
+    std::env::set_current_dir(&workspaces[1]).unwrap();
+    preflight(&home, true).unwrap();
+    std::env::set_current_dir(&workspaces[2]).unwrap();
+    std::fs::remove_dir(&workspaces[2]).unwrap();
+    preflight(&home, true).unwrap();
+    preflight(&home, true).unwrap();
+    std::env::set_current_dir(&original_cwd).unwrap();
+    restore_gates_env(previous);
+    assert_eq!(std::fs::read_to_string(&count).unwrap().lines().count(), 4);
     let _ = std::fs::remove_dir_all(root);
 }
