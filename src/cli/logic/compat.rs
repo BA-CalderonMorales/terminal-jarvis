@@ -42,23 +42,30 @@ pub fn config(
 }
 
 fn auth_for(name: &str, harnesses: &[Harness]) -> Result<String, String> {
-    auth_detail(
-        name,
-        harnesses,
-        &format!("credential storage is not active in v{VERSION}; export env vars in your shell"),
-    )
+    auth_detail(name, harnesses, false)
 }
 
 fn auth_set_for(name: &str, harnesses: &[Harness]) -> Result<String, String> {
-    auth_detail(name, harnesses, "terminal-jarvis does not persist credentials; nothing was stored. Export the env vars in your shell")
+    auth_detail(name, harnesses, true)
 }
 
-fn auth_detail(name: &str, harnesses: &[Harness], note: &str) -> Result<String, String> {
+fn auth_detail(name: &str, harnesses: &[Harness], set: bool) -> Result<String, String> {
     let harness = harnesses
         .iter()
         .find(|harness| harness.name == name)
         .ok_or_else(|| format!("unknown harness '{name}'"))?;
-    Ok(output::auth_detail(harness, &auth_status(harness), note))
+    let note = match (harness.env_mode == crate::contracts::EnvMode::Optional, set) {
+        (true, false) => format!(
+            "credential storage is not active in v{VERSION}; {} uses its own login flow, and the listed env vars are optional overrides",
+            harness.display
+        ),
+        (true, true) => "terminal-jarvis does not persist credentials; nothing was stored. Use the harness's own login flow; the listed env vars are optional overrides".to_string(),
+        (false, true) => "terminal-jarvis does not persist credentials; nothing was stored. Export the env vars in your shell".to_string(),
+        (false, false) => format!(
+            "credential storage is not active in v{VERSION}; export env vars in your shell"
+        ),
+    };
+    Ok(output::auth_detail(harness, &auth_status(harness), &note))
 }
 
 #[cfg(test)]

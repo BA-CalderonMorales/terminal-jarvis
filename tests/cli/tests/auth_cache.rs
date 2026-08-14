@@ -94,6 +94,6 @@ fn auth_reports_missing_environment_status() {
     let (output, _) = tj(&["auth", "opencode"]);
     assert!(output.status.success());
     let body = stdout(&output);
-    assert!(body.contains("setup: set one of: OPENCODE_API_KEY, OPENAI_API_KEY"));
-    assert!(body.contains("status: missing one of: OPENCODE_API_KEY, OPENAI_API_KEY"));
+    assert!(body.contains("setup: optional: OPENCODE_API_KEY, OPENAI_API_KEY"));
+    assert!(body.contains("status: ready"));
 }

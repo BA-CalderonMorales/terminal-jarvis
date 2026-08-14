@@ -30,8 +30,8 @@ Each harness `index.toml` declares:
 | `display` | Human-readable name |
 | `description` | One-line summary |
 | `binary` | Expected executable name |
-| `env_mode` | `none`, `any`, or `all` |
-| `env` | List of required environment variables |
+| `env_mode` | `none`, `optional`, `any`, or `all`; `optional` lists credentials a login-based harness can use but does not require, so readiness never gates on them |
+| `env` | List of environment variables (`optional` mode: advisory only) |
 
 Auth guidance stays at the harness level. Terminal Jarvis never retains
 credentials -- it tells you what each harness needs and lets you manage

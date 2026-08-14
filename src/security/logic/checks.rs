@@ -57,7 +57,7 @@ fn candidates(command: &str, windows: bool, path_ext: &str) -> Vec<String> {
 
 pub fn missing_env(harness: &Harness) -> Vec<String> {
     match harness.env_mode {
-        EnvMode::None => Vec::new(),
+        EnvMode::None | EnvMode::Optional => Vec::new(),
         EnvMode::Any => {
             if harness.env.iter().any(|name| nonempty_env(name)) {
                 Vec::new()

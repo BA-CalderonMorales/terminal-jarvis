@@ -37,6 +37,7 @@ into the wrong type.
 
 | Type | Records |
 |---|---|
+| [data/](data/index.md) | Capability metadata that does not match the real CLI |
 | [naming/](naming/index.md) | File names that encode bookkeeping instead of purpose |
 | [structure/](structure/index.md) | Layout that hides what a file is or how it is called |
 | [tooling/](tooling/index.md) | Reach of standard tools instead of installed ones |
