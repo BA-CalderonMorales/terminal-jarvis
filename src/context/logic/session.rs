@@ -1,5 +1,5 @@
 use crate::context::constants::env as env_const;
-use crate::context::logic::session_parse::{parse, ParseError};
+use crate::context::logic::session_parse::parse;
 use crate::context::structs::session::Session;
 use std::env;
 use std::fs;
