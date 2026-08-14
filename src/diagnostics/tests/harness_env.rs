@@ -34,6 +34,10 @@ fn input(environment: Environment) -> DiagnosticInput {
     local
 }
 
+fn env_record<'a>(records: &'a [Record], key: &str) -> &'a Record {
+    records.iter().find(|record| record.key == key).unwrap()
+}
+
 #[test]
 fn ready_requires_presence_by_mode() {
     assert!(ready(EnvMode::None, &[]));
@@ -56,40 +60,44 @@ fn aggregate_maps_state_sets() {
     assert_eq!(aggregate(&[ValueState::Empty]), Code::Empty);
     assert_eq!(aggregate(&[ValueState::Missing]), Code::Missing);
 }
-#[test]
-fn collect_marks_present_states_info_and_ready() {
-    let mut environment = Environment::default();
-    environment.insert("TOKEN", "token-value");
-    let (records, ready) = collect(
-        &harness(EnvMode::All, &["TOKEN"]),
-        &input(environment),
-        "harness.xh",
-    );
-    let present = records
-        .iter()
-        .find(|record| record.key == "harness.xh.env.TOKEN")
-        .unwrap();
-    assert_eq!(present.severity, Severity::Info);
-    assert!(ready);
-}
 
 #[test]
-fn collect_marks_missing_states_with_action() {
-    let (records, ready) = collect(
+fn collect_marks_env_state_by_mode() {
+    let mut with_env = Environment::default();
+    with_env.insert("TOKEN", "token-value");
+    for (mode, environment, ready_expected, severity) in [
+        (EnvMode::All, with_env, true, Severity::Info),
+        (
+            EnvMode::Optional,
+            Environment::default(),
+            true,
+            Severity::Info,
+        ),
+        (
+            EnvMode::All,
+            Environment::default(),
+            false,
+            Severity::Warning,
+        ),
+    ] {
+        let (records, ready) = collect(
+            &harness(mode, &["TOKEN"]),
+            &input(environment),
+            "harness.xh",
+        );
+        assert_eq!(ready, ready_expected, "mode={mode:?}");
+        assert_eq!(
+            env_record(&records, "harness.xh.env.TOKEN").severity,
+            severity,
+            "mode={mode:?}"
+        );
+    }
+    let (records, _) = collect(
         &harness(EnvMode::All, &["TOKEN"]),
         &input(Environment::default()),
         "harness.xh",
     );
-    assert!(!ready);
-    let missing = records
-        .iter()
-        .find(|record| record.key == "harness.xh.env.TOKEN")
-        .unwrap();
-    assert_eq!(missing.severity, Severity::Warning);
-    let summary = records
-        .iter()
-        .find(|record| record.key == "harness.xh.environment")
-        .unwrap();
+    let summary = env_record(&records, "harness.xh.environment");
     assert_eq!(summary.code, Code::Missing);
     assert_eq!(
         summary.action.as_deref(),
