@@ -16,12 +16,13 @@ fn interrupt_track_and_active_pid_round_trip() {
 #[test]
 fn scan_memo_remembers_and_clears() {
     memo_clear();
-    assert!(!memo_hit("acceptance"));
-    memo_set("acceptance");
-    assert!(memo_hit("acceptance"));
-    assert!(!memo_hit("other"));
+    assert!(!memo_hit("acceptance", "/one"));
+    memo_set("acceptance", "/one");
+    assert!(memo_hit("acceptance", "/one"));
+    assert!(!memo_hit("other", "/one"));
+    assert!(!memo_hit("acceptance", "/two"));
     memo_clear();
-    assert!(!memo_hit("acceptance"));
+    assert!(!memo_hit("acceptance", "/one"));
 }
 
 #[test]

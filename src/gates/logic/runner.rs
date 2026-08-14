@@ -23,7 +23,10 @@ pub fn preflight(home: &Path, narrate: bool) -> Result<Verdict, String> {
                 selection.name
             )
         })?;
-    if memo_hit(&gate.name) {
+    let workspace = std::env::current_dir()
+        .map(|path| path.display().to_string())
+        .unwrap_or_default();
+    if memo_hit(&gate.name, &workspace) {
         return Ok(Verdict::Passed);
     }
     if !security::command_on_path(&gate.binary) {
@@ -40,7 +43,7 @@ pub fn preflight(home: &Path, narrate: bool) -> Result<Verdict, String> {
     }
     let scan = super::stream::run(gate, narrate)?;
     if scan.code == 0 {
-        memo_set(&gate.name);
+        memo_set(&gate.name, &workspace);
         if narrate {
             eprintln!("security gate '{}' passed", gate.name);
         } else if let Some(line) = outcome_line_for(&gate.name, "passed", narrate, scan.heartbeat) {
