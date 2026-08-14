@@ -56,9 +56,19 @@ fn catalog_candidates() -> Vec<PathBuf> {
 /// replace an existing file (windows), the destination is removed only after
 /// the staged write succeeded.
 pub fn save(home: &Path, harness: &str) -> io::Result<()> {
+    if harness.contains(['"', '\n']) {
+        return Err(io::Error::new(
+            io::ErrorKind::InvalidInput,
+            "harness name must be a plain word",
+        ));
+    }
     fs::create_dir_all(home)?;
     let path = home.join("session.toml");
-    let staged = home.join(format!("session.toml.{}.tmp", std::process::id()));
+    let nonce = std::time::SystemTime::now()
+        .duration_since(std::time::UNIX_EPOCH)
+        .unwrap_or_default()
+        .as_nanos();
+    let staged = home.join(format!("session.toml.{}.{nonce}.tmp", std::process::id()));
     fs::write(&staged, format!("active_harness = \"{harness}\"\n"))?;
     match fs::rename(&staged, &path) {
         Ok(()) => Ok(()),
