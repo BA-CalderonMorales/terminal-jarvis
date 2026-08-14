@@ -5,6 +5,9 @@ use std::env;
 use std::fs;
 use std::io;
 use std::path::{Path, PathBuf};
+use std::sync::atomic::{AtomicUsize, Ordering};
+
+static STAGED_SEQ: AtomicUsize = AtomicUsize::new(0);
 
 pub fn default_home() -> PathBuf {
     if let Some(value) = env::var_os(env_const::HOME).filter(|value| !value.is_empty()) {
@@ -60,11 +63,8 @@ pub fn save(home: &Path, harness: &str) -> io::Result<()> {
     }
     fs::create_dir_all(home)?;
     let path = home.join("session.toml");
-    let nonce = std::time::SystemTime::now()
-        .duration_since(std::time::UNIX_EPOCH)
-        .unwrap_or_default()
-        .as_nanos();
-    let staged = home.join(format!("session.toml.{}.{nonce}.tmp", std::process::id()));
+    let seq = STAGED_SEQ.fetch_add(1, Ordering::Relaxed);
+    let staged = home.join(format!("session.toml.{}.{seq}.tmp", std::process::id()));
     fs::write(&staged, format!("active_harness = \"{harness}\"\n"))?;
     match fs::rename(&staged, &path) {
         Ok(()) => Ok(()),
