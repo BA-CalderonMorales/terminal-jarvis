@@ -51,32 +51,11 @@ pub fn inspect(input: &DiagnosticInput, redact: &Redactor<'_>) -> ConfigResult {
 }
 
 fn parse(data: &str) -> Result<String, Code> {
-    let mut values = Vec::new();
-    for line in data
-        .lines()
-        .map(str::trim)
-        .filter(|line| !line.is_empty() && !line.starts_with('#'))
-    {
-        let (key, value) = line.split_once('=').ok_or(Code::Malformed)?;
-        if key.trim() != "active_harness" {
-            return Err(Code::Malformed);
-        }
-        let value = value
-            .trim()
-            .strip_prefix('"')
-            .and_then(|v| v.strip_suffix('"'))
-            .filter(|v| !v.trim().is_empty())
-            .ok_or(Code::Malformed)?;
-        values.push(value.to_string());
-    }
-    let Some(first) = values.first().cloned() else {
-        return Err(Code::Malformed);
-    };
-    if values.iter().any(|value| value != &first) {
-        Err(Code::Conflicting)
-    } else {
-        Ok(first)
-    }
+    use crate::context::ParseError;
+    crate::context::parse_session(data).map_err(|error| match error {
+        ParseError::Malformed => Code::Malformed,
+        ParseError::Conflicting => Code::Conflicting,
+    })
 }
 
 fn record(code: Code, value: String) -> Record {

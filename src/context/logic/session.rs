@@ -1,3 +1,4 @@
+use crate::context::logic::session_parse::{parse, ParseError};
 use crate::context::constants::env as env_const;
 use crate::context::structs::session::Session;
 use std::env;
@@ -49,12 +50,17 @@ fn catalog_candidates() -> Vec<PathBuf> {
     candidates
 }
 
+/// Writes the session through a staged sibling file so a crash or an
+/// interrupted write can never leave an empty or partial session behind.
 pub fn save(home: &Path, harness: &str) -> io::Result<()> {
     fs::create_dir_all(home)?;
-    fs::write(
-        home.join("session.toml"),
-        format!("active_harness = \"{harness}\"\n"),
-    )
+    let path = home.join("session.toml");
+    let staged = home.join("session.toml.tmp");
+    fs::write(&staged, format!("active_harness = \"{harness}\"\n"))?;
+    if path.exists() {
+        fs::remove_file(&path)?;
+    }
+    fs::rename(&staged, &path)
 }
 
 pub fn load(home: &Path) -> io::Result<Option<Session>> {
@@ -63,23 +69,37 @@ pub fn load(home: &Path) -> io::Result<Option<Session>> {
         return Ok(None);
     }
     let data = fs::read_to_string(path)?;
-    let result = parse_active(&data).map(|active_harness| Session { active_harness });
-    if result.is_none() && !data.trim().is_empty() {
-        eprintln!("warning: session.toml could not be parsed; using defaults");
+    match parse(&data) {
+        Ok(active_harness) => Ok(Some(Session { active_harness })),
+        Err(_) => {
+            eprintln!("warning: session.toml could not be parsed; using defaults");
+            Ok(None)
+        }
     }
-    Ok(result)
 }
 
-fn parse_active(data: &str) -> Option<String> {
-    data.lines().find_map(|line| {
-        let (key, value) = line.split_once('=')?;
-        if key.trim() != "active_harness" {
-            return None;
-        }
-        value
-            .trim()
-            .strip_prefix('"')
-            .and_then(|value| value.strip_suffix('"'))
-            .map(str::to_string)
-    })
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn save_and_load_round_trip() {
+        let home = std::env::temp_dir().join(format!("tj-session-{}", std::process::id()));
+        let _ = fs::remove_dir_all(&home);
+        assert!(load(&home).unwrap().is_none());
+        save(&home, "codex").unwrap();
+        assert_eq!(load(&home).unwrap().unwrap().active_harness, "codex");
+        let _ = fs::remove_dir_all(&home);
+    }
+
+    #[test]
+    fn load_reports_strict_errors_and_degrades_to_defaults() {
+        let home = std::env::temp_dir().join(format!("tj-session-bad-{}", std::process::id()));
+        let _ = fs::remove_dir_all(&home);
+        fs::create_dir_all(&home).unwrap();
+        fs::write(home.join("session.toml"), "active_harness = \"a\"\nactive_harness = \"b\"\n")
+            .unwrap();
+        assert!(load(&home).unwrap().is_none());
+        let _ = fs::remove_dir_all(&home);
+    }
 }
