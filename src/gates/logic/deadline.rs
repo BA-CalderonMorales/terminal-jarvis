@@ -12,7 +12,7 @@ pub fn timeout_secs() -> u64 {
     std::env::var("TERMINAL_JARVIS_GATE_TIMEOUT_SECS")
         .ok()
         .and_then(|value| value.trim().parse::<u64>().ok())
-        .filter(|secs| *secs <= 86400)
+        .map(|secs| secs.min(86400))
         .unwrap_or(300)
 }
 
@@ -48,6 +48,7 @@ mod tests {
             (Some(" 30 "), 30),
             (Some("abc"), 300),
             (Some("-5"), 300),
+            (Some("86401"), 86400),
             (Some("999999999999999999999999"), 300),
             (Some("0"), 0),
         ] {
