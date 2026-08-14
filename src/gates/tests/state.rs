@@ -5,11 +5,7 @@ fn config_selection_tolerates_whitespace_and_comments() {
     let home = std::env::temp_dir().join(format!("tj-state-file-{}", std::process::id()));
     let _ = std::fs::remove_dir_all(&home);
     std::fs::create_dir_all(&home).unwrap();
-    std::fs::write(
-        home.join("gate.toml"),
-        "# comment\nenabled=\"trivy\"\n",
-    )
-    .unwrap();
+    std::fs::write(home.join("gate.toml"), "# comment\nenabled=\"trivy\"\n").unwrap();
     let selection = selected(&home).unwrap().unwrap();
     assert_eq!(selection.name, "trivy");
     assert_eq!(selection.source, "config");
