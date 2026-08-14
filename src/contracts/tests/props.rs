@@ -28,7 +28,7 @@ fn interaction_canonical(text: String) -> bool {
 }
 
 fn env_canonical(text: String) -> bool {
-    let known = ["none", "any", "all"].contains(&text.as_str());
+    let known = ["none", "optional", "any", "all"].contains(&text.as_str());
     EnvMode::parse(&text).is_ok() == known
 }
 

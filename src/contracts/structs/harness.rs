@@ -48,6 +48,7 @@ impl Harness {
     pub fn setup_hint(&self) -> String {
         match (self.env_mode, self.env.is_empty()) {
             (EnvMode::None, _) | (_, true) => "no API key required".to_string(),
+            (EnvMode::Optional, false) => format!("optional: {}", self.env.join(", ")),
             (EnvMode::Any, false) => format!("set one of: {}", self.env.join(", ")),
             (EnvMode::All, false) => format!("set all of: {}", self.env.join(", ")),
         }

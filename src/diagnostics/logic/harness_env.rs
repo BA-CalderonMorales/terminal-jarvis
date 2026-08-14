@@ -47,6 +47,9 @@ pub fn collect(harness: &HarnessInput, input: &DiagnosticInput, base: &str) -> (
 fn ready(mode: EnvMode, states: &[ValueState]) -> bool {
     match mode {
         EnvMode::None => states.is_empty(),
+        // Optional credentials never gate readiness: the harness works with
+        // its own login flow (auth.json), and the env names are advisory.
+        EnvMode::Optional => true,
         EnvMode::Any => !states.is_empty() && states.contains(&ValueState::Present),
         EnvMode::All => {
             !states.is_empty() && states.iter().all(|state| *state == ValueState::Present)

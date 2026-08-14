@@ -88,7 +88,7 @@ fn env_status(harness: &Harness, missing: &[String]) -> String {
     match harness.env_mode {
         crate::contracts::EnvMode::Any => format!("missing one of {}", missing.join(", ")),
         crate::contracts::EnvMode::All => format!("missing {}", missing.join(", ")),
-        crate::contracts::EnvMode::None => "ready".to_string(),
+        crate::contracts::EnvMode::None | crate::contracts::EnvMode::Optional => "ready".to_string(),
     }
 }
 

@@ -2,5 +2,5 @@ name = "opencode"
 display = "OpenCode"
 description = "Terminal-based AI coding agent"
 binary = "opencode"
-env_mode = "any"
+env_mode = "optional"
 env = ["OPENCODE_API_KEY", "OPENAI_API_KEY"]

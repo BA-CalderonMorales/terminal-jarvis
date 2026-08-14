@@ -31,7 +31,10 @@ impl Arbitrary for Interaction {
 
 impl Arbitrary for EnvMode {
     fn arbitrary(gen: &mut Gen) -> Self {
-        choose(gen, &[EnvMode::None, EnvMode::Any, EnvMode::All])
+        choose(
+            gen,
+            &[EnvMode::None, EnvMode::Optional, EnvMode::Any, EnvMode::All],
+        )
     }
 }
 

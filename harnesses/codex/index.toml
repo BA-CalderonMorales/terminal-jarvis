@@ -2,5 +2,5 @@ name = "codex"
 display = "OpenAI Codex"
 description = "OpenAI coding agent CLI"
 binary = "codex"
-env_mode = "any"
+env_mode = "optional"
 env = ["OPENAI_API_KEY", "CODEX_API_KEY"]

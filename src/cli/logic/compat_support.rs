@@ -9,6 +9,6 @@ pub fn auth_status(harness: &Harness) -> String {
     match harness.env_mode {
         EnvMode::Any => format!("missing one of: {}", missing.join(", ")),
         EnvMode::All => format!("missing: {}", missing.join(", ")),
-        EnvMode::None => "ready".to_string(),
+        EnvMode::None | EnvMode::Optional => "ready".to_string(),
     }
 }
