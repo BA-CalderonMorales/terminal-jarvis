@@ -71,3 +71,7 @@ fn aggregate(states: &[ValueState]) -> Code {
 #[cfg(test)]
 #[path = "../tests/harness_env.rs"]
 mod tests;
+
+#[cfg(test)]
+#[path = "../tests/harness_env_state.rs"]
+mod tests_state;
