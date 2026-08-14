@@ -50,11 +50,10 @@ fn catalog_candidates() -> Vec<PathBuf> {
     candidates
 }
 
-/// Writes the session through a pid-unique staged sibling file so a crash or
-/// an interrupted write can never leave an empty or partial session behind
-/// and concurrent writers never collide. On platforms where rename cannot
-/// replace an existing file (windows), the destination is removed only after
-/// the staged write succeeded.
+/// Writes the session through a pid+nonce staged sibling file so a crash or
+/// interrupted write can never leave an empty or partial session behind and
+/// concurrent writers never collide. On windows, where rename cannot replace
+/// an existing file, the destination is removed only after staging succeeds.
 pub fn save(home: &Path, harness: &str) -> io::Result<()> {
     if harness.contains(['"', '\n']) {
         return Err(io::Error::new(
