@@ -90,8 +90,9 @@ fn memo_rescans_after_workspace_change_and_fails_open_without_cwd() {
     std::env::set_current_dir(&workspaces[2]).unwrap();
     std::fs::remove_dir(&workspaces[2]).unwrap();
     preflight(&home, true).unwrap();
+    preflight(&home, true).unwrap();
     std::env::set_current_dir(&original_cwd).unwrap();
     restore_gates_env(previous);
-    assert_eq!(std::fs::read_to_string(&count).unwrap().lines().count(), 3);
+    assert_eq!(std::fs::read_to_string(&count).unwrap().lines().count(), 4);
     let _ = std::fs::remove_dir_all(root);
 }
