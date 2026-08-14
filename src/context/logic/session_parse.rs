@@ -49,7 +49,10 @@ mod tests {
 
     #[test]
     fn rejects_unquoted_empty_and_unknown_keys() {
-        assert_eq!(parse("active_harness = codex\n"), Err(ParseError::Malformed));
+        assert_eq!(
+            parse("active_harness = codex\n"),
+            Err(ParseError::Malformed)
+        );
         assert_eq!(parse("active_harness = \"\"\n"), Err(ParseError::Malformed));
         assert_eq!(parse("name = \"x\"\n"), Err(ParseError::Malformed));
         assert_eq!(parse(""), Err(ParseError::Malformed));

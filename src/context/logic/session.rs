@@ -1,5 +1,5 @@
-use crate::context::logic::session_parse::{parse, ParseError};
 use crate::context::constants::env as env_const;
+use crate::context::logic::session_parse::{parse, ParseError};
 use crate::context::structs::session::Session;
 use std::env;
 use std::fs;
@@ -97,8 +97,11 @@ mod tests {
         let home = std::env::temp_dir().join(format!("tj-session-bad-{}", std::process::id()));
         let _ = fs::remove_dir_all(&home);
         fs::create_dir_all(&home).unwrap();
-        fs::write(home.join("session.toml"), "active_harness = \"a\"\nactive_harness = \"b\"\n")
-            .unwrap();
+        fs::write(
+            home.join("session.toml"),
+            "active_harness = \"a\"\nactive_harness = \"b\"\n",
+        )
+        .unwrap();
         assert!(load(&home).unwrap().is_none());
         let _ = fs::remove_dir_all(&home);
     }
