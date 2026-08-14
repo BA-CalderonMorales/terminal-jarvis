@@ -23,16 +23,10 @@ pub fn inspect(input: &DiagnosticInput, redact: &Redactor<'_>) -> ConfigResult {
             };
         }
     };
-    if data.trim().is_empty() {
-        return ConfigResult {
-            record: record(Code::Empty, value),
-            active: None,
-            valid: true,
-        };
-    }
     let parsed = parse(&data);
     let (code, active) = match parsed {
-        Ok(active)
+        Ok(None) => (Code::Empty, None),
+        Ok(Some(active))
             if input
                 .active_harness
                 .as_ref()
@@ -40,17 +34,17 @@ pub fn inspect(input: &DiagnosticInput, redact: &Redactor<'_>) -> ConfigResult {
         {
             (Code::Conflicting, Some(active))
         }
-        Ok(active) => (Code::Ready, Some(active)),
+        Ok(Some(active)) => (Code::Ready, Some(active)),
         Err(code) => (code, None),
     };
     ConfigResult {
         record: record(code, value),
         active,
-        valid: code == Code::Ready,
+        valid: matches!(code, Code::Ready | Code::Empty),
     }
 }
 
-fn parse(data: &str) -> Result<String, Code> {
+fn parse(data: &str) -> Result<Option<String>, Code> {
     use crate::context::ParseError;
     crate::context::parse_session(data).map_err(|error| match error {
         ParseError::Malformed => Code::Malformed,

@@ -50,17 +50,27 @@ fn catalog_candidates() -> Vec<PathBuf> {
     candidates
 }
 
-/// Writes the session through a staged sibling file so a crash or an
-/// interrupted write can never leave an empty or partial session behind.
+/// Writes the session through a pid-unique staged sibling file so a crash or
+/// an interrupted write can never leave an empty or partial session behind
+/// and concurrent writers never collide. On platforms where rename cannot
+/// replace an existing file (windows), the destination is removed only after
+/// the staged write succeeded.
 pub fn save(home: &Path, harness: &str) -> io::Result<()> {
     fs::create_dir_all(home)?;
     let path = home.join("session.toml");
-    let staged = home.join("session.toml.tmp");
+    let staged = home.join(format!("session.toml.{}.tmp", std::process::id()));
     fs::write(&staged, format!("active_harness = \"{harness}\"\n"))?;
-    if path.exists() {
-        fs::remove_file(&path)?;
+    match fs::rename(&staged, &path) {
+        Ok(()) => Ok(()),
+        Err(error) if error.kind() == io::ErrorKind::AlreadyExists => {
+            fs::remove_file(&path)?;
+            fs::rename(&staged, &path)
+        }
+        Err(error) => {
+            let _ = fs::remove_file(&staged);
+            Err(error)
+        }
     }
-    fs::rename(&staged, &path)
 }
 
 pub fn load(home: &Path) -> io::Result<Option<Session>> {
@@ -70,7 +80,8 @@ pub fn load(home: &Path) -> io::Result<Option<Session>> {
     }
     let data = fs::read_to_string(path)?;
     match parse(&data) {
-        Ok(active_harness) => Ok(Some(Session { active_harness })),
+        Ok(Some(active_harness)) => Ok(Some(Session { active_harness })),
+        Ok(None) => Ok(None),
         Err(_) => {
             eprintln!("warning: session.toml could not be parsed; using defaults");
             Ok(None)
