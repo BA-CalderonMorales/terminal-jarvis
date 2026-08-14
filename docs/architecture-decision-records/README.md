@@ -39,6 +39,44 @@ it, and anything future work must respect.
 
 ## Records
 
+### Land the 0.1.15 hardening stack and repair develop's latent gate breakage (fix stack -> 2026-08-14)
+
+**Decision:** Land the five-fix 0.1.15 stack through develop in one atomic
+squash merge: deadline-bounded gate scans (clamped env timeout, bounded reader
+join), whitespace/inline-comment tolerance in gate.toml state selection, real
+jules version capability data, mutation CI thread capping, and the Windows
+delete-pending trivy walk fix (--skip-dirs and --skip-files for "~"-prefixed
+entries). Carry two develop repairs in the same stack: a dropped unused
+import and a 106-line test file split, because both broke the verify gate on
+develop's own head.
+
+**Context:** A hung scanner could block a headless gate scan indefinitely, and
+on Windows the trivy filesystem walk crashed on NTFS delete-pending entries.
+develop itself was silently red: the #188 and #189 merges left an unused
+import and an over-length test file (both merged without CI on their final
+heads), so verify.sh failed on develop before any of this stack merged. The
+stack's own first PR initially dropped reader output by abandoning reader
+threads on the non-timeout path; that race was caught by CI and fixed by
+draining pipes fully unless the scan was killed. Copilot review found the
+timeout clamp was documented but not implemented and that the state parser
+stopped at the first malformed enabled line.
+
+**Considered:** Rejecting values above the 86400s cap with a fallback --
+rejected, the docs promise clamping and a surprise 300s default is worse than
+a bounded ceiling. Killing the last surviving env-aux mutant (a `<` vs `<=`
+grace-boundary comparison) -- rejected as provably equivalent: the 50ms sleep
+steps can never land on the exact boundary, so no test can distinguish it;
+the mutation job is a documented non-gating pre-existing failure. Rebasing
+the stale stack branches by hand -- rejected; gh stack rebase linearized the
+stack within the tool's own flow instead of force-pushing outside it.
+
+**Consequence:** Gate scans are bounded and their output is never truncated;
+gate.toml selection tolerates real-world TOML; develop's verify gate is green
+again and stays enforced (length gate + clippy -D warnings). The stack merges
+are the 0.1.15 payload; release/0.1.15 must be rebuilt from this develop so
+the release branch carries the same commits as the trunk.
+
+
 ### Bucket Rust domains with index faces (release/0.1.13 -> 2026-08-05)
 
 **Decision:** Extend the scripts/ bucketing discipline to Rust: every `src/`
