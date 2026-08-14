@@ -56,10 +56,7 @@ fn catalog_candidates() -> Vec<PathBuf> {
 /// an existing file, the destination is removed only after staging succeeds.
 pub fn save(home: &Path, harness: &str) -> io::Result<()> {
     if harness.contains(['"', '\n']) {
-        return Err(io::Error::new(
-            io::ErrorKind::InvalidInput,
-            "unsafe harness name",
-        ));
+        return Err(io::Error::other("unsafe harness name"));
     }
     fs::create_dir_all(home)?;
     let path = home.join("session.toml");
