@@ -39,7 +39,7 @@ pub fn clear_screen() -> String {
 /// via the same raw-FFI pattern as the pty harnesses), then the COLUMNS env
 /// fallback, then 100. Std-only -- no libc crate.
 pub fn columns() -> usize {
-    if let Some(width) = geometry() {
+    if let Some((width, _)) = size() {
         return width;
     }
     std::env::var("COLUMNS")
@@ -49,8 +49,13 @@ pub fn columns() -> usize {
         .unwrap_or(100)
 }
 
+/// (cols, rows) from the tty, or None when stdout is not a sized terminal.
+pub fn size() -> Option<(usize, usize)> {
+    geometry()
+}
+
 #[cfg(unix)]
-fn geometry() -> Option<usize> {
+fn geometry() -> Option<(usize, usize)> {
     #[repr(C)]
     struct Winsize {
         row: u16,
@@ -72,11 +77,11 @@ fn geometry() -> Option<usize> {
         ypixel: 0,
     };
     let ok = unsafe { ioctl(1, TIOCGWINSZ, &mut size) } == 0;
-    (ok && size.col > 0).then_some(size.col as usize)
+    (ok && size.col > 0 && size.row > 0).then_some((size.col as usize, size.row as usize))
 }
 
 #[cfg(not(unix))]
-fn geometry() -> Option<usize> {
+fn geometry() -> Option<(usize, usize)> {
     None
 }
 

@@ -1,13 +1,34 @@
 # Changelog
 
-## Up next: 0.1.15 (roadmap, not yet started)
+## [0.1.16] - unreleased
+
+- Full-viewport TUI: on terminals that can hold it (50+ cols, 10+ rows, ANSI),
+  the switcher now paints a bordered command-center frame -- title, live
+  status row, zoned body, footer prompt with an embedded hint -- and
+  repaints in place after every command, so nothing scrolls. Child runs
+  (install/update/run/direct) suspend the frame and own the real terminal;
+  a terminal that shrinks below the floor falls back to chat mode.
+- Viewport hardening: catalog strings are sanitized before they reach the
+  frame (color survives; OSC/cursor/query sequences and control bytes do
+  not), wide glyphs measure as two cells so borders never drift, signal
+  interrupts no longer end the session silently, and idle Ctrl+C leaves the
+  frame intact.
+- `update --dry-run` (bare) prints the fleet update summary instead of a
+  usage error.
+- `security` usage errors name the valid forms:
+  `usage: terminal-jarvis security [status|audit|<harness>]`.
+- Unknown command/harness failures state their next action exactly once.
+- Session WRITE failures map to `session_unwritable` (exit 3) advising the
+  Terminal Jarvis home directory (`session_invalid` remains the code for
+  unreadable/corrupt session files). A failed post-install adopt now warns
+  instead of silently claiming success.
+
+## Up next (roadmap, not yet started)
 
 - `status` will surface previously-blocked installs and why they were
   blocked, with a drillable view into the decision (finding details).
 - A fast `uninstall|prune [harness]` verb to locate and remove a harness and
   its installed version on disk.
-- Horizontal rules will divide the TUI frame into header, main, and footer
-  sections so the layout reads as distinct zones.
 
 ## [0.1.14] - 2026-08-12
 

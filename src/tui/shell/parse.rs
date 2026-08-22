@@ -12,9 +12,15 @@ pub enum Resolved {
     Error(String),
 }
 
+#[derive(Debug)]
 pub enum Next {
     Exit,
-    Again { picker_shown: bool },
+    /// `reset` asks the surface to restore its pristine body: chat mode
+    /// printed the banner through the sink, viewport mode re-shows art.
+    Again {
+        picker_shown: bool,
+        reset: bool,
+    },
     Debug(Option<bool>),
 }
 

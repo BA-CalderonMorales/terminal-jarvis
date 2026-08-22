@@ -69,3 +69,9 @@ fn row<T: AsRef<str>>(values: &[T], widths: &[usize]) -> String {
 #[cfg(test)]
 #[path = "../tests/table_test.rs"]
 mod tests;
+
+/// Visible terminal cells for one character -- shared with the tui screen
+/// so both surfaces agree on width (wide glyphs count two).
+pub fn char_cells(character: char) -> usize {
+    width::character_width(character)
+}

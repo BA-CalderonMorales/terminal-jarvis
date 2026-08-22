@@ -99,7 +99,7 @@ invocation, for scripts, CI, and one-shot tasks:
 | `plan [harness] <capability>` | Preview the shell command |
 | `use <harness>` / `current` | Select / show active harness |
 | `run [harness] [capability] [args...]` | Execute a capability |
-| `security [status\|audit\|harness]` | Security posture |
+| `security [status\|audit\|<harness>]` | Security posture |
 | `gate [status\|list\|enable\|disable\|run]` | Optional local security gate |
 | `version [--verbose]` / `--version` / `-v` / `--info` | Version info |
 | `self-update [--dry-run]` / `--update` | Update Terminal Jarvis or print the update command |

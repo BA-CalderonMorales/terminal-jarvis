@@ -1,19 +1,29 @@
-//! Shell: the chat-style read-prompt loop -- results print above the input box.
+//! Shell: the read-prompt loop. Viewport mode paints a full-screen frame
+//! (header, zoned body, footer prompt) and repaints it after every command;
+//! chat mode keeps the classic print-above flow. One resolver, one guard.
+
 use crate::{cli::args, contracts::Harness};
 use std::path::Path;
 
 #[path = "./canonical.rs"]
 mod canonical;
+#[path = "./dispatch.rs"]
+mod dispatch;
 #[path = "./handle.rs"]
 mod handle;
 #[path = "./help.rs"]
 mod help;
+#[path = "./outcome.rs"]
+mod outcome;
 #[path = "./session.rs"]
 mod session;
 #[path = "./status.rs"]
 mod status;
 #[path = "./verdict.rs"]
 mod verdict;
+#[path = "./viewport.rs"]
+mod viewport;
+
 pub use handle::handle;
 
 pub fn run(
@@ -27,29 +37,59 @@ pub fn run(
         active: "none".into(),
         debug: false,
     };
-    super::sigint::guarded(|| {
+    let viewport = super::screen::boot();
+    let in_viewport = viewport.is_some();
+    if !in_viewport {
+        viewport::chat_banner(harnesses, catalog_root, state_home);
+    }
+    super::sigint::guarded(move || {
         let mut hint = status::modeline(state_home, false, debug);
         status::refresh_indicator(&mut indicator, state_home, debug);
-        while let Some(input) = super::input::read_line(&indicator, &hint) {
-            let next = handle(harnesses, catalog_root, state_home, &options, &input);
-            match next {
-                Next::Exit => break,
-                Next::Again { picker_shown } => {
-                    hint = status::modeline(state_home, picker_shown, debug);
-                    status::refresh_indicator(&mut indicator, state_home, debug);
-                    println!();
-                }
-                Next::Debug(toggle) => {
-                    debug = toggle.unwrap_or(!debug);
-                    options.narrate = debug;
-                    hint = status::modeline(state_home, false, debug);
-                    status::refresh_indicator(&mut indicator, state_home, debug);
-                    println!("debug view {}", if debug { "on" } else { "off" });
-                }
+        let mut body = viewport::welcome(harnesses, catalog_root, state_home);
+        loop {
+            crate::tui::screen::ensure_usable();
+            let input = if in_viewport && crate::tui::screen::active() {
+                viewport::prompt(
+                    &indicator,
+                    &hint,
+                    harnesses,
+                    catalog_root,
+                    state_home,
+                    &body,
+                )
+            } else {
+                super::input::read_line(&indicator, &hint)
+            };
+            let Some(input) = input else { break };
+            let mut sink = Vec::new();
+            let next = handle(
+                &mut sink,
+                harnesses,
+                catalog_root,
+                state_home,
+                &options,
+                &input,
+            );
+            if !outcome::step(
+                next,
+                &mut body,
+                sink,
+                &mut hint,
+                &mut options,
+                &mut debug,
+                &mut indicator,
+                state_home,
+                harnesses,
+                catalog_root,
+            ) {
+                break;
             }
         }
     });
-    println!();
+    drop(viewport);
+    if !in_viewport {
+        println!();
+    }
 }
 
 #[path = "./parse.rs"]

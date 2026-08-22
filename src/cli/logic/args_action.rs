@@ -58,7 +58,10 @@ pub(super) fn parse(
             "cache",
             &["status", "clear", "refresh"],
         )?),
-        "security" => Action::Security(at_most_one(&words[1..], "security")?),
+        "security" => Action::Security(at_most_one(
+            &words[1..],
+            "security [status|audit|<harness>]",
+        )?),
         "gate" => Action::Gate(valid_gate(&words[1..])?),
         "templates" | "db" => exact(
             words,

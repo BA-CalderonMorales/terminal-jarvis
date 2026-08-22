@@ -42,3 +42,10 @@ fn resolve_error_distinguishes_active_harness_state_from_unknown() {
     );
     assert_eq!(resolve_error("wow such failure".into()).exit_code, 4);
 }
+
+#[test]
+fn unknown_direct_command_advises_exactly_once() {
+    let failure = resolve_error("unknown command or harness 'bogus'".into());
+    let rendered = failure.rendered();
+    assert_eq!(rendered.matches("run `terminal-jarvis list`").count(), 1);
+}

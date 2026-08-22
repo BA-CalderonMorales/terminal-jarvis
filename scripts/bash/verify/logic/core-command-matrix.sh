@@ -137,6 +137,8 @@ done
 
 ok update-summary update
 table update-summary
+outcome update-dry-run 0 update --dry-run
+contains "$tmp/update-dry-run.out" "Harness Updates"
 ok auth auth
 ok auth-manage auth manage
 ok auth-help auth help codex
