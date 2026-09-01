@@ -1,9 +1,10 @@
 use crate::contracts::CapabilityPlan;
+use std::borrow::Cow;
 use std::io;
 use std::process::{Command, Stdio};
 
 pub fn run_command(plan: &CapabilityPlan, extra: &[String]) -> io::Result<i32> {
-    let mut command = Command::new(resolved_binary(&plan.command.command));
+    let mut command = Command::new(resolved_binary(&plan.command.command).as_ref());
     command.args(&plan.command.args).args(extra);
     command.stdout(Stdio::inherit());
     command.stderr(Stdio::inherit());
@@ -16,15 +17,20 @@ pub fn run_command(plan: &CapabilityPlan, extra: &[String]) -> io::Result<i32> {
 /// `opencode` never resolves to `opencode.CMD` and spawning fails with
 /// `NotFound` even though the harness is installed. Resolve the real
 /// candidate first; fall back to the original name (letting the spawn fail
-/// naturally with `NotFound`) when nothing on `PATH` matches.
+/// naturally with `NotFound`) when nothing on `PATH` matches. Non-Windows
+/// behavior is unchanged, so it just borrows `command` rather than
+/// allocating on every spawn.
 #[cfg(windows)]
-fn resolved_binary(command: &str) -> String {
-    crate::security::resolve_on_path(command).unwrap_or_else(|| command.to_string())
+fn resolved_binary(command: &str) -> Cow<'_, str> {
+    match crate::security::resolve_on_path(command) {
+        Some(resolved) => Cow::Owned(resolved),
+        None => Cow::Borrowed(command),
+    }
 }
 
 #[cfg(not(windows))]
-fn resolved_binary(command: &str) -> String {
-    command.to_string()
+fn resolved_binary(command: &str) -> Cow<'_, str> {
+    Cow::Borrowed(command)
 }
 
 #[cfg(unix)]

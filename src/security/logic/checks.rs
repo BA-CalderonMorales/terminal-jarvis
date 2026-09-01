@@ -6,11 +6,16 @@ pub fn command_on_path(command: &str) -> bool {
     resolve_on_path(command).is_some()
 }
 
-/// Finds the first `PATH` candidate that is actually executable, expanding
+/// Finds the first `PATH` candidate that exists and is runnable, expanding
 /// `PATHEXT` extensions on Windows (e.g. resolving `opencode` to
 /// `opencode.CMD`). Spawning the bare name directly via `Command::new` does
 /// not perform this expansion, so callers that need to `spawn()` a harness
 /// binary should invoke this first and spawn the resolved name.
+///
+/// "Runnable" is platform-dependent: on Unix this checks the execute
+/// permission bit; on Windows, which has no such bit, any existing file
+/// counts (see `executable_mode` below) — a `.CMD` match is not guaranteed
+/// to actually be a runnable script, only to exist under that name.
 ///
 /// Walks `PATH` directories in order, trying every candidate extension
 /// within each directory before moving to the next — never the reverse.
