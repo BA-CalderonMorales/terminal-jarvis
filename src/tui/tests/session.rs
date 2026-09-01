@@ -19,6 +19,11 @@ fn chapter_and_recap_render_the_frame() {
 
 #[test]
 fn frame_wraps_a_direct_harness_with_header_and_recap() {
+    // frame() spawns "true" resolved off the process-global PATH; guard
+    // against other tests concurrently mutating PATH under this same lock
+    // (see ENV_LOCK's other callers) -- without it this races and can
+    // transiently fail to resolve "true" if it runs mid-mutation.
+    let _guard = crate::ENV_LOCK.lock().unwrap_or_else(|e| e.into_inner());
     let start = std::time::Instant::now();
     let mut sink = Vec::new();
     frame(

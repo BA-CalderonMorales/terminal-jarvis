@@ -29,6 +29,12 @@ fn chain_narrate_probe() {
 
 #[test]
 fn quiet_mode_reports_phases_in_one_line_each_and_loud_narrates() {
+    // probe() spawns a child process that inherits PATH at spawn time; guard
+    // against other tests concurrently mutating PATH under this same lock
+    // (see chain_narrate_probe() above and ENV_LOCK's other callers) --
+    // without it this races and can transiently spawn with a PATH that
+    // doesn't have "true" on it.
+    let _guard = crate::ENV_LOCK.lock().unwrap_or_else(|e| e.into_inner());
     let exe = std::env::current_exe().unwrap();
     assert_eq!(
         probe(&exe, "quiet"),

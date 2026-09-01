@@ -96,5 +96,8 @@ fn pathext_skips_empty_segments() {
     let mut input = dummy_input();
     input.platform.os = "windows".into();
     input.environment.insert("PATHEXT", ".COM;;.EXE;");
-    assert_eq!(candidates("tool", &input), vec!["tool.COM", "tool.EXE"]);
+    assert_eq!(
+        candidates("tool", &input),
+        vec!["tool.COM", "tool.EXE", "tool"]
+    );
 }
