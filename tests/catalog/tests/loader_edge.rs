@@ -1,13 +1,20 @@
 use std::fs;
 use std::path::PathBuf;
+use std::sync::atomic::{AtomicUsize, Ordering};
 use terminal_jarvis::catalog;
 use terminal_jarvis::contracts::Capability;
 
+static ID: AtomicUsize = AtomicUsize::new(0);
+
 fn temp_root() -> PathBuf {
+    // A thread name is not a safe path component: Rust's default
+    // test-thread names are the full `::`-separated test path, and `:` is
+    // invalid in Windows paths. process id + counter already guarantee
+    // uniqueness on their own.
     std::env::temp_dir().join(format!(
         "terminal-jarvis-loader-{}-{}",
         std::process::id(),
-        std::thread::current().name().unwrap_or("test")
+        ID.fetch_add(1, Ordering::Relaxed)
     ))
 }
 
