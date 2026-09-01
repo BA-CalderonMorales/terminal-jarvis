@@ -3,16 +3,23 @@ use std::env;
 use std::path::Path;
 
 pub fn command_on_path(command: &str) -> bool {
+    resolve_on_path(command).is_some()
+}
+
+/// Finds the first `PATH` candidate that is actually executable, expanding
+/// `PATHEXT` extensions on Windows (e.g. resolving `opencode` to
+/// `opencode.CMD`). Spawning the bare name directly via `Command::new` does
+/// not perform this expansion, so callers that need to `spawn()` a harness
+/// binary should invoke this first and spawn the resolved name.
+pub fn resolve_on_path(command: &str) -> Option<String> {
     if command.contains('/') || command.contains('\\') {
-        return executable(Path::new(command));
+        return executable(Path::new(command)).then(|| command.to_string());
     }
-    let Some(path) = env::var_os("PATH") else {
-        return false;
-    };
+    let path = env::var_os("PATH")?;
     let path_ext = env::var("PATHEXT").unwrap_or_default();
     candidates(command, cfg!(windows), &path_ext)
-        .iter()
-        .any(|name| env::split_paths(&path).any(|dir| executable(&dir.join(name))))
+        .into_iter()
+        .find(|name| env::split_paths(&path).any(|dir| executable(&dir.join(name))))
 }
 
 fn executable(path: &Path) -> bool {
@@ -36,6 +43,15 @@ fn executable_mode(_metadata: &std::fs::Metadata) -> bool {
     true
 }
 
+/// Candidate file names to probe for `command`, in preference order.
+///
+/// On Windows, PATHEXT-suffixed names come *before* the bare name. A bare
+/// name is not directly launchable there (Windows has no "this file is
+/// runnable" bit the way Unix has the execute permission, so any file counts
+/// as "executable" per `executable_mode` below) — and many npm-installed
+/// tools ship an extensionless POSIX shebang shim (for Git Bash/WSL) right
+/// next to the real `.cmd`/`.exe` entry point. Checking the bare name first
+/// would match that unrunnable shim before ever trying `.CMD`/`.EXE`.
 fn candidates(command: &str, windows: bool, path_ext: &str) -> Vec<String> {
     if !windows || Path::new(command).extension().is_some() {
         return vec![command.to_string()];
@@ -45,13 +61,12 @@ fn candidates(command: &str, windows: bool, path_ext: &str) -> Vec<String> {
     } else {
         path_ext
     };
-    let mut names = vec![command.to_string()];
-    names.extend(
-        extensions
-            .split(';')
-            .filter(|extension| !extension.is_empty())
-            .map(|extension| format!("{command}{extension}")),
-    );
+    let mut names: Vec<String> = extensions
+        .split(';')
+        .filter(|extension| !extension.is_empty())
+        .map(|extension| format!("{command}{extension}"))
+        .collect();
+    names.push(command.to_string());
     names
 }
 

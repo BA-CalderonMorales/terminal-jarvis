@@ -3,13 +3,28 @@ use std::io;
 use std::process::{Command, Stdio};
 
 pub fn run_command(plan: &CapabilityPlan, extra: &[String]) -> io::Result<i32> {
-    let mut command = Command::new(&plan.command.command);
+    let mut command = Command::new(resolved_binary(&plan.command.command));
     command.args(&plan.command.args).args(extra);
     command.stdout(Stdio::inherit());
     command.stderr(Stdio::inherit());
     #[cfg(unix)]
     reset_sigint_in_child(&mut command);
     command.status().map(status_code)
+}
+
+/// On Windows, `Command::new` does not expand `PATHEXT`, so a bare name like
+/// `opencode` never resolves to `opencode.CMD` and spawning fails with
+/// `NotFound` even though the harness is installed. Resolve the real
+/// candidate first; fall back to the original name (letting the spawn fail
+/// naturally with `NotFound`) when nothing on `PATH` matches.
+#[cfg(windows)]
+fn resolved_binary(command: &str) -> String {
+    crate::security::resolve_on_path(command).unwrap_or_else(|| command.to_string())
+}
+
+#[cfg(not(windows))]
+fn resolved_binary(command: &str) -> String {
+    command.to_string()
 }
 
 #[cfg(unix)]
