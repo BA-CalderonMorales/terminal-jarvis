@@ -1,3 +1,8 @@
+#![cfg(unix)]
+// PTY-driven: `crate::logic::pty` wraps a real pseudo-terminal (openpty),
+// which has no equivalent in this codebase on Windows (ConPTY support would
+// be a new feature, not a bug fix).
+
 use crate::logic::tui::{booted, launch, EXIT, FRAME, SERIAL};
 use crate::logic::{pty, screen};
 

@@ -1,5 +1,15 @@
-use std::os::unix::fs::PermissionsExt;
 use std::path::Path;
+
+#[cfg(unix)]
+fn make_executable(path: &Path) {
+    use std::os::unix::fs::PermissionsExt;
+    let mut permissions = std::fs::metadata(path).unwrap().permissions();
+    permissions.set_mode(0o755);
+    std::fs::set_permissions(path, permissions).unwrap();
+}
+
+#[cfg(not(unix))]
+fn make_executable(_path: &Path) {}
 
 pub fn write_gate(root: &Path, name: &str, binary: &str) {
     let directory = root.join(name);
@@ -11,9 +21,7 @@ pub fn write_gate(root: &Path, name: &str, binary: &str) {
 
 pub fn write_executable(path: &Path, script: &str) {
     std::fs::write(path, script).unwrap();
-    let mut permissions = std::fs::metadata(path).unwrap().permissions();
-    permissions.set_mode(0o755);
-    std::fs::set_permissions(path, permissions).unwrap();
+    make_executable(path);
 }
 
 /// A counting gate fixture for preflight: an executable scanner that appends

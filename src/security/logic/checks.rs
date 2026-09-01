@@ -11,15 +11,27 @@ pub fn command_on_path(command: &str) -> bool {
 /// `opencode.CMD`). Spawning the bare name directly via `Command::new` does
 /// not perform this expansion, so callers that need to `spawn()` a harness
 /// binary should invoke this first and spawn the resolved name.
+///
+/// Walks `PATH` directories in order, trying every candidate extension
+/// within each directory before moving to the next — never the reverse.
+/// Searching extension-by-extension-across-all-directories first would let
+/// a same-named binary in a *later* PATH directory (e.g. a real system
+/// install) outrank a shadowing binary in an *earlier* one (e.g. a
+/// project-local override), which breaks the ordinary "earlier PATH entries
+/// win" guarantee every shell provides.
 pub fn resolve_on_path(command: &str) -> Option<String> {
     if command.contains('/') || command.contains('\\') {
         return executable(Path::new(command)).then(|| command.to_string());
     }
     let path = env::var_os("PATH")?;
     let path_ext = env::var("PATHEXT").unwrap_or_default();
-    candidates(command, cfg!(windows), &path_ext)
-        .into_iter()
-        .find(|name| env::split_paths(&path).any(|dir| executable(&dir.join(name))))
+    let names = candidates(command, cfg!(windows), &path_ext);
+    env::split_paths(&path).find_map(|dir| {
+        names
+            .iter()
+            .find(|name| executable(&dir.join(name)))
+            .cloned()
+    })
 }
 
 fn executable(path: &Path) -> bool {

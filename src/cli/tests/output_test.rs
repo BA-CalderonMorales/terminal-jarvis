@@ -15,11 +15,27 @@ fn tmpdir() -> PathBuf {
 fn mock_binary_on_path(tmpdir: &Path) -> String {
     let bin = tmpdir.join("mock-harness");
     std::fs::write(&bin, "#!/bin/sh\necho ok").unwrap();
-    std::fs::set_permissions(&bin, std::os::unix::fs::PermissionsExt::from_mode(0o755)).unwrap();
+    make_executable(&bin);
     let old = std::env::var("PATH").unwrap_or_default();
-    std::env::set_var("PATH", format!("{}:{}", tmpdir.display(), old));
+    let joined = std::env::join_paths(
+        std::iter::once(tmpdir.to_path_buf()).chain(std::env::split_paths(&old)),
+    )
+    .expect("PATH entries join");
+    std::env::set_var("PATH", joined);
     old
 }
+
+#[cfg(unix)]
+fn make_executable(path: &Path) {
+    use std::os::unix::fs::PermissionsExt;
+    std::fs::set_permissions(path, std::fs::Permissions::from_mode(0o755)).unwrap();
+}
+
+/// Windows has no execute bit; `command_on_path` treats any existing file as
+/// runnable there (see `security::checks::executable_mode`), so there is
+/// nothing to mark.
+#[cfg(not(unix))]
+fn make_executable(_path: &Path) {}
 
 fn mock_harness(binary: &str, env_mode: EnvMode, env: Vec<String>) -> Harness {
     let mut plan = crate::cli::logic::test_support::plan(

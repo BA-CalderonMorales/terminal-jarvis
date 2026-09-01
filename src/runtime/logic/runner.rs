@@ -65,6 +65,9 @@ fn signal_code(_status: &std::process::ExitStatus) -> i32 {
     1
 }
 
-#[cfg(test)]
+// Exercises `sh`/POSIX signal semantics (`kill -TERM $$`, the 128+signal
+// exit-code convention `signal_code` only computes on `#[cfg(unix)]`) that
+// have no Windows equivalent, so the whole module is Unix-only.
+#[cfg(all(test, unix))]
 #[path = "../tests/runner_test.rs"]
 mod tests;
