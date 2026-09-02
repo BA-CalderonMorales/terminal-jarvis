@@ -28,6 +28,7 @@ pub fn prompt(
         status: crate::tui::home::styled(&o),
         body: body.to_vec(),
         prompt: prefix.clone(),
+        offset: 0,
         hint: hint.to_string(),
     };
     let cells = crate::tui::screen::visible_width(&prefix) + 2;

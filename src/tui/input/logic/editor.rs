@@ -54,6 +54,7 @@ impl Editor {
             Key::Home => Feed::Moved(Move::Top),
             Key::End => Feed::Moved(Move::Bottom),
             Key::Ignored => Feed::Idle,
+            Key::Dead => Feed::Idle,
         }
     }
 

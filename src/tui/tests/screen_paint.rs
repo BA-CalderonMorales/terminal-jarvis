@@ -9,6 +9,7 @@ fn draft() -> Draft {
         status: "ACTIVE none · CWD ~ · READY 0/0 ready".into(),
         body: vec!["one".into(), "two".into()],
         prompt: "[>_]::[tj:test]::[harness:none]: ".into(),
+        offset: 0,
         hint: "active: none | list, status, help, exit".into(),
     }
 }
@@ -52,11 +53,12 @@ fn parking_is_deterministic(cols: u8, rows: u8) -> bool {
 }
 
 #[test]
-fn long_body_is_clipped_with_a_marker_not_lost_silently() {
+fn long_body_windows_to_the_newest_lines_with_a_badge() {
     let size = Size { cols: 60, rows: 10 };
     let mut d = draft();
     d.body = (0..50).map(|i| format!("line {i}")).collect();
     let painted = frame(size, &d);
-    assert!(painted.contains("more lines above"));
+    assert!(painted.contains("\u{2191} 46"), "scroll badge counts the hidden history");
     assert!(painted.contains("line 49"), "the newest line must survive");
+    assert!(!painted.contains("line 0"), "older lines yield to the window");
 }

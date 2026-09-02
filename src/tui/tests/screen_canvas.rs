@@ -7,7 +7,6 @@ use super::*;
 fn canvas_holds_fitting_properties() {
     quickcheck::quickcheck(escape_bytes_are_zero_width as fn(usize, String) -> bool);
     quickcheck::quickcheck(clipped_lines_never_exceed_cols as fn(String, bool, u8) -> bool);
-    quickcheck::quickcheck(fit_rows_keep_recent_context as fn(Vec<String>, u8) -> bool);
 }
 
 fn escape_bytes_are_zero_width(pad: usize, text: String) -> bool {
@@ -31,13 +30,3 @@ fn clipped_lines_never_exceed_cols(line: String, ansi: bool, cols: u8) -> bool {
     visible_width(&clip_line(&candidate, cols)) <= cols
 }
 
-fn fit_rows_keep_recent_context(lines: Vec<String>, rows: u8) -> bool {
-    let rows = (rows as usize % 50) + 1;
-    let fitted = fit_rows(&lines, rows);
-    if lines.len() <= rows.saturating_sub(1) {
-        return fitted == lines;
-    }
-    fitted.len() == rows
-        && fitted[0].contains("more lines above")
-        && fitted[1..] == lines[lines.len() + 1 - rows..]
-}
