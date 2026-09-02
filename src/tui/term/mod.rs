@@ -7,6 +7,15 @@
 
 use std::io::IsTerminal;
 
+#[path = "logic/raw.rs"]
+mod raw;
+
+/// Raw per-byte, no-echo reads for the viewport prompt; `None` keeps the
+/// caller on the classic line reader (pipes, missing tty, non-unix).
+pub fn enable_raw() -> Option<raw::Guard> {
+    raw::enable()
+}
+
 pub fn ansi_enabled_for(stdout_terminal: bool) -> bool {
     stdout_terminal
         && std::env::var_os("NO_COLOR").is_none()

@@ -11,6 +11,10 @@ Set Height 820
 Set Padding 24
 Set Shell bash
 
+# Hermetic recording: a throwaway session home so the story always starts
+# from "active: none", whatever the recording machine's own state is.
+Type "export TERMINAL_JARVIS_HOME=$(mktemp -d)"
+Enter
 Type "terminal-jarvis tui"
 Enter
 Sleep 6s

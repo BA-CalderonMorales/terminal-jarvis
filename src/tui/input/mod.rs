@@ -1,9 +1,15 @@
 //! Input: the prompt widget surface. `Indicator` renders the context
 //! prefix; the line readers live in `logic/`.
 
+#[path = "logic/editor.rs"]
+mod editor;
+#[path = "logic/keys.rs"]
+mod keys;
 #[path = "logic/line.rs"]
 mod line;
 
+pub use editor::{Editor, Feed, Move};
+pub use keys::read_key;
 pub use line::{compose, raw_line, read_line, retire};
 
 use crate::cli::style;
@@ -54,3 +60,7 @@ fn painted(value: &str, on: bool, paint: fn(&str) -> String) -> String {
 #[cfg(test)]
 #[path = "../tests/input.rs"]
 mod tests;
+
+#[cfg(test)]
+#[path = "../tests/input_keys.rs"]
+mod keys_tests;

@@ -15,6 +15,9 @@ mod paint;
 #[path = "logic/sanitize.rs"]
 mod sanitize;
 
+#[path = "logic/scroll.rs"]
+mod scroll;
+
 #[path = "index.rs"]
 mod index;
 
@@ -23,4 +26,5 @@ pub use canvas::visible_width;
 pub use index::{active, boot, ensure_usable, resume, size, suspend, Session};
 pub use paint::{frame, parked, Draft};
 pub use sanitize::{is_plain, keep_color};
+pub use scroll::{badge, clamp, max_offset, step, window};
 pub use structs::Size;

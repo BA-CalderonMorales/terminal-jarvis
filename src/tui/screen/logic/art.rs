@@ -1,27 +1,38 @@
-//! Art: the fixed retro chrome. Block-glyph monogram, one name row, and the
-//! quick-key cheat sheet that doubles as the default body -- decoration that
-//! teaches the tool is value, not theatrics.
+//! Art: the fixed retro chrome. A double-rule brand block opens the body,
+//! then the quick-key cheat sheet -- decoration that teaches the tool is
+//! value, not theatrics. Pure so tests can pin the shape.
 
-pub const MONOGRAM: &[&str] = &["╔╗╔═╗╔═╗", "║║║╣ ╚═╝", "╝╚╚═╝╚═╝"];
+pub const BRAND: &[&str] = &[
+    "╔═══════════════════════════════╗",
+    "║ T E R M I N A L   J A R V I S ║",
+    "╚═══════════════════════════════╝",
+];
 
-pub const NAME: &str = "T E R M I N A L   J A R V I S";
-
-/// Default body: monogram, identity, then the keys a first-run user needs.
-/// Pure so tests can pin the shape; `active` names the current harness.
+/// Default body: brand block, identity, then the keys a first-run user
+/// needs. Pure so tests can pin the shape; `active` names the harness.
 pub fn welcome(active: &str, ready: usize, total: usize) -> Vec<String> {
-    let mut lines: Vec<String> = MONOGRAM.iter().map(|row| row.to_string()).collect();
+    let mut lines: Vec<String> = BRAND.iter().map(|row| row.to_string()).collect();
     lines.push(String::new());
-    lines.push(format!("{NAME}  ·  context command center"));
     lines.push(format!(
-        "active [{active}]  fleet readiness {ready}/{total}"
+        "context command center · active [{active}] · fleet readiness {ready}/{total}"
     ));
     lines.push(String::new());
-    lines.push(" list      numbered fleet picker".into());
-    lines.push(" status    readiness dashboard".into());
-    lines.push(" <number>  instant switch".into());
-    lines.push(" plan <harness> <capability>   preview before running".into());
-    lines.push(" /debug    raw view · help full table · exit leaves".into());
+    lines.extend(keys().lines().map(String::from));
     lines
+}
+
+fn keys() -> String {
+    let rows = [
+        ("list", "numbered fleet picker"),
+        ("status", "readiness dashboard"),
+        ("<number>", "instant switch"),
+        ("plan <h> <cap>", "preview before running"),
+        ("/debug", "raw view · help full table · exit leaves"),
+    ];
+    rows.iter()
+        .map(|(key, purpose)| format!("  {key:<15} {purpose}"))
+        .collect::<Vec<_>>()
+        .join("\n")
 }
 
 #[cfg(test)]
