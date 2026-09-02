@@ -1,5 +1,15 @@
 # Changelog
 
+## [0.1.16] - 2026-09-02
+
+- Windows: npm-style `.cmd` shims now resolve when spawning harnesses --
+  `terminal-jarvis run <harness>` no longer fails with "not found on PATH"
+  for npm-installed agents. The security preflight and the spawn path agree
+  on the same binary, gate scans resolve `trivy` the same way, and the
+  package check resolves `npm`/`trivy` through PATHEXT.
+- The test suite compiles and passes on Windows; pty-driven TUI acceptance
+  tests are Unix-only by design.
+
 ## [0.1.15] - 2026-08-14
 
 - Headless gate scans are deadline-bounded: a stuck scanner is killed after
