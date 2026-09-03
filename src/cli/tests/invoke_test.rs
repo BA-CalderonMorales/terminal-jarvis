@@ -24,7 +24,12 @@ fn failing_command_preserves_exit_without_crossing_streams() {
     assert_eq!(code, 3);
     assert!(body.is_empty());
 
-    let home = std::env::var("HOME").unwrap();
+    // redact_process_text (see diagnostics::logic::redact_process) checks
+    // both HOME and USERPROFILE; only HOME is set by default on Unix, only
+    // USERPROFILE on Windows, so this mirrors that same fallback.
+    let home = std::env::var("HOME")
+        .or_else(|_| std::env::var("USERPROFILE"))
+        .unwrap();
     let command = CommandPlan::new(format!("{home}/private-child/fixture"), vec![]);
     let rendered = diagnostic("vibe", Capability::Download, &command, 3);
     assert!(!rendered.contains(&home));

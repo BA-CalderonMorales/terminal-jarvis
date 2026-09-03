@@ -20,7 +20,7 @@ pub fn check(package: &str) -> Option<Verdict> {
     }
     let dir = scoped_dir()?;
     let spec = format!("{package}@latest");
-    let resolve = Command::new("npm")
+    let resolve = Command::new(resolved("npm"))
         .args([
             "install",
             "--package-lock-only",
@@ -38,7 +38,7 @@ pub fn check(package: &str) -> Option<Verdict> {
         let _ = std::fs::remove_dir_all(&dir);
         return None;
     }
-    let scan = Command::new("trivy")
+    let scan = Command::new(resolved("trivy"))
         .args([
             "fs",
             "--scanners",
@@ -65,6 +65,19 @@ pub fn check(package: &str) -> Option<Verdict> {
         clean: scan.status.success(),
         detail,
     })
+}
+
+/// Same `Command::new` + bare-name PATHEXT gap as `runtime::run_command`
+/// (see its doc comment): resolve the real candidate first so a `.cmd` shim
+/// like npm's is actually found on Windows.
+#[cfg(windows)]
+fn resolved(command: &str) -> String {
+    super::checks::resolve_on_path(command).unwrap_or_else(|| command.to_string())
+}
+
+#[cfg(not(windows))]
+fn resolved(command: &str) -> String {
+    command.to_string()
 }
 
 fn scoped_dir() -> Option<PathBuf> {
