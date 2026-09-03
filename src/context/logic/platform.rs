@@ -61,7 +61,8 @@ mod tests {
 
     #[test]
     fn shell_returns_basename() {
-        let shell_path = std::env::var("SHELL").unwrap_or_default();
+        let var = if cfg!(windows) { "COMSPEC" } else { "SHELL" };
+        let shell_path = std::env::var(var).unwrap_or_default();
         let result = super::shell();
         if shell_path.is_empty() {
             assert_eq!(result, "unknown");

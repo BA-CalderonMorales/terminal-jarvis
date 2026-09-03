@@ -1,15 +1,36 @@
 use crate::contracts::CapabilityPlan;
+use std::borrow::Cow;
 use std::io;
 use std::process::{Command, Stdio};
 
 pub fn run_command(plan: &CapabilityPlan, extra: &[String]) -> io::Result<i32> {
-    let mut command = Command::new(&plan.command.command);
+    let mut command = Command::new(resolved_binary(&plan.command.command).as_ref());
     command.args(&plan.command.args).args(extra);
     command.stdout(Stdio::inherit());
     command.stderr(Stdio::inherit());
     #[cfg(unix)]
     reset_sigint_in_child(&mut command);
     command.status().map(status_code)
+}
+
+/// On Windows, `Command::new` does not expand `PATHEXT`, so a bare name like
+/// `opencode` never resolves to `opencode.CMD` and spawning fails with
+/// `NotFound` even though the harness is installed. Resolve the real
+/// candidate first; fall back to the original name (letting the spawn fail
+/// naturally with `NotFound`) when nothing on `PATH` matches. Non-Windows
+/// behavior is unchanged, so it just borrows `command` rather than
+/// allocating on every spawn.
+#[cfg(windows)]
+fn resolved_binary(command: &str) -> Cow<'_, str> {
+    match crate::security::resolve_on_path(command) {
+        Some(resolved) => Cow::Owned(resolved),
+        None => Cow::Borrowed(command),
+    }
+}
+
+#[cfg(not(windows))]
+fn resolved_binary(command: &str) -> Cow<'_, str> {
+    Cow::Borrowed(command)
 }
 
 #[cfg(unix)]
@@ -50,6 +71,9 @@ fn signal_code(_status: &std::process::ExitStatus) -> i32 {
     1
 }
 
-#[cfg(test)]
+// Exercises `sh`/POSIX signal semantics (`kill -TERM $$`, the 128+signal
+// exit-code convention `signal_code` only computes on `#[cfg(unix)]`) that
+// have no Windows equivalent, so the whole module is Unix-only.
+#[cfg(all(test, unix))]
 #[path = "../tests/runner_test.rs"]
 mod tests;

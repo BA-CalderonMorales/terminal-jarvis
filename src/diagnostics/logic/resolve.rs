@@ -69,6 +69,13 @@ fn executable_mode(_: &fs::Metadata) -> bool {
     true
 }
 
+/// Mirrors `security::checks::candidates`: on Windows, PATHEXT-suffixed
+/// names are tried before the bare name (a bare extensionless file is often
+/// an unrunnable POSIX shim shipped alongside the real `.cmd`/`.exe` entry
+/// point), but the bare name is still included as a last-resort candidate
+/// so an existing extensionless binary is not silently invisible to
+/// diagnostics -- this function's job is finding every match for conflict
+/// detection, not just a launchable one.
 fn candidates(name: &str, input: &DiagnosticInput) -> Vec<String> {
     if input.platform.os != "windows" || Path::new(name).extension().is_some() {
         return vec![name.to_string()];
@@ -77,11 +84,13 @@ fn candidates(name: &str, input: &DiagnosticInput) -> Vec<String> {
         .environment
         .text("PATHEXT")
         .unwrap_or(".COM;.EXE;.BAT;.CMD");
-    extensions
+    let mut names: Vec<String> = extensions
         .split(';')
         .filter(|ext| !ext.is_empty())
         .map(|ext| format!("{name}{ext}"))
-        .collect()
+        .collect();
+    names.push(name.to_string());
+    names
 }
 fn result(code: Code, path: Option<PathBuf>, paths: Vec<PathBuf>, matches: usize) -> Resolution {
     Resolution {

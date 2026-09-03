@@ -1,10 +1,10 @@
 use super::{candidates, command_on_path, nonempty_env};
 
 #[test]
-fn windows_candidates_include_pathext_extensions() {
+fn windows_candidates_try_pathext_extensions_before_the_bare_name() {
     assert_eq!(
         candidates("trivy", true, ".EXE;.CMD"),
-        ["trivy", "trivy.EXE", "trivy.CMD"]
+        ["trivy.EXE", "trivy.CMD", "trivy"]
     );
 }
 
