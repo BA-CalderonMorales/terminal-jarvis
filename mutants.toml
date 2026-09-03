@@ -9,7 +9,9 @@ exclude_globs = ["src/cli/compat.rs"]
 exclude_re = [
   "self_update\\.rs.*\\b(run|npm_update|brew_update|cargo_update)\\b",
   "table_layout\\.rs.*replace > with >= in wrap",
-  "checks\\.rs.*replace executable_mode -> bool with false",
+  # The cfg(not(unix)) executable_mode stub never compiles on Linux
+  # runners; the unix variant is witnessed by the execute-bit probe tests.
+  "path\\.rs.*replace executable_mode -> bool with false",
   "runner\\.rs.*replace signal_code -> i32 with",
   "platform\\.rs.*delete ! in wsl",
   "execute\\.rs.*replace != with == in run",
