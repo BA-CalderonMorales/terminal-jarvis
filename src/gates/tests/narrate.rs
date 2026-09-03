@@ -32,7 +32,9 @@ fn quiet_preflight_reports_the_scan_in_one_line_and_loud_narrates() {
     // (see narrate_probe() above and ENV_LOCK's other callers) -- without it
     // this races and can transiently spawn with a PATH that doesn't have
     // "true" on it.
-    let _guard = crate::ENV_LOCK.lock().unwrap_or_else(|error| error.into_inner());
+    let _guard = crate::ENV_LOCK
+        .lock()
+        .unwrap_or_else(|error| error.into_inner());
     let exe = std::env::current_exe().unwrap();
     assert_eq!(
         probe(&exe, "quiet"),

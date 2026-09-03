@@ -24,7 +24,9 @@ fn compose_stays_plain_without_ansi() {
     let previous = crate::cli::style::set(true, true);
     assert_eq!(
         compose(false, &fixture(), "pick a number"),
-        format!("[>_]::[tj:{V}]::[harness:codex]: pick a number\n[>_]::[tj:{V}]::[harness:codex]: ")
+        format!(
+            "[>_]::[tj:{V}]::[harness:codex]: pick a number\n[>_]::[tj:{V}]::[harness:codex]: "
+        )
     );
     crate::cli::style::restore(previous);
 }
@@ -42,7 +44,10 @@ fn indicator_marks_harness_and_debug_and_survives_roundtrips() {
     }
     .raw()
     .contains("[harness:codex]"));
-    assert_eq!(plain.raw(), format!("[>_]::[tj:{V}]::[harness:none]::[debug]:"));
+    assert_eq!(
+        plain.raw(),
+        format!("[>_]::[tj:{V}]::[harness:none]::[debug]:")
+    );
     assert_eq!(
         plain.render(false),
         format!("[>_]::[tj:{V}]::[harness:none]::[debug]: ")

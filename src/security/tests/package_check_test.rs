@@ -42,8 +42,7 @@ const WRITE_LOCKFILE_AND_EXIT_OK: &str =
 #[cfg(unix)]
 const REPORT_CRITICAL_AND_EXIT_FAIL: &str = "#!/bin/sh\necho 'CRITICAL: minimist'\nexit 1\n";
 #[cfg(not(unix))]
-const REPORT_CRITICAL_AND_EXIT_FAIL: &str =
-    "@echo off\r\necho CRITICAL: minimist\r\nexit /b 1\r\n";
+const REPORT_CRITICAL_AND_EXIT_FAIL: &str = "@echo off\r\necho CRITICAL: minimist\r\nexit /b 1\r\n";
 
 #[test]
 fn npm_success_without_lockfile_skips_the_check() {
