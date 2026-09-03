@@ -6,7 +6,7 @@
 //! that lockfile with its native npm analysis. Both tools must be on PATH;
 //! otherwise the check is skipped and the caller decides how to warn.
 
-use std::path::PathBuf;
+use super::resolve::scoped_dir;
 use std::process::{Command, Stdio};
 
 pub struct Verdict {
@@ -15,12 +15,12 @@ pub struct Verdict {
 }
 
 pub fn check(package: &str) -> Option<Verdict> {
-    if !super::checks::command_on_path("npm") || !super::checks::command_on_path("trivy") {
+    if !super::path::command_on_path("npm") || !super::path::command_on_path("trivy") {
         return None;
     }
     let dir = scoped_dir()?;
     let spec = format!("{package}@latest");
-    let resolve = Command::new(resolved("npm"))
+    let resolve = Command::new(super::resolve::resolved("npm").as_ref())
         .args([
             "install",
             "--package-lock-only",
@@ -38,7 +38,7 @@ pub fn check(package: &str) -> Option<Verdict> {
         let _ = std::fs::remove_dir_all(&dir);
         return None;
     }
-    let scan = Command::new(resolved("trivy"))
+    let scan = Command::new(super::resolve::resolved("trivy").as_ref())
         .args([
             "fs",
             "--scanners",
@@ -67,36 +67,13 @@ pub fn check(package: &str) -> Option<Verdict> {
     })
 }
 
-/// Same `Command::new` + bare-name PATHEXT gap as `runtime::run_command`
-/// (see its doc comment): resolve the real candidate first so a `.cmd` shim
-/// like npm's is actually found on Windows.
-#[cfg(windows)]
-fn resolved(command: &str) -> String {
-    super::checks::resolve_on_path(command).unwrap_or_else(|| command.to_string())
-}
-
-#[cfg(not(windows))]
-fn resolved(command: &str) -> String {
-    command.to_string()
-}
-
-fn scoped_dir() -> Option<PathBuf> {
-    let leaf = format!(
-        "terminal-jarvis-package-check-{}-{}",
-        std::process::id(),
-        std::time::SystemTime::now()
-            .duration_since(std::time::UNIX_EPOCH)
-            .ok()?
-            .as_nanos()
-    );
-    let dir = std::env::temp_dir().join(leaf);
-    std::fs::create_dir_all(&dir).ok()?;
-    Some(dir)
-}
-
 #[cfg(test)]
 #[path = "../tests/package_check_harness.rs"]
 mod pkgcheck_harness;
+
+#[cfg(test)]
+#[path = "../tests/package_check_scripts.rs"]
+mod pkgcheck_scripts;
 
 #[cfg(test)]
 #[path = "../tests/package_check_test.rs"]

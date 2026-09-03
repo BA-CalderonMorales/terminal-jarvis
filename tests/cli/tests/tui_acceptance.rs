@@ -1,11 +1,6 @@
-#![cfg(unix)]
-// PTY-driven: `crate::logic::pty` wraps a real pseudo-terminal (openpty),
-// which has no equivalent in this codebase on Windows (ConPTY support would
-// be a new feature, not a bug fix).
-
+#![cfg(unix)] // PTY-driven (openpty); no Windows equivalent in-tree.
 use crate::logic::tui::{booted, launch, EXIT, FRAME, SERIAL};
 use crate::logic::{pty, screen};
-
 const VERSION: &str = env!("CARGO_PKG_VERSION");
 
 #[test]

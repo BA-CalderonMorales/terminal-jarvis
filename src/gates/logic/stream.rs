@@ -1,26 +1,8 @@
 use crate::gates::logic::heartbeat::{Heartbeat, Scan};
 use crate::gates::logic::loader::Gate;
 use crate::security;
-use std::borrow::Cow;
 use std::io::{Read, Write};
 use std::process::{Command, ExitStatus, Stdio};
-
-/// Same `Command::new` + bare-name PATHEXT gap as `runtime::run_command`:
-/// `security::command_on_path` above already confirms the binary resolves,
-/// but spawning the bare name directly does not perform Windows' PATHEXT
-/// expansion, so the resolved candidate has to be spawned instead.
-#[cfg(windows)]
-fn resolved(command: &str) -> Cow<'_, str> {
-    match security::resolve_on_path(command) {
-        Some(resolved) => Cow::Owned(resolved),
-        None => Cow::Borrowed(command),
-    }
-}
-
-#[cfg(not(windows))]
-fn resolved(command: &str) -> Cow<'_, str> {
-    Cow::Borrowed(command)
-}
 
 /// The scan's numeric outcome: the real exit code, or 128 + the signal on
 /// unix when a scan was killed outright.
@@ -67,7 +49,7 @@ pub fn run(gate: &Gate, narrate: bool) -> Result<Scan, String> {
             gate.name, gate.binary, gate.install_hint
         ));
     }
-    let mut child = Command::new(resolved(&gate.binary).as_ref())
+    let mut child = Command::new(security::resolved(&gate.binary).as_ref())
         .args(&gate.args)
         .stdout(Stdio::piped())
         .stderr(Stdio::piped())

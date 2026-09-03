@@ -1,124 +1,11 @@
-use crate::structs::catalog;
-use std::path::{Path, PathBuf};
-use std::process::{Command, Output};
+//! Package check acceptance: `install` warns without a gate, fails closed
+//! on HIGH/CRITICAL findings, and proceeds silently on a clean scan.
 
-const INSTALL: &[&str] = &[
-    "install",
-    "fixture",
-    "--no-input",
-    "--confirm=download:fixture",
-];
+use super::package_check_fixture::{fixture, gate_on, tj, INSTALL};
+use std::process::Output;
 
-fn tj(args: &[&str], home: &Path, catalog_root: &Path, path: &Path) -> Output {
-    Command::new(env!("CARGO_BIN_EXE_terminal-jarvis"))
-        .arg("--plain")
-        .args(args)
-        .env("TERMINAL_JARVIS_HOME", home)
-        .env("TERMINAL_JARVIS_CATALOG", catalog_root)
-        .env("PATH", path)
-        .output()
-        .expect("terminal-jarvis runs")
-}
-
-fn write_executable(dir: &Path, name: &str, body: &str) {
-    let entry = dir.join(script_filename(name));
-    std::fs::write(&entry, body).unwrap();
-    make_executable(&entry);
-}
-
-/// `install`'s package-check step resolves `npm`/`trivy` by name (see
-/// `security::logic::package_check::resolved`), which on Windows only
-/// matches `PATHEXT`-suffixed files, so the fakes need a `.cmd` extension
-/// there to actually be found and launched.
-#[cfg(unix)]
-fn script_filename(name: &str) -> String {
-    name.to_string()
-}
-
-#[cfg(not(unix))]
-fn script_filename(name: &str) -> String {
-    format!("{name}.cmd")
-}
-
-#[cfg(unix)]
-fn make_executable(path: &Path) {
-    use std::os::unix::fs::PermissionsExt;
-    let mut permissions = std::fs::metadata(path).unwrap().permissions();
-    permissions.set_mode(0o755);
-    std::fs::set_permissions(path, permissions).unwrap();
-}
-
-#[cfg(not(unix))]
-fn make_executable(_path: &Path) {}
-
-#[cfg(unix)]
-fn npm_script() -> String {
-    "#!/bin/sh\nprintf '{\"name\":\"fixture\"}' > package-lock.json\nexit 0\n".to_string()
-}
-
-#[cfg(not(unix))]
-fn npm_script() -> String {
-    "@echo off\r\necho {\"name\":\"fixture\"}> package-lock.json\r\nexit /b 0\r\n".to_string()
-}
-
-#[cfg(unix)]
-fn trivy_script(trivy_exit: i32) -> String {
-    format!(
-        "#!/bin/sh\nif [ -f package-lock.json ]; then printf 'CRITICAL minimist CVE-2021-44906\\n' >&2; exit {trivy_exit}; fi\nexit 0\n"
-    )
-}
-
-#[cfg(not(unix))]
-fn trivy_script(trivy_exit: i32) -> String {
-    format!(
-        "@echo off\r\nif exist package-lock.json (\r\n  echo CRITICAL minimist CVE-2021-44906 1>&2\r\n  exit /b {trivy_exit}\r\n) else (\r\n  exit /b 0\r\n)\r\n"
-    )
-}
-
-#[cfg(unix)]
-fn noop_script() -> &'static str {
-    "#!/bin/sh\nexit 0\n"
-}
-
-#[cfg(not(unix))]
-fn noop_script() -> &'static str {
-    "@echo off\r\nexit /b 0\r\n"
-}
-
-fn tool_bin(root_dir: &Path, trivy_exit: i32) -> PathBuf {
-    let dir = root_dir.join(format!("bin-{trivy_exit}"));
-    std::fs::create_dir_all(&dir).unwrap();
-    write_executable(&dir, "npm", &npm_script());
-    write_executable(&dir, "trivy", &trivy_script(trivy_exit));
-    write_executable(&dir, "fixture-child", noop_script());
-    dir
-}
-
-fn fixture(trivy_exit: i32) -> (PathBuf, PathBuf, PathBuf) {
-    let nanos = std::time::SystemTime::now()
-        .duration_since(std::time::UNIX_EPOCH)
-        .unwrap()
-        .as_nanos();
-    let root_dir = std::env::temp_dir().join(format!(
-        "terminal-jarvis-pkgcheck-{}-{nanos}",
-        std::process::id()
-    ));
-    let home = root_dir.join("home");
-    let catalog_root = root_dir.join("catalog");
-    let bin = tool_bin(&root_dir, trivy_exit);
-    catalog::write_with_package(
-        &catalog_root,
-        "expected",
-        "expected",
-        Some("fixture-package"),
-    );
-    (home, catalog_root, bin)
-}
-
-fn gate_on(home: &Path, catalog_root: &Path, bin: &Path) {
-    assert!(tj(&["gate", "enable", "trivy"], home, catalog_root, bin)
-        .status
-        .success());
+fn stderr(output: &Output) -> String {
+    String::from_utf8_lossy(&output.stderr).to_string()
 }
 
 #[test]
@@ -126,8 +13,7 @@ fn gate_off_install_warns_and_continues() {
     let (home, catalog_root, bin) = fixture(0);
     let output = tj(INSTALL, &home, &catalog_root, &bin);
     assert_eq!(output.status.code(), Some(0));
-    let stderr = String::from_utf8_lossy(&output.stderr);
-    assert!(stderr.contains("without a vulnerability check"), "{stderr}");
+    assert!(stderr(&output).contains("without a vulnerability check"));
 }
 
 #[test]
@@ -136,8 +22,7 @@ fn gate_on_findings_fail_closed_noninteractive() {
     gate_on(&home, &catalog_root, &bin);
     let output = tj(INSTALL, &home, &catalog_root, &bin);
     assert_eq!(output.status.code(), Some(5));
-    let stderr = String::from_utf8_lossy(&output.stderr);
-    assert!(stderr.contains("HIGH/CRITICAL findings"), "{stderr}");
+    assert!(stderr(&output).contains("HIGH/CRITICAL findings"));
 }
 
 #[test]
@@ -146,6 +31,9 @@ fn gate_on_clean_proceeds_without_warning() {
     gate_on(&home, &catalog_root, &bin);
     let output = tj(INSTALL, &home, &catalog_root, &bin);
     assert_eq!(output.status.code(), Some(0));
-    let stderr = String::from_utf8_lossy(&output.stderr);
-    assert!(!stderr.contains("warning:"), "{stderr}");
+    assert!(
+        !stderr(&output).contains("warning:"),
+        "{:?}",
+        stderr(&output)
+    );
 }

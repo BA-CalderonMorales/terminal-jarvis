@@ -6,12 +6,8 @@ use terminal_jarvis::gates::{self, Gate};
 static ID: AtomicUsize = AtomicUsize::new(0);
 
 fn dir() -> PathBuf {
-    // process id + counter already guarantee uniqueness within this file; a
-    // thread name is not a safe path component (Rust's default test-thread
-    // names are the full `::`-separated test path, and `:` is invalid in
-    // Windows paths). The "coverage" tag (state.rs has its own "state" tag)
-    // keeps this file's counter from colliding with state.rs's -- both
-    // start at 0 and run in the same process.
+    // pid + counter guarantee uniqueness; the "coverage" tag keeps this
+    // file's counter from colliding with state.rs's (same process).
     let path = std::env::temp_dir().join(format!(
         "tj-gatecov-coverage-{}-{}",
         std::process::id(),
