@@ -15,6 +15,15 @@ unsafe extern "C" {
     fn ioctl(fd: i32, request: u64, ...) -> i32;
 }
 
+#[repr(C)]
+#[derive(Default, Clone, Copy)]
+struct Winsize {
+    row: u16,
+    col: u16,
+    xpixel: u16,
+    ypixel: u16,
+}
+
 #[cfg(target_os = "linux")]
 const TIOCSCTTY: u64 = 0x540E;
 #[cfg(not(target_os = "linux"))]
@@ -90,6 +99,18 @@ fn open_pair() -> (File, File) {
     assert!(fd >= 0, "posix_openpt failed");
     assert_eq!(unsafe { grantpt(fd) }, 0, "grantpt failed");
     assert_eq!(unsafe { unlockpt(fd) }, 0, "unlockpt failed");
+    // A real size so the viewport boots in the pty; without this the child
+    // sees a 0x0 window and every acceptance test silently runs chat mode.
+    let size = Winsize {
+        row: 24,
+        col: 80,
+        ..Default::default()
+    };
+    #[cfg(target_os = "linux")]
+    const TIOCSWINSZ: u64 = 0x5413;
+    #[cfg(not(target_os = "linux"))]
+    const TIOCSWINSZ: u64 = 0x4008_7474;
+    unsafe { ioctl(fd, TIOCSWINSZ, &size as *const Winsize) };
     let path = unsafe { CStr::from_ptr(ptsname(fd)) }.to_string_lossy();
     let slave = OpenOptions::new()
         .read(true)

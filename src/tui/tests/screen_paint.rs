@@ -1,16 +1,17 @@
 //! Paint properties: every composed frame is exactly `rows` lines, each
-//! visible row fits the width, and the cursor parks past the prompt.
+//! visible row fits the width, the repaint is surgical (no erase), and the
+//! header keeps its verdict on narrow terminals.
 
-use crate::tui::screen::{frame, parked, Draft, Size};
+use crate::tui::screen::{frame, Draft, Size};
 
 fn draft() -> Draft {
     Draft {
-        title: "TERMINAL JARVIS vtest".into(),
-        status: "ACTIVE none · CWD ~ · READY 0/0 ready".into(),
+        header: "Terminal Jarvis · ACTIVE fixture · READY 1/1 ready".into(),
+        cwd: ".../working/terminal-jarvis".into(),
         body: vec!["one".into(), "two".into()],
-        prompt: "[>_]::[tj:test]::[harness:none]: ".into(),
+        prompt: "[>_]::[tj:test]::[harness:fixture]: ".into(),
         offset: 0,
-        hint: "active: none | list, status, help, exit".into(),
+        hint: "active: fixture | list, status, help, exit".into(),
     }
 }
 
@@ -29,42 +30,66 @@ fn frames_hold_geometry_properties() {
 fn frames_fit_their_size(cols: u8, rows: u8) -> bool {
     let size = geometry(cols, rows);
     let painted = frame(size, &draft());
-    let screen = painted.trim_start_matches("\x1b[H\x1b[2J");
-    let lines: Vec<&str> = screen.split('\n').collect();
-    let bounded = lines
-        .iter()
-        .all(|l| crate::tui::screen::visible_width(l) <= size.cols);
-    let chrome = lines[0].starts_with('╔')
-        && lines[1].contains("ACTIVE")
-        && lines[lines.len() - 3].starts_with('├')
-        && lines[lines.len() - 2].contains("[>_]")
-        && lines[lines.len() - 1].starts_with('╰');
-    bounded && lines.len() == size.rows && chrome
+    let lines: Vec<&str> = painted.split('\n').collect();
+    lines.len() == size.rows
+        && lines
+            .iter()
+            .all(|line| crate::tui::screen::visible_width(line) <= size.cols)
+        && !painted.contains("\x1b[2J")
 }
 
 #[test]
-fn parking_lands_one_cell_past_the_prompt() {
-    quickcheck::quickcheck(parking_is_deterministic as fn(u8, u8) -> bool);
-}
-
-fn parking_is_deterministic(cols: u8, rows: u8) -> bool {
-    let size = geometry(cols, rows);
-    parked(String::new(), size, 12) == format!("\x1b[{};{}H", size.rows - 1, 12)
+fn repaint_is_surgical_cursor_home_without_erase() {
+    let painted = frame(Size { cols: 80, rows: 24 }, &draft());
+    assert!(painted.starts_with("\x1b[H"));
+    assert!(!painted.contains("\x1b[2J"), "no full-erase flicker");
 }
 
 #[test]
-fn long_body_windows_to_the_newest_lines_with_a_badge() {
-    let size = Size { cols: 60, rows: 10 };
+fn header_keeps_the_verdict_and_drops_the_cwd_when_narrow() {
+    let painted = frame(Size { cols: 60, rows: 20 }, &draft());
+    let first = painted.split('\n').next().unwrap();
+    assert!(first.contains("Terminal Jarvis"), "{first}");
+    assert!(first.contains("READY 1/1 ready"), "{first}");
+    assert!(!first.contains("terminal-jarvis"), "cwd dies first");
+}
+
+#[test]
+fn hint_sits_on_the_prompt_row_with_the_scroll_badge() {
+    let size = Size { cols: 80, rows: 24 };
     let mut d = draft();
     d.body = (0..50).map(|i| format!("line {i}")).collect();
     let painted = frame(size, &d);
+    let prompt_row = painted.split('\n').nth(size.rows - 1).unwrap();
+    assert!(prompt_row.contains("↑ 29"), "scroll badge: {prompt_row}");
+    // at 80 cols the badge wins the row and the long hint yields
     assert!(
-        painted.contains("\u{2191} 46"),
-        "scroll badge counts the hidden history"
+        !prompt_row.contains("active: fixture"),
+        "hint yields: {prompt_row}"
     );
+    assert!(
+        !painted.contains("more lines above"),
+        "history is scrolled, not dropped"
+    );
+}
+
+#[test]
+fn long_body_windows_to_the_newest_lines() {
+    let size = Size { cols: 80, rows: 24 };
+    let mut d = draft();
+    d.body = (0..50).map(|i| format!("line {i}")).collect();
+    let painted = frame(size, &d);
     assert!(painted.contains("line 49"), "the newest line must survive");
     assert!(
         !painted.contains("line 0"),
         "older lines yield to the window"
     );
+}
+
+#[test]
+fn no_box_chrome_anywhere() {
+    let painted = frame(Size { cols: 80, rows: 24 }, &draft());
+    for chrome in ["╔", "╚", "╠", "╣", "├", "┤"] {
+        assert!(!painted.contains(chrome), "{chrome} in frame");
+    }
 }

@@ -60,6 +60,17 @@ pub fn columns() -> usize {
 
 /// (cols, rows) from the tty, or None when stdout is not a sized terminal.
 pub fn size() -> Option<(usize, usize)> {
+    // Debug hook: a fixed "cols x rows" for headless TUI frame capture in
+    // environments whose ptys ignore TIOCSWINSZ. Real terminals are
+    // unaffected -- the override only fires when the variable is set.
+    if let Ok(explicit) = std::env::var("TJ_DEBUG_SIZE") {
+        let mut parts = explicit.splitn(2, 'x');
+        let cols = parts.next().and_then(|c| c.parse::<usize>().ok());
+        let rows = parts.next().and_then(|r| r.parse::<usize>().ok());
+        if let (Some(cols), Some(rows)) = (cols, rows) {
+            return Some((cols, rows));
+        }
+    }
     geometry()
 }
 

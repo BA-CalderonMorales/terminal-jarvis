@@ -13,8 +13,8 @@ use std::path::Path;
 /// The frozen frame chrome for one prompt session: everything that does not
 /// change while keys edit the line or scroll the body.
 pub struct ViewportState {
-    pub title: String,
-    pub status: String,
+    pub header: String,
+    pub cwd: String,
     pub prefix: String,
     pub prefix_cells: usize,
 }
@@ -29,8 +29,8 @@ impl ViewportState {
         let o = home::collect(harnesses, catalog_root, state_home);
         let prefix = indicator.render(true);
         Self {
-            title: format!("TERMINAL JARVIS v{}", env!("CARGO_PKG_VERSION")),
-            status: home::styled(&o),
+            header: home::header(&o),
+            cwd: o.cwd,
             prefix_cells: screen::visible_width(&prefix) + 2,
             prefix,
         }
@@ -38,8 +38,8 @@ impl ViewportState {
 
     pub fn base_draft(&self, hint: &str, body: &[String]) -> Draft {
         Draft {
-            title: self.title.clone(),
-            status: self.status.clone(),
+            header: self.header.clone(),
+            cwd: self.cwd.clone(),
             body: body.to_vec(),
             prompt: self.prefix.clone(),
             offset: 0,

@@ -34,14 +34,38 @@ pub fn plain(o: &Overview) -> String {
     )
 }
 
-/// The same line, styled for a terminal that honors ANSI.
-pub fn styled(o: &Overview) -> String {
+/// The viewport header: one merged line, priority-ordered so a narrow
+/// terminal loses the working directory before the readiness verdict.
+pub fn header(o: &Overview) -> String {
     use crate::cli::style;
-    let ready_view = if o.ready == o.total {
+    let ready_view = verdict(o);
+    format!(
+        "{} · {} {} · {} {}",
+        style::heading("Terminal Jarvis"),
+        style::label("ACTIVE"),
+        style::heading(&o.name),
+        style::label("READY"),
+        ready_view,
+    )
+}
+
+fn cwd_view(o: &Overview) -> String {
+    use crate::cli::style;
+    format!("{} {}", style::label("CWD"), o.cwd)
+}
+
+fn verdict(o: &Overview) -> String {
+    use crate::cli::style;
+    if o.ready == o.total {
         format!("{}/{} ready", o.ready, o.total)
     } else {
         style::warning(&format!("{}/{} ready", o.ready, o.total))
-    };
+    }
+}
+
+/// The same line, styled for a terminal that honors ANSI.
+pub fn styled(o: &Overview) -> String {
+    use crate::cli::style;
     format!(
         "{} {} · {} {} · {} {}",
         style::label("ACTIVE"),
@@ -49,7 +73,7 @@ pub fn styled(o: &Overview) -> String {
         style::label("CWD"),
         o.cwd,
         style::label("READY"),
-        ready_view
+        verdict(o)
     )
 }
 

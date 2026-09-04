@@ -10,7 +10,7 @@ mod overview;
 mod cwd;
 
 pub use cwd::cwd_label;
-pub use overview::{collect, plain, styled, Overview};
+pub use overview::{collect, header, plain, styled, Overview};
 
 use crate::cli::style;
 use crate::contracts::Harness;

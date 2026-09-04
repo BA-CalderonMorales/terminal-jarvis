@@ -12,5 +12,8 @@ fn welcome_is_compact_and_names_the_active_harness() {
     assert!(joined.contains("3/25"));
     assert!(joined.contains("list"));
     assert!(joined.contains("status"));
-    assert!(lines.iter().any(|line| line.contains("T E R M I N A L")));
+    assert!(
+        !lines.iter().any(|line| line.contains("╔")),
+        "no brand box: the header owns identity"
+    );
 }
