@@ -1,6 +1,7 @@
+use super::pty_io::{drain, wait_until};
 use std::ffi::CStr;
 use std::fs::{File, OpenOptions};
-use std::io::{Read, Write};
+use std::io::Write;
 use std::os::fd::FromRawFd;
 use std::os::unix::process::CommandExt;
 use std::process::{Command, ExitStatus, Stdio};
@@ -69,29 +70,6 @@ pub fn run_pty_probe(
     reader.join().expect("pseudo-terminal reader joins");
     let final_bytes = bytes.lock().unwrap().clone();
     (status, final_bytes)
-}
-
-fn drain(mut master: File, bytes: Arc<Mutex<Vec<u8>>>) {
-    let mut buffer = [0_u8; 4096];
-    loop {
-        match master.read(&mut buffer) {
-            Ok(0) => break,
-            Ok(size) => bytes.lock().unwrap().extend_from_slice(&buffer[..size]),
-            Err(error) if error.raw_os_error() == Some(5) => break,
-            Err(error) => panic!("pseudo-terminal read failed: {error}"),
-        }
-    }
-}
-
-fn wait_until(bytes: &Arc<Mutex<Vec<u8>>>, marker: &[u8]) {
-    for _ in 0..=500 {
-        let seen = bytes.lock().unwrap().clone();
-        if seen.windows(marker.len()).any(|window| window == marker) {
-            return;
-        }
-        std::thread::sleep(std::time::Duration::from_millis(20));
-    }
-    panic!("timed out waiting for {:?} in: {:?}", marker, bytes);
 }
 
 fn open_pair() -> (File, File) {

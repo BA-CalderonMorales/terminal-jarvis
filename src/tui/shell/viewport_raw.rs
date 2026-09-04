@@ -15,6 +15,7 @@ use std::path::Path;
 pub struct ViewportState {
     pub header: String,
     pub cwd: String,
+    pub tagline: String,
     pub prefix: String,
     pub prefix_cells: usize,
 }
@@ -31,6 +32,7 @@ impl ViewportState {
         Self {
             header: home::header(&o),
             cwd: o.cwd,
+            tagline: crate::tui::screen::tagline(&o.name, o.ready, o.total),
             prefix_cells: screen::visible_width(&prefix) + 2,
             prefix,
         }
@@ -40,6 +42,7 @@ impl ViewportState {
         Draft {
             header: self.header.clone(),
             cwd: self.cwd.clone(),
+            tagline: self.tagline.clone(),
             body: body.to_vec(),
             prompt: self.prefix.clone(),
             offset: 0,
@@ -63,11 +66,9 @@ pub fn run(session: &Session) -> Option<String> {
     loop {
         let size = screen::size();
         let tail = editor.tail_view(session.state.prefix_cells, size.inner_cols());
-        let draft = Draft {
-            offset,
-            prompt: format!("{}{tail}", session.state.prefix),
-            ..session.state.base_draft(session.hint, session.body)
-        };
+        let mut draft = session.state.base_draft(session.hint, session.body);
+        draft.offset = offset;
+        draft.prompt = format!("{}{tail}", session.state.prefix);
         let cells = session.state.prefix_cells + screen::visible_width(&tail);
         let painted = screen::parked(screen::frame(size, &draft), size, cells);
         print!("{painted}");

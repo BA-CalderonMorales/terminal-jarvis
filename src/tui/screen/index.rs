@@ -13,6 +13,7 @@ static ACTIVE: AtomicBool = AtomicBool::new(false);
 pub struct Session;
 
 pub fn boot() -> Option<Session> {
+    super::theme::boot_from_env();
     let (cols, rows) = crate::tui::term::size()?;
     let size = Size { cols, rows };
     let usable = size.usable() && crate::tui::term::ansi_enabled();
@@ -70,6 +71,8 @@ impl Drop for Session {
         }
     }
 }
+
+pub use super::theme::{apply_theme, theme_names};
 
 #[cfg(test)]
 #[path = "../tests/screen_boot.rs"]

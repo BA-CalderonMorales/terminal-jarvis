@@ -3,15 +3,17 @@
 //! scroll badge right-aligned. Repaints overwrite in place: cursor home, no
 //! erase, so keystrokes never flicker. Pure string work.
 
-use super::canvas;
+use super::layout;
 use super::sanitize;
 use super::scroll;
 use super::structs::Size;
+use super::theme;
 
 /// One composed frame. `body` arrives pre-styled; fitting happens here.
 pub struct Draft {
     pub header: String,
     pub cwd: String,
+    pub tagline: String,
     pub body: Vec<String>,
     pub prompt: String,
     pub offset: usize,
@@ -20,101 +22,61 @@ pub struct Draft {
 
 pub fn frame(size: Size, draft: &Draft) -> String {
     let inner = size.inner_cols();
-    let body_rows = size.rows.saturating_sub(3).max(1);
-    let mut rows = vec![header(draft, inner, body_rows), rule(inner)];
-    for line in scroll::window(&draft.body, draft.offset, body_rows) {
-        rows.push(pad(&sanitize::keep_color(line), inner));
+    // Compact terminals spend every row on content: the chrome centers,
+    // dims, and gives up its rule row. Roomy terminals keep the rule.
+    let compact = size.cols < 100 || size.rows < 20;
+    let body_rows = size.rows.saturating_sub(if compact { 2 } else { 3 }).max(1);
+    let mut rows = vec![layout::header(draft, inner, body_rows, compact)];
+    if !compact {
+        rows.push(layout::rule(inner));
+    }
+    let window = scroll::window(&draft.body, draft.offset, body_rows);
+    let block = body_block(window, inner);
+    let pad_top = (body_rows - block.len()) / 2;
+    for _ in 0..pad_top {
+        rows.push(layout::pad("", inner));
+    }
+    for row in block {
+        rows.push(row);
     }
     while rows.len() < size.rows - 1 {
-        rows.push(pad("", inner));
+        rows.push(layout::pad("", inner));
     }
-    rows.push(prompt(draft, inner, body_rows));
+    rows.push(layout::prompt(draft, inner, body_rows));
     // Raw mode disables OPOST, so "\n" alone would stair-step every row
     // after the first; the frame is always painted with explicit returns.
     format!("\x1b[H{}", rows.join("\r\n"))
 }
 
-/// The merged header line: identity, active harness, and the readiness
-/// verdict survive a narrow terminal; the working directory dies first.
-fn header(draft: &Draft, inner: usize, body_rows: usize) -> String {
-    let badge = scroll::badge(draft.offset, draft.body.len(), body_rows);
-    let badge = if badge.is_empty() {
-        badge
-    } else {
-        format!(" {badge}")
-    };
-    let core = sanitize::keep_color(&draft.header);
-    let cwd = format!(" · {}", sanitize::keep_color(&draft.cwd));
-    let wide = format!("{core}{cwd}");
-    let line = if canvas::visible_width(&wide) + canvas::visible_width(&badge) <= inner {
-        wide
-    } else {
-        core
-    };
-    fit(&line, inner)
+/// Appends the cursor park sequence: the last row of the frame (where the
+/// prompt lives), one cell past the typed tail, so the blinking cursor sits
+/// exactly where the next keystroke lands.
+/// The body window as painted rows: always a centered, dimmed BLOCK with
+/// column alignment intact -- the primer and command output share the
+/// treatment, and wide content degrades to flush-left.
+fn body_block(window: &[String], inner: usize) -> Vec<String> {
+    let text: Vec<String> = window
+        .iter()
+        .map(|line| sanitize::keep_color(line))
+        .collect();
+    let block_width = text
+        .iter()
+        .map(|line| crate::tui::screen::visible_width(line))
+        .max()
+        .unwrap_or(0);
+    let margin = inner.saturating_sub(block_width) / 2;
+    text.iter()
+        .map(|line| {
+            theme::dim(&layout::pad(
+                &format!("{}{line}", " ".repeat(margin)),
+                inner,
+            ))
+        })
+        .collect()
 }
 
-fn prompt(draft: &Draft, inner: usize, body_rows: usize) -> String {
-    let left = sanitize::keep_color(&draft.prompt);
-    let badge = scroll::badge(draft.offset, draft.body.len(), body_rows);
-    let hint = sanitize::keep_color(&draft.hint);
-    let right = match (badge.is_empty(), hint.is_empty()) {
-        (true, true) => String::new(),
-        (true, false) => hint,
-        (false, true) => badge.clone(),
-        (false, false) => format!("{badge} · {hint}"),
-    };
-    let left_width = canvas::visible_width(&left);
-    let right_width = canvas::visible_width(&right);
-    let badge_width = canvas::visible_width(&badge);
-    let fits = left_width + right_width + 2 <= inner;
-    let badge_fits = badge.is_empty() || left_width + badge_width + 2 <= inner;
-    let left = if !fits {
-        canvas::clip_line(&left, inner.saturating_sub(1))
-    } else {
-        let gap = inner - left_width - right_width;
-        format!("{left}{}", " ".repeat(gap.saturating_sub(1)))
-    };
-    let right = if fits {
-        crate::cli::style::dim(&right)
-    } else if badge_fits {
-        let gap = inner - left_width - badge_width;
-        let padded = format!(
-            "{left}{}{}",
-            " ".repeat(gap.saturating_sub(1)),
-            crate::cli::style::dim(&badge)
-        );
-        return padded;
-    } else {
-        return left;
-    };
-    format!("{left}{right}")
-}
-
-fn rule(inner: usize) -> String {
-    crate::cli::style::dim(&"─".repeat(inner))
-}
-
-fn pad(line: &str, inner: usize) -> String {
-    let width = canvas::visible_width(line);
-    let fill = inner.saturating_sub(width);
-    format!("{line}{}", " ".repeat(fill))
-}
-
-/// Clamps a line to `inner` cells, marking the cut with an ellipsis.
-fn fit(line: &str, inner: usize) -> String {
-    if canvas::visible_width(line) <= inner {
-        return line.to_string();
-    }
-    let mut kept: String = canvas::clip_line(line, inner.saturating_sub(1));
-    kept.push('…');
-    kept
-}
-
-/// Appends the cursor park sequence: one cell past the prompt prefix on its
-/// final row, so the session's next write lands after the visible prompt.
 pub fn parked(mut painted: String, size: Size, prompt_cells: usize) -> String {
-    let row = size.rows.saturating_sub(1);
+    let row = size.rows;
     let col = prompt_cells.max(1);
     painted.push_str(&format!("\x1b[{row};{col}H"));
     painted
@@ -123,3 +85,7 @@ pub fn parked(mut painted: String, size: Size, prompt_cells: usize) -> String {
 #[cfg(test)]
 #[path = "../../tests/screen_paint.rs"]
 mod tests;
+
+#[cfg(test)]
+#[path = "../../tests/screen_parked.rs"]
+mod parked_tests;

@@ -1,6 +1,5 @@
-//! Shell: the read-prompt loop. Viewport mode paints a full-screen frame
-//! (header, zoned body, footer prompt) and repaints it after every command;
-//! chat mode keeps the classic print-above flow. One resolver, one guard.
+//! Shell: the read-prompt loop -- full-screen frame repaints per command,
+//! chat fallback. One resolver, one guard.
 
 use crate::{cli::args, contracts::Harness};
 use std::path::Path;
@@ -11,10 +10,13 @@ mod canonical;
 mod dispatch;
 #[path = "./handle.rs"]
 mod handle;
+
 #[path = "./help.rs"]
 mod help;
 #[path = "./outcome.rs"]
 mod outcome;
+#[path = "./run_action.rs"]
+mod run_action;
 #[path = "./session.rs"]
 mod session;
 #[path = "./status.rs"]
@@ -28,14 +30,9 @@ mod viewport_raw;
 
 pub use handle::handle;
 
-pub fn run(
-    harnesses: &[Harness],
-    catalog_root: &Path,
-    state_home: &Path,
-    mut options: args::Options,
-) {
-    let mut debug = false;
-    let mut indicator = super::input::Indicator {
+pub fn run(harnesses: &[Harness], catalog_root: &Path, state_home: &Path, options: args::Options) {
+    let debug = false;
+    let indicator = super::input::Indicator {
         active: "none".into(),
         debug: false,
     };
@@ -45,22 +42,27 @@ pub fn run(
         viewport::chat_banner(harnesses, catalog_root, state_home);
     }
     super::sigint::guarded(move || {
-        let mut hint = status::modeline(state_home, false, debug);
-        status::refresh_indicator(&mut indicator, state_home, debug);
-        let mut body = viewport::welcome(harnesses, catalog_root, state_home);
+        let mut state = outcome::LoopState {
+            body: viewport::welcome(harnesses, catalog_root, state_home),
+            hint: status::modeline(state_home, false, debug),
+            options,
+            debug,
+            indicator,
+        };
+        status::refresh_indicator(&mut state.indicator, state_home, state.debug);
         loop {
             crate::tui::screen::ensure_usable();
             let input = if in_viewport && crate::tui::screen::active() {
                 viewport::prompt(
-                    &indicator,
-                    &hint,
+                    &state.indicator,
+                    &state.hint,
                     harnesses,
                     catalog_root,
                     state_home,
-                    &body,
+                    &state.body,
                 )
             } else {
-                super::input::read_line(&indicator, &hint)
+                super::input::read_line(&state.indicator, &state.hint)
             };
             let Some(input) = input else { break };
             let mut sink = Vec::new();
@@ -69,21 +71,10 @@ pub fn run(
                 harnesses,
                 catalog_root,
                 state_home,
-                &options,
+                &state.options,
                 &input,
             );
-            if !outcome::step(
-                next,
-                &mut body,
-                sink,
-                &mut hint,
-                &mut options,
-                &mut debug,
-                &mut indicator,
-                state_home,
-                harnesses,
-                catalog_root,
-            ) {
+            if !outcome::step(next, sink, &mut state, state_home, harnesses, catalog_root) {
                 break;
             }
         }

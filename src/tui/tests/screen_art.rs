@@ -4,14 +4,17 @@
 use super::welcome;
 
 #[test]
-fn welcome_is_compact_and_names_the_active_harness() {
+fn welcome_is_compact_and_teaches_the_commands() {
     let lines = welcome("codex", 3, 25);
-    assert!(lines.len() <= 12, "welcome must fit small viewports");
+    assert!(lines.len() <= 8, "primer must fit small viewports");
     let joined = lines.join("\n");
-    assert!(joined.contains("codex"));
-    assert!(joined.contains("3/25"));
+    // Identity lives in the header and tagline now; the primer teaches
+    // commands only -- including how to leave.
+    assert!(!joined.contains("codex"), "no identity duplication");
+    assert!(!joined.contains("3/25"), "no readiness duplication");
     assert!(joined.contains("list"));
     assert!(joined.contains("status"));
+    assert!(joined.contains("exit"));
     assert!(
         !lines.iter().any(|line| line.contains("╔")),
         "no brand box: the header owns identity"

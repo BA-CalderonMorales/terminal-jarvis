@@ -9,6 +9,7 @@ pub enum Resolved {
     Home,
     Run(args::Action),
     Debug(Option<bool>),
+    Theme(Option<String>),
     Error(String),
 }
 

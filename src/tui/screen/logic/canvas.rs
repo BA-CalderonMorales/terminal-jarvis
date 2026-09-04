@@ -63,10 +63,16 @@ fn pass_escape<I: Iterator<Item = char>>(out: &mut String, chars: &mut std::iter
 }
 
 /// Hard character-budget clip for border labels (no ellipsis: rules fill).
-pub fn hint_clip(hint: &str, budget: usize) -> String {
-    hint.chars().take(budget).collect()
-}
-
 #[cfg(test)]
 #[path = "../../tests/screen_canvas.rs"]
 mod tests;
+
+/// Clips one line to `cols` visible cells with a single ellipsis marker.
+pub fn fit(line: &str, cols: usize) -> String {
+    if visible_width(line) <= cols {
+        return line.to_string();
+    }
+    let mut clipped = clip_line(line, cols.saturating_sub(1));
+    clipped.push('…');
+    clipped
+}

@@ -6,16 +6,20 @@ use super::{status, viewport, Next};
 use crate::{cli::args, contracts::Harness};
 use std::path::Path;
 
+/// The mutable session state one command can change.
+pub struct LoopState {
+    pub body: Vec<String>,
+    pub hint: String,
+    pub options: args::Options,
+    pub debug: bool,
+    pub indicator: crate::tui::input::Indicator,
+}
+
 /// Applies one command's outcome; false means the loop ends.
-#[allow(clippy::too_many_arguments)]
 pub fn step(
     next: Next,
-    body: &mut Vec<String>,
     sink: Vec<u8>,
-    hint: &mut String,
-    options: &mut args::Options,
-    debug: &mut bool,
-    indicator: &mut crate::tui::input::Indicator,
+    state: &mut LoopState,
     state_home: &Path,
     harnesses: &[Harness],
     catalog_root: &Path,
@@ -26,19 +30,26 @@ pub fn step(
             picker_shown,
             reset,
         } => {
-            *hint = status::modeline(state_home, picker_shown, *debug);
-            status::refresh_indicator(indicator, state_home, *debug);
-            absorb(body, sink, reset, harnesses, catalog_root, state_home);
+            state.hint = status::modeline(state_home, picker_shown, state.debug);
+            status::refresh_indicator(&mut state.indicator, state_home, state.debug);
+            absorb(
+                &mut state.body,
+                sink,
+                reset,
+                harnesses,
+                catalog_root,
+                state_home,
+            );
             true
         }
         Next::Debug(toggle) => {
-            *debug = toggle.unwrap_or(!*debug);
-            options.narrate = *debug;
-            *hint = status::modeline(state_home, false, *debug);
-            status::refresh_indicator(indicator, state_home, *debug);
-            let line = format!("debug view {}", if *debug { "on" } else { "off" });
+            state.debug = toggle.unwrap_or(!state.debug);
+            state.options.narrate = state.debug;
+            state.hint = status::modeline(state_home, false, state.debug);
+            status::refresh_indicator(&mut state.indicator, state_home, state.debug);
+            let line = format!("debug view {}", if state.debug { "on" } else { "off" });
             if crate::tui::screen::active() {
-                body.push(line);
+                state.body.push(line);
             } else {
                 println!("{line}");
             }
@@ -48,7 +59,7 @@ pub fn step(
 }
 
 /// Viewport absorbs captured output as the next body; chat prints it above
-/// the prompt. A reset restores the welcome; an empty capture keeps both.
+/// the prompt. A reset restores the primer.
 fn absorb(
     body: &mut Vec<String>,
     sink: Vec<u8>,

@@ -5,6 +5,7 @@ pub mod matrix;
 pub mod platform;
 #[cfg(unix)]
 pub mod pty;
+mod pty_io;
 pub mod screen;
 pub mod tui;
 pub mod width;

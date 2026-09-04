@@ -38,11 +38,11 @@ pub fn capability(
             eprintln!("{} {harness} ...", verb(capability));
         }
     }
-    match runtime::run_command(plan, extra) {
-        Ok(0) => Ok((0, String::new())),
-        Ok(code) => {
+    match runtime::run_command_text(plan, extra) {
+        Ok((0, captured)) => Ok((0, captured)),
+        Ok((code, captured)) => {
             eprintln!("{}", diagnostic(harness, capability, &plan.command, code));
-            Ok((code, String::new()))
+            Ok((code, captured))
         }
         Err(error) => {
             let (code, message) = command_error(selected, plan.command.command.as_str(), error);

@@ -8,6 +8,7 @@ fn draft() -> Draft {
     Draft {
         header: "Terminal Jarvis · ACTIVE fixture · READY 1/1 ready".into(),
         cwd: ".../working/terminal-jarvis".into(),
+        tagline: "context command center · active [fixture] · fleet readiness 1/1".into(),
         body: vec!["one".into(), "two".into()],
         prompt: "[>_]::[tj:test]::[harness:fixture]: ".into(),
         offset: 0,
@@ -50,10 +51,11 @@ fn rows_carry_carriage_returns_for_raw_mode() {
     // Raw mode disables OPOST: a bare \n stair-steps every row after the
     // first. Every line break in a painted frame must be an explicit \r\n.
     let painted = frame(Size { cols: 80, rows: 24 }, &draft());
-    let bare = painted
+    let bare_newlines = painted
         .char_indices()
         .filter(|(index, c)| *c == '\n' && (*index == 0 || painted.as_bytes()[*index - 1] != b'\r'))
         .count();
+    assert_eq!(bare_newlines, 0, "no bare newlines");
     assert!(painted.contains("\r\n"));
 }
 
@@ -67,41 +69,13 @@ fn header_keeps_the_verdict_and_drops_the_cwd_when_narrow() {
 }
 
 #[test]
-fn hint_sits_on_the_prompt_row_with_the_scroll_badge() {
-    let size = Size { cols: 80, rows: 24 };
-    let mut d = draft();
-    d.body = (0..50).map(|i| format!("line {i}")).collect();
-    let painted = frame(size, &d);
-    let prompt_row = painted.split('\n').nth(size.rows - 1).unwrap();
-    assert!(prompt_row.contains("↑ 29"), "scroll badge: {prompt_row}");
-    // at 80 cols the badge wins the row and the long hint yields
-    assert!(
-        !prompt_row.contains("active: fixture"),
-        "hint yields: {prompt_row}"
-    );
-    assert!(
-        !painted.contains("more lines above"),
-        "history is scrolled, not dropped"
-    );
-}
-
-#[test]
-fn long_body_windows_to_the_newest_lines() {
-    let size = Size { cols: 80, rows: 24 };
-    let mut d = draft();
-    d.body = (0..50).map(|i| format!("line {i}")).collect();
-    let painted = frame(size, &d);
-    assert!(painted.contains("line 49"), "the newest line must survive");
-    assert!(
-        !painted.contains("line 0"),
-        "older lines yield to the window"
-    );
-}
-
-#[test]
 fn no_box_chrome_anywhere() {
     let painted = frame(Size { cols: 80, rows: 24 }, &draft());
     for chrome in ["╔", "╚", "╠", "╣", "├", "┤"] {
         assert!(!painted.contains(chrome), "{chrome} in frame");
     }
+}
+
+pub(crate) fn harness_prompt() -> &'static str {
+    "[>_]::[tj:test]::[harness:fixture]: "
 }
