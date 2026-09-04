@@ -33,7 +33,7 @@ impl ViewportState {
             header: home::header(&o),
             cwd: o.cwd,
             tagline: crate::tui::screen::tagline(&o.name, o.ready, o.total),
-            prefix_cells: screen::visible_width(&prefix) + 2,
+            prefix_cells: screen::visible_width(&prefix) + 1,
             prefix,
         }
     }
