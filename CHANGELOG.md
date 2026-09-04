@@ -2,12 +2,24 @@
 
 ## [0.1.17] - unreleased
 
+- Minimalist centered TUI: the frame is gone -- one merged header line
+  (identity, active harness, readiness verdict, working directory, with
+  priority-ordered truncation), a dim rule, and a centered dimmed body.
+  Command output and the first-boot primer share the treatment; wide
+  content degrades to flush-left.
+- `/theme`: live palette switching (`default`, `midnight`, `ember`, `moss`,
+  `solarized`, `mono`), case- and separator-insensitive; pinned at boot via
+  `TERMINAL_JARVIS_THEME`.
+- In-frame command capture: management commands (install, update, gate,
+  package checks) run inside the frame -- their streams land in the body
+  as console lines instead of painting over the alt-screen. Harness runs
+  still own the real terminal.
+- Surgical repaints: cursor-home overwrite without full-erase, and explicit
+  carriage returns so raw-mode frames never stair-step.
 - Full-viewport TUI: on terminals that can hold it (50+ cols, 10+ rows, ANSI),
-  the switcher now paints a bordered command-center frame -- title, live
-  status row, zoned body, footer prompt with an embedded hint -- and
-  repaints in place after every command, so nothing scrolls. Child runs
-  (install/update/run/direct) suspend the frame and own the real terminal;
-  a terminal that shrinks below the floor falls back to chat mode.
+  the switcher paints the command center and repaints in place after every
+  command, so nothing scrolls. A terminal that shrinks below the floor
+  falls back to chat mode.
 - Viewport hardening: catalog strings are sanitized before they reach the
   frame (color survives; OSC/cursor/query sequences and control bytes do
   not), wide glyphs measure as two cells so borders never drift, signal
