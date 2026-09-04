@@ -35,6 +35,13 @@ pub fn resolve(input: &str, harnesses: &[Harness]) -> Resolved {
         "/debug" | "debug" => return Resolved::Debug(None),
         "/debug on" => return Resolved::Debug(Some(true)),
         "/debug off" => return Resolved::Debug(Some(false)),
+        "/theme" | "theme" => return Resolved::Theme(None),
+        rest if rest.starts_with("/theme ") => {
+            return Resolved::Theme(Some(rest["/theme ".len()..].trim().to_string()))
+        }
+        rest if rest.starts_with("theme ") => {
+            return Resolved::Theme(Some(rest["theme ".len()..].trim().to_string()))
+        }
         rest if rest.starts_with('/') => {
             return match crate::tui::palette::parse(&rest[1..]) {
                 Ok(action) => Resolved::Run(action),

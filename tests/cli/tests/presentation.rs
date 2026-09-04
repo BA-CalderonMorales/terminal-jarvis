@@ -41,7 +41,7 @@ fn default_output_is_structured_across_the_core_read_only_surface() {
     for (args, title) in [
         (&["--help"][..], "Commands"),
         (&["list"], "Available Harnesses"),
-        (&["show", "codex"], "Capability Truth"),
+        (&["show", "codex"], "OpenAI coding agent CLI"),
         (&["plan", "codex", "headless"], "Plan: codex headless"),
         (&["version", "--verbose"], "Terminal Jarvis"),
         (&["update"], "Harness Updates"),
@@ -51,6 +51,13 @@ fn default_output_is_structured_across_the_core_read_only_surface() {
         (&["security", "audit"], "Security Audit"),
         (&["gate", "status"], "Security Gate"),
     ] {
+        if args[0] == "show" {
+            let show = tj(args, &home);
+            let body = stdout(&show);
+            assert!(body.contains(title), "{body}");
+            assert!(!body.contains('+'), "show is line-based: {body}");
+            continue;
+        }
         assert_table(&tj(args, &home), title);
     }
     let check = tj(&["check"], &home);

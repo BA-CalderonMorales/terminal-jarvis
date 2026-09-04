@@ -79,7 +79,7 @@ fn tui_idle_ctrl_c_leaves_the_session_open() {
     let fixture = Fixture::new(State::Expected);
     let mut command = fixture.command();
     command.args(["tui"]);
-    let stages: [(&[u8], Option<&[u8]>); 2] = [(b"\x03", Some(b"[>_]")), (b"exit\n", None)];
+    let stages: [(&[u8], Option<&[u8]>); 2] = [(b"\x03", Some(b"::[tj:")), (b"exit\n", None)];
     let (status, output) = run_pty_probe(command, &stages);
     assert_eq!(status.code(), Some(0), "idle Ctrl+C must not kill the tui");
     let body = text(&output);

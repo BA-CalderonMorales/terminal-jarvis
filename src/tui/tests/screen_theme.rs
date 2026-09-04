@@ -47,3 +47,15 @@ fn boot_env_pins_the_palette() {
     assert!(apply_theme("default"));
     assert_eq!(super::accent("x"), "\x1b[1;36mx\x1b[0m");
 }
+
+#[test]
+fn bare_theme_cycles_and_wraps_back_to_default() {
+    let _guard = TEST_LOCK.lock().unwrap_or_else(|e| e.into_inner());
+    apply_theme("default");
+    let names = theme_names();
+    for expected in names.iter().skip(1) {
+        assert_eq!(super::super::cycle_theme(), *expected);
+        assert_eq!(super::super::active_theme(), *expected);
+    }
+    assert_eq!(super::super::cycle_theme(), "default");
+}

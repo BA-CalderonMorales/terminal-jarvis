@@ -9,7 +9,7 @@ use std::process::Command;
 pub const MARKER_SCRIPT: &str = "#!/bin/sh\n: > \"$TJ_FIXTURE_MARKER\"\n";
 #[cfg(not(unix))]
 pub const MARKER_SCRIPT: &str = "@echo off\r\ntype nul > \"%TJ_FIXTURE_MARKER%\"\r\n";
-pub const FRAME: &[u8] = b"[>_]::[tj:";
+pub const FRAME: &[u8] = b"::[tj:";
 pub const EXIT: (&[u8], Option<&[u8]>) = (b"\x04", None);
 
 pub static SERIAL: std::sync::Mutex<()> = std::sync::Mutex::new(());

@@ -12,7 +12,6 @@ mod cwd;
 pub use cwd::cwd_label;
 pub use overview::{collect, header, plain, styled, Overview};
 
-use crate::cli::style;
 use crate::contracts::Harness;
 use std::io::Write;
 use std::path::Path;
@@ -29,8 +28,8 @@ pub fn render(out: &mut dyn Write, harnesses: &[Harness], catalog_root: &Path, s
         let _ = writeln!(
             out,
             "{}\n{}\n{}\n",
-            style::heading(title),
-            style::dim(subtitle),
+            crate::tui::screen::accent(title),
+            crate::tui::screen::dim(subtitle),
             status
         );
     } else {
@@ -38,10 +37,10 @@ pub fn render(out: &mut dyn Write, harnesses: &[Harness], catalog_root: &Path, s
         let _ = writeln!(
             out,
             "{}{}{}\n{}\n",
-            style::heading(title),
+            crate::tui::screen::accent(title),
             gap,
             status,
-            style::dim(subtitle)
+            crate::tui::screen::dim(subtitle)
         );
     }
 }

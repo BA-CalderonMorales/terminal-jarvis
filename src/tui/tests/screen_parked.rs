@@ -38,7 +38,7 @@ fn hint_sits_on_the_prompt_row_with_the_scroll_badge() {
 fn cursor_parks_on_the_prompt_row_after_the_tail() {
     let size = Size { cols: 80, rows: 24 };
     let prompt_str = harness_prompt();
-    let prompt_cells = visible_width(prompt_str) + 2;
+    let prompt_cells = visible_width(prompt_str) + 1;
     let painted = parked(frame(size, &draft()), size, prompt_cells);
     let expected = format!("\x1b[{};{}H", size.rows, prompt_cells);
     assert!(

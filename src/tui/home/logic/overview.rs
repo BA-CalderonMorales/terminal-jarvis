@@ -37,14 +37,14 @@ pub fn plain(o: &Overview) -> String {
 /// The viewport header: one merged line, priority-ordered so a narrow
 /// terminal loses the working directory before the readiness verdict.
 pub fn header(o: &Overview) -> String {
-    use crate::cli::style;
+    use crate::tui::screen::{accent, dim};
     let ready_view = verdict(o);
     format!(
         "{} · {} {} · {} {}",
-        style::heading("Terminal Jarvis"),
-        style::label("ACTIVE"),
-        style::heading(&o.name),
-        style::label("READY"),
+        accent("Terminal Jarvis"),
+        dim("ACTIVE"),
+        accent(&o.name),
+        dim("READY"),
         ready_view,
     )
 }

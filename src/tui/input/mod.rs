@@ -9,6 +9,8 @@ mod keys;
 mod line;
 
 pub use editor::{Editor, Feed, Move};
+#[cfg(test)]
+pub(crate) use keys::decode;
 pub use keys::read_key;
 pub use keys::Key;
 pub use line::{compose, raw_line, read_line, retire};
@@ -27,19 +29,21 @@ pub struct Indicator {
 
 impl Indicator {
     /// The prompt prefix: `[>_]::[tj:{v}]::[harness:{name}]:` + one space
-    /// for the input area.
+    /// for the input area. Painted with the live theme palette so a
+    /// `/theme` swap recolors the prompt on the next frame.
     pub fn render(&self, ansi: bool) -> String {
+        use crate::tui::screen::{accent, dim};
         let on = ansi && !style::plain();
         let debug = if self.debug {
-            format!("::{}", painted("[debug]", on, style::dim))
+            format!("::{}", painted("[debug]", on, dim))
         } else {
             String::new()
         };
         format!(
             "{}::[tj:{}]::[harness:{}]{}: ",
-            PROMPT,
-            painted(TJ_VERSION, on, style::dim),
-            painted(&self.active, on, style::heading),
+            painted(PROMPT, on, accent),
+            painted(TJ_VERSION, on, dim),
+            painted(&self.active, on, accent),
             debug
         )
     }
@@ -65,3 +69,7 @@ mod tests;
 #[cfg(test)]
 #[path = "../tests/input_keys.rs"]
 mod keys_tests;
+
+#[cfg(test)]
+#[path = "../tests/input_decode.rs"]
+mod decode_tests;

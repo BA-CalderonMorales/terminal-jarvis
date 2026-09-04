@@ -7,21 +7,41 @@ use std::sync::Mutex;
 
 use super::palettes::{self, Palette};
 
-static ACTIVE: Mutex<Palette> = Mutex::new(Palette {
-    dim: "2",
-    accent: "1;36",
-});
+static ACTIVE: Mutex<(&'static str, Palette)> = Mutex::new((
+    "default",
+    Palette {
+        dim: "2",
+        accent: "1;36",
+    },
+));
 
 /// Swaps the active palette; false when the name is unknown. The default
 /// theme restores the shipped look exactly.
 pub fn apply_theme(name: &str) -> bool {
     match palettes::lookup_theme(name) {
-        Some(palette) => {
-            *ACTIVE.lock().unwrap_or_else(|e| e.into_inner()) = palette;
+        Some((theme_name, palette)) => {
+            *ACTIVE.lock().unwrap_or_else(|e| e.into_inner()) = (theme_name, palette);
             true
         }
         None => false,
     }
+}
+
+/// The active theme's canonical name.
+pub fn active_theme() -> &'static str {
+    ACTIVE.lock().unwrap_or_else(|e| e.into_inner()).0
+}
+
+/// Advances to the next theme in the sorted cycle; returns the new name.
+pub fn cycle_theme() -> &'static str {
+    let names = palettes::theme_names();
+    let current = active_theme();
+    let next = match names.iter().position(|name| *name == current) {
+        Some(index) => names[(index + 1) % names.len()],
+        None => names[0],
+    };
+    apply_theme(next);
+    next
 }
 
 /// The sorted theme list, for `/theme` with no argument.
@@ -38,7 +58,7 @@ pub fn boot_from_env() {
 
 /// The active palette, read live so `/theme` swaps take effect mid-session.
 fn palette() -> Palette {
-    *ACTIVE.lock().unwrap_or_else(|e| e.into_inner())
+    ACTIVE.lock().unwrap_or_else(|e| e.into_inner()).1
 }
 
 fn paint(value: &str, code: &str) -> String {

@@ -1,4 +1,4 @@
-use crate::cli::logic::{output_plan, output_truth, style, table};
+use crate::cli::logic::{output_plan, style, table};
 use crate::contracts::{Capability, CommandPlan, Harness};
 
 pub fn list(harnesses: &[Harness]) -> String {
@@ -9,7 +9,7 @@ pub fn list(harnesses: &[Harness]) -> String {
                 format!(
                     "{} support={} - {}\n",
                     harness.name,
-                    output_truth::support_summary(harness),
+                    crate::cli::logic::output_truth::support_summary(harness),
                     harness.description
                 )
             })
@@ -20,7 +20,7 @@ pub fn list(harnesses: &[Harness]) -> String {
         .map(|harness| {
             vec![
                 harness.name.clone(),
-                output_truth::support_summary(harness),
+                crate::cli::logic::output_truth::support_summary(harness),
                 harness.description.clone(),
             ]
         })
@@ -29,53 +29,6 @@ pub fn list(harnesses: &[Harness]) -> String {
         "Available Harnesses",
         &["NAME", "SUPPORT", "DESCRIPTION"],
         &rows,
-    )
-}
-
-pub fn show(harness: &Harness) -> String {
-    if style::plain() {
-        let mut out = format!(
-            "{} ({})\n{}\nbinary: {}\nsetup: {}\nsupport: {}\n",
-            harness.display,
-            harness.name,
-            harness.description,
-            harness.binary,
-            harness.setup_hint(),
-            output_truth::support_summary(harness)
-        );
-        for plan in &harness.capabilities {
-            out.push_str(&output_truth::plain_capability(plan));
-        }
-        return out;
-    }
-    let details = table::fields(
-        &format!("{} ({})", harness.display, harness.name),
-        &[
-            ("DESCRIPTION", harness.description.clone()),
-            ("BINARY", harness.binary.clone()),
-            ("SETUP", harness.setup_hint()),
-            ("SUPPORT", output_truth::support_summary(harness)),
-        ],
-    );
-    let rows = harness
-        .capabilities
-        .iter()
-        .map(output_truth::capability_row)
-        .collect::<Vec<_>>();
-    format!(
-        "{details}\n{}",
-        table::render(
-            "Capability Truth",
-            &[
-                "CAPABILITY",
-                "STATE",
-                "EVIDENCE",
-                "EFFECT",
-                "PLATFORMS",
-                "FRESHNESS"
-            ],
-            &rows
-        )
     )
 }
 

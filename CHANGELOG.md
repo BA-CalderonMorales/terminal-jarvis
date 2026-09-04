@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.1.18] - unreleased
+
+- `show` redesigned: human lines (description, aligned binary/setup/support
+  fields, one line per capability with its summary) instead of the
+  capability-truth table -- cell-aware wrapping keeps every line inside the
+  viewport, and the block joins the centered dimmed body treatment.
+- First-boot primer: commands in natural-order (home, status, list,
+  `<number|harness>`, plan, install, show, debug, exit) with install and
+  show added; bare `debug` now resolves in the tui.
+- Cursor parks exactly where the next keystroke lands (the borderless
+  prompt row kept a one-column border calibration).
+- Themes: the chrome palette is theme-driven -- the greyed layer and the
+  accent follow the vibe; six themes ship.
+
 ## [0.1.17] - unreleased
 
 - Minimalist centered TUI: the frame is gone -- one merged header line
