@@ -1,6 +1,7 @@
+use super::pty_io::{drain, wait_until};
 use std::ffi::CStr;
 use std::fs::{File, OpenOptions};
-use std::io::{Read, Write};
+use std::io::Write;
 use std::os::fd::FromRawFd;
 use std::os::unix::process::CommandExt;
 use std::process::{Command, ExitStatus, Stdio};
@@ -13,6 +14,15 @@ unsafe extern "C" {
     fn ptsname(fd: i32) -> *mut std::ffi::c_char;
     fn setsid() -> i32;
     fn ioctl(fd: i32, request: u64, ...) -> i32;
+}
+
+#[repr(C)]
+#[derive(Default, Clone, Copy)]
+struct Winsize {
+    row: u16,
+    col: u16,
+    xpixel: u16,
+    ypixel: u16,
 }
 
 #[cfg(target_os = "linux")]
@@ -62,34 +72,23 @@ pub fn run_pty_probe(
     (status, final_bytes)
 }
 
-fn drain(mut master: File, bytes: Arc<Mutex<Vec<u8>>>) {
-    let mut buffer = [0_u8; 4096];
-    loop {
-        match master.read(&mut buffer) {
-            Ok(0) => break,
-            Ok(size) => bytes.lock().unwrap().extend_from_slice(&buffer[..size]),
-            Err(error) if error.raw_os_error() == Some(5) => break,
-            Err(error) => panic!("pseudo-terminal read failed: {error}"),
-        }
-    }
-}
-
-fn wait_until(bytes: &Arc<Mutex<Vec<u8>>>, marker: &[u8]) {
-    for _ in 0..=500 {
-        let seen = bytes.lock().unwrap().clone();
-        if seen.windows(marker.len()).any(|window| window == marker) {
-            return;
-        }
-        std::thread::sleep(std::time::Duration::from_millis(20));
-    }
-    panic!("timed out waiting for {:?} in: {:?}", marker, bytes);
-}
-
 fn open_pair() -> (File, File) {
     let fd = unsafe { posix_openpt(2) };
     assert!(fd >= 0, "posix_openpt failed");
     assert_eq!(unsafe { grantpt(fd) }, 0, "grantpt failed");
     assert_eq!(unsafe { unlockpt(fd) }, 0, "unlockpt failed");
+    // A real size so the viewport boots in the pty; without this the child
+    // sees a 0x0 window and every acceptance test silently runs chat mode.
+    let size = Winsize {
+        row: 24,
+        col: 80,
+        ..Default::default()
+    };
+    #[cfg(target_os = "linux")]
+    const TIOCSWINSZ: u64 = 0x5413;
+    #[cfg(not(target_os = "linux"))]
+    const TIOCSWINSZ: u64 = 0x4008_7474;
+    unsafe { ioctl(fd, TIOCSWINSZ, &size as *const Winsize) };
     let path = unsafe { CStr::from_ptr(ptsname(fd)) }.to_string_lossy();
     let slave = OpenOptions::new()
         .read(true)

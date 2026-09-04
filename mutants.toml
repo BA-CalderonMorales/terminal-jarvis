@@ -27,6 +27,11 @@ exclude_re = [
   # The cfg(not(unix)) exit_code variant never compiles on CI runners; the
   # unix variant is witnessed by the preflight signal tests.
   "stream\\.rs:12.*replace exit_code -> i32 with",
+  # run_command_text's capture branch executes only inside the tui (screen
+  # active); headless runners take the inherit branch, so its two trim
+  # guards and the capture flip are unkillable there. The in-frame capture
+  # path is witnessed by the pty acceptance suite on real terminals.
+  "runner\\.rs:(2[0-9]|3[0-9]):.*delete ! in run_command_text",
   # The cfg(windows) PATHEXT-resolved spawn target never compiles on Linux
   # runners; the unix pass-through variant is witnessed by the spawn tests
   # (mutating it fails the package-check fake-bin verdicts).

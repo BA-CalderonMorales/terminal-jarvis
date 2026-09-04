@@ -9,12 +9,19 @@ pub enum Resolved {
     Home,
     Run(args::Action),
     Debug(Option<bool>),
+    Theme(Option<String>),
     Error(String),
 }
 
+#[derive(Debug)]
 pub enum Next {
     Exit,
-    Again { picker_shown: bool },
+    /// `reset` asks the surface to restore its pristine body: chat mode
+    /// printed the banner through the sink, viewport mode re-shows art.
+    Again {
+        picker_shown: bool,
+        reset: bool,
+    },
     Debug(Option<bool>),
 }
 
@@ -25,7 +32,7 @@ pub fn resolve(input: &str, harnesses: &[Harness]) -> Resolved {
         "help" | "/help" => return Resolved::Help,
         "/exit" | "/quit" | "exit" | "quit" => return Resolved::Exit,
         "/home" | "/clear" | "home" | "clear" => return Resolved::Home,
-        "/debug" => return Resolved::Debug(None),
+        "/debug" | "debug" => return Resolved::Debug(None),
         "/debug on" => return Resolved::Debug(Some(true)),
         "/debug off" => return Resolved::Debug(Some(false)),
         rest if rest.starts_with('/') => {

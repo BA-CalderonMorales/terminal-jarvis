@@ -21,11 +21,11 @@ and match it:
 | Tail says | What it means | Fix |
 |---|---|---|
 | HIGH/CRITICAL findings listed | Real vulnerabilities or misconfigurations in the working tree | Review the report; `y` continues for that one action only; add `.trivyignore` only for reviewed, documented exceptions |
-| `Fatal error ... walk dir error ... no such file or directory` naming a path | The scanner hit a broken filesystem entry it can list but not open | Windows delete-pending entries (names starting with `~`) cannot be opened from WSL. Reboot Windows once -- they self-delete -- or run Terminal Jarvis from a narrower directory. 0.1.15 and later skip these entries automatically |
+| `Fatal error ... walk dir error ... no such file or directory` naming a path | The scanner hit a broken filesystem entry it can list but not open | Windows delete-pending entries (names starting with `~`) cannot be opened from WSL. Reboot Windows once -- they self-delete -- or run Terminal Jarvis from a narrower directory |
 | `warning: optional gate 'trivy' is enabled but 'trivy' is not on PATH` | The scanner is missing, so nothing is scanned | Install Trivy (see the warning hint) or `terminal-jarvis gate disable` |
 
 Symptom: the scan seems to hang for minutes. Slow trees (OneDrive mounts,
-WSL over Windows folders) can take minutes; 0.1.15 and later redraw a
+WSL over Windows folders) can take minutes; 0.1.16 and later redraw a
 heartbeat (`security scan (trivy) ... 5s scanning workspace`) so it reads as
 progress. Ctrl+C no longer cancels the command: it asks
 `Skip the scan and continue with <capability>:<harness>? [y/N]`, and `y`

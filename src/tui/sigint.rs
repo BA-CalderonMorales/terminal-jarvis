@@ -1,9 +1,8 @@
-//! Sigint: scoped SIGINT handling for the tui shell. While a guarded action
-//! runs the tui ignores SIGINT (children reset to SIG_DFL at spawn, so an
-//! agent still dies on Ctrl+C while the shell survives; a stuck gate scanner
-//! is SIGKILLed outright -- trivy's graceful shutdown can idle for minutes).
-//! Idle Ctrl+C wipes the terminal's echoed `^C` and reprints the stored prompt
-//! prefix, so the frame never shows control-char debris. Std-only libc FFI.
+//! Sigint: scoped SIGINT handling. While a guarded action runs, children
+//! keep SIG_DFL (an agent dies on Ctrl+C; the shell survives; a stuck gate
+//! scanner is SIGKILLed outright). Idle Ctrl+C wipes the echoed `^C` and
+//! reprints the prompt prefix -- suppressed in viewport mode, which owns
+//! its frame. Std-only libc FFI.
 use std::sync::atomic::{AtomicBool, AtomicPtr, AtomicUsize, Ordering};
 
 static CHILD_RUNNING: AtomicBool = AtomicBool::new(false);
@@ -11,8 +10,7 @@ static ANSI: AtomicBool = AtomicBool::new(false);
 static PREFIX: AtomicPtr<u8> = AtomicPtr::new(std::ptr::null_mut());
 static PREFIX_LEN: AtomicUsize = AtomicUsize::new(0);
 
-/// Marks the window where a child owns the terminal (dispatch inside
-/// session/canonical frames). The SIGINT handler redraws only when false.
+/// Marks the window where a child owns the terminal. Redraw only when false.
 pub fn child_running(running: bool) {
     CHILD_RUNNING.store(running, Ordering::Release);
 }
@@ -52,6 +50,10 @@ extern "C" fn refresh(_signum: i32) {
         return;
     }
     if !should_redraw(false, ANSI.load(Ordering::Relaxed)) {
+        return;
+    }
+    if crate::tui::screen::active() {
+        // The viewport owns its frame; erasing rows here would corrupt it.
         return;
     }
     let _ = unsafe { raw_write(1, CORE_FRAME.as_ptr(), CORE_FRAME.len()) };

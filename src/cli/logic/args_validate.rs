@@ -1,7 +1,7 @@
-pub(super) fn at_most_one(words: &[String], command: &str) -> Result<Vec<String>, String> {
+pub(super) fn at_most_one(words: &[String], usage: &str) -> Result<Vec<String>, String> {
     (words.len() <= 1)
         .then(|| words.to_vec())
-        .ok_or_else(|| format!("usage: terminal-jarvis {command} [value]"))
+        .ok_or_else(|| format!("usage: terminal-jarvis {usage}"))
 }
 
 pub(super) fn valid_choice(
@@ -51,10 +51,12 @@ pub(super) fn validate_options(action: &Action, options: &Options) -> Result<(),
         return Err("--verbose is valid only with check or version".into());
     }
     let gate_accepts_no_input = matches!(action, Action::Gate(_)) && options.no_input;
-    let lifecycle = options.dry_run
-        || options.confirm.is_some()
-        || options.allow_dangerous
-        || (options.no_input && !gate_accepts_no_input);
+    let summary_preview = matches!(action, Action::Update(None)) && options.dry_run;
+    let lifecycle = !summary_preview
+        && (options.dry_run
+            || options.confirm.is_some()
+            || options.allow_dangerous
+            || (options.no_input && !gate_accepts_no_input));
     if lifecycle
         && !matches!(
             action,

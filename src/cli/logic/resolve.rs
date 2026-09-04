@@ -46,9 +46,7 @@ pub fn direct(
     harnesses: &[Harness],
 ) -> Result<Invocation, String> {
     if !has_harness(harnesses, harness) {
-        return Err(format!(
-            "unknown command or harness '{harness}'; run `terminal-jarvis list`"
-        ));
+        return Err(format!("unknown command or harness '{harness}'"));
     }
     // Parse capability from extra args if present
     let (capability, remaining_extra) = match extra.split_first() {

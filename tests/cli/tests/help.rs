@@ -29,7 +29,7 @@ fn help_lists_every_public_command() {
         "terminal-jarvis auth help <harness>",
         "terminal-jarvis config show",
         "terminal-jarvis cache status",
-        "terminal-jarvis security [status|audit|harness]",
+        "terminal-jarvis security [status|audit|<harness>]",
     ] {
         assert!(body.contains(command), "help missing {command}");
     }

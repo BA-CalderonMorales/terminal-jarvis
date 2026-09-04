@@ -22,7 +22,7 @@ const USAGE: [(&str, &str); 20] = [
     ("auth", "auth [help|set] <harness>"),
     ("config", "config [show|path|reset]"),
     ("cache", "cache [status|clear|refresh]"),
-    ("security", "security [status|audit|harness]"),
+    ("security", "security [status|audit|<harness>]"),
     (
         "gate",
         "gate [status|list|enable [name]|disable|run [name]]",

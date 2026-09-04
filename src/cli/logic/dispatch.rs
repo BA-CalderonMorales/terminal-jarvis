@@ -19,7 +19,7 @@ pub fn dispatch(
         Action::Current => Ok((0, output::current(dispatch_support::session(home)?))),
         Action::Use(name) => {
             dispatch_support::find(harnesses, &name)?;
-            crate::context::save(home, &name).map_err(dispatch_support::session_error)?;
+            crate::context::save(home, &name).map_err(dispatch_support::session_write_error)?;
             Ok((0, output::selected(&name)))
         }
         Action::Show(name) => Ok((0, output::show(dispatch_support::find(harnesses, &name)?))),

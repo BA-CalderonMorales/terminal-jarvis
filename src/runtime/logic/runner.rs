@@ -4,13 +4,38 @@ use std::io;
 use std::process::{Command, Stdio};
 
 pub fn run_command(plan: &CapabilityPlan, extra: &[String]) -> io::Result<i32> {
+    run_command_text(plan, extra).map(|(code, _)| code)
+}
+
+/// Like [`run_command`], but inside the tui the child's stream is captured
+/// and returned, so the frame can render it as console log lines instead of
+/// letting it paint over the alt-screen. Headless keeps inherited stdio.
+pub fn run_command_text(plan: &CapabilityPlan, extra: &[String]) -> io::Result<(i32, String)> {
     let mut command = Command::new(security::resolved(&plan.command.command).as_ref());
     command.args(&plan.command.args).args(extra);
-    command.stdout(Stdio::inherit());
-    command.stderr(Stdio::inherit());
+    let tui_capture = crate::tui::screen::active();
+    if tui_capture {
+        command.stdout(Stdio::piped()).stderr(Stdio::piped());
+    } else {
+        command.stdout(Stdio::inherit()).stderr(Stdio::inherit());
+    }
     #[cfg(unix)]
     reset_sigint_in_child(&mut command);
-    command.status().map(status_code)
+    if !tui_capture {
+        return command
+            .status()
+            .map(|status| (status_code(status), String::new()));
+    }
+    let output = command.output()?;
+    let mut text = String::from_utf8_lossy(&output.stdout).to_string();
+    let err = String::from_utf8_lossy(&output.stderr);
+    if !err.trim().is_empty() {
+        if !text.trim().is_empty() {
+            text.push('\n');
+        }
+        text.push_str(err.trim());
+    }
+    Ok((status_code(output.status), text))
 }
 
 #[cfg(unix)]

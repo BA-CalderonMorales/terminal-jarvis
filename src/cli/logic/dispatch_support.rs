@@ -3,6 +3,10 @@ use crate::context::{self, Session};
 use crate::contracts::Harness;
 use std::path::Path;
 
+#[cfg(test)]
+#[path = "../tests/dispatch_support_test.rs"]
+mod tests;
+
 pub fn session(home: &Path) -> error::Result<Option<Session>> {
     context::load(home).map_err(session_error)
 }
@@ -12,6 +16,14 @@ pub fn session_error(cause: impl std::fmt::Display) -> error::Failure {
         "session_invalid",
         cause.to_string(),
         "repair or remove the Terminal Jarvis session file",
+    )
+}
+
+pub fn session_write_error(cause: impl std::fmt::Display) -> error::Failure {
+    error::Failure::state(
+        "session_unwritable",
+        cause.to_string(),
+        "check your Terminal Jarvis home directory (TERMINAL_JARVIS_HOME overrides it) permissions and disk space, then retry",
     )
 }
 

@@ -76,7 +76,7 @@ fn entry(name: &str) -> (&'static str, &'static str) {
             "Inspect wrapper cache state and recovery guidance.",
         ),
         "security" => (
-            "terminal-jarvis security [status|audit|harness]",
+            "terminal-jarvis security [status|audit|<harness>]",
             "Inspect local security and support plans.",
         ),
         "gate" => (

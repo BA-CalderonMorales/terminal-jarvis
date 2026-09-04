@@ -8,6 +8,7 @@
 pub mod home;
 pub mod input;
 pub mod palette;
+pub mod screen;
 pub mod shell;
 pub mod sigint;
 pub mod switcher;
@@ -33,7 +34,6 @@ pub fn run(
         narrate: false,
         ..cli::args::Options::default()
     };
-    home::render(harnesses, catalog_root, state_home);
     shell::run(harnesses, catalog_root, state_home, options);
     Ok((0, String::new()))
 }

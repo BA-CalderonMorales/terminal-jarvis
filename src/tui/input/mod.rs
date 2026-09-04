@@ -1,11 +1,19 @@
-//! The canonical-mode line widget (keystrokes land after Enter; std has no
-//! raw mode): `compose` draws the hint *below* the prompt, `retire` clears
-//! it, results print above -- a chat-style layout. The prompt carries the
-//! context indicator `[>_]::[tj:0.1.13]::[harness:codex]:` (names bold cyan,
-//! versions dim -- ANSI-16 core, readable on any theme).
-use super::term;
+//! Input: the prompt widget surface. `Indicator` renders the context
+//! prefix; the line readers live in `logic/`.
+
+#[path = "logic/editor.rs"]
+mod editor;
+#[path = "logic/keys.rs"]
+mod keys;
+#[path = "logic/line.rs"]
+mod line;
+
+pub use editor::{Editor, Feed, Move};
+pub use keys::read_key;
+pub use keys::Key;
+pub use line::{compose, raw_line, read_line, retire};
+
 use crate::cli::style;
-use std::io::{self, Write};
 
 pub const PROMPT: &str = "[>_]";
 
@@ -50,48 +58,10 @@ fn painted(value: &str, on: bool, paint: fn(&str) -> String) -> String {
     }
 }
 
-pub fn compose(ansi: bool, indicator: &Indicator, hint: &str) -> String {
-    let prefix = indicator.render(ansi);
-    if !ansi {
-        return format!("{prefix}{hint}\n{prefix}");
-    }
-    format!("{prefix}\n{}\x1b[1A\r{prefix}", style::dim(hint))
-}
-
-pub fn retire(text: &str, ansi: bool, hint: &str, indicator: &Indicator) -> String {
-    if !ansi {
-        return if text.is_empty() {
-            compose(false, indicator, hint)
-        } else {
-            "\n".to_string()
-        };
-    }
-    if text.is_empty() {
-        return format!("\r\x1b[2K{}", indicator.render(ansi));
-    }
-    "\x1b[1B\x1b[2K\x1b[1A\n".to_string()
-}
-
-pub fn read_line(indicator: &Indicator, hint: &str) -> Option<String> {
-    let ansi = term::ansi_enabled();
-    print!("{}", compose(ansi, indicator, hint));
-    io::stdout().flush().ok()?;
-    let mut line = String::new();
-    match io::stdin().read_line(&mut line) {
-        Ok(0) | Err(_) => {
-            print!("{}", retire("", ansi, hint, indicator));
-            io::stdout().flush().ok()?;
-            None
-        }
-        Ok(_) => {
-            let text = line.trim_end_matches(['\n', '\r']).to_string();
-            print!("{}", retire(&text, ansi, hint, indicator));
-            io::stdout().flush().ok()?;
-            Some(text)
-        }
-    }
-}
-
 #[cfg(test)]
 #[path = "../tests/input.rs"]
 mod tests;
+
+#[cfg(test)]
+#[path = "../tests/input_keys.rs"]
+mod keys_tests;

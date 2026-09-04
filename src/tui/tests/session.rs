@@ -27,6 +27,7 @@ fn frame_wraps_a_direct_harness_with_header_and_recap() {
     let start = std::time::Instant::now();
     let mut sink = Vec::new();
     frame(
+        &mut sink,
         args::Action::Direct {
             harness: "vibe".into(),
             extra: vec![],
@@ -35,7 +36,6 @@ fn frame_wraps_a_direct_harness_with_header_and_recap() {
         &harness(),
         std::path::Path::new("."),
         std::path::Path::new("."),
-        &mut sink,
     );
     let rendered = String::from_utf8(sink).unwrap();
     let lines = rendered

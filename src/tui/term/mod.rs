@@ -7,6 +7,20 @@
 
 use std::io::IsTerminal;
 
+#[path = "logic/raw.rs"]
+mod raw;
+
+#[path = "logic/size.rs"]
+mod geometry;
+
+pub use geometry::size;
+
+/// Raw per-byte, no-echo reads for the viewport prompt; `None` keeps the
+/// caller on the classic line reader (pipes, missing tty, non-unix).
+pub fn enable_raw() -> Option<raw::Guard> {
+    raw::enable()
+}
+
 pub fn ansi_enabled_for(stdout_terminal: bool) -> bool {
     stdout_terminal
         && std::env::var_os("NO_COLOR").is_none()
@@ -39,7 +53,7 @@ pub fn clear_screen() -> String {
 /// via the same raw-FFI pattern as the pty harnesses), then the COLUMNS env
 /// fallback, then 100. Std-only -- no libc crate.
 pub fn columns() -> usize {
-    if let Some(width) = geometry() {
+    if let Some((width, _)) = size() {
         return width;
     }
     std::env::var("COLUMNS")
@@ -47,37 +61,6 @@ pub fn columns() -> usize {
         .and_then(|value| value.parse::<usize>().ok())
         .map(|width| width.clamp(40, 160))
         .unwrap_or(100)
-}
-
-#[cfg(unix)]
-fn geometry() -> Option<usize> {
-    #[repr(C)]
-    struct Winsize {
-        row: u16,
-        col: u16,
-        xpixel: u16,
-        ypixel: u16,
-    }
-    unsafe extern "C" {
-        fn ioctl(fd: i32, request: u64, ...) -> i32;
-    }
-    #[cfg(target_os = "linux")]
-    const TIOCGWINSZ: u64 = 0x5413;
-    #[cfg(not(target_os = "linux"))]
-    const TIOCGWINSZ: u64 = 0x4008_7468;
-    let mut size = Winsize {
-        row: 0,
-        col: 0,
-        xpixel: 0,
-        ypixel: 0,
-    };
-    let ok = unsafe { ioctl(1, TIOCGWINSZ, &mut size) } == 0;
-    (ok && size.col > 0).then_some(size.col as usize)
-}
-
-#[cfg(not(unix))]
-fn geometry() -> Option<usize> {
-    None
 }
 
 #[cfg(test)]

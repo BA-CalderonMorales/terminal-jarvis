@@ -7,10 +7,9 @@ use crate::cli::style;
 use std::path::Path;
 use std::time::Duration;
 
-/// Returns (adopted, verdict-text, persisted): adopted reports the caller
-/// should switch the active harness; persisted reports the executable was
-/// found on PATH after a successful install -- the truth the readiness probe
-/// will show later.
+/// (adopted, verdict-text, persisted): adopted switches the harness;
+/// persisted reports the executable landed on PATH after a successful
+/// install -- the truth the readiness probe shows later.
 pub fn text(
     name: &str,
     verb: &str,
@@ -49,9 +48,9 @@ pub fn text(
     }
 }
 
-/// Finals an install/update card: renders it, warns when the executable did
-/// not land on PATH, and adopts the harness only when it persisted.
+/// Finals an install/update card; adopts only when it persisted.
 pub fn settle(
+    out: &mut dyn std::io::Write,
     name: &str,
     verb: &str,
     binary_on_path: bool,
@@ -61,7 +60,8 @@ pub fn settle(
 ) {
     let (adopted, text, persisted) = text(name, verb, binary_on_path, outcome, elapsed);
     let ok = outcome.as_ref().map(|(code, _)| *code).ok() == Some(0);
-    println!(
+    let _ = writeln!(
+        out,
         "{}",
         if ok {
             style::success(&text)
@@ -70,7 +70,8 @@ pub fn settle(
         }
     );
     if !persisted && ok {
-        eprintln!(
+        let _ = writeln!(
+            out,
             "{}",
             style::warning(&format!(
                 "warning: {name}'s binary was not found on PATH; restart the shell or add its install directory"
@@ -78,7 +79,10 @@ pub fn settle(
         );
     }
     if adopted && persisted {
-        let _ = crate::context::save(state_home, name);
+        if let Err(cause) = crate::context::save(state_home, name) {
+            let failure = crate::cli::session_write_error(cause);
+            let _ = writeln!(out, "{}", style::warning(&failure.rendered()));
+        }
     }
 }
 
