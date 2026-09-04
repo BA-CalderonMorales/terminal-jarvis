@@ -29,7 +29,9 @@ pub fn frame(size: Size, draft: &Draft) -> String {
         rows.push(pad("", inner));
     }
     rows.push(prompt(draft, inner, body_rows));
-    format!("\x1b[H{}", rows.join("\n"))
+    // Raw mode disables OPOST, so "\n" alone would stair-step every row
+    // after the first; the frame is always painted with explicit returns.
+    format!("\x1b[H{}", rows.join("\r\n"))
 }
 
 /// The merged header line: identity, active harness, and the readiness

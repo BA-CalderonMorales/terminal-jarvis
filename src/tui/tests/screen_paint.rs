@@ -46,6 +46,18 @@ fn repaint_is_surgical_cursor_home_without_erase() {
 }
 
 #[test]
+fn rows_carry_carriage_returns_for_raw_mode() {
+    // Raw mode disables OPOST: a bare \n stair-steps every row after the
+    // first. Every line break in a painted frame must be an explicit \r\n.
+    let painted = frame(Size { cols: 80, rows: 24 }, &draft());
+    let bare = painted
+        .char_indices()
+        .filter(|(index, c)| *c == '\n' && (*index == 0 || painted.as_bytes()[*index - 1] != b'\r'))
+        .count();
+    assert!(painted.contains("\r\n"));
+}
+
+#[test]
 fn header_keeps_the_verdict_and_drops_the_cwd_when_narrow() {
     let painted = frame(Size { cols: 60, rows: 20 }, &draft());
     let first = painted.split('\n').next().unwrap();
