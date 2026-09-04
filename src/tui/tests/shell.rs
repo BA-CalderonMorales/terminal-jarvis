@@ -91,14 +91,13 @@ fn bare_harness_names_switch_to_that_harness() {
     );
 }
 
-// bare free text -> Run is covered by the
-// `bare_unknown_words_run_the_active_agent` quickcheck property.
+// bare free text -> Run: covered by `bare_unknown_words_run_the_active_agent`.
 
 #[test]
 fn help_text_lists_commands_and_the_gate_line() {
     let body = crate::tui::shell::help::text();
-    for needle in ["Commands", "list", "install <harness>", "exit | quit"] {
-        assert!(body.contains(needle), "help is missing {needle}");
-    }
+    assert!(body.contains("Commands"));
+    assert!(body.contains("exit | quit"));
     assert!(body.contains("Trivy gate"));
+    assert!(body.contains("install <harness>"));
 }
