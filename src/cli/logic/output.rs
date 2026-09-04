@@ -1,5 +1,7 @@
 #[path = "output_catalog.rs"]
 mod catalog;
+#[path = "output_show.rs"]
+mod detail;
 #[path = "output_diagnostics.rs"]
 mod diagnostics;
 #[path = "output_readiness.rs"]
@@ -11,7 +13,8 @@ use super::{style, table};
 use crate::contracts::Harness;
 use crate::{context::Session, security};
 
-pub use catalog::{list, plan, plan_with_extra, show};
+pub use catalog::{list, plan, plan_with_extra};
+pub use detail::show;
 pub use diagnostics::diagnostics;
 pub use readiness::is_harness_ready;
 pub use summary::{audit, status};
