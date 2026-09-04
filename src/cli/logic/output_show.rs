@@ -49,21 +49,20 @@ pub fn show(harness: &Harness) -> String {
     // Rich: aligned label/value fields and one line per capability, wrapped
     // to the terminal width. The centered body treats this as a block.
     let width = table::terminal_width();
-    let field = |label: &str, value: &str| -> Vec<String> {
-        let pad = format!("  {:<10} ", label);
-        let indent = " ".repeat(pad.chars().count());
-        wrap(value, width.saturating_sub(indent.chars().count()))
+    let rows = |pad: String, text: &str| -> Vec<String> {
+        wrap(text, width.saturating_sub(pad.chars().count()))
             .split('\n')
             .enumerate()
             .map(|(step, line)| {
                 if step == 0 {
                     format!("{pad}{line}")
                 } else {
-                    format!("{indent}{line}")
+                    format!("{}{line}", " ".repeat(pad.chars().count()))
                 }
             })
             .collect()
     };
+    let field = |label: &str, value: &str| rows(format!("  {:<10} ", label), value);
 
     let mut lines: Vec<String> = wrap(&harness.description, width)
         .split('\n')
@@ -73,18 +72,11 @@ pub fn show(harness: &Harness) -> String {
     lines.extend(field("binary", &harness.binary));
     lines.extend(field("setup", &harness.setup_hint()));
     lines.extend(field("support", &support_counts(harness)));
-    lines.push(String::new());
     for plan in &harness.capabilities {
-        let pad = format!("  {:<10} ", plan.capability.to_string());
-        let indent = " ".repeat(pad.chars().count());
-        let wrapped = wrap(&plan.summary, width.saturating_sub(indent.chars().count()));
-        for (step, line) in wrapped.split('\n').enumerate() {
-            if step == 0 {
-                lines.push(format!("{pad}{line}"));
-            } else {
-                lines.push(format!("{indent}{line}"));
-            }
-        }
+        lines.extend(rows(
+            format!("  {:<10} ", plan.capability.to_string()),
+            &plan.summary,
+        ));
     }
     lines.join("\n")
 }
