@@ -126,9 +126,9 @@ contains "$tmp/plain-current.out" "active harness = codex"
 
 ok show show codex
 ok info info codex
-contains "$tmp/show.out" "binary:"
-contains "$tmp/show.out" "support:"
-contains "$tmp/info.out" "binary:"
+contains "$tmp/show.out" "  support "
+contains "$tmp/show.out" "  binary "
+contains "$tmp/info.out" "  setup "
 for capability in download update headless version stats models security yolo ui; do
   label=plan-$capability
   ok "$label" plan codex "$capability"
