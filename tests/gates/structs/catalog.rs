@@ -74,6 +74,7 @@ fn platform() -> &'static str {
         ("linux", "aarch64") => "linux-arm64-gnu",
         ("macos", "x86_64") => "macos-x64",
         ("macos", "aarch64") => "macos-arm64",
+        ("windows", "x86_64") => "windows-x64-msvc",
         pair => panic!("unsupported acceptance-test host: {pair:?}"),
     }
 }

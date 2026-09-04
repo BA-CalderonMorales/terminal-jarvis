@@ -1,9 +1,10 @@
 use crate::contracts::CapabilityPlan;
+use crate::security;
 use std::io;
 use std::process::{Command, Stdio};
 
 pub fn run_command(plan: &CapabilityPlan, extra: &[String]) -> io::Result<i32> {
-    let mut command = Command::new(&plan.command.command);
+    let mut command = Command::new(security::resolved(&plan.command.command).as_ref());
     command.args(&plan.command.args).args(extra);
     command.stdout(Stdio::inherit());
     command.stderr(Stdio::inherit());
@@ -50,6 +51,9 @@ fn signal_code(_status: &std::process::ExitStatus) -> i32 {
     1
 }
 
-#[cfg(test)]
+// Exercises `sh`/POSIX signal semantics (`kill -TERM $$`, the 128+signal
+// exit-code convention `signal_code` only computes on `#[cfg(unix)]`) that
+// have no Windows equivalent, so the whole module is Unix-only.
+#[cfg(all(test, unix))]
 #[path = "../tests/runner_test.rs"]
 mod tests;

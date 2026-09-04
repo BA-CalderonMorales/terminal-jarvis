@@ -69,6 +69,9 @@ fn executable_mode(_: &fs::Metadata) -> bool {
     true
 }
 
+/// Mirrors `security::candidates`: PATHEXT-suffixed names before the bare
+/// name, and the bare name stays last so conflict detection sees every
+/// match, not just launchable ones.
 fn candidates(name: &str, input: &DiagnosticInput) -> Vec<String> {
     if input.platform.os != "windows" || Path::new(name).extension().is_some() {
         return vec![name.to_string()];
@@ -77,11 +80,7 @@ fn candidates(name: &str, input: &DiagnosticInput) -> Vec<String> {
         .environment
         .text("PATHEXT")
         .unwrap_or(".COM;.EXE;.BAT;.CMD");
-    extensions
-        .split(';')
-        .filter(|ext| !ext.is_empty())
-        .map(|ext| format!("{name}{ext}"))
-        .collect()
+    crate::security::candidates(name, true, extensions)
 }
 fn result(code: Code, path: Option<PathBuf>, paths: Vec<PathBuf>, matches: usize) -> Resolution {
     Resolution {
@@ -91,6 +90,10 @@ fn result(code: Code, path: Option<PathBuf>, paths: Vec<PathBuf>, matches: usize
         matches,
     }
 }
+
+#[cfg(test)]
+#[path = "../tests/resolve_harness.rs"]
+mod harness;
 
 #[cfg(test)]
 #[path = "../tests/resolve.rs"]

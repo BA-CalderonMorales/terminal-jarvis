@@ -19,8 +19,7 @@ fn exit_code(status: &ExitStatus) -> i32 {
 }
 
 /// Copies a child gate's pipe to stderr (live, tee-style) while capturing
-/// the full bytes for the caller; the copy only happens when narrating, so
-/// a quiet tui never sees the raw stream but the capture stays intact.
+/// the full bytes for the caller; narrate controls the live copy.
 pub fn tee(pipe: &mut dyn Read, narrate: bool) -> String {
     let mut captured = Vec::new();
     let mut chunk = [0u8; 4096];
@@ -41,8 +40,8 @@ pub fn tee(pipe: &mut dyn Read, narrate: bool) -> String {
     String::from_utf8_lossy(&captured).trim().to_string()
 }
 
-/// Spawns a gate scan and waits for it, streaming live when asked and
-/// redrawing a heartbeat in the quiet view; Ctrl+C SIGKILLs via the tracker.
+/// Spawns a gate scan and waits for it (deadline-bounded), streaming live
+/// when asked and redrawing a heartbeat; Ctrl+C SIGKILLs via the tracker.
 pub fn run(gate: &Gate, narrate: bool) -> Result<Scan, String> {
     if !security::command_on_path(&gate.binary) {
         return Err(format!(
@@ -50,7 +49,7 @@ pub fn run(gate: &Gate, narrate: bool) -> Result<Scan, String> {
             gate.name, gate.binary, gate.install_hint
         ));
     }
-    let mut child = Command::new(&gate.binary)
+    let mut child = Command::new(security::resolved(&gate.binary).as_ref())
         .args(&gate.args)
         .stdout(Stdio::piped())
         .stderr(Stdio::piped())
@@ -62,23 +61,29 @@ pub fn run(gate: &Gate, narrate: bool) -> Result<Scan, String> {
     let stderr_reader = std::thread::spawn(move || tee(&mut stderr, narrate));
     let mut heartbeat =
         (!narrate).then(|| Heartbeat::start(&format!("security scan ({}) ...", gate.name)));
-    let status = child
-        .wait()
+    let limit = super::deadline::timeout_secs();
+    let (status, timed_out) = super::deadline::wait(&mut child, limit)
         .map_err(|error| format!("gate scan failed: {error}"))?;
     super::interrupt::track(0);
     let fired = heartbeat.as_ref().is_some_and(|tick| tick.fired());
     if let Some(tick) = &mut heartbeat {
         tick.stop();
     }
-    let joined = [stdout_reader.join(), stderr_reader.join()]
-        .into_iter()
-        .filter_map(Result::ok)
-        .collect::<Vec<_>>()
-        .join("\n");
-    let scan = Scan {
+    let joined =
+        super::interrupt::bounded_join(vec![stdout_reader, stderr_reader], timed_out).join("\n");
+    let mut output = joined.trim().to_string();
+    if timed_out {
+        if !output.is_empty() {
+            output.push('\n');
+        }
+        let name = &gate.name;
+        output.push_str(&format!(
+            "security gate '{name}' timed out after {limit}s and was killed"
+        ));
+    }
+    Ok(Scan {
         code: exit_code(&status),
-        output: joined.trim().to_string(),
+        output,
         heartbeat: fired,
-    };
-    Ok(scan)
+    })
 }

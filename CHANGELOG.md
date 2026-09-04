@@ -1,6 +1,6 @@
 # Changelog
 
-## [0.1.16] - unreleased
+## [0.1.17] - unreleased
 
 - Full-viewport TUI: on terminals that can hold it (50+ cols, 10+ rows, ANSI),
   the switcher now paints a bordered command-center frame -- title, live
@@ -24,6 +24,31 @@
   instead of silently claiming success.
 
 ## Up next (roadmap, not yet started)
+## [0.1.16] - 2026-09-02
+
+- Windows: npm-style `.cmd` shims now resolve when spawning harnesses --
+  `terminal-jarvis run <harness>` no longer fails with "not found on PATH"
+  for npm-installed agents. The security preflight and the spawn path agree
+  on the same binary, gate scans resolve `trivy` the same way, and the
+  package check resolves `npm`/`trivy` through PATHEXT.
+- The test suite compiles and passes on Windows; pty-driven TUI acceptance
+  tests are Unix-only by design.
+
+## [0.1.15] - 2026-08-14
+
+- Headless gate scans are deadline-bounded: a stuck scanner is killed after
+  the timeout (env-tunable, clamped to 24h) instead of hanging the command,
+  and scan output is never truncated.
+- `gate.toml` selection tolerates whitespace, inline comments, and malformed
+  lines instead of silently disabling the gate.
+- The jules harness reports its real version instead of stale data.
+- Mutation CI threads are capped so the baseline no longer dies on the
+  runner's thread limit.
+- The Trivy walk skips Windows delete-pending files and directories (names
+  starting with `~`), so the security gate no longer crashes mid-scan on
+  NTFS.
+
+## Up next: 0.1.16 (roadmap, not yet started)
 
 - `status` will surface previously-blocked installs and why they were
   blocked, with a drillable view into the decision (finding details).

@@ -1,3 +1,5 @@
+#![cfg(unix)] // PTY-driven + kill/permission-bit semantics; see tui_acceptance.rs.
+
 use crate::logic::tui::{booted, launch, EXIT, FRAME, SERIAL};
 use crate::logic::{pty, screen};
 use std::os::unix::fs::PermissionsExt;

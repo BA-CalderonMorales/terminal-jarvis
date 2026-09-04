@@ -1,6 +1,6 @@
+#![cfg(unix)] // PTY-driven (openpty); no Windows equivalent in-tree.
 use crate::logic::tui::{booted, launch, EXIT, FRAME, SERIAL};
 use crate::logic::{pty, screen};
-
 const VERSION: &str = env!("CARGO_PKG_VERSION");
 
 #[test]

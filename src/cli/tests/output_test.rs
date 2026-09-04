@@ -1,44 +1,10 @@
-use std::path::{Path, PathBuf};
-
+use self::harness::{mock_binary_on_path, mock_harness, tmpdir};
 use super::*;
 use crate::contracts::EnvMode;
 
-fn tmpdir() -> PathBuf {
-    static COUNTER: std::sync::atomic::AtomicU64 = std::sync::atomic::AtomicU64::new(0);
-    let n = COUNTER.fetch_add(1, std::sync::atomic::Ordering::Relaxed);
-    let dir = std::env::temp_dir().join(format!("tjharnesstest_{n}"));
-    let _ = std::fs::remove_dir_all(&dir);
-    std::fs::create_dir_all(&dir).unwrap();
-    dir
-}
-
-fn mock_binary_on_path(tmpdir: &Path) -> String {
-    let bin = tmpdir.join("mock-harness");
-    std::fs::write(&bin, "#!/bin/sh\necho ok").unwrap();
-    std::fs::set_permissions(&bin, std::os::unix::fs::PermissionsExt::from_mode(0o755)).unwrap();
-    let old = std::env::var("PATH").unwrap_or_default();
-    std::env::set_var("PATH", format!("{}:{}", tmpdir.display(), old));
-    old
-}
-
-fn mock_harness(binary: &str, env_mode: EnvMode, env: Vec<String>) -> Harness {
-    let mut plan = crate::cli::logic::test_support::plan(
-        crate::contracts::Capability::Version,
-        binary,
-        vec!["--version".into()],
-    );
-    plan.support = crate::contracts::SupportState::Expected;
-    plan.platforms = vec![crate::context::platform::id().unwrap().into()];
-    Harness {
-        name: "x".into(),
-        display: "X".into(),
-        description: "".into(),
-        binary: binary.into(),
-        env_mode,
-        env,
-        capabilities: vec![plan],
-    }
-}
+#[cfg(test)]
+#[path = "output_test_harness.rs"]
+mod harness;
 
 #[test]
 fn is_harness_ready_false_when_binary_missing() {
