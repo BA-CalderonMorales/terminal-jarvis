@@ -49,11 +49,6 @@ pub fn header(o: &Overview) -> String {
     )
 }
 
-fn cwd_view(o: &Overview) -> String {
-    use crate::cli::style;
-    format!("{} {}", style::label("CWD"), o.cwd)
-}
-
 fn verdict(o: &Overview) -> String {
     use crate::cli::style;
     if o.ready == o.total {
