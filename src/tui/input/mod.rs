@@ -10,6 +10,7 @@ mod line;
 
 pub use editor::{Editor, Feed, Move};
 pub use keys::read_key;
+pub use keys::Key;
 pub use line::{compose, raw_line, read_line, retire};
 
 use crate::cli::style;

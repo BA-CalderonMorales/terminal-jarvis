@@ -46,7 +46,10 @@ pub fn frame(size: Size, draft: &Draft) -> String {
         inner,
     ));
     let hint = format!("─ {} ", canvas::hint_clip(&draft.hint, inner));
-    let badge = format!("{} ", scroll::badge(draft.offset, draft.body.len(), size.body_rows()));
+    let badge = format!(
+        "{} ",
+        scroll::badge(draft.offset, draft.body.len(), size.body_rows())
+    );
     rows.push(bordered_lr(&hint, &badge, inner, '╰', '╯', '─'));
     format!("\x1b[H\x1b[2J{}", rows.join("\n"))
 }

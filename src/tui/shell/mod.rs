@@ -23,6 +23,8 @@ mod status;
 mod verdict;
 #[path = "./viewport.rs"]
 mod viewport;
+#[path = "./viewport_raw.rs"]
+mod viewport_raw;
 
 pub use handle::handle;
 

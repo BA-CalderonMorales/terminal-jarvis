@@ -1,7 +1,9 @@
-//! Viewport prompt: paints the composed frame and reads one line parked
-//! past the prompt prefix; chat mode delegates to the classic widget.
+//! Viewport prompt: paints the composed frame and reads one line. In a
+//! usable viewport the read is a raw-mode key session with scroll and an
+//! in-frame editor; anything else falls back to the classic line reader.
 
 use crate::contracts::Harness;
+use crate::tui::input::Indicator;
 use std::io::Write;
 use std::path::Path;
 
@@ -12,7 +14,7 @@ pub fn welcome(harnesses: &[Harness], catalog_root: &Path, state_home: &Path) ->
 
 #[allow(clippy::too_many_arguments)]
 pub fn prompt(
-    indicator: &crate::tui::input::Indicator,
+    indicator: &Indicator,
     hint: &str,
     harnesses: &[Harness],
     catalog_root: &Path,
@@ -20,22 +22,23 @@ pub fn prompt(
     body: &[String],
 ) -> Option<String> {
     let _ = std::io::stdout().flush();
+    let state =
+        super::viewport_raw::ViewportState::collect(indicator, harnesses, catalog_root, state_home);
     let size = crate::tui::screen::size();
-    let o = crate::tui::home::collect(harnesses, catalog_root, state_home);
-    let prefix = indicator.render(true);
-    let draft = crate::tui::screen::Draft {
-        title: format!("TERMINAL JARVIS v{}", env!("CARGO_PKG_VERSION")),
-        status: crate::tui::home::styled(&o),
-        body: body.to_vec(),
-        prompt: prefix.clone(),
-        offset: 0,
-        hint: hint.to_string(),
-    };
-    let cells = crate::tui::screen::visible_width(&prefix) + 2;
+    let draft = state.base_draft(hint, body);
+    let cells = state.prefix_cells;
     let painted = crate::tui::screen::parked(crate::tui::screen::frame(size, &draft), size, cells);
     print!("{painted}");
-    std::io::stdout().flush().ok()?;
-    crate::tui::input::raw_line()
+    std::io::stdout().flush().ok();
+    let session = super::viewport_raw::Session {
+        state: &state,
+        hint,
+        body,
+    };
+    match crate::tui::term::enable_raw() {
+        Some(_guard) => super::viewport_raw::run(&session),
+        None => crate::tui::input::raw_line(),
+    }
 }
 
 /// Chat-mode boot banner: the welcome frame above the first prompt.

@@ -29,4 +29,3 @@ fn clipped_lines_never_exceed_cols(line: String, ansi: bool, cols: u8) -> bool {
     };
     visible_width(&clip_line(&candidate, cols)) <= cols
 }
-

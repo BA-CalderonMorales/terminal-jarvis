@@ -58,7 +58,13 @@ fn long_body_windows_to_the_newest_lines_with_a_badge() {
     let mut d = draft();
     d.body = (0..50).map(|i| format!("line {i}")).collect();
     let painted = frame(size, &d);
-    assert!(painted.contains("\u{2191} 46"), "scroll badge counts the hidden history");
+    assert!(
+        painted.contains("\u{2191} 46"),
+        "scroll badge counts the hidden history"
+    );
     assert!(painted.contains("line 49"), "the newest line must survive");
-    assert!(!painted.contains("line 0"), "older lines yield to the window");
+    assert!(
+        !painted.contains("line 0"),
+        "older lines yield to the window"
+    );
 }
