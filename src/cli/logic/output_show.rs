@@ -1,20 +1,23 @@
 //! Show: the harness detail surface. Human lines for the rich tui/body
 //! (centered+dimmed by the paint pass), key=value for --plain.
 
-use super::style;
-use super::table;
+use super::{style, table};
 use crate::cli::logic::output_truth;
 use crate::contracts::Harness;
 
-/// Human support counts, non-zero states only, fixed order.
+/// Human support counts: every contract state, non-zero only, fixed order.
 pub(crate) fn support_counts(harness: &Harness) -> String {
     use crate::contracts::SupportState;
-    let mut counts: Vec<(SupportState, usize)> = vec![
-        (SupportState::Verified, 0),
-        (SupportState::Expected, 0),
-        (SupportState::Stub, 0),
-        (SupportState::Disabled, 0),
+    let order = [
+        SupportState::Verified,
+        SupportState::Expected,
+        SupportState::Manual,
+        SupportState::Stub,
+        SupportState::Unsupported,
+        SupportState::Unknown,
+        SupportState::Disabled,
     ];
+    let mut counts = order.map(|state| (state, 0));
     for plan in &harness.capabilities {
         for entry in counts.iter_mut() {
             if entry.0 == plan.support {
@@ -29,7 +32,6 @@ pub(crate) fn support_counts(harness: &Harness) -> String {
         .collect::<Vec<_>>()
         .join(" · ")
 }
-
 pub fn show(harness: &Harness) -> String {
     if style::plain() {
         let mut out = format!(
@@ -46,8 +48,7 @@ pub fn show(harness: &Harness) -> String {
         }
         return out;
     }
-    // Rich: aligned label/value fields and one line per capability, wrapped
-    // to the terminal width. The centered body treats this as a block.
+    // Rich: label/value fields + one line per capability, width-wrapped.
     let width = table::terminal_width();
     let rows = |pad: String, text: &str| -> Vec<String> {
         wrap(text, width.saturating_sub(pad.chars().count()))
@@ -81,8 +82,7 @@ pub fn show(harness: &Harness) -> String {
     lines.join("\n")
 }
 
-/// Wraps by display cells (wide glyphs count two), never by char count --
-/// the two disagree exactly when CJK or emoji ride along.
+/// Wraps by display cells (wide glyphs count two), never by char count.
 pub(crate) fn wrap(text: &str, width: usize) -> String {
     let cells = crate::cli::logic::table::char_cells;
     let mut out = String::new();

@@ -41,6 +41,7 @@ fn default_output_is_structured_across_the_core_read_only_surface() {
     for (args, title) in [
         (&["--help"][..], "Commands"),
         (&["list"], "Available Harnesses"),
+        (&["show", "codex"], "OpenAI coding agent CLI"),
         (&["plan", "codex", "headless"], "Plan: codex headless"),
         (&["version", "--verbose"], "Terminal Jarvis"),
         (&["update"], "Harness Updates"),
