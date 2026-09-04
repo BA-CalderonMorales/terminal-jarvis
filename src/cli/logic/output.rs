@@ -89,7 +89,7 @@ fn env_status(harness: &Harness, missing: &[String]) -> String {
     }
     match harness.env_mode {
         EnvMode::Any => format!("missing one of {}", missing.join(", ")),
-        EnvMode::All => format!("missing {missing}"),
+        EnvMode::All => format!("missing {}", missing.join(", ")),
         EnvMode::None | EnvMode::Optional => "ready".to_string(),
     }
 }
