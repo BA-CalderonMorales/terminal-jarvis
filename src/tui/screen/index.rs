@@ -72,7 +72,7 @@ impl Drop for Session {
     }
 }
 
-pub use super::theme::{apply_theme, theme_names};
+pub use super::theme::{accent, apply_theme, dim, theme_names};
 
 #[cfg(test)]
 #[path = "../tests/screen_boot.rs"]

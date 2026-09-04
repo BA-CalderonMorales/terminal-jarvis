@@ -37,17 +37,15 @@ Type "show codex"
 Enter
 Sleep 2s
 
-# 5. the vibe switch -- moss palette, live
-Type "/theme moss"
+# 5. the command surface
+Type "help"
 Enter
 Sleep 2s
 
-# 6. back to the default vibe
-Type "/theme default"
+# 6. home again, then leave with a clean shell
+Type "home"
 Enter
 Sleep 1.5s
-
-# 7. leave with a clean shell
 Type "exit"
 Enter
 Sleep 1s

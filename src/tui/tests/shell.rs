@@ -26,6 +26,7 @@ fn empty_lines_and_exit_verbs_terminate_the_mapping() {
     for verb in ["/exit", "/quit", "exit", "quit"] {
         assert!(matches!(resolve(verb, &[]), Resolved::Exit), "{verb}");
     }
+    assert!(matches!(resolve("/use", &[]), Resolved::Error(_)));
 }
 
 #[test]
@@ -39,8 +40,10 @@ fn bare_and_slashed_home_and_clear_route_to_the_welcome() {
 fn slash_lines_map_through_the_cli_grammar() {
     assert_eq!(action_of("/list", &[]), Some(args::Action::List));
     assert_eq!(action_of("/status", &[]), Some(args::Action::Check));
-    let used = Some(args::Action::Use("codex".into()));
-    assert_eq!(action_of("/use codex", &[]), used);
+    assert_eq!(
+        action_of("/use codex", &[]),
+        Some(args::Action::Use("codex".into()))
+    );
     assert!(matches!(
         action_of("/bogus", &[]),
         Some(args::Action::Direct { .. })
@@ -48,17 +51,11 @@ fn slash_lines_map_through_the_cli_grammar() {
 }
 
 #[test]
-fn broken_slash_lines_report_errors() {
-    assert!(matches!(resolve("/use", &[]), Resolved::Error(_)));
-}
-
-#[test]
-fn bare_numbers_select_the_harness_at_that_position() {
+fn bare_numbers_and_names_select_the_harness() {
     let harnesses = [harness("alpha"), harness("beta")];
-    assert_eq!(
-        action_of("2", &harnesses),
-        Some(args::Action::Use("beta".into()))
-    );
+    let beta = Some(args::Action::Use("beta".into()));
+    assert_eq!(action_of("2", &harnesses), beta);
+    assert_eq!(action_of("beta", &harnesses), beta);
     assert!(matches!(resolve("9", &harnesses), Resolved::Error(_)));
 }
 
@@ -76,19 +73,6 @@ fn bare_command_words_work_without_the_slash() {
     );
 }
 
-#[test]
-fn bare_harness_names_switch_to_that_harness() {
-    let harnesses = [harness("alpha"), harness("beta")];
-    assert_eq!(
-        action_of("alpha", &harnesses),
-        Some(args::Action::Use("alpha".into()))
-    );
-    assert_eq!(
-        action_of("beta", &harnesses),
-        Some(args::Action::Use("beta".into()))
-    );
-}
-
 // bare free text -> Run: covered by `bare_unknown_words_run_the_active_agent`.
 #[test]
 fn help_text_lists_commands_and_the_gate_line() {
@@ -97,4 +81,14 @@ fn help_text_lists_commands_and_the_gate_line() {
     assert!(body.contains("exit | quit"));
     assert!(body.contains("Trivy gate"));
     assert!(body.contains("install <harness>"));
+}
+
+#[test]
+fn theme_lines_resolve_to_the_theme_surface() {
+    for line in ["/theme", "theme"] {
+        assert!(matches!(resolve(line, &[]), Resolved::Theme(None)));
+    }
+    for line in ["/theme moss", "theme moss"] {
+        assert!(matches!(resolve(line, &[]), Resolved::Theme(Some(_))));
+    }
 }
