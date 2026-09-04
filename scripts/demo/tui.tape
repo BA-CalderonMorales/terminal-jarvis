@@ -11,11 +11,13 @@ Set Shell bash
 # Hermetic: a throwaway session home, so the story always starts from
 # "active: none" whatever the recording machine's own state is.
 
+Hide
 Type "export TERMINAL_JARVIS_HOME=$(mktemp -d)"
 Enter
 Type "./target/release/terminal-jarvis tui"
 Enter
-Sleep 2s
+Sleep 1s
+Show
 
 # 1. boot: the centered first-boot primer under the merged header
 Sleep 1s
