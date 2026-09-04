@@ -37,12 +37,23 @@ Type "show codex"
 Enter
 Sleep 2s
 
-# 5. the command surface
+# 5. the vibe cycle -- each bare theme advances the palette, live
+Type "theme"
+Enter
+Sleep 1.5s
+Type "theme"
+Enter
+Sleep 1.5s
+Type "theme"
+Enter
+Sleep 2s
+
+# 6. the command surface
 Type "help"
 Enter
 Sleep 2s
 
-# 6. home again, then leave with a clean shell
+# 7. home again, then leave with a clean shell
 Type "home"
 Enter
 Sleep 1.5s
