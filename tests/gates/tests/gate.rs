@@ -2,6 +2,35 @@ use crate::structs::catalog;
 use std::process::{Command, Output};
 use std::sync::atomic::{AtomicUsize, Ordering};
 
+#[cfg(unix)]
+const NOOP_SCRIPT: &str = "#!/bin/sh\n";
+#[cfg(not(unix))]
+const NOOP_SCRIPT: &str = "@echo off\r\n";
+
+/// `terminal-jarvis run` resolves a harness binary via `PATHEXT` on Windows
+/// (see `security::checks::resolve_on_path`), which only matches
+/// extension-suffixed files, so the fixture needs a `.cmd` there.
+#[cfg(unix)]
+fn script_filename(name: &str) -> String {
+    name.to_string()
+}
+
+#[cfg(not(unix))]
+fn script_filename(name: &str) -> String {
+    format!("{name}.cmd")
+}
+
+#[cfg(unix)]
+fn make_executable(path: &std::path::Path) {
+    use std::os::unix::fs::PermissionsExt;
+    let mut permissions = std::fs::metadata(path).unwrap().permissions();
+    permissions.set_mode(0o755);
+    std::fs::set_permissions(path, permissions).unwrap();
+}
+
+#[cfg(not(unix))]
+fn make_executable(_path: &std::path::Path) {}
+
 static TEMP_ID: AtomicUsize = AtomicUsize::new(0);
 
 fn home() -> String {
@@ -42,11 +71,9 @@ fn enabled_missing_trivy_warns_and_runs_the_harness() {
     let catalog_root = std::path::Path::new(&root).join("catalog");
     let bin = std::path::Path::new(&root).join("bin");
     std::fs::create_dir_all(&bin).unwrap();
-    let child = bin.join("fixture-child");
-    std::fs::write(&child, "#!/bin/sh\n").unwrap();
-    let mut permissions = std::fs::metadata(&child).unwrap().permissions();
-    std::os::unix::fs::PermissionsExt::set_mode(&mut permissions, 0o755);
-    std::fs::set_permissions(&child, permissions).unwrap();
+    let child = bin.join(script_filename("fixture-child"));
+    std::fs::write(&child, NOOP_SCRIPT).unwrap();
+    make_executable(&child);
     catalog::write(&catalog_root, "expected", "expected");
     assert!(tj(&["gate", "enable", "trivy"], &home).status.success());
     let output = Command::new(env!("CARGO_BIN_EXE_terminal-jarvis"))

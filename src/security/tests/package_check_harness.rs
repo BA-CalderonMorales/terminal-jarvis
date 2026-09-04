@@ -1,3 +1,7 @@
+//! PackageCheck harness: fake `npm`/`trivy` binaries and a PATH-scoped run
+//! wrapper so `check()` can be exercised without a real registry.
+
+use super::pkgcheck_scripts::{make_executable, script_filename, touch_and_exit_ok_script};
 use std::sync::atomic::{AtomicUsize, Ordering};
 
 static NEXT: AtomicUsize = AtomicUsize::new(0);
@@ -9,10 +13,10 @@ pub fn fake_bin_pair(npm: &str, trivy: &str) -> std::path::PathBuf {
         NEXT.fetch_add(1, Ordering::Relaxed)
     ));
     std::fs::create_dir_all(&dir).unwrap();
-    std::fs::write(dir.join("npm"), npm).unwrap();
-    std::fs::write(dir.join("trivy"), trivy).unwrap();
-    for name in ["npm", "trivy"] {
-        make_executable(&dir.join(name));
+    for (name, script) in [("npm", npm), ("trivy", trivy)] {
+        let path = dir.join(script_filename(name));
+        std::fs::write(&path, script).unwrap();
+        make_executable(&path);
     }
     dir
 }
@@ -29,14 +33,15 @@ pub fn fake_bin_npm_only() -> (std::path::PathBuf, std::path::PathBuf) {
         std::process::id(),
         NEXT.fetch_add(1, Ordering::Relaxed)
     ));
-    let script = format!("#!/bin/sh\n: > {}\nexit 0\n", sentinel.display());
-    std::fs::write(dir.join("npm"), script).unwrap();
-    make_executable(&dir.join("npm"));
+    let script = touch_and_exit_ok_script(&sentinel);
+    let path = dir.join(script_filename("npm"));
+    std::fs::write(&path, script).unwrap();
+    make_executable(&path);
     (dir, sentinel)
 }
 
 pub fn run_with_path(name: &str, script: &str) -> Option<Verdict> {
-    run_with_bins(name, script, "#!/bin/sh\nexit 0\n")
+    run_with_bins(name, script, EXIT_OK_SCRIPT)
 }
 
 pub fn run_with_bins(name: &str, npm: &str, trivy: &str) -> Option<Verdict> {
@@ -67,10 +72,5 @@ pub fn run_with_bins(name: &str, npm: &str, trivy: &str) -> Option<Verdict> {
 }
 
 // Re-exported for the tests module that pulls this file in.
+pub use super::pkgcheck_scripts::{EXIT_FAIL_SCRIPT, EXIT_OK_SCRIPT};
 pub use super::{check, Verdict};
-
-fn make_executable(path: &std::path::Path) {
-    let mut permissions = std::fs::metadata(path).unwrap().permissions();
-    std::os::unix::fs::PermissionsExt::set_mode(&mut permissions, 0o755);
-    std::fs::set_permissions(path, permissions).unwrap();
-}

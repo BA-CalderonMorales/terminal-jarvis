@@ -9,7 +9,9 @@ exclude_globs = ["src/cli/compat.rs"]
 exclude_re = [
   "self_update\\.rs.*\\b(run|npm_update|brew_update|cargo_update)\\b",
   "table_layout\\.rs.*replace > with >= in wrap",
-  "checks\\.rs.*replace executable_mode -> bool with false",
+  # The cfg(not(unix)) executable_mode stub never compiles on Linux
+  # runners; the unix variant is witnessed by the execute-bit probe tests.
+  "path\\.rs.*replace executable_mode -> bool with false",
   "runner\\.rs.*replace signal_code -> i32 with",
   "platform\\.rs.*delete ! in wsl",
   "execute\\.rs.*replace != with == in run",
@@ -24,7 +26,11 @@ exclude_re = [
   "distribution\\.rs.*delete ! in channel",
   # The cfg(not(unix)) exit_code variant never compiles on CI runners; the
   # unix variant is witnessed by the preflight signal tests.
-  "stream\\.rs:18.*replace exit_code -> i32 with",
+  "stream\\.rs:12.*replace exit_code -> i32 with",
+  # The cfg(windows) PATHEXT-resolved spawn target never compiles on Linux
+  # runners; the unix pass-through variant is witnessed by the spawn tests
+  # (mutating it fails the package-check fake-bin verdicts).
+  "logic/resolve\\.rs:11:5.*replace resolved -> Cow",
   # The non-heartbeat outcome floor (prefix.len() + 1) is always shorter
   # than the outcome text, so -1/*1 produce byte-identical lines for every
   # real state; the same family at the pad line (91:50) is caught.

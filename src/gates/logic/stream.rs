@@ -49,7 +49,7 @@ pub fn run(gate: &Gate, narrate: bool) -> Result<Scan, String> {
             gate.name, gate.binary, gate.install_hint
         ));
     }
-    let mut child = Command::new(&gate.binary)
+    let mut child = Command::new(security::resolved(&gate.binary).as_ref())
         .args(&gate.args)
         .stdout(Stdio::piped())
         .stderr(Stdio::piped())

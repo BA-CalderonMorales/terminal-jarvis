@@ -38,6 +38,9 @@ pub fn channel() -> Option<&'static str> {
 }
 
 pub fn source_build(path: &str) -> bool {
+    // current_exe() returns backslash-separated paths on Windows; normalize
+    // so the forward-slash matching below works on every platform.
+    let path = path.replace('\\', "/");
     let Some(index) = path.find("/target/") else {
         return false;
     };

@@ -6,11 +6,12 @@ use terminal_jarvis::gates::{self, Gate};
 static ID: AtomicUsize = AtomicUsize::new(0);
 
 fn dir() -> PathBuf {
+    // pid + counter guarantee uniqueness; the "coverage" tag keeps this
+    // file's counter from colliding with state.rs's (same process).
     let path = std::env::temp_dir().join(format!(
-        "tj-gatecov-{}-{}-{}",
+        "tj-gatecov-coverage-{}-{}",
         std::process::id(),
-        ID.fetch_add(1, Ordering::Relaxed),
-        std::thread::current().name().unwrap_or("t")
+        ID.fetch_add(1, Ordering::Relaxed)
     ));
     let _ = fs::remove_dir_all(&path);
     fs::create_dir_all(&path).unwrap();

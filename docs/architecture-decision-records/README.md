@@ -190,3 +190,37 @@ reproduce one scan per session; unknown installers keep an explicit human
 gate. `status` shows `1 of N ready`. The 0.1.15 roadmap (CHANGELOG) carries
 blocked-install drill-down, `uninstall|prune`, and header/main/footer section
 rules. Operator still tags and publishes after final review.
+
+### Ship the Windows PATHEXT fix as 0.1.16 direct to main (release/0.1.16 -> 2026-09-03)
+
+**Decision:** Land PR #198 (npm-style `.cmd` shim resolution when spawning
+harnesses) directly into `main` from the contributor's fork, cut
+`release/0.1.16` from it carrying only version bumps and the changelog, and
+sync `develop` from the release branch. The TUI rework previously staged on
+`release/0.1.16` migrated to `release/0.1.17` and ships later.
+
+**Context:** Windows users could not spawn npm-installed harnesses at all
+(`CreateProcess` never consults PATHEXT, so `Command::new("opencode")`
+fails while the preflight reports the harness installed). The fix was
+externally contributed, security-reviewed, and reproduced end-to-end on a
+real Windows machine before merge. The release branch's TUI work was
+non-compiling WIP -- days from shippable -- while the Windows fix was
+validated and blocking a whole platform.
+
+**Considered:** Holding the release for the TUI rework to ship together --
+rejected, it delayed a platform-level fix behind unfinished feature work
+and compounded merge drift against incoming hotfixes. Cherry-picking the
+contributor's commits -- rejected, merging preserves authorship history
+and zero-conflict semantics by construction. Re-adding the deleted
+`build/build.rs` debate -- resolved, restored as-is; the catalog embedding
+strategy is unchanged.
+
+**Consequence:** 0.1.16 is a hotfix-class release owned by the
+contributor's merge commit. `develop` fell behind `main` twice in one
+cycle (release catch-up, then this sync) -- both reconciled here. Direct
+pushes to `develop` are now permitted for maintainers via the new
+`protect develop` ruleset (the legacy branch protection was unmaintainable;
+enforcement moved to rulesets with maintainer bypass). The fmt and flaky
+env-aux mutation flakes observed on the PR were patched or re-run rather
+than carried into the release. Operator still tags and publishes after
+final review.

@@ -32,24 +32,33 @@ fn trivy_missing_does_not_invoke_npm() {
     let _ = std::fs::remove_file(&sentinel);
 }
 
+#[cfg(unix)]
+const WRITE_LOCKFILE_AND_EXIT_OK: &str =
+    "#!/bin/sh\nprintf '{\"name\":\"fixture\"}' > package-lock.json\nexit 0\n";
+#[cfg(not(unix))]
+const WRITE_LOCKFILE_AND_EXIT_OK: &str =
+    "@echo off\r\necho {\"name\":\"fixture\"}> package-lock.json\r\nexit /b 0\r\n";
+
+#[cfg(unix)]
+const REPORT_CRITICAL_AND_EXIT_FAIL: &str = "#!/bin/sh\necho 'CRITICAL: minimist'\nexit 1\n";
+#[cfg(not(unix))]
+const REPORT_CRITICAL_AND_EXIT_FAIL: &str = "@echo off\r\necho CRITICAL: minimist\r\nexit /b 1\r\n";
+
 #[test]
 fn npm_success_without_lockfile_skips_the_check() {
-    let result = run_with_path("npm-only", "#!/bin/sh\nexit 0\n");
+    let result = run_with_path("npm-only", EXIT_OK_SCRIPT);
     assert!(result.is_none());
 }
 
 #[test]
 fn npm_failure_skips_the_check() {
-    let result = run_with_path("both", "#!/bin/sh\nexit 1\n");
+    let result = run_with_path("both", EXIT_FAIL_SCRIPT);
     assert!(result.is_none());
 }
 
 #[test]
 fn lockfile_with_clean_trivy_reports_clean() {
-    let result = run_with_path(
-        "both",
-        "#!/bin/sh\nprintf '{\"name\":\"fixture\"}' > package-lock.json\nexit 0\n",
-    );
+    let result = run_with_path("both", WRITE_LOCKFILE_AND_EXIT_OK);
     assert!(result.is_some());
     assert!(result.unwrap().clean);
 }
@@ -58,8 +67,8 @@ fn lockfile_with_clean_trivy_reports_clean() {
 fn lockfile_with_vulnerable_trivy_reports_detail() {
     let result = run_with_bins(
         "both",
-        "#!/bin/sh\nprintf '{\"name\":\"fixture\"}' > package-lock.json\nexit 0\n",
-        "#!/bin/sh\necho 'CRITICAL: minimist'\nexit 1\n",
+        WRITE_LOCKFILE_AND_EXIT_OK,
+        REPORT_CRITICAL_AND_EXIT_FAIL,
     );
     let verdict = result.unwrap();
     assert!(!verdict.clean);

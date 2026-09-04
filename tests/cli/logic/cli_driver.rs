@@ -1,8 +1,14 @@
+//! CliDriver: the acceptance-test fixture — a scratch catalog, gate config,
+//! and marker-instrumented child scripts driven through the real binary.
+
+use super::platform::{make_executable, script_filename};
 use crate::structs::catalog;
 use crate::structs::gate;
-use std::path::{Path, PathBuf};
+use std::path::PathBuf;
 use std::process::{Command, Output};
 use std::sync::atomic::{AtomicUsize, Ordering};
+
+pub use super::platform::{prepend_to_path, GATE_MARKER_SCRIPT};
 
 static NEXT_ID: AtomicUsize = AtomicUsize::new(0);
 
@@ -23,11 +29,11 @@ impl Fixture {
         let _ = std::fs::remove_dir_all(&root);
         let bin = root.join("bin");
         std::fs::create_dir_all(&bin).unwrap();
-        let child = bin.join("fixture-child");
+        let child = bin.join(script_filename("fixture-child"));
         std::fs::write(&child, script).unwrap();
         make_executable(&child);
-        let gate_child = bin.join("fixture-gate");
-        std::fs::write(&gate_child, "#!/bin/sh\n: > \"$TJ_FIXTURE_GATE_MARKER\"\n").unwrap();
+        let gate_child = bin.join(script_filename("fixture-gate"));
+        std::fs::write(&gate_child, GATE_MARKER_SCRIPT).unwrap();
         make_executable(&gate_child);
         catalog::write(&root.join("catalog"), download, yolo);
         gate::write(&root.join("gates"));
@@ -39,11 +45,7 @@ impl Fixture {
     }
 
     pub fn run(&self, args: &[&str]) -> Output {
-        let path = format!(
-            "{}:{}",
-            self.root.join("bin").display(),
-            std::env::var("PATH").unwrap_or_default()
-        );
+        let path = prepend_to_path(&self.root.join("bin"));
         Command::new(env!("CARGO_BIN_EXE_terminal-jarvis"))
             .args(args)
             .env("PATH", path)
@@ -78,12 +80,4 @@ impl Drop for Fixture {
     fn drop(&mut self) {
         let _ = std::fs::remove_dir_all(&self.root);
     }
-}
-
-#[cfg(unix)]
-fn make_executable(path: &Path) {
-    use std::os::unix::fs::PermissionsExt;
-    let mut permissions = std::fs::metadata(path).unwrap().permissions();
-    permissions.set_mode(0o755);
-    std::fs::set_permissions(path, permissions).unwrap();
 }

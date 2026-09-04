@@ -25,6 +25,8 @@ mod option;
 mod options;
 mod output;
 mod package_check;
+mod package_check_fixture;
+mod package_check_scripts;
 mod plan;
 mod presentation;
 mod red;
