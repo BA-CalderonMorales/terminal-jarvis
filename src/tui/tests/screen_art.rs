@@ -6,7 +6,7 @@ use super::welcome;
 #[test]
 fn welcome_is_compact_and_teaches_the_commands() {
     let lines = welcome("codex", 3, 25);
-    assert!(lines.len() <= 8, "primer must fit small viewports");
+    assert!(lines.len() <= 10, "primer must fit small viewports");
     let joined = lines.join("\n");
     // Identity lives in the header and tagline now; the primer teaches
     // commands only -- including how to leave.

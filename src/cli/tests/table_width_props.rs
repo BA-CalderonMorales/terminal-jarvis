@@ -19,6 +19,16 @@ fn character_width_ascii(character: char) -> bool {
     }
 }
 
+#[test]
+fn wide_glyphs_measure_two_cells() {
+    // The CJK block is the canonical double-width class; if char_cells
+    // collapses to 1 the framed layouts drift on wide output.
+    assert_eq!(character_width('一'), 2);
+    assert_eq!(character_width('Ａ'), 2);
+    assert_eq!(character_width('a'), 1);
+    assert_eq!(character_width('·'), 1);
+}
+
 fn control_chars_have_zero_width(character: char) -> bool {
     !character.is_control() || character_width(character) == 0
 }

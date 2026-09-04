@@ -32,7 +32,7 @@ pub fn resolve(input: &str, harnesses: &[Harness]) -> Resolved {
         "help" | "/help" => return Resolved::Help,
         "/exit" | "/quit" | "exit" | "quit" => return Resolved::Exit,
         "/home" | "/clear" | "home" | "clear" => return Resolved::Home,
-        "/debug" => return Resolved::Debug(None),
+        "/debug" | "debug" => return Resolved::Debug(None),
         "/debug on" => return Resolved::Debug(Some(true)),
         "/debug off" => return Resolved::Debug(Some(false)),
         rest if rest.starts_with('/') => {

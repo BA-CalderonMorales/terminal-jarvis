@@ -29,7 +29,7 @@ pub fn step(offset: usize, toward: Move, len: usize, rows: usize) -> usize {
 }
 
 /// The visible slice: up to `rows` lines ending `offset` above the newest.
-pub fn window<'a>(lines: &'a [String], offset: usize, rows: usize) -> &'a [String] {
+pub fn window(lines: &[String], offset: usize, rows: usize) -> &[String] {
     let end = lines.len() - clamp(offset, lines.len(), rows);
     &lines[end.saturating_sub(rows)..end]
 }
