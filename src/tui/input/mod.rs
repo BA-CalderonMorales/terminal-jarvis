@@ -9,6 +9,8 @@ mod keys;
 mod line;
 
 pub use editor::{Editor, Feed, Move};
+#[cfg(test)]
+pub(crate) use keys::decode;
 pub use keys::read_key;
 pub use keys::Key;
 pub use line::{compose, raw_line, read_line, retire};
@@ -65,3 +67,7 @@ mod tests;
 #[cfg(test)]
 #[path = "../tests/input_keys.rs"]
 mod keys_tests;
+
+#[cfg(test)]
+#[path = "../tests/input_decode.rs"]
+mod decode_tests;

@@ -41,7 +41,7 @@ fn next_byte(sin: &mut impl Read) -> Option<u8> {
     }
 }
 
-fn decode(sin: &mut impl Read, first: u8) -> Option<Key> {
+pub(crate) fn decode(sin: &mut impl Read, first: u8) -> Option<Key> {
     let key = match first {
         0x04 => return None,
         b'\r' | b'\n' => Key::Enter,
