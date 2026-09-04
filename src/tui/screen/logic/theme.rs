@@ -7,8 +7,13 @@ use std::sync::Mutex;
 
 use super::palettes::{self, Palette};
 
-static ACTIVE: Mutex<(&'static str, Palette)> =
-    Mutex::new(("default", Palette { dim: "2", accent: "1;36" }));
+static ACTIVE: Mutex<(&'static str, Palette)> = Mutex::new((
+    "default",
+    Palette {
+        dim: "2",
+        accent: "1;36",
+    },
+));
 
 /// Swaps the active palette; false when the name is unknown. The default
 /// theme restores the shipped look exactly.
