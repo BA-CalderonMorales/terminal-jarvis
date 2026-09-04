@@ -39,10 +39,8 @@ fn bare_and_slashed_home_and_clear_route_to_the_welcome() {
 fn slash_lines_map_through_the_cli_grammar() {
     assert_eq!(action_of("/list", &[]), Some(args::Action::List));
     assert_eq!(action_of("/status", &[]), Some(args::Action::Check));
-    assert_eq!(
-        action_of("/use codex", &[]),
-        Some(args::Action::Use("codex".into()))
-    );
+    let used = Some(args::Action::Use("codex".into()));
+    assert_eq!(action_of("/use codex", &[]), used);
     assert!(matches!(
         action_of("/bogus", &[]),
         Some(args::Action::Direct { .. })
@@ -92,7 +90,6 @@ fn bare_harness_names_switch_to_that_harness() {
 }
 
 // bare free text -> Run: covered by `bare_unknown_words_run_the_active_agent`.
-
 #[test]
 fn help_text_lists_commands_and_the_gate_line() {
     let body = crate::tui::shell::help::text();
