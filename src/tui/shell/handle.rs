@@ -63,10 +63,11 @@ pub fn handle(
     }
 }
 
-/// `/theme` reply: list the names, or apply one and confirm.
+/// `/theme` reply: with no argument, cycle to the next theme; with one,
+/// pin it. Unknown names keep the list discoverable.
 fn theme_reply(choice: Option<&str>) -> String {
     match choice {
-        None => format!("themes: {}", crate::tui::screen::theme_names().join(", ")),
+        None => format!("theme '{}' applied", crate::tui::screen::cycle_theme()),
         Some(name) if crate::tui::screen::apply_theme(name) => format!("theme '{name}' applied"),
         Some(name) => format!(
             "unknown theme '{name}'; themes: {}",

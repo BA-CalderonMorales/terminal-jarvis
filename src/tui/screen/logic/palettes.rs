@@ -70,13 +70,14 @@ pub fn theme_names() -> Vec<&'static str> {
     names
 }
 
-/// Resolves a theme name (case-, hyphen-, underscore-, space-insensitive).
-pub fn lookup_theme(name: &str) -> Option<Palette> {
+/// Resolves a theme name (case-, hyphen-, underscore-, space-insensitive)
+/// to its canonical name and palette.
+pub fn lookup_theme(name: &str) -> Option<(&'static str, Palette)> {
     let norm = normalize(name);
     THEMES
         .iter()
         .find(|theme| normalize(theme.name) == norm)
-        .map(|theme| theme.palette)
+        .map(|theme| (theme.name, theme.palette))
 }
 
 fn normalize(name: &str) -> String {
