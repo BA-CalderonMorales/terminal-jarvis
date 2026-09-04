@@ -25,7 +25,7 @@ pub fn help() -> String {
 }
 
 pub fn current(session: Option<Session>) -> String {
-    let active = session.map(|s| s.active_harness).unwrap_or_else(|| "none".into());
+    let active = session.map(|s| s.active_harness).unwrap_or("none".into());
     if style::plain() {
         return format!("active harness = {active}\n");
     }
