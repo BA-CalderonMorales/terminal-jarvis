@@ -53,7 +53,20 @@ Type "help"
 Enter
 Sleep 2s
 
-# 7. home again, then leave with a clean shell
+# 7. the vim moment -- Esc for NORMAL, j/k scroll the help table, i returns
+Sleep 0.5s
+Escape
+Sleep 1s
+Type "j"
+Sleep 0.6s
+Type "j"
+Sleep 0.6s
+Type "k"
+Sleep 0.6s
+Type "i"
+Sleep 0.8s
+
+# 8. home again, then leave with a clean shell
 Type "home"
 Enter
 Sleep 1.5s
