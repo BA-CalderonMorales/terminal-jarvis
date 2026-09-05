@@ -3,8 +3,10 @@
 
 #[path = "logic/editor.rs"]
 mod editor;
+#[path = "logic/escape.rs"]
+mod escape;
 #[path = "logic/keys.rs"]
-mod keys;
+pub(crate) mod keys;
 #[path = "logic/line.rs"]
 mod line;
 

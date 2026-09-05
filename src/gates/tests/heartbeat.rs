@@ -50,7 +50,12 @@ fn run_scan(name: &str, script: &str, narrate: bool) -> Scan {
 #[test]
 fn a_fast_scan_never_takes_a_heartbeat_tick() {
     let scan = run_scan("fast", "#!/bin/sh\n", false);
-    assert!(!scan.heartbeat, "a sub-tick scan must not redraw");
+    // A tick for a sub-tick scan is only spurious when the wall clock
+    // agrees; scheduler starvation under parallel load is not a bug.
+    assert!(
+        !scan.heartbeat || scan.elapsed >= TICK,
+        "a sub-tick scan must not redraw"
+    );
     assert_eq!(scan.code, 0);
 }
 

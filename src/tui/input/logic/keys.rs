@@ -1,6 +1,5 @@
-//! Keys: decodes terminal bytes into semantic key events for the raw
-//! viewport prompt. One exhaustive `Key` choice; unknown escape sequences
-//! are swallowed whole, never leaked into the command line.
+//! Keys: decodes terminal bytes into semantic key events; escape soup is
+//! swallowed whole, never leaked into the command line.
 
 use std::io::{self, Read};
 
@@ -8,6 +7,7 @@ use std::io::{self, Read};
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum Key {
     Char(char),
+    Escape,
     Enter,
     Backspace,
     ClearLine,
@@ -24,15 +24,26 @@ pub enum Key {
 /// Blocks until one key arrives; `None` means EOF or Ctrl-D -- the session
 /// ends. Signal interrupts (resize ticks) retry instead of dying.
 pub fn read_key() -> Option<Key> {
+    // Scoped lock: the escape resolver's reader thread needs the stdin
+    // lock free, so the first byte reads and releases before the dance.
+    let first = {
+        let mut sin = io::stdin().lock();
+        next_byte(&mut sin)?
+    };
+    if first == 0x1b {
+        return super::escape::resolve_and_decode(first);
+    }
     let mut sin = io::stdin().lock();
-    let first = next_byte(&mut sin)?;
     decode(&mut sin, first)
 }
 
 fn next_byte(sin: &mut impl Read) -> Option<u8> {
+    if let Some(byte) = super::escape::pending() {
+        return Some(byte);
+    }
     let mut one = [0u8; 1];
     loop {
-        return match sin.read(&mut one) {
+        break match sin.read(&mut one) {
             Err(e) if e.kind() == io::ErrorKind::Interrupted => continue,
             Ok(0) => None,
             Ok(_) => Some(one[0]),
@@ -48,7 +59,7 @@ pub(crate) fn decode(sin: &mut impl Read, first: u8) -> Option<Key> {
         0x7f | 0x08 => Key::Backspace,
         0x15 => Key::ClearLine,
         0x1b => match (next_byte(sin), next_byte(sin)) {
-            (Some(b'[' | b'O'), Some(final_byte)) => csi(sin, final_byte),
+            (Some(b'[' | b'O'), Some(last)) => csi(sin, last),
             _ => Key::Ignored,
         },
         0x20..=0x7e => Key::Char(first as char),

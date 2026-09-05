@@ -3,6 +3,7 @@ use crate::gates::logic::loader::Gate;
 use crate::security;
 use std::io::{Read, Write};
 use std::process::{Command, ExitStatus, Stdio};
+use std::time::Instant;
 
 /// The scan's numeric outcome: the real exit code, or 128 + the signal on
 /// unix when a scan was killed outright.
@@ -59,11 +60,13 @@ pub fn run(gate: &Gate, narrate: bool) -> Result<Scan, String> {
     super::interrupt::track(child.id() as i32);
     let stdout_reader = std::thread::spawn(move || tee(&mut stdout, narrate));
     let stderr_reader = std::thread::spawn(move || tee(&mut stderr, narrate));
+    let started = Instant::now();
     let mut heartbeat =
         (!narrate).then(|| Heartbeat::start(&format!("security scan ({}) ...", gate.name)));
     let limit = super::deadline::timeout_secs();
     let (status, timed_out) = super::deadline::wait(&mut child, limit)
         .map_err(|error| format!("gate scan failed: {error}"))?;
+    let elapsed = started.elapsed();
     super::interrupt::track(0);
     let fired = heartbeat.as_ref().is_some_and(|tick| tick.fired());
     if let Some(tick) = &mut heartbeat {
@@ -85,5 +88,6 @@ pub fn run(gate: &Gate, narrate: bool) -> Result<Scan, String> {
         code: exit_code(&status),
         output,
         heartbeat: fired,
+        elapsed,
     })
 }

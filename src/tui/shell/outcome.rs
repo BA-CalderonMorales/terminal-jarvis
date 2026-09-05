@@ -8,6 +8,7 @@ use std::path::Path;
 /// The mutable session state one command can change.
 pub struct LoopState {
     pub body: Vec<String>,
+    pub history: Vec<String>,
     pub converse: Option<crate::converse::Live>,
     pub hint: String,
     pub options: args::Options,

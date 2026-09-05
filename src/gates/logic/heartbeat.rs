@@ -36,6 +36,9 @@ pub struct Scan {
     pub code: i32,
     pub output: String,
     pub heartbeat: bool,
+    /// Wall-clock duration of the whole scan, so timing tests can tell a
+    /// real spurious tick from scheduler starvation under parallel load.
+    pub elapsed: Duration,
 }
 /// The background redraw loop for one scan; stop it before printing anything
 pub struct Heartbeat {

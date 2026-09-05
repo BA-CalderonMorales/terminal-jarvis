@@ -43,6 +43,7 @@ pub fn prompt(
     catalog_root: &Path,
     state_home: &Path,
     body: &[String],
+    history: &[String],
 ) -> Option<String> {
     paint(indicator, hint, harnesses, catalog_root, state_home, body);
     let state =
@@ -51,6 +52,7 @@ pub fn prompt(
         state: &state,
         hint,
         body,
+        history,
     };
     match crate::tui::term::enable_raw() {
         Some(_guard) => super::viewport_raw::run(&session),

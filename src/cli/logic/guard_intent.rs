@@ -112,8 +112,12 @@ fn confirm_error(token: &str) -> error::Failure {
 }
 
 fn reject_irrelevant(options: &Options) -> error::Result<()> {
-    if options.narrate {
-        eprintln!("read-only: nothing to confirm");
+    if options.dry_run || options.no_input || options.confirm.is_some() || options.allow_dangerous {
+        return Err(error::Failure::usage(
+            "option_not_applicable",
+            "lifecycle options are not valid for a read-only capability",
+            "remove the lifecycle option",
+        ));
     }
     Ok(())
 }

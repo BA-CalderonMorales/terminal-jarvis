@@ -1,19 +1,25 @@
 //! Render: the transcript as chat bubbles -- the first harness on the left,
-//! the reply on the right. Wrapped by display cells (wide glyphs count two)
-//! so the frame's width math stays honest.
+//! the reply on the right. Wrapped on whole words (a long word hard-splits
+//! rather than wandering), by display cells so wide glyphs stay honest.
 
+use crate::converse::render_wrap::wrap;
 use crate::converse::transcript::Transcript;
 
 const BUBBLE_MAX: usize = 60;
 
-/// The full tab body: chapter header, topic, then one bubble per turn.
-pub fn bubbles(transcript: &Transcript, width: usize) -> Vec<String> {
-    let mut lines = vec![
+/// The chapter header: emitted once when the conversation opens.
+pub fn header(transcript: &Transcript) -> Vec<String> {
+    vec![
         format!("── converse: {} ⇄ {} ──", transcript.a, transcript.b),
         format!("topic: {}", transcript.topic),
         String::new(),
-    ];
-    for turn in &transcript.turns {
+    ]
+}
+
+/// Bubbles for `transcript.turns[from..]` -- the not-yet-rendered delta.
+pub fn turns(transcript: &Transcript, from: usize, width: usize) -> Vec<String> {
+    let mut lines = Vec::new();
+    for turn in transcript.turns.iter().skip(from) {
         let left = turn.speaker == transcript.a;
         lines.extend(bubble(&turn.speaker, &turn.text, width, left));
         lines.push(String::new());
@@ -21,22 +27,44 @@ pub fn bubbles(transcript: &Transcript, width: usize) -> Vec<String> {
     lines
 }
 
-/// One rounded box: `left` bubbles hug the margin, replies indent right.
+/// One rounded box: `left` bubbles hug the margin in the theme accent,
+/// replies indent right in the second accent, so the two voices read at
+/// a glance even mid-scroll.
 fn bubble(speaker: &str, text: &str, width: usize, left: bool) -> Vec<String> {
     let bubble_w = width.saturating_sub(6).clamp(24, BUBBLE_MAX);
     let text_w = bubble_w.saturating_sub(4);
-    let mut out = vec![format!(
-        "╭─ {speaker} {}╮",
+    type Tint = fn(&str) -> String;
+    let (paint, reply_paint): (Tint, Tint) = if left {
+        (crate::tui::screen::accent, crate::tui::screen::accent2)
+    } else {
+        (crate::tui::screen::accent2, crate::tui::screen::accent)
+    };
+    let name_row = format!(
+        "╭─ {} {}╮",
+        paint(speaker),
         "─".repeat(bubble_w.saturating_sub(speaker.chars().count() + 5))
-    )];
-    for line in wrap(text, text_w) {
+    );
+    let mut wrapped = wrap(text, text_w);
+    while wrapped
+        .last()
+        .map(|row| row.trim().is_empty())
+        .unwrap_or(false)
+    {
+        wrapped.pop();
+    }
+    let mut out = vec![name_row];
+    for line in wrapped {
         let cells = line.chars().map(crate::cli::char_cells).sum::<usize>();
         out.push(format!(
-            "│ {line}{} │",
+            "│ {}{} │",
+            paint(&line),
             " ".repeat(text_w.saturating_sub(cells))
         ));
     }
-    out.push(format!("╰{}╯", "─".repeat(bubble_w.saturating_sub(2))));
+    out.push(format!(
+        "╰{}╯",
+        reply_paint(&"─".repeat(bubble_w.saturating_sub(2)))
+    ));
     let indent = if left {
         0
     } else {
@@ -45,25 +73,4 @@ fn bubble(speaker: &str, text: &str, width: usize, left: bool) -> Vec<String> {
     out.iter()
         .map(|line| format!("{}{line}", " ".repeat(indent)))
         .collect()
-}
-
-/// Cell-aware wrapping with a hard reset on embedded newlines, so a reply
-/// that carries its own paragraphs never skews the box.
-fn wrap(text: &str, width: usize) -> Vec<String> {
-    let mut lines = Vec::new();
-    for paragraph in text.split('\n') {
-        let mut line = String::new();
-        let mut cells = 0;
-        for character in paragraph.chars() {
-            let glyph = crate::cli::char_cells(character);
-            if cells + glyph > width && !line.is_empty() {
-                lines.push(std::mem::take(&mut line));
-                cells = 0;
-            }
-            line.push(character);
-            cells += glyph;
-        }
-        lines.push(line);
-    }
-    lines
 }

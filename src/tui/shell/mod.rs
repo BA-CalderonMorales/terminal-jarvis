@@ -3,36 +3,24 @@
 use crate::{cli::args, contracts::Harness};
 use std::path::Path;
 
-#[path = "./canonical.rs"]
 mod canonical;
-#[path = "./dispatch.rs"]
 mod dispatch;
-#[path = "./handle.rs"]
 mod handle;
-#[path = "./help.rs"]
 mod help;
-#[path = "./outcome.rs"]
 mod outcome;
-#[path = "./run_action.rs"]
 mod run_action;
-#[path = "./session.rs"]
 mod session;
-#[path = "./status.rs"]
 mod status;
-#[path = "./verdict.rs"]
 mod verdict;
-#[path = "./viewport.rs"]
 mod viewport;
-#[path = "./viewport_raw.rs"]
+mod viewport_nav;
+mod viewport_page;
 mod viewport_raw;
 
 pub use handle::handle;
 
-#[path = "./converse.rs"]
 mod converse;
-#[path = "./stream.rs"]
 mod stream;
-#[path = "./stream_plan.rs"]
 mod stream_plan;
 
 pub fn run(harnesses: &[Harness], catalog_root: &Path, state_home: &Path, options: args::Options) {
@@ -49,6 +37,7 @@ pub fn run(harnesses: &[Harness], catalog_root: &Path, state_home: &Path, option
     super::sigint::guarded(move || {
         let mut state = outcome::LoopState {
             converse: None,
+            history: Vec::new(),
             body: viewport::welcome(harnesses, catalog_root, state_home),
             hint: status::modeline(state_home, false, debug),
             options,
@@ -70,11 +59,15 @@ pub fn run(harnesses: &[Harness], catalog_root: &Path, state_home: &Path, option
                     catalog_root,
                     state_home,
                     &state.body,
+                    &state.history,
                 )
             } else {
                 super::input::read_line(&state.indicator, &state.hint)
             };
             let Some(input) = input else { break };
+            if state.history.last() != Some(&input) {
+                state.history.push(input.clone());
+            }
             let mut sink = Vec::new();
             let next = handle(
                 &mut sink,
@@ -95,6 +88,5 @@ pub fn run(harnesses: &[Harness], catalog_root: &Path, state_home: &Path, option
     }
 }
 
-#[path = "./parse.rs"]
 mod parse;
 pub use parse::{resolve, Next, Resolved};

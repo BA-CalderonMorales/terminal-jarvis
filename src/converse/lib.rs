@@ -13,6 +13,9 @@ mod prompt;
 #[path = "logic/render.rs"]
 pub mod render;
 
+#[path = "logic/render_wrap.rs"]
+mod render_wrap;
+
 #[path = "logic/sanitize.rs"]
 pub mod sanitize;
 

@@ -37,6 +37,13 @@ done
 
 cd "$(dirname "$0")/../../../../"
 
+# Heavy local runs share this box with live agent sessions: cap the cargo
+# parallelism unless the operator overrides it, so rustc never starves the
+# host into allocator aborts.
+: "${TJ_LOCAL_CI_JOBS:=4}"
+export CARGO_BUILD_JOBS="$TJ_LOCAL_CI_JOBS"
+export RUST_TEST_THREADS="${RUST_TEST_THREADS:-4}"
+
 step() {
   printf '\n[%s] %s\n' "$1" "$2"
 }

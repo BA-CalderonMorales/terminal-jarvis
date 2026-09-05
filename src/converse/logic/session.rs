@@ -24,6 +24,8 @@ pub struct Live {
     pub transcript: Transcript,
     pub turns_left: usize,
     pub next_is_a: bool,
+    /// How many transcript turns the frame has already rendered.
+    pub rendered: usize,
 }
 
 impl Live {
@@ -35,6 +37,7 @@ impl Live {
             transcript: Transcript::new(a, b, topic),
             turns_left: turns,
             next_is_a: true,
+            rendered: 0,
         }
     }
 

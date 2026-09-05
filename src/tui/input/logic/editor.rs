@@ -34,6 +34,7 @@ pub struct Editor {
 impl Editor {
     pub fn feed(&mut self, key: Key) -> Feed {
         match key {
+            crate::tui::input::Key::Escape => Feed::Idle,
             Key::Char(c) => {
                 self.buf.push(c);
                 Feed::Edited

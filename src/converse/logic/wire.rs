@@ -17,7 +17,8 @@ pub fn open(
         seed.ok_or_else(|| vec!["no conversation is running".to_string()])?;
     if super::consent::seen(state_home) {
         let live = Live::new(&a, &b, &topic, turns);
-        let lines = render::bubbles(&live.transcript, width);
+        let mut lines = render::header(&live.transcript);
+        lines.extend(render::turns(&live.transcript, 0, width));
         Ok((live, lines))
     } else {
         super::consent::mark(state_home);
@@ -46,7 +47,9 @@ pub fn pending(
     let started = std::time::Instant::now();
     match advance(active, speak) {
         Step::Stopped(failure) => {
-            let mut lines = render::bubbles(&active.transcript, width);
+            let from = active.rendered;
+            let mut lines = render::turns(&active.transcript, from, width);
+            active.rendered = active.transcript.turns.len();
             lines.push(format!(
                 "✗ {speaker} stopped after {:.1}s: {failure}",
                 started.elapsed().as_secs_f32()
@@ -61,7 +64,9 @@ pub fn pending(
                 .last_of(&speaker)
                 .map(|reply| reply.split_whitespace().count())
                 .unwrap_or(0);
-            let mut lines = render::bubbles(&active.transcript, width);
+            let from = active.rendered;
+            let mut lines = render::turns(&active.transcript, from, width);
+            active.rendered = active.transcript.turns.len();
             lines.push(format!(
                 "✓ {speaker} replied in {:.1}s · {words} words",
                 started.elapsed().as_secs_f32()
