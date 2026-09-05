@@ -54,6 +54,8 @@ fn default_output_is_structured_across_the_core_read_only_surface() {
             let show = tj(args, &home);
             let body = stdout(&show);
             assert!(body.contains(title), "{body}");
+            // the identity line leads: "<display> (<name>)"
+            assert!(body.starts_with("OpenAI Codex (codex)"), "{body}");
             assert!(!body.contains('+'), "show is line-based: {body}");
             continue;
         }
