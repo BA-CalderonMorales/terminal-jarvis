@@ -28,14 +28,14 @@ fn all_catalog_rows_have_honest_truth_metadata() {
     }
     assert_eq!(harnesses.len(), 25);
     assert_eq!(rows, 225);
-    assert_eq!(states[&SupportState::Stub], 99);
+    assert_eq!(states[&SupportState::Stub], 98);
     assert_eq!(states[&SupportState::Disabled], 25);
     assert_eq!(states[&SupportState::Unknown], 8);
     assert_eq!(states[&SupportState::Expected], 87);
-    assert_eq!(states[&SupportState::Verified], 6);
-    assert_eq!(effects[&Effect::ReadOnly], 123);
+    assert_eq!(states[&SupportState::Verified], 7);
+    assert_eq!(effects[&Effect::ReadOnly], 122);
     assert_eq!(effects[&Effect::StateChanging], 75);
-    assert_eq!(effects[&Effect::Dangerous], 27);
+    assert_eq!(effects[&Effect::Dangerous], 28);
 }
 
 #[test]
@@ -47,6 +47,6 @@ fn interaction_and_network_counts_match_the_frozen_audit() {
         network += usize::from(plan.network);
         interactive += usize::from(plan.interaction == Interaction::Interactive);
     }
-    assert_eq!(network, 102);
+    assert_eq!(network, 103);
     assert_eq!(interactive, 27);
 }

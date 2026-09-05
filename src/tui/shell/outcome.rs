@@ -9,6 +9,7 @@ use std::path::Path;
 /// The mutable session state one command can change.
 pub struct LoopState {
     pub body: Vec<String>,
+    pub converse: Option<crate::converse::Live>,
     pub hint: String,
     pub options: args::Options,
     pub debug: bool,
@@ -40,6 +41,23 @@ pub fn step(
                 catalog_root,
                 state_home,
             );
+            true
+        }
+        Next::Converse(seed) => {
+            match crate::converse::wire::consent(seed, state_home) {
+                Ok(live) if crate::tui::screen::active() => {
+                    state.body = live.transcript.lines();
+                    state.converse = Some(live);
+                    state.hint = crate::converse::wire::hint(&state.converse).unwrap_or_default();
+                }
+                Ok(_) => {
+                    state.body = vec!["converse runs in the viewport tui only for now".to_string()];
+                }
+                Err(lines) => {
+                    state.body = lines;
+                    state.hint = status::modeline(state_home, false, state.debug);
+                }
+            }
             true
         }
         Next::Debug(toggle) => {

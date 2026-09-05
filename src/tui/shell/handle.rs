@@ -52,6 +52,7 @@ pub fn handle(
             let _ = write!(out, "{}", theme_reply(choice.as_deref()));
             again_plain()
         }
+        Resolved::Converse(seed) => Next::Converse(seed),
         Resolved::Debug(toggle) => Next::Debug(toggle),
         Resolved::Error(message) => {
             let _ = writeln!(out, "{}", style::error(&message));

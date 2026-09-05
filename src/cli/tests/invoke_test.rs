@@ -1,4 +1,6 @@
+use super::errors::{diagnostic, verb};
 use super::*;
+use crate::contracts::CommandPlan;
 use crate::contracts::{EnvMode, Harness};
 
 fn harness(command: &str, args: Vec<String>) -> Vec<Harness> {

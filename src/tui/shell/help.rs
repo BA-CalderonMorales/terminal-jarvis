@@ -38,6 +38,10 @@ pub fn text() -> String {
             "/debug [on|off]",
             "see the raw, verbose view behind the clean one",
         ),
+        (
+            "converse <a> <b> <topic>",
+            "two agents talk in a tab (experimental)",
+        ),
         ("home | clear", "reset the frame"),
         ("exit | quit", "leave without state changes"),
     ];

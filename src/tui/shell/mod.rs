@@ -30,6 +30,9 @@ mod viewport_raw;
 
 pub use handle::handle;
 
+#[path = "./converse.rs"]
+mod converse;
+
 pub fn run(harnesses: &[Harness], catalog_root: &Path, state_home: &Path, options: args::Options) {
     let debug = false;
     let indicator = super::input::Indicator {
@@ -43,6 +46,7 @@ pub fn run(harnesses: &[Harness], catalog_root: &Path, state_home: &Path, option
     }
     super::sigint::guarded(move || {
         let mut state = outcome::LoopState {
+            converse: None,
             body: viewport::welcome(harnesses, catalog_root, state_home),
             hint: status::modeline(state_home, false, debug),
             options,
@@ -52,6 +56,10 @@ pub fn run(harnesses: &[Harness], catalog_root: &Path, state_home: &Path, option
         status::refresh_indicator(&mut state.indicator, state_home, state.debug);
         loop {
             crate::tui::screen::ensure_usable();
+            if let Some(lines) = converse::tick(&mut state, harnesses, catalog_root, state_home) {
+                state.body.extend(lines);
+                continue;
+            }
             let input = if in_viewport && crate::tui::screen::active() {
                 viewport::prompt(
                     &state.indicator,

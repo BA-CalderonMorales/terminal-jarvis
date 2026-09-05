@@ -1,6 +1,13 @@
 use super::resolve;
-use crate::contracts::{Capability, CommandPlan, Harness};
+use crate::contracts::{Capability, Harness};
 use crate::runtime;
+
+fn find<'a>(harnesses: &'a [Harness], name: &str) -> Result<&'a Harness, String> {
+    harnesses
+        .iter()
+        .find(|harness| harness.name == name)
+        .ok_or_else(|| format!("unknown harness '{name}'"))
+}
 
 pub fn invocation(
     invocation: resolve::Invocation,
@@ -31,69 +38,61 @@ pub fn capability(
         if narrate {
             eprintln!(
                 "{} {harness}: {} ...",
-                verb(capability),
+                errors::verb(capability),
                 plan.command.render()
             );
         } else {
-            eprintln!("{} {harness} ...", verb(capability));
+            eprintln!("{} {harness} ...", errors::verb(capability));
         }
     }
     match runtime::run_command_text(plan, extra) {
         Ok((0, captured)) => Ok((0, captured)),
         Ok((code, captured)) => {
-            eprintln!("{}", diagnostic(harness, capability, &plan.command, code));
+            eprintln!(
+                "{}",
+                errors::diagnostic(harness, capability, &plan.command, code)
+            );
             Ok((code, captured))
         }
         Err(error) => {
-            let (code, message) = command_error(selected, plan.command.command.as_str(), error);
+            let (code, message) =
+                errors::command_error(selected, plan.command.command.as_str(), error);
             eprintln!("{message}");
             Ok((code, String::new()))
         }
     }
 }
 
-fn verb(capability: Capability) -> &'static str {
-    if capability == Capability::Download {
-        "installing"
+/// One-shot headless run for the converse loop: policy-checked, then
+/// executed; a nonzero exit becomes the failure string the session shows.
+pub fn headless_one_shot(
+    harnesses: &[Harness],
+    name: &str,
+    prompt: &str,
+) -> Result<String, String> {
+    let selected = find(harnesses, name)?;
+    let plan = selected
+        .plan(Capability::Headless)
+        .ok_or_else(|| format!("{name} lacks headless"))?;
+    if let Err(failure) = super::guard_policy::check(selected, plan, true) {
+        return Err(format!("{}: {}", failure.code, failure.message));
+    }
+    let (code, text) = capability(
+        harnesses,
+        name,
+        Capability::Headless,
+        &[prompt.to_string()],
+        false,
+    )?;
+    if code == 0 {
+        Ok(text)
     } else {
-        "updating"
+        Err(format!("exit {code}"))
     }
 }
 
-fn diagnostic(harness: &str, capability: Capability, command: &CommandPlan, code: i32) -> String {
-    crate::diagnostics::redact_process_text(&format!(
-        "harness '{harness}' capability '{capability}' failed with exit {code}\n  command: {}",
-        command.render()
-    ))
-}
-
-fn find<'a>(harnesses: &'a [Harness], name: &str) -> Result<&'a Harness, String> {
-    harnesses
-        .iter()
-        .find(|harness| harness.name == name)
-        .ok_or_else(|| format!("unknown harness '{name}'"))
-}
-
-fn command_error(harness: &Harness, binary: &str, error: std::io::Error) -> (i32, String) {
-    let name = &harness.name;
-    let (code, message) = match error.kind() {
-        std::io::ErrorKind::NotFound => {
-            let advice = if harness.plan(Capability::Download).is_some() {
-                format!("; run `terminal-jarvis install {name}` or `terminal-jarvis plan {name} download`")
-            } else {
-                "; its download plan is undocumented; see `terminal-jarvis plan ".to_string()
-                    + name
-                    + "`"
-            };
-            (127, format!("{name} binary '{binary}' was not found on PATH{advice}"))
-        }
-        std::io::ErrorKind::PermissionDenied => {
-            (126, format!("{name} binary '{binary}' is not executable; fix its permissions or reinstall {name}"))
-        }
-        _ => (3, format!("failed to start {} binary '{binary}': {error}", harness.name)),
-    };
-    (code, crate::diagnostics::redact_process_text(&message))
-}
+#[path = "invoke_error.rs"]
+mod errors;
 
 #[cfg(test)]
 #[path = "../tests/invoke_test.rs"]

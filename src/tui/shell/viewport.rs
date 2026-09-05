@@ -12,15 +12,17 @@ pub fn welcome(harnesses: &[Harness], catalog_root: &Path, state_home: &Path) ->
     crate::tui::screen::welcome(&o.name, o.ready, o.total)
 }
 
+/// Paints the composed frame without reading -- the converse loop repaints
+/// between turns while the child owns the wait.
 #[allow(clippy::too_many_arguments)]
-pub fn prompt(
+pub fn paint(
     indicator: &Indicator,
     hint: &str,
     harnesses: &[Harness],
     catalog_root: &Path,
     state_home: &Path,
     body: &[String],
-) -> Option<String> {
+) {
     let _ = std::io::stdout().flush();
     let state =
         super::viewport_raw::ViewportState::collect(indicator, harnesses, catalog_root, state_home);
@@ -30,6 +32,20 @@ pub fn prompt(
     let painted = crate::tui::screen::parked(crate::tui::screen::frame(size, &draft), size, cells);
     print!("{painted}");
     std::io::stdout().flush().ok();
+}
+
+#[allow(clippy::too_many_arguments)]
+pub fn prompt(
+    indicator: &Indicator,
+    hint: &str,
+    harnesses: &[Harness],
+    catalog_root: &Path,
+    state_home: &Path,
+    body: &[String],
+) -> Option<String> {
+    paint(indicator, hint, harnesses, catalog_root, state_home, body);
+    let state =
+        super::viewport_raw::ViewportState::collect(indicator, harnesses, catalog_root, state_home);
     let session = super::viewport_raw::Session {
         state: &state,
         hint,
