@@ -2,7 +2,7 @@
 //! the reply on the right. Wrapped on whole words (a long word hard-splits
 //! rather than wandering), by display cells so wide glyphs stay honest.
 
-use crate::converse::render_wrap::wrap;
+use crate::cli::wrap;
 use crate::converse::transcript::Transcript;
 
 const BUBBLE_MAX: usize = 60;

@@ -65,20 +65,3 @@ pub fn show(harness: &Harness) -> String {
     }
     lines.join("\n")
 }
-
-/// Wraps by display cells (wide glyphs count two), never by char count.
-pub(crate) fn wrap(text: &str, width: usize) -> String {
-    let cells = crate::cli::logic::table::char_cells;
-    let mut out = String::new();
-    let mut line_cells = 0;
-    for character in text.chars() {
-        let glyph = cells(character);
-        if line_cells + glyph > width && line_cells > 0 {
-            out.push('\n');
-            line_cells = 0;
-        }
-        out.push(character);
-        line_cells += glyph;
-    }
-    out
-}

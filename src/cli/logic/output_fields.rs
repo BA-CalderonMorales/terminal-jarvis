@@ -2,8 +2,8 @@
 //! label/value rows whose wrapped continuations align under the value, so
 //! `show` and the gate screens read as one family.
 
-use super::output::wrap;
 use super::table;
+use super::text_wrap::wrap;
 
 /// One field block: the `  label     value` line plus aligned continuations.
 pub fn field(label: &str, value: &str, width: usize) -> Vec<String> {
@@ -12,14 +12,15 @@ pub fn field(label: &str, value: &str, width: usize) -> Vec<String> {
 
 /// A padded block: first line carries `pad`, continuations align under it.
 pub fn section(pad: String, text: &str, width: usize) -> Vec<String> {
+    let indent = " ".repeat(pad.chars().count());
     wrap(text, width.saturating_sub(pad.chars().count()))
-        .split('\n')
+        .iter()
         .enumerate()
         .map(|(step, line)| {
             if step == 0 {
                 format!("{pad}{line}")
             } else {
-                format!("{}{line}", " ".repeat(pad.chars().count()))
+                format!("{indent}{line}")
             }
         })
         .collect()

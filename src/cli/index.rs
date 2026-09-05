@@ -22,6 +22,7 @@ pub use crate::cli::logic::output_truth;
 pub use crate::cli::logic::resolve;
 pub use crate::cli::logic::style;
 pub use crate::cli::logic::table::char_cells;
+pub use crate::cli::logic::text_wrap::wrap;
 
 pub fn dispatch(
     action: args::Action,
