@@ -39,6 +39,8 @@ pub fn watcher_active() -> bool {
 
 /// Spawns the sole stdin reader: it decodes keys and parks them until the
 /// process ends. Idempotent -- the first spawn wins, later turns reuse it.
+/// On EOF the watcher retires and hands stdin back to direct reads, so a
+/// dead watcher can never leave consumers polling an empty queue.
 pub fn spawn_watcher() {
     if WATCHER.swap(true, Ordering::AcqRel) {
         return;
@@ -47,52 +49,37 @@ pub fn spawn_watcher() {
         while let Some(key) = super::keys::read_stdin_key() {
             park(key);
         }
+        WATCHER.store(false, Ordering::Release);
         park(Key::Dead);
     });
 }
 
 /// Blocks until a key is parked -- the consumer's read while the watcher
-/// owns stdin. The parked `Dead` (EOF) flows through unchanged.
+/// owns stdin. If the watcher retired (EOF), the read falls back to
+/// stdin directly; the parked `Dead` flows through unchanged.
 pub fn wait() -> Option<Key> {
     loop {
         if let Some(key) = take() {
             return Some(key);
         }
+        if !watcher_active() {
+            return super::keys::read_stdin_key();
+        }
         std::thread::sleep(Duration::from_millis(15));
     }
 }
 
-/// Eats the tail of a typed answer so leftover keystrokes ("es" of a
-/// typed "yes") never reach the prompt buffer: parked keys up to the
-/// Enter when the watcher owns stdin, buffered bytes otherwise.
-pub fn drain_answer(limit: Duration) -> usize {
-    let deadline = Instant::now() + limit;
-    let mut eaten = 0;
-    if watcher_active() {
-        while Instant::now() < deadline {
-            match take() {
-                Some(Key::Enter) | None => break,
-                Some(_) => eaten += 1,
-            }
+/// Bounded `wait`: `None` when silence outlasts `timeout` -- a drain may
+/// never block past its window on a tail that never arrives.
+pub(crate) fn wait_for(timeout: Duration) -> Option<Key> {
+    let deadline = Instant::now() + timeout;
+    loop {
+        if let Some(key) = take() {
+            return Some(key);
         }
-    } else {
-        let mut sin = std::io::stdin().lock();
-        while Instant::now() < deadline {
-            match next_tail_byte(&mut sin) {
-                Some(b'\r' | b'\n') | None => break,
-                Some(_) => eaten += 1,
-            }
+        if !watcher_active() || Instant::now() >= deadline {
+            return None;
         }
+        std::thread::sleep(Duration::from_millis(15));
     }
-    eaten
-}
-
-/// The next tail byte: an escape-resolver leftover first, then stdin;
-/// `None` ends the tail (EOF or a closed pipe).
-fn next_tail_byte(sin: &mut std::io::StdinLock<'_>) -> Option<u8> {
-    use std::io::Read;
-    super::escape::pending().or_else(|| {
-        let mut one = [0u8; 1];
-        sin.read(&mut one).ok().filter(|n| *n > 0).map(|_| one[0])
-    })
 }

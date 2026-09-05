@@ -16,7 +16,9 @@ fn park_clear() {
     PENDING.lock().unwrap_or_else(|e| e.into_inner()).clear();
 }
 
-fn park(byte: u8) {
+/// Parks one raw byte for the next reader; a byte read by a lingering
+/// windowed thread lands here so nothing is ever lost.
+pub(crate) fn park_byte(byte: u8) {
     park_clear();
     PENDING.lock().unwrap_or_else(|e| e.into_inner()).push(byte);
 }
@@ -45,7 +47,7 @@ pub fn resolve_and_decode(first: u8) -> Option<Key> {
             .map(|b| b.unwrap_or(0));
         let _ = tx.send(byte);
         if let Some(byte) = byte {
-            park(byte);
+            park_byte(byte);
         }
     });
     let continuation = match rx.recv_timeout(WINDOW) {
@@ -65,7 +67,7 @@ pub fn resolve_and_decode(first: u8) -> Option<Key> {
         Ok(Some(parked)) => {
             // an Alt combo: Esc ignored, the combo key replays untouched
             park_clear();
-            park(parked);
+            park_byte(parked);
             Some((parked, None))
         }
     };

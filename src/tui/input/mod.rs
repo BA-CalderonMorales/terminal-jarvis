@@ -1,6 +1,8 @@
 //! Input: the prompt widget surface. `Indicator` renders the context
 //! prefix; the line readers live in `logic/`.
 
+#[path = "logic/drain.rs"]
+pub(crate) mod drain;
 #[path = "logic/editor.rs"]
 mod editor;
 #[path = "logic/escape.rs"]
@@ -14,12 +16,13 @@ pub(crate) mod poll;
 #[path = "structs/mod.rs"]
 mod structs;
 
+pub(crate) use drain::drain_answer;
 pub use editor::{Editor, Feed, Move};
 #[cfg(test)]
 pub(crate) use keys::decode;
 pub use keys::read_key;
 pub use line::{compose, raw_line, read_line, retire};
-pub(crate) use poll::{drain_answer, spawn_watcher};
+pub(crate) use poll::spawn_watcher;
 pub use structs::Key;
 
 use crate::cli::style;

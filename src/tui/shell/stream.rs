@@ -73,6 +73,9 @@ pub fn apply(
                     code,
                     started.elapsed(),
                 );
+                // an adopted install changes the active harness: the
+                // indicator must say so on the very next frame
+                super::status::refresh_indicator(&mut state.indicator, state_home, state.debug);
             } else {
                 state
                     .body

@@ -42,10 +42,14 @@ pub(super) fn execute(
                     paint(line);
                 }
                 paint(&format!("Continue with {token}? [y/N]"));
+                // one keystroke answers: raw mode so [y/N] means [y/N],
+                // never a cooked line waiting for an Enter that reads
+                // as a hang
+                let _raw = crate::tui::term::enable_raw();
                 let key = crate::tui::input::read_key();
-                // The tail of a typed answer ("es" of "yes") must never
-                // leak into the prompt buffer.
-                crate::tui::input::drain_answer(std::time::Duration::from_millis(250));
+                // the tail of a typed answer ("es" of "yes") must never
+                // leak into the prompt buffer
+                crate::tui::input::drain_answer(std::time::Duration::from_millis(150));
                 let (row, answer) = guard_ask::in_frame(key);
                 paint(row);
                 guard_ask::consent(answer)
