@@ -39,6 +39,43 @@ it, and anything future work must respect.
 
 ## Records
 
+### Make the tui's human-input flows first-class for the 0.1.19 stack (release/0.1.19 -> 2026-09-05)
+
+**Decision:** Land the 0.1.19 interactive-input stack as one release: the
+in-frame consent reads one raw keystroke (no Enter, no cooked-mode hang) with
+a windowed, non-blocking answer-tail drain; a single parked-key reader owns
+stdin for the whole session so no two readers ever race; install/update
+consent defaults to YES (`[Y/n]`) while the new `uninstall <harness>` verb
+keeps `[y/N]` and derives its uninstaller from the download plan; streamed
+installs settle with the human verdict card and adopt the harness; typed
+headless flags (`--no-input`, `--confirm`) overlay the session options; the
+gate screens speak show's human-line language; the chrome degrades by clause
+at <=40/<=60 columns.
+
+**Context:** The operator hit the live failure chain: a pressed `y` declined
+because the in-frame verdict string ("confirmed") was fed to a gate that
+only accepted y/yes; the keystroke itself was undelivered in cooked mode
+(the vhs probe hung on a bare `y`); converse turns never read keys, so
+scrolling was dead; streamed installs ended in an exit row without adopting;
+and typed headless flags were silently discarded by the tui's parser. Each
+fix exposed the next gap in the same flow.
+
+**Considered:** Confirming on EOF -- rejected, Ctrl-D must never confirm.
+Adding a `--confirm` bypass for interrupted gate scans -- rejected, a
+security gate's skip stays fail-closed and interactive. A per-harness
+catalog `uninstall` capability -- deferred: deriving npm/cargo uninstallers
+from the download plan covers the fleet without touching 25 catalogs; a
+catalog capability is the next-session shape if bespoke uninstallers appear.
+A blocking tail read -- rejected, it hung past its own deadline in raw mode;
+the windowed reader parks late bytes instead.
+
+**Consequence:** The consent grammar is pinned by tests (`[Y/n]` vs `[y/N]`
+is real), the drain and key queue are unit-covered, and the tui_acceptance
+PTY tests witness the full install flow. One watcher thread owns stdin for
+the session; any future stdin reader must go through the parked-key queue.
+Long child lines still staircase in the body (no row wrap), and gate-run
+output streams via eprint-free quiet capture only -- both are the named
+follow-ups for the next release.
 ### Land the 0.1.15 hardening stack and repair develop's latent gate breakage (fix stack -> 2026-08-14)
 
 **Decision:** Land the five-fix 0.1.15 stack through develop in one atomic
