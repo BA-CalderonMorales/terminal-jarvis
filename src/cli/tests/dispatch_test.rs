@@ -73,9 +73,12 @@ fn auth_update_install() {
     let hs = [harness("opencode")];
     let (p, h) = paths();
     assert!(d(Action::Auth(vec![]), &hs, p, h).is_ok());
-    let (_, up) = d(Action::Update(None), &hs, p, h).unwrap();
-    assert!(up.contains("opencode"));
-    assert!(d(Action::Install("opencode".to_string()), &hs, p, h).is_err());
+    // bare update now targets the active harness: no session = explicit error
+    assert!(d(Action::Update(None), &hs, p, h)
+        .unwrap_err()
+        .message
+        .contains("no active harness"));
+    assert!(d(Action::Install(Some("opencode".to_string())), &hs, p, h).is_err());
     assert!(d(Action::Update(Some("opencode".to_string())), &hs, p, h).is_err());
 }
 #[test]

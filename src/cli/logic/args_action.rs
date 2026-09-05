@@ -32,10 +32,11 @@ pub(super) fn parse(
         "tui" => exact(words, Action::Tui, "terminal-jarvis tui")?,
         "current" => exact(words, Action::Current, "terminal-jarvis current")?,
         "use" => one(words, "use").map(Action::Use)?,
-        "show" | "info" => one(words, words[0].as_str()).map(Action::Show)?,
+        "show" | "info" => optional_one(words, "show").map(Action::Show)?,
         "plan" => plan(&words[1..])?,
         "run" => return child_parser::run(&words[1..], child, boundary),
-        "install" => one(words, "install").map(Action::Install)?,
+        "install" => optional_one(words, "install").map(Action::Install)?,
+        "uninstall" => optional_one(words, "uninstall").map(Action::Uninstall)?,
         "update" => optional_one(words, "update").map(Action::Update)?,
         "self-update" => exact(
             words,

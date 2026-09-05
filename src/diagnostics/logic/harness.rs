@@ -48,16 +48,16 @@ pub fn collect(input: &DiagnosticInput, redact: &Redactor<'_>) -> HarnessResult 
             executable.action = Some("install or repair the harness executable".into());
         }
         records.push(executable);
-        let (mut environment, environment_ready) =
-            super::harness_env::collect(harness, input, &base);
+        let (mut environment, _) = super::harness_env::collect(harness, input, &base);
         records.append(&mut environment);
-        let harness_ready = resolution.code == Code::Ready && environment_ready && support_ready;
-        let readiness_code = if harness_ready {
-            Code::Ready
-        } else if !support_ready {
-            Code::Unsupported
-        } else {
-            Code::Missing
+
+        // Available = installed and runnable; creds never gate the count.
+        let harness_ready =
+            matches!(resolution.code, Code::Ready | Code::Conflicting) && support_ready;
+        let readiness_code = match (harness_ready, support_ready) {
+            (true, _) => Code::Ready,
+            (false, false) => Code::Unsupported,
+            (false, true) => Code::Missing,
         };
         records.push(Record::new(
             format!("{base}.readiness"),

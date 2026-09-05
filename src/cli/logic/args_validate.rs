@@ -33,15 +33,16 @@ pub(super) fn valid_gate(words: &[String]) -> Result<Vec<String>, String> {
         [action]
             if matches!(
                 action.as_str(),
-                "status" | "list" | "enable" | "disable" | "run"
+                "status" | "list" | "enable" | "disable" | "run" | "help"
             ) =>
         {
             Ok(words.to_vec())
         }
         [action, _] if matches!(action.as_str(), "enable" | "run") => Ok(words.to_vec()),
-        _ => {
-            Err("usage: terminal-jarvis gate [status|list|enable [name]|disable|run [name]]".into())
-        }
+        _ => Err(
+            "usage: terminal-jarvis gate [status|list|enable [name]|disable|run [name]|help]"
+                .into(),
+        ),
     }
 }
 use super::{Action, Options, OutputMode};
@@ -63,11 +64,14 @@ pub(super) fn validate_options(action: &Action, options: &Options) -> Result<(),
             Action::Run(_)
                 | Action::Direct { .. }
                 | Action::Install(_)
+                | Action::Uninstall(Some(_))
                 | Action::Update(Some(_))
                 | Action::SelfUpdate { .. }
         )
     {
-        return Err("lifecycle options require run, install, harness update, or --update".into());
+        return Err(
+            "lifecycle options require run, install, uninstall, harness update, or --update".into(),
+        );
     }
     if options.output == OutputMode::Json && json_spawns_child(action, options.dry_run) {
         return Err("--json is unavailable for child execution; use plan or --dry-run".into());
@@ -79,7 +83,10 @@ fn json_spawns_child(action: &Action, dry_run: bool) -> bool {
     match action {
         Action::Run(_) | Action::Direct { .. } => true,
         Action::Gate(words) => words.first().is_some_and(|word| word == "run"),
-        Action::Install(_) | Action::Update(Some(_)) | Action::SelfUpdate { .. } => !dry_run,
+        Action::Install(_)
+        | Action::Uninstall(Some(_))
+        | Action::Update(Some(_))
+        | Action::SelfUpdate { .. } => !dry_run,
         _ => false,
     }
 }

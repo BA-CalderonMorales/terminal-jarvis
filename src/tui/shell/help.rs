@@ -25,6 +25,7 @@ pub fn text() -> String {
             "install <harness>",
             "install with the security gate in front",
         ),
+        ("uninstall <harness>", "remove a harness and its binary"),
         ("update <harness>", "update through the same gate"),
         (
             "gate [status|enable|disable|run]",
@@ -37,6 +38,10 @@ pub fn text() -> String {
         (
             "/debug [on|off]",
             "see the raw, verbose view behind the clean one",
+        ),
+        (
+            "converse <a> <b> <topic>",
+            "two agents talk in a tab (experimental)",
         ),
         ("home | clear", "reset the frame"),
         ("exit | quit", "leave without state changes"),

@@ -1,4 +1,5 @@
-use crate::gates::logic::heartbeat::{Heartbeat, TICK};
+use crate::gates::logic::heartbeat::Heartbeat;
+use crate::gates::logic::live::TICK;
 
 #[cfg(unix)]
 #[test]

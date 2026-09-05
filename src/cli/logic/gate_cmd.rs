@@ -8,6 +8,7 @@ pub fn handle(words: &[String], home: &Path) -> Result<(i32, String), String> {
     let available = gates::load(&context::gates_root()).map_err(|error| error.to_string())?;
     match words {
         [] => status(&available, home).map(|body| (0, body)),
+        [action] if action == "--help" || action == "-h" || action == "help" => Ok((0, help())),
         [action] if action == "status" => status(&available, home).map(|body| (0, body)),
         [action] if action == "list" => Ok((0, output::list(&available))),
         [action] if action == "enable" => enable(&available, home, "trivy"),
@@ -44,8 +45,27 @@ fn enable(available: &[gates::Gate], home: &Path, name: &str) -> Result<(i32, St
     Ok((0, output::enabled(&gate.name)))
 }
 
+fn help() -> String {
+    [
+        "gate -- the optional Trivy security gate",
+        "",
+        "  gate status         is a gate enabled, and is its binary runnable?",
+        "  gate list           the gates this catalog ships",
+        "  gate enable [name]  scan installs and runs from here on",
+        "  gate disable        stop scanning (interrupted scans still ask)",
+        "  gate run [name]     run a scan right now",
+        "",
+        "Piping input: headless runs pass --no-input --confirm=<token>; the",
+        "token is printed with every prompt (e.g. download:copilot).",
+    ]
+    .join("\n")
+}
+
 fn run(gate: &gates::Gate) -> Result<(i32, String), String> {
-    let scan = gates::run(gate, true)?;
+    // the viewport paints its own frame: narration would leak under it,
+    // so the scan runs quiet there (the heartbeat keeps the progress)
+    let narrate = !crate::tui::screen::active();
+    let scan = gates::run(gate, narrate)?;
     Ok((
         scan.code,
         output::run_result(&gate.name, scan.code, &scan.output),

@@ -1,15 +1,14 @@
-//! Verdict: the compact result card for lifecycle actions. In the clean tui
-//! mode an install or update answers in one line -- what happened, in how
-//! long -- instead of echoing headless machinery. Rendering is pure; the
-//! caller measures the action, adopts the installed harness, and styles.
+//! Verdict: the compact result card for lifecycle actions. An install,
+//! update, or uninstall answers in one line -- what happened, in how
+//! long -- instead of echoing headless machinery. Pure rendering; the
+//! caller measures, adopts, and styles.
 
 use crate::cli::style;
 use std::path::Path;
 use std::time::Duration;
 
 /// (adopted, verdict-text, persisted): adopted switches the harness;
-/// persisted reports the executable landed on PATH after a successful
-/// install -- the truth the readiness probe shows later.
+/// persisted reports the executable landed on PATH after a success.
 pub fn text(
     name: &str,
     verb: &str,
@@ -18,6 +17,9 @@ pub fn text(
     elapsed: Duration,
 ) -> (bool, String, bool) {
     match outcome {
+        Ok((0, _)) if verb == "uninstalled" => {
+            (false, format!("{verb} {name} · {}", human(elapsed)), true)
+        }
         Ok((0, _)) if binary_on_path => {
             let tail = if verb == "installed" {
                 " · now active"
@@ -60,15 +62,12 @@ pub fn settle(
 ) {
     let (adopted, text, persisted) = text(name, verb, binary_on_path, outcome, elapsed);
     let ok = outcome.as_ref().map(|(code, _)| *code).ok() == Some(0);
-    let _ = writeln!(
-        out,
-        "{}",
-        if ok {
-            style::success(&text)
-        } else {
-            style::error(&text)
-        }
-    );
+    let painted = if ok {
+        style::success(&text)
+    } else {
+        style::error(&text)
+    };
+    let _ = writeln!(out, "{painted}");
     if !persisted && ok {
         let _ = writeln!(
             out,

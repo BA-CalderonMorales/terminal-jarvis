@@ -12,6 +12,7 @@ pub const PLAIN: &str = "Terminal Jarvis\n\
        terminal-jarvis show <harness>\n\
        terminal-jarvis plan [harness] <capability>\n\
        terminal-jarvis install <harness> [lifecycle options]\n\
+       terminal-jarvis uninstall <harness> [lifecycle options]\n\
        terminal-jarvis update [harness] [lifecycle options]\n\
        terminal-jarvis self-update [lifecycle options]\n\
        terminal-jarvis auth help <harness>\n\

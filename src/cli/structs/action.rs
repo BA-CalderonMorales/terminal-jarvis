@@ -12,7 +12,7 @@ pub enum Action {
         verbose: bool,
     },
     Use(String),
-    Show(String),
+    Show(Option<String>),
     Plan {
         harness: Option<String>,
         capability: Capability,
@@ -22,7 +22,8 @@ pub enum Action {
         harness: String,
         extra: Vec<String>,
     },
-    Install(String),
+    Install(Option<String>),
+    Uninstall(Option<String>),
     SelfUpdate {
         dry_run: bool,
     },

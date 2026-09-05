@@ -1,25 +1,15 @@
 //! Outcome: applies one resolved command to the loop state -- body
-//! absorption for the viewport, printing for chat mode, hint and indicator
-//! refreshes, and the debug toggle.
+//! absorption for the viewport, chat printing, hint/indicator refreshes.
 
-use super::{status, viewport, Next};
-use crate::{cli::args, contracts::Harness};
+use super::{status, Next};
+use crate::contracts::Harness;
 use std::path::Path;
-
-/// The mutable session state one command can change.
-pub struct LoopState {
-    pub body: Vec<String>,
-    pub hint: String,
-    pub options: args::Options,
-    pub debug: bool,
-    pub indicator: crate::tui::input::Indicator,
-}
 
 /// Applies one command's outcome; false means the loop ends.
 pub fn step(
     next: Next,
     sink: Vec<u8>,
-    state: &mut LoopState,
+    state: &mut super::state::LoopState,
     state_home: &Path,
     harnesses: &[Harness],
     catalog_root: &Path,
@@ -34,12 +24,39 @@ pub fn step(
             status::refresh_indicator(&mut state.indicator, state_home, state.debug);
             absorb(
                 &mut state.body,
+                &mut state.offset,
                 sink,
                 reset,
                 harnesses,
                 catalog_root,
                 state_home,
             );
+            true
+        }
+        Next::Stream { action, options } => super::stream::apply(
+            &action,
+            &options,
+            state,
+            harnesses,
+            catalog_root,
+            state_home,
+        ),
+        Next::Converse(seed) => {
+            let width = crate::tui::screen::size().inner_cols();
+            match crate::converse::wire::open(seed, state_home, width) {
+                Ok((live, lines)) if crate::tui::screen::active() => {
+                    state.body = lines;
+                    state.converse = Some(live);
+                    state.offset = super::viewport::pinned(&state.body);
+                    state.hint = crate::converse::wire::hint(&state.converse).unwrap_or_default();
+                }
+                Ok(_) => state.body = vec!["converse runs in the viewport tui only".into()],
+                Err(lines) => {
+                    state.body = lines;
+                    state.offset = super::viewport::pinned(&state.body);
+                    state.hint = status::modeline(state_home, false, state.debug);
+                }
+            }
             true
         }
         Next::Debug(toggle) => {
@@ -60,8 +77,9 @@ pub fn step(
 
 /// Viewport absorbs captured output as the next body; chat prints it above
 /// the prompt. A reset restores the primer.
-fn absorb(
+pub fn absorb(
     body: &mut Vec<String>,
+    offset: &mut usize,
     sink: Vec<u8>,
     reset: bool,
     harnesses: &[Harness],
@@ -70,10 +88,11 @@ fn absorb(
 ) {
     let text = String::from_utf8_lossy(&sink).to_string();
     if reset {
-        *body = viewport::welcome(harnesses, catalog_root, state_home);
+        *body = super::viewport::welcome(harnesses, catalog_root, state_home);
     } else if !text.is_empty() {
         *body = text.lines().map(String::from).collect();
     }
+    *offset = super::viewport::pinned(body);
     if !crate::tui::screen::active() {
         print!("{text}");
         println!();

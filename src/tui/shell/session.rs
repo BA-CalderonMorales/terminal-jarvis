@@ -19,7 +19,7 @@ pub fn run(
     state_home: &Path,
 ) -> bool {
     match action {
-        args::Action::Run(_) | args::Action::Direct { .. } => {
+        args::Action::Run(_) | args::Action::Direct { .. } | args::Action::Uninstall(Some(_)) => {
             frame(out, action, options, harnesses, catalog_root, state_home)
         }
         other => super::canonical::run(out, other, options, harnesses, catalog_root, state_home),

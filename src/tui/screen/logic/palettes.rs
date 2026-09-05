@@ -8,6 +8,7 @@
 pub struct Palette {
     pub dim: &'static str,
     pub accent: &'static str,
+    pub accent2: &'static str,
 }
 
 struct Theme {
@@ -20,6 +21,7 @@ const DEFAULT: Theme = Theme {
     palette: Palette {
         dim: "2",
         accent: "1;36",
+        accent2: "1;35",
     },
 };
 const MIDNIGHT: Theme = Theme {
@@ -27,6 +29,7 @@ const MIDNIGHT: Theme = Theme {
     palette: Palette {
         dim: "2",
         accent: "1;34",
+        accent2: "1;36",
     },
 };
 const EMBER: Theme = Theme {
@@ -34,6 +37,7 @@ const EMBER: Theme = Theme {
     palette: Palette {
         dim: "2",
         accent: "1;31",
+        accent2: "1;33",
     },
 };
 const MOSS: Theme = Theme {
@@ -41,6 +45,7 @@ const MOSS: Theme = Theme {
     palette: Palette {
         dim: "2",
         accent: "1;32",
+        accent2: "1;36",
     },
 };
 const SOLARIZED: Theme = Theme {
@@ -48,6 +53,7 @@ const SOLARIZED: Theme = Theme {
     palette: Palette {
         dim: "2",
         accent: "1;34",
+        accent2: "1;33",
     },
 };
 const MONO: Theme = Theme {
@@ -55,6 +61,7 @@ const MONO: Theme = Theme {
     palette: Palette {
         dim: "2",
         accent: "1",
+        accent2: "1",
     },
 };
 

@@ -1,7 +1,7 @@
 //! Show: the harness detail surface. Human lines for the rich tui/body
 //! (centered+dimmed by the paint pass), key=value for --plain.
 
-use super::{style, table};
+use super::super::{output_fields as fields, style};
 use crate::cli::logic::output_truth;
 use crate::contracts::Harness;
 
@@ -48,53 +48,20 @@ pub fn show(harness: &Harness) -> String {
         }
         return out;
     }
-    // Rich: label/value fields + one line per capability, width-wrapped.
-    let width = table::terminal_width();
-    let rows = |pad: String, text: &str| -> Vec<String> {
-        wrap(text, width.saturating_sub(pad.chars().count()))
-            .split('\n')
-            .enumerate()
-            .map(|(step, line)| {
-                if step == 0 {
-                    format!("{pad}{line}")
-                } else {
-                    format!("{}{line}", " ".repeat(pad.chars().count()))
-                }
-            })
-            .collect()
-    };
-    let field = |label: &str, value: &str| rows(format!("  {:<10} ", label), value);
-
-    let mut lines: Vec<String> = wrap(&harness.description, width)
-        .split('\n')
-        .map(String::from)
-        .collect();
+    // Rich: identity line, wrapped description, then label/value fields.
+    let width = fields::width();
+    let mut lines = vec![format!("{} ({})", harness.display, harness.name)];
+    lines.extend(fields::section(String::new(), &harness.description, width));
     lines.push(String::new());
-    lines.extend(field("binary", &harness.binary));
-    lines.extend(field("setup", &harness.setup_hint()));
-    lines.extend(field("support", &support_counts(harness)));
+    lines.extend(fields::field("binary", &harness.binary, width));
+    lines.extend(fields::field("setup", &harness.setup_hint(), width));
+    lines.extend(fields::field("support", &support_counts(harness), width));
     for plan in &harness.capabilities {
-        lines.extend(rows(
+        lines.extend(fields::section(
             format!("  {:<10} ", plan.capability.to_string()),
             &plan.summary,
+            width,
         ));
     }
     lines.join("\n")
-}
-
-/// Wraps by display cells (wide glyphs count two), never by char count.
-pub(crate) fn wrap(text: &str, width: usize) -> String {
-    let cells = crate::cli::logic::table::char_cells;
-    let mut out = String::new();
-    let mut line_cells = 0;
-    for character in text.chars() {
-        let glyph = cells(character);
-        if line_cells + glyph > width && line_cells > 0 {
-            out.push('\n');
-            line_cells = 0;
-        }
-        out.push(character);
-        line_cells += glyph;
-    }
-    out
 }

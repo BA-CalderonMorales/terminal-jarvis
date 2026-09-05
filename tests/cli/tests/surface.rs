@@ -28,7 +28,7 @@ fn every_canonical_surface_has_a_deterministic_safe_outcome() {
         &["--plain", "current"],
         &["--plain", "show", "fixture"],
         &["--plain", "plan", "fixture", "headless"],
-        &["--plain", "update"],
+        &["--plain", "update", "--dry-run"],
         &["--plain", "auth"],
         &["--plain", "config", "show"],
         &["--plain", "cache", "status"],
