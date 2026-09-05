@@ -53,12 +53,16 @@ pub fn render(harnesses: &[Harness], catalog_root: &Path, state_home: &Path) -> 
         diagnostics::DiagnosticInput::local(catalog_root, state_home, None, harnesses, runtime);
     let report = diagnostics::collect(&input);
     let active = active_name(state_home);
+    // Repeated installs append duplicate readiness records to the cache;
+    // the fleet list is a set, so a tool is named once no matter what.
     let ready: Vec<&str> = report
         .records
         .iter()
         .filter(|record| record.key.ends_with(".readiness") && record.value == "ready")
         .filter_map(|record| record.key.strip_prefix("harness."))
         .map(|key| key.strip_suffix(".readiness").unwrap_or(key))
+        .collect::<std::collections::BTreeSet<&str>>()
+        .into_iter()
         .collect();
     let not_ready: Vec<&str> = harnesses
         .iter()

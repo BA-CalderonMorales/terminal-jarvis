@@ -3,9 +3,9 @@
 //! centered by the paint pass — that yields to real content after the
 //! first command.
 
-/// The default body: a centered greeting with the live fleet state, then
-/// the commands in the order a new user reaches for them. Pure so tests
-/// can pin the shape.
+/// The default body: a centered greeting over a left-aligned command
+/// block, in the order a new user reaches for them. Pure so tests can pin
+/// the shape.
 pub fn welcome(active: &str, ready: usize, total: usize) -> Vec<String> {
     let commands = [
         "  home              the command center",
@@ -24,11 +24,12 @@ pub fn welcome(active: &str, ready: usize, total: usize) -> Vec<String> {
         format!("{ready} of {total} harnesses are ready to run; the rest are one install away."),
         String::new(),
     ];
-    // One shared center axis for the whole block, so greetings and commands
-    // align on the same midline instead of each row drifting.
+    // One shared axis: greetings center over the block, commands stay
+    // flush-left as a unit, and the paint pass centers the assembly.
     let widest = greeting
         .iter()
-        .chain(commands.iter())
+        .map(String::as_str)
+        .chain(commands.iter().copied())
         .map(|line| line.chars().count())
         .max()
         .unwrap_or(0);
@@ -37,7 +38,7 @@ pub fn welcome(active: &str, ready: usize, total: usize) -> Vec<String> {
         format!("{}{line}", " ".repeat(pad))
     };
     let mut lines: Vec<String> = greeting.iter().map(|line| centered(line)).collect();
-    lines.extend(commands.iter().map(|line| centered(line)));
+    lines.extend(commands.iter().map(|line| (*line).to_string()));
     lines
 }
 

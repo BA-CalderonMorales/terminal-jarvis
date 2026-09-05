@@ -10,11 +10,16 @@ mod prompt_impl;
 #[path = "package_report.rs"]
 mod report;
 
-pub fn check(
+/// `quiet` routes every announcement through `row` instead of stderr, and
+/// turns finding-level prompts into a fail-closed cancel (the streaming
+/// surface cannot leak a prompt under the frame).
+pub fn check_quiet(
     harness: &Harness,
     plan: &CapabilityPlan,
     options: &Options,
     home: &Path,
+    quiet: bool,
+    row: &mut dyn FnMut(&str),
 ) -> error::Result<()> {
     if !matches!(plan.capability, Capability::Download | Capability::Update) || options.dry_run {
         return Ok(());
@@ -38,7 +43,9 @@ pub fn check(
             harness.name
         ));
     }
-    if options.narrate {
+    if quiet {
+        row(&format!("checking {package} for known vulnerabilities ..."));
+    } else if options.narrate {
         eprintln!("checking {package} for known vulnerabilities ...");
     } else {
         eprint!("package check ...");
@@ -51,7 +58,11 @@ pub fn check(
             ))
         }
         Some(verdict) if verdict.clean => {
-            if options.narrate {
+            if quiet {
+                row(&format!(
+                    "package check: clean -- no HIGH/CRITICAL findings for {package}"
+                ));
+            } else if options.narrate {
                 eprintln!("no HIGH/CRITICAL findings for {package}");
             } else {
                 report::quiet_done(options, "clean");
@@ -60,6 +71,16 @@ pub fn check(
         }
         Some(verdict) => {
             let v = report::verb(plan.capability);
+            if quiet {
+                return Err(error::Failure::safety(
+                    "package_findings",
+                    format!(
+                        "HIGH/CRITICAL findings for {package} before {v}: {}",
+                        verdict.detail
+                    ),
+                    "review the findings, then run headless with --confirm to proceed",
+                ));
+            }
             eprintln!(
                 "HIGH/CRITICAL findings for {package} before {v}:\n{}",
                 verdict.detail
