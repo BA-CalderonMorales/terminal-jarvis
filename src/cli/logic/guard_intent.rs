@@ -6,7 +6,7 @@
 use super::{args::Options, error};
 use crate::cli::logic::prompt_lead;
 use crate::contracts::{CapabilityPlan, Effect, Harness, Interaction};
-use std::io::{IsTerminal, Write};
+use std::io::IsTerminal;
 
 pub fn check(
     harness: &Harness,
@@ -78,30 +78,7 @@ pub fn check_with(
     )
 }
 
-/// The terminal strategy: prompt on stderr, read one line from stdin.
-fn ask_in_terminal(lead: &str, token: &str) -> error::Result<()> {
-    eprint!("{lead}");
-    eprint!("Continue with {token}? [y/N] ");
-    std::io::stderr().flush().map_err(prompt_failed)?;
-    let mut answer = String::new();
-    std::io::stdin()
-        .read_line(&mut answer)
-        .map_err(prompt_failed)?;
-    consent(answer.trim())
-}
-
-/// The streaming strategy's verdict for one decoded answer.
-pub fn consent(answer: &str) -> error::Result<()> {
-    if matches!(answer.trim().to_ascii_lowercase().as_str(), "y" | "yes") {
-        Ok(())
-    } else {
-        Err(error::Failure::safety(
-            "confirmation_declined",
-            "cancelled; nothing was run",
-            "review the plan and retry when ready",
-        ))
-    }
-}
+pub use super::guard_ask::{ask_in_terminal, consent};
 
 fn confirm_error(token: &str) -> error::Failure {
     error::Failure::safety(
@@ -120,12 +97,4 @@ fn reject_irrelevant(options: &Options) -> error::Result<()> {
         ));
     }
     Ok(())
-}
-
-fn prompt_failed(cause: std::io::Error) -> error::Failure {
-    error::Failure::state(
-        "prompt_failed",
-        cause.to_string(),
-        "retry with --no-input and --confirm",
-    )
 }

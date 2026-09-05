@@ -16,6 +16,7 @@ pub(crate) mod execute;
 pub(crate) mod gate_cmd;
 pub(crate) mod gate_skip;
 pub(crate) mod guard;
+pub(crate) mod guard_ask;
 pub(crate) mod guard_intent;
 pub(crate) mod guard_policy;
 pub(crate) mod help;

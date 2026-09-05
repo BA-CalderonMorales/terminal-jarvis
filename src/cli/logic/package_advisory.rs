@@ -43,13 +43,7 @@ pub fn check_quiet(
             harness.name
         ));
     }
-    if quiet {
-        row(&format!("checking {package} for known vulnerabilities ..."));
-    } else if options.narrate {
-        eprintln!("checking {package} for known vulnerabilities ...");
-    } else {
-        eprint!("package check ...");
-    }
+    report::announce(package, options, quiet, row);
     match security::package_check(package) {
         None => {
             report::quiet_done(options, "skipped");
@@ -58,15 +52,7 @@ pub fn check_quiet(
             ))
         }
         Some(verdict) if verdict.clean => {
-            if quiet {
-                row(&format!(
-                    "package check: clean -- no HIGH/CRITICAL findings for {package}"
-                ));
-            } else if options.narrate {
-                eprintln!("no HIGH/CRITICAL findings for {package}");
-            } else {
-                report::quiet_done(options, "clean");
-            }
+            report::clean(package, options, quiet, row);
             Ok(())
         }
         Some(verdict) => {

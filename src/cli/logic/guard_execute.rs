@@ -82,21 +82,3 @@ pub(super) fn execute(
             .map_err(dispatch_support::unavailable_error),
     }
 }
-
-pub(super) fn explicit_capability(words: &[String], harnesses: &[Harness]) -> bool {
-    use crate::contracts::Capability;
-    words.len() >= 2
-        && harnesses.iter().any(|harness| harness.name == words[0])
-        && Capability::parse(&words[1]).is_some()
-}
-
-pub(super) fn resolve_error(message: String) -> error::Failure {
-    if message.contains("no active harness") || message.contains("active harness") {
-        return error::Failure::state(
-            "active_harness_invalid",
-            message,
-            "run `terminal-jarvis use <harness>` or pass a harness",
-        );
-    }
-    error::Failure::unavailable("harness_unknown", message, "run `terminal-jarvis list`")
-}

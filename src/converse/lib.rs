@@ -28,16 +28,15 @@ mod session;
 #[path = "structs/transcript.rs"]
 pub mod transcript;
 
+use crate::contracts::{Capability, Harness, SupportState};
 pub use prompt::{reply, seed, WORD_CAP};
 pub use session::{advance, Live, Step};
 pub use transcript::Transcript;
 
-/// The hard ceiling on turns per conversation, so the token bill stays
-/// bounded no matter how long the topic runs.
+/// The hard turn cap per conversation, so the token bill stays bounded.
 pub const MAX_TURNS: usize = 12;
 
-/// The `converse` grammar: bare continues an active session; otherwise
-/// `<turns> <a> <b> <topic...>` starts one, both sides policy-checked.
+/// The `converse` grammar: bare, or `<turns> <a> <b> <topic...>` to start.
 pub enum Parsed {
     Continue,
     Start {
@@ -77,7 +76,9 @@ pub fn parse(input: &str, harnesses: &[Harness]) -> Parsed {
 #[path = "tests/session.rs"]
 mod session_tests;
 
-use crate::contracts::{Capability, Harness, SupportState};
+#[cfg(test)]
+#[path = "tests/bubble.rs"]
+mod bubble_tests;
 
 /// Seed-time validation: the harness must exist and expose a real (non-stub)
 /// headless plan, or the conversation cannot hold both sides up.

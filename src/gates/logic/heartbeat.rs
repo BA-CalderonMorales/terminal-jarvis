@@ -1,34 +1,15 @@
 //! Heartbeat: while a slow gate scan runs, the clean view redraws a
-//! fixed-width progress line so the user knows the scan is alive and why;
-//! drawing is pure, property-tested.
+//! fixed-width progress line so the user knows the scan is alive and why.
+//! The pure drawing rules live in `live`; this file is the thread machine.
 
+use super::live::{live_line, should_tick};
 use std::io::Write;
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::Arc;
 use std::thread::{self, JoinHandle};
 use std::time::{Duration, Instant};
 
-pub const TICK: Duration = Duration::from_secs(5);
 const POLL: Duration = Duration::from_millis(250);
-const TAIL: &str = " · scanning workspace; this can take a minute or more";
-
-/// The live line for an elapsed scan time: CR, fixed-width seconds, padding.
-pub fn live_line(prefix: &str, secs: u64) -> String {
-    let body = format!("{prefix} {secs:>4}s{TAIL}");
-    format!(
-        "\r{body}{}",
-        " ".repeat(live_width(prefix).saturating_sub(body.len()))
-    )
-}
-
-/// The stable width every live line is padded to, so ticks leave no residue.
-pub fn live_width(prefix: &str) -> usize {
-    prefix.len() + 1 + 4 + 1 + TAIL.len()
-}
-
-pub fn should_tick(elapsed_secs: u64) -> bool {
-    elapsed_secs >= TICK.as_secs() && elapsed_secs % TICK.as_secs() == 0
-}
 
 /// A finished scan: outcome, captured output, heartbeat visibility.
 #[derive(Debug)]
@@ -40,6 +21,7 @@ pub struct Scan {
     /// real spurious tick from scheduler starvation under parallel load.
     pub elapsed: Duration,
 }
+
 /// The background redraw loop for one scan; stop it before printing anything
 pub struct Heartbeat {
     stop: Arc<AtomicBool>,

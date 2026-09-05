@@ -1,4 +1,5 @@
-use crate::gates::logic::heartbeat::{live_line, live_width, should_tick, Heartbeat, Scan, TICK};
+use crate::gates::logic::heartbeat::{Heartbeat, Scan};
+use crate::gates::logic::live::{live_line, live_width, should_tick, TICK};
 use crate::gates::tests_util::{lock, scan_gate};
 
 #[test]

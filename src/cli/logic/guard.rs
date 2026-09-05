@@ -13,8 +13,8 @@ pub fn run(
     harnesses: &[Harness],
     home: &Path,
 ) -> error::Result<(i32, String)> {
-    let explicit = execute::explicit_capability(words, harnesses);
-    let invocation = resolve::run(words, harnesses, home).map_err(execute::resolve_error)?;
+    let explicit = explicit_capability(words, harnesses);
+    let invocation = resolve::run(words, harnesses, home).map_err(resolve_error)?;
     execute::execute(invocation, options, harnesses, home, explicit, None)
 }
 
@@ -25,7 +25,7 @@ pub fn direct(
     harnesses: &[Harness],
     home: &Path,
 ) -> error::Result<(i32, String)> {
-    let invocation = resolve::direct(name, extra, harnesses).map_err(execute::resolve_error)?;
+    let invocation = resolve::direct(name, extra, harnesses).map_err(resolve_error)?;
     execute::execute(invocation, options, harnesses, home, false, None)
 }
 
@@ -57,6 +57,27 @@ pub fn stream_invocation(
         .map(|(code, _)| code)
 }
 
+/// True when the words name a known harness plus a parsable capability, so
+/// the intent gate can tell an explicit ask from an ambient default.
+pub fn explicit_capability(words: &[String], harnesses: &[Harness]) -> bool {
+    words.len() >= 2
+        && harnesses.iter().any(|harness| harness.name == words[0])
+        && Capability::parse(&words[1]).is_some()
+}
+
+/// Maps a resolve failure onto the exit contract: active-harness state
+/// problems guide back to `use`, everything else to the fleet list.
+pub fn resolve_error(message: String) -> error::Failure {
+    if message.contains("no active harness") || message.contains("active harness") {
+        return error::Failure::state(
+            "active_harness_invalid",
+            message,
+            "run `terminal-jarvis use <harness>` or pass a harness",
+        );
+    }
+    error::Failure::unavailable("harness_unknown", message, "run `terminal-jarvis list`")
+}
+
 #[path = "guard_execute.rs"]
 mod execute;
 
@@ -66,6 +87,3 @@ mod guard_tests;
 #[cfg(test)]
 #[path = "../tests/guard_narrate.rs"]
 mod narrate_tests;
-
-#[cfg(test)]
-use execute::{explicit_capability, resolve_error};

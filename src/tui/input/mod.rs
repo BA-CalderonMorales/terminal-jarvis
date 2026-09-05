@@ -9,13 +9,15 @@ mod escape;
 pub(crate) mod keys;
 #[path = "logic/line.rs"]
 mod line;
+#[path = "structs/mod.rs"]
+mod structs;
 
 pub use editor::{Editor, Feed, Move};
 #[cfg(test)]
 pub(crate) use keys::decode;
 pub use keys::read_key;
-pub use keys::Key;
 pub use line::{compose, raw_line, read_line, retire};
+pub use structs::Key;
 
 use crate::cli::style;
 

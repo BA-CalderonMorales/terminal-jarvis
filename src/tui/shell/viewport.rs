@@ -65,3 +65,25 @@ pub fn chat_banner(harnesses: &[Harness], catalog_root: &Path, state_home: &Path
     let mut out = std::io::stdout();
     crate::tui::home::render(&mut out, harnesses, catalog_root, state_home);
 }
+
+/// Viewport absorbs captured output as the next body; chat prints it above
+/// the prompt. A reset restores the primer.
+pub fn absorb(
+    body: &mut Vec<String>,
+    sink: Vec<u8>,
+    reset: bool,
+    harnesses: &[Harness],
+    catalog_root: &Path,
+    state_home: &Path,
+) {
+    let text = String::from_utf8_lossy(&sink).to_string();
+    if reset {
+        *body = welcome(harnesses, catalog_root, state_home);
+    } else if !text.is_empty() {
+        *body = text.lines().map(String::from).collect();
+    }
+    if !crate::tui::screen::active() {
+        print!("{text}");
+        println!();
+    }
+}

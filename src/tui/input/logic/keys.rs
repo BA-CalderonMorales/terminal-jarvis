@@ -1,25 +1,8 @@
 //! Keys: decodes terminal bytes into semantic key events; escape soup is
 //! swallowed whole, never leaked into the command line.
 
+use super::structs::Key;
 use std::io::{self, Read};
-
-/// One decoded input event from the raw terminal.
-#[derive(Clone, Copy, Debug, Eq, PartialEq)]
-pub enum Key {
-    Char(char),
-    Escape,
-    Enter,
-    Backspace,
-    ClearLine,
-    Up,
-    Down,
-    Home,
-    End,
-    PageUp,
-    PageDown,
-    Ignored,
-    Dead,
-}
 
 /// Blocks until one key arrives; `None` means EOF or Ctrl-D -- the session
 /// ends. Signal interrupts (resize ticks) retry instead of dying.
