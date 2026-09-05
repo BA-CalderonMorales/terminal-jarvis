@@ -39,6 +39,11 @@ fn collected(catalog: &Path, dir: &Path, harnesses: &[Harness]) -> (Vec<Record>,
     (records, valid)
 }
 
+fn raw(catalog: &Path, dir: &Path, harnesses: &[Harness]) -> (DiagnosticInput, Redactor<'static>) {
+    let input = input(catalog, dir, harnesses);
+    (input, Redactor::new(None, None))
+}
+
 fn record<'r>(records: &'r [Record], key: &str) -> &'r Record {
     records.iter().find(|r| r.key == key).unwrap()
 }
@@ -78,10 +83,12 @@ fn ready_state_reports_valid_without_spurious_actions() {
 
 #[test]
 fn absent_cache_state_is_not_applicable() {
-    let _guard = crate::ENV_LOCK.lock().unwrap_or_else(|e| e.into_inner());
-    std::env::remove_var("TERMINAL_JARVIS_CACHE");
     let dir = tempdir("cache");
-    let (records, _) = collected(&dir.join("catalog"), &dir, &[]);
+    let (mut input, redact) = raw(&dir.join("catalog"), &dir, &[]);
+    // Mutate the snapshot, not the process env: parallel tests can never
+    // make the cache "present" between here and the collect.
+    input.environment.remove("TERMINAL_JARVIS_CACHE");
+    let (records, _, _) = collect(&input, &redact);
     let cache = record(&records, "state.cache");
     assert_eq!(cache.code, Code::Ready);
     assert_eq!(cache.value, "not-applicable");
