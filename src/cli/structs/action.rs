@@ -23,6 +23,7 @@ pub enum Action {
         extra: Vec<String>,
     },
     Install(Option<String>),
+    Uninstall(Option<String>),
     SelfUpdate {
         dry_run: bool,
     },

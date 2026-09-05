@@ -41,8 +41,14 @@ pub(super) fn execute(
                 for line in lead.lines() {
                     paint(line);
                 }
-                paint(&format!("Continue with {token}? [y/N]"));
-                // one keystroke answers: raw mode so [y/N] means [y/N],
+                // the add/update direction defaults to yes (Enter
+                // confirms); a destructive direction defaults to no
+                let default_yes = token.starts_with("download:") || token.starts_with("update:");
+                paint(&format!(
+                    "Continue with {token}? {}",
+                    guard_ask::bracket(default_yes)
+                ));
+                // one keystroke answers: raw mode so [Y/n] means [Y/n],
                 // never a cooked line waiting for an Enter that reads
                 // as a hang
                 let _raw = crate::tui::term::enable_raw();
@@ -50,7 +56,7 @@ pub(super) fn execute(
                 // the tail of a typed answer ("es" of "yes") must never
                 // leak into the prompt buffer
                 crate::tui::input::drain_answer(std::time::Duration::from_millis(150));
-                let (row, answer) = guard_ask::in_frame(key);
+                let (row, answer) = guard_ask::in_frame(key, default_yes);
                 paint(row);
                 guard_ask::consent(answer)
             },

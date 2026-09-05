@@ -6,7 +6,7 @@ use super::welcome;
 #[test]
 fn welcome_greets_then_teaches_the_commands() {
     let lines = welcome("codex", 3, 25);
-    assert!(lines.len() <= 13, "primer must fit small viewports");
+    assert!(lines.len() <= 14, "primer must fit small viewports");
     let joined = lines.join("\n");
     // The greeting carries the live fleet state truthfully.
     assert!(joined.contains("codex is at the helm"));

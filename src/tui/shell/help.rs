@@ -25,6 +25,7 @@ pub fn text() -> String {
             "install <harness>",
             "install with the security gate in front",
         ),
+        ("uninstall <harness>", "remove a harness and its binary"),
         ("update <harness>", "update through the same gate"),
         (
             "gate [status|enable|disable|run]",

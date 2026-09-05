@@ -1,6 +1,7 @@
 use super::{
     args::{Action, Options},
     compat, dispatch_compat, dispatch_security, dispatch_support, error, gate_cmd, guard, output,
+    uninstall,
 };
 use crate::contracts::{Capability, Harness};
 use std::path::Path;
@@ -49,6 +50,11 @@ pub fn dispatch(
         Action::Install(name) => {
             let selected = dispatch_support::selected_name(name, home)?;
             guard::capability(harnesses, &selected, Capability::Download, options, home)
+        }
+        Action::Uninstall(Some(name)) => uninstall::run(harnesses, &name, options),
+        Action::Uninstall(None) => {
+            let selected = dispatch_support::selected_name(None, home)?;
+            uninstall::run(harnesses, &selected, options)
         }
         Action::Update(Some(name)) => {
             guard::capability(harnesses, &name, Capability::Update, options, home)

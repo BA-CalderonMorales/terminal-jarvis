@@ -37,6 +37,7 @@ pub(crate) mod self_update_intent;
 pub mod style;
 pub(crate) mod table;
 pub(crate) mod text_wrap;
+pub(crate) mod uninstall;
 pub(crate) mod version;
 
 #[cfg(test)]

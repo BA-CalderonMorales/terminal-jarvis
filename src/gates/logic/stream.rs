@@ -62,7 +62,10 @@ pub fn run(gate: &Gate, narrate: bool) -> Result<Scan, String> {
     let stderr_reader = std::thread::spawn(move || tee(&mut stderr, narrate));
     let started = Instant::now();
     let mut heartbeat =
-        (!narrate).then(|| Heartbeat::start(&format!("security scan ({}) ...", gate.name)));
+        // the viewport paints its own frame and cannot show eprints; the
+        // heartbeat is the clean headless view's progress line
+        (!narrate && !crate::tui::screen::active())
+            .then(|| Heartbeat::start(&format!("security scan ({}) ...", gate.name)));
     let limit = super::deadline::timeout_secs();
     let (status, timed_out) = super::deadline::wait(&mut child, limit)
         .map_err(|error| format!("gate scan failed: {error}"))?;

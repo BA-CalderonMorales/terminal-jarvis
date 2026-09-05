@@ -32,11 +32,27 @@ pub fn consent(answer: &str) -> error::Result<()> {
 }
 
 /// One raw key in-frame: the human row painted into the transcript and the
-/// answer fed to [`consent`] -- the same y/N grammar the terminal asks in.
-pub fn in_frame(key: Option<crate::tui::input::Key>) -> (&'static str, &'static str) {
+/// answer fed to [`consent`]. `default_yes` makes Enter confirm -- the
+/// add/update direction (install, update) asks with [Y/n]; the destructive
+/// direction (uninstall) asks with [y/N] and Enter declines.
+pub fn in_frame(
+    key: Option<crate::tui::input::Key>,
+    default_yes: bool,
+) -> (&'static str, &'static str) {
     match key {
         Some(crate::tui::input::Key::Char('y' | 'Y')) => ("confirmed", "y"),
+        Some(crate::tui::input::Key::Char('n' | 'N')) => ("cancelled -- nothing was run", "n"),
+        Some(crate::tui::input::Key::Enter) if default_yes => ("confirmed", "y"),
         _ => ("cancelled -- nothing was run", "n"),
+    }
+}
+
+/// The bracket that tells the truth about the default: [Y/n] or [y/N].
+pub fn bracket(default_yes: bool) -> &'static str {
+    if default_yes {
+        "[Y/n]"
+    } else {
+        "[y/N]"
     }
 }
 

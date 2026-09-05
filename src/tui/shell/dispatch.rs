@@ -17,6 +17,7 @@ pub fn run(
     let started = std::time::Instant::now();
     let lifecycle = match &action {
         crate::cli::args::Action::Install(Some(name)) => Some((name.clone(), "installed")),
+        crate::cli::args::Action::Uninstall(Some(name)) => Some((name.clone(), "uninstalled")),
         crate::cli::args::Action::Update(Some(name)) => Some((name.clone(), "updated")),
         _ => None,
     };

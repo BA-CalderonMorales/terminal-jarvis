@@ -36,6 +36,7 @@ pub(super) fn parse(
         "plan" => plan(&words[1..])?,
         "run" => return child_parser::run(&words[1..], child, boundary),
         "install" => optional_one(words, "install").map(Action::Install)?,
+        "uninstall" => optional_one(words, "uninstall").map(Action::Uninstall)?,
         "update" => optional_one(words, "update").map(Action::Update)?,
         "self-update" => exact(
             words,

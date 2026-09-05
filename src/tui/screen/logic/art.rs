@@ -14,6 +14,7 @@ pub fn welcome(active: &str, ready: usize, total: usize) -> Vec<String> {
         "  <number|harness>  instant switch",
         "  plan <h> <cap>    preview before running",
         "  install <h>       add a harness to the fleet",
+        "  uninstall <h>     remove a harness and its binary",
         "  show <h>          harness details",
         "  debug             raw view · help full table",
         "  exit              leave the command center",
