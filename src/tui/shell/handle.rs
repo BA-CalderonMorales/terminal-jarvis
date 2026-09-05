@@ -41,6 +41,20 @@ pub fn handle(
             }
         }
         Resolved::Run(action) => {
+            let action = match stream_gate::normalized(action, state_home) {
+                Some(action) => action,
+                None => {
+                    let _ = writeln!(
+                        out,
+                        "{}",
+                        style::error("no active harness is selected; use list, then pick one")
+                    );
+                    return again_plain();
+                }
+            };
+            if crate::tui::screen::active() && stream_gate::eligible(&action) {
+                return Next::Stream(action);
+            }
             let picker_shown =
                 super::run_action::run(out, action, options, harnesses, catalog_root, state_home);
             Next::Again {
@@ -76,6 +90,9 @@ fn theme_reply(choice: Option<&str>) -> String {
         ),
     }
 }
+
+#[path = "stream_gate.rs"]
+mod stream_gate;
 
 #[cfg(test)]
 #[path = "../tests/handle.rs"]

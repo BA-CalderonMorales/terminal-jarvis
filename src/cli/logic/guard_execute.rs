@@ -1,0 +1,75 @@
+//! GuardExecute: the shared tail of every guarded invocation. `on_line`
+//! switches the final hop from the blocking runner to the streaming one.
+
+use crate::cli::logic::{
+    args::Options, dispatch_support, error, gate_skip, guard_intent, guard_policy, invoke, output,
+    package_advisory, resolve,
+};
+use crate::contracts::Harness;
+use crate::gates;
+use std::io::IsTerminal;
+use std::path::Path;
+
+type Lines<'a> = Option<&'a mut dyn FnMut(&str)>;
+
+pub(super) fn execute(
+    invocation: resolve::Invocation,
+    options: &Options,
+    harnesses: &[Harness],
+    home: &Path,
+    explicit: bool,
+    on_line: Lines<'_>,
+) -> error::Result<(i32, String)> {
+    let harness = dispatch_support::find(harnesses, &invocation.harness)?;
+    let plan = harness.plan(invocation.capability).ok_or_else(|| {
+        error::Failure::state(
+            "catalog_incomplete",
+            format!("{} lacks {}", harness.name, invocation.capability),
+            "repair the harness catalog",
+        )
+    })?;
+    guard_policy::check(harness, plan, std::io::stdin().is_terminal())?;
+    guard_intent::check(harness, plan, &invocation.extra, options, explicit)?;
+    if options.dry_run {
+        return Ok((
+            0,
+            output::plan_with_extra(harness, invocation.capability, &invocation.extra),
+        ));
+    }
+    let target = format!("{}:{}", invocation.capability, invocation.harness);
+    gates::preflight(home, options.narrate)
+        .map_err(|m| error::Failure::safety("gate_blocked", m, "run `terminal-jarvis gate status`"))
+        .and_then(|verdict| gate_skip::route(options, verdict, &target))?;
+    package_advisory::check(harness, plan, options, home)?;
+    match on_line {
+        Some(paint) => {
+            let code = crate::runtime::run_streaming(plan, &invocation.extra, &mut |line: &str| {
+                paint(&crate::runtime::classify(line))
+            });
+            match code {
+                Ok(code) => Ok((code, String::new())),
+                Err(error) => Err(dispatch_support::unavailable_error(error.to_string())),
+            }
+        }
+        None => invoke::invocation(invocation, harnesses, options.narrate)
+            .map_err(dispatch_support::unavailable_error),
+    }
+}
+
+pub(super) fn explicit_capability(words: &[String], harnesses: &[Harness]) -> bool {
+    use crate::contracts::Capability;
+    words.len() >= 2
+        && harnesses.iter().any(|harness| harness.name == words[0])
+        && Capability::parse(&words[1]).is_some()
+}
+
+pub(super) fn resolve_error(message: String) -> error::Failure {
+    if message.contains("no active harness") || message.contains("active harness") {
+        return error::Failure::state(
+            "active_harness_invalid",
+            message,
+            "run `terminal-jarvis use <harness>` or pass a harness",
+        );
+    }
+    error::Failure::unavailable("harness_unknown", message, "run `terminal-jarvis list`")
+}

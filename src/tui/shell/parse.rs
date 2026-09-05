@@ -25,6 +25,7 @@ pub enum Next {
     },
     Debug(Option<bool>),
     Converse(Option<(usize, String, String, String)>),
+    Stream(args::Action),
 }
 
 pub fn resolve(input: &str, harnesses: &[Harness]) -> Resolved {

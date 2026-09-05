@@ -1,9 +1,10 @@
-use super::{
-    args::Options, dispatch_support, error, guard_intent, guard_policy, invoke, output, resolve,
-};
+//! Guard: the consent layer every harness invocation passes through --
+//! policy (support/freshness/platform), intent, the trivy gate preflight,
+//! and the package advisory -- before the runner executes. Streaming runs
+//! share the identical chain; only the last hop differs.
+
+use super::{args::Options, error, resolve};
 use crate::contracts::{Capability, Harness};
-use crate::gates;
-use std::io::IsTerminal;
 use std::path::Path;
 
 pub fn run(
@@ -12,9 +13,9 @@ pub fn run(
     harnesses: &[Harness],
     home: &Path,
 ) -> error::Result<(i32, String)> {
-    let explicit = explicit_capability(words, harnesses);
-    let invocation = resolve::run(words, harnesses, home).map_err(resolve_error)?;
-    execute(invocation, options, harnesses, home, explicit)
+    let explicit = execute::explicit_capability(words, harnesses);
+    let invocation = resolve::run(words, harnesses, home).map_err(execute::resolve_error)?;
+    execute::execute(invocation, options, harnesses, home, explicit, None)
 }
 
 pub fn direct(
@@ -24,8 +25,8 @@ pub fn direct(
     harnesses: &[Harness],
     home: &Path,
 ) -> error::Result<(i32, String)> {
-    let invocation = resolve::direct(name, extra, harnesses).map_err(resolve_error)?;
-    execute(invocation, options, harnesses, home, false)
+    let invocation = resolve::direct(name, extra, harnesses).map_err(execute::resolve_error)?;
+    execute::execute(invocation, options, harnesses, home, false, None)
 }
 
 pub fn capability(
@@ -40,61 +41,31 @@ pub fn capability(
         capability,
         extra: Vec::new(),
     };
-    execute(invocation, options, harnesses, home, true)
+    execute::execute(invocation, options, harnesses, home, true, None)
 }
 
-fn execute(
+/// Streams one invocation line-by-line through the same guard chain the
+/// blocking run uses; the tui paints each line as a splunk row.
+pub fn stream_invocation(
     invocation: resolve::Invocation,
     options: &Options,
     harnesses: &[Harness],
     home: &Path,
-    explicit: bool,
-) -> error::Result<(i32, String)> {
-    let harness = dispatch_support::find(harnesses, &invocation.harness)?;
-    let plan = harness.plan(invocation.capability).ok_or_else(|| {
-        error::Failure::state(
-            "catalog_incomplete",
-            format!("{} lacks {}", harness.name, invocation.capability),
-            "repair the harness catalog",
-        )
-    })?;
-    guard_policy::check(harness, plan, std::io::stdin().is_terminal())?;
-    guard_intent::check(harness, plan, &invocation.extra, options, explicit)?;
-    if options.dry_run {
-        return Ok((
-            0,
-            output::plan_with_extra(harness, invocation.capability, &invocation.extra),
-        ));
-    }
-    let target = format!("{}:{}", invocation.capability, invocation.harness);
-    gates::preflight(home, options.narrate)
-        .map_err(|m| error::Failure::safety("gate_blocked", m, "run `terminal-jarvis gate status`"))
-        .and_then(|verdict| super::gate_skip::route(options, verdict, &target))?;
-    super::package_advisory::check(harness, plan, options, home)?;
-    invoke::invocation(invocation, harnesses, options.narrate)
-        .map_err(dispatch_support::unavailable_error)
+    on_line: &mut dyn FnMut(&str),
+) -> error::Result<i32> {
+    execute::execute(invocation, options, harnesses, home, true, Some(on_line))
+        .map(|(code, _)| code)
 }
 
-fn explicit_capability(words: &[String], harnesses: &[Harness]) -> bool {
-    words.len() >= 2
-        && harnesses.iter().any(|harness| harness.name == words[0])
-        && Capability::parse(&words[1]).is_some()
-}
+#[path = "guard_execute.rs"]
+mod execute;
 
-fn resolve_error(message: String) -> error::Failure {
-    if message.contains("no active harness") || message.contains("active harness") {
-        return error::Failure::state(
-            "active_harness_invalid",
-            message,
-            "run `terminal-jarvis use <harness>` or pass a harness",
-        );
-    }
-    error::Failure::unavailable("harness_unknown", message, "run `terminal-jarvis list`")
-}
-
+#[cfg(test)]
+#[path = "../tests/guard_test.rs"]
+mod guard_tests;
 #[cfg(test)]
 #[path = "../tests/guard_narrate.rs"]
 mod narrate_tests;
+
 #[cfg(test)]
-#[path = "../tests/guard_test.rs"]
-mod tests;
+use execute::{explicit_capability, resolve_error};

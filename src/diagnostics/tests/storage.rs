@@ -83,6 +83,11 @@ fn ready_state_reports_valid_without_spurious_actions() {
 
 #[test]
 fn absent_cache_state_is_not_applicable() {
+    let _guard = crate::ENV_LOCK.lock().unwrap_or_else(|e| e.into_inner());
+    // The not-applicable verdict requires the source channel: distribution
+    // tests run in parallel and would flip it to the npm branch otherwise.
+    std::env::remove_var("TERMINAL_JARVIS_DISTRIBUTION");
+    std::env::remove_var("TERMINAL_JARVIS_WRAPPER");
     let dir = tempdir("cache");
     let (mut input, redact) = raw(&dir.join("catalog"), &dir, &[]);
     // Mutate the snapshot, not the process env: parallel tests can never

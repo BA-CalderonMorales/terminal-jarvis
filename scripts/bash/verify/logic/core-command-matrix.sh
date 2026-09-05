@@ -136,7 +136,7 @@ for capability in download update headless version stats models security yolo ui
   contains "$tmp/$label.out" "Plan: codex $capability"
 done
 
-ok update-summary update
+ok update-summary update --dry-run
 table update-summary
 outcome update-dry-run 0 update --dry-run
 contains "$tmp/update-dry-run.out" "Harness Updates"

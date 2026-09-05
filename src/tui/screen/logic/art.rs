@@ -3,26 +3,39 @@
 //! centered by the paint pass — that yields to real content after the
 //! first command.
 
-/// The default body: a greeting with the live fleet state, then the
-/// commands in the order a new user reaches for them. Pure so tests can
-/// pin the shape.
+/// The default body: a centered greeting with the live fleet state, then
+/// the commands in the order a new user reaches for them. Pure so tests
+/// can pin the shape.
 pub fn welcome(active: &str, ready: usize, total: usize) -> Vec<String> {
-    let mut lines = vec![
-        format!("welcome back -- {active} is at the helm."),
-        format!("{ready} of {total} harnesses are ready to run; the rest are one install away."),
+    let commands = [
+        "  home              the command center",
+        "  status            readiness dashboard",
+        "  list              numbered fleet picker",
+        "  <number|harness>  instant switch",
+        "  plan <h> <cap>    preview before running",
+        "  install <h>       add a harness to the fleet",
+        "  show <h>          harness details",
+        "  debug             raw view · help full table",
+        "  exit              leave the command center",
+    ];
+    let widest = commands
+        .iter()
+        .map(|line| line.chars().count())
+        .max()
+        .unwrap_or(0);
+    let centered = |line: &str| {
+        let pad = (widest.saturating_sub(line.chars().count())) / 2;
+        format!("{}{line}", " ".repeat(pad))
+    };
+    let greeting = [
+        centered(&format!("Welcome back -- {active} is at the helm.")),
+        centered(&format!(
+            "{ready} of {total} harnesses are ready to run; the rest are one install away."
+        )),
         String::new(),
     ];
-    lines.extend([
-        "  home              the command center".to_string(),
-        "  status            readiness dashboard".to_string(),
-        "  list              numbered fleet picker".to_string(),
-        "  <number|harness>  instant switch".to_string(),
-        "  plan <h> <cap>    preview before running".to_string(),
-        "  install <h>       add a harness to the fleet".to_string(),
-        "  show <h>          harness details".to_string(),
-        "  debug             raw view · help full table".to_string(),
-        "  exit              leave the command center".to_string(),
-    ]);
+    let mut lines: Vec<String> = greeting.into_iter().collect();
+    lines.extend(commands.iter().map(|line| (*line).to_string()));
     lines
 }
 

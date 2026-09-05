@@ -60,20 +60,34 @@ pub fn render(harnesses: &[Harness], catalog_root: &Path, state_home: &Path) -> 
         .filter_map(|record| record.key.strip_prefix("harness."))
         .map(|key| key.strip_suffix(".readiness").unwrap_or(key))
         .collect();
-    format!(
-        "{}  {}\n{}  {} of {} ready{}",
-        style::label("ACTIVE"),
-        active,
-        style::label("READY"),
-        ready.len(),
-        harnesses.len(),
-        if ready.is_empty() {
-            String::new()
-        } else {
-            format!(": {}", ready.join(", "))
-        }
-    )
+    let not_ready: Vec<&str> = harnesses
+        .iter()
+        .map(|harness| harness.name.as_str())
+        .filter(|name| !ready.contains(name))
+        .collect();
+    let mut lines = vec![
+        format!("{}  {}", style::label("ACTIVE"), active),
+        format!(
+            "{}  {} of {} ready",
+            style::label("READY"),
+            ready.len(),
+            harnesses.len()
+        ),
+        String::new(),
+    ];
+    if !ready.is_empty() {
+        lines.push(style::label("ready now"));
+        lines.extend(rows::wrap(&ready));
+    }
+    if !not_ready.is_empty() {
+        lines.push(style::label("one install away"));
+        lines.extend(rows::wrap(&not_ready));
+    }
+    lines.join("\n")
 }
+
+#[path = "status_rows.rs"]
+mod rows;
 
 #[cfg(test)]
 #[path = "../tests/status.rs"]

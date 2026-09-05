@@ -39,7 +39,7 @@ pub fn run_command_text(plan: &CapabilityPlan, extra: &[String]) -> io::Result<(
 }
 
 #[cfg(unix)]
-fn reset_sigint_in_child(command: &mut Command) {
+pub(crate) fn reset_sigint_in_child(command: &mut Command) {
     use std::os::unix::process::CommandExt;
     unsafe {
         command.pre_exec(|| {

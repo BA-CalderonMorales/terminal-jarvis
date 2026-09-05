@@ -1,5 +1,4 @@
-//! Shell: the read-prompt loop -- full-screen frame repaints per command,
-//! chat fallback. One resolver, one guard.
+//! Shell: the read-prompt loop -- frame repaints per command, chat fallback.
 
 use crate::{cli::args, contracts::Harness};
 use std::path::Path;
@@ -10,7 +9,6 @@ mod canonical;
 mod dispatch;
 #[path = "./handle.rs"]
 mod handle;
-
 #[path = "./help.rs"]
 mod help;
 #[path = "./outcome.rs"]
@@ -32,6 +30,10 @@ pub use handle::handle;
 
 #[path = "./converse.rs"]
 mod converse;
+#[path = "./stream.rs"]
+mod stream;
+#[path = "./stream_plan.rs"]
+mod stream_plan;
 
 pub fn run(harnesses: &[Harness], catalog_root: &Path, state_home: &Path, options: args::Options) {
     let debug = false;

@@ -1,6 +1,5 @@
 //! Outcome: applies one resolved command to the loop state -- body
-//! absorption for the viewport, printing for chat mode, hint and indicator
-//! refreshes, and the debug toggle.
+//! absorption for the viewport, chat printing, hint/indicator refreshes.
 
 use super::{status, viewport, Next};
 use crate::{cli::args, contracts::Harness};
@@ -43,6 +42,9 @@ pub fn step(
             );
             true
         }
+        Next::Stream(action) => {
+            super::stream::apply(&action, state, harnesses, catalog_root, state_home)
+        }
         Next::Converse(seed) => {
             let width = crate::tui::screen::size().inner_cols();
             match crate::converse::wire::open(seed, state_home, width) {
@@ -51,9 +53,7 @@ pub fn step(
                     state.converse = Some(live);
                     state.hint = crate::converse::wire::hint(&state.converse).unwrap_or_default();
                 }
-                Ok(_) => {
-                    state.body = vec!["converse runs in the viewport tui only for now".to_string()];
-                }
+                Ok(_) => state.body = vec!["converse runs in the viewport tui only".into()],
                 Err(lines) => {
                     state.body = lines;
                     state.hint = status::modeline(state_home, false, state.debug);
