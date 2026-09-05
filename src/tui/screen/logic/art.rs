@@ -18,8 +18,17 @@ pub fn welcome(active: &str, ready: usize, total: usize) -> Vec<String> {
         "  debug             raw view · help full table",
         "  exit              leave the command center",
     ];
-    let widest = commands
+    let greeting = [
+        format!("Welcome back -- {active} is at the helm."),
+        String::new(),
+        format!("{ready} of {total} harnesses are ready to run; the rest are one install away."),
+        String::new(),
+    ];
+    // One shared center axis for the whole block, so greetings and commands
+    // align on the same midline instead of each row drifting.
+    let widest = greeting
         .iter()
+        .chain(commands.iter())
         .map(|line| line.chars().count())
         .max()
         .unwrap_or(0);
@@ -27,15 +36,8 @@ pub fn welcome(active: &str, ready: usize, total: usize) -> Vec<String> {
         let pad = (widest.saturating_sub(line.chars().count())) / 2;
         format!("{}{line}", " ".repeat(pad))
     };
-    let greeting = [
-        centered(&format!("Welcome back -- {active} is at the helm.")),
-        centered(&format!(
-            "{ready} of {total} harnesses are ready to run; the rest are one install away."
-        )),
-        String::new(),
-    ];
-    let mut lines: Vec<String> = greeting.into_iter().collect();
-    lines.extend(commands.iter().map(|line| (*line).to_string()));
+    let mut lines: Vec<String> = greeting.iter().map(|line| centered(line)).collect();
+    lines.extend(commands.iter().map(|line| centered(line)));
     lines
 }
 
