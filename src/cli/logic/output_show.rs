@@ -1,7 +1,7 @@
 //! Show: the harness detail surface. Human lines for the rich tui/body
 //! (centered+dimmed by the paint pass), key=value for --plain.
 
-use super::{style, table};
+use super::super::{output_fields as fields, style};
 use crate::cli::logic::output_truth;
 use crate::contracts::Harness;
 
@@ -48,34 +48,19 @@ pub fn show(harness: &Harness) -> String {
         }
         return out;
     }
-    // Rich: label/value fields + one line per capability, width-wrapped.
-    let width = table::terminal_width();
-    let rows = |pad: String, text: &str| -> Vec<String> {
-        wrap(text, width.saturating_sub(pad.chars().count()))
-            .split('\n')
-            .enumerate()
-            .map(|(step, line)| {
-                if step == 0 {
-                    format!("{pad}{line}")
-                } else {
-                    format!("{}{line}", " ".repeat(pad.chars().count()))
-                }
-            })
-            .collect()
-    };
-    let field = |label: &str, value: &str| rows(format!("  {:<10} ", label), value);
-
+    // Rich: identity line, wrapped description, then label/value fields.
+    let width = fields::width();
     let mut lines = vec![format!("{} ({})", harness.display, harness.name)];
-    let description = wrap(&harness.description, width);
-    lines.extend(description.split('\n').map(String::from));
+    lines.extend(fields::section(String::new(), &harness.description, width));
     lines.push(String::new());
-    lines.extend(field("binary", &harness.binary));
-    lines.extend(field("setup", &harness.setup_hint()));
-    lines.extend(field("support", &support_counts(harness)));
+    lines.extend(fields::field("binary", &harness.binary, width));
+    lines.extend(fields::field("setup", &harness.setup_hint(), width));
+    lines.extend(fields::field("support", &support_counts(harness), width));
     for plan in &harness.capabilities {
-        lines.extend(rows(
+        lines.extend(fields::section(
             format!("  {:<10} ", plan.capability.to_string()),
             &plan.summary,
+            width,
         ));
     }
     lines.join("\n")

@@ -22,13 +22,30 @@ fn plain<T>(render: impl FnOnce() -> T) -> T {
 #[test]
 fn rich_gate_output_covers_each_status() {
     let gate = gate();
-    assert!(disabled_status("trivy").contains("Security Gate"));
-    assert!(configured(&gate, "config", "found").contains("COMMAND"));
-    assert!(list(std::slice::from_ref(&gate)).contains("Available Security Gates"));
+    assert!(disabled_status("trivy").contains("  status     disabled"));
+    assert!(disabled_status("trivy").contains("  available  trivy"));
+    assert!(configured(&gate, "config", "found").contains("Trivy (trivy)"));
+    assert!(configured(&gate, "config", "found").contains("  command     trivy fs ."));
+    assert!(list(std::slice::from_ref(&gate)).contains("Trivy (trivy)"));
+    assert!(list(std::slice::from_ref(&gate)).contains("Scan the working tree"));
     assert!(enabled("trivy").contains("Security gate enabled"));
     assert!(disabled().contains("Security gate disabled"));
     assert!(run_result("trivy", 0, "clean").contains("passed"));
     assert!(run_result("trivy", 1, "findings").contains("blocked"));
+}
+
+#[test]
+fn rich_gate_fields_never_render_table_chrome() {
+    let gate = gate();
+    for body in [
+        disabled_status("trivy"),
+        configured(&gate, "config", "found"),
+        list(std::slice::from_ref(&gate)),
+        enabled("trivy"),
+        disabled(),
+    ] {
+        assert!(!body.contains('|') && !body.contains('+'), "{body}");
+    }
 }
 
 #[test]

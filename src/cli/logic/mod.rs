@@ -25,6 +25,7 @@ pub(crate) mod help_text;
 pub(crate) mod invoke;
 pub(crate) mod json;
 pub(crate) mod output;
+pub(crate) mod output_fields;
 pub(crate) mod output_plan;
 pub mod output_truth;
 pub(crate) mod package_advisory;

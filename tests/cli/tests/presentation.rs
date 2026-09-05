@@ -49,7 +49,6 @@ fn default_output_is_structured_across_the_core_read_only_surface() {
         (&["config", "path"], "Configuration Paths"),
         (&["cache", "status"], "Cache Status"),
         (&["security", "audit"], "Security Audit"),
-        (&["gate", "status"], "Security Gate"),
     ] {
         if args[0] == "show" {
             let show = tj(args, &home);
@@ -60,6 +59,13 @@ fn default_output_is_structured_across_the_core_read_only_surface() {
         }
         assert_table(&tj(args, &home), title);
     }
+    // gate screens share the show human-line style: fields, never tables.
+    let gate = tj(&["gate", "status"], &home);
+    let body = stdout(&gate);
+    assert!(gate.status.success(), "{gate:?}");
+    assert!(body.contains("Security gate"), "{body}");
+    assert!(body.contains("  status     disabled"), "{body}");
+    assert!(!body.contains('+'), "gate is line-based: {body}");
     let check = tj(&["check"], &home);
     assert_eq!(check.status.code(), Some(4));
     assert!(stdout(&check).contains("Terminal Jarvis Diagnostics"));

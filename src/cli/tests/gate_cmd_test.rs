@@ -38,7 +38,7 @@ fn handle_routes_every_gate_form() {
     assert!(handle(&words(&["list"]), &home)
         .unwrap()
         .1
-        .contains("Trivy"));
+        .contains("(trivy)"));
     assert!(handle(&words(&["enable"]), &home).is_ok());
     assert_eq!(
         crate::gates::selected(&home).unwrap().unwrap().name,

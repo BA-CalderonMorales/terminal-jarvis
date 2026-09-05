@@ -1,20 +1,21 @@
-use crate::cli::logic::{style, table};
+//! GateOutput: the gate screens in the human-line style of `show` --
+//! identity lines, grouped label/value fields, cell-aware wrapping.
+//! `--plain` stays line-oriented for automation.
+
+use crate::cli::logic::{output_fields as fields, style};
 use crate::gates::Gate;
-#[cfg(test)]
-#[path = "../tests/gate_output_test.rs"]
-mod tests;
+
 pub fn disabled_status(available: &str) -> String {
     if style::plain() {
         return format!("gate: disabled\navailable: {available}\n");
     }
-    table::fields(
-        "Security Gate",
-        &[
-            ("STATUS", "disabled".to_string()),
-            ("AVAILABLE", available.to_string()),
-        ],
-    )
+    let width = fields::width();
+    let mut lines = vec!["Security gate".to_string(), String::new()];
+    lines.extend(fields::field("status", "disabled", width));
+    lines.extend(fields::field("available", available, width));
+    lines.join("\n")
 }
+
 pub fn configured(gate: &Gate, source: &str, binary: &str) -> String {
     if style::plain() {
         return format!(
@@ -24,19 +25,21 @@ pub fn configured(gate: &Gate, source: &str, binary: &str) -> String {
             gate.args.join(" ")
         );
     }
-    table::fields(
-        "Security Gate",
-        &[
-            ("GATE", gate.name.clone()),
-            ("SOURCE", source.to_string()),
-            ("BINARY", binary.to_string()),
-            (
-                "COMMAND",
-                format!("{} {}", gate.binary, gate.args.join(" ")),
-            ),
-        ],
-    )
+    let width = fields::width();
+    let mut lines = vec![format!("{} ({})", gate.display, gate.name)];
+    lines.extend(fields::section(String::new(), &gate.description, width));
+    lines.push(String::new());
+    lines.extend(fields::field("status", "enabled", width));
+    lines.extend(fields::field("source", source, width));
+    lines.extend(fields::field("binary", binary, width));
+    lines.extend(fields::field(
+        "command",
+        &format!("{} {}", gate.binary, gate.args.join(" ")),
+        width,
+    ));
+    lines.join("\n")
 }
+
 pub fn list(available: &[Gate]) -> String {
     if style::plain() {
         return available
@@ -44,46 +47,41 @@ pub fn list(available: &[Gate]) -> String {
             .map(|gate| format!("{} - {}\n", gate.name, gate.description))
             .collect();
     }
-    let rows = available
+    let width = fields::width();
+    let sections: Vec<Vec<String>> = available
         .iter()
         .map(|gate| {
-            vec![
-                gate.name.clone(),
-                gate.display.clone(),
-                gate.description.clone(),
-            ]
+            let mut lines = vec![format!("{} ({})", gate.display, gate.name)];
+            lines.extend(fields::section(String::new(), &gate.description, width));
+            lines
         })
-        .collect::<Vec<_>>();
-    table::render(
-        "Available Security Gates",
-        &["NAME", "DISPLAY", "DESCRIPTION"],
-        &rows,
-    )
+        .collect();
+    sections
+        .iter()
+        .map(|section| section.join("\n"))
+        .collect::<Vec<_>>()
+        .join("\n\n")
 }
 
 pub fn enabled(name: &str) -> String {
     if style::plain() {
         return format!("gate '{name}' enabled; harness commands will scan before execution\n");
     }
-    format!(
-        "{}\n{}",
-        style::success("Security gate enabled"),
-        table::fields(
-            "Security Gate",
-            &[("GATE", name.to_string()), ("STATUS", "active".to_string())],
-        )
-    )
+    let width = fields::width();
+    let mut lines = vec![style::success("Security gate enabled"), String::new()];
+    lines.extend(fields::field("gate", name, width));
+    lines.extend(fields::field("status", "active", width));
+    lines.join("\n")
 }
 
 pub fn disabled() -> String {
     if style::plain() {
         return "gate: disabled\n".to_string();
     }
-    format!(
-        "{}\n{}",
-        style::success("Security gate disabled"),
-        table::fields("Security Gate", &[("STATUS", "disabled".to_string())])
-    )
+    let width = fields::width();
+    let mut lines = vec![style::success("Security gate disabled"), String::new()];
+    lines.extend(fields::field("status", "disabled", width));
+    lines.join("\n")
 }
 
 pub fn run_result(name: &str, code: i32, body: &str) -> String {
