@@ -8,6 +8,13 @@
   Experimental: first run shows a consent warning (feedback via Discord or
   GitHub issues); the banner stays on every transcript.
 - Hermes Agent headless is real now (`hermes -z`), no longer a `--help` stub.
+- Converse reads like a chat: rounded bubbles (first harness left in the
+  theme accent, replies right in a second accent), scroll follows the
+  newest turn, and every turn logs `⏳ responding` / `✓ replied in Ns · N
+  words`.
+- `show` leads with the harness identity in rich mode.
+- installs and updates verify the binary actually landed on PATH and warn
+  when a shell restart is needed.
 
 ## [0.1.18] - unreleased
 

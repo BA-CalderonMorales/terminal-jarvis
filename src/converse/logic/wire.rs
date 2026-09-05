@@ -43,16 +43,29 @@ pub fn pending(
         return None;
     }
     let speaker = active.speaker().to_string();
+    let started = std::time::Instant::now();
     match advance(active, speak) {
         Step::Stopped(failure) => {
             let mut lines = render::bubbles(&active.transcript, width);
-            lines.push(format!("[{speaker}] stopped: {failure}"));
+            lines.push(format!(
+                "✗ {speaker} stopped after {:.1}s: {failure}",
+                started.elapsed().as_secs_f32()
+            ));
             lines.push("── converse ended early ──".to_string());
             *live = None;
             Some(lines)
         }
         Step::Spoke => {
+            let words = active
+                .transcript
+                .last_of(&speaker)
+                .map(|reply| reply.split_whitespace().count())
+                .unwrap_or(0);
             let mut lines = render::bubbles(&active.transcript, width);
+            lines.push(format!(
+                "✓ {speaker} replied in {:.1}s · {words} words",
+                started.elapsed().as_secs_f32()
+            ));
             if active.turns_left == 0 {
                 let count = active.transcript.turns.len();
                 lines.push(format!("── converse ended · {count} turns ──"));
@@ -61,6 +74,15 @@ pub fn pending(
             Some(lines)
         }
     }
+}
+
+/// The splunk-style start marker: which agent is mid-response right now.
+pub fn thinking_line(live: &Live) -> String {
+    format!(
+        "⏳ {} is responding… (turn {})",
+        live.speaker(),
+        live.transcript.turns.len() + 1
+    )
 }
 
 /// The modeline hint while a conversation is live.

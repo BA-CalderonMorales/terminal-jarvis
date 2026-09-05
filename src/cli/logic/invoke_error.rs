@@ -47,3 +47,26 @@ pub(super) fn command_error(
     };
     (code, crate::diagnostics::redact_process_text(&message))
 }
+
+/// Post-install verification: an exit-0 download whose binary is still
+/// missing from PATH gets an explicit warning -- the classic npm-global
+/// surprise, surfaced instead of swallowed.
+pub(super) fn installed_note(
+    harness: &Harness,
+    capability: Capability,
+    captured: String,
+) -> String {
+    if !matches!(capability, Capability::Download | Capability::Update) {
+        return captured;
+    }
+    let binary = harness
+        .plan(capability)
+        .map(|plan| plan.command.command.clone())
+        .unwrap_or_default();
+    if crate::security::command_on_path(&binary) {
+        return captured;
+    }
+    format!(
+        "{captured}\n\u{26a0} installed, but '{binary}' is not on PATH yet -- restart your shell or fix PATH before running it"
+    )
+}

@@ -62,7 +62,7 @@ pub struct Session<'a> {
 /// Returns the committed command line, or None when the session is over.
 pub fn run(session: &Session) -> Option<String> {
     let mut editor = Editor::default();
-    let mut offset = 0;
+    let mut offset = screen::max_offset(session.body.len(), screen::size().body_rows());
     loop {
         let size = screen::size();
         let tail = editor.tail_view(session.state.prefix_cells, size.inner_cols());

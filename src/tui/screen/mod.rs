@@ -33,8 +33,8 @@ mod index;
 pub use art::{tagline, welcome};
 pub use canvas::visible_width;
 pub use index::{
-    accent, active, active_theme, apply_theme, boot, cycle_theme, dim, ensure_usable, resume, size,
-    suspend, theme_names, Session,
+    accent, accent2, active, active_theme, apply_theme, boot, cycle_theme, dim, ensure_usable,
+    resume, size, suspend, theme_names, Session,
 };
 pub use paint::{frame, parked, Draft};
 pub use sanitize::{is_plain, keep_color};

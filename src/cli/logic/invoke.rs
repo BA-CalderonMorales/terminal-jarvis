@@ -46,7 +46,7 @@ pub fn capability(
         }
     }
     match runtime::run_command_text(plan, extra) {
-        Ok((0, captured)) => Ok((0, captured)),
+        Ok((0, captured)) => Ok((0, errors::installed_note(selected, capability, captured))),
         Ok((code, captured)) => {
             eprintln!(
                 "{}",

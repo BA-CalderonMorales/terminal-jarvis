@@ -65,10 +65,9 @@ pub fn show(harness: &Harness) -> String {
     };
     let field = |label: &str, value: &str| rows(format!("  {:<10} ", label), value);
 
-    let mut lines: Vec<String> = wrap(&harness.description, width)
-        .split('\n')
-        .map(String::from)
-        .collect();
+    let mut lines = vec![format!("{} ({})", harness.display, harness.name)];
+    let description = wrap(&harness.description, width);
+    lines.extend(description.split('\n').map(String::from));
     lines.push(String::new());
     lines.extend(field("binary", &harness.binary));
     lines.extend(field("setup", &harness.setup_hint()));

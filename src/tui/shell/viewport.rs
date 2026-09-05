@@ -27,7 +27,8 @@ pub fn paint(
     let state =
         super::viewport_raw::ViewportState::collect(indicator, harnesses, catalog_root, state_home);
     let size = crate::tui::screen::size();
-    let draft = state.base_draft(hint, body);
+    let mut draft = state.base_draft(hint, body);
+    draft.offset = crate::tui::screen::max_offset(body.len(), size.body_rows());
     let cells = state.prefix_cells;
     let painted = crate::tui::screen::parked(crate::tui::screen::frame(size, &draft), size, cells);
     print!("{painted}");
