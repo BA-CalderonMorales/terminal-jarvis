@@ -2,7 +2,6 @@
 //! The child's output arrives as classified splunk rows; the body grows
 //! and repaints live, so the user never leaves the tui to watch a task.
 
-use super::outcome;
 use super::stream_plan;
 use super::viewport::paint;
 use crate::cli::{args, stream_invocation};
@@ -36,7 +35,8 @@ pub fn absorb(
 
 pub fn apply(
     action: &args::Action,
-    state: &mut outcome::LoopState,
+    options: &args::Options,
+    state: &mut super::state::LoopState,
     harnesses: &[Harness],
     catalog_root: &Path,
     state_home: &Path,
@@ -48,12 +48,11 @@ pub fn apply(
     state.body.push(format!("── {label} ──"));
     let started = Instant::now();
     let outcome = {
-        let outcome::LoopState {
+        let super::state::LoopState {
             body,
             offset,
             indicator,
             hint,
-            options,
             ..
         } = state;
         let mut since_paint = Instant::now();

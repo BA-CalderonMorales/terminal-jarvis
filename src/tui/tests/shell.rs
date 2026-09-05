@@ -14,7 +14,7 @@ fn harness(name: &str) -> Harness {
 
 fn action_of(input: &str, harnesses: &[Harness]) -> Option<args::Action> {
     match resolve(input, harnesses) {
-        Resolved::Run(action) => Some(action),
+        Resolved::Run(action, _) => Some(action),
         _ => None,
     }
 }

@@ -1,7 +1,6 @@
 //! StreamPlan: maps a tui action onto its headless invocation, so the
 //! streaming runner stays generic over what it executes.
 
-use super::outcome;
 use crate::cli::args;
 use crate::cli::resolve::{self, Invocation};
 use crate::contracts::{Capability, Harness};
@@ -18,7 +17,7 @@ fn one(harness: String, capability: Capability) -> Invocation {
 }
 pub fn for_action(
     action: &args::Action,
-    state: &mut outcome::LoopState,
+    state: &mut super::state::LoopState,
     harnesses: &[Harness],
     state_home: &Path,
 ) -> Option<(Invocation, String)> {

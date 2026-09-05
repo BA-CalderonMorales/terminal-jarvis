@@ -3,7 +3,6 @@
 //! with a splunk-style marker while the current speaker is mid-response.
 
 use super::converse_live;
-use super::outcome;
 use super::status;
 use crate::contracts::Harness;
 use std::path::Path;
@@ -12,7 +11,7 @@ use std::time::{Duration, Instant};
 /// Runs at most one conversation turn: paint the current transcript, mark
 /// the responding agent, invoke it, then hand the body delta back.
 pub fn tick(
-    state: &mut outcome::LoopState,
+    state: &mut super::state::LoopState,
     harnesses: &[Harness],
     catalog_root: &Path,
     state_home: &Path,
@@ -27,7 +26,7 @@ pub fn tick(
     if let Some(marker) = &thinking {
         state.body.push(marker.clone());
     }
-    let outcome::LoopState {
+    let super::state::LoopState {
         body,
         offset,
         converse,

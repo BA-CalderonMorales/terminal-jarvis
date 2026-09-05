@@ -13,6 +13,7 @@ mod live_nav;
 mod outcome;
 mod run_action;
 mod session;
+mod state;
 mod status;
 mod stream;
 mod stream_plan;
@@ -36,7 +37,7 @@ pub fn run(harnesses: &[Harness], catalog_root: &Path, state_home: &Path, option
         viewport::chat_banner(harnesses, catalog_root, state_home);
     }
     super::sigint::guarded(move || {
-        let mut state = outcome::LoopState {
+        let mut state = state::LoopState {
             converse: None,
             offset: 0,
             history: Vec::new(),

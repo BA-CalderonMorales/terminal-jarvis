@@ -1,14 +1,16 @@
 //! Palette: the clap-grounded slash-command surface. A slash line is parsed
 //! with the exact same `Action` grammar as argv, after prepending a dummy
 //! program name -- the tui never maintains a parallel command language.
+//! The parsed options ride along, so flags typed in-frame (`--no-input`,
+//! `--confirm=...`) reach the same guards the headless cli applies.
 
 use crate::cli::args;
 
-pub fn parse(line: &str) -> Result<args::Action, String> {
+pub fn parse(line: &str) -> Result<(args::Action, args::Options), String> {
     let mut tokens = vec![String::from("terminal-jarvis")];
     tokens.extend(line.split_whitespace().map(String::from));
     args::parse_cli(tokens)
-        .map(|parsed| parsed.action)
+        .map(|parsed| (parsed.action, parsed.options))
         .map_err(|error| format!("{error}; type /help for commands"))
 }
 

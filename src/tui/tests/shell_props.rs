@@ -45,7 +45,7 @@ fn bare_known_harness_switches(names: Vec<String>) -> bool {
     }
     let harnesses: Vec<Harness> = names.iter().map(|name| to_harness(name)).collect();
     let pick = names[0].clone();
-    matches!(resolve(&pick, &harnesses), Resolved::Run(args::Action::Use(switched)) if switched == pick)
+    matches!(resolve(&pick, &harnesses), Resolved::Run(args::Action::Use(switched), _) if switched == pick)
 }
 
 fn bare_unknown_words_run_the_active_agent(names: Vec<String>) -> bool {
@@ -54,7 +54,7 @@ fn bare_unknown_words_run_the_active_agent(names: Vec<String>) -> bool {
         return true;
     }
     let phrase = names.join(" ");
-    matches!(resolve(&phrase, &[]), Resolved::Run(args::Action::Run(words)) if words == names)
+    matches!(resolve(&phrase, &[]), Resolved::Run(args::Action::Run(words), _) if words == names)
 }
 
 fn out_of_range_and_zero_numbers_error(number: usize) -> bool {

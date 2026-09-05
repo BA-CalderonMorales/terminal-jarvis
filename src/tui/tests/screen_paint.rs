@@ -4,7 +4,7 @@
 
 use crate::tui::screen::{frame, Draft, Size};
 
-fn draft() -> Draft {
+pub(crate) fn draft() -> Draft {
     Draft {
         header: "Terminal Jarvis · ACTIVE fixture · READY 1/1 ready".into(),
         cwd: ".../working/terminal-jarvis".into(),
@@ -58,16 +58,6 @@ fn rows_carry_carriage_returns_for_raw_mode() {
     assert_eq!(bare_newlines, 0, "no bare newlines");
     assert!(painted.contains("\r\n"));
 }
-
-#[test]
-fn header_keeps_the_verdict_and_drops_the_cwd_when_narrow() {
-    let painted = frame(Size { cols: 60, rows: 20 }, &draft());
-    let first = painted.split('\n').next().unwrap();
-    assert!(first.contains("Terminal Jarvis"), "{first}");
-    assert!(first.contains("READY 1/1 ready"), "{first}");
-    assert!(!first.contains("terminal-jarvis"), "cwd dies first");
-}
-
 #[test]
 fn no_box_chrome_anywhere() {
     let painted = frame(Size { cols: 80, rows: 24 }, &draft());

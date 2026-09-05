@@ -1,7 +1,4 @@
-use crate::gates::logic::runner::preflight;
-use crate::gates::logic::stream::run;
-use crate::gates::logic::verdict::Verdict;
-
+use crate::gates::logic::{runner::preflight, stream::run, verdict::Verdict};
 use crate::gates::tests_util::*;
 
 #[cfg(unix)]
@@ -45,6 +42,8 @@ fn preflight_accepts_success_and_reports_blocking_exit() {
 #[cfg(unix)]
 #[test]
 fn run_streams_gate_output_and_captures_it() {
+    // the child inherits the cwd; the lock bars the deleted-cwd test
+    let _guard = lock();
     let script = "#!/bin/sh\nprintf 'streamed-1\\n'\nprintf 'streamed-2\\n' >&2\n";
     let dir = std::env::temp_dir().join(format!("tj-gate-stream-{}", std::process::id()));
     let _ = std::fs::remove_dir_all(&dir);

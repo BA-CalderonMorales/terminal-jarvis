@@ -1,16 +1,20 @@
 use super::*;
 
+fn action(line: &str) -> args::Action {
+    parse(line).expect("parses").0
+}
+
 #[test]
 fn slash_lines_parse_with_the_cli_grammar() {
-    assert_eq!(parse("list"), Ok(args::Action::List));
-    assert_eq!(parse("status"), Ok(args::Action::Check));
-    assert_eq!(parse("use codex"), Ok(args::Action::Use("codex".into())));
+    assert_eq!(action("list"), args::Action::List);
+    assert_eq!(action("status"), args::Action::Check);
+    assert_eq!(action("use codex"), args::Action::Use("codex".into()));
     assert_eq!(
-        parse("opencode headless fix this"),
-        Ok(args::Action::Direct {
+        action("opencode headless fix this"),
+        args::Action::Direct {
             harness: "opencode".into(),
             extra: vec!["headless".into(), "fix".into(), "this".into()],
-        })
+        }
     );
 }
 
@@ -32,15 +36,23 @@ fn invalid_flags_are_rejected_inside_slash_lines() {
 #[test]
 fn lifecycle_verbs_map_to_their_actions() {
     assert_eq!(
-        parse("install opencode"),
-        Ok(args::Action::Install(Some("opencode".to_string())))
+        action("install opencode"),
+        args::Action::Install(Some("opencode".to_string()))
     );
     assert_eq!(
-        parse("update opencode"),
-        Ok(args::Action::Update(Some("opencode".into())))
+        action("update opencode"),
+        args::Action::Update(Some("opencode".into()))
     );
-    assert_eq!(
-        parse("version"),
-        Ok(args::Action::Version { verbose: false })
-    );
+    assert_eq!(action("version"), args::Action::Version { verbose: false });
+}
+
+#[test]
+fn typed_flags_travel_with_the_action() {
+    // the headless escape hatch must survive the tui's parse: the same
+    // --no-input / --confirm grammar the cli speaks, typed in-frame
+    let (action, options) =
+        parse("install copilot --no-input --confirm=download:copilot").expect("parses");
+    assert_eq!(action, args::Action::Install(Some("copilot".into())));
+    assert!(options.no_input);
+    assert_eq!(options.confirm.as_deref(), Some("download:copilot"));
 }

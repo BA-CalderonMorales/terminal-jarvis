@@ -2,27 +2,14 @@
 //! absorption for the viewport, chat printing, hint/indicator refreshes.
 
 use super::{status, stream, Next};
-use crate::{cli::args, contracts::Harness};
+use crate::contracts::Harness;
 use std::path::Path;
-
-/// The mutable session state one command can change.
-pub struct LoopState {
-    pub body: Vec<String>,
-    pub history: Vec<String>,
-    pub converse: Option<crate::converse::Live>,
-    /// The shared scroll position: turns and prompts move the same view.
-    pub offset: usize,
-    pub hint: String,
-    pub options: args::Options,
-    pub debug: bool,
-    pub indicator: crate::tui::input::Indicator,
-}
 
 /// Applies one command's outcome; false means the loop ends.
 pub fn step(
     next: Next,
     sink: Vec<u8>,
-    state: &mut LoopState,
+    state: &mut super::state::LoopState,
     state_home: &Path,
     harnesses: &[Harness],
     catalog_root: &Path,
@@ -46,9 +33,14 @@ pub fn step(
             );
             true
         }
-        Next::Stream(action) => {
-            super::stream::apply(&action, state, harnesses, catalog_root, state_home)
-        }
+        Next::Stream { action, options } => super::stream::apply(
+            &action,
+            &options,
+            state,
+            harnesses,
+            catalog_root,
+            state_home,
+        ),
         Next::Converse(seed) => {
             let width = crate::tui::screen::size().inner_cols();
             match crate::converse::wire::open(seed, state_home, width) {

@@ -40,7 +40,8 @@ pub fn handle(
                 reset: true,
             }
         }
-        Resolved::Run(action) => {
+        Resolved::Run(action, typed) => {
+            let options = super::state::overlay(options, &typed);
             let action = match stream_gate::normalized(action, state_home) {
                 Some(action) => action,
                 None => {
@@ -53,10 +54,10 @@ pub fn handle(
                 }
             };
             if crate::tui::screen::active() && stream_gate::eligible(&action) {
-                return Next::Stream(action);
+                return Next::Stream { action, options };
             }
             let picker_shown =
-                super::run_action::run(out, action, options, harnesses, catalog_root, state_home);
+                super::run_action::run(out, action, &options, harnesses, catalog_root, state_home);
             Next::Again {
                 picker_shown,
                 reset: false,

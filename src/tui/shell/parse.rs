@@ -1,5 +1,6 @@
 //! Slash-command and selection resolution for the shell: every line maps
-//! onto the same Action grammar the headless cli parses.
+//! onto the same Action grammar the headless cli parses, options included
+//! (`--no-input`, `--confirm=...` typed in-frame reach the same guards).
 
 use crate::{cli::args, contracts::Harness};
 pub enum Resolved {
@@ -7,7 +8,7 @@ pub enum Resolved {
     Help,
     Exit,
     Home,
-    Run(args::Action),
+    Run(args::Action, args::Options),
     Debug(Option<bool>),
     Theme(Option<String>),
     Converse(Option<(usize, String, String, String)>),
@@ -17,15 +18,18 @@ pub enum Resolved {
 #[derive(Debug)]
 pub enum Next {
     Exit,
-    /// `reset` asks the surface to restore its pristine body: chat mode
-    /// printed the banner through the sink, viewport mode re-shows art.
+    /// `reset` restores the pristine body (the home primer).
     Again {
         picker_shown: bool,
         reset: bool,
     },
     Debug(Option<bool>),
     Converse(Option<(usize, String, String, String)>),
-    Stream(args::Action),
+    /// A streaming action plus its typed options (session-overlaid).
+    Stream {
+        action: args::Action,
+        options: args::Options,
+    },
 }
 
 pub fn resolve(input: &str, harnesses: &[Harness]) -> Resolved {
@@ -48,15 +52,12 @@ pub fn resolve(input: &str, harnesses: &[Harness]) -> Resolved {
             };
         }
         "/theme" | "theme" => return Resolved::Theme(None),
-        rest if rest.starts_with("/theme ") => {
-            return Resolved::Theme(Some(rest["/theme ".len()..].trim().to_string()))
-        }
-        rest if rest.starts_with("theme ") => {
-            return Resolved::Theme(Some(rest["theme ".len()..].trim().to_string()))
+        rest if rest.starts_with("/theme ") | rest.starts_with("theme ") => {
+            return Resolved::Theme(Some(rest[rest.find(' ').unwrap() + 1..].trim().to_string()))
         }
         rest if rest.starts_with('/') => {
             return match crate::tui::palette::parse(&rest[1..]) {
-                Ok(action) => Resolved::Run(action),
+                Ok((action, options)) => Resolved::Run(action, options),
                 Err(message) => Resolved::Error(message),
             };
         }
@@ -64,24 +65,29 @@ pub fn resolve(input: &str, harnesses: &[Harness]) -> Resolved {
     }
     if let Ok(number) = input.parse::<usize>() {
         return match crate::tui::switcher::select(input, harnesses) {
-            Some(selection) => Resolved::Run(selection),
+            Some(selection) => Resolved::Run(selection, args::Options::default()),
             None => Resolved::Error(format!(
                 "no harness at position {number}; /list shows the numbered tools"
             )),
         };
     }
     if harnesses.iter().any(|harness| harness.name == input) {
-        return Resolved::Run(args::Action::Use(input.to_string()));
+        return Resolved::Run(
+            args::Action::Use(input.to_string()),
+            args::Options::default(),
+        );
     }
+    let unknown_harness = |action: &args::Action| match action {
+        args::Action::Direct { harness, .. } => !harnesses.iter().any(|h| &h.name == harness),
+        _ => false,
+    };
     match crate::tui::palette::parse(input) {
-        Ok(args::Action::Direct { harness, .. })
-            if !harnesses.iter().any(|h| h.name == harness) =>
-        {
-            Resolved::Run(args::Action::Run(
-                input.split_whitespace().map(String::from).collect(),
-            ))
-        }
-        Ok(action) => Resolved::Run(action),
+        // a bare verb line naming no harness speaks for the active agent
+        Ok((action, options)) if unknown_harness(&action) => Resolved::Run(
+            args::Action::Run(input.split_whitespace().map(String::from).collect()),
+            options,
+        ),
+        Ok((action, options)) => Resolved::Run(action, options),
         Err(message) => Resolved::Error(message),
     }
 }
