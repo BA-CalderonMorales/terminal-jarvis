@@ -33,7 +33,7 @@ fn invalid_flags_are_rejected_inside_slash_lines() {
 fn lifecycle_verbs_map_to_their_actions() {
     assert_eq!(
         parse("install opencode"),
-        Ok(args::Action::Install("opencode".into()))
+        Ok(args::Action::Install(Some("opencode".to_string())))
     );
     assert_eq!(
         parse("update opencode"),

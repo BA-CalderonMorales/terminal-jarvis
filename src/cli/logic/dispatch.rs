@@ -22,7 +22,13 @@ pub fn dispatch(
             crate::context::save(home, &name).map_err(dispatch_support::session_write_error)?;
             Ok((0, output::selected(&name)))
         }
-        Action::Show(name) => Ok((0, output::show(dispatch_support::find(harnesses, &name)?))),
+        Action::Show(name) => {
+            let selected = dispatch_support::selected_name(name, home)?;
+            Ok((
+                0,
+                output::show(dispatch_support::find(harnesses, &selected)?),
+            ))
+        }
         Action::Plan {
             harness,
             capability,
@@ -41,12 +47,17 @@ pub fn dispatch(
             guard::direct(&harness, &extra, options, harnesses, home)
         }
         Action::Install(name) => {
-            guard::capability(harnesses, &name, Capability::Download, options, home)
+            let selected = dispatch_support::selected_name(name, home)?;
+            guard::capability(harnesses, &selected, Capability::Download, options, home)
         }
         Action::Update(Some(name)) => {
             guard::capability(harnesses, &name, Capability::Update, options, home)
         }
-        Action::Update(None) => Ok((0, compat::update_summary(harnesses))),
+        Action::Update(None) if options.dry_run => Ok((0, compat::update_summary(harnesses))),
+        Action::Update(None) => {
+            let selected = dispatch_support::selected_name(None, home)?;
+            guard::capability(harnesses, &selected, Capability::Update, options, home)
+        }
         Action::Auth(words) => dispatch_compat::auth(&words, harnesses),
         Action::Config(words) => dispatch_compat::config(&words, catalog_root, home),
         Action::Cache(words) => dispatch_compat::cache(&words),

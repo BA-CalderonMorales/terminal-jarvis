@@ -44,7 +44,7 @@ fn default_output_is_structured_across_the_core_read_only_surface() {
         (&["show", "codex"], "OpenAI coding agent CLI"),
         (&["plan", "codex", "headless"], "Plan: codex headless"),
         (&["version", "--verbose"], "Terminal Jarvis"),
-        (&["update"], "Harness Updates"),
+        (&["update", "--dry-run"], "Harness Updates"),
         (&["auth", "help", "codex"], "Authentication"),
         (&["config", "path"], "Configuration Paths"),
         (&["cache", "status"], "Cache Status"),

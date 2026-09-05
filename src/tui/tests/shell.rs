@@ -69,7 +69,7 @@ fn bare_command_words_work_without_the_slash() {
     );
     assert_eq!(
         action_of("show opencode", &[]),
-        Some(args::Action::Show("opencode".into()))
+        Some(args::Action::Show(Some("opencode".to_string())))
     );
 }
 

@@ -33,9 +33,9 @@ fn plan_run_install() {
     );
     assert_eq!(
         a(&["tj", "install", "opencode"]),
-        Action::Install("opencode".to_string())
+        Action::Install(Some("opencode".to_string()))
     );
-    assert!(e(&["tj", "install"]).is_err());
+    assert_eq!(a(&["tj", "install"]), Action::Install(None));
 }
 #[test]
 fn update_auth_config_cache_security_legacy() {

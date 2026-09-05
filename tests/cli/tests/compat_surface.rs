@@ -38,7 +38,7 @@ mod unix {
     #[test]
     fn compat_info_auth_config_cache_security_and_legacy_are_helpful() {
         let home = temp_home();
-        let update = stdout(&tj(&["update"], &home, None));
+        let update = stdout(&tj(&["update", "--dry-run"], &home, None));
         assert!(update.contains("updates are per harness"));
         assert!(update.contains("npm update -g opencode-ai"));
         assert!(update.contains("ollama: support=unknown evidence=deterministic command=withheld"));
