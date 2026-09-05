@@ -45,7 +45,10 @@ fn enable(available: &[gates::Gate], home: &Path, name: &str) -> Result<(i32, St
 }
 
 fn run(gate: &gates::Gate) -> Result<(i32, String), String> {
-    let scan = gates::run(gate, true)?;
+    // the viewport paints its own frame: narration would leak under it,
+    // so the scan runs quiet there (the heartbeat keeps the progress)
+    let narrate = !crate::tui::screen::active();
+    let scan = gates::run(gate, narrate)?;
     Ok((
         scan.code,
         output::run_result(&gate.name, scan.code, &scan.output),

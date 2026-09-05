@@ -20,21 +20,24 @@ pub fn for_action(
     state: &mut super::state::LoopState,
     harnesses: &[Harness],
     state_home: &Path,
-) -> Option<(Invocation, String)> {
+) -> Option<Planned> {
     match action {
-        args::Action::Install(Some(name)) => {
-            let invocation = one(name.clone(), Capability::Download);
-            Some((invocation, format!("install {name}")))
-        }
-        args::Action::Update(Some(name)) => {
-            let invocation = one(name.clone(), Capability::Update);
-            Some((invocation, format!("update {name}")))
-        }
+        args::Action::Install(Some(name)) => Some(Planned {
+            invocation: one(name.clone(), Capability::Download),
+            label: format!("install {name}"),
+            lifecycle: Some((name.clone(), "installed")),
+        }),
+        args::Action::Update(Some(name)) => Some(Planned {
+            invocation: one(name.clone(), Capability::Update),
+            label: format!("update {name}"),
+            lifecycle: Some((name.clone(), "updated")),
+        }),
         args::Action::Run(words) => match resolve::run(words, harnesses, state_home) {
-            Ok(invocation) => {
-                let label = words.join(" ");
-                Some((invocation, label))
-            }
+            Ok(invocation) => Some(Planned {
+                invocation,
+                label: words.join(" "),
+                lifecycle: None,
+            }),
             Err(message) => {
                 state.body.push(format!("✗ {message}"));
                 None
@@ -43,8 +46,20 @@ pub fn for_action(
         args::Action::Direct { harness, extra } => {
             let mut invocation = one(harness.clone(), Capability::Headless);
             invocation.extra = extra.clone();
-            Some((invocation, format!("{harness} {}", extra.join(" "))))
+            Some(Planned {
+                invocation,
+                label: format!("{harness} {}", extra.join(" ")),
+                lifecycle: None,
+            })
         }
         _ => None,
     }
+}
+
+/// One mapped action: its invocation, its row label, and -- for install
+/// and update -- the lifecycle pair the verdict card speaks.
+pub struct Planned {
+    pub invocation: Invocation,
+    pub label: String,
+    pub lifecycle: Option<(String, &'static str)>,
 }

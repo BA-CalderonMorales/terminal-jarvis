@@ -1,7 +1,7 @@
 //! Outcome: applies one resolved command to the loop state -- body
 //! absorption for the viewport, chat printing, hint/indicator refreshes.
 
-use super::{status, stream, Next};
+use super::{status, Next};
 use crate::contracts::Harness;
 use std::path::Path;
 
@@ -22,7 +22,7 @@ pub fn step(
         } => {
             state.hint = status::modeline(state_home, picker_shown, state.debug);
             status::refresh_indicator(&mut state.indicator, state_home, state.debug);
-            stream::absorb(
+            absorb(
                 &mut state.body,
                 &mut state.offset,
                 sink,
@@ -72,5 +72,29 @@ pub fn step(
             }
             true
         }
+    }
+}
+
+/// Viewport absorbs captured output as the next body; chat prints it above
+/// the prompt. A reset restores the primer.
+pub fn absorb(
+    body: &mut Vec<String>,
+    offset: &mut usize,
+    sink: Vec<u8>,
+    reset: bool,
+    harnesses: &[Harness],
+    catalog_root: &Path,
+    state_home: &Path,
+) {
+    let text = String::from_utf8_lossy(&sink).to_string();
+    if reset {
+        *body = super::viewport::welcome(harnesses, catalog_root, state_home);
+    } else if !text.is_empty() {
+        *body = text.lines().map(String::from).collect();
+    }
+    *offset = super::viewport::pinned(body);
+    if !crate::tui::screen::active() {
+        print!("{text}");
+        println!();
     }
 }

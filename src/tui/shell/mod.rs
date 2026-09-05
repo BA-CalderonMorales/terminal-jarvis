@@ -16,6 +16,7 @@ mod session;
 mod state;
 mod status;
 mod stream;
+mod stream_finish;
 mod stream_plan;
 mod verdict;
 mod viewport;
