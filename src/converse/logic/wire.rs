@@ -2,26 +2,65 @@
 //! shell loop calls `pending` once per frame; each call runs at most one
 //! one-shot turn so the frame repaints between every exchange.
 
-use super::session::{advance, Live, Speaker};
+use super::render;
+use super::session::{advance, Live, Speaker, Step};
 use std::path::Path;
 
-/// Seeds a conversation (post-consent) and returns its opening body lines.
-pub fn seed(a: &str, b: &str, topic: &str) -> Live {
-    Live::new(a, b, topic)
+/// First-run gate + opener: `Ok` pairs the live session with its opening
+/// bubble body; `Err` shows the warning once and asks for the re-run.
+pub fn open(
+    seed: Option<(usize, String, String, String)>,
+    state_home: &Path,
+    width: usize,
+) -> Result<(Live, Vec<String>), Vec<String>> {
+    let (turns, a, b, topic) =
+        seed.ok_or_else(|| vec!["no conversation is running".to_string()])?;
+    if super::consent::seen(state_home) {
+        let live = Live::new(&a, &b, &topic, turns);
+        let lines = render::bubbles(&live.transcript, width);
+        Ok((live, lines))
+    } else {
+        super::consent::mark(state_home);
+        let mut lines = vec![
+            format!("── converse: {a} ⇄ {b} ──"),
+            format!("topic: {topic}"),
+            String::new(),
+        ];
+        lines.extend(super::consent::opening_lines(false));
+        Err(lines)
+    }
 }
 
 /// Runs at most one turn for the active session; `None` when no session is
 /// live or the budget is spent. The returned lines are the body delta.
-pub fn pending(live: &mut Option<Live>, speak: &mut Speaker<'_>) -> Option<Vec<String>> {
+pub fn pending(
+    live: &mut Option<Live>,
+    speak: &mut Speaker<'_>,
+    width: usize,
+) -> Option<Vec<String>> {
     let active = live.as_mut()?;
     if active.turns_left == 0 {
         return None;
     }
-    let turned = advance(active, speak);
-    if turned.over {
-        *live = None;
+    let speaker = active.speaker().to_string();
+    match advance(active, speak) {
+        Step::Stopped(failure) => {
+            let mut lines = render::bubbles(&active.transcript, width);
+            lines.push(format!("[{speaker}] stopped: {failure}"));
+            lines.push("── converse ended early ──".to_string());
+            *live = None;
+            Some(lines)
+        }
+        Step::Spoke => {
+            let mut lines = render::bubbles(&active.transcript, width);
+            if active.turns_left == 0 {
+                let count = active.transcript.turns.len();
+                lines.push(format!("── converse ended · {count} turns ──"));
+                *live = None;
+            }
+            Some(lines)
+        }
     }
-    Some(turned.lines)
 }
 
 /// The modeline hint while a conversation is live.
@@ -31,24 +70,4 @@ pub fn hint(live: &Option<Live>) -> Option<String> {
         "converse {}⇄{} · {} turns left · experimental",
         live.transcript.a, live.transcript.b, live.turns_left
     ))
-}
-
-/// First-run gate: `Ok(live)` seeds; `Err(lines)` shows the warning once.
-pub fn consent(
-    seed: Option<(String, String, String)>,
-    state_home: &Path,
-) -> Result<Live, Vec<String>> {
-    let (a, b, topic) = seed.ok_or_else(|| vec!["no conversation is running".to_string()])?;
-    let live = Live::new(&a, &b, &topic);
-    if super::consent::seen(state_home) {
-        Ok(live)
-    } else {
-        super::consent::mark(state_home);
-        let mut lines = vec![
-            format!("── converse: {a} ⇄ {b} ──"),
-            format!("topic: {topic}"),
-        ];
-        lines.extend(super::consent::opening_lines(false));
-        Err(lines)
-    }
 }

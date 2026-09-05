@@ -27,7 +27,8 @@ pub fn tick(
     );
     let mut speak =
         |name: &str, prompt: &str| crate::cli::headless_one_shot(harnesses, name, prompt);
-    let lines = crate::converse::wire::pending(&mut state.converse, &mut speak)?;
+    let width = crate::tui::screen::size().inner_cols();
+    let lines = crate::converse::wire::pending(&mut state.converse, &mut speak, width)?;
     state.hint = crate::converse::wire::hint(&state.converse)
         .unwrap_or_else(|| status::modeline(state_home, false, state.debug));
     Some(lines)

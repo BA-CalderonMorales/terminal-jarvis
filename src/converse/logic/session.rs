@@ -9,6 +9,13 @@ use crate::converse::transcript::Transcript;
 /// path; tests inject a fake, so no test ever spawns a real child.
 pub type Speaker<'a> = dyn FnMut(&str, &str) -> Result<String, String> + 'a;
 
+/// The outcome of one invocation. A failure ends the session -- the user is
+/// watching every turn, so retrying silently would hide what happened.
+pub enum Step {
+    Spoke,
+    Stopped(String),
+}
+
 /// The live conversation: sides, topic, transcript, and remaining budget.
 pub struct Live {
     pub a: String,
@@ -19,16 +26,14 @@ pub struct Live {
     pub next_is_a: bool,
 }
 
-pub const DEFAULT_TURNS: usize = 4;
-
 impl Live {
-    pub fn new(a: &str, b: &str, topic: &str) -> Self {
+    pub fn new(a: &str, b: &str, topic: &str, turns: usize) -> Self {
         Self {
             a: a.to_string(),
             b: b.to_string(),
             topic: topic.to_string(),
             transcript: Transcript::new(a, b, topic),
-            turns_left: DEFAULT_TURNS,
+            turns_left: turns,
             next_is_a: true,
         }
     }
@@ -50,16 +55,10 @@ impl Live {
     }
 }
 
-/// The body lines one turn produces, plus whether the conversation ended.
-pub struct Turned {
-    pub lines: Vec<String>,
-    pub over: bool,
-}
-
 /// Runs one turn: prompt the current speaker, capture the reply, record it.
-/// A failed invocation (binary gone, nonzero exit, Ctrl-C) ends the session
-/// with a note instead of retrying -- the user is watching every turn.
-pub fn advance(live: &mut Live, speak: &mut Speaker) -> Turned {
+/// A failed invocation (binary gone, nonzero exit, Ctrl-C) freezes the
+/// budget so the caller ends the session with a note.
+pub fn advance(live: &mut Live, speak: &mut Speaker) -> Step {
     let speaker = live.speaker().to_string();
     let other = live.other().to_string();
     let prompt = match live.transcript.last_of(&other) {
@@ -68,27 +67,15 @@ pub fn advance(live: &mut Live, speak: &mut Speaker) -> Turned {
     };
     let outcome = speak(&speaker, &prompt);
     live.turns_left = live.turns_left.saturating_sub(1);
-    let over = live.turns_left == 0;
     match outcome {
         Ok(reply) => {
-            let reply = clean(&reply);
-            live.transcript.push(&speaker, &reply);
+            live.transcript.push(&speaker, &clean(&reply));
             live.next_is_a = !live.next_is_a;
-            let mut lines = live.transcript.lines();
-            if over {
-                lines.push(format!(
-                    "── converse ended · {} turns ──",
-                    live.transcript.turns.len()
-                ));
-            }
-            Turned { lines, over }
+            Step::Spoke
         }
         Err(failure) => {
             live.turns_left = 0;
-            let mut lines = live.transcript.lines();
-            lines.push(format!("[{speaker}] stopped: {failure}"));
-            lines.push("── converse ended early ──".to_string());
-            Turned { lines, over: true }
+            Step::Stopped(failure)
         }
     }
 }

@@ -10,7 +10,7 @@ pub enum Resolved {
     Run(args::Action),
     Debug(Option<bool>),
     Theme(Option<String>),
-    Converse(Option<(String, String, String)>),
+    Converse(Option<(usize, String, String, String)>),
     Error(String),
 }
 
@@ -24,7 +24,7 @@ pub enum Next {
         reset: bool,
     },
     Debug(Option<bool>),
-    Converse(Option<(String, String, String)>),
+    Converse(Option<(usize, String, String, String)>),
 }
 
 pub fn resolve(input: &str, harnesses: &[Harness]) -> Resolved {
@@ -38,18 +38,12 @@ pub fn resolve(input: &str, harnesses: &[Harness]) -> Resolved {
         "/debug on" => return Resolved::Debug(Some(true)),
         "/debug off" => return Resolved::Debug(Some(false)),
         rest if rest == "converse" || rest.starts_with("converse ") => {
-            let words: Vec<&str> = rest.split_whitespace().skip(1).collect();
-            return match words.as_slice() {
-                [] => Resolved::Converse(None),
-                [a, b, topic @ ..] if !topic.is_empty() => {
-                    for side in [*a, *b] {
-                        if let Err(message) = crate::converse::headless_ready(harnesses, side) {
-                            return Resolved::Error(message);
-                        }
-                    }
-                    Resolved::Converse(Some(((*a).into(), (*b).into(), topic.join(" "))))
+            return match crate::converse::parse(rest, harnesses) {
+                crate::converse::Parsed::Continue => Resolved::Converse(None),
+                crate::converse::Parsed::Start { turns, a, b, topic } => {
+                    Resolved::Converse(Some((turns, a, b, topic)))
                 }
-                _ => Resolved::Error("converse <a> <b> <topic...>".to_string()),
+                crate::converse::Parsed::Error(message) => Resolved::Error(message),
             };
         }
         "/theme" | "theme" => return Resolved::Theme(None),

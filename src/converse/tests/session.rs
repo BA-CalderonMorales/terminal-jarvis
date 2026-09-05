@@ -1,11 +1,11 @@
 //! Session contract: one call per turn, alternating speakers, a hard turn
 //! cap, and failures that end the session with a note instead of retrying.
 
+use crate::converse::render::bubbles;
 use crate::converse::sanitize::clean;
-use crate::converse::{advance, Live, DEFAULT_TURNS};
+use crate::converse::{advance, Live, Step, MAX_TURNS};
 
-/// A speaker that always answers with its script prefix, so tests can see
-/// exactly which side ran and in what order.
+/// A scripted speaker: tests see which side ran and in what order.
 fn scripted(
     replies: Vec<Result<String, String>>,
 ) -> impl FnMut(&str, &str) -> Result<String, String> {
@@ -18,41 +18,30 @@ fn scripted(
 }
 
 #[test]
-fn turns_alternate_sides_and_honour_the_word_cap_in_prompts() {
-    let mut live = Live::new("opencode", "hermes", "workspace layout");
+fn turns_alternate_sides_until_the_budget_is_spent() {
+    let mut live = Live::new("opencode", "hermes", "workspace layout", 2);
     let mut speak = scripted(vec![Ok("alpha one".into()), Ok("bravo one".into())]);
-    let first = advance(&mut live, &mut speak);
-    assert!(first
-        .lines
-        .iter()
-        .any(|line| line == "[opencode] alpha one"));
-    assert!(!first.over);
-    let second = advance(&mut live, &mut speak);
-    assert!(second.lines.iter().any(|line| line == "[hermes] bravo one"));
-    assert!(!second.over, "the default budget is {DEFAULT_TURNS} turns");
+    assert!(matches!(advance(&mut live, &mut speak), Step::Spoke));
+    assert_eq!(live.transcript.turns[0].speaker, "opencode");
+    assert!(matches!(advance(&mut live, &mut speak), Step::Spoke));
+    assert_eq!(live.transcript.turns[1].speaker, "hermes");
+    assert_eq!(live.turns_left, 0);
+    assert!(matches!(advance(&mut live, &mut speak), Step::Stopped(_)));
 }
 
 #[test]
 fn the_reply_prompt_carries_the_topic_and_the_other_reply() {
-    let mut live = Live::new("opencode", "hermes", "workspace layout");
-    live.transcript.push("hermes", "start with two crates");
-    let prompt = crate::converse::reply(&live.topic, "opencode", "hermes", "start with two crates");
-    assert!(prompt.contains("workspace layout"));
-    assert!(prompt.contains("start with two crates"));
+    let prompt = crate::converse::reply("workspace layout", "opencode", "hermes", "two crates");
+    assert!(prompt.contains("workspace layout") && prompt.contains("two crates"));
     assert!(prompt.contains("80 words or fewer"));
 }
 
 #[test]
-fn a_failed_invocation_ends_the_session_with_a_note() {
-    let mut live = Live::new("opencode", "hermes", "topic");
+fn a_failed_invocation_freezes_the_budget() {
+    let mut live = Live::new("opencode", "hermes", "topic", 4);
     let mut speak = scripted(vec![Err("exit 1".into())]);
-    let turn = advance(&mut live, &mut speak);
-    assert!(turn.over);
-    assert!(turn
-        .lines
-        .iter()
-        .any(|line| line.contains("[opencode] stopped: exit 1")));
-    assert!(turn.lines.iter().any(|line| line.contains("ended early")));
+    assert!(matches!(advance(&mut live, &mut speak), Step::Stopped(_)));
+    assert_eq!(live.turns_left, 0);
 }
 
 #[test]
@@ -63,27 +52,44 @@ fn clean_strips_ansi_and_controls_but_keeps_text() {
 }
 
 #[test]
-fn transcript_lines_carry_badges_and_the_chapter_header() {
+fn bubbles_put_the_first_harness_left_and_replies_right() {
     let mut transcript = crate::converse::Transcript::new("opencode", "hermes", "t");
-    transcript.push("opencode", "hi");
-    let lines = transcript.lines();
-    assert!(lines[0].contains("opencode ⇄ hermes"));
+    transcript.push("opencode", "hi there");
+    transcript.push("hermes", "hello");
+    let lines = bubbles(&transcript, 60);
+    let top = lines
+        .iter()
+        .find(|line| line.contains("╭─ opencode"))
+        .unwrap();
+    assert!(top.starts_with("╭─ opencode"));
+    let reply = lines
+        .iter()
+        .find(|line| line.contains("╭─ hermes"))
+        .unwrap();
+    assert!(reply.starts_with(' '), "reply bubble indents right");
     assert!(lines.iter().any(|line| line == "topic: t"));
-    assert!(lines.iter().any(|line| line == "[opencode] hi"));
 }
 
 #[test]
-fn the_turn_budget_ends_the_session_after_the_default() {
-    let mut live = Live::new("a", "b", "t");
-    let mut speak = scripted(vec![
-        Ok("1".into()),
-        Ok("2".into()),
-        Ok("3".into()),
-        Ok("4".into()),
-    ]);
-    for expected in [false, false, false, true] {
-        let turn = advance(&mut live, &mut speak);
-        assert_eq!(turn.over, expected);
+fn bubble_wrapping_keeps_wide_lines_inside_the_box() {
+    let mut transcript = crate::converse::Transcript::new("a", "b", "t");
+    transcript.push("a", &"word ".repeat(40));
+    let lines = bubbles(&transcript, 60);
+    let boxed: Vec<&String> = lines.iter().filter(|line| line.contains('│')).collect();
+    assert!(boxed.len() > 1, "long text wraps into multiple box rows");
+    for row in &boxed {
+        assert!(row.trim_end().chars().count() <= 60, "row {row} overflows");
     }
-    assert_eq!(live.transcript.turns.len(), DEFAULT_TURNS);
+}
+
+#[test]
+fn the_turn_budget_ends_the_session_after_the_selected_turns() {
+    let mut live = Live::new("a", "b", "t", MAX_TURNS);
+    let replies: Vec<_> = (0..MAX_TURNS).map(|turn| Ok(turn.to_string())).collect();
+    let mut speak = scripted(replies);
+    for expected in (0..MAX_TURNS).rev() {
+        assert!(matches!(advance(&mut live, &mut speak), Step::Spoke));
+        assert_eq!(live.turns_left, expected);
+    }
+    assert!(matches!(advance(&mut live, &mut speak), Step::Stopped(_)));
 }

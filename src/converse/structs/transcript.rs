@@ -40,14 +40,4 @@ impl Transcript {
             .find(|turn| turn.speaker == speaker)
             .map(|turn| turn.text.as_str())
     }
-
-    /// Body lines: one chapter header, the topic, then badge-prefixed turns.
-    pub fn lines(&self) -> Vec<String> {
-        let mut lines = vec![format!("── converse: {} ⇄ {} ──", self.a, self.b)];
-        lines.push(format!("topic: {}", self.topic));
-        for turn in &self.turns {
-            lines.push(format!("[{}] {}", turn.speaker, turn.text));
-        }
-        lines
-    }
 }

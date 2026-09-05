@@ -44,9 +44,10 @@ pub fn step(
             true
         }
         Next::Converse(seed) => {
-            match crate::converse::wire::consent(seed, state_home) {
-                Ok(live) if crate::tui::screen::active() => {
-                    state.body = live.transcript.lines();
+            let width = crate::tui::screen::size().inner_cols();
+            match crate::converse::wire::open(seed, state_home, width) {
+                Ok((live, lines)) if crate::tui::screen::active() => {
+                    state.body = lines;
                     state.converse = Some(live);
                     state.hint = crate::converse::wire::hint(&state.converse).unwrap_or_default();
                 }
