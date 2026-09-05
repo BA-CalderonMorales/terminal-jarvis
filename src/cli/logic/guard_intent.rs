@@ -3,6 +3,7 @@
 //! question is a strategy -- stderr+stdin in a terminal, in-frame rows and
 //! one raw key inside the tui's streaming surface.
 
+use super::guard_ask::{ask_in_terminal, confirm_error, reject_irrelevant};
 use super::{args::Options, error};
 use crate::cli::logic::prompt_lead;
 use crate::contracts::{CapabilityPlan, Effect, Harness, Interaction};
@@ -78,23 +79,6 @@ pub fn check_with(
     )
 }
 
-pub use super::guard_ask::{ask_in_terminal, consent};
-
-fn confirm_error(token: &str) -> error::Failure {
-    error::Failure::safety(
-        "confirmation_required",
-        format!("noninteractive execution requires --no-input --confirm={token}"),
-        format!("review the plan, then pass --no-input --confirm={token}"),
-    )
-}
-
-fn reject_irrelevant(options: &Options) -> error::Result<()> {
-    if options.dry_run || options.no_input || options.confirm.is_some() || options.allow_dangerous {
-        return Err(error::Failure::usage(
-            "option_not_applicable",
-            "lifecycle options are not valid for a read-only capability",
-            "remove the lifecycle option",
-        ));
-    }
-    Ok(())
-}
+#[cfg(test)]
+#[path = "../tests/guard_intent.rs"]
+mod guard_intent_tests;

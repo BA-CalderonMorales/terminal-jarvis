@@ -4,7 +4,7 @@
 use super::viewport_nav::{self, Mode};
 use crate::contracts::Harness;
 use crate::tui::home;
-use crate::tui::input::{read_key, Editor, Indicator};
+use crate::tui::input::{read_key, Editor, Indicator, Key};
 use std::io::Write;
 use std::path::Path;
 
@@ -49,18 +49,20 @@ impl ViewportState {
     }
 }
 
-/// One raw-mode prompt session over the frozen chrome.
+/// One raw-mode prompt session over the frozen chrome. The scroll offset
+/// lives in the caller's state (turns and prompts share one position); the
+/// key reads go through `read_key`, which takes from the parked queue
+/// while a conversation's watcher owns stdin.
 pub struct Session<'a> {
     pub state: &'a ViewportState,
     pub hint: &'a str,
     pub body: &'a [String],
     pub history: &'a [String],
+    pub offset: &'a mut usize,
 }
 
-pub fn run(session: &Session<'_>) -> Option<String> {
+pub fn run(session: &mut Session<'_>) -> Option<String> {
     let mut editor = Editor::default();
-    let mut offset =
-        crate::tui::screen::max_offset(session.body.len(), crate::tui::screen::size().body_rows());
     let mut mode = Mode::Insert;
     let mut history_at = session.history.len();
     loop {
@@ -71,7 +73,7 @@ pub fn run(session: &Session<'_>) -> Option<String> {
         };
         let tail = editor.tail_view(session.state.prefix_cells, size.inner_cols());
         let mut draft = session.state.base_draft(session.hint, session.body);
-        draft.offset = offset;
+        draft.offset = *session.offset;
         draft.prompt = format!("{}{badge}{tail}", session.state.prefix);
         let cells = session.state.prefix_cells
             + crate::tui::screen::visible_width(badge)
@@ -80,14 +82,8 @@ pub fn run(session: &Session<'_>) -> Option<String> {
             crate::tui::screen::parked(crate::tui::screen::frame(size, &draft), size, cells);
         print!("{painted}");
         std::io::stdout().flush().ok();
-        match viewport_nav::key(
-            &mut mode,
-            &mut editor,
-            read_key()?,
-            session,
-            &mut offset,
-            history_at,
-        ) {
+        let next = read_key().unwrap_or(Key::Dead);
+        match viewport_nav::key(&mut mode, &mut editor, next, session, history_at) {
             viewport_nav::Flow::Continue(next_at) => history_at = next_at,
             viewport_nav::Flow::Submit(line) => return Some(line),
             viewport_nav::Flow::Dead => return None,

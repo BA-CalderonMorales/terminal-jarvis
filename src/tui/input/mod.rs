@@ -9,6 +9,8 @@ mod escape;
 pub(crate) mod keys;
 #[path = "logic/line.rs"]
 mod line;
+#[path = "logic/poll.rs"]
+pub(crate) mod poll;
 #[path = "structs/mod.rs"]
 mod structs;
 
@@ -17,6 +19,7 @@ pub use editor::{Editor, Feed, Move};
 pub(crate) use keys::decode;
 pub use keys::read_key;
 pub use line::{compose, raw_line, read_line, retire};
+pub(crate) use poll::{drain_answer, spawn_watcher};
 pub use structs::Key;
 
 use crate::cli::style;

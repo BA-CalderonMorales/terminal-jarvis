@@ -18,6 +18,7 @@ pub use crate::cli::logic::canonical;
 pub use crate::cli::logic::dispatch_support::session_write_error;
 pub use crate::cli::logic::guard::stream_invocation;
 pub use crate::cli::logic::invoke::headless_one_shot;
+pub use crate::cli::logic::invoke_live::headless_stream;
 pub use crate::cli::logic::output_truth;
 pub use crate::cli::logic::resolve;
 pub use crate::cli::logic::style;

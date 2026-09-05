@@ -10,6 +10,30 @@ use crate::contracts::Harness;
 use std::path::Path;
 use std::time::{Duration, Instant};
 
+/// Viewport absorbs captured output as the next body; chat prints it above
+/// the prompt. A reset restores the primer.
+pub fn absorb(
+    body: &mut Vec<String>,
+    offset: &mut usize,
+    sink: Vec<u8>,
+    reset: bool,
+    harnesses: &[Harness],
+    catalog_root: &Path,
+    state_home: &Path,
+) {
+    let text = String::from_utf8_lossy(&sink).to_string();
+    if reset {
+        *body = super::viewport::welcome(harnesses, catalog_root, state_home);
+    } else if !text.is_empty() {
+        *body = text.lines().map(String::from).collect();
+    }
+    *offset = super::viewport::pinned(body);
+    if !crate::tui::screen::active() {
+        print!("{text}");
+        println!();
+    }
+}
+
 pub fn apply(
     action: &args::Action,
     state: &mut outcome::LoopState,
@@ -26,6 +50,7 @@ pub fn apply(
     let outcome = {
         let outcome::LoopState {
             body,
+            offset,
             indicator,
             hint,
             options,
@@ -36,9 +61,18 @@ pub fn apply(
             for row in line.split('\n') {
                 body.push(row.to_string());
             }
+            *offset = super::viewport::pinned(body);
             let now = Instant::now();
             if now.duration_since(since_paint) > Duration::from_millis(180) {
-                paint(indicator, hint, harnesses, catalog_root, state_home, body);
+                paint(
+                    indicator,
+                    hint,
+                    harnesses,
+                    catalog_root,
+                    state_home,
+                    body,
+                    *offset,
+                );
                 since_paint = now;
             }
         })

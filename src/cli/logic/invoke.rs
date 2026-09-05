@@ -2,7 +2,7 @@ use super::resolve;
 use crate::contracts::{Capability, Harness};
 use crate::runtime;
 
-fn find<'a>(harnesses: &'a [Harness], name: &str) -> Result<&'a Harness, String> {
+pub(crate) fn find<'a>(harnesses: &'a [Harness], name: &str) -> Result<&'a Harness, String> {
     harnesses
         .iter()
         .find(|harness| harness.name == name)

@@ -23,6 +23,7 @@ pub(crate) mod help;
 pub(crate) mod help_command;
 pub(crate) mod help_text;
 pub(crate) mod invoke;
+pub(crate) mod invoke_live;
 pub(crate) mod json;
 pub(crate) mod output;
 pub(crate) mod output_fields;

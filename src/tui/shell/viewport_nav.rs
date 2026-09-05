@@ -32,17 +32,18 @@ pub fn recall(editor: &mut Editor, text: Option<&String>) {
     }
 }
 
-/// Applies one key to the session in the current mode; `offset` moves for
-/// scrolls, the returned flow ends the session on submit or death.
+/// Applies one key to the session in the current mode; the session's
+/// scroll offset moves for scrolls, the returned flow ends the session on
+/// submit or death.
 pub fn key(
     mode: &mut Mode,
     editor: &mut Editor,
     key: Key,
-    session: &Session<'_>,
-    offset: &mut usize,
+    session: &mut Session<'_>,
     history_at: usize,
 ) -> Flow {
     let rows = crate::tui::screen::size().body_rows();
+    let offset = &mut *session.offset;
     match (*mode, key) {
         (Mode::Normal, Key::Char('j') | Key::Down) => {
             *offset = crate::tui::screen::step(*offset, Move::Newer, session.body.len(), rows);

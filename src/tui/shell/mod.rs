@@ -4,13 +4,18 @@ use crate::{cli::args, contracts::Harness};
 use std::path::Path;
 
 mod canonical;
+mod converse;
+mod converse_live;
 mod dispatch;
 mod handle;
 mod help;
+mod live_nav;
 mod outcome;
 mod run_action;
 mod session;
 mod status;
+mod stream;
+mod stream_plan;
 mod verdict;
 mod viewport;
 mod viewport_nav;
@@ -18,10 +23,6 @@ mod viewport_page;
 mod viewport_raw;
 
 pub use handle::handle;
-
-mod converse;
-mod stream;
-mod stream_plan;
 
 pub fn run(harnesses: &[Harness], catalog_root: &Path, state_home: &Path, options: args::Options) {
     let debug = false;
@@ -37,6 +38,7 @@ pub fn run(harnesses: &[Harness], catalog_root: &Path, state_home: &Path, option
     super::sigint::guarded(move || {
         let mut state = outcome::LoopState {
             converse: None,
+            offset: 0,
             history: Vec::new(),
             body: viewport::welcome(harnesses, catalog_root, state_home),
             hint: status::modeline(state_home, false, debug),
@@ -49,6 +51,7 @@ pub fn run(harnesses: &[Harness], catalog_root: &Path, state_home: &Path, option
             crate::tui::screen::ensure_usable();
             if let Some(lines) = converse::tick(&mut state, harnesses, catalog_root, state_home) {
                 state.body.extend(lines);
+                state.offset = viewport::pinned(&state.body);
                 continue;
             }
             let input = if in_viewport && crate::tui::screen::active() {
@@ -60,6 +63,7 @@ pub fn run(harnesses: &[Harness], catalog_root: &Path, state_home: &Path, option
                     state_home,
                     &state.body,
                     &state.history,
+                    &mut state.offset,
                 )
             } else {
                 super::input::read_line(&state.indicator, &state.hint)

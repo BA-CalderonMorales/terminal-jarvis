@@ -5,8 +5,20 @@ use super::structs::Key;
 use std::io::{self, Read};
 
 /// Blocks until one key arrives; `None` means EOF or Ctrl-D -- the session
-/// ends. Signal interrupts (resize ticks) retry instead of dying.
+/// ends. Signal interrupts (resize ticks) retry instead of dying. While a
+/// conversation's watcher owns stdin, keys come from the parked queue.
 pub fn read_key() -> Option<Key> {
+    if super::poll::watcher_active() {
+        return super::poll::wait();
+    }
+    if let Some(key) = super::poll::take() {
+        return Some(key);
+    }
+    read_stdin_key()
+}
+
+/// The raw path: straight from stdin, no queue -- the watcher's own read.
+pub(crate) fn read_stdin_key() -> Option<Key> {
     // Scoped lock: the escape resolver's reader thread needs the stdin
     // lock free, so the first byte reads and releases before the dance.
     let first = {

@@ -62,7 +62,7 @@ fn pump<R: std::io::Read + Send + 'static>(pipe: R) -> mpsc::IntoIter<String> {
     rx.into_iter()
 }
 
-fn status_code(status: std::process::ExitStatus) -> i32 {
+pub(crate) fn status_code(status: std::process::ExitStatus) -> i32 {
     status.code().unwrap_or(3)
 }
 

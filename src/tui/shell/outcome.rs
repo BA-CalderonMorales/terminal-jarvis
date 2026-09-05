@@ -1,7 +1,7 @@
 //! Outcome: applies one resolved command to the loop state -- body
 //! absorption for the viewport, chat printing, hint/indicator refreshes.
 
-use super::{status, viewport, Next};
+use super::{status, stream, Next};
 use crate::{cli::args, contracts::Harness};
 use std::path::Path;
 
@@ -10,6 +10,8 @@ pub struct LoopState {
     pub body: Vec<String>,
     pub history: Vec<String>,
     pub converse: Option<crate::converse::Live>,
+    /// The shared scroll position: turns and prompts move the same view.
+    pub offset: usize,
     pub hint: String,
     pub options: args::Options,
     pub debug: bool,
@@ -33,8 +35,9 @@ pub fn step(
         } => {
             state.hint = status::modeline(state_home, picker_shown, state.debug);
             status::refresh_indicator(&mut state.indicator, state_home, state.debug);
-            viewport::absorb(
+            stream::absorb(
                 &mut state.body,
+                &mut state.offset,
                 sink,
                 reset,
                 harnesses,
@@ -52,11 +55,13 @@ pub fn step(
                 Ok((live, lines)) if crate::tui::screen::active() => {
                     state.body = lines;
                     state.converse = Some(live);
+                    state.offset = super::viewport::pinned(&state.body);
                     state.hint = crate::converse::wire::hint(&state.converse).unwrap_or_default();
                 }
                 Ok(_) => state.body = vec!["converse runs in the viewport tui only".into()],
                 Err(lines) => {
                     state.body = lines;
+                    state.offset = super::viewport::pinned(&state.body);
                     state.hint = status::modeline(state_home, false, state.debug);
                 }
             }

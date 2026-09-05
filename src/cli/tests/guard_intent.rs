@@ -1,5 +1,6 @@
 use super::*;
 use crate::cli::args::Options;
+use crate::cli::logic::guard_ask::{consent, in_frame};
 
 fn options(
     dry_run: bool,
@@ -61,4 +62,27 @@ fn confirm_error_contains_token() {
     let err = confirm_error("test:token");
     assert!(err.message.contains("test:token"));
     assert!(err.next_action.contains("test:token"));
+}
+
+#[test]
+fn the_in_frame_key_speaks_the_same_y_n_grammar_as_the_terminal() {
+    use crate::tui::input::Key;
+    // pressing y must confirm: the painted row AND the consent answer
+    let (row, answer) = in_frame(Some(Key::Char('y')));
+    assert_eq!(row, "confirmed");
+    assert!(consent(answer).is_ok(), "'y' must pass the consent gate");
+    let (row, answer) = in_frame(Some(Key::Char('Y')));
+    assert_eq!(row, "confirmed");
+    assert!(consent(answer).is_ok(), "'Y' must pass the consent gate");
+    // anything else declines, and the painted row says so in plain words
+    for key in [
+        Some(Key::Char('n')),
+        Some(Key::Enter),
+        Some(Key::Escape),
+        None,
+    ] {
+        let (row, answer) = in_frame(key);
+        assert_eq!(row, "cancelled -- nothing was run");
+        assert!(consent(answer).is_err());
+    }
 }

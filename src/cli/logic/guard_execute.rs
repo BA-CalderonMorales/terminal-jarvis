@@ -2,8 +2,8 @@
 //! switches the final hop from the blocking runner to the streaming one.
 
 use crate::cli::logic::{
-    args::Options, dispatch_support, error, gate_skip, guard_intent, guard_policy, invoke, output,
-    package_advisory, resolve,
+    args::Options, dispatch_support, error, gate_skip, guard_ask, guard_intent, guard_policy,
+    invoke, output, package_advisory, resolve,
 };
 use crate::contracts::Harness;
 use crate::gates;
@@ -42,12 +42,13 @@ pub(super) fn execute(
                     paint(line);
                 }
                 paint(&format!("Continue with {token}? [y/N]"));
-                let verdict = match crate::tui::input::read_key() {
-                    Some(crate::tui::input::Key::Char('y' | 'Y')) => "confirmed",
-                    _ => "cancelled -- nothing was run",
-                };
-                paint(verdict);
-                crate::cli::logic::guard_intent::consent(verdict)
+                let key = crate::tui::input::read_key();
+                // The tail of a typed answer ("es" of "yes") must never
+                // leak into the prompt buffer.
+                crate::tui::input::drain_answer(std::time::Duration::from_millis(250));
+                let (row, answer) = guard_ask::in_frame(key);
+                paint(row);
+                guard_ask::consent(answer)
             },
         ),
         None => guard_intent::check(harness, plan, &invocation.extra, options, explicit),

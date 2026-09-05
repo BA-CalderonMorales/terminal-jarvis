@@ -13,7 +13,8 @@ pub fn welcome(harnesses: &[Harness], catalog_root: &Path, state_home: &Path) ->
 }
 
 /// Paints the composed frame without reading -- the converse loop repaints
-/// between turns while the child owns the wait.
+/// between turns while the child owns the wait. `offset` is the scroll
+/// position the owning loop keeps (the converse live surface scrolls it).
 #[allow(clippy::too_many_arguments)]
 pub fn paint(
     indicator: &Indicator,
@@ -22,13 +23,14 @@ pub fn paint(
     catalog_root: &Path,
     state_home: &Path,
     body: &[String],
+    offset: usize,
 ) {
     let _ = std::io::stdout().flush();
     let state =
         super::viewport_raw::ViewportState::collect(indicator, harnesses, catalog_root, state_home);
     let size = crate::tui::screen::size();
     let mut draft = state.base_draft(hint, body);
-    draft.offset = crate::tui::screen::max_offset(body.len(), size.body_rows());
+    draft.offset = offset;
     let cells = state.prefix_cells;
     let painted = crate::tui::screen::parked(crate::tui::screen::frame(size, &draft), size, cells);
     print!("{painted}");
@@ -44,18 +46,28 @@ pub fn prompt(
     state_home: &Path,
     body: &[String],
     history: &[String],
+    offset: &mut usize,
 ) -> Option<String> {
-    paint(indicator, hint, harnesses, catalog_root, state_home, body);
+    paint(
+        indicator,
+        hint,
+        harnesses,
+        catalog_root,
+        state_home,
+        body,
+        *offset,
+    );
     let state =
         super::viewport_raw::ViewportState::collect(indicator, harnesses, catalog_root, state_home);
-    let session = super::viewport_raw::Session {
+    let mut session = super::viewport_raw::Session {
         state: &state,
         hint,
         body,
         history,
+        offset,
     };
     match crate::tui::term::enable_raw() {
-        Some(_guard) => super::viewport_raw::run(&session),
+        Some(_guard) => super::viewport_raw::run(&mut session),
         None => crate::tui::input::raw_line(),
     }
 }
@@ -66,24 +78,7 @@ pub fn chat_banner(harnesses: &[Harness], catalog_root: &Path, state_home: &Path
     crate::tui::home::render(&mut out, harnesses, catalog_root, state_home);
 }
 
-/// Viewport absorbs captured output as the next body; chat prints it above
-/// the prompt. A reset restores the primer.
-pub fn absorb(
-    body: &mut Vec<String>,
-    sink: Vec<u8>,
-    reset: bool,
-    harnesses: &[Harness],
-    catalog_root: &Path,
-    state_home: &Path,
-) {
-    let text = String::from_utf8_lossy(&sink).to_string();
-    if reset {
-        *body = welcome(harnesses, catalog_root, state_home);
-    } else if !text.is_empty() {
-        *body = text.lines().map(String::from).collect();
-    }
-    if !crate::tui::screen::active() {
-        print!("{text}");
-        println!();
-    }
+/// The scroll offset that follows the bottom of `body`.
+pub fn pinned(body: &[String]) -> usize {
+    crate::tui::screen::max_offset(body.len(), crate::tui::screen::size().body_rows())
 }
