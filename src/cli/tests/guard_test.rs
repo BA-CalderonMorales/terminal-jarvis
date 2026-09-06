@@ -49,3 +49,40 @@ fn unknown_direct_command_advises_exactly_once() {
     let rendered = failure.rendered();
     assert_eq!(rendered.matches("run `terminal-jarvis list`").count(), 1);
 }
+
+#[test]
+fn streaming_invocation_preserves_the_child_exit_code() {
+    let mut plan = crate::cli::logic::test_support::plan(
+        Capability::Headless,
+        "sh",
+        vec!["-c".into(), "printf streamed; exit 7".into()],
+    );
+    plan.support = crate::contracts::SupportState::Verified;
+    plan.verified_at = "2026-08-05T00:00:00Z".into();
+    let harnesses = vec![Harness {
+        name: "vibe".into(),
+        display: "Vibe".into(),
+        description: "test fixture".into(),
+        binary: "sh".into(),
+        env_mode: crate::contracts::EnvMode::None,
+        env: vec![],
+        capabilities: vec![plan],
+    }];
+    let home = std::env::temp_dir().join(format!("tj-stream-{}", std::process::id()));
+    let _ = std::fs::remove_dir_all(&home);
+    let mut lines = Vec::new();
+    let result = stream_invocation(
+        crate::cli::logic::resolve::Invocation {
+            harness: "vibe".into(),
+            capability: Capability::Headless,
+            extra: vec![],
+        },
+        &Options::default(),
+        &harnesses,
+        &home,
+        &mut |line| lines.push(line.to_string()),
+    );
+    assert_eq!(result, Ok(7));
+    assert!(lines.iter().any(|line| line.contains("streamed")));
+    let _ = std::fs::remove_dir_all(home);
+}

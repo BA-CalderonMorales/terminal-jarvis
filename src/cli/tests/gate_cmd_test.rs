@@ -34,6 +34,7 @@ fn handle_routes_every_gate_form() {
         .unwrap_or_else(|error| error.into_inner());
     let home = home();
     let help = handle(&words(&["--help"]), &home).unwrap();
+    assert!(help.1.contains("optional Trivy security gate"));
     assert_eq!(help, handle(&words(&["-h"]), &home).unwrap());
     assert_eq!(help, handle(&words(&["help"]), &home).unwrap());
     let default = handle(&[], &home).unwrap();
@@ -95,4 +96,15 @@ fn run_and_names_preserve_gate_results() {
     assert_eq!(code, 7);
     assert!(body.contains("marker"));
     assert_eq!(names(&[gate, fake("beta")]), "alpha, beta");
+}
+
+#[test]
+fn gate_scans_narrate_only_outside_the_viewport() {
+    let _guard = crate::ENV_LOCK
+        .lock()
+        .unwrap_or_else(|error| error.into_inner());
+    crate::tui::screen::resume(true);
+    assert!(!narrate());
+    crate::tui::screen::suspend();
+    assert!(narrate());
 }
