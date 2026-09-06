@@ -91,5 +91,8 @@ fn names(available: &[gates::Gate]) -> String {
 }
 
 #[cfg(test)]
+#[path = "../tests/gate_narrate_test.rs"]
+mod narrate_tests;
+#[cfg(test)]
 #[path = "../tests/gate_cmd_test.rs"]
 mod tests;
