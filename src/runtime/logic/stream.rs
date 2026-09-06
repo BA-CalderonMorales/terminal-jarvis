@@ -3,9 +3,6 @@
 //! two reader threads pump into a channel; the caller repaints at will.
 
 use crate::contracts::CapabilityPlan;
-use std::io::{BufRead, BufReader};
-use std::process::{Command, Stdio};
-use std::sync::mpsc;
 use std::time::Duration;
 
 /// Spawns the plan with fully piped output and feeds every stdout/stderr
@@ -16,50 +13,15 @@ pub fn run(
     extra: &[String],
     on_line: &mut dyn FnMut(&str),
 ) -> io::Result<i32> {
-    let mut command = Command::new(crate::security::resolved(&plan.command.command).as_ref());
-    command
-        .args(&plan.command.args)
-        .args(extra)
-        .stdin(Stdio::null())
-        .stdout(Stdio::piped())
-        .stderr(Stdio::piped());
-    super::runner::reset_sigint_in_child(&mut command);
-    let mut child = command.spawn()?;
-    let (tx, rx) = mpsc::channel::<String>();
-    for stream in child
-        .stdout
-        .take()
-        .map(pump)
-        .into_iter()
-        .chain(child.stderr.take().map(pump))
-    {
-        let tx = tx.clone();
-        std::thread::spawn(move || {
-            for line in stream {
-                if tx.send(line).is_err() {
-                    return;
-                }
-            }
-        });
-    }
-    drop(tx);
-    while let Ok(line) = rx.recv_timeout(Duration::from_millis(150)) {
-        on_line(&line);
-    }
-    let code = child.wait()?;
-    Ok(status_code(code))
-}
-
-fn pump<R: std::io::Read + Send + 'static>(pipe: R) -> mpsc::IntoIter<String> {
-    let (tx, rx) = mpsc::channel();
-    std::thread::spawn(move || {
-        for line in BufReader::new(pipe).lines() {
-            if tx.send(line.unwrap_or_default()).is_err() {
-                return;
-            }
+    let mut child = super::live::spawn(plan, extra)?;
+    loop {
+        match child.next(Duration::from_millis(150)) {
+            super::live::Event::Line(super::live::Line::Out(line))
+            | super::live::Event::Line(super::live::Line::Err(line)) => on_line(&line),
+            super::live::Event::Idle => continue,
+            super::live::Event::Done => return Ok(child.wait()),
         }
-    });
-    rx.into_iter()
+    }
 }
 
 pub(crate) fn status_code(status: std::process::ExitStatus) -> i32 {
@@ -95,3 +57,7 @@ pub fn classify(line: &str) -> String {
 }
 
 use std::io;
+
+#[cfg(test)]
+#[path = "../tests/stream_test.rs"]
+mod tests;

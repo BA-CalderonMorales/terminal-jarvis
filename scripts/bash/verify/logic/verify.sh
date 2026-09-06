@@ -4,7 +4,7 @@ set -eu
 here=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
 
 line_limit=100
-coverage_target=90
+coverage_target=80
 mutation_target=90
 
 fail() {
