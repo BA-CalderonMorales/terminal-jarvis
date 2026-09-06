@@ -38,10 +38,10 @@ case "$cmd" in
     for path in $shard; do
       base="$base --file $path"
     done
-    # Keep one mutation worker and two libtest threads: concurrent workers
+    # Keep one mutation worker and one libtest thread: concurrent workers
     # spawn nested test children and exhaust hosted runners (EAGAIN). Coverage
     # is unaffected, only parallelism drops, and the env never leaks later.
-    RUST_TEST_THREADS=2 cargo mutants --config mutants.toml \
+    RUST_TEST_THREADS=1 cargo mutants --config mutants.toml \
       --minimum-test-timeout 30 --jobs 1 --no-shuffle $base "$@"
     ;;
   -h | --help)
