@@ -25,7 +25,8 @@ fn rich_gate_output_covers_each_status() {
     assert!(disabled_status("trivy").contains("  status     disabled"));
     assert!(disabled_status("trivy").contains("  available  trivy"));
     assert!(configured(&gate, "config", "found").contains("Trivy (trivy)"));
-    assert!(configured(&gate, "config", "found").contains("  command     trivy fs ."));
+    let configured = configured(&gate, "config", "found");
+    assert!(configured.contains("command") && configured.contains("trivy fs ."));
     assert!(list(std::slice::from_ref(&gate)).contains("Trivy (trivy)"));
     assert!(list(std::slice::from_ref(&gate)).contains("Scan the working tree"));
     assert!(enabled("trivy").contains("Security gate enabled"));

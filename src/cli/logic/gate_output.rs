@@ -1,10 +1,8 @@
 //! GateOutput: the gate screens in the human-line style of `show` --
-//! identity lines, grouped label/value fields, cell-aware wrapping.
 //! `--plain` stays line-oriented for automation.
 
 use crate::cli::logic::{output_fields as fields, style};
 use crate::gates::Gate;
-
 pub fn disabled_status(available: &str) -> String {
     if style::plain() {
         return format!("gate: disabled\navailable: {available}\n");
@@ -96,3 +94,7 @@ pub fn run_result(name: &str, code: i32, body: &str) -> String {
     };
     format!("{title}\n\n{body}\n")
 }
+
+#[cfg(test)]
+#[path = "../tests/gate_output_test.rs"]
+mod tests;
