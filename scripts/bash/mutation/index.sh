@@ -38,12 +38,11 @@ case "$cmd" in
     for path in $shard; do
       base="$base --file $path"
     done
-    # Cap libtest threads for this invocation only so the baseline never
-    # exhausts the runner's thread limit (observed as 'Resource temporarily
-    # unavailable' on the unmutated tree); coverage is unaffected, only
-    # parallelism drops, and the env never leaks to later commands.
+    # Keep one mutation worker and two libtest threads: concurrent workers
+    # spawn nested test children and exhaust hosted runners (EAGAIN). Coverage
+    # is unaffected, only parallelism drops, and the env never leaks later.
     RUST_TEST_THREADS=2 cargo mutants --config mutants.toml \
-      --minimum-test-timeout 30 --jobs 4 --no-shuffle $base "$@"
+      --minimum-test-timeout 30 --jobs 1 --no-shuffle $base "$@"
     ;;
   -h | --help)
     usage
