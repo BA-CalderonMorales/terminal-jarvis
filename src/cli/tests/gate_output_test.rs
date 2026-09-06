@@ -65,7 +65,10 @@ fn plain_gate_output_stays_line_oriented() {
     assert_eq!(status, "gate: disabled\navailable: trivy\n");
     assert!(configured.contains("gate: trivy (environment)"));
     assert_eq!(listed, "trivy - Scan the working tree\n");
-    assert!(enabled.contains("enabled"));
+    assert_eq!(
+        enabled,
+        "gate 'trivy' enabled; harness commands will scan before execution\n"
+    );
     assert_eq!(disabled, "gate: disabled\n");
     assert!(passed.contains("passed") && blocked.contains("blocked"));
 }

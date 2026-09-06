@@ -33,6 +33,9 @@ fn handle_routes_every_gate_form() {
         .lock()
         .unwrap_or_else(|error| error.into_inner());
     let home = home();
+    let help = handle(&words(&["--help"]), &home).unwrap();
+    assert_eq!(help, handle(&words(&["-h"]), &home).unwrap());
+    assert_eq!(help, handle(&words(&["help"]), &home).unwrap());
     let default = handle(&[], &home).unwrap();
     assert_eq!(default, handle(&words(&["status"]), &home).unwrap());
     assert!(handle(&words(&["list"]), &home)
