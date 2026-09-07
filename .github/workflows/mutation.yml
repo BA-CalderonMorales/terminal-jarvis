@@ -28,7 +28,9 @@ jobs:
   mutation:
     name: Mutation (${{ matrix.domain }})
     runs-on: ubuntu-latest
-    timeout-minutes: 60
+    # Serialized mutation and libtest workers keep runner memory bounded;
+    # the largest PR-diff shards therefore need more than the old hour cap.
+    timeout-minutes: 90
     strategy:
       fail-fast: false
       matrix:

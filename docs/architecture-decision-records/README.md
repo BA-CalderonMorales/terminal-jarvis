@@ -80,7 +80,9 @@ to 80% for this release: the 90% threshold had no passing baseline (CI
 measured 80.81% after all tests passed), while 80% keeps a meaningful floor
 without blocking a verified release on pre-existing interactive paths.
 Mutation runs use one worker plus one libtest thread because two threads can
-exhaust hosted-runner memory before a mutant can be evaluated.
+exhaust hosted-runner memory before a mutant can be evaluated. The largest
+serialized PR-diff shards have a 90-minute CI ceiling, preserving that memory
+bound without converting a complete mutation run into a timeout.
 ### Land the 0.1.15 hardening stack and repair develop's latent gate breakage (fix stack -> 2026-08-14)
 
 **Decision:** Land the five-fix 0.1.15 stack through develop in one atomic
