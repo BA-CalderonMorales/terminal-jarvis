@@ -3,8 +3,8 @@
 
 ### Added
 
-- `converse <a> <b> <topic>` in the tui: a tab where two harnesses hold a
-  one-shot conversation, one turn per frame, with a hard 4-turn budget.
+- `converse <turns> <a> <b> <topic...>` in the tui: a tab where two harnesses
+  hold a one-shot conversation, one turn per frame, with a hard 12-turn cap.
   Experimental: first run shows a consent warning (feedback via Discord or
   GitHub issues); the banner stays on every transcript.
 - Hermes Agent headless is real now (`hermes -z`), no longer a `--help` stub.
