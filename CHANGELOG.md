@@ -1,4 +1,41 @@
 # Changelog
+## [0.1.19] - unreleased
+
+### Added
+
+- `converse <a> <b> <topic>` in the tui: a tab where two harnesses hold a
+  one-shot conversation, one turn per frame, with a hard 4-turn budget.
+  Experimental: first run shows a consent warning (feedback via Discord or
+  GitHub issues); the banner stays on every transcript.
+- Hermes Agent headless is real now (`hermes -z`), no longer a `--help` stub.
+- Converse reads like a chat: rounded bubbles (first harness left in the
+  theme accent, replies right in a second accent), scroll follows the
+  newest turn, and every turn logs `⏳ responding` / `✓ replied in Ns · N
+  words`.
+- `show` leads with the harness identity in rich mode.
+- installs and updates verify the binary actually landed on PATH and warn
+  when a shell restart is needed.
+- in-frame consent answers one keystroke (raw mode) and can no longer
+  decline a pressed `y`; typed-ahead answer tails never leak into the
+  prompt buffer, and a retired key reader can no longer freeze the tui.
+- converse streams turns with scroll: stderr paints as classified rows
+  while the child works, and j/k/arrows/PgUp/PgDn/g/G scroll mid-turn.
+- streamed installs and updates settle with the human verdict card
+  (`installed x · now active`) and adopt the harness.
+- typed flags work in-frame: `install x --no-input --confirm=download:x`
+  reaches the same guards headless does.
+- `uninstall <harness>`: an explicit removal verb whose uninstaller
+  derives from the download plan (npm/cargo); consent defaults to NO
+  with its own `uninstall:<name>` confirm token.
+- install and update consent defaults to yes (`[Y/n]`); uninstall keeps
+  `[y/N]` -- removal is never an accidental Enter.
+- gate screens speak the human-line language of show; `gate help` /
+  `gate --help` prints the gate surface with the piping note.
+- the chrome degrades by priority on small terminals: at <=40 columns
+  the header keeps only the readiness verdict; at <=60 the modeline
+  hint degrades to its primary clause.
+- one word-boundary wrapper serves show, the gate screens, and the chat
+  bubbles: no row ends mid-word, wide glyphs count two cells.
 
 ## [0.1.18] - unreleased
 

@@ -1,4 +1,6 @@
+use super::errors::{diagnostic, verb};
 use super::*;
+use crate::contracts::CommandPlan;
 use crate::contracts::{EnvMode, Harness};
 
 fn harness(command: &str, args: Vec<String>) -> Vec<Harness> {
@@ -50,4 +52,28 @@ fn narration_verb_matches_the_capability() {
     assert_eq!(verb(Capability::Update), "updating");
     assert_eq!(verb(Capability::Headless), "updating");
     assert_eq!(verb(Capability::Yolo), "updating");
+}
+
+#[test]
+fn headless_one_shot_returns_the_reply_and_rejects_nonzero_exits() {
+    let _guard = crate::ENV_LOCK
+        .lock()
+        .unwrap_or_else(|error| error.into_inner());
+    let plans = vec![Harness {
+        name: "vibe".into(),
+        display: "Vibe".into(),
+        description: "test fixture".into(),
+        binary: "sh".into(),
+        env_mode: EnvMode::None,
+        env: vec![],
+        capabilities: vec![crate::cli::logic::test_support::plan(
+            Capability::Headless,
+            "sh",
+            vec!["-c".into(), "printf reply; exit \"$1\"".into(), "sh".into()],
+        )],
+    }];
+    crate::tui::screen::resume(true);
+    assert_eq!(headless_one_shot(&plans, "vibe", "0"), Ok("reply".into()));
+    assert_eq!(headless_one_shot(&plans, "vibe", "7"), Err("exit 7".into()));
+    crate::tui::screen::suspend();
 }

@@ -1,7 +1,7 @@
 //! Editor: the one-line buffer behind the viewport prompt. Pure mapping
 //! from decoded keys to text edits, scroll intents, submit, or session end.
 
-use super::keys::Key;
+use super::structs::Key;
 
 /// A scroll intent produced by the navigation keys.
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
@@ -34,6 +34,7 @@ pub struct Editor {
 impl Editor {
     pub fn feed(&mut self, key: Key) -> Feed {
         match key {
+            crate::tui::input::Key::Escape => Feed::Idle,
             Key::Char(c) => {
                 self.buf.push(c);
                 Feed::Edited

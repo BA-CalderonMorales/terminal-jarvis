@@ -5,6 +5,18 @@ exists.
 
 ## Entries
 
+### Substring filters recursively launch a test's parent
+
+**Pattern:** A subprocess invokes the current Rust test binary with a short
+filter such as `heartbeat_probe`, also matching the parent's module path.
+
+**Why it is wrong:** The child runs the parent again, recursively spawning
+test binaries until memory, process limits, or the CI deadline is exhausted.
+Reducing thread counts or increasing job timeouts masks the cause.
+
+**Fix:** Use `--exact` with the fully qualified probe name, assert child
+success and one executed test, and check selection with `--list` first.
+
 ### Plain grep when ripgrep is available (docs/)
 
 **Pattern:** Content searches were issued with plain `grep -r` even where

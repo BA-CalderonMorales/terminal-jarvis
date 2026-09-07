@@ -1,10 +1,10 @@
-summary = "Review Hermes Agent headless invocation options."
+summary = "Run Hermes Agent headlessly with a one-shot prompt (-z)."
 command = "hermes"
-args = ["--help"]
-support = "stub"
-evidence = "deterministic"
-effect = "read-only"
-network = false
+args = ["-z"]
+support = "verified"
+evidence = "disposable-real"
+effect = "dangerous"
+network = true
 interaction = "noninteractive"
 platforms = ["linux-x64-gnu"]
 executable = "hermes"

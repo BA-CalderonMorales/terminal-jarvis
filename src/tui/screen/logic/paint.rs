@@ -87,5 +87,9 @@ pub fn parked(mut painted: String, size: Size, prompt_cells: usize) -> String {
 mod tests;
 
 #[cfg(test)]
+#[path = "../../tests/screen_narrow.rs"]
+mod narrow_tests;
+
+#[cfg(test)]
 #[path = "../../tests/screen_parked.rs"]
 mod parked_tests;

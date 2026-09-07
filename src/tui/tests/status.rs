@@ -14,14 +14,16 @@ fn harness(name: &str) -> Harness {
 }
 
 #[test]
-fn render_is_a_three_line_dashboard() {
+fn render_groups_the_fleet_into_ready_and_pending() {
     let previous = crate::cli::style::set(true, true);
     let root = std::env::temp_dir();
     let harnesses = [harness("alpha"), harness("beta")];
     let body = render(&harnesses, &root, &root);
     assert!(body.contains("ACTIVE"));
-    assert!(body.contains("READY"));
-    assert!(body.contains("of 2 ready"));
-    assert_eq!(body.lines().count(), 2);
+    assert!(body.contains("0 of 2 ready"));
+    assert!(body.contains("one install away"));
+    assert!(body.contains("alpha, beta"));
+    // zero ready skips the "ready now" group entirely
+    assert_eq!(body.lines().count(), 5);
     crate::cli::style::restore(previous);
 }

@@ -45,16 +45,16 @@ fn catalog_walk_records_all_rows_once_without_effects() {
         BTreeMap::from([
             ("disabled", 25),
             ("expected", 87),
-            ("stub", 99),
+            ("stub", 98),
             ("unknown", 8),
-            ("verified", 6),
+            ("verified", 7),
         ])
     );
     assert_eq!(
         effects,
         BTreeMap::from([
-            ("dangerous", 27),
-            ("read-only", 123),
+            ("dangerous", 28),
+            ("read-only", 122),
             ("state-changing", 75)
         ])
     );

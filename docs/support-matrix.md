@@ -124,7 +124,7 @@ Catalog presence is not a support claim. Each row reports its own guard state an
 | goose | version | expected | deterministic | read-only | false | noninteractive | none | `sh` | `internal:phase-01@fab5848` | 2026-08-05T00:00:00Z |
 | goose | yolo | disabled | deterministic | dangerous | true | noninteractive | linux-x64-gnu | `sh` | `internal:phase-01@fab5848` | 2026-08-05T00:00:00Z |
 | hermes | download | unknown | deterministic | state-changing | true | noninteractive | none | `bash` | `internal:phase-01@fab5848` | 2026-08-05T00:00:00Z |
-| hermes | headless | stub | deterministic | read-only | false | noninteractive | linux-x64-gnu | `hermes` | `internal:phase-01@fab5848` | 2026-08-05T00:00:00Z |
+| hermes | headless | verified | disposable-real | dangerous | true | noninteractive | linux-x64-gnu | `hermes` | `internal:phase-01@fab5848` | 2026-08-05T00:00:00Z |
 | hermes | models | stub | deterministic | read-only | false | noninteractive | linux-x64-gnu | `hermes` | `internal:phase-01@fab5848` | 2026-08-05T00:00:00Z |
 | hermes | security | stub | deterministic | read-only | false | noninteractive | linux-x64-gnu | `hermes` | `internal:phase-01@fab5848` | 2026-08-05T00:00:00Z |
 | hermes | stats | stub | deterministic | read-only | false | noninteractive | linux-x64-gnu | `hermes` | `internal:phase-01@fab5848` | 2026-08-05T00:00:00Z |
@@ -242,6 +242,6 @@ Promotion is fail-closed. Catalog data may prove a candidate is not eligible; it
 | codex | 9 | 1 | 1 | 4 | not promoted; catalog prerequisites fail |
 | claude | 9 | 1 | 1 | 6 | not promoted; catalog prerequisites fail |
 | gemini | 9 | 0 | 0 | 5 | not promoted; catalog prerequisites fail |
-| hermes | 9 | 0 | 0 | 6 | not promoted; catalog prerequisites fail |
+| hermes | 9 | 1 | 1 | 5 | not promoted; catalog prerequisites fail |
 
 The five decisions above are derived from current catalog rows. Fake execution alone never promotes a candidate.

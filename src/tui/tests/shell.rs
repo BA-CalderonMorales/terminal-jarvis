@@ -14,7 +14,7 @@ fn harness(name: &str) -> Harness {
 
 fn action_of(input: &str, harnesses: &[Harness]) -> Option<args::Action> {
     match resolve(input, harnesses) {
-        Resolved::Run(action) => Some(action),
+        Resolved::Run(action, _) => Some(action),
         _ => None,
     }
 }
@@ -69,7 +69,7 @@ fn bare_command_words_work_without_the_slash() {
     );
     assert_eq!(
         action_of("show opencode", &[]),
-        Some(args::Action::Show("opencode".into()))
+        Some(args::Action::Show(Some("opencode".to_string())))
     );
 }
 

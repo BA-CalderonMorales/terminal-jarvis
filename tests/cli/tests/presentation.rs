@@ -44,22 +44,30 @@ fn default_output_is_structured_across_the_core_read_only_surface() {
         (&["show", "codex"], "OpenAI coding agent CLI"),
         (&["plan", "codex", "headless"], "Plan: codex headless"),
         (&["version", "--verbose"], "Terminal Jarvis"),
-        (&["update"], "Harness Updates"),
+        (&["update", "--dry-run"], "Harness Updates"),
         (&["auth", "help", "codex"], "Authentication"),
         (&["config", "path"], "Configuration Paths"),
         (&["cache", "status"], "Cache Status"),
         (&["security", "audit"], "Security Audit"),
-        (&["gate", "status"], "Security Gate"),
     ] {
         if args[0] == "show" {
             let show = tj(args, &home);
             let body = stdout(&show);
             assert!(body.contains(title), "{body}");
+            // the identity line leads: "<display> (<name>)"
+            assert!(body.starts_with("OpenAI Codex (codex)"), "{body}");
             assert!(!body.contains('+'), "show is line-based: {body}");
             continue;
         }
         assert_table(&tj(args, &home), title);
     }
+    // gate screens share the show human-line style: fields, never tables.
+    let gate = tj(&["gate", "status"], &home);
+    let body = stdout(&gate);
+    assert!(gate.status.success(), "{gate:?}");
+    assert!(body.contains("Security gate"), "{body}");
+    assert!(body.contains("  status     disabled"), "{body}");
+    assert!(!body.contains('+'), "gate is line-based: {body}");
     let check = tj(&["check"], &home);
     assert_eq!(check.status.code(), Some(4));
     assert!(stdout(&check).contains("Terminal Jarvis Diagnostics"));

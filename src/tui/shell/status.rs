@@ -53,27 +53,45 @@ pub fn render(harnesses: &[Harness], catalog_root: &Path, state_home: &Path) -> 
         diagnostics::DiagnosticInput::local(catalog_root, state_home, None, harnesses, runtime);
     let report = diagnostics::collect(&input);
     let active = active_name(state_home);
+    // Repeated installs append duplicate readiness records to the cache;
+    // the fleet list is a set, so a tool is named once no matter what.
     let ready: Vec<&str> = report
         .records
         .iter()
         .filter(|record| record.key.ends_with(".readiness") && record.value == "ready")
         .filter_map(|record| record.key.strip_prefix("harness."))
         .map(|key| key.strip_suffix(".readiness").unwrap_or(key))
+        .collect::<std::collections::BTreeSet<&str>>()
+        .into_iter()
         .collect();
-    format!(
-        "{}  {}\n{}  {} of {} ready{}",
-        style::label("ACTIVE"),
-        active,
-        style::label("READY"),
-        ready.len(),
-        harnesses.len(),
-        if ready.is_empty() {
-            String::new()
-        } else {
-            format!(": {}", ready.join(", "))
-        }
-    )
+    let not_ready: Vec<&str> = harnesses
+        .iter()
+        .map(|harness| harness.name.as_str())
+        .filter(|name| !ready.contains(name))
+        .collect();
+    let mut lines = vec![
+        format!("{}  {}", style::label("ACTIVE"), active),
+        format!(
+            "{}  {} of {} ready",
+            style::label("READY"),
+            ready.len(),
+            harnesses.len()
+        ),
+        String::new(),
+    ];
+    if !ready.is_empty() {
+        lines.push(style::label("ready now"));
+        lines.extend(rows::wrap(&ready));
+    }
+    if !not_ready.is_empty() {
+        lines.push(style::label("one install away"));
+        lines.extend(rows::wrap(&not_ready));
+    }
+    lines.join("\n")
 }
+
+#[path = "status_rows.rs"]
+mod rows;
 
 #[cfg(test)]
 #[path = "../tests/status.rs"]
