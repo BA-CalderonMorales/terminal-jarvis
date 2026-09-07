@@ -85,7 +85,11 @@ binaries and exhausting memory or the CI deadline. Thread caps and longer
 deadlines did not fix that cause. Mutation work is partitioned across smaller
 CI jobs while retaining the existing file selection and exclusions; one
 mutation worker per runner bounds concurrency. This trades repeated baseline
-builds for shorter elapsed review time without dropping mutants.
+builds for shorter elapsed review time without dropping mutants. CI uses
+eight partitions for cli-core and env-aux, four for cli-args, and two for
+other domains: a measured 12-mutant env-aux partition spent 80 seconds on
+its baseline and over five minutes evaluating mutants, making further
+partitioning useful. Runner availability still bounds elapsed speedup.
 ### Land the 0.1.15 hardening stack and repair develop's latent gate breakage (fix stack -> 2026-08-14)
 
 **Decision:** Land the five-fix 0.1.15 stack through develop in one atomic

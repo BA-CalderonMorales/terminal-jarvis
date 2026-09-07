@@ -35,12 +35,18 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - {domain: cli-core, shard: 0/4, part: 0}
-          - {domain: cli-core, shard: 1/4, part: 1}
-          - {domain: cli-core, shard: 2/4, part: 2}
-          - {domain: cli-core, shard: 3/4, part: 3}
-          - {domain: cli-args, shard: 0/2, part: 0}
-          - {domain: cli-args, shard: 1/2, part: 1}
+          - {domain: cli-core, shard: 0/8, part: 0}
+          - {domain: cli-core, shard: 1/8, part: 1}
+          - {domain: cli-core, shard: 2/8, part: 2}
+          - {domain: cli-core, shard: 3/8, part: 3}
+          - {domain: cli-core, shard: 4/8, part: 4}
+          - {domain: cli-core, shard: 5/8, part: 5}
+          - {domain: cli-core, shard: 6/8, part: 6}
+          - {domain: cli-core, shard: 7/8, part: 7}
+          - {domain: cli-args, shard: 0/4, part: 0}
+          - {domain: cli-args, shard: 1/4, part: 1}
+          - {domain: cli-args, shard: 2/4, part: 2}
+          - {domain: cli-args, shard: 3/4, part: 3}
           - {domain: cli-output, shard: 0/2, part: 0}
           - {domain: cli-output, shard: 1/2, part: 1}
           - {domain: diagnostics-core, shard: 0/2, part: 0}
@@ -49,10 +55,14 @@ jobs:
           - {domain: diagnostics-report, shard: 1/2, part: 1}
           - {domain: catalog, shard: 0/2, part: 0}
           - {domain: catalog, shard: 1/2, part: 1}
-          - {domain: env-aux, shard: 0/4, part: 0}
-          - {domain: env-aux, shard: 1/4, part: 1}
-          - {domain: env-aux, shard: 2/4, part: 2}
-          - {domain: env-aux, shard: 3/4, part: 3}
+          - {domain: env-aux, shard: 0/8, part: 0}
+          - {domain: env-aux, shard: 1/8, part: 1}
+          - {domain: env-aux, shard: 2/8, part: 2}
+          - {domain: env-aux, shard: 3/8, part: 3}
+          - {domain: env-aux, shard: 4/8, part: 4}
+          - {domain: env-aux, shard: 5/8, part: 5}
+          - {domain: env-aux, shard: 6/8, part: 6}
+          - {domain: env-aux, shard: 7/8, part: 7}
     steps:
       - uses: actions/checkout@v7
         with:

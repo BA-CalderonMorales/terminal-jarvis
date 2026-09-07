@@ -1,7 +1,7 @@
 # Mutation shard table — single source of truth for the mutation domains.
 # Local runner (scripts/bash/mutation/index.sh) and CI (mutation.yml) both
-# read this file. CI applies native cargo-mutants 0/2 and 1/2 sharding to most
-# domains, and 0/4 through 3/4 to the two largest. The native indices are
+# read this file. CI applies eight partitions to cli-core and env-aux,
+# four to cli-args, and two to the remaining domains. The native indices are
 # zero-based; this preserves the complete generated set and file filters.
 cli-core src/cli/index.rs
 cli-core src/cli/logic/gate_cmd.rs
