@@ -17,10 +17,16 @@ fn heartbeat_probe() {
 fn the_first_tick_lands_exactly_on_five_seconds() {
     let exe = std::env::current_exe().unwrap();
     let output = std::process::Command::new(&exe)
-        .args(["heartbeat_probe", "--nocapture"])
+        .args([
+            "--exact",
+            "gates::logic::heartbeat::heartbeat_probe_tests::heartbeat_probe",
+            "--nocapture",
+        ])
         .env("TJ_HB_PROBE", "ticks")
         .output()
         .unwrap();
+    assert!(output.status.success(), "probe failed: {output:?}");
+    assert!(String::from_utf8_lossy(&output.stdout).contains("1 passed; 0 failed"));
     let stderr = String::from_utf8_lossy(&output.stderr);
     assert!(stderr.contains("    5s"), "first tick at 5s:\n{stderr}");
     assert!(!stderr.contains("    1s"), "no premature tick:\n{stderr}");

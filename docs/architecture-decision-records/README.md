@@ -79,10 +79,13 @@ follow-ups for the next release. The global line-coverage gate is calibrated
 to 80% for this release: the 90% threshold had no passing baseline (CI
 measured 80.81% after all tests passed), while 80% keeps a meaningful floor
 without blocking a verified release on pre-existing interactive paths.
-Mutation runs use one worker plus one libtest thread because two threads can
-exhaust hosted-runner memory before a mutant can be evaluated. The largest
-serialized PR-diff shards have a 90-minute CI ceiling, preserving that memory
-bound without converting a complete mutation run into a timeout.
+The heartbeat subprocess test uses an exact, fully qualified filter: its
+old substring filter also selected its parent, recursively spawning test
+binaries and exhausting memory or the CI deadline. Thread caps and longer
+deadlines did not fix that cause. Mutation work is partitioned across smaller
+CI jobs while retaining the existing file selection and exclusions; one
+mutation worker per runner bounds concurrency. This trades repeated baseline
+builds for shorter elapsed review time without dropping mutants.
 ### Land the 0.1.15 hardening stack and repair develop's latent gate breakage (fix stack -> 2026-08-14)
 
 **Decision:** Land the five-fix 0.1.15 stack through develop in one atomic
