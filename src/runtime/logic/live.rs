@@ -55,6 +55,9 @@ pub fn spawn(plan: &CapabilityPlan, extra: &[String]) -> io::Result<Running> {
         .stdin(Stdio::null())
         .stdout(Stdio::piped())
         .stderr(Stdio::piped());
+    // Unix-only: the SIGINT reset does not exist on Windows (see runner.rs);
+    // the spawned child inherits the parent's handler there.
+    #[cfg(unix)]
     super::runner::reset_sigint_in_child(&mut command);
     let mut child = command.spawn()?;
     let (tx, rx) = mpsc::channel::<Line>();
