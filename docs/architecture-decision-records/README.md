@@ -39,6 +39,25 @@ it, and anything future work must respect.
 
 ## Records
 
+### Close the Copilot tui review gaps before 0.1.19 reaches main (fix/copilot-review-develop -> 2026-09-07)
+
+**Decision:** Treat `Key::Dead` as terminal in every viewport mode, use
+`VecDeque` for the parked-key FIFO, and align converse help and changelog text
+with the implemented `1..=12` turn grammar. Regression tests pin EOF exit and
+FIFO ordering.
+
+**Context:** The release PR review found an EOF repaint loop, an O(n) front
+removal on every parked key, and two stale descriptions that contradicted the
+parser and runtime turn cap.
+
+**Considered:** Keeping `Vec` would preserve the old shape but make each
+front dequeue increasingly expensive; ignoring EOF in Normal mode would keep
+the repaint loop. Updating only one help surface would leave users with
+conflicting invocation syntax.
+
+**Consequence:** Input termination and queue ordering are executable contracts,
+and all user-facing converse guidance now describes the actual CLI grammar.
+
 ### Make the tui's human-input flows first-class for the 0.1.19 stack (release/0.1.19 -> 2026-09-05)
 
 **Decision:** Land the 0.1.19 interactive-input stack as one release: the

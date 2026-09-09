@@ -1,8 +1,5 @@
-//! ViewportNav: the vim-style mode machine and navigation table. Normal
-//! mode scrolls (j/k, arrows, PgUp/PgDn page bubble-to-bubble, g/G home/
-//! end); Insert mode types, recalls history on Up/Down, and hands Esc
-//! back to Normal. One key, one decision, every repaint in the caller.
-
+//! ViewportNav: vim-style navigation. Normal mode scrolls; Insert mode types,
+//! recalls history, and hands Esc back to Normal. One key, one decision.
 use super::viewport_page::page;
 use super::viewport_raw::Session;
 use crate::tui::input::{Editor, Key, Move};
@@ -21,8 +18,8 @@ pub enum Flow {
     Dead,
 }
 
-/// Replaces the editor buffer with a recalled history entry (an empty
-/// entry clears the line, the way a shell returns to the live prompt).
+/// Replaces the editor buffer with a recalled history entry; an empty entry
+/// clears the line, the way a shell returns to the live prompt.
 pub fn recall(editor: &mut Editor, text: Option<&String>) {
     editor.feed(Key::ClearLine);
     if let Some(text) = text {
@@ -32,9 +29,8 @@ pub fn recall(editor: &mut Editor, text: Option<&String>) {
     }
 }
 
-/// Applies one key to the session in the current mode; the session's
-/// scroll offset moves for scrolls, the returned flow ends the session on
-/// submit or death.
+/// Applies one key to the session; scrolls move the offset, and submit/death
+/// end the session.
 pub fn key(
     mode: &mut Mode,
     editor: &mut Editor,
@@ -69,6 +65,7 @@ pub fn key(
             *offset = crate::tui::screen::max_offset(session.body.len(), rows);
             Flow::Continue(history_at)
         }
+        (Mode::Normal, Key::Dead) => Flow::Dead,
         (Mode::Normal, _) => Flow::Continue(history_at),
         (Mode::Insert, Key::Escape) => {
             *mode = Mode::Normal;
@@ -97,3 +94,7 @@ pub fn key(
         },
     }
 }
+
+#[cfg(test)]
+#[path = "../tests/viewport_nav.rs"]
+mod tests;

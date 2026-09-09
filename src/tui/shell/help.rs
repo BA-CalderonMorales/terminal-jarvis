@@ -40,8 +40,8 @@ pub fn text() -> String {
             "see the raw, verbose view behind the clean one",
         ),
         (
-            "converse <a> <b> <topic>",
-            "two agents talk in a tab (experimental)",
+            "converse <turns> <a> <b> <topic...>",
+            "two agents talk in a tab (1..=12 turns; experimental)",
         ),
         ("home | clear", "reset the frame"),
         ("exit | quit", "leave without state changes"),

@@ -5,15 +5,19 @@
 //! tail of a typed answer so "yes<Enter>" never leaks "es" into the prompt.
 
 use super::Key;
+use std::collections::VecDeque;
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::Mutex;
 use std::time::{Duration, Instant};
 
 static WATCHER: AtomicBool = AtomicBool::new(false);
-static PARKED: Mutex<Vec<Key>> = Mutex::new(Vec::new());
+static PARKED: Mutex<VecDeque<Key>> = Mutex::new(VecDeque::new());
 
 fn park(key: Key) {
-    PARKED.lock().unwrap_or_else(|e| e.into_inner()).push(key);
+    PARKED
+        .lock()
+        .unwrap_or_else(|e| e.into_inner())
+        .push_back(key);
 }
 
 /// The next parked key, if any.
@@ -22,13 +26,14 @@ pub fn take() -> Option<Key> {
     if parked.is_empty() {
         None
     } else {
-        Some(parked.remove(0))
+        parked.pop_front()
     }
 }
 
 /// Every key already parked, without blocking.
 pub fn drained() -> Vec<Key> {
-    std::mem::take(&mut PARKED.lock().unwrap_or_else(|e| e.into_inner()))
+    let mut parked = PARKED.lock().unwrap_or_else(|e| e.into_inner());
+    parked.drain(..).collect()
 }
 
 /// True while the watcher thread owns stdin; consumers poll the queue
@@ -83,3 +88,7 @@ pub(crate) fn wait_for(timeout: Duration) -> Option<Key> {
         std::thread::sleep(Duration::from_millis(15));
     }
 }
+
+#[cfg(test)]
+#[path = "../../tests/poll.rs"]
+mod tests;
