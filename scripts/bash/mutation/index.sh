@@ -16,6 +16,7 @@ files() {
 usage() {
   echo "usage: scripts/bash/mutation/index.sh <list|run DOMAIN [args...]>"
   echo "DOMAIN: one of the shard keys in constants/shards.txt"
+  echo "Partition a domain with --shard 0/4 (zero-based index/total)."
 }
 
 case "$cmd" in
@@ -27,23 +28,21 @@ case "$cmd" in
       usage >&2
       exit 2
     }
-    shard=$(files)
-    [ -n "$shard" ] || {
+    file_list=$(files)
+    [ -n "$file_list" ] || {
       echo "mutation: unknown shard '$domain'" >&2
       usage >&2
       exit 2
     }
     cd "$root"
     base=""
-    for path in $shard; do
+    for path in $file_list; do
       base="$base --file $path"
     done
-    # Cap libtest threads for this invocation only so the baseline never
-    # exhausts the runner's thread limit (observed as 'Resource temporarily
-    # unavailable' on the unmutated tree); coverage is unaffected, only
-    # parallelism drops, and the env never leaks to later commands.
-    RUST_TEST_THREADS=2 cargo mutants --config mutants.toml \
-      --minimum-test-timeout 30 --jobs 4 --no-shuffle $base "$@"
+    # Bound per-runner parallelism; CI partitions the same mutant set with
+    # native --shard arguments passed through below. No tests are skipped.
+    RUST_TEST_THREADS=1 cargo mutants --config mutants.toml \
+      --minimum-test-timeout 30 --jobs 1 --no-shuffle $base "$@"
     ;;
   -h | --help)
     usage

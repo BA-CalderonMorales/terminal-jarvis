@@ -12,6 +12,31 @@ pub fn welcome(harnesses: &[Harness], catalog_root: &Path, state_home: &Path) ->
     crate::tui::screen::welcome(&o.name, o.ready, o.total)
 }
 
+/// Paints the composed frame without reading -- the converse loop repaints
+/// between turns while the child owns the wait. `offset` is the scroll
+/// position the owning loop keeps (the converse live surface scrolls it).
+#[allow(clippy::too_many_arguments)]
+pub fn paint(
+    indicator: &Indicator,
+    hint: &str,
+    harnesses: &[Harness],
+    catalog_root: &Path,
+    state_home: &Path,
+    body: &[String],
+    offset: usize,
+) {
+    let _ = std::io::stdout().flush();
+    let state =
+        super::viewport_raw::ViewportState::collect(indicator, harnesses, catalog_root, state_home);
+    let size = crate::tui::screen::size();
+    let mut draft = state.base_draft(hint, body);
+    draft.offset = offset;
+    let cells = state.prefix_cells;
+    let painted = crate::tui::screen::parked(crate::tui::screen::frame(size, &draft), size, cells);
+    print!("{painted}");
+    std::io::stdout().flush().ok();
+}
+
 #[allow(clippy::too_many_arguments)]
 pub fn prompt(
     indicator: &Indicator,
@@ -20,23 +45,29 @@ pub fn prompt(
     catalog_root: &Path,
     state_home: &Path,
     body: &[String],
+    history: &[String],
+    offset: &mut usize,
 ) -> Option<String> {
-    let _ = std::io::stdout().flush();
+    paint(
+        indicator,
+        hint,
+        harnesses,
+        catalog_root,
+        state_home,
+        body,
+        *offset,
+    );
     let state =
         super::viewport_raw::ViewportState::collect(indicator, harnesses, catalog_root, state_home);
-    let size = crate::tui::screen::size();
-    let draft = state.base_draft(hint, body);
-    let cells = state.prefix_cells;
-    let painted = crate::tui::screen::parked(crate::tui::screen::frame(size, &draft), size, cells);
-    print!("{painted}");
-    std::io::stdout().flush().ok();
-    let session = super::viewport_raw::Session {
+    let mut session = super::viewport_raw::Session {
         state: &state,
         hint,
         body,
+        history,
+        offset,
     };
     match crate::tui::term::enable_raw() {
-        Some(_guard) => super::viewport_raw::run(&session),
+        Some(_guard) => super::viewport_raw::run(&mut session),
         None => crate::tui::input::raw_line(),
     }
 }
@@ -45,4 +76,9 @@ pub fn prompt(
 pub fn chat_banner(harnesses: &[Harness], catalog_root: &Path, state_home: &Path) {
     let mut out = std::io::stdout();
     crate::tui::home::render(&mut out, harnesses, catalog_root, state_home);
+}
+
+/// The scroll offset that follows the bottom of `body`.
+pub fn pinned(body: &[String]) -> usize {
+    crate::tui::screen::max_offset(body.len(), crate::tui::screen::size().body_rows())
 }

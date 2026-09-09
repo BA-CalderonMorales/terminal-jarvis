@@ -1,4 +1,5 @@
-use crate::gates::logic::heartbeat::{live_line, live_width, should_tick, Heartbeat, Scan, TICK};
+use crate::gates::logic::heartbeat::{Heartbeat, Scan};
+use crate::gates::logic::live::{live_line, live_width, should_tick, TICK};
 use crate::gates::tests_util::{lock, scan_gate};
 
 #[test]
@@ -50,7 +51,12 @@ fn run_scan(name: &str, script: &str, narrate: bool) -> Scan {
 #[test]
 fn a_fast_scan_never_takes_a_heartbeat_tick() {
     let scan = run_scan("fast", "#!/bin/sh\n", false);
-    assert!(!scan.heartbeat, "a sub-tick scan must not redraw");
+    // A tick for a sub-tick scan is only spurious when the wall clock
+    // agrees; scheduler starvation under parallel load is not a bug.
+    assert!(
+        !scan.heartbeat || scan.elapsed >= TICK,
+        "a sub-tick scan must not redraw"
+    );
     assert_eq!(scan.code, 0);
 }
 

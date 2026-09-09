@@ -1,8 +1,8 @@
-# Mutation shard table — single source of truth for the domain shards.
+# Mutation shard table — single source of truth for the mutation domains.
 # Local runner (scripts/bash/mutation/index.sh) and CI (mutation.yml) both
-# read this file. Shard cap: keep each domain shard at or under ~250
-# mutants (cargo-mutants --list) so a shard completes in ~10 minutes.
-# When a domain's census exceeds the cap, split it into sub-shards below.
+# read this file. CI applies eight partitions to cli-core and env-aux,
+# four to cli-args, and two to the remaining domains. The native indices are
+# zero-based; this preserves the complete generated set and file filters.
 cli-core src/cli/index.rs
 cli-core src/cli/logic/gate_cmd.rs
 cli-core src/cli/logic/gate_output.rs

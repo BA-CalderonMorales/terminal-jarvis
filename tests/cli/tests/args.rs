@@ -11,7 +11,7 @@ use terminal_jarvis::contracts::Capability;
 #[rustfmt::skip]
 #[test] fn parses_legacy_and_direct_commands() {
     assert_eq!(parse(["tj", "opencode", "--help"]).unwrap(), Action::Direct { harness: "opencode".to_string(), extra: vec!["--help".to_string()] });
-    assert_eq!(parse(["tj", "install", "opencode"]).unwrap(), Action::Install("opencode".to_string()));
+    assert_eq!(parse(["tj", "install", "opencode"]).unwrap(), Action::Install(Some("opencode".to_string())));
     assert_eq!(parse(["tj", "status"]).unwrap(), Action::Check);
 }
 #[rustfmt::skip]

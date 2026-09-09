@@ -1,5 +1,5 @@
-use crate::gates::logic::heartbeat::live_width;
 use crate::gates::logic::interrupt::{memo_clear, memo_hit, memo_set};
+use crate::gates::logic::live::live_width;
 use crate::gates::logic::loader::load;
 use crate::gates::logic::verdict::{verdict_for, Verdict};
 use crate::gates::structs::state::selected;

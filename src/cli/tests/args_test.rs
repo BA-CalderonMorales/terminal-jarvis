@@ -87,8 +87,12 @@ fn list_status_check_current_use_show() {
     );
     assert_eq!(
         a(&["tj", "show", "opencode"]),
-        Action::Show("opencode".to_string())
+        Action::Show(Some("opencode".to_string()))
     );
     assert!(e(&["tj", "use"]).is_err());
-    assert!(e(&["tj", "show"]).is_err());
+    assert_eq!(
+        a(&["tj", "show"]),
+        Action::Show(None),
+        "bare show defers to the active harness"
+    );
 }

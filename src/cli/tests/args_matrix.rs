@@ -25,7 +25,10 @@ fn every_action_variant_roundtrips_green() {
     g(&["tj", "version"], Action::Version { verbose: false });
     g(&["tj", "--info"], Action::Version { verbose: true });
     g(&["tj", "use", "opencode"], Action::Use("opencode".into()));
-    g(&["tj", "show", "opencode"], Action::Show("opencode".into()));
+    g(
+        &["tj", "show", "opencode"],
+        Action::Show(Some("opencode".to_string())),
+    );
     g(
         &["tj", "plan", "headless"],
         plan(None, Capability::Headless),
@@ -45,7 +48,7 @@ fn every_action_variant_roundtrips_green() {
     );
     g(
         &["tj", "install", "opencode"],
-        Action::Install("opencode".into()),
+        Action::Install(Some("opencode".to_string())),
     );
     g(
         &["tj", "self-update"],

@@ -6,6 +6,8 @@ pub mod cli;
 pub mod context;
 #[path = "contracts/index.rs"]
 pub mod contracts;
+#[path = "converse/lib.rs"]
+pub mod converse;
 #[path = "diagnostics/index.rs"]
 pub mod diagnostics;
 #[path = "gates/index.rs"]

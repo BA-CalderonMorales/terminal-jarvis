@@ -136,7 +136,7 @@ for capability in download update headless version stats models security yolo ui
   contains "$tmp/$label.out" "Plan: codex $capability"
 done
 
-ok update-summary update
+ok update-summary update --dry-run
 table update-summary
 outcome update-dry-run 0 update --dry-run
 contains "$tmp/update-dry-run.out" "Harness Updates"
@@ -178,11 +178,14 @@ ok gate-list gate list
 ok gate-enable gate enable trivy
 ok gate-enabled gate status
 ok gate-disable gate disable
-table gate
-table gate-list
-table gate-enable
-table gate-enabled
-table gate-disable
+# the gate screens are human-line fields now (parity with show); no tables
+contains "$tmp/gate.out" "  status "
+contains "$tmp/gate.out" "  available "
+contains "$tmp/gate-list.out" "(trivy)"
+contains "$tmp/gate-enable.out" "  gate "
+contains "$tmp/gate-enable.out" "  status "
+contains "$tmp/gate-enabled.out" "  command "
+contains "$tmp/gate-disable.out" "  status "
 plain gate status >"$tmp/plain-gate.out"
 contains "$tmp/plain-gate.out" "gate: disabled"
 if TERMINAL_JARVIS_CATALOG="$catalog" TERMINAL_JARVIS_HOME="$home" PATH="" \

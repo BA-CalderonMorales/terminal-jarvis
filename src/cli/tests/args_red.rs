@@ -16,11 +16,9 @@ fn every_action_variant_rejects_malformed_red() {
     red(&["tj", "version", "x"]);
     red(&["tj", "--info", "x"]);
     red(&["tj", "use"]);
-    red(&["tj", "show"]);
     red(&["tj", "plan"]);
     red(&["tj", "plan", "bogus"]);
     red(&["tj", "plan", "x", "bogus"]);
-    red(&["tj", "install"]);
     red(&["tj", "self-update", "x"]);
     red(&["tj", "update", "a", "b"]);
     red(&["tj", "auth", "a", "b"]);

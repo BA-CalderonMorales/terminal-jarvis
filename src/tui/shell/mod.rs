@@ -1,31 +1,27 @@
-//! Shell: the read-prompt loop -- full-screen frame repaints per command,
-//! chat fallback. One resolver, one guard.
+//! Shell: the read-prompt loop -- frame repaints per command, chat fallback.
 
 use crate::{cli::args, contracts::Harness};
 use std::path::Path;
 
-#[path = "./canonical.rs"]
 mod canonical;
-#[path = "./dispatch.rs"]
+mod converse;
+mod converse_live;
 mod dispatch;
-#[path = "./handle.rs"]
 mod handle;
-
-#[path = "./help.rs"]
 mod help;
-#[path = "./outcome.rs"]
+mod live_nav;
 mod outcome;
-#[path = "./run_action.rs"]
 mod run_action;
-#[path = "./session.rs"]
 mod session;
-#[path = "./status.rs"]
+mod state;
 mod status;
-#[path = "./verdict.rs"]
+mod stream;
+mod stream_finish;
+mod stream_plan;
 mod verdict;
-#[path = "./viewport.rs"]
 mod viewport;
-#[path = "./viewport_raw.rs"]
+mod viewport_nav;
+mod viewport_page;
 mod viewport_raw;
 
 pub use handle::handle;
@@ -42,7 +38,10 @@ pub fn run(harnesses: &[Harness], catalog_root: &Path, state_home: &Path, option
         viewport::chat_banner(harnesses, catalog_root, state_home);
     }
     super::sigint::guarded(move || {
-        let mut state = outcome::LoopState {
+        let mut state = state::LoopState {
+            converse: None,
+            offset: 0,
+            history: Vec::new(),
             body: viewport::welcome(harnesses, catalog_root, state_home),
             hint: status::modeline(state_home, false, debug),
             options,
@@ -52,6 +51,11 @@ pub fn run(harnesses: &[Harness], catalog_root: &Path, state_home: &Path, option
         status::refresh_indicator(&mut state.indicator, state_home, state.debug);
         loop {
             crate::tui::screen::ensure_usable();
+            if let Some(lines) = converse::tick(&mut state, harnesses, catalog_root, state_home) {
+                state.body.extend(lines);
+                state.offset = viewport::pinned(&state.body);
+                continue;
+            }
             let input = if in_viewport && crate::tui::screen::active() {
                 viewport::prompt(
                     &state.indicator,
@@ -60,11 +64,16 @@ pub fn run(harnesses: &[Harness], catalog_root: &Path, state_home: &Path, option
                     catalog_root,
                     state_home,
                     &state.body,
+                    &state.history,
+                    &mut state.offset,
                 )
             } else {
                 super::input::read_line(&state.indicator, &state.hint)
             };
             let Some(input) = input else { break };
+            if state.history.last() != Some(&input) {
+                state.history.push(input.clone());
+            }
             let mut sink = Vec::new();
             let next = handle(
                 &mut sink,
@@ -85,6 +94,5 @@ pub fn run(harnesses: &[Harness], catalog_root: &Path, state_home: &Path, option
     }
 }
 
-#[path = "./parse.rs"]
 mod parse;
 pub use parse::{resolve, Next, Resolved};

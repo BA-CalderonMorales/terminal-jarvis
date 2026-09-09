@@ -12,6 +12,7 @@ static ACTIVE: Mutex<(&'static str, Palette)> = Mutex::new((
     Palette {
         dim: "2",
         accent: "1;36",
+        accent2: "1;35",
     },
 ));
 
@@ -73,6 +74,12 @@ pub fn dim(value: &str) -> String {
 /// The theme accent, for chrome that may carry the vibe.
 pub fn accent(value: &str) -> String {
     paint(value, palette().accent)
+}
+
+/// The second accent: the converse reply side, so the two speakers read
+/// as distinct voices at a glance.
+pub fn accent2(value: &str) -> String {
+    paint(value, palette().accent2)
 }
 
 #[cfg(test)]

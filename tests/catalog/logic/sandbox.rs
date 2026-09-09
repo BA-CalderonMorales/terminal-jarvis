@@ -51,10 +51,18 @@ impl Sandbox {
                         let output = sandbox.probe(harness, *capability);
                         if matches!(state, SupportState::Verified | SupportState::Expected) {
                             if effect == &Effect::ReadOnly {
-                                assert_eq!(output.status.code(), Some(2));
+                                assert_eq!(
+                                    output.status.code(),
+                                    Some(2),
+                                    "{harness}:{capability} read-only row"
+                                );
                                 assert!(output.stdout.is_empty());
                             } else {
-                                assert_eq!(output.status.code(), Some(0));
+                                assert_eq!(
+                                    output.status.code(),
+                                    Some(0),
+                                    "{harness}:{capability} executable row"
+                                );
                                 assert!(!output.stdout.is_empty());
                             }
                         } else {

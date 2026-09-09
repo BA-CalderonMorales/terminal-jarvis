@@ -17,7 +17,7 @@ fn presentation_options_work_at_every_token_boundary() {
     ] {
         for index in 0..=base.len() {
             let parsed = inserted(&base, flag, index);
-            assert_eq!(parsed.action, Action::Show("fixture".to_string()));
+            assert_eq!(parsed.action, Action::Show(Some("fixture".to_string())));
             assert_eq!(parsed.options.output, mode);
             assert_eq!(parsed.options.no_color, no_color);
         }

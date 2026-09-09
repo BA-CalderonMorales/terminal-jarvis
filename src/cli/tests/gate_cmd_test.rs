@@ -33,12 +33,16 @@ fn handle_routes_every_gate_form() {
         .lock()
         .unwrap_or_else(|error| error.into_inner());
     let home = home();
+    let help = handle(&words(&["--help"]), &home).unwrap();
+    assert!(help.1.contains("optional Trivy security gate"));
+    assert_eq!(help, handle(&words(&["-h"]), &home).unwrap());
+    assert_eq!(help, handle(&words(&["help"]), &home).unwrap());
     let default = handle(&[], &home).unwrap();
     assert_eq!(default, handle(&words(&["status"]), &home).unwrap());
     assert!(handle(&words(&["list"]), &home)
         .unwrap()
         .1
-        .contains("Trivy"));
+        .contains("(trivy)"));
     assert!(handle(&words(&["enable"]), &home).is_ok());
     assert_eq!(
         crate::gates::selected(&home).unwrap().unwrap().name,
