@@ -39,6 +39,14 @@ it, and anything future work must respect.
 
 ## Records
 
+### Match the runtime `write` signature instead of silencing the lint (release/0.1.20 -> 2026-10-16)
+
+Recorded in
+[runtime-write-signature-2026-10-16.md](runtime-write-signature-2026-10-16.md):
+CI floats on `@stable`, whose 1.99.1 release made `write` a
+`suspicious-runtime-symbol-definitions` case and reddened a branch that carried
+no relevant change.
+
 ### Make the Windows test suite honest without widening support claims (release/0.1.20 -> 2026-10-16)
 
 **Decision:** Pass the suite on a clean Windows `PATH` instead of assuming a
