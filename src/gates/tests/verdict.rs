@@ -52,6 +52,11 @@ fn block_summary_never_comes_back_empty() {
     fn never_empty(output: String) -> bool {
         !block_summary(&output).is_empty()
     }
+    // quickcheck only reaches these by luck: every line is noise or blank and
+    // the last line is empty. Keep them pinned so the hole cannot reopen.
+    for output in ["\n", "\n\n", " INFO x\n\n", "?INFO?y\n\n"] {
+        assert!(!block_summary(output).is_empty(), "{output:?}");
+    }
 }
 
 #[test]
