@@ -1,9 +1,9 @@
 use super::*;
 use crate::contracts::{Capability, CommandPlan, Effect, EvidenceMode, Interaction, SupportState};
 
-fn plan(script: &str) -> CapabilityPlan {
+fn plan(command: &str, args: Vec<String>) -> CapabilityPlan {
     CapabilityPlan {
-        command: CommandPlan::new("sh".into(), vec!["-c".into(), script.into()]),
+        command: CommandPlan::new(command.into(), args),
         capability: Capability::Headless,
         summary: String::new(),
         support: SupportState::Unknown,
@@ -22,11 +22,13 @@ fn plan(script: &str) -> CapabilityPlan {
 #[test]
 fn run_drains_both_streams_after_a_lull_and_preserves_exit_code() {
     let mut lines = vec![];
-    let code = run(
-        &plan("printf early; sleep 0.2; printf '\\nlate-out\\n'; printf late-err >&2; exit 17"),
-        &[],
-        &mut |line| lines.push(line.to_string()),
-    )
+    let (command, args) = crate::cli::logic::test_support::shell(
+        "printf early; sleep 0.2; printf '\\nlate-out\\n'; printf late-err >&2; exit 17",
+        "set /p =early<nul& ping -n 2 127.0.0.1 >nul& echo.& echo late-out& echo late-err>&2& exit 17",
+    );
+    let code = run(&plan(&command, args), &[], &mut |line| {
+        lines.push(line.to_string())
+    })
     .unwrap();
     assert_eq!(code, 17);
     assert_eq!(lines.len(), 3);

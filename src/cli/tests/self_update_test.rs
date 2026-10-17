@@ -23,7 +23,9 @@ fn wrapper_path_requires_package_json() {
 
 #[test]
 fn run_cmd_reports_success_output() {
-    let (code, out) = run_cmd("echo", &["mutation-marker"]).expect("echo should run");
+    let (command, args) = crate::cli::logic::test_support::succeed();
+    let args: Vec<&str> = args.iter().map(String::as_str).collect();
+    let (code, out) = run_cmd(&command, &args).expect("fixture should run");
     assert_eq!(code, 0);
     assert!(
         out.contains("Terminal Jarvis updated"),
@@ -33,7 +35,9 @@ fn run_cmd_reports_success_output() {
 
 #[test]
 fn run_cmd_reports_failure() {
-    assert!(run_cmd("false", &[]).is_err(), "false should fail");
+    let (command, args) = crate::cli::logic::test_support::fail(1);
+    let args: Vec<&str> = args.iter().map(String::as_str).collect();
+    assert!(run_cmd(&command, &args).is_err(), "fixture should fail");
 }
 
 #[test]

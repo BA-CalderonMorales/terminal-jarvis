@@ -59,29 +59,31 @@ fn options() -> args::Options {
 }
 
 fn harness() -> Vec<Harness> {
+    let (command, args) = crate::cli::logic::test_support::succeed();
+    let plan = plan(&command, args);
     vec![Harness {
         name: "vibe".into(),
         display: "Vibe".into(),
         description: "test fixture".into(),
-        binary: "true".into(),
+        binary: command,
         env_mode: crate::contracts::EnvMode::None,
         env: vec![],
-        capabilities: vec![plan()],
+        capabilities: vec![plan],
     }]
 }
 
-fn plan() -> crate::contracts::CapabilityPlan {
+fn plan(command: &str, args: Vec<String>) -> crate::contracts::CapabilityPlan {
     crate::contracts::CapabilityPlan {
         capability: crate::contracts::Capability::Ui,
         summary: "run the fixture".into(),
-        command: crate::contracts::CommandPlan::new("true".into(), vec![]),
+        command: crate::contracts::CommandPlan::new(command.into(), args),
         support: crate::contracts::SupportState::Verified,
         evidence: crate::contracts::EvidenceMode::Deterministic,
         effect: crate::contracts::Effect::ReadOnly,
         network: false,
         interaction: crate::contracts::Interaction::Noninteractive,
         platforms: vec![],
-        executable: "true".into(),
+        executable: command.into(),
         source: "internal:test-fixture".into(),
         verified_at: "2026-08-06T00:00:00Z".to_string(),
         package: None,

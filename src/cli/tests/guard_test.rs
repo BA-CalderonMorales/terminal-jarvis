@@ -52,18 +52,16 @@ fn unknown_direct_command_advises_exactly_once() {
 
 #[test]
 fn streaming_invocation_preserves_the_child_exit_code() {
-    let mut plan = crate::cli::logic::test_support::plan(
-        Capability::Headless,
-        "sh",
-        vec!["-c".into(), "printf streamed; exit 7".into()],
-    );
+    let (command, args) =
+        crate::cli::logic::test_support::shell("printf streamed; exit 7", "echo streamed& exit 7");
+    let mut plan = crate::cli::logic::test_support::plan(Capability::Headless, &command, args);
     plan.support = crate::contracts::SupportState::Verified;
     plan.verified_at = "2026-08-05T00:00:00Z".into();
     let harnesses = vec![Harness {
         name: "vibe".into(),
         display: "Vibe".into(),
         description: "test fixture".into(),
-        binary: "sh".into(),
+        binary: command,
         env_mode: crate::contracts::EnvMode::None,
         env: vec![],
         capabilities: vec![plan],

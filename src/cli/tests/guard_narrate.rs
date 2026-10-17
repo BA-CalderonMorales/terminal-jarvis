@@ -1,4 +1,4 @@
-use self::harness::{chain_mode, harnesses, probe, restore, write_gate};
+use self::harness::{chain_mode, command, harnesses, probe, rendered, restore, write_gate};
 use super::*;
 
 const WARNING_TAIL: &str = "uses a custom installer";
@@ -16,7 +16,8 @@ fn chain_narrate_probe() {
     let root = std::env::temp_dir().join(format!("tj-chain-{}", std::process::id()));
     let (home, catalog) = (root.join("home"), root.join("catalog"));
     let _ = std::fs::remove_dir_all(&root);
-    write_gate(&catalog, "pass", "true");
+    let (binary, args) = command();
+    write_gate(&catalog, "pass", &binary, &args);
     let previous_gates = std::env::var_os("TERMINAL_JARVIS_GATES");
     std::env::set_var("TERMINAL_JARVIS_GATES", &catalog);
     crate::gates::enable(&home, "pass").unwrap();
@@ -54,7 +55,8 @@ fn quiet_mode_reports_phases_in_one_line_each_and_loud_narrates() {
         format!(
             "running security gate 'pass' ...\nsecurity gate 'pass' passed\n\
              warning: vibe's installing {WARNING_TAIL} that cannot be pre-scanned; continuing\n\
-             installing vibe: true ...\n"
+             installing vibe: {} ...\n",
+            rendered()
         )
     );
 }
