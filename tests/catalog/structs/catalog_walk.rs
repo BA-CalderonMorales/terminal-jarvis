@@ -24,6 +24,7 @@ pub fn walk_catalog() -> Report {
                 plan.capability,
                 plan.support,
                 plan.effect,
+                plan.platforms.clone(),
             ));
             rows.push(Row::from_plan(harness, plan));
         }

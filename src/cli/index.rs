@@ -5,7 +5,7 @@
 //! `logic/`; structs/ holds the data shapes produced by parsing.
 
 #[path = "logic/mod.rs"]
-mod logic;
+pub(crate) mod logic;
 #[path = "structs/mod.rs"]
 mod structs;
 

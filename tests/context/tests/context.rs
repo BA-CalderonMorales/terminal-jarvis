@@ -36,8 +36,10 @@ fn active_harness_round_trips() {
 #[test]
 fn default_home_resolves_to_global_config_dir_without_env() {
     let _guard = ENV_LOCK.lock().unwrap();
-    let previous = std::env::var_os("TERMINAL_JARVIS_HOME");
-    std::env::remove_var("TERMINAL_JARVIS_HOME");
+    let previous = var_os("TERMINAL_JARVIS_HOME");
+    let previous_home = var_os("HOME");
+    remove_var("TERMINAL_JARVIS_HOME");
+    set_var("HOME", temp_home());
     let home = context::default_home();
     assert!(
         home.is_absolute(),
@@ -45,7 +47,11 @@ fn default_home_resolves_to_global_config_dir_without_env() {
     );
     assert!(home.ends_with("terminal-jarvis"));
     if let Some(value) = previous {
-        std::env::set_var("TERMINAL_JARVIS_HOME", value);
+        set_var("TERMINAL_JARVIS_HOME", value);
+    }
+    match previous_home {
+        Some(value) => set_var("HOME", value),
+        None => remove_var("HOME"),
     }
 }
 
@@ -66,29 +72,28 @@ fn config_home_skips_empty_xdg() {
 #[test]
 fn catalog_root_uses_explicit_env_path() {
     let _guard = ENV_LOCK.lock().unwrap();
-    let previous = std::env::var_os("TERMINAL_JARVIS_CATALOG");
-    std::env::set_var("TERMINAL_JARVIS_CATALOG", "/tmp/terminal-jarvis-catalog");
+    let previous = var_os("TERMINAL_JARVIS_CATALOG");
+    set_var("TERMINAL_JARVIS_CATALOG", "/tmp/terminal-jarvis-catalog");
     assert_eq!(
         context::catalog_root(),
         PathBuf::from("/tmp/terminal-jarvis-catalog")
     );
-    if let Some(value) = previous {
-        std::env::set_var("TERMINAL_JARVIS_CATALOG", value);
-    } else {
-        std::env::remove_var("TERMINAL_JARVIS_CATALOG");
+    match previous {
+        Some(value) => set_var("TERMINAL_JARVIS_CATALOG", value),
+        None => remove_var("TERMINAL_JARVIS_CATALOG"),
     }
 }
 
 #[test]
 fn catalog_root_finds_repo_catalog() {
     let _guard = ENV_LOCK.lock().unwrap();
-    let previous = std::env::var_os("TERMINAL_JARVIS_CATALOG");
-    std::env::remove_var("TERMINAL_JARVIS_CATALOG");
+    let previous = var_os("TERMINAL_JARVIS_CATALOG");
+    remove_var("TERMINAL_JARVIS_CATALOG");
     let root = context::catalog_root();
     assert!(root.is_absolute());
     assert!(root.is_dir());
     assert!(root.ends_with("harnesses"));
     if let Some(value) = previous {
-        std::env::set_var("TERMINAL_JARVIS_CATALOG", value);
+        set_var("TERMINAL_JARVIS_CATALOG", value);
     }
 }

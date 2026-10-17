@@ -35,13 +35,38 @@ pub fn write_metadata(root: &Path, cargo: &str, npm: &str, lock: &str) {
 }
 
 pub fn run_preflight(root: &Path, args: &[&str]) -> std::process::Output {
-    Command::new("sh")
+    shell()
         .arg("scripts/bash/release/index.sh")
         .arg("preflight")
         .args(args)
         .current_dir(root)
         .output()
         .unwrap()
+}
+
+/// The POSIX shell that runs the bash release scripts. Unix has `sh` on PATH;
+/// a clean Windows box does not, but Git for Windows -- already required by
+/// the tag test -- ships one beside `git`, so derive it from git's exec-path
+/// instead of requiring Git-Bash on PATH.
+#[cfg(unix)]
+fn shell() -> Command {
+    Command::new("sh")
+}
+
+#[cfg(not(unix))]
+fn shell() -> Command {
+    Command::new(windows_shell().unwrap_or_else(|| "sh".into()))
+}
+
+#[cfg(not(unix))]
+fn windows_shell() -> Option<std::path::PathBuf> {
+    let output = Command::new("git").arg("--exec-path").output().ok()?;
+    let exec = String::from_utf8(output.stdout).ok()?;
+    let root = Path::new(exec.trim()).ancestors().nth(3)?;
+    ["bin/sh.exe", "usr/bin/sh.exe"]
+        .iter()
+        .map(|relative| root.join(relative))
+        .find(|candidate| candidate.is_file())
 }
 
 pub fn git(root: &Path, args: &[&str]) {

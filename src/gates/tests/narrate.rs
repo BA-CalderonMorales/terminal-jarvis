@@ -16,7 +16,8 @@ fn narrate_probe() {
     let home = root.join("home");
     let catalog = root.join("catalog");
     let _ = std::fs::remove_dir_all(&root);
-    write_gate(&catalog, "pass", "true");
+    let (binary, args) = crate::cli::logic::test_support::succeed();
+    write_gate(&catalog, "pass", &binary, &args);
     let previous = std::env::var_os("TERMINAL_JARVIS_GATES");
     std::env::set_var("TERMINAL_JARVIS_GATES", &catalog);
     enable(&home, "pass").unwrap();
@@ -61,13 +62,20 @@ fn probe(exe: &Path, mode: &str) -> String {
     String::from_utf8_lossy(&output.stderr).to_string()
 }
 
-fn write_gate(root: &Path, name: &str, binary: &str) {
+fn write_gate(root: &Path, name: &str, binary: &str, args: &[String]) {
     let directory = root.join(name);
     std::fs::create_dir_all(&directory).unwrap();
-    let body = "name = \"{name}\"\ndisplay = \"{name}\"\ndescription = \"test\"\nbinary = \"{binary}\"\nargs = []\ninstall_hint = \"install\"\n";
+    let args = args
+        .iter()
+        .map(|arg| format!("\"{arg}\""))
+        .collect::<Vec<_>>()
+        .join(", ");
+    let body = "name = \"{name}\"\ndisplay = \"{name}\"\ndescription = \"test\"\nbinary = \"{binary}\"\nargs = [{args}]\ninstall_hint = \"install\"\n";
     std::fs::write(
         directory.join("index.toml"),
-        body.replace("{name}", name).replace("{binary}", binary),
+        body.replace("{name}", name)
+            .replace("{binary}", binary)
+            .replace("{args}", &args),
     )
     .unwrap();
 }

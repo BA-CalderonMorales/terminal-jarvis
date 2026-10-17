@@ -21,7 +21,8 @@ fn harness(command: &str, args: Vec<String>) -> Vec<Harness> {
 
 #[test]
 fn failing_command_preserves_exit_without_crossing_streams() {
-    let plans = harness("sh", vec!["-c".into(), "exit 3".into()]);
+    let (command, args) = crate::cli::logic::test_support::fail(3);
+    let plans = harness(&command, args);
     let (code, body) = capability(&plans, "vibe", Capability::Download, &[], true).unwrap();
     assert_eq!(code, 3);
     assert!(body.is_empty());
@@ -59,17 +60,21 @@ fn headless_one_shot_returns_the_reply_and_rejects_nonzero_exits() {
     let _guard = crate::ENV_LOCK
         .lock()
         .unwrap_or_else(|error| error.into_inner());
+    let (command, args) = crate::cli::logic::test_support::shell(
+        "printf reply; exit \"$1\"",
+        "set /p =reply<nul& exit",
+    );
     let plans = vec![Harness {
         name: "vibe".into(),
         display: "Vibe".into(),
         description: "test fixture".into(),
-        binary: "sh".into(),
+        binary: command.clone(),
         env_mode: EnvMode::None,
         env: vec![],
         capabilities: vec![crate::cli::logic::test_support::plan(
             Capability::Headless,
-            "sh",
-            vec!["-c".into(), "printf reply; exit \"$1\"".into(), "sh".into()],
+            &command,
+            args,
         )],
     }];
     crate::tui::screen::resume(true);

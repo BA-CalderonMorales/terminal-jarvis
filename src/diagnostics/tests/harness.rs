@@ -27,7 +27,7 @@ fn probing_harness() -> HarnessInput {
         env_mode: EnvMode::None,
         env: Vec::new(),
         support: vec![("run".into(), "ok".into(), true)],
-        version: Some(("sh".into(), vec!["-c".into(), "printf 'v1.2.3\\n'".into()])),
+        version: Some(crate::cli::logic::test_support::version_probe()),
     }
 }
 
