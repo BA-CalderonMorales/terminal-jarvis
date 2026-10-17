@@ -95,6 +95,41 @@ jobs:
         env:
           TJ_REQUIRE_SECURITY_TOOLS: "1"
 
+  windows-verify:
+    name: Windows Verify
+    runs-on: windows-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt, clippy
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: npm/terminal-jarvis/package-lock.json
+
+      - uses: actions/cache@v6
+        with:
+          path: |
+            ~/.cargo/git
+            ~/.cargo/registry
+            target
+          key: cargo-verify-${{ runner.os }}-${{ hashFiles('Cargo.lock') }}-v1
+          restore-keys: cargo-verify-${{ runner.os }}-
+
+      # win32-x64 is a supported target, but the only `-D warnings` gate used
+      # to run on Linux: a dead-code warning that fires only on Windows could
+      # reach a release. Deny warnings on Windows here so it cannot.
+      - name: Strict clippy on Windows
+        run: cargo clippy --all-targets -- -D warnings
+
+      - name: Test on a clean Windows PATH
+        run: cargo test --all-targets
+
   package:
     name: Package Smoke
     runs-on: ubuntu-latest

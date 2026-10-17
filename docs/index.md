@@ -11,6 +11,7 @@ the tool exists.
 | [Capability contract](harness-capability-contract.md) | Full breakdown of the 9 capabilities |
 | [Cataloged agents](supported-agents.md) | All 25 descriptors and support caveat |
 | [Support matrix](support-matrix.md) | All 225 capability truth rows |
+| [Claim inventory](claim-inventory.tsv) | Every manifest assertion, classified and verdicted |
 
 ## Using the tool
 
@@ -30,4 +31,5 @@ the tool exists.
 | [Development](development.md) | Architecture, verification, and release artifacts |
 | [Security gates](security-gates.md) | Optional Trivy scan behavior and configuration |
 | [Architecture decisions](architecture-decision-records/README.md) | Why changes exist |
+| [Claim-earning study](claim-earning-study.md) | How the platform claims were made earned |
 | [Anti-patterns](anti-patterns/index.md) | The ledger of recurring mistakes |

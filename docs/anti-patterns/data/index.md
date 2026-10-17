@@ -3,6 +3,29 @@
 Ledger entries for mistakes in the `harnesses/` data plane (capability
 metadata that describes a real CLI). Newest first.
 
+## An executing row claims to run anywhere through a POSIX shell
+
+(first observed in: 0.1.21 claim audit)
+
+**Pattern:** 23 `harnesses/*/version/index.toml` rows set `support` to
+`verified`/`expected` and `platforms = []` (which disables the runtime platform
+guard) while declaring `command = "sh"`, `args = ["-c", "<tool> --version"]`,
+and `executable = "sh"`. The row therefore asserts that the probe works
+everywhere and routes it through an executable that a clean Windows `PATH` does
+not provide.
+
+**Why it is wrong:** The claim is false on a supported platform and the guard
+is off, so nothing refuses it: the version check fails with a shell error the
+catalog never predicted. A POSIX shell is itself a platform constraint, so
+"runs anywhere" and "requires `sh`" cannot both be true.
+
+**Fix:** Call the binary directly (`command = "<tool>"`, `args = ["--version"]`,
+`executable = "<tool>"`), or narrow `platforms` to the POSIX platform the probe
+needs. `catalog::logic::command_truth` now rejects an executing row whose
+`platforms` are empty and whose executable is `sh` or `bash`, and
+`docs/claim-inventory.tsv` marks platform scope `witnessed` only when a real run
+recorded the platform.
+
 ## Capability data declared from assumption, not from the real CLI
 
 (first observed in: 0.1.15 readiness audit)

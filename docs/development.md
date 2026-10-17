@@ -15,6 +15,14 @@ scripts/bash/release/index.sh package build /tmp/terminal-jarvis-package
 scripts/bash/release/index.sh local-cd --check-auth
 ```
 
+`verify` step `[7]` also regenerates and checks the generated claim inventory:
+`python3 scripts/python/catalog/index.py claim-inventory [--check]`. Two
+rerunnable proofs carry the old-fails/new-passes pair for the platform-claim
+rule (`scripts/bash/verify/index.sh claim-earned --from REF`) and for the
+Windows strict-clippy gate
+(`scripts/bash/verify/index.sh windows-clippy --from REF`), where `REF` is the
+pre-fix commit; see `docs/claim-earning-study.md`.
+
 ## Domain shape
 
 Every Rust domain mirrors the scripts/ bucketing: `src/<domain>/index.rs` is

@@ -24,6 +24,22 @@ pub fn validate(prefix: &str, plan: &CapabilityPlan, errors: &mut Vec<String>) {
             "{prefix} fail-closed placeholder must be classified as disabled"
         ));
     }
+    // A POSIX shell is itself a platform constraint. A row that claims to run
+    // anywhere (`platforms` empty) and claims execution must not route through
+    // `sh`/`bash`: on Windows with a clean PATH there is no such executable, so
+    // the claim is false and the platform guard -- which an empty list disables
+    // -- cannot catch it.
+    if claims_execution(plan.support) && plan.platforms.is_empty() && posix_shell(&plan.executable)
+    {
+        errors.push(format!(
+            "{prefix} platform-independent execution cannot require POSIX shell {}",
+            plan.executable
+        ));
+    }
+}
+
+fn posix_shell(executable: &str) -> bool {
+    matches!(executable, "sh" | "bash")
 }
 
 fn claims_execution(support: SupportState) -> bool {
@@ -47,6 +63,10 @@ fn placeholder(command: &str) -> bool {
 #[cfg(test)]
 #[path = "../tests/command_truth_props.rs"]
 mod props;
+
+#[cfg(test)]
+#[path = "../tests/command_truth_rules.rs"]
+mod rules;
 
 #[cfg(test)]
 mod tests {

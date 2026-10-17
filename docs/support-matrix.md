@@ -13,7 +13,7 @@ Catalog presence is not a support claim. Each row reports its own guard state an
 | aider | stats | stub | deterministic | read-only | false | noninteractive | linux-x64-gnu | `aider` | `internal:phase-01@fab5848` | 2026-08-05T00:00:00Z |
 | aider | ui | expected | deterministic | state-changing | true | interactive | none | `aider` | `internal:phase-01@fab5848` | 2026-08-05T00:00:00Z |
 | aider | update | expected | deterministic | state-changing | true | noninteractive | none | `uv` | `internal:phase-01@fab5848` | 2026-08-05T00:00:00Z |
-| aider | version | verified | disposable-real | read-only | false | noninteractive | none | `sh` | `internal:phase-01@fab5848` | 2026-08-05T00:00:00Z |
+| aider | version | verified | disposable-real | read-only | false | noninteractive | none | `aider` | `internal:phase-01@fab5848` | 2026-08-05T00:00:00Z |
 | aider | yolo | disabled | deterministic | dangerous | true | noninteractive | linux-x64-gnu | `sh` | `internal:phase-01@fab5848` | 2026-08-05T00:00:00Z |
 | amp | download | expected | deterministic | state-changing | true | noninteractive | none | `npm` | `internal:phase-01@fab5848` | 2026-08-05T00:00:00Z |
 | amp | headless | stub | deterministic | read-only | false | noninteractive | linux-x64-gnu | `amp` | `internal:phase-01@fab5848` | 2026-08-05T00:00:00Z |
@@ -22,7 +22,7 @@ Catalog presence is not a support claim. Each row reports its own guard state an
 | amp | stats | stub | deterministic | read-only | false | noninteractive | linux-x64-gnu | `amp` | `internal:phase-01@fab5848` | 2026-08-05T00:00:00Z |
 | amp | ui | expected | deterministic | state-changing | true | interactive | none | `amp` | `internal:phase-01@fab5848` | 2026-08-05T00:00:00Z |
 | amp | update | expected | deterministic | state-changing | true | noninteractive | none | `npm` | `internal:phase-01@fab5848` | 2026-08-05T00:00:00Z |
-| amp | version | expected | deterministic | read-only | false | noninteractive | none | `sh` | `internal:phase-01@fab5848` | 2026-08-05T00:00:00Z |
+| amp | version | expected | deterministic | read-only | false | noninteractive | none | `amp` | `internal:phase-01@fab5848` | 2026-08-05T00:00:00Z |
 | amp | yolo | disabled | deterministic | dangerous | true | noninteractive | linux-x64-gnu | `sh` | `internal:phase-01@fab5848` | 2026-08-05T00:00:00Z |
 | claude | download | unknown | deterministic | state-changing | true | noninteractive | none | `sh` | `internal:phase-01@fab5848` | 2026-08-05T00:00:00Z |
 | claude | headless | stub | deterministic | read-only | false | noninteractive | linux-x64-gnu | `claude` | `internal:phase-01@fab5848` | 2026-08-05T00:00:00Z |
@@ -31,7 +31,7 @@ Catalog presence is not a support claim. Each row reports its own guard state an
 | claude | stats | stub | deterministic | read-only | false | noninteractive | linux-x64-gnu | `claude` | `internal:phase-01@fab5848` | 2026-08-05T00:00:00Z |
 | claude | ui | expected | deterministic | state-changing | true | interactive | none | `claude` | `internal:phase-01@fab5848` | 2026-08-05T00:00:00Z |
 | claude | update | expected | deterministic | state-changing | true | noninteractive | none | `claude` | `internal:phase-01@fab5848` | 2026-08-05T00:00:00Z |
-| claude | version | verified | disposable-real | read-only | false | noninteractive | none | `sh` | `internal:phase-01@fab5848` | 2026-08-05T00:00:00Z |
+| claude | version | verified | disposable-real | read-only | false | noninteractive | none | `claude` | `internal:phase-01@fab5848` | 2026-08-05T00:00:00Z |
 | claude | yolo | disabled | deterministic | dangerous | true | noninteractive | linux-x64-gnu | `sh` | `internal:phase-01@fab5848` | 2026-08-05T00:00:00Z |
 | code | download | expected | deterministic | state-changing | true | noninteractive | none | `npm` | `internal:phase-01@fab5848` | 2026-08-05T00:00:00Z |
 | code | headless | stub | deterministic | read-only | false | noninteractive | linux-x64-gnu | `coder` | `internal:phase-01@fab5848` | 2026-08-05T00:00:00Z |
@@ -40,7 +40,7 @@ Catalog presence is not a support claim. Each row reports its own guard state an
 | code | stats | stub | deterministic | read-only | false | noninteractive | linux-x64-gnu | `coder` | `internal:phase-01@fab5848` | 2026-08-05T00:00:00Z |
 | code | ui | expected | deterministic | state-changing | true | interactive | none | `coder` | `internal:phase-01@fab5848` | 2026-08-05T00:00:00Z |
 | code | update | expected | deterministic | state-changing | true | noninteractive | none | `npm` | `internal:phase-01@fab5848` | 2026-08-05T00:00:00Z |
-| code | version | expected | deterministic | read-only | false | noninteractive | none | `sh` | `internal:phase-01@fab5848` | 2026-08-05T00:00:00Z |
+| code | version | expected | deterministic | read-only | false | noninteractive | none | `coder` | `internal:phase-01@fab5848` | 2026-08-05T00:00:00Z |
 | code | yolo | disabled | deterministic | dangerous | true | noninteractive | linux-x64-gnu | `sh` | `internal:phase-01@fab5848` | 2026-08-05T00:00:00Z |
 | codex | download | expected | deterministic | state-changing | true | noninteractive | none | `npm` | `internal:phase-01@fab5848` | 2026-08-05T00:00:00Z |
 | codex | headless | expected | deterministic | dangerous | true | noninteractive | none | `codex` | `internal:phase-01@fab5848` | 2026-08-05T00:00:00Z |
@@ -58,7 +58,7 @@ Catalog presence is not a support claim. Each row reports its own guard state an
 | copilot | stats | stub | deterministic | read-only | false | noninteractive | linux-x64-gnu | `copilot` | `internal:phase-01@fab5848` | 2026-08-05T00:00:00Z |
 | copilot | ui | expected | deterministic | state-changing | true | interactive | none | `copilot` | `internal:phase-01@fab5848` | 2026-08-05T00:00:00Z |
 | copilot | update | expected | deterministic | state-changing | true | noninteractive | none | `npm` | `internal:phase-01@fab5848` | 2026-08-05T00:00:00Z |
-| copilot | version | expected | deterministic | read-only | false | noninteractive | none | `sh` | `internal:phase-01@fab5848` | 2026-08-05T00:00:00Z |
+| copilot | version | expected | deterministic | read-only | false | noninteractive | none | `copilot` | `internal:phase-01@fab5848` | 2026-08-05T00:00:00Z |
 | copilot | yolo | disabled | deterministic | dangerous | true | noninteractive | linux-x64-gnu | `sh` | `internal:phase-01@fab5848` | 2026-08-05T00:00:00Z |
 | crush | download | expected | deterministic | state-changing | true | noninteractive | none | `npm` | `internal:phase-01@fab5848` | 2026-08-05T00:00:00Z |
 | crush | headless | stub | deterministic | read-only | false | noninteractive | linux-x64-gnu | `crush` | `internal:phase-01@fab5848` | 2026-08-05T00:00:00Z |
@@ -67,7 +67,7 @@ Catalog presence is not a support claim. Each row reports its own guard state an
 | crush | stats | stub | deterministic | read-only | false | noninteractive | linux-x64-gnu | `crush` | `internal:phase-01@fab5848` | 2026-08-05T00:00:00Z |
 | crush | ui | expected | deterministic | state-changing | true | interactive | none | `crush` | `internal:phase-01@fab5848` | 2026-08-05T00:00:00Z |
 | crush | update | expected | deterministic | state-changing | true | noninteractive | none | `npm` | `internal:phase-01@fab5848` | 2026-08-05T00:00:00Z |
-| crush | version | expected | deterministic | read-only | false | noninteractive | none | `sh` | `internal:phase-01@fab5848` | 2026-08-05T00:00:00Z |
+| crush | version | expected | deterministic | read-only | false | noninteractive | none | `crush` | `internal:phase-01@fab5848` | 2026-08-05T00:00:00Z |
 | crush | yolo | disabled | deterministic | dangerous | true | noninteractive | linux-x64-gnu | `sh` | `internal:phase-01@fab5848` | 2026-08-05T00:00:00Z |
 | cursor-agent | download | expected | deterministic | state-changing | true | noninteractive | none | `pip` | `internal:phase-01@fab5848` | 2026-08-05T00:00:00Z |
 | cursor-agent | headless | stub | deterministic | read-only | false | noninteractive | linux-x64-gnu | `cursor-agent` | `internal:phase-01@fab5848` | 2026-08-05T00:00:00Z |
@@ -76,7 +76,7 @@ Catalog presence is not a support claim. Each row reports its own guard state an
 | cursor-agent | stats | stub | deterministic | read-only | false | noninteractive | linux-x64-gnu | `cursor-agent` | `internal:phase-01@fab5848` | 2026-08-05T00:00:00Z |
 | cursor-agent | ui | expected | deterministic | state-changing | true | interactive | none | `cursor-agent` | `internal:phase-01@fab5848` | 2026-08-05T00:00:00Z |
 | cursor-agent | update | expected | deterministic | state-changing | true | noninteractive | none | `pip` | `internal:phase-01@fab5848` | 2026-08-05T00:00:00Z |
-| cursor-agent | version | stub | deterministic | read-only | false | noninteractive | linux-x64-gnu | `sh` | `internal:phase-01@fab5848` | 2026-08-05T00:00:00Z |
+| cursor-agent | version | stub | deterministic | read-only | false | noninteractive | linux-x64-gnu | `cursor-agent` | `internal:phase-01@fab5848` | 2026-08-05T00:00:00Z |
 | cursor-agent | yolo | disabled | deterministic | dangerous | true | noninteractive | linux-x64-gnu | `sh` | `internal:phase-01@fab5848` | 2026-08-05T00:00:00Z |
 | droid | download | unknown | deterministic | state-changing | true | noninteractive | none | `sh` | `internal:phase-01@fab5848` | 2026-08-05T00:00:00Z |
 | droid | headless | stub | deterministic | read-only | false | noninteractive | linux-x64-gnu | `droid` | `internal:phase-01@fab5848` | 2026-08-05T00:00:00Z |
@@ -85,7 +85,7 @@ Catalog presence is not a support claim. Each row reports its own guard state an
 | droid | stats | stub | deterministic | read-only | false | noninteractive | linux-x64-gnu | `droid` | `internal:phase-01@fab5848` | 2026-08-05T00:00:00Z |
 | droid | ui | expected | deterministic | state-changing | true | interactive | none | `droid` | `internal:phase-01@fab5848` | 2026-08-05T00:00:00Z |
 | droid | update | expected | deterministic | state-changing | true | noninteractive | none | `droid` | `internal:phase-01@fab5848` | 2026-08-05T00:00:00Z |
-| droid | version | expected | deterministic | read-only | false | noninteractive | none | `sh` | `internal:phase-01@fab5848` | 2026-08-05T00:00:00Z |
+| droid | version | expected | deterministic | read-only | false | noninteractive | none | `droid` | `internal:phase-01@fab5848` | 2026-08-05T00:00:00Z |
 | droid | yolo | disabled | deterministic | dangerous | true | noninteractive | linux-x64-gnu | `sh` | `internal:phase-01@fab5848` | 2026-08-05T00:00:00Z |
 | eca | download | unknown | deterministic | state-changing | true | noninteractive | none | `sh` | `internal:phase-01@fab5848` | 2026-08-05T00:00:00Z |
 | eca | headless | stub | deterministic | read-only | false | noninteractive | linux-x64-gnu | `eca` | `internal:phase-01@fab5848` | 2026-08-05T00:00:00Z |
@@ -94,7 +94,7 @@ Catalog presence is not a support claim. Each row reports its own guard state an
 | eca | stats | stub | deterministic | read-only | false | noninteractive | linux-x64-gnu | `eca` | `internal:phase-01@fab5848` | 2026-08-05T00:00:00Z |
 | eca | ui | expected | deterministic | state-changing | true | interactive | none | `eca` | `internal:phase-01@fab5848` | 2026-08-05T00:00:00Z |
 | eca | update | expected | deterministic | state-changing | true | noninteractive | none | `eca` | `internal:phase-01@fab5848` | 2026-08-05T00:00:00Z |
-| eca | version | expected | deterministic | read-only | false | noninteractive | none | `sh` | `internal:phase-01@fab5848` | 2026-08-05T00:00:00Z |
+| eca | version | expected | deterministic | read-only | false | noninteractive | none | `eca` | `internal:phase-01@fab5848` | 2026-08-05T00:00:00Z |
 | eca | yolo | disabled | deterministic | dangerous | true | noninteractive | linux-x64-gnu | `sh` | `internal:phase-01@fab5848` | 2026-08-05T00:00:00Z |
 | forge | download | expected | deterministic | state-changing | true | noninteractive | none | `npm` | `internal:phase-01@fab5848` | 2026-08-05T00:00:00Z |
 | forge | headless | stub | deterministic | read-only | false | noninteractive | linux-x64-gnu | `forge` | `internal:phase-01@fab5848` | 2026-08-05T00:00:00Z |
@@ -103,7 +103,7 @@ Catalog presence is not a support claim. Each row reports its own guard state an
 | forge | stats | stub | deterministic | read-only | false | noninteractive | linux-x64-gnu | `forge` | `internal:phase-01@fab5848` | 2026-08-05T00:00:00Z |
 | forge | ui | expected | deterministic | state-changing | true | interactive | none | `forge` | `internal:phase-01@fab5848` | 2026-08-05T00:00:00Z |
 | forge | update | expected | deterministic | state-changing | true | noninteractive | none | `npm` | `internal:phase-01@fab5848` | 2026-08-05T00:00:00Z |
-| forge | version | expected | deterministic | read-only | false | noninteractive | none | `sh` | `internal:phase-01@fab5848` | 2026-08-05T00:00:00Z |
+| forge | version | expected | deterministic | read-only | false | noninteractive | none | `forge` | `internal:phase-01@fab5848` | 2026-08-05T00:00:00Z |
 | forge | yolo | disabled | deterministic | dangerous | true | noninteractive | linux-x64-gnu | `sh` | `internal:phase-01@fab5848` | 2026-08-05T00:00:00Z |
 | gemini | download | expected | deterministic | state-changing | true | noninteractive | none | `npm` | `internal:phase-01@fab5848` | 2026-08-05T00:00:00Z |
 | gemini | headless | stub | deterministic | read-only | false | noninteractive | linux-x64-gnu | `gemini` | `internal:phase-01@fab5848` | 2026-08-05T00:00:00Z |
@@ -112,7 +112,7 @@ Catalog presence is not a support claim. Each row reports its own guard state an
 | gemini | stats | stub | deterministic | read-only | false | noninteractive | linux-x64-gnu | `gemini` | `internal:phase-01@fab5848` | 2026-08-05T00:00:00Z |
 | gemini | ui | expected | deterministic | state-changing | true | interactive | none | `gemini` | `internal:phase-01@fab5848` | 2026-08-05T00:00:00Z |
 | gemini | update | expected | deterministic | state-changing | true | noninteractive | none | `npm` | `internal:phase-01@fab5848` | 2026-08-05T00:00:00Z |
-| gemini | version | expected | deterministic | read-only | false | noninteractive | none | `sh` | `internal:phase-01@fab5848` | 2026-08-05T00:00:00Z |
+| gemini | version | expected | deterministic | read-only | false | noninteractive | none | `gemini` | `internal:phase-01@fab5848` | 2026-08-05T00:00:00Z |
 | gemini | yolo | disabled | deterministic | dangerous | true | noninteractive | linux-x64-gnu | `sh` | `internal:phase-01@fab5848` | 2026-08-05T00:00:00Z |
 | goose | download | unknown | deterministic | state-changing | true | noninteractive | none | `sh` | `internal:phase-01@fab5848` | 2026-08-05T00:00:00Z |
 | goose | headless | stub | deterministic | read-only | false | noninteractive | linux-x64-gnu | `goose` | `internal:phase-01@fab5848` | 2026-08-05T00:00:00Z |
@@ -121,7 +121,7 @@ Catalog presence is not a support claim. Each row reports its own guard state an
 | goose | stats | stub | deterministic | read-only | false | noninteractive | linux-x64-gnu | `goose` | `internal:phase-01@fab5848` | 2026-08-05T00:00:00Z |
 | goose | ui | expected | deterministic | state-changing | true | interactive | none | `goose` | `internal:phase-01@fab5848` | 2026-08-05T00:00:00Z |
 | goose | update | expected | deterministic | state-changing | true | noninteractive | none | `goose` | `internal:phase-01@fab5848` | 2026-08-05T00:00:00Z |
-| goose | version | expected | deterministic | read-only | false | noninteractive | none | `sh` | `internal:phase-01@fab5848` | 2026-08-05T00:00:00Z |
+| goose | version | expected | deterministic | read-only | false | noninteractive | none | `goose` | `internal:phase-01@fab5848` | 2026-08-05T00:00:00Z |
 | goose | yolo | disabled | deterministic | dangerous | true | noninteractive | linux-x64-gnu | `sh` | `internal:phase-01@fab5848` | 2026-08-05T00:00:00Z |
 | hermes | download | unknown | deterministic | state-changing | true | noninteractive | none | `bash` | `internal:phase-01@fab5848` | 2026-08-05T00:00:00Z |
 | hermes | headless | verified | disposable-real | dangerous | true | noninteractive | linux-x64-gnu | `hermes` | `internal:phase-01@fab5848` | 2026-08-05T00:00:00Z |
@@ -130,7 +130,7 @@ Catalog presence is not a support claim. Each row reports its own guard state an
 | hermes | stats | stub | deterministic | read-only | false | noninteractive | linux-x64-gnu | `hermes` | `internal:phase-01@fab5848` | 2026-08-05T00:00:00Z |
 | hermes | ui | expected | deterministic | state-changing | true | interactive | none | `hermes` | `internal:phase-01@fab5848` | 2026-08-05T00:00:00Z |
 | hermes | update | expected | deterministic | state-changing | true | noninteractive | none | `hermes` | `internal:phase-01@fab5848` | 2026-08-05T00:00:00Z |
-| hermes | version | expected | deterministic | read-only | false | noninteractive | none | `sh` | `internal:phase-01@fab5848` | 2026-08-05T00:00:00Z |
+| hermes | version | expected | deterministic | read-only | false | noninteractive | none | `hermes` | `internal:phase-01@fab5848` | 2026-08-05T00:00:00Z |
 | hermes | yolo | disabled | deterministic | dangerous | true | noninteractive | linux-x64-gnu | `sh` | `internal:phase-01@fab5848` | 2026-08-05T00:00:00Z |
 | jules | download | expected | deterministic | state-changing | true | noninteractive | none | `npm` | `internal:phase-01@fab5848` | 2026-08-05T00:00:00Z |
 | jules | headless | stub | deterministic | read-only | false | noninteractive | linux-x64-gnu | `jules` | `internal:phase-01@fab5848` | 2026-08-05T00:00:00Z |
@@ -139,7 +139,7 @@ Catalog presence is not a support claim. Each row reports its own guard state an
 | jules | stats | stub | deterministic | read-only | false | noninteractive | linux-x64-gnu | `jules` | `internal:phase-01@fab5848` | 2026-08-05T00:00:00Z |
 | jules | ui | expected | deterministic | state-changing | true | interactive | none | `jules` | `internal:phase-01@fab5848` | 2026-08-05T00:00:00Z |
 | jules | update | expected | deterministic | state-changing | true | noninteractive | none | `npm` | `internal:phase-01@fab5848` | 2026-08-05T00:00:00Z |
-| jules | version | expected | deterministic | read-only | false | noninteractive | none | `sh` | `internal:phase-01@fab5848` | 2026-08-05T00:00:00Z |
+| jules | version | expected | deterministic | read-only | false | noninteractive | none | `jules` | `internal:phase-01@fab5848` | 2026-08-05T00:00:00Z |
 | jules | yolo | disabled | deterministic | dangerous | true | noninteractive | linux-x64-gnu | `sh` | `internal:phase-01@fab5848` | 2026-08-05T00:00:00Z |
 | kilocode | download | expected | deterministic | state-changing | true | noninteractive | none | `npm` | `internal:phase-01@fab5848` | 2026-08-05T00:00:00Z |
 | kilocode | headless | stub | deterministic | read-only | false | noninteractive | linux-x64-gnu | `kilocode` | `internal:phase-01@fab5848` | 2026-08-05T00:00:00Z |
@@ -148,7 +148,7 @@ Catalog presence is not a support claim. Each row reports its own guard state an
 | kilocode | stats | stub | deterministic | read-only | false | noninteractive | linux-x64-gnu | `kilocode` | `internal:phase-01@fab5848` | 2026-08-05T00:00:00Z |
 | kilocode | ui | expected | deterministic | state-changing | true | interactive | none | `kilocode` | `internal:phase-01@fab5848` | 2026-08-05T00:00:00Z |
 | kilocode | update | expected | deterministic | state-changing | true | noninteractive | none | `npm` | `internal:phase-01@fab5848` | 2026-08-05T00:00:00Z |
-| kilocode | version | expected | deterministic | read-only | false | noninteractive | none | `sh` | `internal:phase-01@fab5848` | 2026-08-05T00:00:00Z |
+| kilocode | version | expected | deterministic | read-only | false | noninteractive | none | `kilocode` | `internal:phase-01@fab5848` | 2026-08-05T00:00:00Z |
 | kilocode | yolo | disabled | deterministic | dangerous | true | noninteractive | linux-x64-gnu | `sh` | `internal:phase-01@fab5848` | 2026-08-05T00:00:00Z |
 | letta | download | expected | deterministic | state-changing | true | noninteractive | none | `npm` | `internal:phase-01@fab5848` | 2026-08-05T00:00:00Z |
 | letta | headless | stub | deterministic | read-only | false | noninteractive | linux-x64-gnu | `letta` | `internal:phase-01@fab5848` | 2026-08-05T00:00:00Z |
@@ -157,7 +157,7 @@ Catalog presence is not a support claim. Each row reports its own guard state an
 | letta | stats | stub | deterministic | read-only | false | noninteractive | linux-x64-gnu | `letta` | `internal:phase-01@fab5848` | 2026-08-05T00:00:00Z |
 | letta | ui | expected | deterministic | state-changing | true | interactive | none | `letta` | `internal:phase-01@fab5848` | 2026-08-05T00:00:00Z |
 | letta | update | expected | deterministic | state-changing | true | noninteractive | none | `npm` | `internal:phase-01@fab5848` | 2026-08-05T00:00:00Z |
-| letta | version | expected | deterministic | read-only | false | noninteractive | none | `sh` | `internal:phase-01@fab5848` | 2026-08-05T00:00:00Z |
+| letta | version | expected | deterministic | read-only | false | noninteractive | none | `letta` | `internal:phase-01@fab5848` | 2026-08-05T00:00:00Z |
 | letta | yolo | disabled | deterministic | dangerous | true | noninteractive | linux-x64-gnu | `sh` | `internal:phase-01@fab5848` | 2026-08-05T00:00:00Z |
 | llxprt | download | expected | deterministic | state-changing | true | noninteractive | none | `npm` | `internal:phase-01@fab5848` | 2026-08-05T00:00:00Z |
 | llxprt | headless | stub | deterministic | read-only | false | noninteractive | linux-x64-gnu | `llxprt` | `internal:phase-01@fab5848` | 2026-08-05T00:00:00Z |
@@ -166,7 +166,7 @@ Catalog presence is not a support claim. Each row reports its own guard state an
 | llxprt | stats | stub | deterministic | read-only | false | noninteractive | linux-x64-gnu | `llxprt` | `internal:phase-01@fab5848` | 2026-08-05T00:00:00Z |
 | llxprt | ui | expected | deterministic | state-changing | true | interactive | none | `llxprt` | `internal:phase-01@fab5848` | 2026-08-05T00:00:00Z |
 | llxprt | update | expected | deterministic | state-changing | true | noninteractive | none | `npm` | `internal:phase-01@fab5848` | 2026-08-05T00:00:00Z |
-| llxprt | version | expected | deterministic | read-only | false | noninteractive | none | `sh` | `internal:phase-01@fab5848` | 2026-08-05T00:00:00Z |
+| llxprt | version | expected | deterministic | read-only | false | noninteractive | none | `llxprt` | `internal:phase-01@fab5848` | 2026-08-05T00:00:00Z |
 | llxprt | yolo | disabled | deterministic | dangerous | true | noninteractive | linux-x64-gnu | `sh` | `internal:phase-01@fab5848` | 2026-08-05T00:00:00Z |
 | nanocoder | download | expected | deterministic | state-changing | true | noninteractive | none | `npm` | `internal:phase-01@fab5848` | 2026-08-05T00:00:00Z |
 | nanocoder | headless | stub | deterministic | read-only | false | noninteractive | linux-x64-gnu | `nanocoder` | `internal:phase-01@fab5848` | 2026-08-05T00:00:00Z |
@@ -175,7 +175,7 @@ Catalog presence is not a support claim. Each row reports its own guard state an
 | nanocoder | stats | stub | deterministic | read-only | false | noninteractive | linux-x64-gnu | `nanocoder` | `internal:phase-01@fab5848` | 2026-08-05T00:00:00Z |
 | nanocoder | ui | expected | deterministic | state-changing | true | interactive | none | `nanocoder` | `internal:phase-01@fab5848` | 2026-08-05T00:00:00Z |
 | nanocoder | update | expected | deterministic | state-changing | true | noninteractive | none | `npm` | `internal:phase-01@fab5848` | 2026-08-05T00:00:00Z |
-| nanocoder | version | expected | deterministic | read-only | false | noninteractive | none | `sh` | `internal:phase-01@fab5848` | 2026-08-05T00:00:00Z |
+| nanocoder | version | expected | deterministic | read-only | false | noninteractive | none | `nanocoder` | `internal:phase-01@fab5848` | 2026-08-05T00:00:00Z |
 | nanocoder | yolo | disabled | deterministic | dangerous | true | noninteractive | linux-x64-gnu | `sh` | `internal:phase-01@fab5848` | 2026-08-05T00:00:00Z |
 | ollama | download | unknown | deterministic | state-changing | true | noninteractive | none | `sh` | `internal:phase-01@fab5848` | 2026-08-05T00:00:00Z |
 | ollama | headless | stub | deterministic | read-only | false | noninteractive | linux-x64-gnu | `ollama` | `internal:phase-01@fab5848` | 2026-08-05T00:00:00Z |
@@ -184,7 +184,7 @@ Catalog presence is not a support claim. Each row reports its own guard state an
 | ollama | stats | stub | deterministic | read-only | false | noninteractive | linux-x64-gnu | `ollama` | `internal:phase-01@fab5848` | 2026-08-05T00:00:00Z |
 | ollama | ui | expected | deterministic | state-changing | true | interactive | none | `ollama` | `internal:phase-01@fab5848` | 2026-08-05T00:00:00Z |
 | ollama | update | unknown | deterministic | state-changing | true | noninteractive | none | `sh` | `internal:phase-01@fab5848` | 2026-08-05T00:00:00Z |
-| ollama | version | verified | disposable-real | read-only | false | noninteractive | none | `sh` | `internal:phase-01@fab5848` | 2026-08-05T00:00:00Z |
+| ollama | version | verified | disposable-real | read-only | false | noninteractive | none | `ollama` | `internal:phase-01@fab5848` | 2026-08-05T00:00:00Z |
 | ollama | yolo | disabled | deterministic | dangerous | true | noninteractive | linux-x64-gnu | `sh` | `internal:phase-01@fab5848` | 2026-08-05T00:00:00Z |
 | openclaw | download | expected | deterministic | state-changing | true | noninteractive | none | `npm` | `internal:phase-01@fab5848` | 2026-08-05T00:00:00Z |
 | openclaw | headless | stub | deterministic | read-only | false | noninteractive | linux-x64-gnu | `openclaw` | `internal:phase-01@fab5848` | 2026-08-05T00:00:00Z |
@@ -193,7 +193,7 @@ Catalog presence is not a support claim. Each row reports its own guard state an
 | openclaw | stats | stub | deterministic | read-only | false | noninteractive | linux-x64-gnu | `openclaw` | `internal:phase-01@fab5848` | 2026-08-05T00:00:00Z |
 | openclaw | ui | expected | deterministic | state-changing | true | interactive | none | `openclaw` | `internal:phase-01@fab5848` | 2026-08-05T00:00:00Z |
 | openclaw | update | expected | deterministic | state-changing | true | noninteractive | none | `openclaw` | `internal:phase-01@fab5848` | 2026-08-05T00:00:00Z |
-| openclaw | version | expected | deterministic | read-only | false | noninteractive | none | `sh` | `internal:phase-01@fab5848` | 2026-08-05T00:00:00Z |
+| openclaw | version | expected | deterministic | read-only | false | noninteractive | none | `openclaw` | `internal:phase-01@fab5848` | 2026-08-05T00:00:00Z |
 | openclaw | yolo | disabled | deterministic | dangerous | true | noninteractive | linux-x64-gnu | `sh` | `internal:phase-01@fab5848` | 2026-08-05T00:00:00Z |
 | opencode | download | expected | deterministic | state-changing | true | noninteractive | none | `npm` | `internal:phase-01@fab5848` | 2026-08-05T00:00:00Z |
 | opencode | headless | expected | deterministic | dangerous | true | noninteractive | none | `opencode` | `internal:phase-01@fab5848` | 2026-08-05T00:00:00Z |
@@ -211,7 +211,7 @@ Catalog presence is not a support claim. Each row reports its own guard state an
 | pi | stats | stub | deterministic | read-only | false | noninteractive | linux-x64-gnu | `pi` | `internal:phase-01@fab5848` | 2026-08-05T00:00:00Z |
 | pi | ui | expected | deterministic | state-changing | true | interactive | none | `pi` | `internal:phase-01@fab5848` | 2026-08-05T00:00:00Z |
 | pi | update | expected | deterministic | state-changing | true | noninteractive | none | `npm` | `internal:phase-01@fab5848` | 2026-08-05T00:00:00Z |
-| pi | version | verified | disposable-real | read-only | false | noninteractive | none | `sh` | `internal:phase-01@fab5848` | 2026-08-05T00:00:00Z |
+| pi | version | verified | disposable-real | read-only | false | noninteractive | none | `pi` | `internal:phase-01@fab5848` | 2026-08-05T00:00:00Z |
 | pi | yolo | disabled | deterministic | dangerous | true | noninteractive | linux-x64-gnu | `sh` | `internal:phase-01@fab5848` | 2026-08-05T00:00:00Z |
 | qwen | download | expected | deterministic | state-changing | true | noninteractive | none | `npm` | `internal:phase-01@fab5848` | 2026-08-05T00:00:00Z |
 | qwen | headless | stub | deterministic | read-only | false | noninteractive | linux-x64-gnu | `qwen` | `internal:phase-01@fab5848` | 2026-08-05T00:00:00Z |
@@ -220,7 +220,7 @@ Catalog presence is not a support claim. Each row reports its own guard state an
 | qwen | stats | stub | deterministic | read-only | false | noninteractive | linux-x64-gnu | `qwen` | `internal:phase-01@fab5848` | 2026-08-05T00:00:00Z |
 | qwen | ui | expected | deterministic | state-changing | true | interactive | none | `qwen` | `internal:phase-01@fab5848` | 2026-08-05T00:00:00Z |
 | qwen | update | expected | deterministic | state-changing | true | noninteractive | none | `npm` | `internal:phase-01@fab5848` | 2026-08-05T00:00:00Z |
-| qwen | version | expected | deterministic | read-only | false | noninteractive | none | `sh` | `internal:phase-01@fab5848` | 2026-08-05T00:00:00Z |
+| qwen | version | expected | deterministic | read-only | false | noninteractive | none | `qwen` | `internal:phase-01@fab5848` | 2026-08-05T00:00:00Z |
 | qwen | yolo | disabled | deterministic | dangerous | true | noninteractive | linux-x64-gnu | `sh` | `internal:phase-01@fab5848` | 2026-08-05T00:00:00Z |
 | vibe | download | unknown | deterministic | state-changing | true | noninteractive | none | `bash` | `internal:phase-01@fab5848` | 2026-08-05T00:00:00Z |
 | vibe | headless | stub | deterministic | read-only | false | noninteractive | linux-x64-gnu | `vibe` | `internal:phase-01@fab5848` | 2026-08-05T00:00:00Z |
@@ -229,7 +229,7 @@ Catalog presence is not a support claim. Each row reports its own guard state an
 | vibe | stats | stub | deterministic | read-only | false | noninteractive | linux-x64-gnu | `vibe` | `internal:phase-01@fab5848` | 2026-08-05T00:00:00Z |
 | vibe | ui | expected | deterministic | state-changing | true | interactive | none | `vibe` | `internal:phase-01@fab5848` | 2026-08-05T00:00:00Z |
 | vibe | update | expected | deterministic | state-changing | true | noninteractive | none | `vibe` | `internal:phase-01@fab5848` | 2026-08-05T00:00:00Z |
-| vibe | version | expected | deterministic | read-only | false | noninteractive | none | `sh` | `internal:phase-01@fab5848` | 2026-08-05T00:00:00Z |
+| vibe | version | expected | deterministic | read-only | false | noninteractive | none | `vibe` | `internal:phase-01@fab5848` | 2026-08-05T00:00:00Z |
 | vibe | yolo | disabled | deterministic | dangerous | true | noninteractive | linux-x64-gnu | `sh` | `internal:phase-01@fab5848` | 2026-08-05T00:00:00Z |
 
 ## First-class decisions

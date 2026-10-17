@@ -1,8 +1,10 @@
 use crate::gates::logic::interrupt::{active_pid, memo_clear, memo_hit, memo_set, track};
-use crate::gates::logic::runner::{outcome_line_for, preflight};
-use crate::gates::logic::verdict::Verdict;
-
-use crate::gates::tests_util::*;
+use crate::gates::logic::runner::outcome_line_for;
+#[cfg(unix)]
+use crate::gates::{
+    logic::{runner::preflight, verdict::Verdict},
+    tests_util::*,
+};
 
 #[test]
 fn interrupt_track_and_active_pid_round_trip() {

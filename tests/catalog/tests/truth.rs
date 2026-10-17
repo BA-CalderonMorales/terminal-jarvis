@@ -50,3 +50,30 @@ fn interaction_and_network_counts_match_the_frozen_audit() {
     assert_eq!(network, 103);
     assert_eq!(interactive, 27);
 }
+
+/// Regression witness for the shape-gate rule in
+/// `catalog::logic::command_truth`: an executable claim that also declares
+/// itself platform-independent (`platforms` empty) must not route through a
+/// POSIX shell, which a clean Windows `PATH` lacks. This is the check that
+/// would have caught the 23 version probes that used to `sh -c`.
+#[test]
+fn no_row_claims_platform_independence_through_a_posix_shell() {
+    let harnesses = catalog::load(Path::new("harnesses")).expect("catalog loads");
+    for harness in &harnesses {
+        for plan in &harness.capabilities {
+            let executable_claim = matches!(
+                plan.support,
+                SupportState::Verified | SupportState::Expected
+            );
+            assert!(
+                !(executable_claim
+                    && plan.platforms.is_empty()
+                    && matches!(plan.executable.as_str(), "sh" | "bash")),
+                "{}:{} claims to run anywhere but requires the POSIX shell '{}'",
+                harness.name,
+                plan.capability,
+                plan.executable
+            );
+        }
+    }
+}
