@@ -1,4 +1,17 @@
 # Changelog
+## [0.1.20] - unreleased
+
+### Fixed
+
+- the test suite passes on a clean Windows `PATH`. Process fixtures no longer
+  assume POSIX utilities (`sh`, `true`, `false`, `echo`) are resolvable; they
+  use `cmd` on Windows, and the release preflight tests derive Git's `sh.exe`
+  from `git --exec-path` so Git Bash never has to be on `PATH`. Catalog
+  coverage now reads each row's declared `platforms`, so a capability narrowed
+  to another platform is asserted as correctly blocked (exit 4) instead of
+  assumed runnable. `default_home`'s test pins `HOME`, which Windows leaves
+  unset.
+
 ## [0.1.19] - unreleased
 
 ### Added
