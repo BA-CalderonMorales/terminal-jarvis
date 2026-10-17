@@ -74,3 +74,19 @@ contains the default harness and gate data as a fallback.
 Release preparation stops at a verified `release/X.Y.Z` branch. Tagging,
 publishing, protected merges, and the mandatory release Trivy scans use the
 separate release workflow and require operator approval.
+
+### npm Trusted Publishing
+
+The npm publish job holds no stored credential. It authenticates with the
+workflow's GitHub OIDC identity, so a Trusted Publisher must be registered on
+npmjs.com for this repository and the `cd-multiplatform.yml` workflow before a
+release tag is pushed. The job asserts npm 11.5.1 or newer before it touches the
+registry and stops with an explicit message when the toolchain is older.
+
+### Registry Confirmation
+
+npm and crates.io acknowledge a write before they serve it. The release jobs
+therefore confirm the published version, each dist-tag, and the crates.io entry
+by polling to convergence, failing only on timeout. A single read immediately
+after a write is not evidence, and treating one as evidence reports a false
+failure for a release that actually succeeded.

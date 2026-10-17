@@ -159,15 +159,31 @@ jobs:
           VERSION: ${{ needs.release-meta.outputs.version }}
         run: |
           set -eu
-          if curl -A "terminal-jarvis-release-ci" -fsS "https://crates.io/api/v1/crates/terminal-jarvis/$VERSION" >/dev/null; then
-            echo "terminal-jarvis@$VERSION already exists on crates.io"
-            exit 0
-          fi
-          test -n "${CARGO_REGISTRY_TOKEN:-}" || {
-            echo "CARGO_REGISTRY_TOKEN is required to publish terminal-jarvis@$VERSION" >&2
-            exit 1
+          # crates.io indexes asynchronously, so "published" and "readable" are
+          # separate events. Poll to convergence rather than reading once.
+          served() {
+            curl -A "terminal-jarvis-release-ci" -fsS \
+              "https://crates.io/api/v1/crates/terminal-jarvis/$VERSION" >/dev/null 2>&1
           }
-          cargo publish --locked
+          if served; then
+            echo "terminal-jarvis@$VERSION already exists on crates.io"
+          else
+            test -n "${CARGO_REGISTRY_TOKEN:-}" || {
+              echo "CARGO_REGISTRY_TOKEN is required to publish terminal-jarvis@$VERSION" >&2
+              exit 1
+            }
+            cargo publish --locked
+          fi
+          elapsed=0
+          until served; do
+            if [ "$elapsed" -ge 300 ]; then
+              echo "timed out after ${elapsed}s waiting for crates.io to serve terminal-jarvis@$VERSION" >&2
+              exit 1
+            fi
+            sleep 10
+            elapsed=$((elapsed + 10))
+          done
+          echo "confirmed: crates.io serves terminal-jarvis@$VERSION"
 
   release:
     name: Publish GitHub Release
@@ -331,6 +347,12 @@ jobs:
     needs: [release-meta, update-homebrew-tap]
     runs-on: ubuntu-latest
     timeout-minutes: 10
+    # Trusted publishing (OIDC) replaces the stored NPM_TOKEN. A trusted
+    # publisher for this repository and workflow file must exist on npmjs.com
+    # before a release runs; see docs/development.md.
+    permissions:
+      contents: read
+      id-token: write
     steps:
       - uses: actions/download-artifact@v8
         with:
@@ -339,32 +361,68 @@ jobs:
 
       - uses: actions/setup-node@v6
         with:
-          node-version: 20
-          registry-url: "https://registry.npmjs.org"
+          node-version: 24
+
+      - name: Require npm with trusted publishing support
+        run: |
+          set -eu
+          npm_version="$(npm --version)"
+          echo "npm $npm_version"
+          oldest="$(printf '%s\n%s\n' 11.5.1 "$npm_version" | sort -V | head -n 1)"
+          if [ "$oldest" != "11.5.1" ]; then
+            echo "npm >= 11.5.1 is required for OIDC trusted publishing, found $npm_version" >&2
+            exit 1
+          fi
 
       - name: Publish or retag npm channels
         env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
           VERSION: ${{ needs.release-meta.outputs.version }}
         run: |
           set -eu
-          test -n "${NODE_AUTH_TOKEN:-}" || {
-            echo "NPM_TOKEN is required to publish terminal-jarvis@$VERSION" >&2
-            exit 1
-          }
           package_dir="artifacts/$VERSION/linux-x64-gnu/npm/terminal-jarvis"
           test -f "$package_dir/package.json"
           chmod +x "$package_dir/bin/terminal-jarvis"
           test -x "$package_dir/bin/terminal-jarvis"
           (cd "$package_dir" && npm pack --dry-run --loglevel error)
+
+          # The npm registry is eventually consistent: a write is acknowledged
+          # before it is readable, so a single immediate read proves nothing.
+          # Poll to convergence, and fail only on timeout.
+          wait_for_version() {
+            elapsed=0
+            until npm view "terminal-jarvis@$VERSION" version >/dev/null 2>&1; do
+              if [ "$elapsed" -ge 180 ]; then
+                echo "timed out after ${elapsed}s waiting for terminal-jarvis@$VERSION" >&2
+                return 1
+              fi
+              sleep 10
+              elapsed=$((elapsed + 10))
+            done
+            echo "confirmed: terminal-jarvis@$VERSION is readable"
+          }
+          wait_for_tag() {
+            tag="$1"
+            elapsed=0
+            until npm dist-tag ls terminal-jarvis 2>/dev/null | grep -q "^$tag: $VERSION\$"; do
+              if [ "$elapsed" -ge 180 ]; then
+                echo "timed out after ${elapsed}s waiting for dist-tag $tag -> $VERSION" >&2
+                return 1
+              fi
+              sleep 10
+              elapsed=$((elapsed + 10))
+            done
+            echo "confirmed: $tag -> $VERSION"
+          }
+
           if npm view "terminal-jarvis@$VERSION" version >/dev/null 2>&1; then
-            npm dist-tag add "terminal-jarvis@$VERSION" latest
+            echo "terminal-jarvis@$VERSION is already published; moving tags only"
           else
-            (cd "$package_dir" && npm publish --tag latest)
+            (cd "$package_dir" && npm publish --tag latest --provenance)
           fi
-          for tag in stable beta; do
+          wait_for_version
+          for tag in latest stable beta; do
             npm dist-tag add "terminal-jarvis@$VERSION" "$tag"
           done
           for tag in latest stable beta; do
-            npm dist-tag ls terminal-jarvis | grep "^$tag: $VERSION$"
+            wait_for_tag "$tag"
           done
