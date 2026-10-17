@@ -39,6 +39,36 @@ it, and anything future work must respect.
 
 ## Records
 
+### Make the Windows test suite honest without widening support claims (release/0.1.20 -> 2026-10-16)
+
+**Decision:** Pass the suite on a clean Windows `PATH` instead of assuming a
+POSIX shell is there. Process fixtures use `cmd` on Windows rather than `sh`,
+`true`, `false`, or `echo`, and the release preflight tests derive Git's
+`sh.exe` from `git --exec-path` rather than requiring Git Bash on `PATH`.
+Catalog coverage reads each descriptor's declared `platforms`, so a row
+narrowed to another platform is asserted as correctly blocked (exit 4) instead
+of being assumed runnable.
+
+**Context:** `win32-x64` is a documented supported platform (`installation.md`,
+and `release_platforms` in `release.toml`), and the changelog already claimed
+the suite passed on Windows -- but only where Git for Windows' `usr\bin` sat on
+`PATH`. CI verifies on `ubuntu-latest` alone, and the `win32-x64` CD job builds
+and packages without running tests, so nothing caught the gap. `hermes:headless`
+is declared `linux-x64-gnu`, so on Windows its row is correctly refused; the walk
+test had hard-coded the Linux outcome (`Some(0)`).
+
+**Considered:** Adding `windows-x64-msvc` to `hermes:headless` would make the
+old assertion true, but it asserts support for a capability never verified on
+Windows. Requiring Git Bash on `PATH` fixes the fixtures without touching the
+tests, but makes a supported platform depend on a non-default shell install.
+
+**Consequence:** Support claims stay where they are declared -- in the catalog --
+and the coverage test now witnesses the platform gate rather than assuming it
+away. A Windows-hostile fixture must state a per-platform command. The
+Windows-only `clippy -D warnings`, generated support-report line endings,
+`integration-hardening`, and npm wrapper tests remain open and are a follow-up;
+CI still verifies on Linux.
+
 ### Close the Copilot tui review gaps before 0.1.19 reaches main (fix/copilot-review-develop -> 2026-09-07)
 
 **Decision:** Treat `Key::Dead` as terminal in every viewport mode, use
