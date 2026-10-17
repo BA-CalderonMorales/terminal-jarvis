@@ -6,6 +6,7 @@
 use std::sync::atomic::{AtomicBool, AtomicPtr, AtomicUsize, Ordering};
 
 static CHILD_RUNNING: AtomicBool = AtomicBool::new(false);
+#[cfg(unix)]
 static ANSI: AtomicBool = AtomicBool::new(false);
 static PREFIX: AtomicPtr<u8> = AtomicPtr::new(std::ptr::null_mut());
 static PREFIX_LEN: AtomicUsize = AtomicUsize::new(0);
@@ -23,15 +24,12 @@ pub fn guarded<T>(body: impl FnOnce() -> T) -> T {
     }
     let result = body();
     #[cfg(unix)]
-    {
-        set_sigint(SIG_DFL);
-    }
+    set_sigint(SIG_DFL);
     result
 }
 
-/// Hands the handler the fully rendered prompt prefix (indicator, colored)
-/// so an idle Ctrl+C redraws the exact frame. The string must outlive the
-/// process; the shell passes a leaked prefix.
+/// Hands the handler the fully rendered prompt prefix (indicator, colored) so
+/// an idle Ctrl+C redraws the exact frame. The shell passes a leaked string.
 pub fn remember_prefix(prefix: &'static str) {
     PREFIX_LEN.store(prefix.len(), Ordering::Release);
     PREFIX.store(prefix.as_ptr() as *mut u8, Ordering::Release);
@@ -66,12 +64,14 @@ extern "C" fn refresh(_signum: i32) {
 
 /// The current gate scan's pid, or None when nothing is scanning. Killing
 /// the scanner outright beats trivy's multi-minute graceful shutdown.
+#[cfg(unix)]
 fn system_gate_pid() -> Option<i32> {
     let pid = crate::gates::active_child_pid();
     (pid > 0).then_some(pid)
 }
 
 /// Erase the echoed control character, then reprint the stored prefix.
+#[cfg(any(unix, test))]
 const CORE_FRAME: &[u8] = b"\r\x1b[2K";
 
 #[cfg(unix)]
