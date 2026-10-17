@@ -56,11 +56,11 @@ extern "C" fn refresh(_signum: i32) {
         // The viewport owns its frame; erasing rows here would corrupt it.
         return;
     }
-    let _ = unsafe { raw_write(1, CORE_FRAME.as_ptr(), CORE_FRAME.len()) };
+    let _ = unsafe { raw_write(1, CORE_FRAME.as_ptr().cast(), CORE_FRAME.len()) };
     let len = PREFIX_LEN.load(Ordering::Acquire);
     let prefix = PREFIX.load(Ordering::Acquire);
     if len > 0 && !prefix.is_null() {
-        let _ = unsafe { raw_write(1, prefix as *const u8, len) };
+        let _ = unsafe { raw_write(1, (prefix as *const u8).cast(), len) };
     }
 }
 
@@ -78,7 +78,7 @@ const CORE_FRAME: &[u8] = b"\r\x1b[2K";
 extern "C" {
     fn signal(signum: i32, handler: usize) -> usize;
     #[link_name = "write"]
-    fn raw_write(fd: i32, buf: *const u8, count: usize) -> isize;
+    fn raw_write(fd: i32, buf: *const std::ffi::c_void, count: usize) -> isize;
     #[link_name = "kill"]
     fn raw_kill(pid: i32, signal: i32) -> i32;
 }
