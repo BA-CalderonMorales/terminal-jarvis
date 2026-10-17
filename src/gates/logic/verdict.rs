@@ -36,7 +36,8 @@ pub fn block_summary(output: &str) -> String {
         .collect::<Vec<_>>();
     let mut lines = tail.into_iter().rev().collect::<Vec<_>>();
     if lines.is_empty() {
-        lines.push(output.lines().next_back().unwrap_or("scan failed"));
+        let fallback = output.lines().next_back().filter(|line| !line.is_empty());
+        lines.push(fallback.unwrap_or("scan failed"));
     }
     lines.join("\n")
 }

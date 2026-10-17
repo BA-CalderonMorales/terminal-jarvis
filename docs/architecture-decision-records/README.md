@@ -39,6 +39,86 @@ it, and anything future work must respect.
 
 ## Records
 
+### Fix an empty block summary instead of relaxing the property that caught it (develop -> 2026-10-17)
+
+**Decision:** Give `block_summary` a non-empty fallback and pin the inputs
+quickcheck reaches only by chance, rather than loosening
+`block_summary_never_comes_back_empty`.
+
+**Context:** The release PR for 0.1.20 failed gate [12] coverage on
+`[quickcheck] TEST FAILED` for a random `String`, on a tree whose identical
+gate had passed minutes earlier. The hole is real: when every line is trivy
+chatter or blank and the last line is empty, the tail filter keeps nothing and
+the old fallback pushed that empty last line, so a blocked verdict's summary
+could come back blank.
+
+**Considered:** Relaxing or deleting the property would make the gate agree
+with the code, but it is the only thing asserting a blocked verdict always
+carries a summary. Re-running the job would likely have gone green and hidden
+the defect until the next unlucky seed.
+
+**Consequence:** `block_summary` returns a sentinel when nothing survives the
+filter, and four reproducing inputs are asserted deterministically, so the
+contract no longer depends on quickcheck's luck.
+
+### Scope the SIGINT internals to unix so the Windows build is warning-free (develop -> 2026-10-17)
+
+**Decision:** Mark `ANSI`, `system_gate_pid`, and `CORE_FRAME` in
+`src/tui/sigint.rs` unix-only, using `#[cfg(any(unix, test))]` for `CORE_FRAME`
+so the cross-platform frame test still runs on Windows.
+
+**Context:** `refresh`, the only production user, is `#[cfg(unix)]`, so the
+Windows build reported three dead-code warnings. No gate could see them: the
+repo's only `-D warnings` is Linux clippy, and the win32 CD job builds without
+denying warnings.
+
+**Considered:** `#[cfg_attr(not(unix), allow(dead_code))]` silences the warnings
+without stating why they exist. A plain `#[cfg(unix)]` on `CORE_FRAME` would
+have dropped `core_frame_erases_the_line_before_any_redraw` from the Windows
+suite -- gating coverage away, which we do not do.
+
+**Consequence:** `cargo build` on Windows is warning-free, the Windows test
+count is unchanged, and the unix signal path is untouched. `sigint.rs` still
+sits at the 100-line limit.
+
+### Match the runtime `write` signature instead of silencing the lint (release/0.1.20 -> 2026-10-16)
+
+Recorded in
+[runtime-write-signature-2026-10-16.md](runtime-write-signature-2026-10-16.md):
+CI floats on `@stable`, whose 1.99.1 release made `write` a
+`suspicious-runtime-symbol-definitions` case and reddened a branch that carried
+no relevant change.
+
+### Make the Windows test suite honest without widening support claims (release/0.1.20 -> 2026-10-16)
+
+**Decision:** Pass the suite on a clean Windows `PATH` instead of assuming a
+POSIX shell is there. Process fixtures use `cmd` on Windows rather than `sh`,
+`true`, `false`, or `echo`, and the release preflight tests derive Git's
+`sh.exe` from `git --exec-path` rather than requiring Git Bash on `PATH`.
+Catalog coverage reads each descriptor's declared `platforms`, so a row
+narrowed to another platform is asserted as correctly blocked (exit 4) instead
+of being assumed runnable.
+
+**Context:** `win32-x64` is a documented supported platform (`installation.md`,
+and `release_platforms` in `release.toml`), and the changelog already claimed
+the suite passed on Windows -- but only where Git for Windows' `usr\bin` sat on
+`PATH`. CI verifies on `ubuntu-latest` alone, and the `win32-x64` CD job builds
+and packages without running tests, so nothing caught the gap. `hermes:headless`
+is declared `linux-x64-gnu`, so on Windows its row is correctly refused; the walk
+test had hard-coded the Linux outcome (`Some(0)`).
+
+**Considered:** Adding `windows-x64-msvc` to `hermes:headless` would make the
+old assertion true, but it asserts support for a capability never verified on
+Windows. Requiring Git Bash on `PATH` fixes the fixtures without touching the
+tests, but makes a supported platform depend on a non-default shell install.
+
+**Consequence:** Support claims stay where they are declared -- in the catalog --
+and the coverage test now witnesses the platform gate rather than assuming it
+away. A Windows-hostile fixture must state a per-platform command. The
+Windows-only `clippy -D warnings`, generated support-report line endings,
+`integration-hardening`, and npm wrapper tests remain open and are a follow-up;
+CI still verifies on Linux.
+
 ### Close the Copilot tui review gaps before 0.1.19 reaches main (fix/copilot-review-develop -> 2026-09-07)
 
 **Decision:** Treat `Key::Dead` as terminal in every viewport mode, use

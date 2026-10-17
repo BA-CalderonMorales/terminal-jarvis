@@ -6,6 +6,7 @@
 use std::sync::atomic::{AtomicBool, AtomicPtr, AtomicUsize, Ordering};
 
 static CHILD_RUNNING: AtomicBool = AtomicBool::new(false);
+#[cfg(unix)]
 static ANSI: AtomicBool = AtomicBool::new(false);
 static PREFIX: AtomicPtr<u8> = AtomicPtr::new(std::ptr::null_mut());
 static PREFIX_LEN: AtomicUsize = AtomicUsize::new(0);
@@ -23,15 +24,12 @@ pub fn guarded<T>(body: impl FnOnce() -> T) -> T {
     }
     let result = body();
     #[cfg(unix)]
-    {
-        set_sigint(SIG_DFL);
-    }
+    set_sigint(SIG_DFL);
     result
 }
 
-/// Hands the handler the fully rendered prompt prefix (indicator, colored)
-/// so an idle Ctrl+C redraws the exact frame. The string must outlive the
-/// process; the shell passes a leaked prefix.
+/// Hands the handler the fully rendered prompt prefix (indicator, colored) so
+/// an idle Ctrl+C redraws the exact frame. The shell passes a leaked string.
 pub fn remember_prefix(prefix: &'static str) {
     PREFIX_LEN.store(prefix.len(), Ordering::Release);
     PREFIX.store(prefix.as_ptr() as *mut u8, Ordering::Release);
@@ -56,29 +54,31 @@ extern "C" fn refresh(_signum: i32) {
         // The viewport owns its frame; erasing rows here would corrupt it.
         return;
     }
-    let _ = unsafe { raw_write(1, CORE_FRAME.as_ptr(), CORE_FRAME.len()) };
+    let _ = unsafe { raw_write(1, CORE_FRAME.as_ptr().cast(), CORE_FRAME.len()) };
     let len = PREFIX_LEN.load(Ordering::Acquire);
     let prefix = PREFIX.load(Ordering::Acquire);
     if len > 0 && !prefix.is_null() {
-        let _ = unsafe { raw_write(1, prefix as *const u8, len) };
+        let _ = unsafe { raw_write(1, (prefix as *const u8).cast(), len) };
     }
 }
 
 /// The current gate scan's pid, or None when nothing is scanning. Killing
 /// the scanner outright beats trivy's multi-minute graceful shutdown.
+#[cfg(unix)]
 fn system_gate_pid() -> Option<i32> {
     let pid = crate::gates::active_child_pid();
     (pid > 0).then_some(pid)
 }
 
 /// Erase the echoed control character, then reprint the stored prefix.
+#[cfg(any(unix, test))]
 const CORE_FRAME: &[u8] = b"\r\x1b[2K";
 
 #[cfg(unix)]
 extern "C" {
     fn signal(signum: i32, handler: usize) -> usize;
     #[link_name = "write"]
-    fn raw_write(fd: i32, buf: *const u8, count: usize) -> isize;
+    fn raw_write(fd: i32, buf: *const std::ffi::c_void, count: usize) -> isize;
     #[link_name = "kill"]
     fn raw_kill(pid: i32, signal: i32) -> i32;
 }
