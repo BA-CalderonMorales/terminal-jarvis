@@ -39,6 +39,48 @@ it, and anything future work must respect.
 
 ## Records
 
+### Fix an empty block summary instead of relaxing the property that caught it (develop -> 2026-10-17)
+
+**Decision:** Give `block_summary` a non-empty fallback and pin the inputs
+quickcheck reaches only by chance, rather than loosening
+`block_summary_never_comes_back_empty`.
+
+**Context:** The release PR for 0.1.20 failed gate [12] coverage on
+`[quickcheck] TEST FAILED` for a random `String`, on a tree whose identical
+gate had passed minutes earlier. The hole is real: when every line is trivy
+chatter or blank and the last line is empty, the tail filter keeps nothing and
+the old fallback pushed that empty last line, so a blocked verdict's summary
+could come back blank.
+
+**Considered:** Relaxing or deleting the property would make the gate agree
+with the code, but it is the only thing asserting a blocked verdict always
+carries a summary. Re-running the job would likely have gone green and hidden
+the defect until the next unlucky seed.
+
+**Consequence:** `block_summary` returns a sentinel when nothing survives the
+filter, and four reproducing inputs are asserted deterministically, so the
+contract no longer depends on quickcheck's luck.
+
+### Scope the SIGINT internals to unix so the Windows build is warning-free (develop -> 2026-10-17)
+
+**Decision:** Mark `ANSI`, `system_gate_pid`, and `CORE_FRAME` in
+`src/tui/sigint.rs` unix-only, using `#[cfg(any(unix, test))]` for `CORE_FRAME`
+so the cross-platform frame test still runs on Windows.
+
+**Context:** `refresh`, the only production user, is `#[cfg(unix)]`, so the
+Windows build reported three dead-code warnings. No gate could see them: the
+repo's only `-D warnings` is Linux clippy, and the win32 CD job builds without
+denying warnings.
+
+**Considered:** `#[cfg_attr(not(unix), allow(dead_code))]` silences the warnings
+without stating why they exist. A plain `#[cfg(unix)]` on `CORE_FRAME` would
+have dropped `core_frame_erases_the_line_before_any_redraw` from the Windows
+suite -- gating coverage away, which we do not do.
+
+**Consequence:** `cargo build` on Windows is warning-free, the Windows test
+count is unchanged, and the unix signal path is untouched. `sigint.rs` still
+sits at the 100-line limit.
+
 ### Match the runtime `write` signature instead of silencing the lint (release/0.1.20 -> 2026-10-16)
 
 Recorded in
