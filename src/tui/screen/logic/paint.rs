@@ -1,7 +1,7 @@
 //! Paint: composes the viewport as three minimal zones -- one merged header
 //! line, a dim rule, then the body -- and a prompt line with the hint and
 //! scroll badge right-aligned. Repaints overwrite in place: cursor home, no
-//! erase, so keystrokes never flicker.
+//! erase, so keystrokes never flicker; a size change clears once first.
 
 use super::layout;
 use super::sanitize;
@@ -83,7 +83,7 @@ pub fn parked(mut painted: String, size: Size, prompt_cells: usize) -> String {
     let row = size.rows;
     let col = prompt_cells.max(1);
     painted.push_str(&format!("\x1b[{row};{col}H"));
-    painted
+    crate::tui::resize::settle(painted, size.cols, size.rows)
 }
 
 #[cfg(test)]
