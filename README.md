@@ -19,9 +19,12 @@
 [![Docs](https://img.shields.io/badge/docs-latest-blue.svg?style=flat-square)](https://github.com/BA-CalderonMorales/terminal-jarvis/blob/main/docs/index.md)
 [![Coverage](https://img.shields.io/badge/coverage-report-green.svg?style=flat-square)](https://github.com/BA-CalderonMorales/terminal-jarvis/actions/workflows/ci.yml?query=branch%3Adevelop)
 
-<img src="docs/demo-tui.gif" alt="Terminal Jarvis command center in action" width="100%">
+<img src="docs/demo-tui.gif" alt="Terminal Jarvis running in a terminal window on an Omarchy desktop: listing the harness fleet, switching the active harness to codex, previewing a headless plan, refusing a dangerous run, and changing theme" width="100%">
 
-<i>Registries that don't animate GIFs render the static frame
+<i>A real session, captured on an Omarchy desktop with
+<a href="https://github.com/BA-CalderonMorales/terminal-jarvis/blob/develop/scripts/demo/record-omarchy.sh">scripts/demo/record-omarchy.sh</a>
+-- no compositing, and nothing installed or run. Registries that don't animate
+GIFs render the static frame
 <a href="docs/demo-tui.png">docs/demo-tui.png</a>; see
 <a href="docs/demo.md">docs/demo.md</a> for how both are recorded.</i>
 

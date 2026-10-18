@@ -39,12 +39,10 @@ fn settle_at(
         return painted;
     }
     *last = Some((cols, rows));
-    // Erase only. `term::clear_screen` also homes the cursor, and a frame opens
-    // with its own home, so a second one reads to the frame reader as an extra,
-    // empty frame.
+    // Erase only: a frame homes its own cursor, and a second home reads to the
+    // frame reader as an extra, empty frame.
     format!("\x1b[2J{painted}")
 }
-
 /// Consumes one resize event: true at most once per signal.
 pub fn take() -> bool {
     RESIZED.swap(false, Ordering::AcqRel)
