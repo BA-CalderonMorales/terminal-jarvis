@@ -15,6 +15,8 @@ pub enum Key {
     End,
     PageUp,
     PageDown,
+    /// A terminal resize: no state change, just repaint the frame.
+    Resized,
     Ignored,
     Dead,
 }

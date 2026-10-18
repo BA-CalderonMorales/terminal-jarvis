@@ -32,38 +32,43 @@ pub fn read_line(indicator: &Indicator, hint: &str) -> Option<String> {
     let ansi = term::ansi_enabled();
     print!("{}", compose(ansi, indicator, hint));
     io::stdout().flush().ok()?;
-    let mut line = String::new();
-    let outcome = loop {
-        break match io::stdin().read_line(&mut line) {
-            // A signal (resize, tick) must never end the session silently.
-            Err(e) if e.kind() == io::ErrorKind::Interrupted => continue,
-            other => other,
-        };
+    let Some(bytes) = read_entry() else {
+        print!("{}", retire("", ansi, hint, indicator));
+        io::stdout().flush().ok()?;
+        return None;
     };
-    match outcome {
-        Ok(0) | Err(_) => {
-            print!("{}", retire("", ansi, hint, indicator));
-            io::stdout().flush().ok()?;
-            None
+    let text = text_of(&bytes);
+    print!("{}", retire(&text, ansi, hint, indicator));
+    io::stdout().flush().ok()?;
+    Some(text)
+}
+
+/// Reads one entered line without printing anything -- the viewport paints
+/// its own frame and positions the cursor first. A resize returns an empty
+/// line so the loop repaints the frame at the new geometry.
+pub fn raw_line() -> Option<String> {
+    Some(text_of(&read_entry()?))
+}
+
+/// One entered line, byte by byte, from the unbuffered reader. `None` is EOF;
+/// an empty line is a resize, which the caller turns into a repaint. A signal
+/// must never end the session silently.
+fn read_entry() -> Option<Vec<u8>> {
+    let mut bytes = Vec::new();
+    loop {
+        if !super::readiness::wait_for_input() {
+            return Some(bytes);
         }
-        Ok(_) => {
-            let text = line.trim_end_matches(['\n', '\r']).to_string();
-            print!("{}", retire(&text, ansi, hint, indicator));
-            io::stdout().flush().ok()?;
-            Some(text)
+        match super::raw_stdin::read_byte() {
+            None => return None,
+            Some(b'\n' | b'\r') => return Some(bytes),
+            Some(byte) => bytes.push(byte),
         }
     }
 }
 
-/// Reads one entered line without printing anything -- the viewport paints
-/// its own frame and positions the cursor first.
-pub fn raw_line() -> Option<String> {
-    let mut line = String::new();
-    loop {
-        match io::stdin().read_line(&mut line) {
-            Err(e) if e.kind() == io::ErrorKind::Interrupted => continue,
-            Ok(0) | Err(_) => return None,
-            Ok(_) => return Some(line.trim_end_matches(['\n', '\r']).to_string()),
-        }
-    }
+fn text_of(bytes: &[u8]) -> String {
+    String::from_utf8_lossy(bytes)
+        .trim_end_matches(['\n', '\r'])
+        .to_string()
 }

@@ -3,7 +3,7 @@
 //! short window; a late byte parks in `PENDING` so nothing is lost.
 
 use super::Key;
-use std::io::{self, Read};
+use std::io;
 use std::sync::mpsc;
 use std::time::Duration;
 
@@ -23,6 +23,12 @@ pub(crate) fn park_byte(byte: u8) {
     PENDING.lock().unwrap_or_else(|e| e.into_inner()).push(byte);
 }
 
+/// Whether a late byte is parked, without consuming it -- the readiness
+/// wait must not sleep past a byte the escape dance already captured.
+pub fn has_pending() -> bool {
+    !PENDING.lock().unwrap_or_else(|e| e.into_inner()).is_empty()
+}
+
 /// The next input byte: a parked late byte first, then the real reader.
 pub fn pending() -> Option<u8> {
     let mut parked = PENDING.lock().unwrap_or_else(|e| e.into_inner());
@@ -40,11 +46,7 @@ pub fn pending() -> Option<u8> {
 pub fn resolve_and_decode(first: u8) -> Option<Key> {
     let (tx, rx) = mpsc::channel();
     std::thread::spawn(move || {
-        let byte = std::io::stdin()
-            .lock()
-            .bytes()
-            .next()
-            .map(|b| b.unwrap_or(0));
+        let byte = super::raw_stdin::read_byte();
         let _ = tx.send(byte);
         if let Some(byte) = byte {
             park_byte(byte);
@@ -56,11 +58,7 @@ pub fn resolve_and_decode(first: u8) -> Option<Key> {
         Ok(Some(introducer @ (b'[' | b'O'))) => {
             // the final CSI byte reads directly; the introducer parked
             // itself, so clear it before the replay consumes the triple
-            let final_byte = std::io::stdin()
-                .lock()
-                .bytes()
-                .next()
-                .map(|b| b.unwrap_or(0));
+            let final_byte = super::raw_stdin::read_byte();
             park_clear();
             Some((introducer, final_byte))
         }

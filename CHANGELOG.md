@@ -1,4 +1,17 @@
 # Changelog
+## [0.1.21] - unreleased
+
+### Fixed
+
+- The frame follows a terminal resize. `SIGWINCH` was never handled, so a
+  resize only repainted on the next keystroke -- mid-scroll or mid-typing, the
+  frame lagged the window. A resize is now its own input event: the frame
+  repaints immediately and leaves the prompt, the vim mode, and the scroll
+  position untouched. The geometry check that hands a shrunken terminal back
+  to chat mode compared the clamped frame size, so it could never fire; it now
+  reads the real size and reclaims the frame when the terminal grows back.
+  A resize during an install consent is no longer read as a decline.
+
 ## [0.1.20] - unreleased
 
 ### Fixed

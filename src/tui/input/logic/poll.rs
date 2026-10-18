@@ -61,16 +61,20 @@ pub fn spawn_watcher() {
 
 /// Blocks until a key is parked -- the consumer's read while the watcher
 /// owns stdin. If the watcher retired (EOF), the read falls back to
-/// stdin directly; the parked `Dead` flows through unchanged.
+/// stdin directly; the parked `Dead` flows through unchanged. A resize
+/// surfaces as [`Key::Resized`] so the frame repaints without a keystroke.
 pub fn wait() -> Option<Key> {
     loop {
         if let Some(key) = take() {
             return Some(key);
         }
+        if crate::tui::resize::take() {
+            return Some(Key::Resized);
+        }
         if !watcher_active() {
             return super::keys::read_stdin_key();
         }
-        std::thread::sleep(Duration::from_millis(15));
+        std::thread::sleep(super::readiness::TICK);
     }
 }
 

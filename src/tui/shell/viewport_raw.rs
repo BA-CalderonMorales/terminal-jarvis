@@ -83,6 +83,12 @@ pub fn run(session: &mut Session<'_>) -> Option<String> {
         print!("{painted}");
         std::io::stdout().flush().ok();
         let next = read_key().unwrap_or(Key::Dead);
+        // A resize changes the body height, so the scroll window moves under
+        // the stored offset; re-clamp it before the repaint at the top.
+        if next == Key::Resized {
+            let rows = crate::tui::screen::size().body_rows();
+            *session.offset = crate::tui::screen::clamp(*session.offset, session.body.len(), rows);
+        }
         match viewport_nav::key(&mut mode, &mut editor, next, session, history_at) {
             viewport_nav::Flow::Continue(next_at) => history_at = next_at,
             viewport_nav::Flow::Submit(line) => return Some(line),

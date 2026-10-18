@@ -13,6 +13,10 @@ pub(crate) mod keys;
 mod line;
 #[path = "logic/poll.rs"]
 pub(crate) mod poll;
+#[path = "logic/raw_stdin.rs"]
+pub(crate) mod raw_stdin;
+#[path = "logic/readiness.rs"]
+pub(crate) mod readiness;
 #[path = "structs/mod.rs"]
 mod structs;
 
