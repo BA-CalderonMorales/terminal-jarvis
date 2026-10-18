@@ -28,10 +28,13 @@ pub fn boot() -> Option<Session> {
 }
 
 pub fn size() -> Size {
+    // The REAL geometry, never widened: a clamped frame would paint rows
+    // wider than the terminal and the terminal would wrap them, walking the
+    // prompt up the screen. `usable()` decides whether the frame runs at all.
     let (cols, rows) = crate::tui::term::size().unwrap_or((80, 24));
     Size {
-        cols: cols.max(Size::MIN_COLS),
-        rows: rows.max(Size::MIN_ROWS),
+        cols: cols.max(1),
+        rows: rows.max(1),
     }
 }
 

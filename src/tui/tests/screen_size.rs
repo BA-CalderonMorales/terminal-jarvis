@@ -5,7 +5,7 @@ use super::*;
 
 #[test]
 fn min_bounds_gate_the_viewport() {
-    assert!(!Size { cols: 39, rows: 24 }.usable());
+    assert!(!Size { cols: 19, rows: 24 }.usable());
     assert!(!Size { cols: 120, rows: 9 }.usable());
     assert!(Size {
         cols: Size::MIN_COLS,
@@ -15,11 +15,10 @@ fn min_bounds_gate_the_viewport() {
 }
 
 #[test]
-fn the_floor_is_narrow_enough_to_compose_a_frame_that_fits() {
-    // 40 columns is the floor on purpose: the frame's rows are `cols - 2`
-    // wide, so a narrow terminal never makes the terminal wrap a row.
-    assert_eq!(Size::MIN_COLS, 40);
-    assert_eq!(Size::MIN_ROWS, 10);
+fn the_column_floor_keeps_a_narrow_terminal_on_the_frame() {
+    // 20 columns still composes a frame (`Continue? [Y/n]` is 15 cells), and
+    // the frame clips its own rows, so the terminal never wraps one.
+    assert_eq!(Size::MIN_COLS, 20);
 }
 
 #[test]

@@ -43,5 +43,6 @@ mod tty;
 mod tui_acceptance;
 mod tui_acceptance_interrupt;
 mod tui_acceptance_security;
+mod tui_cancel;
 mod update_dry_run;
 mod version;

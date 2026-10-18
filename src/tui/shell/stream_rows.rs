@@ -31,6 +31,18 @@ pub fn render(row: &str) -> String {
     row.to_string()
 }
 
+/// The most log rows the frame keeps; older rows scroll off. A chatty
+/// installer must not grow the body without bound.
+pub const MAX_ROWS: usize = 400;
+
+/// Drops the oldest rows once the log exceeds [`MAX_ROWS`].
+pub fn cap(body: &mut Vec<String>) {
+    if body.len() > MAX_ROWS {
+        let excess = body.len() - MAX_ROWS;
+        body.drain(..excess);
+    }
+}
+
 /// The burst-head throttle for live rows. The guard chain paints the plan and
 /// the consent question as a few rows and then blocks on a key, so the head of
 /// every burst paints in full; sustained output is throttled to one repaint

@@ -9,10 +9,11 @@ pub struct Size {
 
 impl Size {
     /// Below these bounds the viewport frame cannot hold its chrome plus a
-    /// useful body. 40 columns is the floor: the frame composes and clips
-    /// there (its rows are `cols - 2` wide), so a narrow terminal never
-    /// makes the terminal itself wrap a row onto the next line.
-    pub const MIN_COLS: usize = 40;
+    /// useful body. The column floor is deliberately low: the frame composes
+    /// and clips at any width (`cols - 2` rows), so a narrow terminal stays on
+    /// the frame instead of falling back to chat mode -- where the terminal
+    /// wraps the install log and walks the prompt up the screen.
+    pub const MIN_COLS: usize = 20;
     pub const MIN_ROWS: usize = 10;
 
     pub fn usable(self) -> bool {

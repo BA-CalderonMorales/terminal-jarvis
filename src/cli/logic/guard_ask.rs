@@ -1,6 +1,5 @@
 //! GuardAsk: the consent strategies. The terminal asks on stderr and reads
-//! one line; the streaming surface resolves one key in-frame. Both funnel
-//! into the same answer grammar, so the consent matrix stays one truth.
+//! one line; the streaming surface resolves one key in-frame.
 
 use super::args::Options;
 use super::error;
@@ -11,11 +10,12 @@ pub fn default_yes(token: &str) -> bool {
 }
 
 /// The terminal strategy: prompt on stderr, read one line from stdin. The lead
-/// wraps to the terminal so a narrow window never wraps a line onto the next,
-/// and the bracket is the real default -- Enter means what it says here too.
+/// wraps to the REAL terminal width (the table width never reports below 40,
+/// so a narrow window would be wrapped by the terminal instead of by us).
 pub fn ask_in_terminal(lead: &str, token: &str, default_yes: bool) -> error::Result<()> {
     use std::io::Write;
-    let width = super::table::terminal_width();
+    let width =
+        crate::tui::term::size().map_or_else(super::table::terminal_width, |(cols, _)| cols);
     for line in crate::cli::wrap(lead.trim_end(), width) {
         eprintln!("{line}");
     }

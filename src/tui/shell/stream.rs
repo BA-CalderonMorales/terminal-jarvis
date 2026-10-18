@@ -1,5 +1,4 @@
-//! StreamWire: runs one streaming-eligible action inside the live frame: the
-//! child's output arrives as classified rows and a run anchors to the prompt.
+//! StreamWire: runs one streaming-eligible action in the live frame.
 use super::session;
 use super::stream_finish;
 use super::stream_plan;
@@ -23,13 +22,13 @@ pub fn apply(
         None => return true,
     };
     let label = &planned.label;
-    // The primer and the last command's output yield to the task under way.
     state.body.clear();
     let chapter = paint(Role::Accent, &session::chapter(label));
     state.body.push(chapter);
     state.offset = 0;
-    // A run is a log: it grows upward from the prompt, newest row nearest it.
+    // A run is a log; a long run with a dead prompt reads as a hang.
     state.bottom = true;
+    state.hint = "esc or ctrl-c cancels".to_string();
     let started = Instant::now();
     let outcome = {
         let super::state::LoopState {
@@ -52,6 +51,7 @@ pub fn apply(
                 for row in line.split('\n') {
                     body.push(super::stream_rows::render(row));
                 }
+                super::stream_rows::cap(body);
                 *offset = super::viewport::pinned(body);
                 if throttle.due(rows) {
                     repaint(

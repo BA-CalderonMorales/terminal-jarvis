@@ -26,8 +26,17 @@
 - The consent bracket is the real default on every surface. The terminal
   strategy hardcoded `[y/N]`, so an install asked `Continue with
   download:x? [y/N]` and Enter *declined* it -- the opposite of the documented
-  intent, and inconsistent with the frame. The lead also wraps to the terminal
-  now, so a narrow window never wraps a line onto the next.
+  intent, and inconsistent with the frame. The lead also wraps to the real
+  terminal width now.
+- A narrow terminal stays on the frame. The floor drops to 20 columns and
+  `size()` no longer widens a narrow window to a floor, so the frame composes
+  at the REAL size and clips its own rows (`cols - 2`) instead of the terminal
+  wrapping a long install line and walking the prompt up the screen.
+- A running install says how to leave it: the modeline reads `esc or ctrl-c
+  cancels` for the duration, and the log is capped so a chatty installer cannot
+  grow the body without bound.
+- `modeline::prompt` no longer panics when the prompt is wider than the frame
+  and there is no scroll badge: the gap saturates.
 
 ### Changed
 
