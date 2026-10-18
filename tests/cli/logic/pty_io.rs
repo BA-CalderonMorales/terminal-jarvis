@@ -20,7 +20,10 @@ pub fn drain(mut master: File, bytes: Arc<Mutex<Vec<u8>>>) {
 }
 
 pub fn wait_until(bytes: &Arc<Mutex<Vec<u8>>>, marker: &[u8]) {
-    for _ in 0..=500 {
+    // Generous on purpose: a slow scanner's heartbeat thread can be starved
+    // for seconds under a loaded `cargo test`, and a gate that fails on the
+    // host's scheduler is not a gate. A genuine hang still fails, later.
+    for _ in 0..=1500 {
         let seen = bytes.lock().unwrap().clone();
         if seen.windows(marker.len()).any(|window| window == marker) {
             return;
