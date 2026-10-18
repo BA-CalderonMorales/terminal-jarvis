@@ -1,16 +1,44 @@
 # Changelog
 ## [0.1.21] - unreleased
 
-### Fixed
+### Changed
 
-- The frame follows a terminal resize. `SIGWINCH` was never handled, so a
-  resize only repainted on the next keystroke -- mid-scroll or mid-typing, the
-  frame lagged the window. A resize is now its own input event: the frame
-  repaints immediately and leaves the prompt, the vim mode, and the scroll
-  position untouched. The geometry check that hands a shrunken terminal back
-  to chat mode compared the clamped frame size, so it could never fire; it now
-  reads the real size and reclaims the frame when the terminal grows back.
-  A resize during an install consent is no longer read as a decline.
+- The frame is one themed surface. The active theme now paints body content,
+  not only the chrome: the header, the first-boot primer, `status`, `help`,
+  the `list` heading, and the install/update verdict cards all name a role
+  (`title`, `accent`, `label`, `value`, `ok`, `warn`, `err`, `rule`) that the
+  theme resolves. `/theme` repaints everything, and each of the six themes is
+  a full design rather than three colours.
+- Section headings name the screen on every layout (`commands ───`,
+  `readiness ───`, `ready now ───`, `one install away ───`), so moving between
+  screens is legible.
+- The header shows the working directory again. The brand tagline was dead
+  signal and is now the lowest-priority tail, so a roomy terminal shows the
+  path and a narrow one keeps the readiness verdict.
+- Narrow viewports drop a table's secondary column instead of clipping it:
+  `help` and the primer lose their purpose column below the width the full
+  table needs, and any remaining overflow is clipped rather than allowed to
+  spill past the frame.
+- `help` aligns every purpose column to the longest command, and the primer's
+  rule spans the command block.
+- A lifecycle run owns the screen: `install`, `update`, and a run start from a
+  clean body, so the primer and the previous command's output yield to the task
+  under way instead of accumulating on top of it.
+- The live log lost its wall-clock stamp. Rows read `info   message`,
+  `warn   message`, `error  message` -- the level in its theme role, the
+  message as body text -- and the runner keeps the level a line declares
+  instead of guessing over the whole line. A row that is not a classified log
+  line (a gate note, an advisory) passes through untouched.
+- The verdict card is scannable: `✓ installed droid · 3.2s · now active`, and a
+  failed run answers `✗ ...` instead of a bare line.
+- Raw mode is held for the whole run, so a key typed while the child works no
+  longer echoes into the frame.
+- A command's first frame lands before the guard chain blocks: typing
+  `install droid` and pressing Enter now shows the plan and the consent
+  question at once, so the second Enter is an informed one instead of a guess
+  at a screen that never changed. Typed-ahead input is read unbuffered, so a
+  pasted or quickly typed line no longer stalls behind `std::io::stdin()`'s
+  internal buffer while the reader waits on a `poll` that cannot see it.
 
 ## [0.1.20] - unreleased
 

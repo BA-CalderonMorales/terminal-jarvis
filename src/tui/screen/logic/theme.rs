@@ -1,23 +1,17 @@
-//! Theme: the live palette the viewport chrome paints with -- the
-//! greyed-out dim layer and the accent. Swapped by `/theme` in-session
-//! and pinned by `TERMINAL_JARVIS_THEME` at boot.
+//! Theme: the live palette the whole frame paints with -- chrome and body
+//! alike. Swapped by `/theme` in-session and pinned by
+//! `TERMINAL_JARVIS_THEME` at boot; every role reads it live, so a swap
+//! repaints the entire surface, not just the chrome.
 
 use std::env;
 use std::sync::Mutex;
 
 use super::palettes::{self, Palette};
+use super::roles::Role;
 
-static ACTIVE: Mutex<(&'static str, Palette)> = Mutex::new((
-    "default",
-    Palette {
-        dim: "2",
-        accent: "1;36",
-        accent2: "1;35",
-    },
-));
+static ACTIVE: Mutex<(&'static str, Palette)> = Mutex::new(("default", palettes::DEFAULT_PALETTE));
 
-/// Swaps the active palette; false when the name is unknown. The default
-/// theme restores the shipped look exactly.
+/// Swaps the active palette; false when the name is unknown.
 pub fn apply_theme(name: &str) -> bool {
     match palettes::lookup_theme(name) {
         Some((theme_name, palette)) => {
@@ -62,24 +56,37 @@ fn palette() -> Palette {
     ACTIVE.lock().unwrap_or_else(|e| e.into_inner()).1
 }
 
-fn paint(value: &str, code: &str) -> String {
+/// The active SGR code for a role; empty when the theme leaves it unstyled.
+pub fn code(role: Role) -> &'static str {
+    palette().code(role)
+}
+
+fn wrap(value: &str, code: &str) -> String {
+    if code.is_empty() {
+        return value.to_string();
+    }
     format!("\x1b[{code}m{value}\x1b[0m")
 }
 
-/// The greyed-out chrome layer: present, never the center of focus.
+/// Paints text in the active theme's role -- the one styling entry point, so
+/// chrome and body both follow a theme swap.
+pub fn paint(role: Role, value: &str) -> String {
+    wrap(value, code(role))
+}
+
+/// The greyed chrome layer: present, never the center of focus.
 pub fn dim(value: &str) -> String {
-    paint(value, palette().dim)
+    paint(Role::Dim, value)
 }
 
 /// The theme accent, for chrome that may carry the vibe.
 pub fn accent(value: &str) -> String {
-    paint(value, palette().accent)
+    paint(Role::Accent, value)
 }
 
-/// The second accent: the converse reply side, so the two speakers read
-/// as distinct voices at a glance.
+/// The second accent: the converse reply side.
 pub fn accent2(value: &str) -> String {
-    paint(value, palette().accent2)
+    paint(Role::Accent2, value)
 }
 
 #[cfg(test)]

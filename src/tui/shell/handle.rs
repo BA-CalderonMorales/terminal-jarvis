@@ -29,7 +29,8 @@ pub fn handle(
         Resolved::Empty => again_plain(),
         Resolved::Exit => Next::Exit,
         Resolved::Help => {
-            let _ = write!(out, "{}", super::help::text());
+            let inner = crate::tui::screen::size().inner_cols();
+            let _ = write!(out, "{}", super::help::text(inner));
             again_plain()
         }
         Resolved::Home => {
@@ -71,10 +72,7 @@ pub fn handle(
         Resolved::Debug(toggle) => Next::Debug(toggle),
         Resolved::Error(message) => {
             let _ = writeln!(out, "{}", style::error(&message));
-            Next::Again {
-                picker_shown: false,
-                reset: false,
-            }
+            again_plain()
         }
     }
 }

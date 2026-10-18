@@ -9,7 +9,8 @@ use std::path::Path;
 
 pub fn welcome(harnesses: &[Harness], catalog_root: &Path, state_home: &Path) -> Vec<String> {
     let o = crate::tui::home::collect(harnesses, catalog_root, state_home);
-    crate::tui::screen::welcome(&o.name, o.ready, o.total)
+    let inner = crate::tui::screen::size().inner_cols();
+    crate::tui::screen::welcome(&o.name, o.ready, o.total, inner)
 }
 
 /// Paints the composed frame without reading -- the converse loop repaints

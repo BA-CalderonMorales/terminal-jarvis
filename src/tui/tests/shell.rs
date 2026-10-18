@@ -76,7 +76,7 @@ fn bare_command_words_work_without_the_slash() {
 // bare free text -> Run: covered by `bare_unknown_words_run_the_active_agent`.
 #[test]
 fn help_text_lists_commands_and_the_gate_line() {
-    let body = crate::tui::shell::help::text();
+    let body = crate::tui::shell::help::text(78);
     assert!(body.contains("Commands"));
     assert!(body.contains("exit | quit"));
     assert!(body.contains("Trivy gate"));

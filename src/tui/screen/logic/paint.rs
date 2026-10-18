@@ -51,26 +51,29 @@ pub fn frame(size: Size, draft: &Draft) -> String {
 /// Appends the cursor park sequence: the last row of the frame (where the
 /// prompt lives), one cell past the typed tail, so the blinking cursor sits
 /// exactly where the next keystroke lands.
-/// The body window as painted rows: always a centered, dimmed BLOCK with
-/// column alignment intact -- the primer and command output share the
-/// treatment, and wide content degrades to flush-left.
+/// The body window as painted rows: a centered BLOCK clipped to the frame.
+/// A line that names its own role keeps it; only unstyled text takes the dim
+/// layer, so an inner reset never cancels the outer dim.
 fn body_block(window: &[String], inner: usize) -> Vec<String> {
     let text: Vec<String> = window
         .iter()
         .map(|line| sanitize::keep_color(line))
+        .map(|line| crate::tui::screen::clip_line(&line, inner))
         .collect();
-    let block_width = text
+    let width = text
         .iter()
         .map(|line| crate::tui::screen::visible_width(line))
         .max()
         .unwrap_or(0);
-    let margin = inner.saturating_sub(block_width) / 2;
+    let margin = inner.saturating_sub(width) / 2;
     text.iter()
         .map(|line| {
-            theme::dim(&layout::pad(
-                &format!("{}{line}", " ".repeat(margin)),
-                inner,
-            ))
+            let padded = layout::pad(&format!("{}{line}", " ".repeat(margin)), inner);
+            if line.contains('\x1b') {
+                padded
+            } else {
+                theme::dim(&padded)
+            }
         })
         .collect()
 }

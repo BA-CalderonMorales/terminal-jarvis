@@ -3,7 +3,7 @@
 //! long -- instead of echoing headless machinery. Pure rendering; the
 //! caller measures, adopts, and styles.
 
-use crate::cli::style;
+use crate::tui::screen::{paint, Role};
 use std::path::Path;
 use std::time::Duration;
 
@@ -63,24 +63,21 @@ pub fn settle(
     let (adopted, text, persisted) = text(name, verb, binary_on_path, outcome, elapsed);
     let ok = outcome.as_ref().map(|(code, _)| *code).ok() == Some(0);
     let painted = if ok {
-        style::success(&text)
+        paint(Role::Ok, &format!("✓ {text}"))
     } else {
-        style::error(&text)
+        paint(Role::Err, &format!("✗ {text}"))
     };
     let _ = writeln!(out, "{painted}");
     if !persisted && ok {
-        let _ = writeln!(
-            out,
-            "{}",
-            style::warning(&format!(
-                "warning: {name}'s binary was not found on PATH; restart the shell or add its install directory"
-            ))
+        let note = format!(
+            "warning: {name}'s binary was not found on PATH; restart the shell or add its install directory"
         );
+        let _ = writeln!(out, "{}", paint(Role::Warn, &note));
     }
     if adopted && persisted {
         if let Err(cause) = crate::context::save(state_home, name) {
             let failure = crate::cli::session_write_error(cause);
-            let _ = writeln!(out, "{}", style::warning(&failure.rendered()));
+            let _ = writeln!(out, "{}", paint(Role::Warn, &failure.rendered()));
         }
     }
 }

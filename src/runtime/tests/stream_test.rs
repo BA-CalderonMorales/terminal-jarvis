@@ -39,19 +39,25 @@ fn run_drains_both_streams_after_a_lull_and_preserves_exit_code() {
 
 #[test]
 fn classify_labels_failures_warnings_and_normal_lines() {
-    assert!(classify("failed marker").contains(" ERROR failed marker"));
-    assert!(classify("deprecated marker").contains(" WARN  deprecated marker"));
-    assert!(classify("plain marker").contains(" INFO  plain marker"));
+    let failed = classify("failed marker");
+    assert!(failed.starts_with("ERROR "), "{failed}");
+    assert!(failed.ends_with("failed marker"), "{failed}");
+    let warned = classify("deprecated marker");
+    assert!(warned.starts_with("WARN "), "{warned}");
+    assert!(warned.ends_with("deprecated marker"), "{warned}");
+    let plain = classify("plain marker");
+    assert!(plain.starts_with("INFO "), "{plain}");
+    assert!(plain.ends_with("plain marker"), "{plain}");
 }
 
 #[test]
-fn stamp_is_a_utc_clock_value() {
-    let stamp = stamp();
-    assert_eq!(stamp.len(), 8);
-    assert_eq!(&stamp[2..3], ":");
-    assert_eq!(&stamp[5..6], ":");
-    assert!(stamp
-        .chars()
-        .enumerate()
-        .all(|(i, c)| matches!(i, 2 | 5) || c.is_ascii_digit()));
+fn classify_keeps_a_declared_level_instead_of_stacking_one() {
+    assert_eq!(
+        classify("INFO Downloading thing"),
+        "INFO  Downloading thing"
+    );
+    assert_eq!(classify("error: boom"), "ERROR boom");
+    assert_eq!(classify("warn deprecated"), "WARN  deprecated");
+    // No wall-clock stamp is prefixed: the row starts with the level.
+    assert!(!classify("plain").contains(':'));
 }

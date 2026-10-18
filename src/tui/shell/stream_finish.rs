@@ -3,6 +3,7 @@
 
 use super::state::LoopState;
 use crate::contracts::Harness;
+use crate::tui::screen::{paint, Role};
 use std::path::Path;
 use std::time::Duration;
 
@@ -25,15 +26,18 @@ pub fn settle(
     let (adopted, text, persisted) =
         super::verdict::text(name, verb, binary_on_path, &outcome, elapsed);
     let row = if code == 0 {
-        crate::cli::style::success(&text)
+        paint(Role::Ok, &format!("✓ {text}"))
     } else {
-        crate::cli::style::error(&text)
+        paint(Role::Err, &format!("✗ {text}"))
     };
     state.body.push(row);
     if !persisted && code == 0 {
-        state.body.push(crate::cli::style::warning(&format!(
-            "warning: {name}'s binary was not found on PATH; restart the shell or add its install directory"
-        )));
+        state.body.push(paint(
+            Role::Warn,
+            &format!(
+                "warning: {name}'s binary was not found on PATH; restart the shell or add its install directory"
+            ),
+        ));
     }
     if adopted && persisted {
         if let Err(cause) = crate::context::save(state_home, name) {

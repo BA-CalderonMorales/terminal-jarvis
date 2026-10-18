@@ -1,7 +1,9 @@
 //! Theme contract: normalized lookup, live palette swap, env boot pin, and
 //! every theme keeping the chrome dim (never the center of focus).
 
-use super::{apply_theme, dim, theme_names, TEST_LOCK};
+use super::{apply_theme, code, dim, paint, theme_names, TEST_LOCK};
+use crate::tui::screen::roles::ALL;
+use crate::tui::screen::Role;
 
 #[test]
 fn apply_theme_swaps_the_accent_live() {
@@ -58,4 +60,41 @@ fn bare_theme_cycles_and_wraps_back_to_default() {
         assert_eq!(super::super::active_theme(), *expected);
     }
     assert_eq!(super::super::cycle_theme(), "default");
+}
+
+#[test]
+fn every_theme_answers_every_role() {
+    let _serial = TEST_LOCK.lock().unwrap_or_else(|e| e.into_inner());
+    for name in theme_names() {
+        assert!(apply_theme(name), "{name} is a listed theme");
+        for role in ALL {
+            let _ = code(role);
+        }
+    }
+    apply_theme("default");
+}
+
+#[test]
+fn paint_wraps_once_and_never_nests() {
+    let _serial = TEST_LOCK.lock().unwrap_or_else(|e| e.into_inner());
+    assert!(apply_theme("default"));
+    let painted = paint(Role::Accent, "x");
+    assert_eq!(painted, "\x1b[1;36mx\x1b[0m");
+    assert_eq!(painted.matches("\x1b[").count(), 2, "one open, one reset");
+    assert_eq!(paint(Role::Value, "x"), "x", "value is unstyled by default");
+    apply_theme("default");
+}
+
+#[test]
+fn a_theme_swap_repaints_the_body_not_only_the_chrome() {
+    let _serial = TEST_LOCK.lock().unwrap_or_else(|e| e.into_inner());
+    apply_theme("default");
+    let default = crate::tui::shell::help::text(78);
+    apply_theme("ember");
+    let ember = crate::tui::shell::help::text(78);
+    assert_ne!(
+        default, ember,
+        "body content follows the theme, not just chrome"
+    );
+    apply_theme("default");
 }

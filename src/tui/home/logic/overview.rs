@@ -35,17 +35,22 @@ pub fn plain(o: &Overview) -> String {
 }
 
 /// The viewport header: one merged line, priority-ordered so a narrow
-/// terminal loses the working directory before the readiness verdict.
+/// terminal loses the working directory before the readiness verdict. Every
+/// clause names a role, so the header follows the theme like the body does.
 pub fn header(o: &Overview) -> String {
-    use crate::tui::screen::{accent, dim};
-    let ready_view = verdict(o);
+    use crate::tui::screen::{paint, Role};
+    let ready_role = if o.ready == o.total {
+        Role::Ok
+    } else {
+        Role::Warn
+    };
     format!(
         "{} · {} {} · {} {}",
-        accent("Terminal Jarvis"),
-        dim("ACTIVE"),
-        accent(&o.name),
-        dim("READY"),
-        ready_view,
+        paint(Role::Title, "Terminal Jarvis"),
+        paint(Role::Dim, "ACTIVE"),
+        paint(Role::Accent, &o.name),
+        paint(Role::Dim, "READY"),
+        paint(ready_role, &format!("{}/{} ready", o.ready, o.total)),
     )
 }
 

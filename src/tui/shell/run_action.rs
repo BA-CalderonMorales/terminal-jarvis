@@ -2,6 +2,7 @@
 //! report whether the picker was shown; everything else is a session run.
 
 use crate::contracts::Harness;
+use crate::tui::screen::{paint, Role};
 use std::io::Write;
 use std::path::Path;
 
@@ -30,10 +31,13 @@ pub fn run(
         let _ = writeln!(
             out,
             "{}",
-            crate::cli::style::dim(&format!(
-                "{} isn't installed yet -- no worries, setting it up now (gated as always).",
-                harness.display
-            ))
+            paint(
+                Role::Dim,
+                &format!(
+                    "{} isn't installed yet -- no worries, setting it up now (gated as always).",
+                    harness.display
+                )
+            )
         );
         let installed = super::session::run(
             out,
@@ -46,18 +50,21 @@ pub fn run(
         if !crate::security::command_on_path(&harness.binary) {
             let _ = writeln!(
                 out,
-                "{}",
-                crate::cli::style::error(&format!(
-                    "{} still isn't on PATH after the install attempt; fix PATH and try again.",
-                    harness.binary
-                ))
+                "{}\n",
+                paint(
+                    Role::Err,
+                    &format!(
+                        "error: {} still isn't on PATH after the install attempt; fix PATH and try again.",
+                        harness.binary
+                    )
+                )
             );
             return installed;
         }
         let _ = writeln!(
             out,
             "{}",
-            crate::cli::style::dim("installed -- resuming your command.")
+            paint(Role::Dim, "installed -- resuming your command.")
         );
     }
     match action {
@@ -67,7 +74,7 @@ pub fn run(
                 .flatten()
                 .map(|session| session.active_harness);
             let body = crate::tui::switcher::pick(harnesses, active.as_deref());
-            let _ = writeln!(out, "{}", crate::cli::style::heading("Available Harnesses"));
+            let _ = writeln!(out, "{}", paint(Role::Accent, "Available Harnesses"));
             let _ = write!(out, "{body}");
             true
         }

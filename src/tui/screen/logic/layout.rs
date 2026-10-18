@@ -1,7 +1,7 @@
 //! Layout: the frame's row builders -- header, rule, body rows, prompt.
 //! The header degrades by segment priority on narrow terminals: the
-//! readiness verdict survives, cwd dies first, tagline next, then the
-//! title and active-harness clause -- never a cut mid-segment.
+//! readiness verdict survives, the brand tagline dies first, then the cwd,
+//! then the title and active-harness clause -- never a cut mid-segment.
 
 use super::canvas::{self, fit};
 use super::modeline;
@@ -10,9 +10,9 @@ use super::scroll;
 use super::theme;
 use super::Draft;
 
-/// The header row: compact centers+greys it; roomy yields tagline, then
-/// cwd; at inner <= 40 whole header clauses drop until the verdict is
-/// the last thing standing.
+/// The header row: compact centers+greys it; roomy yields the cwd, then the
+/// brand tagline; at inner <= 40 whole header clauses drop until the verdict
+/// is the last thing standing.
 pub fn header(draft: &Draft, inner: usize, body_rows: usize, compact: bool) -> String {
     let badge = scroll::badge(draft.offset, draft.body.len(), body_rows);
     let badge = if badge.is_empty() {
@@ -24,7 +24,9 @@ pub fn header(draft: &Draft, inner: usize, body_rows: usize, compact: bool) -> S
     let core = sanitize::keep_color(&draft.header);
     let cwd = format!(" · {}", sanitize::keep_color(&draft.cwd));
     let tagline = format!("  {}", sanitize::keep_color(&draft.tagline));
-    let mut candidates = vec![format!("{core}{tagline}"), format!("{core}{cwd}")];
+    // The working directory is live signal; the brand tagline is the
+    // lowest-priority tail, so it only spends width a roomy terminal has.
+    let mut candidates = vec![format!("{core}{cwd}"), format!("{core}{tagline}")];
     candidates.push(core.clone());
     if inner <= 40 {
         candidates.extend(degraded(&core));

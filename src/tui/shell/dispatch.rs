@@ -57,3 +57,7 @@ pub fn run(
     }
     false
 }
+
+#[cfg(test)]
+#[path = "../tests/shell_gallery.rs"]
+mod gallery;

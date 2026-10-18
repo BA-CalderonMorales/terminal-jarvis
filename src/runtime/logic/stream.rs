@@ -1,8 +1,9 @@
 //! Stream: one-shot harness invocations whose output arrives line-by-line,
-//! so the tui can paint splunk-style logs while the child works. Std-only:
+//! so the tui can paint classified rows while the child works. Std-only:
 //! two reader threads pump into a channel; the caller repaints at will.
 
 use crate::contracts::CapabilityPlan;
+use std::io;
 use std::time::Duration;
 
 /// Spawns the plan with fully piped output and feeds every stdout/stderr
@@ -28,35 +29,52 @@ pub(crate) fn status_code(status: std::process::ExitStatus) -> i32 {
     status.code().unwrap_or(3)
 }
 
-/// The wall-clock stamp splunk rows lead with, UTC, no external crates.
-pub fn stamp() -> String {
-    let seconds = std::time::SystemTime::now()
-        .duration_since(std::time::UNIX_EPOCH)
-        .map(|since| since.as_secs())
-        .unwrap_or(0);
-    format!(
-        "{:02}:{:02}:{:02}",
-        seconds / 3600 % 24,
-        seconds / 60 % 60,
-        seconds % 60
-    )
+/// The level labels the frame knows, padded to one width so a column of rows
+/// stays aligned. Longest first: `ERROR` must not be read as a message that
+/// happens to begin with `ERR`.
+const LEVELS: [&str; 3] = ["ERROR", "WARN ", "INFO "];
+
+/// Classifies one child line for the live frame: the level the line declares,
+/// or one inferred from its text. There is deliberately no wall-clock stamp
+/// -- a live view already shows when it is, and the stamp only widened every
+/// row while telling the reader nothing.
+pub fn classify(line: &str) -> String {
+    match declared_level(line) {
+        Some((level, message)) => format!("{level} {message}"),
+        None => format!("{} {line}", inferred_level(line)),
+    }
 }
 
-/// Classifies one child line into a splunk row: ERROR for failures, WARN
-/// for warnings, INFO otherwise -- matched on the whole lowercase line.
-pub fn classify(line: &str) -> String {
+/// The child's own level token, when the line leads with one: the log's own
+/// signal beats anything guessed from the text.
+fn declared_level(line: &str) -> Option<(&'static str, &str)> {
+    for level in LEVELS {
+        let token = level.trim_end();
+        let lower = token.to_lowercase();
+        for candidate in [token, lower.as_str()] {
+            let Some(rest) = line.strip_prefix(candidate) else {
+                continue;
+            };
+            if rest.is_empty() || rest.starts_with([' ', '\t', ':', '|']) {
+                return Some((level, rest.trim_start_matches([' ', '\t', ':', '|'])));
+            }
+        }
+    }
+    None
+}
+
+/// The fallback level: the whole lowercase line, as before, but without the
+/// timestamp that used to make every row look like a log record.
+fn inferred_level(line: &str) -> &'static str {
     let lower = line.to_lowercase();
-    let level = if lower.contains("error") || lower.contains("failed") || lower.contains("err!") {
+    if lower.contains("error") || lower.contains("failed") || lower.contains("err!") {
         "ERROR"
     } else if lower.contains("warn") || lower.contains("deprecated") {
         "WARN "
     } else {
         "INFO "
-    };
-    format!("{} {} {}", stamp(), level, line)
+    }
 }
-
-use std::io;
 
 #[cfg(test)]
 #[path = "../tests/stream_test.rs"]
