@@ -31,8 +31,17 @@ pub fn paint(
         super::viewport_raw::ViewportState::collect(indicator, harnesses, catalog_root, state_home);
     let size = crate::tui::screen::size();
     let mut draft = state.base_draft(hint, body);
+    // A pending decision owns the prompt row: the cursor and the question are
+    // the same place, and the modeline hint stands down for it.
+    if let Some(question) = crate::tui::input::pending_question() {
+        draft.prompt = question;
+        draft.hint = String::new();
+        // Bottom-anchor so the plan the question is about sits directly above
+        // it, in one glance, instead of in the middle of the frame.
+        draft.bottom = true;
+    }
     draft.offset = offset;
-    let cells = state.prefix_cells;
+    let cells = crate::tui::screen::visible_width(&draft.prompt) + 1;
     let painted = crate::tui::screen::parked(crate::tui::screen::frame(size, &draft), size, cells);
     print!("{painted}");
     std::io::stdout().flush().ok();

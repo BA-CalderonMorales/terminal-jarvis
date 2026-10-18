@@ -1,6 +1,8 @@
 //! Input: the prompt widget surface. `Indicator` renders the context
 //! prefix; the line readers live in `logic/`.
 
+#[path = "logic/ask.rs"]
+mod ask;
 #[path = "logic/drain.rs"]
 pub(crate) mod drain;
 #[path = "logic/editor.rs"]
@@ -20,6 +22,7 @@ pub(crate) mod readiness;
 #[path = "structs/mod.rs"]
 mod structs;
 
+pub use ask::{question as pending_question, show as ask};
 pub(crate) use drain::drain_answer;
 pub use editor::{Editor, Feed, Move};
 #[cfg(test)]

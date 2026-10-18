@@ -45,6 +45,7 @@ impl ViewportState {
             prompt: self.prefix.clone(),
             offset: 0,
             hint: hint.to_string(),
+            bottom: false,
         }
     }
 }

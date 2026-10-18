@@ -50,6 +50,17 @@
   at a screen that never changed. Typed-ahead input is read unbuffered, so a
   pasted or quickly typed line no longer stalls behind `std::io::stdin()`'s
   internal buffer while the reader waits on a `poll` that cannot see it.
+- The decision is at the cursor. A consent question now takes the prompt row
+  -- `Continue with download:crush? [Y/n]` sits where you are already looking
+  -- and the body bottom-anchors for the decision, so the plan it is asking
+  about sits directly above the question instead of in the middle of the
+  frame.
+- The plan is one sentence for every install mechanism:
+  `install crush · npm · @charmland/crush`,
+  `install droid · remote script · app.factory.ai`,
+  `install aider · uv tool · aider-chat@latest`. The raw argv said neither the
+  mechanism nor where the bytes come from, and `sh -c 'curl … | sh'` reads as a
+  dare rather than a plan.
 
 ## [0.1.20] - unreleased
 

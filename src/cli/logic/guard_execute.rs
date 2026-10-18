@@ -38,23 +38,24 @@ pub(super) fn execute(
             options,
             explicit,
             &mut |lead: &str, token: &str| {
-                for line in lead.lines() {
-                    paint(line);
-                }
-                // the add/update direction defaults to yes (Enter
-                // confirms); a destructive direction defaults to no
+                // the add/update direction defaults to yes; a destructive one to no
                 let default_yes = token.starts_with("download:") || token.starts_with("update:");
                 let question =
                     format!("Continue with {token}? {}", guard_ask::bracket(default_yes));
-                paint(&question);
+                // The decision lives at the cursor: the prompt row carries the
+                // question, so the answer is given where the user is looking.
+                let _ask = crate::tui::input::ask(&question);
+                for line in lead.lines() {
+                    paint(line);
+                }
                 // one keystroke answers: raw mode so [Y/n] means [Y/n],
                 // never a cooked line waiting for an Enter that reads
                 // as a hang
                 let _raw = crate::tui::term::enable_raw();
                 let mut key = crate::tui::input::read_key();
-                // A resize is not an answer: repaint and read again.
+                // A resize is not an answer: repaint the frame and read again.
                 while matches!(key, Some(crate::tui::input::Key::Resized)) {
-                    paint(&question);
+                    paint("");
                     key = crate::tui::input::read_key();
                 }
                 // the tail of a typed answer ("es" of "yes") must never

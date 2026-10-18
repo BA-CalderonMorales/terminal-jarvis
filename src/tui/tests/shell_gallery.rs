@@ -41,6 +41,7 @@ fn show(name: &str, body: &[String], cols: usize) {
         prompt: "[>_]::[tj]:: ".into(),
         offset: 0,
         hint: "active: codex | a number or name switches, list, status, help, home, exit".into(),
+        bottom: false,
     };
     println!("\n----- {name} @ {cols} cols -----");
     for line in frame(Size { cols, rows: 24 }, &draft).split("\r\n") {
@@ -52,7 +53,6 @@ fn lines(text: &str) -> Vec<String> {
     text.lines().map(String::from).collect()
 }
 
-/// A lifecycle card as the frame renders it: chapter, plan, consent, rows, verdict.
 fn install_card() -> Vec<String> {
     use crate::tui::screen::{paint, Role};
     use crate::tui::shell::{session, stream_rows, verdict};

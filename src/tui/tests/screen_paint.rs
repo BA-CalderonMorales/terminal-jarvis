@@ -13,6 +13,7 @@ pub(crate) fn draft() -> Draft {
         prompt: "[>_]::[tj:test]::[harness:fixture]: ".into(),
         offset: 0,
         hint: "active: fixture | list, status, help, exit".into(),
+        bottom: false,
     }
 }
 
