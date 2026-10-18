@@ -25,19 +25,18 @@ pub fn paint(
     state_home: &Path,
     body: &[String],
     offset: usize,
+    bottom: bool,
 ) {
     let _ = std::io::stdout().flush();
     let state =
         super::viewport_raw::ViewportState::collect(indicator, harnesses, catalog_root, state_home);
     let size = crate::tui::screen::size();
-    let mut draft = state.base_draft(hint, body);
+    let mut draft = state.base_draft(hint, body, bottom);
     // A pending decision owns the prompt row: the cursor and the question are
     // the same place, and the modeline hint stands down for it.
     if let Some(question) = crate::tui::input::pending_question() {
         draft.prompt = question;
         draft.hint = String::new();
-        // Bottom-anchor so the plan the question is about sits directly above
-        // it, in one glance, instead of in the middle of the frame.
         draft.bottom = true;
     }
     draft.offset = offset;
@@ -57,6 +56,7 @@ pub fn prompt(
     body: &[String],
     history: &[String],
     offset: &mut usize,
+    bottom: bool,
 ) -> Option<String> {
     paint(
         indicator,
@@ -66,6 +66,7 @@ pub fn prompt(
         state_home,
         body,
         *offset,
+        bottom,
     );
     let state =
         super::viewport_raw::ViewportState::collect(indicator, harnesses, catalog_root, state_home);
@@ -77,7 +78,7 @@ pub fn prompt(
         offset,
     };
     match crate::tui::term::enable_raw() {
-        Some(_guard) => super::viewport_raw::run(&mut session),
+        Some(_guard) => super::viewport_raw::run(&mut session, bottom),
         None => crate::tui::input::raw_line(),
     }
 }

@@ -1,7 +1,6 @@
-//! StreamWire: runs one streaming-eligible action inside the live frame.
-//! The child's output arrives as classified rows; the body grows and repaints
-//! live, so the user never leaves the tui to watch a task. A run owns the
-//! screen: it starts from a clean body and its rows carry the theme.
+//! StreamWire: runs one streaming-eligible action inside the live frame. The
+//! child's output arrives as classified rows; the body grows and repaints live,
+//! so the user never leaves the tui: a run anchors to the prompt, themed.
 
 use super::session;
 use super::stream_finish;
@@ -32,6 +31,8 @@ pub fn apply(
         .body
         .push(paint(Role::Accent, &session::chapter(label)));
     state.offset = 0;
+    // A run is a log: it grows upward from the prompt, newest row nearest it.
+    state.bottom = true;
     let started = Instant::now();
     let outcome = {
         let super::state::LoopState {
@@ -41,8 +42,7 @@ pub fn apply(
             hint,
             ..
         } = state;
-        // Hold raw mode for the whole run: a key typed while the child works
-        // must not echo into the frame.
+        // Hold raw mode for the whole run: a typed key must not echo.
         let _raw = crate::tui::term::enable_raw();
         let mut throttle = super::stream_rows::Throttle::new();
         stream_invocation(
@@ -51,10 +51,9 @@ pub fn apply(
             harnesses,
             state_home,
             &mut |line| {
-                let mut rows = 0;
+                let rows = line.split('\n').count();
                 for row in line.split('\n') {
                     body.push(super::stream_rows::render(row));
-                    rows += 1;
                 }
                 *offset = super::viewport::pinned(body);
                 if throttle.due(rows) {
@@ -66,6 +65,7 @@ pub fn apply(
                         state_home,
                         body,
                         *offset,
+                        true,
                     );
                 }
             },

@@ -32,7 +32,7 @@ fn strip(text: &str) -> String {
     out
 }
 
-fn show(name: &str, body: &[String], cols: usize) {
+fn show(name: &str, body: &[String], cols: usize, bottom: bool) {
     let draft = Draft {
         header: "Terminal Jarvis · ACTIVE codex · READY 1/3 ready".into(),
         cwd: "~/Projects/terminal-jarvis".into(),
@@ -41,7 +41,7 @@ fn show(name: &str, body: &[String], cols: usize) {
         prompt: "[>_]::[tj]:: ".into(),
         offset: 0,
         hint: "active: codex | a number or name switches, list, status, help, home, exit".into(),
-        bottom: false,
+        bottom,
     };
     println!("\n----- {name} @ {cols} cols -----");
     for line in frame(Size { cols, rows: 24 }, &draft).split("\r\n") {
@@ -57,12 +57,8 @@ fn install_card() -> Vec<String> {
     use crate::tui::screen::{paint, Role};
     use crate::tui::shell::{session, stream_rows, verdict};
     let chapter = session::chapter("install droid");
-    let plan = "  plan  droid download · sh -c 'curl -fsSL https://app.factory.ai/cli | sh'";
-    let mut rows = vec![
-        paint(Role::Accent, &chapter),
-        paint(Role::Dim, plan),
-        paint(Role::Ok, "  gate  download:droid  [Y/n]"),
-    ];
+    let lead = "install droid · remote script · app.factory.ai";
+    let mut rows = vec![paint(Role::Accent, &chapter), paint(Role::Value, lead)];
     for line in [
         "INFO  Downloading Factory CLI v0.244.0 for linux-x64",
         "INFO  Fetching and verifying checksum",
@@ -92,9 +88,10 @@ fn gallery() {
         let inner = cols - 2;
         let welcome = crate::tui::screen::welcome("codex", 1, 3, inner);
         let help = lines(&crate::tui::shell::help::text(inner));
-        show("welcome", &welcome, cols);
-        show("status", &status, cols);
-        show("help", &help, cols);
-        show("install card", &install_card(), cols);
+        show("welcome", &welcome, cols, false);
+        show("status", &status, cols, false);
+        show("help", &help, cols, false);
+        // a run is a log: it anchors to the prompt
+        show("install card", &install_card(), cols, true);
     }
 }

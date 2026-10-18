@@ -1,10 +1,9 @@
-//! ViewportRaw: the raw prompt session chrome. The frozen header/prefix
-//! live here; the mode machine and navigation live in viewport_nav.
-
+//! ViewportRaw: the raw prompt session chrome.
 use super::viewport_nav::{self, Mode};
 use crate::contracts::Harness;
 use crate::tui::home;
 use crate::tui::input::{read_key, Editor, Indicator, Key};
+use crate::tui::screen::Draft;
 use std::io::Write;
 use std::path::Path;
 
@@ -36,8 +35,8 @@ impl ViewportState {
         }
     }
 
-    pub fn base_draft(&self, hint: &str, body: &[String]) -> crate::tui::screen::Draft {
-        crate::tui::screen::Draft {
+    pub fn base_draft(&self, hint: &str, body: &[String], bottom: bool) -> Draft {
+        Draft {
             header: self.header.clone(),
             cwd: self.cwd.clone(),
             tagline: self.tagline.clone(),
@@ -45,15 +44,15 @@ impl ViewportState {
             prompt: self.prefix.clone(),
             offset: 0,
             hint: hint.to_string(),
-            bottom: false,
+            bottom,
         }
     }
 }
 
 /// One raw-mode prompt session over the frozen chrome. The scroll offset
-/// lives in the caller's state (turns and prompts share one position); the
-/// key reads go through `read_key`, which takes from the parked queue
-/// while a conversation's watcher owns stdin.
+/// lives in the caller's state (turns and prompts share one position); key
+/// reads go through `read_key`, which takes from the parked queue while a
+/// conversation's watcher owns stdin.
 pub struct Session<'a> {
     pub state: &'a ViewportState,
     pub hint: &'a str,
@@ -62,7 +61,7 @@ pub struct Session<'a> {
     pub offset: &'a mut usize,
 }
 
-pub fn run(session: &mut Session<'_>) -> Option<String> {
+pub fn run(session: &mut Session<'_>, bottom: bool) -> Option<String> {
     let mut editor = Editor::default();
     let mut mode = Mode::Insert;
     let mut history_at = session.history.len();
@@ -73,7 +72,7 @@ pub fn run(session: &mut Session<'_>) -> Option<String> {
             Mode::Insert => "",
         };
         let tail = editor.tail_view(session.state.prefix_cells, size.inner_cols());
-        let mut draft = session.state.base_draft(session.hint, session.body);
+        let mut draft = session.state.base_draft(session.hint, session.body, bottom);
         draft.offset = *session.offset;
         draft.prompt = format!("{}{badge}{tail}", session.state.prefix);
         let cells = session.state.prefix_cells

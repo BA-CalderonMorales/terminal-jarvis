@@ -22,15 +22,7 @@ pub fn step(
         } => {
             state.hint = status::modeline(state_home, picker_shown, state.debug);
             status::refresh_indicator(&mut state.indicator, state_home, state.debug);
-            absorb(
-                &mut state.body,
-                &mut state.offset,
-                sink,
-                reset,
-                harnesses,
-                catalog_root,
-                state_home,
-            );
+            absorb(state, sink, reset, harnesses, catalog_root, state_home);
             true
         }
         Next::Stream { action, options } => super::stream::apply(
@@ -57,6 +49,8 @@ pub fn step(
                     state.hint = status::modeline(state_home, false, state.debug);
                 }
             }
+            // a transcript reads as a log: it grows from the prompt
+            state.bottom = true;
             true
         }
         Next::Debug(toggle) => {
@@ -76,10 +70,10 @@ pub fn step(
 }
 
 /// Viewport absorbs captured output as the next body; chat prints it above
-/// the prompt. A reset restores the primer.
+/// the prompt. A reset restores the primer and a fresh card re-centers; a log
+/// keeps its bottom anchor.
 pub fn absorb(
-    body: &mut Vec<String>,
-    offset: &mut usize,
+    state: &mut super::state::LoopState,
     sink: Vec<u8>,
     reset: bool,
     harnesses: &[Harness],
@@ -87,14 +81,20 @@ pub fn absorb(
     state_home: &Path,
 ) {
     let text = String::from_utf8_lossy(&sink).to_string();
-    if reset {
-        *body = super::viewport::welcome(harnesses, catalog_root, state_home);
+    let replaced = if reset {
+        state.body = super::viewport::welcome(harnesses, catalog_root, state_home);
+        true
     } else if !text.is_empty() {
-        *body = text.lines().map(String::from).collect();
+        state.body = text.lines().map(String::from).collect();
+        true
+    } else {
+        false
+    };
+    if replaced {
+        state.bottom = false;
     }
-    *offset = super::viewport::pinned(body);
-    if !crate::tui::screen::active() {
-        // Close the last line only if the output left one open.
+    state.offset = super::viewport::pinned(&state.body);
+    if !crate::tui::screen::active() && !text.is_empty() {
         print!("{text}{}", if text.ends_with('\n') { "" } else { "\n" });
     }
 }

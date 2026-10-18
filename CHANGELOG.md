@@ -61,6 +61,11 @@
   `install aider · uv tool · aider-chat@latest`. The raw argv said neither the
   mechanism nor where the bytes come from, and `sh -c 'curl … | sh'` reads as a
   dare rather than a plan.
+- A run is a log. The body bottom-anchors while a command streams or a
+  transcript grows, so the newest row sits directly above the prompt instead of
+  in the middle of the frame; the primer and one-shot cards (`status`, `help`,
+  `show`, `list`) stay centered. Chat mode no longer prints a blank line for an
+  empty command.
 
 ## [0.1.20] - unreleased
 

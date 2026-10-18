@@ -12,6 +12,9 @@ pub struct LoopState {
     /// The shared scroll position: turns and prompts move the same view.
     pub offset: usize,
     pub hint: String,
+    /// Anchor the body to the bottom: a log or a transcript grows upward from
+    /// the prompt, while a primer or a one-shot card stays centered.
+    pub bottom: bool,
     pub options: args::Options,
     pub debug: bool,
     pub indicator: crate::tui::input::Indicator,
