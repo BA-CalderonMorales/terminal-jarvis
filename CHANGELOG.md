@@ -45,6 +45,15 @@
   alt-screen exit with `println!` -- a stray newline after the last frame,
   which scrolls the restored screen by a row -- where `suspend` already used
   `print!`.
+- Esc is one keypress again, and a quick second Esc is no longer swallowed:
+  the escape resolver treated `Esc Esc` as an Alt combo and decoded the pair to
+  `Ignored`, eating both. An Alt combo also replays its key now (the replay
+  used to decode to `Ignored` and eat the key as well).
+- The escape resolver no longer deadlocks the reader. Its continuation thread
+  blocked in a `read` while holding the stdin lock, so the next keypress waited
+  on a mutex instead of the parked byte -- the tui froze until another key
+  arrived. It now waits for readiness within the window, so the lock is never
+  held past it.
 
 ### Changed
 

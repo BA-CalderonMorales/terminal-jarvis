@@ -45,5 +45,6 @@ mod tui_acceptance_interrupt;
 mod tui_acceptance_security;
 mod tui_cancel;
 mod tui_frame;
+mod tui_keys;
 mod update_dry_run;
 mod version;

@@ -46,38 +46,42 @@ pub fn pending() -> Option<u8> {
 pub fn resolve_and_decode(first: u8) -> Option<Key> {
     let (tx, rx) = mpsc::channel();
     std::thread::spawn(move || {
-        let byte = super::raw_stdin::read_byte();
+        // Wait for the continuation WITHOUT holding the stdin lock past the
+        // window. A read that blocks here would deadlock the next keypress:
+        // the reader takes the same lock before it can look at the parked byte.
+        let byte = super::readiness::stdin_ready(WINDOW)
+            .then(super::raw_stdin::read_byte)
+            .flatten();
         let _ = tx.send(byte);
         if let Some(byte) = byte {
             park_byte(byte);
         }
     });
-    let continuation = match rx.recv_timeout(WINDOW) {
-        Err(_) => return Some(Key::Escape),
-        Ok(None) => return Some(Key::Escape),
-        Ok(Some(introducer @ (b'[' | b'O'))) => {
-            // the final CSI byte reads directly; the introducer parked
-            // itself, so clear it before the replay consumes the triple
-            let final_byte = super::raw_stdin::read_byte();
-            park_clear();
-            Some((introducer, final_byte))
-        }
-        Ok(Some(parked)) => {
-            // an Alt combo: Esc ignored, the combo key replays untouched
-            park_clear();
-            park_byte(parked);
-            Some((parked, None))
-        }
+    let second = match rx.recv_timeout(WINDOW) {
+        // no continuation: a bare Esc -- the vim mode switch
+        Err(_) | Ok(None) => return Some(Key::Escape),
+        Ok(Some(second)) => second,
     };
-    match continuation {
-        None => Some(Key::Ignored),
-        Some((second, third)) => {
-            let mut bytes = vec![first, second];
-            if let Some(third) = third {
-                bytes.push(third);
-            }
-            let mut replay = io::Cursor::new(bytes);
-            super::keys::decode(&mut replay, first)
-        }
+    if second == 0x1b {
+        // A second Esc is its own keypress, not an Alt combo: pressing Esc
+        // twice in quick succession must not swallow both.
+        park_clear();
+        return Some(Key::Escape);
     }
+    if second != b'[' && second != b'O' {
+        // An Alt combo: the Esc is ignored and the combo key stands alone.
+        // Replaying the pair would decode to `Ignored` and eat the key too.
+        park_clear();
+        return super::keys::decode(&mut io::Cursor::new(vec![second]), second);
+    }
+    // A CSI/SS3 introducer: the final byte reads directly; the introducer
+    // parked itself, so clear it before the replay consumes the triple.
+    let final_byte = super::raw_stdin::read_byte();
+    park_clear();
+    let mut bytes = vec![first, second];
+    if let Some(third) = final_byte {
+        bytes.push(third);
+    }
+    let mut replay = io::Cursor::new(bytes);
+    super::keys::decode(&mut replay, first)
 }
