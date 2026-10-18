@@ -11,6 +11,23 @@
   `--allow-dangerous`.
 - Command output no longer gains a blank line: the frame closed an already
   closed line, so the centered body jumped a row whenever a command finished.
+- A streamed install can be cancelled. Ctrl+C or Esc stops the child and
+  returns the prompt with `cancelled` in the card; the session's SIGINT
+  handler had been swallowing Ctrl+C while a stream ran, so a hung installer
+  left the tui with no way out.
+- A streamed child gets no controlling terminal, so an installer that reads
+  `/dev/tty` (hermes does, for a `sudo` prompt) can no longer reach past our
+  pipes and paint over the frame -- it fails closed instead of bricking the
+  run.
+- The viewport floor drops from 50 to 40 columns, and the consent question
+  falls back to `Continue? [Y/n]` when the frame cannot hold the full line: a
+  narrow terminal is composed and clipped by the frame, never wrapped by the
+  terminal itself, and the bracket is always visible.
+- The consent bracket is the real default on every surface. The terminal
+  strategy hardcoded `[y/N]`, so an install asked `Continue with
+  download:x? [y/N]` and Enter *declined* it -- the opposite of the documented
+  intent, and inconsistent with the frame. The lead also wraps to the terminal
+  now, so a narrow window never wraps a line onto the next.
 
 ### Changed
 

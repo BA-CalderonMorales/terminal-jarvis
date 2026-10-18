@@ -46,6 +46,7 @@ fn next_byte(sin: &mut impl Read) -> Option<u8> {
 
 pub(crate) fn decode(sin: &mut impl Read, first: u8) -> Option<Key> {
     let key = match first {
+        0x03 => Key::Interrupt,
         0x04 => return None,
         b'\r' | b'\n' => Key::Enter,
         0x7f | 0x08 => Key::Backspace,

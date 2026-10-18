@@ -65,7 +65,7 @@ fn clean_install_answers_with_a_verdict_and_adopts_the_harness() {
             (b"install fixture\n", None),
             (
                 b"y\n",
-                Some(b"Continue with download:fixture? [y/N]".as_slice()),
+                Some(b"Continue with download:fixture? [Y/n]".as_slice()),
             ),
             (b"", Some(b"installed fixture".as_slice())),
             EXIT,

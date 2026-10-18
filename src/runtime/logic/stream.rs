@@ -6,16 +6,27 @@ use crate::contracts::CapabilityPlan;
 use std::io;
 use std::time::Duration;
 
+/// The code a cancelled child reports: 128 + SIGINT.
+pub const CANCELLED: i32 = 130;
+
 /// Spawns the plan with fully piped output and feeds every stdout/stderr
-/// line to `on_line` until the child exits. Stdin is null: headless runs
-/// never prompt, so the tui frame above the log stays interactive-safe.
+/// line to `on_line` until the child exits. `cancelled` is polled on every
+/// tick, so a quiet or hung child can still be aborted. Stdin is null and the
+/// child has no terminal: headless runs never prompt, and an installer cannot
+/// reach past our pipes to ask.
 pub fn run(
     plan: &CapabilityPlan,
     extra: &[String],
     on_line: &mut dyn FnMut(&str),
+    cancelled: &mut dyn FnMut() -> bool,
 ) -> io::Result<i32> {
     let mut child = super::live::spawn(plan, extra)?;
     loop {
+        if cancelled() {
+            child.kill();
+            let _ = child.wait();
+            return Ok(CANCELLED);
+        }
         match child.next(Duration::from_millis(150)) {
             super::live::Event::Line(super::live::Line::Out(line))
             | super::live::Event::Line(super::live::Line::Err(line)) => on_line(&line),

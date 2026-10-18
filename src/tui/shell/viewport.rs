@@ -34,7 +34,7 @@ pub fn paint(
     let mut draft = state.base_draft(hint, body, bottom);
     // A pending decision owns the prompt row: the cursor and the question are
     // the same place, and the modeline hint stands down for it.
-    if let Some(question) = crate::tui::input::pending_question() {
+    if let Some(question) = crate::tui::input::prompt_for(size.inner_cols()) {
         draft.prompt = question;
         draft.hint = String::new();
         draft.bottom = true;

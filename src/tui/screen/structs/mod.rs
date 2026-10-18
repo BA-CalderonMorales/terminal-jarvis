@@ -8,9 +8,11 @@ pub struct Size {
 }
 
 impl Size {
-    /// Below these bounds the viewport frame cannot hold its four fixed
-    /// chrome rows plus a useful body; the tui falls back to chat mode.
-    pub const MIN_COLS: usize = 50;
+    /// Below these bounds the viewport frame cannot hold its chrome plus a
+    /// useful body. 40 columns is the floor: the frame composes and clips
+    /// there (its rows are `cols - 2` wide), so a narrow terminal never
+    /// makes the terminal itself wrap a row onto the next line.
+    pub const MIN_COLS: usize = 40;
     pub const MIN_ROWS: usize = 10;
 
     pub fn usable(self) -> bool {

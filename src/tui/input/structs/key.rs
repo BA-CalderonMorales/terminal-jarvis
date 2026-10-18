@@ -15,6 +15,8 @@ pub enum Key {
     End,
     PageUp,
     PageDown,
+    /// Ctrl+C in raw mode: a request to stop the running child, not a signal.
+    Interrupt,
     /// A terminal resize: no state change, just repaint the frame.
     Resized,
     Ignored,

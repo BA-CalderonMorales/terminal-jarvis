@@ -52,3 +52,17 @@ pub fn stdin_ready(timeout: Duration) -> bool {
 pub fn stdin_ready(_timeout: Duration) -> bool {
     true
 }
+
+/// True when the user asked to stop a stream: Ctrl+C (a byte in raw mode) or
+/// Esc. Reads without blocking, so the stream's tick stays responsive.
+pub fn cancel_requested() -> bool {
+    matches!(try_key(), Some(super::Key::Interrupt | super::Key::Escape))
+}
+
+/// A key already waiting, without blocking.
+fn try_key() -> Option<super::Key> {
+    if !stdin_ready(Duration::ZERO) {
+        return None;
+    }
+    super::keys::read_stdin_key()
+}

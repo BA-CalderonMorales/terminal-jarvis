@@ -1,7 +1,5 @@
-//! StreamWire: runs one streaming-eligible action inside the live frame. The
-//! child's output arrives as classified rows; the body grows and repaints live,
-//! so the user never leaves the tui: a run anchors to the prompt, themed.
-
+//! StreamWire: runs one streaming-eligible action inside the live frame: the
+//! child's output arrives as classified rows and a run anchors to the prompt.
 use super::session;
 use super::stream_finish;
 use super::stream_plan;
@@ -27,9 +25,8 @@ pub fn apply(
     let label = &planned.label;
     // The primer and the last command's output yield to the task under way.
     state.body.clear();
-    state
-        .body
-        .push(paint(Role::Accent, &session::chapter(label)));
+    let chapter = paint(Role::Accent, &session::chapter(label));
+    state.body.push(chapter);
     state.offset = 0;
     // A run is a log: it grows upward from the prompt, newest row nearest it.
     state.bottom = true;
@@ -72,6 +69,9 @@ pub fn apply(
         )
     };
     match outcome {
+        Ok(crate::runtime::CANCELLED) => {
+            state.body.push(paint(Role::Warn, "cancelled"));
+        }
         Ok(code) => {
             if let Some((name, verb)) = &planned.lifecycle {
                 stream_finish::settle(
@@ -89,12 +89,12 @@ pub fn apply(
                 let recap = session::recap(label, Some(code), started.elapsed());
                 state.body.push(paint(Role::Dim, &recap));
             }
-            state.hint = super::status::modeline(state_home, false, state.debug);
         }
         Err(message) => {
             let line = format!("✗ {} -- {}", message.code, message.message);
             state.body.push(paint(Role::Err, &line));
         }
     }
+    state.hint = super::status::modeline(state_home, false, state.debug);
     true
 }
