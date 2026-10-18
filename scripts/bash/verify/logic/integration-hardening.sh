@@ -59,6 +59,16 @@ run_tj() {
   TERMINAL_JARVIS_CATALOG="$catalog" TERMINAL_JARVIS_HOME="$home" "$binary" --plain "$@"
 }
 
+# The diagnostics contract is about an UNAUTHENTICATED fleet: nothing installed,
+# nothing ready, exit 4. A developer machine has harnesses on PATH and the
+# binary may sit under a known install route, so the same probe would exit 0 and
+# this gate would fail on exactly the machine that has to run it. Pin the PATH
+# so the probe sees the fleet the contract describes, not the host's.
+run_tj_unauthenticated() {
+  PATH=/usr/bin:/bin TERMINAL_JARVIS_CATALOG="$catalog" TERMINAL_JARVIS_HOME="$home" \
+    "$binary" --plain "$@"
+}
+
 contains() {
   grep -F "$2" "$1" >/dev/null || fail "$1 missing expected text: $2"
 }
@@ -82,7 +92,7 @@ contains "$tmp/version-info" "catalog:"
 run_tj list >"$tmp/list"
 line_count_is "$tmp/list" "$expected"
 
-if run_tj check --verbose >"$tmp/check" 2>"$tmp/check.err"; then
+if run_tj_unauthenticated check --verbose >"$tmp/check" 2>"$tmp/check.err"; then
   fail "unauthenticated catalog diagnostics unexpectedly succeeded"
 else
   code=$?
