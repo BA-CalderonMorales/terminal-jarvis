@@ -76,7 +76,8 @@ if [ -n "$from" ]; then
   if TERMINAL_JARVIS_CATALOG="$work/harnesses" "$old" --plain list >"$work/old.out" 2>&1; then
     echo "  old: accepted the stand-in"
   else
-    echo "  old: refused it"
+    cat "$work/old.out" >&2
+    fail "the baseline at $from already refuses the stand-in; there is no old/new contrast to show"
   fi
 fi
 

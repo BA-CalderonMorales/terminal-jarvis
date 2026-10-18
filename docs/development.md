@@ -21,7 +21,10 @@ rerunnable proofs carry the old-fails/new-passes pair for the platform-claim
 rule (`scripts/bash/verify/index.sh claim-earned --from REF`) and for the
 Windows strict-clippy gate
 (`scripts/bash/verify/index.sh windows-clippy --from REF`), where `REF` is the
-pre-fix commit; see `docs/claim-earning-study.md`.
+pre-fix commit; see `docs/claim-earning-study.md`. Each exits nonzero unless its
+pre-fix half fails and the working tree passes, so `windows-clippy` belongs on a
+host where the pre-fix tree fails (a Windows checkout) and reports
+`there is no warning to deny` anywhere else.
 
 ## Domain shape
 
@@ -88,8 +91,21 @@ separate release workflow and require operator approval.
 The npm publish job holds no stored credential. It authenticates with the
 workflow's GitHub OIDC identity, so a Trusted Publisher must be registered on
 npmjs.com for this repository and the `cd-multiplatform.yml` workflow before a
-release tag is pushed. The job asserts npm 11.5.1 or newer before it touches the
-registry and stops with an explicit message when the toolchain is older.
+release tag is pushed.
+
+Two settings on that publisher are easy to miss and both fail *after* the
+package is already published:
+
+- **Allow npm dist-tag** is **off by default**. Publishing and moving channels
+  are independent permissions, so without it the release publishes and then
+  cannot point `latest`, `stable`, or `beta` at the new version.
+- The client must support dist-tags over OIDC: **npm 11.21.0+ in the 11.x line,
+  or 12.2.0+ in the 12.x line**. The job installs a current npm and then
+  asserts the version before it touches the registry, because the toolchain a
+  `setup-node` version ships can be older than the publish minimum.
+
+Provenance is generated automatically for a trusted publish from GitHub
+Actions; the `--provenance` flag only makes it explicit.
 
 ### Registry Confirmation
 

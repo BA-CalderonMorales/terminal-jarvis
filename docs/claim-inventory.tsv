@@ -1,10 +1,10 @@
 subject	field	kind	value	held_by	basis	verdict
-gate:trivy	args	execution-shape	["fs", "--scanners", "vuln,misconfig", "--severity", "HIGH,CRITICAL", "--exit-code", "1", "--skip-dirs", "node_modules", "--skip-dirs", "target", "--skip-dirs", ".git", "--skip-dirs", "dist", "--skip-dirs", "build", "--skip-dirs", "vendor", "--skip-dirs", ".venv", "--skip-dirs", "venv", "--skip-dirs", "npm", "--skip-dirs", "mutants.out", "--skip-dirs", "mutants.out.old", "--skip-dirs", "graphify-out", "--skip-dirs", "**/~*", "--skip-files", "**/~*", "."]	gate:command-shape	evidence	gate
-gate:trivy	binary	identity	trivy	gate:identity	evidence	gate
+gate:trivy	args	execution-shape	["fs", "--scanners", "vuln,misconfig", "--severity", "HIGH,CRITICAL", "--exit-code", "1", "--skip-dirs", "node_modules", "--skip-dirs", "target", "--skip-dirs", ".git", "--skip-dirs", "dist", "--skip-dirs", "build", "--skip-dirs", "vendor", "--skip-dirs", ".venv", "--skip-dirs", "venv", "--skip-dirs", "npm", "--skip-dirs", "mutants.out", "--skip-dirs", "mutants.out.old", "--skip-dirs", "graphify-out", "--skip-dirs", "**/~*", "--skip-files", "**/~*", "."]	none	assertion	asserted
+gate:trivy	binary	identity	trivy	none	assertion	asserted
 gate:trivy	description	narration	Scans the current workspace for high and critical vulnerabilities and misconfigurations before a harness command runs. Secret scanning is off (slowest scanner, lowest download risk); dependency and build directories are skipped so the walk stays fast, and Windows delete-pending entries (files and directories whose names start with '~') are skipped so the walk cannot crash on them.	none	assertion	asserted
 gate:trivy	display	narration	Trivy filesystem gate	none	assertion	asserted
 gate:trivy	install_hint	narration	Install Trivy from https://trivy.dev/docs/latest/getting-started/installation/ or run `terminal-jarvis gate disable`.	none	assertion	asserted
-gate:trivy	name	identity	trivy	gate:identity	evidence	gate
+gate:trivy	name	identity	trivy	none	assertion	asserted
 harness:aider	binary	identity	aider	gate:identity	evidence	gate
 harness:aider	description	narration	AI pair programming assistant that edits code in your local git repository	none	assertion	asserted
 harness:aider	display	narration	Aider	none	assertion	asserted
@@ -97,11 +97,11 @@ harness:aider/update	support	support-state	expected	gate:evidence-pairing	eviden
 harness:aider/update	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	frozen
 harness:aider/version	args	execution-shape	["--version"]	gate:command-shape	evidence	witnessed
 harness:aider/version	command	execution-shape	aider	gate:command-shape	evidence	witnessed
-harness:aider/version	effect	risk-class	read-only	gate:effect-class	evidence	witnessed
+harness:aider/version	effect	risk-class	read-only	none	assertion	asserted
 harness:aider/version	evidence	support-state	disposable-real	gate:evidence-pairing	evidence	witnessed
 harness:aider/version	executable	identity	aider	gate:identity	evidence	gate
-harness:aider/version	interaction	risk-class	noninteractive	gate:effect-class	evidence	witnessed
-harness:aider/version	network	risk-class	false	gate:effect-class	evidence	witnessed
+harness:aider/version	interaction	risk-class	noninteractive	none	assertion	asserted
+harness:aider/version	network	risk-class	false	none	assertion	asserted
 harness:aider/version	platforms	platform-scope	[]	gate:platform-name	evidence	asserted
 harness:aider/version	source	provenance	internal:phase-01@fab5848	none	assertion	external
 harness:aider/version	summary	narration	Print or verify the installed Aider version.	none	assertion	asserted
@@ -213,11 +213,11 @@ harness:amp/update	support	support-state	expected	gate:evidence-pairing	evidence
 harness:amp/update	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	frozen
 harness:amp/version	args	execution-shape	["--version"]	gate:command-shape	evidence	gate
 harness:amp/version	command	execution-shape	amp	gate:command-shape	evidence	gate
-harness:amp/version	effect	risk-class	read-only	gate:effect-class	evidence	gate
+harness:amp/version	effect	risk-class	read-only	none	assertion	asserted
 harness:amp/version	evidence	support-state	deterministic	gate:evidence-pairing	evidence	gate
 harness:amp/version	executable	identity	amp	gate:identity	evidence	gate
-harness:amp/version	interaction	risk-class	noninteractive	gate:effect-class	evidence	gate
-harness:amp/version	network	risk-class	false	gate:effect-class	evidence	gate
+harness:amp/version	interaction	risk-class	noninteractive	none	assertion	asserted
+harness:amp/version	network	risk-class	false	none	assertion	asserted
 harness:amp/version	platforms	platform-scope	[]	gate:platform-name	evidence	asserted
 harness:amp/version	source	provenance	internal:phase-01@fab5848	none	assertion	external
 harness:amp/version	summary	narration	Print or verify the installed Amp version.	none	assertion	asserted
@@ -248,7 +248,7 @@ harness:claude/download	evidence	support-state	deterministic	gate:evidence-pairi
 harness:claude/download	executable	identity	sh	gate:identity	evidence	gate
 harness:claude/download	interaction	risk-class	noninteractive	gate:effect-class	evidence	gate
 harness:claude/download	network	risk-class	true	gate:effect-class	evidence	gate
-harness:claude/download	platforms	platform-scope	[]	gate:platform-name	evidence	inert
+harness:claude/download	platforms	platform-scope	[]	gate:platform-name	evidence	asserted
 harness:claude/download	source	provenance	internal:phase-01@fab5848	none	assertion	external
 harness:claude/download	summary	narration	Install Claude from its documented distribution channel.	none	assertion	asserted
 harness:claude/download	support	support-state	unknown	gate:evidence-pairing	evidence	gate
@@ -327,11 +327,11 @@ harness:claude/update	support	support-state	expected	gate:evidence-pairing	evide
 harness:claude/update	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	frozen
 harness:claude/version	args	execution-shape	["--version"]	gate:command-shape	evidence	witnessed
 harness:claude/version	command	execution-shape	claude	gate:command-shape	evidence	witnessed
-harness:claude/version	effect	risk-class	read-only	gate:effect-class	evidence	witnessed
+harness:claude/version	effect	risk-class	read-only	none	assertion	asserted
 harness:claude/version	evidence	support-state	disposable-real	gate:evidence-pairing	evidence	witnessed
 harness:claude/version	executable	identity	claude	gate:identity	evidence	gate
-harness:claude/version	interaction	risk-class	noninteractive	gate:effect-class	evidence	witnessed
-harness:claude/version	network	risk-class	false	gate:effect-class	evidence	witnessed
+harness:claude/version	interaction	risk-class	noninteractive	none	assertion	asserted
+harness:claude/version	network	risk-class	false	none	assertion	asserted
 harness:claude/version	platforms	platform-scope	[]	gate:platform-name	evidence	asserted
 harness:claude/version	source	provenance	internal:phase-01@fab5848	none	assertion	external
 harness:claude/version	summary	narration	Print or verify the installed Claude version.	none	assertion	asserted
@@ -443,11 +443,11 @@ harness:code/update	support	support-state	expected	gate:evidence-pairing	evidenc
 harness:code/update	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	frozen
 harness:code/version	args	execution-shape	["--version"]	gate:command-shape	evidence	gate
 harness:code/version	command	execution-shape	coder	gate:command-shape	evidence	gate
-harness:code/version	effect	risk-class	read-only	gate:effect-class	evidence	gate
+harness:code/version	effect	risk-class	read-only	none	assertion	asserted
 harness:code/version	evidence	support-state	deterministic	gate:evidence-pairing	evidence	gate
 harness:code/version	executable	identity	coder	gate:identity	evidence	gate
-harness:code/version	interaction	risk-class	noninteractive	gate:effect-class	evidence	gate
-harness:code/version	network	risk-class	false	gate:effect-class	evidence	gate
+harness:code/version	interaction	risk-class	noninteractive	none	assertion	asserted
+harness:code/version	network	risk-class	false	none	assertion	asserted
 harness:code/version	platforms	platform-scope	[]	gate:platform-name	evidence	asserted
 harness:code/version	source	provenance	internal:phase-01@fab5848	none	assertion	external
 harness:code/version	summary	narration	Print or verify the installed Code version.	none	assertion	asserted
@@ -486,11 +486,11 @@ harness:codex/download	support	support-state	expected	gate:evidence-pairing	evid
 harness:codex/download	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	frozen
 harness:codex/headless	args	execution-shape	["exec"]	gate:command-shape	evidence	gate
 harness:codex/headless	command	execution-shape	codex	gate:command-shape	evidence	gate
-harness:codex/headless	effect	risk-class	dangerous	gate:effect-class	evidence	gate
+harness:codex/headless	effect	risk-class	dangerous	none	assertion	asserted
 harness:codex/headless	evidence	support-state	deterministic	gate:evidence-pairing	evidence	gate
 harness:codex/headless	executable	identity	codex	gate:identity	evidence	gate
-harness:codex/headless	interaction	risk-class	noninteractive	gate:effect-class	evidence	gate
-harness:codex/headless	network	risk-class	true	gate:effect-class	evidence	gate
+harness:codex/headless	interaction	risk-class	noninteractive	none	assertion	asserted
+harness:codex/headless	network	risk-class	true	none	assertion	asserted
 harness:codex/headless	platforms	platform-scope	[]	gate:platform-name	evidence	asserted
 harness:codex/headless	source	provenance	internal:phase-01@fab5848	none	assertion	external
 harness:codex/headless	summary	narration	Run Codex in a headless command mode when the CLI supports it.	none	assertion	asserted
@@ -559,11 +559,11 @@ harness:codex/update	support	support-state	expected	gate:evidence-pairing	eviden
 harness:codex/update	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	frozen
 harness:codex/version	args	execution-shape	["--version"]	gate:command-shape	evidence	witnessed
 harness:codex/version	command	execution-shape	codex	gate:command-shape	evidence	witnessed
-harness:codex/version	effect	risk-class	read-only	gate:effect-class	evidence	witnessed
+harness:codex/version	effect	risk-class	read-only	none	assertion	asserted
 harness:codex/version	evidence	support-state	disposable-real	gate:evidence-pairing	evidence	witnessed
 harness:codex/version	executable	identity	codex	gate:identity	evidence	gate
-harness:codex/version	interaction	risk-class	noninteractive	gate:effect-class	evidence	witnessed
-harness:codex/version	network	risk-class	false	gate:effect-class	evidence	witnessed
+harness:codex/version	interaction	risk-class	noninteractive	none	assertion	asserted
+harness:codex/version	network	risk-class	false	none	assertion	asserted
 harness:codex/version	platforms	platform-scope	[]	gate:platform-name	evidence	asserted
 harness:codex/version	source	provenance	internal:phase-01@fab5848	none	assertion	external
 harness:codex/version	summary	narration	Print the installed Codex version.	none	assertion	asserted
@@ -675,11 +675,11 @@ harness:copilot/update	support	support-state	expected	gate:evidence-pairing	evid
 harness:copilot/update	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	frozen
 harness:copilot/version	args	execution-shape	["--version"]	gate:command-shape	evidence	gate
 harness:copilot/version	command	execution-shape	copilot	gate:command-shape	evidence	gate
-harness:copilot/version	effect	risk-class	read-only	gate:effect-class	evidence	gate
+harness:copilot/version	effect	risk-class	read-only	none	assertion	asserted
 harness:copilot/version	evidence	support-state	deterministic	gate:evidence-pairing	evidence	gate
 harness:copilot/version	executable	identity	copilot	gate:identity	evidence	gate
-harness:copilot/version	interaction	risk-class	noninteractive	gate:effect-class	evidence	gate
-harness:copilot/version	network	risk-class	false	gate:effect-class	evidence	gate
+harness:copilot/version	interaction	risk-class	noninteractive	none	assertion	asserted
+harness:copilot/version	network	risk-class	false	none	assertion	asserted
 harness:copilot/version	platforms	platform-scope	[]	gate:platform-name	evidence	asserted
 harness:copilot/version	source	provenance	internal:phase-01@fab5848	none	assertion	external
 harness:copilot/version	summary	narration	Print or verify the installed Copilot version.	none	assertion	asserted
@@ -791,11 +791,11 @@ harness:crush/update	support	support-state	expected	gate:evidence-pairing	eviden
 harness:crush/update	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	frozen
 harness:crush/version	args	execution-shape	["--version"]	gate:command-shape	evidence	gate
 harness:crush/version	command	execution-shape	crush	gate:command-shape	evidence	gate
-harness:crush/version	effect	risk-class	read-only	gate:effect-class	evidence	gate
+harness:crush/version	effect	risk-class	read-only	none	assertion	asserted
 harness:crush/version	evidence	support-state	deterministic	gate:evidence-pairing	evidence	gate
 harness:crush/version	executable	identity	crush	gate:identity	evidence	gate
-harness:crush/version	interaction	risk-class	noninteractive	gate:effect-class	evidence	gate
-harness:crush/version	network	risk-class	false	gate:effect-class	evidence	gate
+harness:crush/version	interaction	risk-class	noninteractive	none	assertion	asserted
+harness:crush/version	network	risk-class	false	none	assertion	asserted
 harness:crush/version	platforms	platform-scope	[]	gate:platform-name	evidence	asserted
 harness:crush/version	source	provenance	internal:phase-01@fab5848	none	assertion	external
 harness:crush/version	summary	narration	Print or verify the installed Crush version.	none	assertion	asserted
@@ -940,7 +940,7 @@ harness:droid/download	evidence	support-state	deterministic	gate:evidence-pairin
 harness:droid/download	executable	identity	sh	gate:identity	evidence	gate
 harness:droid/download	interaction	risk-class	noninteractive	gate:effect-class	evidence	gate
 harness:droid/download	network	risk-class	true	gate:effect-class	evidence	gate
-harness:droid/download	platforms	platform-scope	[]	gate:platform-name	evidence	inert
+harness:droid/download	platforms	platform-scope	[]	gate:platform-name	evidence	asserted
 harness:droid/download	source	provenance	internal:phase-01@fab5848	none	assertion	external
 harness:droid/download	summary	narration	Install Droid from its documented distribution channel.	none	assertion	asserted
 harness:droid/download	support	support-state	unknown	gate:evidence-pairing	evidence	gate
@@ -1019,11 +1019,11 @@ harness:droid/update	support	support-state	expected	gate:evidence-pairing	eviden
 harness:droid/update	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	frozen
 harness:droid/version	args	execution-shape	["--version"]	gate:command-shape	evidence	gate
 harness:droid/version	command	execution-shape	droid	gate:command-shape	evidence	gate
-harness:droid/version	effect	risk-class	read-only	gate:effect-class	evidence	gate
+harness:droid/version	effect	risk-class	read-only	none	assertion	asserted
 harness:droid/version	evidence	support-state	deterministic	gate:evidence-pairing	evidence	gate
 harness:droid/version	executable	identity	droid	gate:identity	evidence	gate
-harness:droid/version	interaction	risk-class	noninteractive	gate:effect-class	evidence	gate
-harness:droid/version	network	risk-class	false	gate:effect-class	evidence	gate
+harness:droid/version	interaction	risk-class	noninteractive	none	assertion	asserted
+harness:droid/version	network	risk-class	false	none	assertion	asserted
 harness:droid/version	platforms	platform-scope	[]	gate:platform-name	evidence	asserted
 harness:droid/version	source	provenance	internal:phase-01@fab5848	none	assertion	external
 harness:droid/version	summary	narration	Print or verify the installed Droid version.	none	assertion	asserted
@@ -1054,7 +1054,7 @@ harness:eca/download	evidence	support-state	deterministic	gate:evidence-pairing	
 harness:eca/download	executable	identity	sh	gate:identity	evidence	gate
 harness:eca/download	interaction	risk-class	noninteractive	gate:effect-class	evidence	gate
 harness:eca/download	network	risk-class	true	gate:effect-class	evidence	gate
-harness:eca/download	platforms	platform-scope	[]	gate:platform-name	evidence	inert
+harness:eca/download	platforms	platform-scope	[]	gate:platform-name	evidence	asserted
 harness:eca/download	source	provenance	internal:phase-01@fab5848	none	assertion	external
 harness:eca/download	summary	narration	Install ECA from its documented distribution channel.	none	assertion	asserted
 harness:eca/download	support	support-state	unknown	gate:evidence-pairing	evidence	gate
@@ -1133,11 +1133,11 @@ harness:eca/update	support	support-state	expected	gate:evidence-pairing	evidence
 harness:eca/update	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	frozen
 harness:eca/version	args	execution-shape	["--version"]	gate:command-shape	evidence	gate
 harness:eca/version	command	execution-shape	eca	gate:command-shape	evidence	gate
-harness:eca/version	effect	risk-class	read-only	gate:effect-class	evidence	gate
+harness:eca/version	effect	risk-class	read-only	none	assertion	asserted
 harness:eca/version	evidence	support-state	deterministic	gate:evidence-pairing	evidence	gate
 harness:eca/version	executable	identity	eca	gate:identity	evidence	gate
-harness:eca/version	interaction	risk-class	noninteractive	gate:effect-class	evidence	gate
-harness:eca/version	network	risk-class	false	gate:effect-class	evidence	gate
+harness:eca/version	interaction	risk-class	noninteractive	none	assertion	asserted
+harness:eca/version	network	risk-class	false	none	assertion	asserted
 harness:eca/version	platforms	platform-scope	[]	gate:platform-name	evidence	asserted
 harness:eca/version	source	provenance	internal:phase-01@fab5848	none	assertion	external
 harness:eca/version	summary	narration	Print or verify the installed ECA version.	none	assertion	asserted
@@ -1249,11 +1249,11 @@ harness:forge/update	support	support-state	expected	gate:evidence-pairing	eviden
 harness:forge/update	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	frozen
 harness:forge/version	args	execution-shape	["--version"]	gate:command-shape	evidence	gate
 harness:forge/version	command	execution-shape	forge	gate:command-shape	evidence	gate
-harness:forge/version	effect	risk-class	read-only	gate:effect-class	evidence	gate
+harness:forge/version	effect	risk-class	read-only	none	assertion	asserted
 harness:forge/version	evidence	support-state	deterministic	gate:evidence-pairing	evidence	gate
 harness:forge/version	executable	identity	forge	gate:identity	evidence	gate
-harness:forge/version	interaction	risk-class	noninteractive	gate:effect-class	evidence	gate
-harness:forge/version	network	risk-class	false	gate:effect-class	evidence	gate
+harness:forge/version	interaction	risk-class	noninteractive	none	assertion	asserted
+harness:forge/version	network	risk-class	false	none	assertion	asserted
 harness:forge/version	platforms	platform-scope	[]	gate:platform-name	evidence	asserted
 harness:forge/version	source	provenance	internal:phase-01@fab5848	none	assertion	external
 harness:forge/version	summary	narration	Print or verify the installed Forge version.	none	assertion	asserted
@@ -1365,11 +1365,11 @@ harness:gemini/update	support	support-state	expected	gate:evidence-pairing	evide
 harness:gemini/update	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	frozen
 harness:gemini/version	args	execution-shape	["--version"]	gate:command-shape	evidence	gate
 harness:gemini/version	command	execution-shape	gemini	gate:command-shape	evidence	gate
-harness:gemini/version	effect	risk-class	read-only	gate:effect-class	evidence	gate
+harness:gemini/version	effect	risk-class	read-only	none	assertion	asserted
 harness:gemini/version	evidence	support-state	deterministic	gate:evidence-pairing	evidence	gate
 harness:gemini/version	executable	identity	gemini	gate:identity	evidence	gate
-harness:gemini/version	interaction	risk-class	noninteractive	gate:effect-class	evidence	gate
-harness:gemini/version	network	risk-class	false	gate:effect-class	evidence	gate
+harness:gemini/version	interaction	risk-class	noninteractive	none	assertion	asserted
+harness:gemini/version	network	risk-class	false	none	assertion	asserted
 harness:gemini/version	platforms	platform-scope	[]	gate:platform-name	evidence	asserted
 harness:gemini/version	source	provenance	internal:phase-01@fab5848	none	assertion	external
 harness:gemini/version	summary	narration	Print or verify the installed Gemini version.	none	assertion	asserted
@@ -1400,7 +1400,7 @@ harness:goose/download	evidence	support-state	deterministic	gate:evidence-pairin
 harness:goose/download	executable	identity	sh	gate:identity	evidence	gate
 harness:goose/download	interaction	risk-class	noninteractive	gate:effect-class	evidence	gate
 harness:goose/download	network	risk-class	true	gate:effect-class	evidence	gate
-harness:goose/download	platforms	platform-scope	[]	gate:platform-name	evidence	inert
+harness:goose/download	platforms	platform-scope	[]	gate:platform-name	evidence	asserted
 harness:goose/download	source	provenance	internal:phase-01@fab5848	none	assertion	external
 harness:goose/download	summary	narration	Install Goose from its documented distribution channel.	none	assertion	asserted
 harness:goose/download	support	support-state	unknown	gate:evidence-pairing	evidence	gate
@@ -1479,11 +1479,11 @@ harness:goose/update	support	support-state	expected	gate:evidence-pairing	eviden
 harness:goose/update	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	frozen
 harness:goose/version	args	execution-shape	["--version"]	gate:command-shape	evidence	gate
 harness:goose/version	command	execution-shape	goose	gate:command-shape	evidence	gate
-harness:goose/version	effect	risk-class	read-only	gate:effect-class	evidence	gate
+harness:goose/version	effect	risk-class	read-only	none	assertion	asserted
 harness:goose/version	evidence	support-state	deterministic	gate:evidence-pairing	evidence	gate
 harness:goose/version	executable	identity	goose	gate:identity	evidence	gate
-harness:goose/version	interaction	risk-class	noninteractive	gate:effect-class	evidence	gate
-harness:goose/version	network	risk-class	false	gate:effect-class	evidence	gate
+harness:goose/version	interaction	risk-class	noninteractive	none	assertion	asserted
+harness:goose/version	network	risk-class	false	none	assertion	asserted
 harness:goose/version	platforms	platform-scope	[]	gate:platform-name	evidence	asserted
 harness:goose/version	source	provenance	internal:phase-01@fab5848	none	assertion	external
 harness:goose/version	summary	narration	Print or verify the installed Goose version.	none	assertion	asserted
@@ -1514,18 +1514,18 @@ harness:hermes/download	evidence	support-state	deterministic	gate:evidence-pairi
 harness:hermes/download	executable	identity	bash	gate:identity	evidence	gate
 harness:hermes/download	interaction	risk-class	noninteractive	gate:effect-class	evidence	gate
 harness:hermes/download	network	risk-class	true	gate:effect-class	evidence	gate
-harness:hermes/download	platforms	platform-scope	[]	gate:platform-name	evidence	inert
+harness:hermes/download	platforms	platform-scope	[]	gate:platform-name	evidence	asserted
 harness:hermes/download	source	provenance	internal:phase-01@fab5848	none	assertion	external
 harness:hermes/download	summary	narration	Install Hermes Agent from its documented distribution channel.	none	assertion	asserted
 harness:hermes/download	support	support-state	unknown	gate:evidence-pairing	evidence	gate
 harness:hermes/download	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	frozen
 harness:hermes/headless	args	execution-shape	["-z"]	gate:command-shape	evidence	witnessed
 harness:hermes/headless	command	execution-shape	hermes	gate:command-shape	evidence	witnessed
-harness:hermes/headless	effect	risk-class	dangerous	gate:effect-class	evidence	witnessed
+harness:hermes/headless	effect	risk-class	dangerous	none	assertion	asserted
 harness:hermes/headless	evidence	support-state	disposable-real	gate:evidence-pairing	evidence	witnessed
 harness:hermes/headless	executable	identity	hermes	gate:identity	evidence	gate
-harness:hermes/headless	interaction	risk-class	noninteractive	gate:effect-class	evidence	witnessed
-harness:hermes/headless	network	risk-class	true	gate:effect-class	evidence	witnessed
+harness:hermes/headless	interaction	risk-class	noninteractive	none	assertion	asserted
+harness:hermes/headless	network	risk-class	true	none	assertion	asserted
 harness:hermes/headless	platforms	platform-scope	["linux-x64-gnu"]	gate:platform-name	evidence	witnessed
 harness:hermes/headless	source	provenance	internal:phase-01@fab5848	none	assertion	external
 harness:hermes/headless	summary	narration	Run Hermes Agent headlessly with a one-shot prompt (-z).	none	assertion	asserted
@@ -1593,11 +1593,11 @@ harness:hermes/update	support	support-state	expected	gate:evidence-pairing	evide
 harness:hermes/update	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	frozen
 harness:hermes/version	args	execution-shape	["--version"]	gate:command-shape	evidence	gate
 harness:hermes/version	command	execution-shape	hermes	gate:command-shape	evidence	gate
-harness:hermes/version	effect	risk-class	read-only	gate:effect-class	evidence	gate
+harness:hermes/version	effect	risk-class	read-only	none	assertion	asserted
 harness:hermes/version	evidence	support-state	deterministic	gate:evidence-pairing	evidence	gate
 harness:hermes/version	executable	identity	hermes	gate:identity	evidence	gate
-harness:hermes/version	interaction	risk-class	noninteractive	gate:effect-class	evidence	gate
-harness:hermes/version	network	risk-class	false	gate:effect-class	evidence	gate
+harness:hermes/version	interaction	risk-class	noninteractive	none	assertion	asserted
+harness:hermes/version	network	risk-class	false	none	assertion	asserted
 harness:hermes/version	platforms	platform-scope	[]	gate:platform-name	evidence	asserted
 harness:hermes/version	source	provenance	internal:phase-01@fab5848	none	assertion	external
 harness:hermes/version	summary	narration	Print or verify the installed Hermes Agent version.	none	assertion	asserted
@@ -1709,11 +1709,11 @@ harness:jules/update	support	support-state	expected	gate:evidence-pairing	eviden
 harness:jules/update	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	frozen
 harness:jules/version	args	execution-shape	["version"]	gate:command-shape	evidence	gate
 harness:jules/version	command	execution-shape	jules	gate:command-shape	evidence	gate
-harness:jules/version	effect	risk-class	read-only	gate:effect-class	evidence	gate
+harness:jules/version	effect	risk-class	read-only	none	assertion	asserted
 harness:jules/version	evidence	support-state	deterministic	gate:evidence-pairing	evidence	gate
 harness:jules/version	executable	identity	jules	gate:identity	evidence	gate
-harness:jules/version	interaction	risk-class	noninteractive	gate:effect-class	evidence	gate
-harness:jules/version	network	risk-class	false	gate:effect-class	evidence	gate
+harness:jules/version	interaction	risk-class	noninteractive	none	assertion	asserted
+harness:jules/version	network	risk-class	false	none	assertion	asserted
 harness:jules/version	platforms	platform-scope	[]	gate:platform-name	evidence	asserted
 harness:jules/version	source	provenance	internal:phase-01@fab5848	none	assertion	external
 harness:jules/version	summary	narration	Print or verify the installed Jules version.	none	assertion	asserted
@@ -1825,11 +1825,11 @@ harness:kilocode/update	support	support-state	expected	gate:evidence-pairing	evi
 harness:kilocode/update	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	frozen
 harness:kilocode/version	args	execution-shape	["--version"]	gate:command-shape	evidence	gate
 harness:kilocode/version	command	execution-shape	kilocode	gate:command-shape	evidence	gate
-harness:kilocode/version	effect	risk-class	read-only	gate:effect-class	evidence	gate
+harness:kilocode/version	effect	risk-class	read-only	none	assertion	asserted
 harness:kilocode/version	evidence	support-state	deterministic	gate:evidence-pairing	evidence	gate
 harness:kilocode/version	executable	identity	kilocode	gate:identity	evidence	gate
-harness:kilocode/version	interaction	risk-class	noninteractive	gate:effect-class	evidence	gate
-harness:kilocode/version	network	risk-class	false	gate:effect-class	evidence	gate
+harness:kilocode/version	interaction	risk-class	noninteractive	none	assertion	asserted
+harness:kilocode/version	network	risk-class	false	none	assertion	asserted
 harness:kilocode/version	platforms	platform-scope	[]	gate:platform-name	evidence	asserted
 harness:kilocode/version	source	provenance	internal:phase-01@fab5848	none	assertion	external
 harness:kilocode/version	summary	narration	Print or verify the installed Kilocode version.	none	assertion	asserted
@@ -1941,11 +1941,11 @@ harness:letta/update	support	support-state	expected	gate:evidence-pairing	eviden
 harness:letta/update	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	frozen
 harness:letta/version	args	execution-shape	["--version"]	gate:command-shape	evidence	gate
 harness:letta/version	command	execution-shape	letta	gate:command-shape	evidence	gate
-harness:letta/version	effect	risk-class	read-only	gate:effect-class	evidence	gate
+harness:letta/version	effect	risk-class	read-only	none	assertion	asserted
 harness:letta/version	evidence	support-state	deterministic	gate:evidence-pairing	evidence	gate
 harness:letta/version	executable	identity	letta	gate:identity	evidence	gate
-harness:letta/version	interaction	risk-class	noninteractive	gate:effect-class	evidence	gate
-harness:letta/version	network	risk-class	false	gate:effect-class	evidence	gate
+harness:letta/version	interaction	risk-class	noninteractive	none	assertion	asserted
+harness:letta/version	network	risk-class	false	none	assertion	asserted
 harness:letta/version	platforms	platform-scope	[]	gate:platform-name	evidence	asserted
 harness:letta/version	source	provenance	internal:phase-01@fab5848	none	assertion	external
 harness:letta/version	summary	narration	Print or verify the installed Letta version.	none	assertion	asserted
@@ -2057,11 +2057,11 @@ harness:llxprt/update	support	support-state	expected	gate:evidence-pairing	evide
 harness:llxprt/update	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	frozen
 harness:llxprt/version	args	execution-shape	["--version"]	gate:command-shape	evidence	gate
 harness:llxprt/version	command	execution-shape	llxprt	gate:command-shape	evidence	gate
-harness:llxprt/version	effect	risk-class	read-only	gate:effect-class	evidence	gate
+harness:llxprt/version	effect	risk-class	read-only	none	assertion	asserted
 harness:llxprt/version	evidence	support-state	deterministic	gate:evidence-pairing	evidence	gate
 harness:llxprt/version	executable	identity	llxprt	gate:identity	evidence	gate
-harness:llxprt/version	interaction	risk-class	noninteractive	gate:effect-class	evidence	gate
-harness:llxprt/version	network	risk-class	false	gate:effect-class	evidence	gate
+harness:llxprt/version	interaction	risk-class	noninteractive	none	assertion	asserted
+harness:llxprt/version	network	risk-class	false	none	assertion	asserted
 harness:llxprt/version	platforms	platform-scope	[]	gate:platform-name	evidence	asserted
 harness:llxprt/version	source	provenance	internal:phase-01@fab5848	none	assertion	external
 harness:llxprt/version	summary	narration	Print or verify the installed LLXPRT version.	none	assertion	asserted
@@ -2173,11 +2173,11 @@ harness:nanocoder/update	support	support-state	expected	gate:evidence-pairing	ev
 harness:nanocoder/update	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	frozen
 harness:nanocoder/version	args	execution-shape	["--version"]	gate:command-shape	evidence	gate
 harness:nanocoder/version	command	execution-shape	nanocoder	gate:command-shape	evidence	gate
-harness:nanocoder/version	effect	risk-class	read-only	gate:effect-class	evidence	gate
+harness:nanocoder/version	effect	risk-class	read-only	none	assertion	asserted
 harness:nanocoder/version	evidence	support-state	deterministic	gate:evidence-pairing	evidence	gate
 harness:nanocoder/version	executable	identity	nanocoder	gate:identity	evidence	gate
-harness:nanocoder/version	interaction	risk-class	noninteractive	gate:effect-class	evidence	gate
-harness:nanocoder/version	network	risk-class	false	gate:effect-class	evidence	gate
+harness:nanocoder/version	interaction	risk-class	noninteractive	none	assertion	asserted
+harness:nanocoder/version	network	risk-class	false	none	assertion	asserted
 harness:nanocoder/version	platforms	platform-scope	[]	gate:platform-name	evidence	asserted
 harness:nanocoder/version	source	provenance	internal:phase-01@fab5848	none	assertion	external
 harness:nanocoder/version	summary	narration	Print or verify the installed Nanocoder version.	none	assertion	asserted
@@ -2208,7 +2208,7 @@ harness:ollama/download	evidence	support-state	deterministic	gate:evidence-pairi
 harness:ollama/download	executable	identity	sh	gate:identity	evidence	gate
 harness:ollama/download	interaction	risk-class	noninteractive	gate:effect-class	evidence	gate
 harness:ollama/download	network	risk-class	true	gate:effect-class	evidence	gate
-harness:ollama/download	platforms	platform-scope	[]	gate:platform-name	evidence	inert
+harness:ollama/download	platforms	platform-scope	[]	gate:platform-name	evidence	asserted
 harness:ollama/download	source	provenance	internal:phase-01@fab5848	none	assertion	external
 harness:ollama/download	summary	narration	Install Ollama from its documented distribution channel.	none	assertion	asserted
 harness:ollama/download	support	support-state	unknown	gate:evidence-pairing	evidence	gate
@@ -2280,18 +2280,18 @@ harness:ollama/update	evidence	support-state	deterministic	gate:evidence-pairing
 harness:ollama/update	executable	identity	sh	gate:identity	evidence	gate
 harness:ollama/update	interaction	risk-class	noninteractive	gate:effect-class	evidence	gate
 harness:ollama/update	network	risk-class	true	gate:effect-class	evidence	gate
-harness:ollama/update	platforms	platform-scope	[]	gate:platform-name	evidence	inert
+harness:ollama/update	platforms	platform-scope	[]	gate:platform-name	evidence	asserted
 harness:ollama/update	source	provenance	internal:phase-01@fab5848	none	assertion	external
 harness:ollama/update	summary	narration	Update Ollama without interactive setup flows.	none	assertion	asserted
 harness:ollama/update	support	support-state	unknown	gate:evidence-pairing	evidence	gate
 harness:ollama/update	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	frozen
 harness:ollama/version	args	execution-shape	["--version"]	gate:command-shape	evidence	witnessed
 harness:ollama/version	command	execution-shape	ollama	gate:command-shape	evidence	witnessed
-harness:ollama/version	effect	risk-class	read-only	gate:effect-class	evidence	witnessed
+harness:ollama/version	effect	risk-class	read-only	none	assertion	asserted
 harness:ollama/version	evidence	support-state	disposable-real	gate:evidence-pairing	evidence	witnessed
 harness:ollama/version	executable	identity	ollama	gate:identity	evidence	gate
-harness:ollama/version	interaction	risk-class	noninteractive	gate:effect-class	evidence	witnessed
-harness:ollama/version	network	risk-class	false	gate:effect-class	evidence	witnessed
+harness:ollama/version	interaction	risk-class	noninteractive	none	assertion	asserted
+harness:ollama/version	network	risk-class	false	none	assertion	asserted
 harness:ollama/version	platforms	platform-scope	[]	gate:platform-name	evidence	asserted
 harness:ollama/version	source	provenance	internal:phase-01@fab5848	none	assertion	external
 harness:ollama/version	summary	narration	Print or verify the installed Ollama version.	none	assertion	asserted
@@ -2402,11 +2402,11 @@ harness:openclaw/update	support	support-state	expected	gate:evidence-pairing	evi
 harness:openclaw/update	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	frozen
 harness:openclaw/version	args	execution-shape	["--version"]	gate:command-shape	evidence	gate
 harness:openclaw/version	command	execution-shape	openclaw	gate:command-shape	evidence	gate
-harness:openclaw/version	effect	risk-class	read-only	gate:effect-class	evidence	gate
+harness:openclaw/version	effect	risk-class	read-only	none	assertion	asserted
 harness:openclaw/version	evidence	support-state	deterministic	gate:evidence-pairing	evidence	gate
 harness:openclaw/version	executable	identity	openclaw	gate:identity	evidence	gate
-harness:openclaw/version	interaction	risk-class	noninteractive	gate:effect-class	evidence	gate
-harness:openclaw/version	network	risk-class	false	gate:effect-class	evidence	gate
+harness:openclaw/version	interaction	risk-class	noninteractive	none	assertion	asserted
+harness:openclaw/version	network	risk-class	false	none	assertion	asserted
 harness:openclaw/version	platforms	platform-scope	[]	gate:platform-name	evidence	asserted
 harness:openclaw/version	source	provenance	internal:phase-01@fab5848	none	assertion	external
 harness:openclaw/version	summary	narration	Print or verify the installed OpenClaw version.	none	assertion	asserted
@@ -2445,11 +2445,11 @@ harness:opencode/download	support	support-state	expected	gate:evidence-pairing	e
 harness:opencode/download	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	frozen
 harness:opencode/headless	args	execution-shape	["run"]	gate:command-shape	evidence	gate
 harness:opencode/headless	command	execution-shape	opencode	gate:command-shape	evidence	gate
-harness:opencode/headless	effect	risk-class	dangerous	gate:effect-class	evidence	gate
+harness:opencode/headless	effect	risk-class	dangerous	none	assertion	asserted
 harness:opencode/headless	evidence	support-state	deterministic	gate:evidence-pairing	evidence	gate
 harness:opencode/headless	executable	identity	opencode	gate:identity	evidence	gate
-harness:opencode/headless	interaction	risk-class	noninteractive	gate:effect-class	evidence	gate
-harness:opencode/headless	network	risk-class	true	gate:effect-class	evidence	gate
+harness:opencode/headless	interaction	risk-class	noninteractive	none	assertion	asserted
+harness:opencode/headless	network	risk-class	true	none	assertion	asserted
 harness:opencode/headless	platforms	platform-scope	[]	gate:platform-name	evidence	asserted
 harness:opencode/headless	source	provenance	internal:phase-01@fab5848	none	assertion	external
 harness:opencode/headless	summary	narration	Run OpenCode headlessly when the local CLI supports it.	none	assertion	asserted
@@ -2518,11 +2518,11 @@ harness:opencode/update	support	support-state	expected	gate:evidence-pairing	evi
 harness:opencode/update	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	frozen
 harness:opencode/version	args	execution-shape	["--version"]	gate:command-shape	evidence	witnessed
 harness:opencode/version	command	execution-shape	opencode	gate:command-shape	evidence	witnessed
-harness:opencode/version	effect	risk-class	read-only	gate:effect-class	evidence	witnessed
+harness:opencode/version	effect	risk-class	read-only	none	assertion	asserted
 harness:opencode/version	evidence	support-state	disposable-real	gate:evidence-pairing	evidence	witnessed
 harness:opencode/version	executable	identity	opencode	gate:identity	evidence	gate
-harness:opencode/version	interaction	risk-class	noninteractive	gate:effect-class	evidence	witnessed
-harness:opencode/version	network	risk-class	false	gate:effect-class	evidence	witnessed
+harness:opencode/version	interaction	risk-class	noninteractive	none	assertion	asserted
+harness:opencode/version	network	risk-class	false	none	assertion	asserted
 harness:opencode/version	platforms	platform-scope	[]	gate:platform-name	evidence	asserted
 harness:opencode/version	source	provenance	internal:phase-01@fab5848	none	assertion	external
 harness:opencode/version	summary	narration	Print the installed OpenCode version.	none	assertion	asserted
@@ -2634,11 +2634,11 @@ harness:pi/update	support	support-state	expected	gate:evidence-pairing	evidence	
 harness:pi/update	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	frozen
 harness:pi/version	args	execution-shape	["--version"]	gate:command-shape	evidence	witnessed
 harness:pi/version	command	execution-shape	pi	gate:command-shape	evidence	witnessed
-harness:pi/version	effect	risk-class	read-only	gate:effect-class	evidence	witnessed
+harness:pi/version	effect	risk-class	read-only	none	assertion	asserted
 harness:pi/version	evidence	support-state	disposable-real	gate:evidence-pairing	evidence	witnessed
 harness:pi/version	executable	identity	pi	gate:identity	evidence	gate
-harness:pi/version	interaction	risk-class	noninteractive	gate:effect-class	evidence	witnessed
-harness:pi/version	network	risk-class	false	gate:effect-class	evidence	witnessed
+harness:pi/version	interaction	risk-class	noninteractive	none	assertion	asserted
+harness:pi/version	network	risk-class	false	none	assertion	asserted
 harness:pi/version	platforms	platform-scope	[]	gate:platform-name	evidence	asserted
 harness:pi/version	source	provenance	internal:phase-01@fab5848	none	assertion	external
 harness:pi/version	summary	narration	Print or verify the installed Pi version.	none	assertion	asserted
@@ -2750,11 +2750,11 @@ harness:qwen/update	support	support-state	expected	gate:evidence-pairing	evidenc
 harness:qwen/update	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	frozen
 harness:qwen/version	args	execution-shape	["--version"]	gate:command-shape	evidence	gate
 harness:qwen/version	command	execution-shape	qwen	gate:command-shape	evidence	gate
-harness:qwen/version	effect	risk-class	read-only	gate:effect-class	evidence	gate
+harness:qwen/version	effect	risk-class	read-only	none	assertion	asserted
 harness:qwen/version	evidence	support-state	deterministic	gate:evidence-pairing	evidence	gate
 harness:qwen/version	executable	identity	qwen	gate:identity	evidence	gate
-harness:qwen/version	interaction	risk-class	noninteractive	gate:effect-class	evidence	gate
-harness:qwen/version	network	risk-class	false	gate:effect-class	evidence	gate
+harness:qwen/version	interaction	risk-class	noninteractive	none	assertion	asserted
+harness:qwen/version	network	risk-class	false	none	assertion	asserted
 harness:qwen/version	platforms	platform-scope	[]	gate:platform-name	evidence	asserted
 harness:qwen/version	source	provenance	internal:phase-01@fab5848	none	assertion	external
 harness:qwen/version	summary	narration	Print or verify the installed Qwen version.	none	assertion	asserted
@@ -2785,7 +2785,7 @@ harness:vibe/download	evidence	support-state	deterministic	gate:evidence-pairing
 harness:vibe/download	executable	identity	bash	gate:identity	evidence	gate
 harness:vibe/download	interaction	risk-class	noninteractive	gate:effect-class	evidence	gate
 harness:vibe/download	network	risk-class	true	gate:effect-class	evidence	gate
-harness:vibe/download	platforms	platform-scope	[]	gate:platform-name	evidence	inert
+harness:vibe/download	platforms	platform-scope	[]	gate:platform-name	evidence	asserted
 harness:vibe/download	source	provenance	internal:phase-01@fab5848	none	assertion	external
 harness:vibe/download	summary	narration	Install Mistral Vibe from its documented distribution channel.	none	assertion	asserted
 harness:vibe/download	support	support-state	unknown	gate:evidence-pairing	evidence	gate
@@ -2864,11 +2864,11 @@ harness:vibe/update	support	support-state	expected	gate:evidence-pairing	evidenc
 harness:vibe/update	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	frozen
 harness:vibe/version	args	execution-shape	["--version"]	gate:command-shape	evidence	gate
 harness:vibe/version	command	execution-shape	vibe	gate:command-shape	evidence	gate
-harness:vibe/version	effect	risk-class	read-only	gate:effect-class	evidence	gate
+harness:vibe/version	effect	risk-class	read-only	none	assertion	asserted
 harness:vibe/version	evidence	support-state	deterministic	gate:evidence-pairing	evidence	gate
 harness:vibe/version	executable	identity	vibe	gate:identity	evidence	gate
-harness:vibe/version	interaction	risk-class	noninteractive	gate:effect-class	evidence	gate
-harness:vibe/version	network	risk-class	false	gate:effect-class	evidence	gate
+harness:vibe/version	interaction	risk-class	noninteractive	none	assertion	asserted
+harness:vibe/version	network	risk-class	false	none	assertion	asserted
 harness:vibe/version	platforms	platform-scope	[]	gate:platform-name	evidence	asserted
 harness:vibe/version	source	provenance	internal:phase-01@fab5848	none	assertion	external
 harness:vibe/version	summary	narration	Print or verify the installed Mistral Vibe version.	none	assertion	asserted

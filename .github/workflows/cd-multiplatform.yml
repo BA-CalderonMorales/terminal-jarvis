@@ -363,6 +363,12 @@ jobs:
         with:
           node-version: 24
 
+      # dist-tags over OIDC need npm 11.21.0+ (11.x) or 12.2.0+ (12.x), and the
+      # node 24 toolchain ships older. Without this the job can publish and then
+      # fail to move a channel; see docs/development.md.
+      - name: Install a dist-tag-capable npm
+        run: npm install -g npm@latest
+
       # The publish body lives in the release domain, not here, so
       # `scripts/bash/verify/index.sh publish-rehearsal` can run these exact
       # bytes against a fake registry before a tag is pushed.
@@ -372,4 +378,4 @@ jobs:
       - name: Publish or retag npm channels
         env:
           VERSION: ${{ needs.release-meta.outputs.version }}
-        run: scripts/bash/release/index.sh publish-npm --version "$VERSION"
+        run: scripts/bash/release/index.sh publish-npm --version "$VERSION" --provenance

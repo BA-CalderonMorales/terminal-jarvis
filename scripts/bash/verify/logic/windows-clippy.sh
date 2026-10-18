@@ -31,15 +31,23 @@ echo "windows-clippy: building the pre-fix tree at $from"
 git -C "$root" worktree add --detach "$work/old" "$from" >/dev/null 2>&1 ||
   fail "cannot create a worktree at $from"
 
-check() { # path label
-  if (cd "$1" && cargo clippy --all-targets -- -D warnings) >"$work/out" 2>&1; then
-    echo "$2: clean (strict clippy passes)"
-  else
-    echo "$2: refused ($(grep -c '^error' "$work/out") deny-warnings errors)"
-    grep -o 'due to [0-9]* previous errors\?' "$work/out" | sed 's/^/    /' | sort -u
-  fi
+# True when strict clippy passes for the tree at $1; the log is kept for the
+# caller either way, so a caller can require the contrast rather than trust it.
+check() { # path
+  (cd "$1" && cargo clippy --all-targets -- -D warnings) >"$work/out" 2>&1
 }
 
-check "$work/old" "old ($from)"
-check "$root" "new (working tree)"
+echo "windows-clippy: pre-fix tree at $from"
+if check "$work/old"; then
+  fail "the pre-fix tree at $from passes strict clippy here; there is no warning to deny"
+fi
+echo "  old: refused ($(grep -c '^error' "$work/out") deny-warnings errors)"
+grep -o 'due to [0-9]* previous errors\?' "$work/out" | sed 's/^/    /' | sort -u
+
+echo "windows-clippy: working tree"
+if ! check "$root"; then
+  sed -n '1,40p' "$work/out" >&2
+  fail "the working tree fails strict clippy"
+fi
+echo "  new: clean (strict clippy passes)"
 echo "windows-clippy: ok"

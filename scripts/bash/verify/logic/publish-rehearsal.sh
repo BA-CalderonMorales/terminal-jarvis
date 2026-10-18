@@ -62,11 +62,11 @@ grep -q "already published; moving tags only" "$work/retag.out" ||
 echo "  retag: converged on the already-published version"
 
 echo "publish-rehearsal: npm toolchain guard"
-for npm_version in 11.4.0 11.5.0 11.5.1 11.17.0; do
+for npm_version in 11.20.9 11.21.0 12.1.9 12.2.0 13.0.0; do
   mkdir -p "$work/reg-guard"
   printf '%s' "$npm_version" >"$work/reg-guard/npm-version"
   expected=refused
-  case "$npm_version" in 11.5.1 | 11.17.0) expected=accepted ;; esac
+  case "$npm_version" in 11.21.0 | 12.2.0 | 13.0.0) expected=accepted ;; esac
   got=refused
   if TERMINAL_JARVIS_REHEARSAL_REGISTRY="$work/reg-guard" PATH="$work/bin:$PATH" \
     scripts/bash/release/index.sh publish-npm --check-toolchain >/dev/null 2>&1; then

@@ -14,7 +14,7 @@ bump() { reads=$((reads + 1)); printf '%s' "$reads" >"$reg/reads"; }
 cmd=${1:-}
 [ "$#" -gt 0 ] && shift
 case "$cmd" in
-  --version) cat "$reg/npm-version" 2>/dev/null || echo 11.5.1 ;;
+  --version) cat "$reg/npm-version" 2>/dev/null || echo 11.21.0 ;;
   pack) exit 0 ;;
   view)
     bump

@@ -68,17 +68,27 @@ grep-able word:
 `scripts/bash/verify/logic/verify.sh` step `[7]`, and `.gitattributes` pins LF
 for `docs/*.tsv` so a Windows checkout cannot make it look stale.
 
-**What it found (2,887 claims).** `asserted=402, external=225, frozen=225,
-gate=1854, inert=131, witnessed=50`.
+**What it found (2,887 claims).** `asserted=494, external=225, frozen=225,
+gate=1791, inert=123, witnessed=29`.
 
 - **The platform-scope class.** 225 rows carry a `platforms` claim. Exactly one
   is `witnessed`: `hermes:headless = ["linux-x64-gnu"]` — the row the repo
-  already knew about, now the model instead of the exception. 131 are `inert`
-  (a non-empty scope on a `stub`/`disabled`/`unknown` row, where `guard_policy`
-  refuses before the platform check ever runs). 93 are `asserted`: an executing
-  row with `platforms = []`, which disables the guard, claiming to run anywhere.
-  Six of those are `verified` — a run on one host generalized to every platform.
-  This is the rest of the hermes class, and it is exactly where D2 landed.
+  already knew about, now the model instead of the exception. 123 are `inert`
+  (a non-empty scope on a `stub`/`disabled` row, where `guard_policy` refuses
+  before the platform check ever runs). 101 are `asserted`: 93 executing rows
+  with `platforms = []`, which disables the guard, claiming to run anywhere —
+  six of them `verified`, a run on one host generalized to every platform — plus
+  8 `unknown` rows, which `guard_policy` admits once a terminal session consents
+  and whose empty scope the shape gate explicitly permits. This is the rest of
+  the hermes class, and it is exactly where D2 landed.
+- **A mechanism is chosen by schema, capability, and support state.** `held_by`
+  names the thing that fails closed, so it cannot be inferred from the field
+  name: the gate loader parses `gates/*/index.toml` instead of running the
+  catalog shape gate over it, and `effect_truth` constrains `effect`/`network`/
+  `interaction` only on the `download`/`update`/`ui`/`yolo` arms (or on a
+  `stub`/`manual` row). The first pass claimed `gate:identity`,
+  `gate:command-shape`, and `gate:effect-class` in both places — 92 rows of
+  overstated mechanism, now `asserted`.
 - **`freshness` is frozen.** All 225 rows share
   `verified_at = "2026-08-05T00:00:00Z"`, and `catalog::logic::freshness`
   compares it to the compile-time constant `AS_OF` (also `2026-08-05T00:00:00Z`).
@@ -150,9 +160,18 @@ because the behavior they exercise is unix-only).
 
 ```
 scripts/bash/verify/index.sh windows-clippy --from 0c312d6
-  old (0c312d6):  refused (36 deny-warnings errors)
-  new (working tree):  clean (strict clippy passes)
+  windows-clippy: pre-fix tree at 0c312d6
+  old: refused (36 deny-warnings errors)
+  windows-clippy: working tree
+  new: clean (strict clippy passes)
+  windows-clippy: ok
 ```
+
+Recorded on a Windows checkout, where the pre-fix tree is the half that fails.
+The proof is host-bound by construction: where the pre-fix tree passes strict
+clippy (a Linux host) it exits nonzero with `there is no warning to deny`, so a
+passing baseline — or a working tree that fails — can no longer be recorded as a
+passing contrast.
 
 **The pipeline half:** `.github/workflows/ci.yml` gained a `windows-verify` job
 on `windows-latest` that runs the same two commands the fix was proven with,
@@ -212,7 +231,10 @@ for the chosen deliverables and is named as the next decider for D1's
 
 1. **Adding a claim means adding its verdict.** A new manifest key the
    inventory does not classify makes `claim-inventory` exit nonzero; add the key
-   to `KIND`/`HELD_BY`, or the inventory stops being complete.
+   to `KIND` and to the mechanism table for its schema
+   (`FACADE_HELD_BY`/`CAPABILITY_HELD_BY`), or the inventory stops being
+   complete. A capability `effect_truth` does not arm carries no
+   `gate:effect-class`; add it to `EFFECT_ARMS` when it gains one.
 2. **`platforms = []` means "runs anywhere" and disables the guard.** An
    executing row with an empty scope is `asserted`, not `witnessed`, until a
    real run records the platform. Do not read "not `witnessed`" as "broken" —
@@ -226,16 +248,45 @@ for the chosen deliverables and is named as the next decider for D1's
 6. **Open holes, in priority order:** the three near-copy npm publishers
    (`cd-npm-stable-release.yml`, `cd-npm-beta-release.yml`,
    `cd-npm-release-recovery.yml`) carry the race `0c312d6` fixed and an unused
-   `NPM_TOKEN`; `scripts/bash/release/logic/local-cd.sh:71` still advises
-   renewing an npm automation token; workflow YAML is validated only by
-   `local-ci`, which CI never runs and which needs `actionlint` on `PATH`;
-   `CHANGELOG.md` tops out at `## [0.1.20] - unreleased` on a tree where 0.1.20
-   is published to four registries.
+   `NPM_TOKEN`; workflow YAML is validated only by
+   `local-ci`, which CI never runs and which needs `actionlint` on `PATH`.
+   Closed since: `local-cd.sh`'s npm guidance (a tag release publishes over OIDC
+   and needs no local login) and the `CHANGELOG.md` headings, which the 0.1.21
+   cut dates.
 
 ## Draft ADR — record at merge to `develop`
 
 Per `docs/architecture-decision-records/README.md`, a `release/*` branch does
 not create records; paste this at merge, newest first.
+
+### Make the proofs fail when their contrast is absent (release/0.1.21 -> <merge date>)
+
+**Decision:** `claim-earned` and `windows-clippy` require the pre-fix half to
+actually fail and the working tree to pass, printing the captured diagnostic and
+exiting nonzero otherwise; both are executable through the verify index again.
+The npm publisher requires a dist-tag-capable client (11.21.0+ in the 11.x line,
+12.2.0+ in the 12.x line), CI installs one before it publishes, and
+`docs/development.md` records the Trusted Publisher's separate, default-off
+`Allow npm dist-tag` permission.
+
+**Context:** Both proofs printed their two halves and then `ok` regardless of
+what the halves said, so a baseline that already rejected the stand-in, or a
+host where both trees pass strict clippy, was recorded as an old-fails /
+new-passes contrast. The npm job's minimum (11.5.1) covered OIDC publishing but
+not the tokenless `dist-tag add` calls the same job makes, and the dist-tag
+permission is off by default — either one ships a release that publishes and
+then cannot move `latest`/`stable`/`beta`.
+
+**Considered:** Printing the halves and leaving the verdict to the reader (the
+pattern that let both scripts report `ok` for a contrast they never showed);
+raising the npm floor with a plain `sort -V` compare (it cannot express
+"11.21.0+ in 11.x, 12.2.0+ in 12.x"); documenting the permission without
+asserting the client version (the version is the half the job can check).
+
+**Consequence:** A proof that cannot show its contrast is a failure, not a
+verdict; `windows-clippy` fails on Linux with `there is no warning to deny`
+rather than passing, so it belongs on the host where the pre-fix tree fails; and
+the npm job stops before the registry when its client cannot retag.
 
 ### Put the decision at the cursor (release/0.1.21 -> <merge date>)
 
@@ -377,7 +428,9 @@ assertion carries a verdict; reject `platforms = []` plus a POSIX-shell
 executable on an executing row and de-shell the 23 `*/version` rows; scope the
 unix-only test support to `unix` and add a `windows-latest` CI job that runs
 `cargo clippy --all-targets -- -D warnings` and `cargo test --all-targets`; pin
-`docs/support-matrix.md` and `docs/*.tsv` to `text eol=lf`.
+`docs/support-matrix.md` and `docs/*.tsv` to `text eol=lf`; and select each
+row's mechanism by manifest schema, capability, and support state rather than by
+field name.
 
 **Context:** The catalog makes hundreds of assertions about software the repo
 does not own, and the only thing holding many of them up was a human having
@@ -394,6 +447,7 @@ converging the near-copy npm publishers now (needs a registry change that cannot
 be verified locally).
 
 **Consequence:** Every manifest key has a verdict and the inventory fails
-`--check` when it stops covering one; platform independence can no longer route
+`--check` when it stops covering one; a mechanism is claimed only where an
+invariant actually runs; platform independence can no longer route
 through `sh`; `win32-x64` is denied warnings in CI, not only reasoned about;
 generated artifacts survive a Windows checkout byte-for-byte.

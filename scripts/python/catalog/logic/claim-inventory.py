@@ -9,13 +9,15 @@ assertion, so a reader can grep for the weak classes instead of trusting prose:
   field     the manifest key
   kind      what sort of claim the key carries
   value     the asserted value, with tabs and newlines escaped
-  held_by   the mechanism, if any, that fails closed when the value is wrong
+  held_by   the mechanism, if any, that fails closed when the value is wrong,
+            selected by manifest schema, capability, and support state
   basis     evidence | assertion
   verdict   witnessed | gate | inert | frozen | external | asserted
 
 Verdict vocabulary::
 
-  witnessed  a recorded real execution backs the value (support=verified)
+  witnessed  a recorded real execution backs the value and a mechanism
+             constrains it (support=verified)
   gate       an executable cross-field invariant in the catalog shape gate
              constrains the value
   inert      a gate covers the field, but a higher-precedence guard makes the
@@ -23,7 +25,8 @@ Verdict vocabulary::
   frozen     the value is only compared against a compile-time constant, so it
              cannot drift into a measurable failure
   external   provenance confirmable only outside this repository
-  asserted   human narration; nothing here executes it
+  asserted   nothing in this repository constrains the value: narration, a
+             field with no applicable invariant, or a value only a human reads
 
 A key the catalog loader accepts but this script does not classify is an
 error, so the inventory stays complete as the catalog grows.
@@ -65,9 +68,17 @@ KIND = {
     "package": "install-source",
 }
 
-HELD_BY = {
+# A mechanism is selected by manifest schema, capability, and support state: the
+# field name alone overstates. The gate loader parses its own manifest rather
+# than running the catalog shape gate over it, and effect_truth only constrains
+# the arms below -- outside them the risk fields are assertions.
+FACADE_HELD_BY = {
     "name": "gate:identity",
     "binary": "gate:identity",
+    "env_mode": "gate:env",
+    "env": "gate:env",
+}
+CAPABILITY_HELD_BY = {
     "executable": "gate:identity",
     "support": "gate:evidence-pairing",
     "evidence": "gate:evidence-pairing",
@@ -78,12 +89,25 @@ HELD_BY = {
     "command": "gate:command-shape",
     "args": "gate:command-shape",
     "verified_at": "constant:freshness",
-    "env_mode": "gate:env",
-    "env": "gate:env",
 }
+EFFECT_ARMS = {"download", "update", "ui", "yolo"}
+EFFECT_SUPPORT = {"stub", "manual"}
+RISK_FIELDS = {"effect", "network", "interaction"}
 
-EXECUTING = {"verified", "expected"}
+# guard_policy refuses these before the platform guard runs. `unknown` is not
+# one of them: a terminal session consents and proceeds, so its rows execute.
+UNREACHABLE = {"manual", "stub", "unsupported", "disabled"}
 BEHAVIOUR = {"execution-shape", "risk-class", "platform-scope", "support-state"}
+
+
+def held_by_for(schema, capability, support, field):
+    if schema == "gate":
+        return "none"
+    if schema == "facade":
+        return FACADE_HELD_BY.get(field, "none")
+    if field in RISK_FIELDS and capability not in EFFECT_ARMS and support not in EFFECT_SUPPORT:
+        return "none"
+    return CAPABILITY_HELD_BY.get(field, "none")
 
 
 def clean(value):
@@ -100,7 +124,7 @@ def verdict(kind, support, platforms, held_by):
     if kind == "freshness":
         return "frozen"
     if kind == "platform-scope":
-        if support not in EXECUTING:
+        if support in UNREACHABLE:
             return "inert"
         if not platforms:
             return "asserted"
@@ -112,13 +136,13 @@ def verdict(kind, support, platforms, held_by):
     return "gate"
 
 
-def rows_for(subject, data, support):
+def rows_for(subject, data, support, schema, capability):
     for field in sorted(data):
         try:
             kind = KIND[field]
         except KeyError:
             raise SystemExit(f"claim-inventory: unrecognized manifest key {field!r} in {subject}")
-        held_by = HELD_BY.get(field, "none")
+        held_by = held_by_for(schema, capability, support, field)
         yield [
             subject,
             field,
@@ -134,16 +158,22 @@ def manifests():
     for harness in sorted(path for path in HARNESSES.iterdir() if path.is_dir()):
         facade = harness / "index.toml"
         if facade.is_file():
-            yield f"harness:{harness.name}", load(facade), None
+            yield f"harness:{harness.name}", load(facade), None, "facade", None
         for facet in sorted(path for path in harness.iterdir() if path.is_dir()):
             index = facet / "index.toml"
             if index.is_file():
                 data = load(index)
-                yield f"harness:{harness.name}/{facet.name}", data, data.get("support")
+                yield (
+                    f"harness:{harness.name}/{facet.name}",
+                    data,
+                    data.get("support"),
+                    "capability",
+                    facet.name,
+                )
     for gate in sorted(path for path in GATES.iterdir() if path.is_dir()):
         index = gate / "index.toml"
         if index.is_file():
-            yield f"gate:{gate.name}", load(index), None
+            yield f"gate:{gate.name}", load(index), None, "gate", None
 
 
 def load(path):
@@ -153,8 +183,8 @@ def load(path):
 
 def build():
     rows = []
-    for subject, data, support in manifests():
-        rows.extend(rows_for(subject, data, support))
+    for subject, data, support, schema, capability in manifests():
+        rows.extend(rows_for(subject, data, support, schema, capability))
     rows.sort(key=lambda row: (row[0], row[1]))
     return rows
 

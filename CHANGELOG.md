@@ -1,5 +1,5 @@
 # Changelog
-## [0.1.21] - unreleased
+## [0.1.21] - 2026-10-18
 
 ### Fixed
 
@@ -61,6 +61,28 @@
 - The escape resolver no longer hands one keypress back twice. It parked the
   continuation byte *after* sending it, racing the reader's own bookkeeping, so
   a fast `Esc Esc` could produce two Escapes.
+- The release path stops at the boundary instead of after it. The npm publisher
+  now requires a dist-tag-capable client -- npm 11.21.0+ in the 11.x line, or
+  12.2.0+ in the 12.x line -- before it touches the registry, and CI installs
+  one: a client that can publish but not retag ships a release whose `latest`,
+  `stable`, and `beta` still point at the previous version.
+- The two rerunnable proofs require the contrast they advertise. `claim-earned`
+  fails when the pre-fix binary already refuses the stand-in (printing the
+  diagnostic), and `windows-clippy` fails when the pre-fix tree passes strict
+  clippy, so a baseline that cannot fail -- or a working tree that cannot pass
+  -- is no longer recorded as an old-fails/new-passes `ok`. Both scripts are
+  executable through the verify index again, as `docs/development.md` documents
+  them.
+- The claim inventory no longer overstates its own mechanisms. A row's
+  `held_by` is selected by manifest schema, capability, and support state
+  instead of by field name: a gate manifest reports `asserted` (the gate loader
+  parses it; the catalog shape gate never sees it), and `effect`/`network`/
+  `interaction` report `asserted` on a capability `effect_truth` does not arm
+  (92 rows). An `unknown` row's empty platform scope is `asserted`, not
+  `inert`, because `guard_policy` admits it once a terminal session consents.
+- `local-cd --check-auth` no longer advises renewing an npm automation token the
+  tag release does not use; it says the OIDC publish needs no local login and
+  that only the manual channel workflows use `NPM_TOKEN`.
 
 ### Changed
 
@@ -117,7 +139,7 @@
   `show`, `list`) stay centered. Chat mode no longer prints a blank line for an
   empty command.
 
-## [0.1.20] - unreleased
+## [0.1.20] - 2026-10-17
 
 ### Fixed
 
@@ -130,7 +152,7 @@
   assumed runnable. `default_home`'s test pins `HOME`, which Windows leaves
   unset.
 
-## [0.1.19] - unreleased
+## [0.1.19] - 2026-09-08
 
 ### Added
 
@@ -168,7 +190,7 @@
 - one word-boundary wrapper serves show, the gate screens, and the chat
   bubbles: no row ends mid-word, wide glyphs count two cells.
 
-## [0.1.18] - unreleased
+## [0.1.18] - 2026-09-04
 
 - `show` redesigned: human lines (description, aligned binary/setup/support
   fields, one line per capability with its summary) instead of the
@@ -182,7 +204,7 @@
 - Themes: the chrome palette is theme-driven -- the greyed layer and the
   accent follow the vibe; six themes ship.
 
-## [0.1.17] - unreleased
+## [0.1.17] - 2026-09-04
 
 - Minimalist centered TUI: the frame is gone -- one merged header line
   (identity, active harness, readiness verdict, working directory, with
