@@ -84,7 +84,9 @@ impl Drop for Session {
     fn drop(&mut self) {
         BOOTED.store(false, Ordering::Release);
         if ACTIVE.swap(false, Ordering::AcqRel) {
-            println!("\x1b[?1049l");
+            // No newline here: the frame's last row is the prompt, and a stray
+            // newline scrolls the screen the terminal restores by one line.
+            print!("\x1b[?1049l");
             io::stdout().flush().ok();
         }
     }

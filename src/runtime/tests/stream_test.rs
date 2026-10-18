@@ -91,3 +91,10 @@ fn a_piped_child_cannot_reach_the_terminal() {
     let code = run(&plan(&command, args), &[], &mut |_| {}, &mut || false).unwrap();
     assert_eq!(code, 7, "the child reached the terminal");
 }
+
+#[test]
+fn classify_keeps_a_blank_line_blank() {
+    // Labelling a blank line `INFO` turns paragraph breaks into content rows.
+    assert_eq!(classify(""), "", "a blank line stays blank");
+    assert_eq!(classify("   "), "");
+}

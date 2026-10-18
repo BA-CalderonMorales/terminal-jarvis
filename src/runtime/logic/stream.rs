@@ -50,6 +50,11 @@ const LEVELS: [&str; 3] = ["ERROR", "WARN ", "INFO "];
 /// -- a live view already shows when it is, and the stamp only widened every
 /// row while telling the reader nothing.
 pub fn classify(line: &str) -> String {
+    // A blank line is spacing, not a record: labelling it `INFO` turns the
+    // child's paragraph breaks into rows that read as content.
+    if line.trim().is_empty() {
+        return String::new();
+    }
     match declared_level(line) {
         Some((level, message)) => format!("{level} {message}"),
         None => format!("{} {line}", inferred_level(line)),

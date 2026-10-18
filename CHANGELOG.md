@@ -37,6 +37,14 @@
   grow the body without bound.
 - `modeline::prompt` no longer panics when the prompt is wider than the frame
   and there is no scroll badge: the gap saturates.
+- A blank line in an install log stays blank. `classify` labelled every empty
+  line `INFO`, so a tool's paragraph breaks became rows that read as content --
+  `info` with nothing after it, which is the extra line that showed up after an
+  install. Blank input now passes through as spacing.
+- The frame never grows past the terminal. `Drop for Session` printed the
+  alt-screen exit with `println!` -- a stray newline after the last frame,
+  which scrolls the restored screen by a row -- where `suspend` already used
+  `print!`.
 
 ### Changed
 
