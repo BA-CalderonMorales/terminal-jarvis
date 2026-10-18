@@ -7,8 +7,8 @@ use crate::tui::screen::Draft;
 use std::io::Write;
 use std::path::Path;
 
-/// The frozen frame chrome for one prompt session: everything that does
-/// not change while keys edit the line or scroll the body.
+/// The frozen frame chrome for one prompt session: what does not change while
+/// keys edit the line or scroll the body.
 pub struct ViewportState {
     pub header: String,
     pub cwd: String,
@@ -49,10 +49,8 @@ impl ViewportState {
     }
 }
 
-/// One raw-mode prompt session over the frozen chrome. The scroll offset
-/// lives in the caller's state (turns and prompts share one position); key
-/// reads go through `read_key`, which takes from the parked queue while a
-/// conversation's watcher owns stdin.
+/// One raw-mode prompt session over the frozen chrome. The scroll offset lives
+/// in the caller's state (turns and prompts share one position).
 pub struct Session<'a> {
     pub state: &'a ViewportState,
     pub hint: &'a str,
@@ -72,7 +70,12 @@ pub fn run(session: &mut Session<'_>, bottom: bool) -> Option<String> {
             Mode::Insert => "",
         };
         let tail = editor.tail_view(session.state.prefix_cells, size.inner_cols());
-        let mut draft = session.state.base_draft(session.hint, session.body, bottom);
+        // The modeline drops a hint that will not fit beside the badge.
+        let hint = match mode {
+            Mode::Normal => "esc or i to type",
+            Mode::Insert => session.hint,
+        };
+        let mut draft = session.state.base_draft(hint, session.body, bottom);
         draft.offset = *session.offset;
         draft.prompt = format!("{}{badge}{tail}", session.state.prefix);
         let cells = session.state.prefix_cells
@@ -83,8 +86,7 @@ pub fn run(session: &mut Session<'_>, bottom: bool) -> Option<String> {
         print!("{painted}");
         std::io::stdout().flush().ok();
         let next = read_key().unwrap_or(Key::Dead);
-        // A resize changes the body height, so the scroll window moves under
-        // the stored offset; re-clamp it before the repaint at the top.
+        // A resize moves the scroll window under the stored offset; re-clamp.
         if next == Key::Resized {
             let rows = crate::tui::screen::size().body_rows();
             *session.offset = crate::tui::screen::clamp(*session.offset, session.body.len(), rows);

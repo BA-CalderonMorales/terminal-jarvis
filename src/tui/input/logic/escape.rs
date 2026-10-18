@@ -12,15 +12,12 @@ static PENDING: std::sync::Mutex<Vec<u8>> = std::sync::Mutex::new(Vec::new());
 /// The window a bare Esc waits for its continuation before standing alone.
 const WINDOW: Duration = Duration::from_millis(60);
 
-fn park_clear() {
-    PENDING.lock().unwrap_or_else(|e| e.into_inner()).clear();
-}
-
-/// Parks one raw byte for the next reader; a byte read by a lingering
-/// windowed thread lands here so nothing is ever lost.
+/// Parks one raw byte for the next reader; a byte the windowed thread read
+/// after the reader gave up lands here so nothing is ever lost.
 pub(crate) fn park_byte(byte: u8) {
-    park_clear();
-    PENDING.lock().unwrap_or_else(|e| e.into_inner()).push(byte);
+    let mut parked = PENDING.lock().unwrap_or_else(|e| e.into_inner());
+    parked.clear();
+    parked.push(byte);
 }
 
 /// Whether a late byte is parked, without consuming it -- the readiness
@@ -47,14 +44,17 @@ pub fn resolve_and_decode(first: u8) -> Option<Key> {
     let (tx, rx) = mpsc::channel();
     std::thread::spawn(move || {
         // Wait for the continuation WITHOUT holding the stdin lock past the
-        // window. A read that blocks here would deadlock the next keypress:
-        // the reader takes the same lock before it can look at the parked byte.
+        // window: a read that blocks here would deadlock the next keypress.
         let byte = super::readiness::stdin_ready(WINDOW)
             .then(super::raw_stdin::read_byte)
             .flatten();
-        let _ = tx.send(byte);
-        if let Some(byte) = byte {
-            park_byte(byte);
+        if tx.send(byte).is_err() {
+            // Nobody was waiting for it: keep the byte for the next read.
+            // Parking unconditionally would race the reader's own bookkeeping
+            // and hand the same keypress back twice.
+            if let Some(byte) = byte {
+                park_byte(byte);
+            }
         }
     });
     let second = match rx.recv_timeout(WINDOW) {
@@ -65,19 +65,15 @@ pub fn resolve_and_decode(first: u8) -> Option<Key> {
     if second == 0x1b {
         // A second Esc is its own keypress, not an Alt combo: pressing Esc
         // twice in quick succession must not swallow both.
-        park_clear();
         return Some(Key::Escape);
     }
     if second != b'[' && second != b'O' {
         // An Alt combo: the Esc is ignored and the combo key stands alone.
         // Replaying the pair would decode to `Ignored` and eat the key too.
-        park_clear();
         return super::keys::decode(&mut io::Cursor::new(vec![second]), second);
     }
-    // A CSI/SS3 introducer: the final byte reads directly; the introducer
-    // parked itself, so clear it before the replay consumes the triple.
+    // A CSI/SS3 introducer: the final byte reads directly.
     let final_byte = super::raw_stdin::read_byte();
-    park_clear();
     let mut bytes = vec![first, second];
     if let Some(third) = final_byte {
         bytes.push(third);

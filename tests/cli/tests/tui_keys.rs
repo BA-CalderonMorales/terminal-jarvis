@@ -4,18 +4,33 @@ use crate::logic::frames::{frames, rows};
 use crate::logic::pty;
 use crate::logic::tui::{booted, launch, EXIT, FRAME, SERIAL};
 
-/// The last frame the tui painted after `input`.
-fn last_frame_rows(input: &[u8]) -> Vec<String> {
+/// The last frame the tui painted after `steps`, each separated in time so the
+/// escape resolver sees a bare Esc rather than an Alt combo.
+fn frame_after(steps: &[&[u8]]) -> Vec<String> {
     let fixture = booted();
+    let mut stages: Vec<(&[u8], Option<&[u8]>)> = vec![(b"", Some(FRAME))];
+    for step in steps {
+        stages.push((step, None));
+        stages.push((b"", None));
+    }
+    stages.push(EXIT);
     let (_, bytes) = pty::run_pty_probe(
         launch(
             &fixture,
             &[("TERM", "xterm-256color"), ("TJ_DEBUG_SIZE", "80x24")],
         ),
-        &[(b"", Some(FRAME)), (input, None), (b"", None), EXIT],
+        &stages,
     );
     let painted = frames(&bytes);
     rows(painted.last().expect("a final frame"))
+}
+
+fn prompt(screen: &[String]) -> String {
+    screen
+        .iter()
+        .find(|row| row.contains("[>_]::"))
+        .cloned()
+        .unwrap_or_default()
 }
 
 /// Esc is the vim mode switch, so it must be exactly one keypress: a second
@@ -25,7 +40,7 @@ fn last_frame_rows(input: &[u8]) -> Vec<String> {
 fn esc_reaches_normal_mode_and_a_double_press_is_not_swallowed() {
     let _serial = SERIAL.lock().unwrap_or_else(|error| error.into_inner());
     for input in [&b"\x1b"[..], &b"\x1b\x1b"[..]] {
-        let screen = last_frame_rows(input);
+        let screen = frame_after(&[input]);
         assert!(
             screen.iter().any(|row| row.contains("-- NORMAL --")),
             "{input:?} did not reach Normal mode: {screen:?}"
@@ -38,11 +53,33 @@ fn esc_reaches_normal_mode_and_a_double_press_is_not_swallowed() {
 #[test]
 fn an_alt_combo_replays_its_key() {
     let _serial = SERIAL.lock().unwrap_or_else(|error| error.into_inner());
-    let screen = last_frame_rows(b"\x1bq");
+    let screen = frame_after(&[b"\x1bq"]);
     assert!(
         screen
             .iter()
             .any(|row| row.contains("[harness:fixture]: q")),
         "the combo key was eaten: {screen:?}"
+    );
+}
+
+/// Normal mode must have a way back. It was a trap: nothing typed there
+/// reached the line and no key returned to Insert, so the prompt was dead
+/// until the session restarted.
+#[test]
+fn normal_mode_has_a_way_back_to_insert() {
+    let _serial = SERIAL.lock().unwrap_or_else(|error| error.into_inner());
+    for way_out in [&b"i"[..], &b"\x1b"[..]] {
+        let screen = frame_after(&[b"\x1b", way_out, b"hello"]);
+        assert!(
+            prompt(&screen).contains("hello"),
+            "{way_out:?} did not leave Normal mode: {:?}",
+            prompt(&screen)
+        );
+    }
+    // and the frame says how, instead of leaving the user to guess
+    let normal = frame_after(&[b"\x1b"]);
+    assert!(
+        normal.iter().any(|row| row.contains("esc or i to type")),
+        "Normal mode does not say the way out: {normal:?}"
     );
 }

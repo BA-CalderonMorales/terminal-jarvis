@@ -1,10 +1,9 @@
-//! ViewportNav: vim-style navigation. Normal mode scrolls; Insert mode types,
-//! recalls history, and hands Esc back to Normal. One key, one decision.
+//! ViewportNav: vim-style navigation. Normal scrolls; Insert types.
 use super::viewport_page::page;
 use super::viewport_raw::Session;
-use crate::tui::input::{Editor, Key, Move};
+use crate::tui::input::{Editor, Feed, Key, Move};
 
-/// The vim-style prompt modes: Normal navigates, Insert types.
+/// The vim-style prompt modes.
 #[derive(Clone, Copy, Eq, PartialEq)]
 pub enum Mode {
     Normal,
@@ -18,8 +17,7 @@ pub enum Flow {
     Dead,
 }
 
-/// Replaces the editor buffer with a recalled history entry; an empty entry
-/// clears the line, the way a shell returns to the live prompt.
+/// Replaces the editor buffer with a recalled history entry.
 pub fn recall(editor: &mut Editor, text: Option<&String>) {
     editor.feed(Key::ClearLine);
     if let Some(text) = text {
@@ -29,8 +27,6 @@ pub fn recall(editor: &mut Editor, text: Option<&String>) {
     }
 }
 
-/// Applies one key to the session; scrolls move the offset, and submit/death
-/// end the session.
 pub fn key(
     mode: &mut Mode,
     editor: &mut Editor,
@@ -41,12 +37,13 @@ pub fn key(
     let rows = crate::tui::screen::size().body_rows();
     let offset = &mut *session.offset;
     match (*mode, key) {
-        (Mode::Normal, Key::Char('j') | Key::Down) => {
-            *offset = crate::tui::screen::step(*offset, Move::Newer, session.body.len(), rows);
-            Flow::Continue(history_at)
-        }
-        (Mode::Normal, Key::Char('k') | Key::Up) => {
-            *offset = crate::tui::screen::step(*offset, Move::Older, session.body.len(), rows);
+        (Mode::Normal, Key::Char('j') | Key::Down | Key::Char('k') | Key::Up) => {
+            let toward = if matches!(key, Key::Char('k') | Key::Up) {
+                Move::Older
+            } else {
+                Move::Newer
+            };
+            *offset = crate::tui::screen::step(*offset, toward, session.body.len(), rows);
             Flow::Continue(history_at)
         }
         (Mode::Normal, Key::PageUp) => {
@@ -57,12 +54,17 @@ pub fn key(
             *offset = page(session.body, *offset, true);
             Flow::Continue(history_at)
         }
-        (Mode::Normal, Key::Char('g')) => {
-            *offset = 0;
+        (Mode::Normal, Key::Char(mark @ ('g' | 'G'))) => {
+            *offset = match mark {
+                'G' => crate::tui::screen::max_offset(session.body.len(), rows),
+                _ => 0,
+            };
             Flow::Continue(history_at)
         }
-        (Mode::Normal, Key::Char('G')) => {
-            *offset = crate::tui::screen::max_offset(session.body.len(), rows);
+        (Mode::Normal, Key::Escape | Key::Char('i')) => {
+            // The way back: without it Normal is a trap, where nothing typed
+            // reaches the line and no key returns to Insert.
+            *mode = Mode::Insert;
             Flow::Continue(history_at)
         }
         (Mode::Normal, Key::Dead) => Flow::Dead,
@@ -82,15 +84,13 @@ pub fn key(
             Flow::Continue(at)
         }
         (Mode::Insert, key) => match editor.feed(key) {
-            crate::tui::input::Feed::Edited | crate::tui::input::Feed::Idle => {
-                Flow::Continue(history_at)
-            }
-            crate::tui::input::Feed::Moved(toward) => {
+            Feed::Edited | Feed::Idle => Flow::Continue(history_at),
+            Feed::Moved(toward) => {
                 *offset = crate::tui::screen::step(*offset, toward, session.body.len(), rows);
                 Flow::Continue(history_at)
             }
-            crate::tui::input::Feed::Submit(line) => Flow::Submit(line),
-            crate::tui::input::Feed::Dead => Flow::Dead,
+            Feed::Submit(line) => Flow::Submit(line),
+            Feed::Dead => Flow::Dead,
         },
     }
 }

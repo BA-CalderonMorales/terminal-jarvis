@@ -54,6 +54,13 @@
   on a mutex instead of the parked byte -- the tui froze until another key
   arrived. It now waits for readiness within the window, so the lock is never
   held past it.
+- Normal mode has a way back. Esc entered it, but nothing left it: `i`, `a` and
+  Esc all did nothing there, so the prompt was dead until the session
+  restarted. `i` and Esc both return to Insert now, and the modeline says so
+  (`esc or i to type`).
+- The escape resolver no longer hands one keypress back twice. It parked the
+  continuation byte *after* sending it, racing the reader's own bookkeeping, so
+  a fast `Esc Esc` could produce two Escapes.
 
 ### Changed
 
