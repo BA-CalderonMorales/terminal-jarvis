@@ -19,7 +19,8 @@ fn run_after_a_passed_scan_skips_the_scan_again() {
             ),
             (b"", Some(b"installed fixture".as_slice())),
             (b"run fixture ui\n", None),
-            (b"y\n", Some(b"Continue with ui:fixture? [y/N]".as_slice())),
+            // an interactive launch is the user's own action: no consent
+            // keystroke stands between them and the harness ui
             (b"", Some(b"exited 0".as_slice())),
             EXIT,
         ],

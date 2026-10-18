@@ -94,7 +94,7 @@ pub fn absorb(
     }
     *offset = super::viewport::pinned(body);
     if !crate::tui::screen::active() {
-        print!("{text}");
-        println!();
+        // Close the last line only if the output left one open.
+        print!("{text}{}", if text.ends_with('\n') { "" } else { "\n" });
     }
 }

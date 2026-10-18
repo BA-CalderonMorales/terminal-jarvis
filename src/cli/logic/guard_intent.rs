@@ -63,6 +63,13 @@ pub fn check_with(
             ),
         ));
     }
+    // An interactive launch hands the terminal to the harness, which asks its
+    // own questions: a consent keystroke in front of it is friction with
+    // nothing to review. State-changing headless runs still confirm, and a
+    // dangerous capability was already stopped above.
+    if plan.interaction == Interaction::Interactive {
+        return Ok(());
+    }
     let token = format!("{}:{}", plan.capability, harness.name);
     if let Some(actual) = options.confirm.as_deref() {
         if actual == token && (terminal || options.no_input) {

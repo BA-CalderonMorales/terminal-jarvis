@@ -1,6 +1,17 @@
 # Changelog
 ## [0.1.21] - unreleased
 
+### Fixed
+
+- Running a tool no longer stops at a consent prompt. An interactive launch
+  (`ui`, a bare `run`) hands the terminal to the harness, which asks its own
+  questions; the `Continue with ui:<harness>? [y/N]` keystroke in front of it
+  was friction with nothing to review, and its default was NO. State-changing
+  headless runs still confirm, and a dangerous capability still needs
+  `--allow-dangerous`.
+- Command output no longer gains a blank line: the frame closed an already
+  closed line, so the centered body jumped a row whenever a command finished.
+
 ### Changed
 
 - The frame is one themed surface. The active theme now paints body content,
