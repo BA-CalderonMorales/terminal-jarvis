@@ -363,66 +363,13 @@ jobs:
         with:
           node-version: 24
 
+      # The publish body lives in the release domain, not here, so
+      # `scripts/bash/verify/index.sh publish-rehearsal` can run these exact
+      # bytes against a fake registry before a tag is pushed.
       - name: Require npm with trusted publishing support
-        run: |
-          set -eu
-          npm_version="$(npm --version)"
-          echo "npm $npm_version"
-          oldest="$(printf '%s\n%s\n' 11.5.1 "$npm_version" | sort -V | head -n 1)"
-          if [ "$oldest" != "11.5.1" ]; then
-            echo "npm >= 11.5.1 is required for OIDC trusted publishing, found $npm_version" >&2
-            exit 1
-          fi
+        run: scripts/bash/release/index.sh publish-npm --check-toolchain
 
       - name: Publish or retag npm channels
         env:
           VERSION: ${{ needs.release-meta.outputs.version }}
-        run: |
-          set -eu
-          package_dir="artifacts/$VERSION/linux-x64-gnu/npm/terminal-jarvis"
-          test -f "$package_dir/package.json"
-          chmod +x "$package_dir/bin/terminal-jarvis"
-          test -x "$package_dir/bin/terminal-jarvis"
-          (cd "$package_dir" && npm pack --dry-run --loglevel error)
-
-          # The npm registry is eventually consistent: a write is acknowledged
-          # before it is readable, so a single immediate read proves nothing.
-          # Poll to convergence, and fail only on timeout.
-          wait_for_version() {
-            elapsed=0
-            until npm view "terminal-jarvis@$VERSION" version >/dev/null 2>&1; do
-              if [ "$elapsed" -ge 180 ]; then
-                echo "timed out after ${elapsed}s waiting for terminal-jarvis@$VERSION" >&2
-                return 1
-              fi
-              sleep 10
-              elapsed=$((elapsed + 10))
-            done
-            echo "confirmed: terminal-jarvis@$VERSION is readable"
-          }
-          wait_for_tag() {
-            tag="$1"
-            elapsed=0
-            until npm dist-tag ls terminal-jarvis 2>/dev/null | grep -q "^$tag: $VERSION\$"; do
-              if [ "$elapsed" -ge 180 ]; then
-                echo "timed out after ${elapsed}s waiting for dist-tag $tag -> $VERSION" >&2
-                return 1
-              fi
-              sleep 10
-              elapsed=$((elapsed + 10))
-            done
-            echo "confirmed: $tag -> $VERSION"
-          }
-
-          if npm view "terminal-jarvis@$VERSION" version >/dev/null 2>&1; then
-            echo "terminal-jarvis@$VERSION is already published; moving tags only"
-          else
-            (cd "$package_dir" && npm publish --tag latest --provenance)
-          fi
-          wait_for_version
-          for tag in latest stable beta; do
-            npm dist-tag add "terminal-jarvis@$VERSION" "$tag"
-          done
-          for tag in latest stable beta; do
-            wait_for_tag "$tag"
-          done
+        run: scripts/bash/release/index.sh publish-npm --version "$VERSION"

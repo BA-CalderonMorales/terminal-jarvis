@@ -98,3 +98,19 @@ therefore confirm the published version, each dist-tag, and the crates.io entry
 by polling to convergence, failing only on timeout. A single read immediately
 after a write is not evidence, and treating one as evidence reports a false
 failure for a release that actually succeeded.
+
+### Publish Rehearsal
+
+The npm publisher lives in `scripts/bash/release/logic/publish-npm.sh` and the
+workflow calls it through the release domain index, so it is not inlined in a
+`run:` block. That keeps the shipped bytes rehearsable before a tag exists:
+
+```bash
+scripts/bash/verify/index.sh publish-rehearsal --from <pre-fix-ref>
+```
+
+The shipped publisher must converge against a fake registry that serves a write
+only after N reads, and the pre-fix body extracted from `--from` must publish
+and then fail its own verification -- the v0.1.20 shape. The rehearsal never
+touches the real registry, git tags, or the network, and it does not remove the
+one thing only a real release can decide: the OIDC credential exchange.

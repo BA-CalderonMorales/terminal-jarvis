@@ -237,6 +237,139 @@ for the chosen deliverables and is named as the next decider for D1's
 Per `docs/architecture-decision-records/README.md`, a `release/*` branch does
 not create records; paste this at merge, newest first.
 
+### Put the decision at the cursor (release/0.1.21 -> <merge date>)
+
+**Decision:** A pending consent owns the prompt row. `crate::tui::input::ask`
+publishes the question, the viewport renders it where the cursor already is,
+and the body bottom-anchors so the plan sits directly above it. The clean
+plan line becomes one sentence per mechanism:
+`install droid · remote script · app.factory.ai`.
+
+**Context:** The plan and the question rendered in the vertical center of the
+frame while the cursor parked at the bottom prompt. The user had to read the
+middle, then find the prompt to answer, and nothing at the cursor said a
+decision was pending -- it read as broken even when the text was correct. The
+lead was also raw argv (`sh -c 'curl … | sh'`), which names neither the
+mechanism nor the source.
+
+**Considered:** Moving the cursor to the centered question (the eye still
+travels to the middle); defaulting the question to yes (still a prompt, still
+away from the cursor); bottom-anchoring the body always (a bigger aesthetic
+pivot than the pain asked for -- the primer stays centered).
+
+**Consequence:** The decision, the context, and the cursor are one glance. The
+prompt row degrades to the question when it is set, so the modeline hint stands
+down for it. `show`/`plan` keep their own `plan_with_extra` format; only the
+clean consent lead changed.
+
+### Let an interactive launch through without a consent keystroke (release/0.1.21 -> <merge date>)
+
+**Decision:** The intent gate returns early for `Interaction::Interactive`
+capabilities. A bare `tj`, `run <h>`, and the tui's run path reach the harness
+ui without a `Continue with ui:<harness>? [y/N]` prompt. The dangerous check
+still runs first, and state-changing noninteractive runs keep their bracket and
+token.
+
+**Context:** The consent layer treats every non-read-only effect as worth
+reviewing, so launching the agent -- the primary action, and the one the user
+just asked for -- stopped at a prompt whose default was NO. The harness owns
+the terminal in that mode and asks its own questions; the extra keystroke
+reviewed nothing.
+
+**Considered:** Defaulting the prompt to yes for `ui` (still friction, still a
+prompt); leaving it (the pty acceptance tests pinned it, and pinning a bad
+contract is not a reason to keep it); dropping the consent for all state
+changes (headless installs and uninstalls must still confirm).
+
+**Consequence:** Launching a tool is one action. The two pty tests that pinned
+the `ui` consent now pin its absence, and their scan-count assertions -- the
+reason they exist -- are unchanged.
+
+### Give a lifecycle run its own card and stop stamping the log (release/0.1.21 -> <merge date>)
+
+**Decision:** A streaming run clears the body and starts from a themed chapter,
+so the primer and the previous command's output yield to the task under way.
+The live log drops the wall-clock stamp the runner used to prefix and keeps the
+level a line declares; the frame renders each classified row as
+`info   message`, the level in its role, and holds raw mode for the run.
+
+**Context:** The frame accumulated. The primer stayed above an install; every
+child row was stamped `HH:MM:SS INFO` by `runtime::classify` -- our stamp, not
+the child's; the level was guessed from substrings of the whole line, so a
+message containing "error" read as an error; and a key typed while the child
+worked echoed into the body, because raw mode was released with the prompt.
+
+**Considered:** Keeping the stamp (it told the reader nothing a live view does
+not, and widened every row); classifying on the whole line (a message is not a
+level); wrapping long rows instead of clipping them (deferred -- the frame
+clips, which is bounded and honest, and the full text stays available headless).
+
+**Consequence:** The screen tells one story per task; a log row carries the
+level the tool declared; nothing echoes into the frame while a child works. The
+runtime stream no longer owns a clock, so `stamp` is gone.
+
+### Make the frame one themed surface with a role vocabulary (release/0.1.21 -> <merge date>)
+
+**Decision:** Replace the TUI's two styling systems with one role vocabulary
+(`screen::roles::Role`) resolved by the active theme, and route the chrome and
+the TUI-native body renderers -- header, primer, `status`, `help`, the `list`
+heading, the verdict cards -- through `theme::paint`. `Palette` becomes a table
+of one SGR code per role, so each of the six themes is a full design. Section
+headings name each screen; narrow viewports drop a table's secondary column
+instead of clipping it; `body_block` dims only unstyled lines and clips rather
+than overflowing.
+
+**Context:** The chrome was theme-driven and always emitted SGR; every body
+screen used `cli::style`'s hardcoded colours, gated on `is_terminal()`. A theme
+swap therefore repainted the header and nothing else. `body_block` also wrapped
+each line in `theme::dim`, and an inner reset cancelled the outer dim mid-line,
+so styled rows read as half-dimmed. The flatness was two systems disagreeing,
+not a design choice.
+
+**Considered:** Leaving `cli::style` as the body system and adding theme codes
+alongside (two palettes to keep in sync); making `theme::paint` respect
+`is_terminal()` so `cli` could delegate to it (inverts the domain dependency and
+breaks the theme tests, which assert exact SGR); converting the shared `show` /
+`plan` renderers now (they are also the headless surface, whose colour gate must
+be unified first); keeping the centred dim block untouched (it is the shipped
+look, but it hid the theme).
+
+**Consequence:** One styling entry point, so a theme swap is total and the
+theme-completeness and `paint_wraps_once_and_never_nests` tests hold it. The
+header carries the working directory again (the brand tagline was dead signal).
+Narrow terminals lose a secondary column by rule, not by an ellipsis mid-word.
+`show` and `plan` still paint through `cli::style`; unifying the headless colour
+gate with the theme is the next step, recorded in the structure ledger.
+
+### Rehearse the npm publisher instead of asserting it (release/0.1.21 -> <merge date>)
+
+**Decision:** Move the npm publish body out of the `cd-multiplatform.yml`
+`run:` block into `scripts/bash/release/logic/publish-npm.sh`, called through
+the release domain index, and prove it with
+`scripts/bash/verify/index.sh publish-rehearsal`: a fake registry that serves a
+write only after N reads, the shipped publisher converging against it, and the
+pre-fix body -- extracted by step name from `git show <ref>:...` -- publishing
+and then failing its own verification.
+
+**Context:** `0c312d6` fixed the v0.1.20 false failure but left its evidence in
+the commit message: a fake-registry old-fails/new-passes pair that was never
+committed. The publish body also lived in workflow YAML, which this repo's
+structure puts in `scripts/bash/{domain}/logic/`, so the logic could not be
+rehearsed locally -- the reason the failure reached a real release at all.
+
+**Considered:** Leaving the body in YAML and extracting it only at test time
+(rehearses the shipped bytes but keeps the untestable shape); trusting the
+commit-message claim and doing nothing (the claim the study's own standard
+rejects); a Rust integration test (the shell rehearsal is the artifact the
+release actually runs, and the file-length gate keeps both under 100 lines).
+
+**Consequence:** The publisher is reviewable and locally rehearsable before a
+tag; the workflow cannot inline it again without the rehearsal's drift guard
+failing; the rehearsal removes the logic uncertainty and names the OIDC
+credential exchange as the remaining thing only a real release decides. The
+near-copy npm publishers in `cd-npm-{stable,beta,release-recovery}.yml` still
+carry the single-read race and are the next hole to close.
+
 ### Earn the catalog's platform claims and deny Windows warnings (release/0.1.21 -> <merge date>)
 
 **Decision:** Generate `docs/claim-inventory.tsv` from the manifests so every
