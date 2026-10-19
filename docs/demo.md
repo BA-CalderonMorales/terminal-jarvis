@@ -3,24 +3,32 @@
 ## Registry still (PNG)
 
 Registries like crates.io and npm don't animate GIFs, so the project also
-ships a static frame: `docs/demo-tui.png`. It shows the boot banner, then a
-live command with its output -- the `status` dashboard -- so new visitors
-see what actually happens when they type, not an empty prompt. The animated
-`docs/demo-tui.gif` stays on the GitHub README; the PNG backs the registry
-pages.
+ships a static frame: `docs/demo-tui.png`. It is a frame from the same
+recording as the gif, taken at the `status` dashboard, so the still and the
+animation show the same thing: what actually happens when you type, on the
+desktop it happens on, not an empty prompt. The animated `docs/demo-tui.gif`
+stays on the GitHub README; the PNG backs the registry pages.
 
-Regenerate the PNG from the real binary:
+Take a frame from a recording (the same crop and scale the gif uses):
+
+```bash
+ffmpeg -ss 12.5 -i ~/Videos/screenrecording-*.mp4 \
+  -vf "crop=1500:940:210:0,scale=1000:-1:flags=lanczos" -frames:v 1 docs/demo-tui.png
+```
+
+### Alternative: a headless still
+
+`scripts/demo/capture_frame.sh` renders one from the binary alone, with no
+desktop: it boots the tui in a headless tmux pane (no shell echo line, so the
+frame only ever contains TUI content), captures the pane, and renders it with
+`scripts/demo/render_frame.go`, a std-only ANSI replayer -- SGR colors, `\r`
+overwrites, and erase-to-EOL are applied the way a real terminal does, then
+glyphs rasterize from a TTF onto the canvas.
 
 ```bash
 cargo build --release
 scripts/demo/capture_frame.sh demo      # -> docs/demo-demo.png
 ```
-
-`scripts/demo/capture_frame.sh` boots the tui in a headless tmux pane (no
-shell echo line, so the frame only ever contains TUI content), captures the
-pane, and renders it with `scripts/demo/render_frame.go`, a std-only ANSI
-replayer -- SGR colors, `\r` overwrites, and erase-to-EOL are applied the
-way a real terminal does, then glyphs rasterize from a TTF onto the canvas.
 
 The renderer defaults to the stock Windows Terminal scheme (Campbell: bg
 `#0C0C0C`, fg `#CCCCCC`), which matches a default WSL profile; bold maps to
