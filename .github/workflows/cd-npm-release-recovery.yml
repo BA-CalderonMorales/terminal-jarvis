@@ -54,7 +54,7 @@ jobs:
 
       - uses: actions/setup-node@v6
         with:
-          node-version: 20
+          node-version: 24
           registry-url: "https://registry.npmjs.org"
           cache: npm
           cache-dependency-path: npm/terminal-jarvis/package-lock.json
@@ -68,9 +68,14 @@ jobs:
           key: cargo-npm-recovery-${{ runner.os }}-${{ hashFiles('Cargo.lock') }}-v1
           restore-keys: cargo-npm-recovery-${{ runner.os }}-
 
+      - name: Install a dist-tag-capable npm
+        run: npm install -g npm@latest
+
       - name: Build npm package stage
         run: scripts/bash/release/index.sh package build dist/npm-release
 
+      # One publisher for the tag job and every manual channel run: it polls
+      # until the registry serves the version and the requested tag.
       - name: Publish or retag package
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
@@ -79,40 +84,8 @@ jobs:
           DRY_RUN: ${{ inputs.dry_run }}
         run: |
           set -eu
-          cargo_version="$(sed -n 's/^version = "\([^"]*\)"/\1/p' Cargo.toml | head -n 1)"
-          test "$VERSION" = "$cargo_version"
-          package_dir="dist/npm-release/$VERSION/linux-x64-gnu/npm/terminal-jarvis"
-          test -f "$package_dir/package.json"
-          chmod +x "$package_dir/bin/terminal-jarvis"
-          test -x "$package_dir/bin/terminal-jarvis"
-          (cd "$package_dir" && npm pack --dry-run --loglevel error)
-
-          if npm view "terminal-jarvis@$VERSION" version >/dev/null 2>&1; then
-            if [ "$DRY_RUN" = "true" ]; then
-              echo "dry run: npm dist-tag add terminal-jarvis@$VERSION $DIST_TAG"
-            else
-              test -n "${NODE_AUTH_TOKEN:-}" || {
-                echo "NPM_TOKEN is required to update npm dist-tags" >&2
-                exit 1
-              }
-              npm dist-tag add "terminal-jarvis@$VERSION" "$DIST_TAG"
-            fi
-          elif [ "$DRY_RUN" = "true" ]; then
-            (cd "$package_dir" && npm publish --dry-run --tag "$DIST_TAG")
-          else
-            test -n "${NODE_AUTH_TOKEN:-}" || {
-              echo "NPM_TOKEN is required to publish terminal-jarvis" >&2
-              exit 1
-            }
-            (cd "$package_dir" && npm publish --tag "$DIST_TAG")
+          args="--version $VERSION --dist-tags $DIST_TAG --artifacts-dir dist/npm-release"
+          if [ "$DRY_RUN" = "true" ]; then
+            args="$args --dry-run"
           fi
-
-      - name: Verify dist-tag
-        if: ${{ inputs.dry_run == false }}
-        env:
-          VERSION: ${{ steps.version.outputs.version }}
-          DIST_TAG: ${{ inputs.dist_tag }}
-        run: |
-          set -eu
-          npm view "terminal-jarvis@$VERSION" version
-          npm dist-tag ls terminal-jarvis | grep "^$DIST_TAG: $VERSION$"
+          scripts/bash/release/index.sh publish-npm $args

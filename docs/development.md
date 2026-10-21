@@ -88,12 +88,18 @@ separate release workflow and require operator approval.
 
 ### npm Trusted Publishing
 
-The npm publish job holds no stored credential. It authenticates with the
-workflow's GitHub OIDC identity, so a Trusted Publisher must be registered on
-npmjs.com for this repository and the `cd-multiplatform.yml` workflow before a
-release tag is pushed.
+The tag workflow prefers OIDC trusted publishing: the job holds `id-token:
+write`, and once a Trusted Publisher is registered on npmjs.com for this
+repository and the `cd-multiplatform.yml` workflow, npm authenticates with the
+workflow identity instead of a stored credential.
 
-Two settings on that publisher are easy to miss and both fail *after* the
+Until that publisher exists, the job also passes `NPM_TOKEN` so a tag cannot
+fail after crates.io, the GitHub release, and the Homebrew tap have shipped.
+The three manual channel workflows use the same token. Once the publisher is
+registered and one tag proves the OIDC exchange, remove `NODE_AUTH_TOKEN` from
+the tag job and the token becomes unnecessary.
+
+Two settings on the publisher are easy to miss and both fail *after* the
 package is already published:
 
 - **Allow npm dist-tag** is **off by default**. Publishing and moving channels
@@ -109,24 +115,32 @@ Actions; the `--provenance` flag only makes it explicit.
 
 ### Registry Confirmation
 
-npm and crates.io acknowledge a write before they serve it. The release jobs
-therefore confirm the published version, each dist-tag, and the crates.io entry
-by polling to convergence, failing only on timeout. A single read immediately
-after a write is not evidence, and treating one as evidence reports a false
-failure for a release that actually succeeded.
+npm and crates.io acknowledge a write before they serve it. `publish-npm` waits
+for the version and each dist-tag to be served, failing only after
+`--timeout` (default 600 seconds); the crates job polls its entry for up to
+300 seconds. A single read immediately after a write is not evidence: v0.1.21
+published to npm and was not served for several minutes, so the old inline
+verify reported a false failure.
+
+The tag job and all three manual channel workflows call the same publisher.
+There is no second inline publish body to drift from it or to read the registry
+too early.
 
 ### Publish Rehearsal
 
-The npm publisher lives in `scripts/bash/release/logic/publish-npm.sh` and the
-workflow calls it through the release domain index, so it is not inlined in a
-`run:` block. That keeps the shipped bytes rehearsable before a tag exists:
+The npm publisher lives in `scripts/bash/release/logic/publish-npm.sh` with its
+registry helpers in `npm-registry.sh`, and every workflow calls it through the
+release domain index, so it is not inlined in a `run:` block. That keeps the
+shipped bytes rehearsable before a tag exists:
 
 ```bash
-scripts/bash/verify/index.sh publish-rehearsal --from <pre-fix-ref>
+scripts/bash/verify/index.sh publish-rehearsal --from v0.1.20
 ```
 
-The shipped publisher must converge against a fake registry that serves a write
-only after N reads, and the pre-fix body extracted from `--from` must publish
-and then fail its own verification -- the v0.1.20 shape. The rehearsal never
-touches the real registry, git tags, or the network, and it does not remove the
-one thing only a real release can decide: the OIDC credential exchange.
+The rehearsal runs the shipped publisher against a fake registry that serves a
+write only after N reads, covering publish, retag, single-tag, and dry-run, plus
+the npm-version guard matrix. The pre-fix body extracted from `--from` must
+publish and then fail its own verification -- the v0.1.20 shape. Use a ref from
+before the publisher moved into the script; a ref that already calls
+`publish-npm` has no inline body to extract. The rehearsal never touches the
+real registry, git tags, or the network.

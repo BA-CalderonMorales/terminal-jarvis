@@ -39,6 +39,14 @@ it, and anything future work must respect.
 
 ## Records
 
+### Ship one npm publisher that waits for the registry (release/0.1.22 -> 2026-10-21)
+
+Recorded in
+[release-flow-convergence-2026-10-21.md](release-flow-convergence-2026-10-21.md):
+the tag job and the manual channel workflows now share a publisher that polls
+to convergence, because one immediate read reported a successful v0.1.21
+publish and its retags as failures.
+
 ### Make a workflow job that runs scripts/ check out the tree (develop -> 2026-10-21)
 
 Recorded in
