@@ -346,10 +346,11 @@ jobs:
     name: Publish NPM Package
     needs: [release-meta, update-homebrew-tap]
     runs-on: ubuntu-latest
-    timeout-minutes: 10
-    # Trusted publishing (OIDC) replaces the stored NPM_TOKEN. A trusted
-    # publisher for this repository and workflow file must exist on npmjs.com
-    # before a release runs; see docs/development.md.
+    timeout-minutes: 20
+    # Trusted publishing (OIDC) is the preferred auth; docs/development.md
+    # records the npmjs.com setup. The token below is the fallback that keeps a
+    # tag release from failing before that publisher exists, and the publish
+    # body polls until the registry serves the write.
     permissions:
       contents: read
       id-token: write
@@ -368,6 +369,7 @@ jobs:
       - uses: actions/setup-node@v6
         with:
           node-version: 24
+          registry-url: "https://registry.npmjs.org"
 
       # dist-tags over OIDC need npm 11.21.0+ (11.x) or 12.2.0+ (12.x), and the
       # node 24 toolchain ships older. Without this the job can publish and then
@@ -378,10 +380,11 @@ jobs:
       # The publish body lives in the release domain, not here, so
       # `scripts/bash/verify/index.sh publish-rehearsal` can run these exact
       # bytes against a fake registry before a tag is pushed.
-      - name: Require npm with trusted publishing support
+      - name: Require a dist-tag-capable npm
         run: scripts/bash/release/index.sh publish-npm --check-toolchain
 
       - name: Publish or retag npm channels
         env:
           VERSION: ${{ needs.release-meta.outputs.version }}
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: scripts/bash/release/index.sh publish-npm --version "$VERSION" --provenance
