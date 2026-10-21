@@ -67,6 +67,11 @@ echo "[10/12] security"
 scripts/bash/verify/index.sh security-check
 
 echo "[11/12] distribution smoke"
+if command -v python3 >/dev/null 2>&1; then
+  scripts/bash/verify/index.sh workflow-checkout
+else
+  echo "python3 not installed; skipping workflow checkout check"
+fi
 scripts/bash/release/index.sh preflight
 if command -v node >/dev/null 2>&1 && command -v npm >/dev/null 2>&1; then
   npm --prefix npm/terminal-jarvis test

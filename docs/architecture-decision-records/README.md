@@ -39,6 +39,13 @@ it, and anything future work must respect.
 
 ## Records
 
+### Make a workflow job that runs scripts/ check out the tree (develop -> 2026-10-21)
+
+Recorded in
+[workflow-checkout-2026-10-21.md](workflow-checkout-2026-10-21.md): the
+`publish-npm` job ran a repository script after only downloading an artifact,
+so the v0.1.21 tag died at exit 127 with npm still unpublished.
+
 ### Record the README demo on a real desktop, and drive it over a pty (release/0.1.21 -> 2026-10-19)
 
 Recorded in [readme-demo-2026-10-19.md](readme-demo-2026-10-19.md): the gif is a
