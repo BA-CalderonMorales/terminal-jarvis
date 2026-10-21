@@ -79,6 +79,7 @@ fn open_pair() -> (File, File) {
     assert_eq!(unsafe { unlockpt(fd) }, 0, "unlockpt failed");
     // A real size so the viewport boots in the pty; without this the child
     // sees a 0x0 window and every acceptance test silently runs chat mode.
+    // NOTE: 0x5413 is TIOCGWINSZ (the GET); the viewport tests use TJ_DEBUG_SIZE.
     let size = Winsize {
         row: 24,
         col: 80,

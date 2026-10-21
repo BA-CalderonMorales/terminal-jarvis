@@ -9,7 +9,8 @@ use std::path::Path;
 
 pub fn welcome(harnesses: &[Harness], catalog_root: &Path, state_home: &Path) -> Vec<String> {
     let o = crate::tui::home::collect(harnesses, catalog_root, state_home);
-    crate::tui::screen::welcome(&o.name, o.ready, o.total)
+    let inner = crate::tui::screen::size().inner_cols();
+    crate::tui::screen::welcome(&o.name, o.ready, o.total, inner)
 }
 
 /// Paints the composed frame without reading -- the converse loop repaints
@@ -24,14 +25,22 @@ pub fn paint(
     state_home: &Path,
     body: &[String],
     offset: usize,
+    bottom: bool,
 ) {
     let _ = std::io::stdout().flush();
     let state =
         super::viewport_raw::ViewportState::collect(indicator, harnesses, catalog_root, state_home);
     let size = crate::tui::screen::size();
-    let mut draft = state.base_draft(hint, body);
+    let mut draft = state.base_draft(hint, body, bottom);
+    // A pending decision owns the prompt row: the cursor and the question are
+    // the same place, and the modeline hint stands down for it.
+    if let Some(question) = crate::tui::input::prompt_for(size.inner_cols()) {
+        draft.prompt = question;
+        draft.hint = String::new();
+        draft.bottom = true;
+    }
     draft.offset = offset;
-    let cells = state.prefix_cells;
+    let cells = crate::tui::screen::visible_width(&draft.prompt) + 1;
     let painted = crate::tui::screen::parked(crate::tui::screen::frame(size, &draft), size, cells);
     print!("{painted}");
     std::io::stdout().flush().ok();
@@ -47,6 +56,7 @@ pub fn prompt(
     body: &[String],
     history: &[String],
     offset: &mut usize,
+    bottom: bool,
 ) -> Option<String> {
     paint(
         indicator,
@@ -56,6 +66,7 @@ pub fn prompt(
         state_home,
         body,
         *offset,
+        bottom,
     );
     let state =
         super::viewport_raw::ViewportState::collect(indicator, harnesses, catalog_root, state_home);
@@ -67,7 +78,7 @@ pub fn prompt(
         offset,
     };
     match crate::tui::term::enable_raw() {
-        Some(_guard) => super::viewport_raw::run(&mut session),
+        Some(_guard) => super::viewport_raw::run(&mut session, bottom),
         None => crate::tui::input::raw_line(),
     }
 }

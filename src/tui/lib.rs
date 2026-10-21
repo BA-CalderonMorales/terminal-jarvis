@@ -8,6 +8,7 @@
 pub mod home;
 pub mod input;
 pub mod palette;
+pub mod resize;
 pub mod screen;
 pub mod shell;
 pub mod sigint;

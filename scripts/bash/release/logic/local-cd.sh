@@ -68,7 +68,7 @@ check_auth() {
   if command -v npm >/dev/null 2>&1 && npm whoami >/dev/null 2>&1; then
     echo "npm auth: ok for registry identity"
   else
-    echo "auth boundary: renew npm automation token with package publish rights"
+    echo "npm auth: none locally; the tag release publishes over OIDC, only the manual channel workflows need NPM_TOKEN"
   fi
 
   if test -n "${CARGO_REGISTRY_TOKEN:-}"; then

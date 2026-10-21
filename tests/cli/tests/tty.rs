@@ -56,7 +56,7 @@ fn lifecycle_pty_confirmation_executes_the_visible_plan() {
     assert_eq!(status.code(), Some(0));
     assert!(output.contains("fixture:download"));
     assert!(output.contains("command: fixture-child"));
-    assert!(output.contains("Continue with download:fixture? [y/N]"));
+    assert!(output.contains("Continue with download:fixture? [Y/n]"));
 }
 
 #[test]

@@ -1,5 +1,6 @@
-use crate::gates::logic::heartbeat::{Heartbeat, Scan};
+use crate::gates::logic::heartbeat::Heartbeat;
 use crate::gates::logic::live::{live_line, live_width, should_tick, TICK};
+#[cfg(unix)]
 use crate::gates::tests_util::{lock, scan_gate};
 
 #[test]
@@ -37,7 +38,7 @@ fn the_elapsed_seconds_are_always_visible() {
 }
 
 #[cfg(unix)]
-fn run_scan(name: &str, script: &str, narrate: bool) -> Scan {
+fn run_scan(name: &str, script: &str, narrate: bool) -> crate::gates::logic::heartbeat::Scan {
     let _guard = lock();
     let root = std::env::temp_dir().join(format!("tj-hb-{name}-{}", std::process::id()));
     let _ = std::fs::remove_dir_all(&root);
@@ -77,7 +78,7 @@ fn narrating_scans_never_redraw_themselves() {
     assert!(!scan.heartbeat, "the narrated view streams, never redraws");
 }
 
-#[cfg(unix)]
+// Plain threads and atomics -- no subprocess or signals -- so it runs anywhere.
 #[test]
 fn heartbeat_stops_promptly_when_the_scan_ends() {
     let mut pump = Heartbeat::start("security scan (pump) ...");

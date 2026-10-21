@@ -39,6 +39,59 @@ it, and anything future work must respect.
 
 ## Records
 
+### Record the README demo on a real desktop, and drive it over a pty (release/0.1.21 -> 2026-10-19)
+
+Recorded in [readme-demo-2026-10-19.md](readme-demo-2026-10-19.md): the gif is a
+real capture of the release binary on an Omarchy desktop, driven over a pty the
+window owns, because the flow it replaced never showed the switch it exists to
+demonstrate.
+
+### Clear the frame once per size change instead of erasing every paint (release/0.1.21 -> 2026-10-19)
+
+Recorded in [tui-resize-clear-2026-10-19.md](tui-resize-clear-2026-10-19.md): a
+frame pads to `cols - 2` so a full row cannot set pending-wrap, which left the
+previous frame's last two columns on screen after a shrink.
+
+### Make the release proofs and the npm publisher fail closed (release/0.1.21 -> 2026-10-19)
+
+Recorded in
+[release-proofs-and-publisher-2026-10-19.md](release-proofs-and-publisher-2026-10-19.md):
+both proofs reported `ok` without ever showing their old/new contrast, and the
+npm job's client minimum did not cover the tokenless `dist-tag add` it performs.
+
+### Let an interactive launch through without a consent keystroke (release/0.1.21 -> 2026-10-19)
+
+Recorded in [tui-consent-2026-10-19.md](tui-consent-2026-10-19.md): launching a
+harness -- the primary action -- stopped at a prompt whose default was NO and
+which reviewed nothing, because the harness asks its own questions.
+
+### Give a lifecycle run its own card and stop stamping the log (release/0.1.21 -> 2026-10-19)
+
+Recorded in
+[tui-lifecycle-card-2026-10-19.md](tui-lifecycle-card-2026-10-19.md): a run owns
+the screen, a row keeps the level its tool declared, and the frame clips rather
+than letting the terminal wrap it.
+
+### Put the decision at the cursor (release/0.1.21 -> 2026-10-19)
+
+Recorded in
+[tui-decision-at-the-cursor-2026-10-19.md](tui-decision-at-the-cursor-2026-10-19.md):
+a pending consent owns the prompt row, so the question, its context, and the
+cursor are one glance.
+
+### Make the frame one themed surface with a role vocabulary (release/0.1.21 -> 2026-10-19)
+
+Recorded in [tui-one-surface-2026-10-19.md](tui-one-surface-2026-10-19.md): the
+tui had two styling systems, so a theme swap repainted the chrome and nothing
+else.
+
+### Earn the catalog's platform claims and deny Windows warnings (release/0.1.21 -> 2026-10-19)
+
+Recorded in [catalog-claims-2026-10-19.md](catalog-claims-2026-10-19.md): every
+manifest key carries a verdict, platform independence cannot route through a
+POSIX shell, and a row's mechanism is selected by schema and support state
+rather than by field name.
+
 ### Fix an empty block summary instead of relaxing the property that caught it (develop -> 2026-10-17)
 
 **Decision:** Give `block_summary` a non-empty fallback and pin the inputs

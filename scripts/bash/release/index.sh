@@ -7,7 +7,7 @@ cmd=${1:-}
 
 usage() {
   cat <<'EOF'
-usage: scripts/bash/release/index.sh <preflight|package|local-cd|rollback-rehearsal> [args...]
+usage: scripts/bash/release/index.sh <preflight|package|local-cd|publish-npm|rollback-rehearsal> [args...]
 
 Public entrypoint to the release domain. Run from any directory; the logic
 scripts resolve the repository root from their own location.
@@ -16,6 +16,7 @@ Commands:
   preflight [--tag vX.Y.Z] [--expected-main-ref REF]
   package [build|--check] [out-dir]
   local-cd [--out-dir PATH] [--check-auth]
+  publish-npm [--check-toolchain] [--version X.Y.Z] [--artifacts-dir DIR]
   rollback-rehearsal [--output PATH] [--current-ref REF]
 EOF
 }
@@ -24,6 +25,7 @@ case "$cmd" in
   preflight) exec "$here/logic/release-preflight.sh" "$@" ;;
   package) exec "$here/logic/package-release.sh" "$@" ;;
   local-cd) exec "$here/logic/local-cd.sh" "$@" ;;
+  publish-npm) exec "$here/logic/publish-npm.sh" "$@" ;;
   rollback-rehearsal) exec "$here/logic/rollback-rehearsal.sh" "$@" ;;
   -h | --help) usage; exit 0 ;;
   "")

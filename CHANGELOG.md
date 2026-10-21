@@ -1,5 +1,145 @@
 # Changelog
-## [0.1.20] - unreleased
+## [0.1.21] - 2026-10-18
+
+### Fixed
+
+- Running a tool no longer stops at a consent prompt. An interactive launch
+  (`ui`, a bare `run`) hands the terminal to the harness, which asks its own
+  questions; the `Continue with ui:<harness>? [y/N]` keystroke in front of it
+  was friction with nothing to review, and its default was NO. State-changing
+  headless runs still confirm, and a dangerous capability still needs
+  `--allow-dangerous`.
+- Command output no longer gains a blank line: the frame closed an already
+  closed line, so the centered body jumped a row whenever a command finished.
+- A streamed install can be cancelled. Ctrl+C or Esc stops the child and
+  returns the prompt with `cancelled` in the card; the session's SIGINT
+  handler had been swallowing Ctrl+C while a stream ran, so a hung installer
+  left the tui with no way out.
+- A streamed child gets no controlling terminal, so an installer that reads
+  `/dev/tty` (hermes does, for a `sudo` prompt) can no longer reach past our
+  pipes and paint over the frame -- it fails closed instead of bricking the
+  run.
+- The viewport floor drops from 50 to 40 columns, and the consent question
+  falls back to `Continue? [Y/n]` when the frame cannot hold the full line: a
+  narrow terminal is composed and clipped by the frame, never wrapped by the
+  terminal itself, and the bracket is always visible.
+- The consent bracket is the real default on every surface. The terminal
+  strategy hardcoded `[y/N]`, so an install asked `Continue with
+  download:x? [y/N]` and Enter *declined* it -- the opposite of the documented
+  intent, and inconsistent with the frame. The lead also wraps to the real
+  terminal width now.
+- A narrow terminal stays on the frame. The floor drops to 20 columns and
+  `size()` no longer widens a narrow window to a floor, so the frame composes
+  at the REAL size and clips its own rows (`cols - 2`) instead of the terminal
+  wrapping a long install line and walking the prompt up the screen.
+- A running install says how to leave it: the modeline reads `esc or ctrl-c
+  cancels` for the duration, and the log is capped so a chatty installer cannot
+  grow the body without bound.
+- `modeline::prompt` no longer panics when the prompt is wider than the frame
+  and there is no scroll badge: the gap saturates.
+- A blank line in an install log stays blank. `classify` labelled every empty
+  line `INFO`, so a tool's paragraph breaks became rows that read as content --
+  `info` with nothing after it, which is the extra line that showed up after an
+  install. Blank input now passes through as spacing.
+- The frame never grows past the terminal. `Drop for Session` printed the
+  alt-screen exit with `println!` -- a stray newline after the last frame,
+  which scrolls the restored screen by a row -- where `suspend` already used
+  `print!`.
+- Esc is one keypress again, and a quick second Esc is no longer swallowed:
+  the escape resolver treated `Esc Esc` as an Alt combo and decoded the pair to
+  `Ignored`, eating both. An Alt combo also replays its key now (the replay
+  used to decode to `Ignored` and eat the key as well).
+- The escape resolver no longer deadlocks the reader. Its continuation thread
+  blocked in a `read` while holding the stdin lock, so the next keypress waited
+  on a mutex instead of the parked byte -- the tui froze until another key
+  arrived. It now waits for readiness within the window, so the lock is never
+  held past it.
+- Normal mode has a way back. Esc entered it, but nothing left it: `i`, `a` and
+  Esc all did nothing there, so the prompt was dead until the session
+  restarted. `i` and Esc both return to Insert now, and the modeline says so
+  (`esc or i to type`).
+- The escape resolver no longer hands one keypress back twice. It parked the
+  continuation byte *after* sending it, racing the reader's own bookkeeping, so
+  a fast `Esc Esc` could produce two Escapes.
+- The release path stops at the boundary instead of after it. The npm publisher
+  now requires a dist-tag-capable client -- npm 11.21.0+ in the 11.x line, or
+  12.2.0+ in the 12.x line -- before it touches the registry, and CI installs
+  one: a client that can publish but not retag ships a release whose `latest`,
+  `stable`, and `beta` still point at the previous version.
+- The two rerunnable proofs require the contrast they advertise. `claim-earned`
+  fails when the pre-fix binary already refuses the stand-in (printing the
+  diagnostic), and `windows-clippy` fails when the pre-fix tree passes strict
+  clippy, so a baseline that cannot fail -- or a working tree that cannot pass
+  -- is no longer recorded as an old-fails/new-passes `ok`. Both scripts are
+  executable through the verify index again, as `docs/development.md` documents
+  them.
+- The claim inventory no longer overstates its own mechanisms. A row's
+  `held_by` is selected by manifest schema, capability, and support state
+  instead of by field name: a gate manifest reports `asserted` (the gate loader
+  parses it; the catalog shape gate never sees it), and `effect`/`network`/
+  `interaction` report `asserted` on a capability `effect_truth` does not arm
+  (92 rows). An `unknown` row's empty platform scope is `asserted`, not
+  `inert`, because `guard_policy` admits it once a terminal session consents.
+- `local-cd --check-auth` no longer advises renewing an npm automation token the
+  tag release does not use; it says the OIDC publish needs no local login and
+  that only the manual channel workflows use `NPM_TOKEN`.
+
+### Changed
+
+- The frame is one themed surface. The active theme now paints body content,
+  not only the chrome: the header, the first-boot primer, `status`, `help`,
+  the `list` heading, and the install/update verdict cards all name a role
+  (`title`, `accent`, `label`, `value`, `ok`, `warn`, `err`, `rule`) that the
+  theme resolves. `/theme` repaints everything, and each of the six themes is
+  a full design rather than three colours.
+- Section headings name the screen on every layout (`commands ───`,
+  `readiness ───`, `ready now ───`, `one install away ───`), so moving between
+  screens is legible.
+- The header shows the working directory again. The brand tagline was dead
+  signal and is now the lowest-priority tail, so a roomy terminal shows the
+  path and a narrow one keeps the readiness verdict.
+- Narrow viewports drop a table's secondary column instead of clipping it:
+  `help` and the primer lose their purpose column below the width the full
+  table needs, and any remaining overflow is clipped rather than allowed to
+  spill past the frame.
+- `help` aligns every purpose column to the longest command, and the primer's
+  rule spans the command block.
+- A lifecycle run owns the screen: `install`, `update`, and a run start from a
+  clean body, so the primer and the previous command's output yield to the task
+  under way instead of accumulating on top of it.
+- The live log lost its wall-clock stamp. Rows read `info   message`,
+  `warn   message`, `error  message` -- the level in its theme role, the
+  message as body text -- and the runner keeps the level a line declares
+  instead of guessing over the whole line. A row that is not a classified log
+  line (a gate note, an advisory) passes through untouched.
+- The verdict card is scannable: `✓ installed droid · 3.2s · now active`, and a
+  failed run answers `✗ ...` instead of a bare line.
+- Raw mode is held for the whole run, so a key typed while the child works no
+  longer echoes into the frame.
+- A command's first frame lands before the guard chain blocks: typing
+  `install droid` and pressing Enter now shows the plan and the consent
+  question at once, so the second Enter is an informed one instead of a guess
+  at a screen that never changed. Typed-ahead input is read unbuffered, so a
+  pasted or quickly typed line no longer stalls behind `std::io::stdin()`'s
+  internal buffer while the reader waits on a `poll` that cannot see it.
+- The decision is at the cursor. A consent question now takes the prompt row
+  -- `Continue with download:crush? [Y/n]` sits where you are already looking
+  -- and the body bottom-anchors for the decision, so the plan it is asking
+  about sits directly above the question instead of in the middle of the
+  frame.
+- The plan is one sentence for every install mechanism:
+  `install crush · npm · @charmland/crush`,
+  `install droid · remote script · app.factory.ai`,
+  `install aider · uv tool · aider-chat@latest`. The raw argv said neither the
+  mechanism nor where the bytes come from, and `sh -c 'curl … | sh'` reads as a
+  dare rather than a plan.
+- A run is a log. The body bottom-anchors while a command streams or a
+  transcript grows, so the newest row sits directly above the prompt instead of
+  in the middle of the frame; the primer and one-shot cards (`status`, `help`,
+  `show`, `list`) stay centered. Chat mode no longer prints a blank line for an
+  empty command.
+
+## [0.1.20] - 2026-10-17
 
 ### Fixed
 
@@ -12,7 +152,7 @@
   assumed runnable. `default_home`'s test pins `HOME`, which Windows leaves
   unset.
 
-## [0.1.19] - unreleased
+## [0.1.19] - 2026-09-08
 
 ### Added
 
@@ -50,7 +190,7 @@
 - one word-boundary wrapper serves show, the gate screens, and the chat
   bubbles: no row ends mid-word, wide glyphs count two cells.
 
-## [0.1.18] - unreleased
+## [0.1.18] - 2026-09-04
 
 - `show` redesigned: human lines (description, aligned binary/setup/support
   fields, one line per capability with its summary) instead of the
@@ -64,7 +204,7 @@
 - Themes: the chrome palette is theme-driven -- the greyed layer and the
   accent follow the vibe; six themes ship.
 
-## [0.1.17] - unreleased
+## [0.1.17] - 2026-09-04
 
 - Minimalist centered TUI: the frame is gone -- one merged header line
   (identity, active harness, readiness verdict, working directory, with

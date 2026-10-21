@@ -1,15 +1,16 @@
+//! Gate test fixtures. Every consumer is a unix-only gate test (the fixtures
+//! are `sh` scripts), so the module is scoped to unix instead of building a
+//! set of dead helpers on Windows.
+#![cfg(unix)]
+
 use std::path::Path;
 
-#[cfg(unix)]
 fn make_executable(path: &Path) {
     use std::os::unix::fs::PermissionsExt;
     let mut permissions = std::fs::metadata(path).unwrap().permissions();
     permissions.set_mode(0o755);
     std::fs::set_permissions(path, permissions).unwrap();
 }
-
-#[cfg(not(unix))]
-fn make_executable(_path: &Path) {}
 
 pub fn write_gate(root: &Path, name: &str, binary: &str) {
     let directory = root.join(name);

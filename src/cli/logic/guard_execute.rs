@@ -37,24 +37,24 @@ pub(super) fn execute(
             &invocation.extra,
             options,
             explicit,
-            &mut |lead: &str, token: &str| {
+            &mut |lead: &str, token: &str, default_yes: bool| {
+                let question =
+                    format!("Continue with {token}? {}", guard_ask::bracket(default_yes));
+                let short = format!("Continue? {}", guard_ask::bracket(default_yes));
+                // The decision lives at the cursor: the prompt row carries it.
+                let _ask = crate::tui::input::ask(&question, &short);
                 for line in lead.lines() {
                     paint(line);
                 }
-                // the add/update direction defaults to yes (Enter
-                // confirms); a destructive direction defaults to no
-                let default_yes = token.starts_with("download:") || token.starts_with("update:");
-                paint(&format!(
-                    "Continue with {token}? {}",
-                    guard_ask::bracket(default_yes)
-                ));
-                // one keystroke answers: raw mode so [Y/n] means [Y/n],
-                // never a cooked line waiting for an Enter that reads
-                // as a hang
+                // one keystroke answers: raw mode, never a cooked Enter hang
                 let _raw = crate::tui::term::enable_raw();
-                let key = crate::tui::input::read_key();
-                // the tail of a typed answer ("es" of "yes") must never
-                // leak into the prompt buffer
+                let mut key = crate::tui::input::read_key();
+                // A resize is not an answer: repaint the frame and read again.
+                while matches!(key, Some(crate::tui::input::Key::Resized)) {
+                    paint("");
+                    key = crate::tui::input::read_key();
+                }
+                // a typed answer's tail must never leak into the prompt buffer
                 crate::tui::input::drain_answer(std::time::Duration::from_millis(150));
                 let (row, answer) = guard_ask::in_frame(key, default_yes);
                 paint(row);
@@ -81,9 +81,14 @@ pub(super) fn execute(
     })?;
     match on_line {
         Some(paint) => {
-            let code = crate::runtime::run_streaming(plan, &invocation.extra, &mut |line: &str| {
-                paint(&crate::runtime::classify(line))
-            });
+            let code = crate::runtime::run_streaming(
+                plan,
+                &invocation.extra,
+                &mut |line: &str| paint(&crate::runtime::classify(line)),
+                // Ctrl+C or Esc cancels a streamed install: the child has no
+                // terminal to reach and no polite shutdown worth waiting for.
+                &mut || crate::tui::input::cancel_requested(),
+            );
             match code {
                 Ok(code) => Ok((code, String::new())),
                 Err(error) => Err(dispatch_support::unavailable_error(error.to_string())),

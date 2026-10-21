@@ -1,3 +1,8 @@
+//! Support fixtures for the diagnostics state tests, which are unix-only
+//! (they build an `OsString` from raw bytes and a fake HOME layout), so the
+//! helpers are scoped to unix rather than compiled dead on Windows.
+#![cfg(unix)]
+
 use std::fs;
 use std::path::PathBuf;
 use terminal_jarvis::diagnostics::{Code, Report};

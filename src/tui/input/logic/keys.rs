@@ -4,9 +4,8 @@
 use super::structs::Key;
 use std::io::{self, Read};
 
-/// Blocks until one key arrives; `None` means EOF or Ctrl-D -- the session
-/// ends. Signal interrupts (resize ticks) retry instead of dying. While a
-/// conversation's watcher owns stdin, keys come from the parked queue.
+/// Blocks until one key arrives; `None` means EOF or Ctrl-D. A resize
+/// arrives as [`Key::Resized`] so the frame repaints without a keystroke.
 pub fn read_key() -> Option<Key> {
     if super::poll::watcher_active() {
         return super::poll::wait();
@@ -19,16 +18,14 @@ pub fn read_key() -> Option<Key> {
 
 /// The raw path: straight from stdin, no queue -- the watcher's own read.
 pub(crate) fn read_stdin_key() -> Option<Key> {
-    // Scoped lock: the escape resolver's reader thread needs the stdin
-    // lock free, so the first byte reads and releases before the dance.
-    let first = {
-        let mut sin = io::stdin().lock();
-        next_byte(&mut sin)?
-    };
+    if !super::readiness::wait_for_input() {
+        return Some(Key::Resized);
+    }
+    let mut sin = super::raw_stdin::Stdin;
+    let first = next_byte(&mut sin)?;
     if first == 0x1b {
         return super::escape::resolve_and_decode(first);
     }
-    let mut sin = io::stdin().lock();
     decode(&mut sin, first)
 }
 
@@ -49,6 +46,7 @@ fn next_byte(sin: &mut impl Read) -> Option<u8> {
 
 pub(crate) fn decode(sin: &mut impl Read, first: u8) -> Option<Key> {
     let key = match first {
+        0x03 => Key::Interrupt,
         0x04 => return None,
         b'\r' | b'\n' => Key::Enter,
         0x7f | 0x08 => Key::Backspace,

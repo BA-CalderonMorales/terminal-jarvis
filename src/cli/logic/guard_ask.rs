@@ -1,15 +1,29 @@
 //! GuardAsk: the consent strategies. The terminal asks on stderr and reads
-//! one line; the streaming surface resolves one key in-frame. Both funnel
-//! into the same answer grammar, so the consent matrix stays one truth.
+//! one line; the streaming surface resolves one key in-frame.
 
 use super::args::Options;
 use super::error;
 
-/// The terminal strategy: prompt on stderr, read one line from stdin.
-pub fn ask_in_terminal(lead: &str, token: &str) -> error::Result<()> {
+/// The add/update direction defaults to yes; a destructive one to no.
+pub fn default_yes(token: &str) -> bool {
+    token.starts_with("download:") || token.starts_with("update:")
+}
+
+/// The terminal strategy: prompt on stderr, read one line from stdin. The lead
+/// wraps to the REAL terminal width (the table width never reports below 40,
+/// so a narrow window would be wrapped by the terminal instead of by us).
+pub fn ask_in_terminal(lead: &str, token: &str, default_yes: bool) -> error::Result<()> {
     use std::io::Write;
-    eprint!("{lead}");
-    eprint!("Continue with {token}? [y/N] ");
+    let width =
+        crate::tui::term::size().map_or_else(super::table::terminal_width, |(cols, _)| cols);
+    for line in crate::cli::wrap(lead.trim_end(), width) {
+        eprintln!("{line}");
+    }
+    let full = format!("Continue with {token}? {}", bracket(default_yes));
+    let short = format!("Continue? {}", bracket(default_yes));
+    let cells: usize = full.chars().map(crate::cli::char_cells).sum();
+    let question = if cells <= width { full } else { short };
+    eprintln!("{question}");
     std::io::stderr().flush().map_err(prompt_failed)?;
     let mut answer = String::new();
     std::io::stdin()

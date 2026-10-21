@@ -15,6 +15,17 @@ scripts/bash/release/index.sh package build /tmp/terminal-jarvis-package
 scripts/bash/release/index.sh local-cd --check-auth
 ```
 
+`verify` step `[7]` also regenerates and checks the generated claim inventory:
+`python3 scripts/python/catalog/index.py claim-inventory [--check]`. Two
+rerunnable proofs carry the old-fails/new-passes pair for the platform-claim
+rule (`scripts/bash/verify/index.sh claim-earned --from REF`) and for the
+Windows strict-clippy gate
+(`scripts/bash/verify/index.sh windows-clippy --from REF`), where `REF` is the
+pre-fix commit; see `docs/claim-earning-study.md`. Each exits nonzero unless its
+pre-fix half fails and the working tree passes, so `windows-clippy` belongs on a
+host where the pre-fix tree fails (a Windows checkout) and reports
+`there is no warning to deny` anywhere else.
+
 ## Domain shape
 
 Every Rust domain mirrors the scripts/ bucketing: `src/<domain>/index.rs` is
@@ -74,3 +85,48 @@ contains the default harness and gate data as a fallback.
 Release preparation stops at a verified `release/X.Y.Z` branch. Tagging,
 publishing, protected merges, and the mandatory release Trivy scans use the
 separate release workflow and require operator approval.
+
+### npm Trusted Publishing
+
+The npm publish job holds no stored credential. It authenticates with the
+workflow's GitHub OIDC identity, so a Trusted Publisher must be registered on
+npmjs.com for this repository and the `cd-multiplatform.yml` workflow before a
+release tag is pushed.
+
+Two settings on that publisher are easy to miss and both fail *after* the
+package is already published:
+
+- **Allow npm dist-tag** is **off by default**. Publishing and moving channels
+  are independent permissions, so without it the release publishes and then
+  cannot point `latest`, `stable`, or `beta` at the new version.
+- The client must support dist-tags over OIDC: **npm 11.21.0+ in the 11.x line,
+  or 12.2.0+ in the 12.x line**. The job installs a current npm and then
+  asserts the version before it touches the registry, because the toolchain a
+  `setup-node` version ships can be older than the publish minimum.
+
+Provenance is generated automatically for a trusted publish from GitHub
+Actions; the `--provenance` flag only makes it explicit.
+
+### Registry Confirmation
+
+npm and crates.io acknowledge a write before they serve it. The release jobs
+therefore confirm the published version, each dist-tag, and the crates.io entry
+by polling to convergence, failing only on timeout. A single read immediately
+after a write is not evidence, and treating one as evidence reports a false
+failure for a release that actually succeeded.
+
+### Publish Rehearsal
+
+The npm publisher lives in `scripts/bash/release/logic/publish-npm.sh` and the
+workflow calls it through the release domain index, so it is not inlined in a
+`run:` block. That keeps the shipped bytes rehearsable before a tag exists:
+
+```bash
+scripts/bash/verify/index.sh publish-rehearsal --from <pre-fix-ref>
+```
+
+The shipped publisher must converge against a fake registry that serves a write
+only after N reads, and the pre-fix body extracted from `--from` must publish
+and then fail its own verification -- the v0.1.20 shape. The rehearsal never
+touches the real registry, git tags, or the network, and it does not remove the
+one thing only a real release can decide: the OIDC credential exchange.

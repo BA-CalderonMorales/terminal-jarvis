@@ -1,14 +1,15 @@
 //! Shared machinery for the tui acceptance oracle: a hermetically seeded
 //! fixture, the pty launch, and serialization (pty scenarios are timing-
 //! and signal-sensitive against each other; other tests run untouched).
+//!
+//! Unix-only: every consumer is a PTY acceptance test (`#![cfg(unix)]`), and
+//! the frame/serial helpers have no Windows caller.
+#![cfg(unix)]
 
 use super::cli_driver::{prepend_to_path, Fixture};
 use std::process::Command;
 
-#[cfg(unix)]
 pub const MARKER_SCRIPT: &str = "#!/bin/sh\n: > \"$TJ_FIXTURE_MARKER\"\n";
-#[cfg(not(unix))]
-pub const MARKER_SCRIPT: &str = "@echo off\r\ntype nul > \"%TJ_FIXTURE_MARKER%\"\r\n";
 pub const FRAME: &[u8] = b"::[tj:";
 pub const EXIT: (&[u8], Option<&[u8]>) = (b"\x04", None);
 

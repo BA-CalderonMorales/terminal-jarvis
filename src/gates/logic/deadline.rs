@@ -37,6 +37,7 @@ pub fn wait(child: &mut Child, secs: u64) -> std::io::Result<(ExitStatus, bool)>
 #[cfg(test)]
 mod tests {
     use super::*;
+    #[cfg(unix)]
     use std::process::Command;
 
     #[test]

@@ -5,6 +5,27 @@ be called.
 
 ## Entries
 
+### Two styling systems in one surface (src/tui/, src/cli/logic/style.rs)
+
+**Pattern:** The viewport chrome painted through `screen::theme` (theme-driven,
+always emits SGR) while every body screen -- `status`, `help`, the primer,
+verdict cards -- painted through `cli::style` (hardcoded `1;36`/`1;37`, gated on
+`is_terminal()`). The frame had one styling system for its edges and another for
+its contents.
+
+**Why it is wrong:** The theme was half-real: `/theme ember` repainted the
+header and left every body screen cyan, so the six themes were three colours
+with names. Worse, `paint::body_block` wrapped each body line in `theme::dim`,
+and an inner `\x1b[0m` cancelled the outer dim mid-line, so a styled row read as
+half-dimmed. The flatness was not a taste choice; it was two systems disagreeing.
+
+**Fix:** One role vocabulary (`screen::roles::Role`) that every renderer names,
+resolved by the active theme (`theme::paint`). Chrome and body both call it, so
+a theme swap is total. Keep `cli::style` for the headless surface, which has its
+own colour gate; converting a shared renderer (`show`, `plan`) needs the gate
+unified first, not a second hardcoded palette. The theme-completeness and
+`paint_wraps_once_and_never_nests` tests hold the line.
+
 ### Dual module entry: mod.rs and index.rs in every domain (src/<domain>/)
 
 **Pattern:** Every Rust domain folder carries both `mod.rs` and `index.rs`.

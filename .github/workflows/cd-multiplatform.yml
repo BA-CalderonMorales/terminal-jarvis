@@ -159,15 +159,31 @@ jobs:
           VERSION: ${{ needs.release-meta.outputs.version }}
         run: |
           set -eu
-          if curl -A "terminal-jarvis-release-ci" -fsS "https://crates.io/api/v1/crates/terminal-jarvis/$VERSION" >/dev/null; then
-            echo "terminal-jarvis@$VERSION already exists on crates.io"
-            exit 0
-          fi
-          test -n "${CARGO_REGISTRY_TOKEN:-}" || {
-            echo "CARGO_REGISTRY_TOKEN is required to publish terminal-jarvis@$VERSION" >&2
-            exit 1
+          # crates.io indexes asynchronously, so "published" and "readable" are
+          # separate events. Poll to convergence rather than reading once.
+          served() {
+            curl -A "terminal-jarvis-release-ci" -fsS \
+              "https://crates.io/api/v1/crates/terminal-jarvis/$VERSION" >/dev/null 2>&1
           }
-          cargo publish --locked
+          if served; then
+            echo "terminal-jarvis@$VERSION already exists on crates.io"
+          else
+            test -n "${CARGO_REGISTRY_TOKEN:-}" || {
+              echo "CARGO_REGISTRY_TOKEN is required to publish terminal-jarvis@$VERSION" >&2
+              exit 1
+            }
+            cargo publish --locked
+          fi
+          elapsed=0
+          until served; do
+            if [ "$elapsed" -ge 300 ]; then
+              echo "timed out after ${elapsed}s waiting for crates.io to serve terminal-jarvis@$VERSION" >&2
+              exit 1
+            fi
+            sleep 10
+            elapsed=$((elapsed + 10))
+          done
+          echo "confirmed: crates.io serves terminal-jarvis@$VERSION"
 
   release:
     name: Publish GitHub Release
@@ -331,6 +347,12 @@ jobs:
     needs: [release-meta, update-homebrew-tap]
     runs-on: ubuntu-latest
     timeout-minutes: 10
+    # Trusted publishing (OIDC) replaces the stored NPM_TOKEN. A trusted
+    # publisher for this repository and workflow file must exist on npmjs.com
+    # before a release runs; see docs/development.md.
+    permissions:
+      contents: read
+      id-token: write
     steps:
       - uses: actions/download-artifact@v8
         with:
@@ -339,32 +361,21 @@ jobs:
 
       - uses: actions/setup-node@v6
         with:
-          node-version: 20
-          registry-url: "https://registry.npmjs.org"
+          node-version: 24
+
+      # dist-tags over OIDC need npm 11.21.0+ (11.x) or 12.2.0+ (12.x), and the
+      # node 24 toolchain ships older. Without this the job can publish and then
+      # fail to move a channel; see docs/development.md.
+      - name: Install a dist-tag-capable npm
+        run: npm install -g npm@latest
+
+      # The publish body lives in the release domain, not here, so
+      # `scripts/bash/verify/index.sh publish-rehearsal` can run these exact
+      # bytes against a fake registry before a tag is pushed.
+      - name: Require npm with trusted publishing support
+        run: scripts/bash/release/index.sh publish-npm --check-toolchain
 
       - name: Publish or retag npm channels
         env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
           VERSION: ${{ needs.release-meta.outputs.version }}
-        run: |
-          set -eu
-          test -n "${NODE_AUTH_TOKEN:-}" || {
-            echo "NPM_TOKEN is required to publish terminal-jarvis@$VERSION" >&2
-            exit 1
-          }
-          package_dir="artifacts/$VERSION/linux-x64-gnu/npm/terminal-jarvis"
-          test -f "$package_dir/package.json"
-          chmod +x "$package_dir/bin/terminal-jarvis"
-          test -x "$package_dir/bin/terminal-jarvis"
-          (cd "$package_dir" && npm pack --dry-run --loglevel error)
-          if npm view "terminal-jarvis@$VERSION" version >/dev/null 2>&1; then
-            npm dist-tag add "terminal-jarvis@$VERSION" latest
-          else
-            (cd "$package_dir" && npm publish --tag latest)
-          fi
-          for tag in stable beta; do
-            npm dist-tag add "terminal-jarvis@$VERSION" "$tag"
-          done
-          for tag in latest stable beta; do
-            npm dist-tag ls terminal-jarvis | grep "^$tag: $VERSION$"
-          done
+        run: scripts/bash/release/index.sh publish-npm --version "$VERSION" --provenance

@@ -1,3 +1,7 @@
+//! Heartbeat timing probe. Both tests drive a `sh`-based subprocess and are
+//! unix-only, so the module is scoped to unix.
+#![cfg(unix)]
+
 use crate::gates::logic::heartbeat::Heartbeat;
 use crate::gates::logic::live::TICK;
 

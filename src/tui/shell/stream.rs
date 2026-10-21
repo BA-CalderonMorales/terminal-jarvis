@@ -1,15 +1,13 @@
-//! StreamWire: runs one streaming-eligible action inside the live frame.
-//! The child's output arrives as classified splunk rows; the body grows
-//! and repaints live, so the user never leaves the tui to watch a task.
-
+//! StreamWire: runs one streaming-eligible action in the live frame.
 use super::session;
 use super::stream_finish;
 use super::stream_plan;
-use super::viewport::paint;
+use super::viewport::paint as repaint;
 use crate::cli::{args, stream_invocation};
 use crate::contracts::Harness;
+use crate::tui::screen::{paint, Role};
 use std::path::Path;
-use std::time::{Duration, Instant};
+use std::time::Instant;
 
 pub fn apply(
     action: &args::Action,
@@ -24,7 +22,13 @@ pub fn apply(
         None => return true,
     };
     let label = &planned.label;
-    state.body.push(format!("── {label} ──"));
+    state.body.clear();
+    let chapter = paint(Role::Accent, &session::chapter(label));
+    state.body.push(chapter);
+    state.offset = 0;
+    // A run is a log; a long run with a dead prompt reads as a hang.
+    state.bottom = true;
+    state.hint = "esc or ctrl-c cancels".to_string();
     let started = Instant::now();
     let outcome = {
         let super::state::LoopState {
@@ -34,20 +38,23 @@ pub fn apply(
             hint,
             ..
         } = state;
-        let mut since_paint = Instant::now();
+        // Hold raw mode for the whole run: a typed key must not echo.
+        let _raw = crate::tui::term::enable_raw();
+        let mut throttle = super::stream_rows::Throttle::new();
         stream_invocation(
             planned.invocation,
             options,
             harnesses,
             state_home,
             &mut |line| {
+                let rows = line.split('\n').count();
                 for row in line.split('\n') {
-                    body.push(row.to_string());
+                    body.push(super::stream_rows::render(row));
                 }
+                super::stream_rows::cap(body);
                 *offset = super::viewport::pinned(body);
-                let now = Instant::now();
-                if now.duration_since(since_paint) > Duration::from_millis(180) {
-                    paint(
+                if throttle.due(rows) {
+                    repaint(
                         indicator,
                         hint,
                         harnesses,
@@ -55,13 +62,16 @@ pub fn apply(
                         state_home,
                         body,
                         *offset,
+                        true,
                     );
-                    since_paint = now;
                 }
             },
         )
     };
     match outcome {
+        Ok(crate::runtime::CANCELLED) => {
+            state.body.push(paint(Role::Warn, "cancelled"));
+        }
         Ok(code) => {
             if let Some((name, verb)) = &planned.lifecycle {
                 stream_finish::settle(
@@ -73,21 +83,18 @@ pub fn apply(
                     code,
                     started.elapsed(),
                 );
-                // an adopted install changes the active harness: the
-                // indicator must say so on the very next frame
+                // an adopted install changes the active harness
                 super::status::refresh_indicator(&mut state.indicator, state_home, state.debug);
             } else {
-                state
-                    .body
-                    .push(session::recap(label, Some(code), started.elapsed()));
+                let recap = session::recap(label, Some(code), started.elapsed());
+                state.body.push(paint(Role::Dim, &recap));
             }
-            state.hint = super::status::modeline(state_home, false, state.debug);
         }
         Err(message) => {
-            state
-                .body
-                .push(format!("✗ {} -- {}", message.code, message.message));
+            let line = format!("✗ {} -- {}", message.code, message.message);
+            state.body.push(paint(Role::Err, &line));
         }
     }
+    state.hint = super::status::modeline(state_home, false, state.debug);
     true
 }

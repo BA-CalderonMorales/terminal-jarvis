@@ -4,9 +4,8 @@
 //! the fleet. The full evidence table stays in headless `check`; the tui
 //! never renders forty rows of red.
 
-use crate::cli::style;
-
 use crate::contracts::Harness;
+use crate::tui::screen::{pair, section, visible_width, Role};
 use crate::{context, diagnostics};
 use std::path::Path;
 
@@ -23,10 +22,8 @@ pub fn modeline(state_home: &Path, picker_shown: bool, debug: bool) -> String {
         return "pick a number to switch agents, or type 'home' to go back".to_string();
     }
     let active = active_name(state_home);
-    format!(
-        "active: {active}{} | a number or name switches, list, status, help, home, exit",
-        if debug { " (debug)" } else { "" }
-    )
+    let debug = if debug { " (debug)" } else { "" };
+    format!("active: {active}{debug} | a number or name switches, list, status, help, home, exit")
 }
 
 /// (coverage) builds and caches the indicator; probes the harness version
@@ -69,22 +66,26 @@ pub fn render(harnesses: &[Harness], catalog_root: &Path, state_home: &Path) -> 
         .map(|harness| harness.name.as_str())
         .filter(|name| !ready.contains(name))
         .collect();
+    let active_row = pair("ACTIVE", &active, 6);
+    let ready_row = pair(
+        "READY",
+        &format!("{} of {} ready", ready.len(), harnesses.len()),
+        6,
+    );
+    let width = visible_width(&active_row)
+        .max(visible_width(&ready_row))
+        .max("one install away".len());
     let mut lines = vec![
-        format!("{}  {}", style::label("ACTIVE"), active),
-        format!(
-            "{}  {} of {} ready",
-            style::label("READY"),
-            ready.len(),
-            harnesses.len()
-        ),
-        String::new(),
+        section("readiness", Role::Accent, width),
+        active_row,
+        ready_row,
     ];
     if !ready.is_empty() {
-        lines.push(style::label("ready now"));
+        lines.push(section("ready now", Role::Ok, width));
         lines.extend(rows::wrap(&ready));
     }
     if !not_ready.is_empty() {
-        lines.push(style::label("one install away"));
+        lines.push(section("one install away", Role::Warn, width));
         lines.extend(rows::wrap(&not_ready));
     }
     lines.join("\n")

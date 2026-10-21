@@ -38,7 +38,9 @@ pub fn prompt(draft: &Draft, inner: usize, body_rows: usize) -> String {
     let right = if fits {
         theme::dim(&right)
     } else if badge_fits {
-        let gap = inner - left_width - badge_width;
+        // The prompt may be wider than the frame: the gap must saturate, or a
+        // narrow window underflows and panics.
+        let gap = inner.saturating_sub(left_width).saturating_sub(badge_width);
         return format!(
             "{left}{}{}",
             " ".repeat(gap.saturating_sub(1)),

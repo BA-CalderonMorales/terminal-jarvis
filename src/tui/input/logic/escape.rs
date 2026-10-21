@@ -3,7 +3,7 @@
 //! short window; a late byte parks in `PENDING` so nothing is lost.
 
 use super::Key;
-use std::io::{self, Read};
+use std::io;
 use std::sync::mpsc;
 use std::time::Duration;
 
@@ -12,15 +12,18 @@ static PENDING: std::sync::Mutex<Vec<u8>> = std::sync::Mutex::new(Vec::new());
 /// The window a bare Esc waits for its continuation before standing alone.
 const WINDOW: Duration = Duration::from_millis(60);
 
-fn park_clear() {
-    PENDING.lock().unwrap_or_else(|e| e.into_inner()).clear();
+/// Parks one raw byte for the next reader; a byte the windowed thread read
+/// after the reader gave up lands here so nothing is ever lost.
+pub(crate) fn park_byte(byte: u8) {
+    let mut parked = PENDING.lock().unwrap_or_else(|e| e.into_inner());
+    parked.clear();
+    parked.push(byte);
 }
 
-/// Parks one raw byte for the next reader; a byte read by a lingering
-/// windowed thread lands here so nothing is ever lost.
-pub(crate) fn park_byte(byte: u8) {
-    park_clear();
-    PENDING.lock().unwrap_or_else(|e| e.into_inner()).push(byte);
+/// Whether a late byte is parked, without consuming it -- the readiness
+/// wait must not sleep past a byte the escape dance already captured.
+pub fn has_pending() -> bool {
+    !PENDING.lock().unwrap_or_else(|e| e.into_inner()).is_empty()
 }
 
 /// The next input byte: a parked late byte first, then the real reader.
@@ -40,46 +43,41 @@ pub fn pending() -> Option<u8> {
 pub fn resolve_and_decode(first: u8) -> Option<Key> {
     let (tx, rx) = mpsc::channel();
     std::thread::spawn(move || {
-        let byte = std::io::stdin()
-            .lock()
-            .bytes()
-            .next()
-            .map(|b| b.unwrap_or(0));
-        let _ = tx.send(byte);
-        if let Some(byte) = byte {
-            park_byte(byte);
+        // Wait for the continuation WITHOUT holding the stdin lock past the
+        // window: a read that blocks here would deadlock the next keypress.
+        let byte = super::readiness::stdin_ready(WINDOW)
+            .then(super::raw_stdin::read_byte)
+            .flatten();
+        if tx.send(byte).is_err() {
+            // Nobody was waiting for it: keep the byte for the next read.
+            // Parking unconditionally would race the reader's own bookkeeping
+            // and hand the same keypress back twice.
+            if let Some(byte) = byte {
+                park_byte(byte);
+            }
         }
     });
-    let continuation = match rx.recv_timeout(WINDOW) {
-        Err(_) => return Some(Key::Escape),
-        Ok(None) => return Some(Key::Escape),
-        Ok(Some(introducer @ (b'[' | b'O'))) => {
-            // the final CSI byte reads directly; the introducer parked
-            // itself, so clear it before the replay consumes the triple
-            let final_byte = std::io::stdin()
-                .lock()
-                .bytes()
-                .next()
-                .map(|b| b.unwrap_or(0));
-            park_clear();
-            Some((introducer, final_byte))
-        }
-        Ok(Some(parked)) => {
-            // an Alt combo: Esc ignored, the combo key replays untouched
-            park_clear();
-            park_byte(parked);
-            Some((parked, None))
-        }
+    let second = match rx.recv_timeout(WINDOW) {
+        // no continuation: a bare Esc -- the vim mode switch
+        Err(_) | Ok(None) => return Some(Key::Escape),
+        Ok(Some(second)) => second,
     };
-    match continuation {
-        None => Some(Key::Ignored),
-        Some((second, third)) => {
-            let mut bytes = vec![first, second];
-            if let Some(third) = third {
-                bytes.push(third);
-            }
-            let mut replay = io::Cursor::new(bytes);
-            super::keys::decode(&mut replay, first)
-        }
+    if second == 0x1b {
+        // A second Esc is its own keypress, not an Alt combo: pressing Esc
+        // twice in quick succession must not swallow both.
+        return Some(Key::Escape);
     }
+    if second != b'[' && second != b'O' {
+        // An Alt combo: the Esc is ignored and the combo key stands alone.
+        // Replaying the pair would decode to `Ignored` and eat the key too.
+        return super::keys::decode(&mut io::Cursor::new(vec![second]), second);
+    }
+    // A CSI/SS3 introducer: the final byte reads directly.
+    let final_byte = super::raw_stdin::read_byte();
+    let mut bytes = vec![first, second];
+    if let Some(third) = final_byte {
+        bytes.push(third);
+    }
+    let mut replay = io::Cursor::new(bytes);
+    super::keys::decode(&mut replay, first)
 }

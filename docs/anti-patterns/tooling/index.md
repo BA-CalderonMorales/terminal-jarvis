@@ -5,6 +5,26 @@ exists.
 
 ## Entries
 
+### Release logic embedded in workflow YAML cannot be rehearsed
+
+**Pattern:** The npm publish body -- version guard, publish/retag, and the
+poll-to-convergence confirmation -- lived inside the `run:` block of
+`.github/workflows/cd-multiplatform.yml`. Its only execution was a real release
+tag, and the commit that fixed it asserted an old-fails/new-passes proof in its
+message that was never committed.
+
+**Why it is wrong:** Logic that runs only on a tag cannot be reviewed or
+rehearsed, so the v0.1.20 release published successfully and then failed its own
+single-read verification. A fix whose evidence is prose instead of an artifact
+is a claim held up by nothing -- the same failure the catalog claim inventory
+exists to prevent, one layer up.
+
+**Fix:** Keep release logic in `scripts/bash/release/logic/` behind the domain
+index and have the workflow call it. Prove it with a re-runnable artifact
+(`scripts/bash/verify/index.sh publish-rehearsal`) that runs the shipped bytes
+against a fake registry and shows the pre-fix body failing. Extract workflow
+steps by name so the proof cannot drift from the workflow.
+
 ### Substring filters recursively launch a test's parent
 
 **Pattern:** A subprocess invokes the current Rust test binary with a short

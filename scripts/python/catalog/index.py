@@ -7,13 +7,17 @@ from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
 DISPATCH = {
+    "claim-inventory": "claim-inventory.py",
     "harness-risk": "harness-risk.py",
 }
 
 
 def main():
     if len(sys.argv) < 2:
-        print("usage: python3 scripts/python/catalog/index.py <harness-risk> [args...]", file=sys.stderr)
+        print(
+            "usage: python3 scripts/python/catalog/index.py <claim-inventory|harness-risk> [args...]",
+            file=sys.stderr,
+        )
         return 2
     name, args = sys.argv[1], sys.argv[2:]
     target = DISPATCH.get(name)

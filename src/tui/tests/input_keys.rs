@@ -38,6 +38,11 @@ fn ignored_keys_never_touch_the_buffer() {
     let mut editor = Editor::default();
     editor.feed(Key::Char('x'));
     assert_eq!(editor.feed(Key::Ignored), Feed::Idle);
+    assert_eq!(
+        editor.feed(Key::Resized),
+        Feed::Idle,
+        "a resize is not an edit"
+    );
     assert_eq!(editor.feed(Key::Dead), Feed::Dead);
     assert_eq!(editor.feed(Key::Enter), Feed::Submit("x".into()));
 }

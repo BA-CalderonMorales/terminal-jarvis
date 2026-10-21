@@ -1,7 +1,10 @@
+//! Gate runner tests. Every case drives a `sh` gate fixture and is unix-only,
+//! so the module is scoped to unix.
+#![cfg(unix)]
+
 use crate::gates::logic::{runner::preflight, stream::run, verdict::Verdict};
 use crate::gates::tests_util::*;
 
-#[cfg(unix)]
 #[test]
 fn block_summary_drops_info_lines_and_keeps_the_signal_tail() {
     let verbatim = "2026 INFO [vuln] enabled\n2026 WARN spam\n2026 INFO secret\n2026 FATAL fs scan error: stat file: no such file\n";
@@ -14,7 +17,6 @@ fn block_summary_drops_info_lines_and_keeps_the_signal_tail() {
         "2026 INFO [vuln] enabled"
     );
 }
-#[cfg(unix)]
 #[test]
 fn preflight_accepts_success_and_reports_blocking_exit() {
     let _guard = lock();
@@ -39,7 +41,6 @@ fn preflight_accepts_success_and_reports_blocking_exit() {
     restore_gates_env(previous);
     let _ = std::fs::remove_dir_all(root);
 }
-#[cfg(unix)]
 #[test]
 fn run_streams_gate_output_and_captures_it() {
     // the child inherits the cwd; the lock bars the deleted-cwd test
@@ -54,7 +55,6 @@ fn run_streams_gate_output_and_captures_it() {
     assert!(scan.output.contains("streamed-2"));
     let _ = std::fs::remove_dir_all(&dir);
 }
-#[cfg(unix)]
 #[test]
 fn preflight_reports_exit_128_as_blocked_and_signals_as_interrupted() {
     let _guard = lock();
