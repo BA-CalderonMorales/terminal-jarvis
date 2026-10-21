@@ -1,4 +1,36 @@
 # Changelog
+## [0.1.22] - 2026-10-21
+
+### Fixed
+
+- The npm release path ships one publisher. The tag job and the stable, beta,
+  and recovery workflows call `scripts/bash/release/logic/publish-npm.sh`
+  instead of carrying inline `npm publish` blocks, so the exact rehearsed bytes
+  are the ones that run.
+- A published version and every moved dist-tag are confirmed by polling until
+  the registry serves them (600 seconds), not by one immediate read. v0.1.21
+  published successfully and was reported as failed because npm acknowledges a
+  write before it serves it; that false failure cannot recur.
+- The tag npm job checks out the repository before it calls the publisher. On
+  v0.1.21 it downloaded only an artifact, so the script was absent and the job
+  died with exit 127 after crates.io, the GitHub release, and the Homebrew tap
+  had already shipped.
+- The tag npm job falls back to `NPM_TOKEN` while the npm Trusted Publisher is
+  being registered, so a release is not blocked on an external setting. Once
+  the publisher is registered, removing the token makes OIDC the only path.
+- `publish-npm --dry-run` validates the stage and prints the publish or retag
+  action without touching the registry, and `--dist-tags` accepts a single
+  channel for the manual workflows.
+- The publisher refuses a `--version` that does not match `Cargo.toml`.
+
+### Added
+
+- `scripts/bash/verify/index.sh workflow-checkout` fails when any workflow job
+  invokes a repository script without `actions/checkout`; it runs in verify
+  step 11.
+- The publish rehearsal covers the single-tag and dry-run paths, and the npm
+  toolchain guard matrix lives in its own rehearsal script.
+
 ## [0.1.21] - 2026-10-18
 
 ### Fixed
