@@ -354,6 +354,12 @@ jobs:
       contents: read
       id-token: write
     steps:
+      # The publish body lives in scripts/, so this job needs the tree.
+      # Downloading the artifact alone leaves the script absent (exit 127).
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ needs.release-meta.outputs.tag }}
+
       - uses: actions/download-artifact@v8
         with:
           name: release-linux-x64-gnu
