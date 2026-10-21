@@ -7,7 +7,7 @@ cmd=${1:-}
 
 usage() {
   cat <<'EOF'
-usage: scripts/bash/verify/index.sh <verify|local-ci|security-check|integration-hardening|distribution-payloads|core-command-matrix|claim-earned|windows-clippy|publish-rehearsal> [args...]
+usage: scripts/bash/verify/index.sh <verify|local-ci|security-check|integration-hardening|distribution-payloads|core-command-matrix|workflow-checkout|claim-earned|windows-clippy|publish-rehearsal> [args...]
 
 Public entrypoint to the verify domain. Run from the repository root; the
 verify gate truth is produced here.
@@ -34,6 +34,7 @@ case "$cmd" in
   integration-hardening) exec "$here/logic/integration-hardening.sh" "$@" ;;
   distribution-payloads) exec "$here/logic/check-distribution-payloads.sh" "$@" ;;
   core-command-matrix) exec "$here/logic/core-command-matrix.sh" "$@" ;;
+  workflow-checkout) exec "$here/logic/workflow-checkout.sh" "$@" ;;
   claim-earned) exec "$here/logic/claim-earned.sh" "$@" ;;
   windows-clippy) exec "$here/logic/windows-clippy.sh" "$@" ;;
   publish-rehearsal) exec "$here/logic/publish-rehearsal.sh" "$@" ;;
