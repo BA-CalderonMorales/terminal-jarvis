@@ -15,11 +15,12 @@ fn run_after_a_passed_scan_skips_the_scan_again() {
             (b"install fixture\n", None),
             (
                 b"y\n",
-                Some(b"Continue with download:fixture? [y/N]".as_slice()),
+                Some(b"Continue with download:fixture? [Y/n]".as_slice()),
             ),
             (b"", Some(b"installed fixture".as_slice())),
             (b"run fixture ui\n", None),
-            (b"y\n", Some(b"Continue with ui:fixture? [y/N]".as_slice())),
+            // an interactive launch is the user's own action: no consent
+            // keystroke stands between them and the harness ui
             (b"", Some(b"exited 0".as_slice())),
             EXIT,
         ],
@@ -53,7 +54,7 @@ fn debug_toggle_restores_the_verbose_view_on_demand() {
             (b"install fixture\n", Some(b"debug view on".as_slice())),
             (
                 b"y\n",
-                Some(b"Continue with download:fixture? [y/N]".as_slice()),
+                Some(b"Continue with download:fixture? [Y/n]".as_slice()),
             ),
             (b"", Some(b"installing fixture: fixture-child".as_slice())),
             (b"/debug off\n", None),

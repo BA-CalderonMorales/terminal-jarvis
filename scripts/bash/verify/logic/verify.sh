@@ -47,6 +47,11 @@ test "$indexes" -eq "$expected" ||
 
 echo "[7/12] generated support report"
 scripts/bash/catalog/index.sh support-report --check
+if command -v python3 >/dev/null 2>&1; then
+  python3 scripts/python/catalog/index.py claim-inventory --check
+else
+  echo "python3 not installed; skipping claim inventory check"
+fi
 
 echo "[8/12] cli smoke"
 cargo run -- --plain list >/tmp/terminal-jarvis-list.txt

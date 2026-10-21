@@ -3,7 +3,7 @@
 //! question is a strategy -- stderr+stdin in a terminal, in-frame rows and
 //! one raw key inside the tui's streaming surface.
 
-use super::guard_ask::{ask_in_terminal, confirm_error, reject_irrelevant};
+use super::guard_ask::{ask_in_terminal, confirm_error, default_yes, reject_irrelevant};
 use super::{args::Options, error};
 use crate::cli::logic::prompt_lead;
 use crate::contracts::{CapabilityPlan, Effect, Harness, Interaction};
@@ -26,15 +26,15 @@ pub fn check(
     )
 }
 
-/// The confirm step is a strategy: `ask(lead, token)` presents the plan
-/// and resolves to Ok on consent.
+/// The confirm step is a strategy: `ask(lead, token, default_yes)` presents
+/// the plan and resolves to Ok on consent.
 pub fn check_with(
     harness: &Harness,
     plan: &CapabilityPlan,
     extra: &[String],
     options: &Options,
     explicit: bool,
-    ask: &mut dyn FnMut(&str, &str) -> error::Result<()>,
+    ask: &mut dyn FnMut(&str, &str, bool) -> error::Result<()>,
 ) -> error::Result<()> {
     if plan.effect == Effect::ReadOnly {
         return reject_irrelevant(options);
@@ -63,6 +63,13 @@ pub fn check_with(
             ),
         ));
     }
+    // An interactive launch hands the terminal to the harness, which asks its
+    // own questions: a consent keystroke in front of it is friction with
+    // nothing to review. State-changing headless runs still confirm, and a
+    // dangerous capability was already stopped above.
+    if plan.interaction == Interaction::Interactive {
+        return Ok(());
+    }
     let token = format!("{}:{}", plan.capability, harness.name);
     if let Some(actual) = options.confirm.as_deref() {
         if actual == token && (terminal || options.no_input) {
@@ -73,9 +80,11 @@ pub fn check_with(
     if options.no_input || !terminal {
         return Err(confirm_error(&token));
     }
+    let default_yes = default_yes(&token);
     ask(
         &prompt_lead::confirm_lead(options, harness, plan, extra),
         &token,
+        default_yes,
     )
 }
 

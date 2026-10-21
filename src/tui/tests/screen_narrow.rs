@@ -49,3 +49,23 @@ fn at_sixty_columns_the_modeline_hint_degrades_to_its_primary_clause() {
         "the secondary clause dies at 60: {last}"
     );
 }
+
+#[test]
+fn the_primer_drops_the_purpose_column_when_narrow() {
+    let narrow = crate::tui::screen::welcome("codex", 1, 3, 46);
+    let wide = crate::tui::screen::welcome("codex", 1, 3, 78);
+    assert!(
+        narrow
+            .iter()
+            .all(|line| crate::tui::screen::visible_width(line) <= 46),
+        "no row overflows the narrow frame: {narrow:?}"
+    );
+    assert!(
+        !narrow.join("\n").contains("the command center"),
+        "the purpose column is dropped, not clipped"
+    );
+    assert!(
+        wide.join("\n").contains("the command center"),
+        "the roomy primer keeps its purposes"
+    );
+}

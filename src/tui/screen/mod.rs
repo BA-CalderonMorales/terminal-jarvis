@@ -21,8 +21,14 @@ mod paint;
 #[path = "logic/palettes.rs"]
 mod palettes;
 
+#[path = "logic/roles.rs"]
+mod roles;
+
 #[path = "logic/theme.rs"]
 mod theme;
+
+#[path = "logic/view.rs"]
+mod view;
 
 #[path = "logic/sanitize.rs"]
 mod sanitize;
@@ -34,12 +40,15 @@ mod scroll;
 mod index;
 
 pub use art::{tagline, welcome};
-pub use canvas::visible_width;
+pub use canvas::{clip_line, fit, visible_width};
 pub use index::{
     accent, accent2, active, active_theme, apply_theme, boot, cycle_theme, dim, ensure_usable,
     resume, size, suspend, theme_names, Session,
 };
 pub use paint::{frame, parked, Draft};
+pub use roles::Role;
 pub use sanitize::{is_plain, keep_color};
 pub use scroll::{badge, clamp, max_offset, step, window};
 pub use structs::Size;
+pub use theme::paint;
+pub use view::{block_width, chip, pair, section};

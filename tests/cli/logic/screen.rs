@@ -10,6 +10,8 @@ impl Screen {
         self.rows.iter().map(|row| row.iter().collect()).collect()
     }
 
+    // Only the unix PTY oracle reads a rendered screen back out.
+    #[cfg(unix)]
     pub fn displayed(&self) -> String {
         self.lines().join("\n")
     }
@@ -22,7 +24,6 @@ impl Screen {
         self.lines().iter().all(|line| !line.contains(needle))
     }
 }
-
 pub fn render(bytes: &[u8]) -> Screen {
     let mut screen = Screen::default();
     let chars: Vec<char> = String::from_utf8_lossy(bytes).chars().collect();
@@ -64,7 +65,7 @@ fn escape(screen: &mut Screen, chars: &[char], start: usize) -> usize {
     if start + 1 < chars.len() && chars[start + 1] == '[' {
         let mut index = start + 2;
         while index < chars.len() && !matches!(chars[index], '@'..='~') {
-            index += 1; // skip the parameter run
+            index += 1;
         }
         let params: String = chars[start + 2..index].iter().collect();
         if index < chars.len() {
@@ -94,7 +95,6 @@ fn apply(screen: &mut Screen, params: &str, final_: char) {
         _ => {}
     }
 }
-
 #[cfg(test)]
 #[path = "screen_self.rs"]
 mod self_tests;

@@ -45,7 +45,11 @@ fn frame(
     match &outcome {
         Ok((_, body)) if !body.is_empty() => {
             let _ = out.write_all(body.as_bytes());
-            let _ = out.write_all(b"\n");
+            // Only close a line that is still open: an unconditional newline
+            // adds a blank body row and the centered frame jumps.
+            if !body.ends_with('\n') {
+                let _ = out.write_all(b"\n");
+            }
         }
         Err(message) => {
             let _ = writeln!(out, "{}", style::error(message));

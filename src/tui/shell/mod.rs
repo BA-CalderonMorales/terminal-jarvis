@@ -8,7 +8,7 @@ mod converse;
 mod converse_live;
 mod dispatch;
 mod handle;
-mod help;
+pub(crate) mod help;
 mod live_nav;
 mod outcome;
 mod run_action;
@@ -18,6 +18,7 @@ mod status;
 mod stream;
 mod stream_finish;
 mod stream_plan;
+mod stream_rows;
 mod verdict;
 mod viewport;
 mod viewport_nav;
@@ -25,12 +26,11 @@ mod viewport_page;
 mod viewport_raw;
 
 pub use handle::handle;
-
 pub fn run(harnesses: &[Harness], catalog_root: &Path, state_home: &Path, options: args::Options) {
     let debug = false;
     let indicator = super::input::Indicator {
         active: "none".into(),
-        debug: false,
+        debug,
     };
     let viewport = super::screen::boot();
     let in_viewport = viewport.is_some();
@@ -44,6 +44,7 @@ pub fn run(harnesses: &[Harness], catalog_root: &Path, state_home: &Path, option
             history: Vec::new(),
             body: viewport::welcome(harnesses, catalog_root, state_home),
             hint: status::modeline(state_home, false, debug),
+            bottom: false,
             options,
             debug,
             indicator,
@@ -66,6 +67,7 @@ pub fn run(harnesses: &[Harness], catalog_root: &Path, state_home: &Path, option
                     &state.body,
                     &state.history,
                     &mut state.offset,
+                    state.bottom,
                 )
             } else {
                 super::input::read_line(&state.indicator, &state.hint)

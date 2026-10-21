@@ -20,7 +20,7 @@ pub fn run_command_text(plan: &CapabilityPlan, extra: &[String]) -> io::Result<(
         command.stdout(Stdio::inherit()).stderr(Stdio::inherit());
     }
     #[cfg(unix)]
-    reset_sigint_in_child(&mut command);
+    harden_child(&mut command);
     if !tui_capture {
         return command
             .status()
@@ -39,11 +39,17 @@ pub fn run_command_text(plan: &CapabilityPlan, extra: &[String]) -> io::Result<(
 }
 
 #[cfg(unix)]
-pub(crate) fn reset_sigint_in_child(command: &mut Command) {
+/// Prepares a piped child: the default SIGINT, so a Ctrl+C is never inherited
+/// from the tui's handler, and a new session, so the child has no controlling
+/// terminal. An installer that reads `/dev/tty` (hermes does) can then not
+/// reach past our pipes and prompt over the frame -- it fails closed instead.
+pub(crate) fn harden_child(command: &mut Command) {
     use std::os::unix::process::CommandExt;
     unsafe {
         command.pre_exec(|| {
             signal(SIGINT, SIG_DFL);
+            // Fails when the child already leads a group; it is detached then.
+            let _ = setsid();
             Ok(())
         });
     }
@@ -52,6 +58,7 @@ pub(crate) fn reset_sigint_in_child(command: &mut Command) {
 #[cfg(unix)]
 extern "C" {
     fn signal(signum: i32, handler: usize) -> usize;
+    fn setsid() -> i32;
 }
 
 #[cfg(unix)]

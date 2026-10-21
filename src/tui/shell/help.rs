@@ -1,30 +1,22 @@
 //! The tui's own command table. Headless-only flags (`--plain`, `--json`,
 //! `--no-input`, ...) and bare-invocation rows that cannot be typed here are
 //! omitted; the headless `terminal-jarvis help` keeps the full grammar. The
-//! security line anchors what the gate actually guards in this surface.
+//! security line anchors what the gate actually guards in this surface, and
+//! a narrow viewport drops the purpose column instead of clipping it.
 
-use crate::cli::style;
+use crate::tui::screen::{paint, section, Role};
 
-pub fn text() -> String {
+pub fn text(inner: usize) -> String {
     let rows = [
-        ("list", "numbered picker of every harness"),
-        ("show <harness>", "details and readiness of one harness"),
-        (
-            "plan [harness] <cap>",
-            "preview a command without running it",
-        ),
+        ("list", "numbered fleet picker"),
+        ("show <harness>", "one harness in detail"),
+        ("plan [harness] <cap>", "preview, don't run"),
         (
             "use <harness> | <number> | <name>",
             "switch the active harness",
         ),
-        (
-            "run <harness> [args]",
-            "open the harness ui in a framed session",
-        ),
-        (
-            "install <harness>",
-            "install with the security gate in front",
-        ),
+        ("run <harness> [args]", "open the harness ui"),
+        ("install <harness>", "install behind the security gate"),
         ("uninstall <harness>", "remove a harness and its binary"),
         ("update <harness>", "update through the same gate"),
         (
@@ -35,32 +27,43 @@ pub fn text() -> String {
             "auth | config | cache | security",
             "inspect local setup and posture",
         ),
-        (
-            "/debug [on|off]",
-            "see the raw, verbose view behind the clean one",
-        ),
+        ("/debug [on|off]", "raw, verbose view"),
         (
             "converse <turns> <a> <b> <topic...>",
-            "two agents talk in a tab (1..=12 turns; experimental)",
+            "two agents talk (1..=12 turns)",
         ),
         ("home | clear", "reset the frame"),
         ("exit | quit", "leave without state changes"),
     ];
-    let mut body = String::from("Commands\n");
+    let cmd_w = rows
+        .iter()
+        .map(|(command, _)| command.chars().count())
+        .max()
+        .unwrap_or(0);
+    let purpose_w = rows
+        .iter()
+        .map(|(_, purpose)| purpose.chars().count())
+        .max()
+        .unwrap_or(0);
+    let wide = inner >= 2 + cmd_w + 2 + purpose_w;
+    let width = if wide {
+        2 + cmd_w + 2 + purpose_w
+    } else {
+        2 + cmd_w
+    };
+    let mut body = format!("{}\n", section("Commands", Role::Accent, width));
     for (command, purpose) in rows {
-        body.push_str(&format!(
-            "  {}  {}\n",
-            style::heading(&format!("{command:<32}")),
-            purpose
-        ));
+        if wide {
+            body.push_str(&format!(
+                "  {}  {}\n",
+                paint(Role::Label, &format!("{command:<cmd_w$}")),
+                paint(Role::Value, purpose)
+            ));
+        } else {
+            body.push_str(&format!("  {}\n", paint(Role::Label, command)));
+        }
     }
-    body.push_str(&format!(
-        "  {}\n",
-        style::heading(&format!("{:<32}", "empty line"))
-    ));
-    body.push_str(&format!(
-        "  {}\n",
-        style::dim("  every install and run is checked by the enabled Trivy gate")
-    ));
+    let footer = "installs and runs pass the Trivy gate";
+    body.push_str(&format!("  {}\n", paint(Role::Dim, footer)));
     body
 }

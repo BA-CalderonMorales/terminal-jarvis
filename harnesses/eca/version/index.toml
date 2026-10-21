@@ -1,12 +1,12 @@
 summary = "Print or verify the installed ECA version."
-command = "sh"
-args = ["-c", "eca --version"]
+command = "eca"
+args = ["--version"]
 support = "expected"
 evidence = "deterministic"
 effect = "read-only"
 network = false
 interaction = "noninteractive"
 platforms = []
-executable = "sh"
+executable = "eca"
 source = "internal:phase-01@fab5848"
 verified_at = "2026-08-05T00:00:00Z"

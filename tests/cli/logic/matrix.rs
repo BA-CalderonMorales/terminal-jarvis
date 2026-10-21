@@ -1,4 +1,5 @@
 pub use crate::logic::assert::{assert_json_document, assert_width, text};
+#[cfg(unix)]
 use crate::logic::child;
 #[cfg(unix)]
 use crate::logic::pty;
@@ -73,6 +74,9 @@ impl Fixture {
         self.command().args(args).output().expect("CLI runs")
     }
 
+    // A fixture child is a `sh` script (unix execute bit), so it is only
+    // available on the unix test harness.
+    #[cfg(unix)]
     pub fn child(&self, executable: bool) -> PathBuf {
         child::write(&self.bin, executable)
     }

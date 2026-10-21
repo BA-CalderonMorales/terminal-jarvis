@@ -5,7 +5,7 @@ use super::welcome;
 
 #[test]
 fn welcome_greets_then_teaches_the_commands() {
-    let lines = welcome("codex", 3, 25);
+    let lines = welcome("codex", 3, 25, 80);
     assert!(lines.len() <= 14, "primer must fit small viewports");
     let joined = lines.join("\n");
     // The greeting carries the live fleet state truthfully.

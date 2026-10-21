@@ -84,7 +84,7 @@ fn an_interrupted_scan_can_be_skipped_and_the_install_proceeds() {
         &[
             (
                 b"",
-                Some(b"Continue with download:fixture? [y/N]".as_slice()),
+                Some(b"Continue with download:fixture? [Y/n]".as_slice()),
             ),
             (b"y\n", None),
             (

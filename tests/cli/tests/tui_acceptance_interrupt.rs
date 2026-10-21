@@ -37,7 +37,6 @@ fn a_stuck_scanner_dies_fast_on_ctrl_c_and_the_run_continues_on_skip() {
             (b"", Some(FRAME)),
             (b"/debug on\n", None),
             (b"run fixture ui\n", Some(b"debug view on".as_slice())),
-            (b"y\n", Some(b"Continue with ui:fixture? [y/N]".as_slice())),
             (b"", Some(b"running security gate".as_slice())),
             (b"\x03", None),
             (
@@ -83,7 +82,6 @@ fn a_slow_but_finishing_scan_redraws_a_patient_heartbeat_and_passes() {
         &[
             (b"", Some(FRAME)),
             (b"run fixture ui\n", None),
-            (b"y\n", Some(b"Continue with ui:fixture? [y/N]".as_slice())),
             (b"", Some(b"security scan (acceptance) ...".as_slice())),
             (b"", Some(b"can take a minute or more".as_slice())),
             (b"", Some(b"security scan (acceptance): passed".as_slice())),

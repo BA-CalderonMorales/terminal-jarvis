@@ -1,6 +1,8 @@
 //! Input: the prompt widget surface. `Indicator` renders the context
 //! prefix; the line readers live in `logic/`.
 
+#[path = "logic/ask.rs"]
+mod ask;
 #[path = "logic/drain.rs"]
 pub(crate) mod drain;
 #[path = "logic/editor.rs"]
@@ -13,9 +15,14 @@ pub(crate) mod keys;
 mod line;
 #[path = "logic/poll.rs"]
 pub(crate) mod poll;
+#[path = "logic/raw_stdin.rs"]
+pub(crate) mod raw_stdin;
+#[path = "logic/readiness.rs"]
+pub(crate) mod readiness;
 #[path = "structs/mod.rs"]
 mod structs;
 
+pub use ask::{prompt_for, show as ask};
 pub(crate) use drain::drain_answer;
 pub use editor::{Editor, Feed, Move};
 #[cfg(test)]
@@ -23,6 +30,7 @@ pub(crate) use keys::decode;
 pub use keys::read_key;
 pub use line::{compose, raw_line, read_line, retire};
 pub(crate) use poll::spawn_watcher;
+pub use readiness::cancel_requested;
 pub use structs::Key;
 
 use crate::cli::style;

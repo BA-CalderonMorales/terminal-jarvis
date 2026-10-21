@@ -1,8 +1,7 @@
 //! Sigint: scoped SIGINT handling. While a guarded action runs, children
 //! keep SIG_DFL (an agent dies on Ctrl+C; the shell survives; a stuck gate
 //! scanner is SIGKILLed outright). Idle Ctrl+C wipes the echoed `^C` and
-//! reprints the prompt prefix -- suppressed in viewport mode, which owns
-//! its frame. Std-only libc FFI.
+//! reprints the prompt prefix, suppressed in viewport mode. Std-only FFI.
 use std::sync::atomic::{AtomicBool, AtomicPtr, AtomicUsize, Ordering};
 
 static CHILD_RUNNING: AtomicBool = AtomicBool::new(false);
@@ -22,6 +21,7 @@ pub fn guarded<T>(body: impl FnOnce() -> T) -> T {
         ANSI.store(super::term::ansi_enabled(), Ordering::Relaxed);
         set_sigint(refresh as *const () as usize);
     }
+    let _resize = super::resize::watch(); // repaint on resize, not on the next key
     let result = body();
     #[cfg(unix)]
     set_sigint(SIG_DFL);

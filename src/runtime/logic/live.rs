@@ -43,6 +43,12 @@ impl Running {
     pub fn wait(&mut self) -> i32 {
         status_code(self.child.wait().expect("child status"))
     }
+
+    /// Kills the child outright: the cancel path must not wait for a polite
+    /// shutdown the child may never take.
+    pub fn kill(&mut self) {
+        let _ = self.child.kill();
+    }
 }
 
 /// Spawns the plan fully piped (stdin null, so headless runs never prompt)
@@ -58,7 +64,7 @@ pub fn spawn(plan: &CapabilityPlan, extra: &[String]) -> io::Result<Running> {
     // Unix-only: the SIGINT reset does not exist on Windows (see runner.rs);
     // the spawned child inherits the parent's handler there.
     #[cfg(unix)]
-    super::runner::reset_sigint_in_child(&mut command);
+    super::runner::harden_child(&mut command);
     let mut child = command.spawn()?;
     let (tx, rx) = mpsc::channel::<Line>();
     for lines in child
