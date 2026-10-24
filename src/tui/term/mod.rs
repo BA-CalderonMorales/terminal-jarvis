@@ -49,6 +49,12 @@ pub fn clear_screen() -> String {
     "\x1b[2J\x1b[H".to_string()
 }
 
+/// Sets the terminal title (OSC 2), so the window and the tab name what is
+/// running instead of the shell that launched it.
+pub fn set_title(title: &str) -> String {
+    format!("\x1b]2;{title}\x07")
+}
+
 /// Terminal columns: real geometry from the tty when available (TIOCGWINSZ
 /// via the same raw-FFI pattern as the pty harnesses), then the COLUMNS env
 /// fallback, then 100. Std-only -- no libc crate.

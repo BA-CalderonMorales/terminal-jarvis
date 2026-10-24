@@ -39,6 +39,26 @@ it, and anything future work must respect.
 
 ## Records
 
+### Name the terminal window after the product (fix/terminal-title-from-develop -> 2026-10-24)
+
+**Decision:** The tui sets the terminal title (OSC 2) when the viewport takes
+the terminal, so the window and the tab say `terminal-jarvis` instead of the
+shell that launched it.
+
+**Context:** Nothing set a title, so the window read `foot` -- the terminal
+that hosted the tui, not the product the user launched. The README recording
+shows it plainly: the demo window is labelled with the shell.
+
+**Considered:** Renaming the terminal's process (a `tj` symlink, a different
+shell) changes the user's environment to fix a cosmetic detail, and it only
+works for the people who do it. Setting the title is what a terminal
+application does for itself, and the next program to set one replaces it.
+
+**Consequence:** The window and the tab name the tool. `term::set_title` joins
+the other control sequences in that module, and the viewport boot -- the one
+place that takes the terminal -- is where it is emitted, so it appears only
+where the rest of the control codes do.
+
 ### Close the mutation gaps the nightly found, and re-anchor the exclusion that drifted (fix/mutation-gaps-from-develop -> 2026-10-24)
 
 Recorded in [mutation-gaps-2026-10-24.md](mutation-gaps-2026-10-24.md): the
