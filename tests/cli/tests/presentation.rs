@@ -59,6 +59,16 @@ fn default_output_is_structured_across_the_core_read_only_surface() {
             assert!(!body.contains('+'), "show is line-based: {body}");
             continue;
         }
+        if args[0] == "plan" {
+            // A plan is a card of facts and a command, not a table inside a
+            // card: the tui and the terminal read the same lines.
+            let plan = tj(args, &home);
+            let body = stdout(&plan);
+            assert!(body.contains(title), "{body}");
+            assert!(!body.contains('+'), "plan is line-based: {body}");
+            assert!(body.contains("the command"), "{body}");
+            continue;
+        }
         assert_table(&tj(args, &home), title);
     }
     // gate screens share the show human-line style: fields, never tables.
