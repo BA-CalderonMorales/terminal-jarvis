@@ -1,12 +1,14 @@
-//! Show: the harness detail surface. Human lines for the rich tui/body
-//! (centered+dimmed by the paint pass), key=value for --plain.
+//! Show: the harness detail surface. The rich card is grouped -- the facts,
+//! the support, then what the harness can do -- so a card reads as sections
+//! instead of one wall of peers. `--plain` keeps the key=value contract.
 
+use super::super::value_block;
 use super::super::{output_fields as fields, style};
-use crate::cli::logic::output_truth;
+use crate::cli::structs::value_block::{Group, Row};
 use crate::contracts::Harness;
 
-/// Human support counts: every contract state, non-zero only, fixed order.
-pub(crate) fn support_counts(harness: &Harness) -> String {
+/// One row per support state that occurs, in a fixed order.
+fn support_rows(harness: &Harness) -> Vec<Row> {
     use crate::contracts::SupportState;
     let order = [
         SupportState::Verified,
@@ -28,10 +30,19 @@ pub(crate) fn support_counts(harness: &Harness) -> String {
     counts
         .iter()
         .filter(|(_, count)| *count > 0)
-        .map(|(state, count)| format!("{count} {}", state.as_str()))
-        .collect::<Vec<_>>()
-        .join(" · ")
+        .map(|(state, count)| Row::new(state.as_str(), count.to_string()))
+        .collect()
 }
+
+/// One row per capability, under the capability's own name.
+fn capability_rows(harness: &Harness) -> Vec<Row> {
+    harness
+        .capabilities
+        .iter()
+        .map(|plan| Row::new(&plan.capability.to_string(), plan.summary.clone()))
+        .collect()
+}
+
 pub fn show(harness: &Harness) -> String {
     if style::plain() {
         let mut out = format!(
@@ -41,27 +52,30 @@ pub fn show(harness: &Harness) -> String {
             harness.description,
             harness.binary,
             harness.setup_hint(),
-            output_truth::support_summary(harness)
+            crate::cli::logic::output_truth::support_summary(harness)
         );
         for plan in &harness.capabilities {
-            out.push_str(&output_truth::plain_capability(plan));
+            out.push_str(&crate::cli::logic::output_truth::plain_capability(plan));
         }
         return out;
     }
-    // Rich: identity line, wrapped description, then label/value fields.
     let width = fields::width();
     let mut lines = vec![format!("{} ({})", harness.display, harness.name)];
     lines.extend(fields::section(String::new(), &harness.description, width));
     lines.push(String::new());
-    lines.extend(fields::field("binary", &harness.binary, width));
-    lines.extend(fields::field("setup", &harness.setup_hint(), width));
-    lines.extend(fields::field("support", &support_counts(harness), width));
-    for plan in &harness.capabilities {
-        lines.extend(fields::section(
-            format!("  {:<10} ", plan.capability.to_string()),
-            &plan.summary,
-            width,
-        ));
-    }
+    lines.extend(value_block::card(
+        &[
+            Group::new(
+                "the facts",
+                vec![
+                    Row::new("binary", &harness.binary),
+                    Row::new("setup", harness.setup_hint()),
+                ],
+            ),
+            Group::new("the support", support_rows(harness)),
+            Group::new("what it can do", capability_rows(harness)),
+        ],
+        width,
+    ));
     lines.join("\n")
 }

@@ -1,4 +1,5 @@
 use super::output_truth;
+use crate::cli::structs::value_block::{Group, Row};
 use crate::contracts::{CapabilityPlan, CommandPlan, Effect, Harness};
 
 pub fn plain(harness: &Harness, plan: &CapabilityPlan, command: &CommandPlan) -> String {
@@ -20,23 +21,31 @@ pub fn plain(harness: &Harness, plan: &CapabilityPlan, command: &CommandPlan) ->
     )
 }
 
-pub fn fields(
-    harness: &Harness,
-    plan: &CapabilityPlan,
-    command: &CommandPlan,
-) -> Vec<(&'static str, String)> {
+/// The plan as a card: the facts about the capability, then the command that
+/// would run it.
+pub fn groups(harness: &Harness, plan: &CapabilityPlan, command: &CommandPlan) -> Vec<Group> {
     vec![
-        ("SUMMARY", plan.summary.clone()),
-        ("SUPPORT", plan.support.as_str().to_string()),
-        ("EVIDENCE", plan.evidence.as_str().to_string()),
-        ("EFFECT", output_truth::effect(plan)),
-        ("PLATFORMS", output_truth::platforms(plan)),
-        ("EXECUTABLE", plan.executable.clone()),
-        ("SOURCE", plan.source.clone()),
-        ("VERIFIED AT", output_truth::freshness(plan)),
-        ("COMMAND", command.render()),
-        ("ENVIRONMENT", harness.setup_hint()),
-        ("INTENT", intent(harness, plan)),
+        Group::new(
+            "the facts",
+            vec![
+                Row::new("summary", plan.summary.clone()),
+                Row::new("support", plan.support.as_str()),
+                Row::new("evidence", plan.evidence.as_str()),
+                Row::new("effect", output_truth::effect(plan)),
+                Row::new("platforms", output_truth::platforms(plan)),
+                Row::new("executable", plan.executable.clone()),
+                Row::new("source", plan.source.clone()),
+                Row::new("verified", output_truth::freshness(plan)),
+            ],
+        ),
+        Group::new(
+            "the command",
+            vec![
+                Row::new("command", command.render()),
+                Row::new("environment", harness.setup_hint()),
+                Row::new("intent", intent(harness, plan)),
+            ],
+        ),
     ]
 }
 

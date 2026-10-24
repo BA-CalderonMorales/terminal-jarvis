@@ -1,6 +1,7 @@
 mod args;
 mod auth_cache;
 mod boundary;
+mod card_golden;
 mod catalog_fallback;
 mod child_argv;
 mod compat_surface;

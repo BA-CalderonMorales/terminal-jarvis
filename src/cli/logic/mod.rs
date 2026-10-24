@@ -38,6 +38,7 @@ pub mod style;
 pub(crate) mod table;
 pub(crate) mod text_wrap;
 pub(crate) mod uninstall;
+pub(crate) mod value_block;
 pub(crate) mod version;
 
 #[cfg(test)]

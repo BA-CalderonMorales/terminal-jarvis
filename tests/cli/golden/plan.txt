@@ -2,22 +2,22 @@
 
 
 
-     Plan: fixture headless
-     +-------------+----------------------------------------------------+
-     | FIELD       | VALUE                                              |
-     +-------------+----------------------------------------------------+
-     | SUMMARY     | Disposable fixture capability                      |
-     | SUPPORT     | expected                                           |
-     | EVIDENCE    | deterministic                                      |
-     | EFFECT      | read-only network=false interaction=noninteractive |
-     | PLATFORMS   | linux-x64-gnu                                      |
-     | EXECUTABLE  | fixture-child                                      |
-     | SOURCE      | internal:test                                      |
-     | VERIFIED AT | 2026-07-17T00:00:00Z (fresh)                       |
-     | COMMAND     | fixture-child                                      |
-     | ENVIRONMENT | no API key required                                |
-     | INTENT      | none                                               |
-     +-------------+----------------------------------------------------+
+      Plan: fixture headless
+        the facts
+          summary    Disposable fixture capability
+          support    expected
+          evidence   deterministic
+          effect     read-only network=false interaction=noninteractive
+          platforms  linux-x64-gnu
+          executable fixture-child
+          source     internal:test
+          verified   2026-07-17T00:00:00Z (fresh)
+
+        the command
+          command     fixture-child
+          environment no API key required
+          intent      none
+
 
 
 
