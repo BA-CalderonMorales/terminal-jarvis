@@ -20,6 +20,11 @@ fn without_color_env<T>(test: impl FnOnce() -> T) -> T {
 }
 
 #[test]
+fn the_title_is_set_with_an_osc_two_sequence() {
+    assert_eq!(set_title("terminal-jarvis"), "\x1b]2;terminal-jarvis\x07");
+}
+
+#[test]
 fn ansi_is_gated_on_a_color_capable_terminal() {
     without_color_env(|| {
         assert!(ansi_enabled_for(true));
