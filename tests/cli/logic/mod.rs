@@ -3,6 +3,7 @@ pub mod child;
 pub mod cli_driver;
 #[cfg(unix)]
 pub mod frames;
+pub mod golden;
 pub mod matrix;
 pub mod platform;
 #[cfg(unix)]

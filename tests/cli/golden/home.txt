@@ -1,0 +1,24 @@
+  Terminal Jarvis · ACTIVE fixture · READY 1/1 ready  context command center
+
+
+
+
+                   Welcome back -- fixture is at the helm.
+
+          1 of 1 harnesses are ready; the rest are one install away.
+          commands ─────────────────────────────────────────
+            home              the command center
+            status            readiness dashboard
+            list              numbered fleet picker
+            <number|harness>  instant switch
+            plan <h> <cap>    preview before running
+            install <h>       add a harness to the fleet
+            uninstall <h>     remove a harness and its binary
+            show <h>          harness details
+            debug             raw view · help full table
+            exit              leave the command center
+
+
+
+
+[>_]::[tj:<version>]::[harness:fixture]:

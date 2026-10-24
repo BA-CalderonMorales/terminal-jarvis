@@ -1,0 +1,24 @@
+  Terminal Jarvis · ACTIVE fixture · READY 1/1 ready  context command center
+
+
+
+     Plan: fixture headless
+     +-------------+----------------------------------------------------+
+     | FIELD       | VALUE                                              |
+     +-------------+----------------------------------------------------+
+     | SUMMARY     | Disposable fixture capability                      |
+     | SUPPORT     | expected                                           |
+     | EVIDENCE    | deterministic                                      |
+     | EFFECT      | read-only network=false interaction=noninteractive |
+     | PLATFORMS   | linux-x64-gnu                                      |
+     | EXECUTABLE  | fixture-child                                      |
+     | SOURCE      | internal:test                                      |
+     | VERIFIED AT | 2026-07-17T00:00:00Z (fresh)                       |
+     | COMMAND     | fixture-child                                      |
+     | ENVIRONMENT | no API key required                                |
+     | INTENT      | none                                               |
+     +-------------+----------------------------------------------------+
+
+
+
+[>_]::[tj:<version>]::[harness:fixture]:

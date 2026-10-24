@@ -1,0 +1,24 @@
+  Terminal Jarvis · ACTIVE fixture · READY 1/1 ready  context command center
+
+
+
+
+
+
+
+
+                             readiness ─────────
+                             ACTIVE  fixture
+                             READY   1 of 1 ready
+                             ready now ─────────
+                               fixture
+
+
+
+
+
+
+
+
+
+[>_]::[tj:<version>]::[harness:fixture]:
