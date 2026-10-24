@@ -45,3 +45,15 @@ fn pathext_skips_empty_segments() {
         vec!["tool.COM", "tool.EXE", "tool"]
     );
 }
+
+#[test]
+fn candidates_keep_a_bare_name_off_windows() {
+    let mut input = dummy_input();
+    input.platform.os = "linux".into();
+    input.environment.insert("PATHEXT", ".COM;.EXE;");
+    assert_eq!(
+        candidates("tool", &input),
+        vec!["tool"],
+        "off windows a bare name is the only candidate"
+    );
+}

@@ -25,8 +25,23 @@ exclude_re = [
   "resolve\\.rs.*replace executable_mode -> bool with false",
   "distribution\\.rs.*delete ! in channel",
   # The cfg(not(unix)) exit_code variant never compiles on CI runners; the
-  # unix variant is witnessed by the preflight signal tests.
-  "stream\\.rs:12.*replace exit_code -> i32 with",
+  # unix variant is witnessed by the preflight signal tests. The line is that
+  # variant's body, so re-anchor it if the file moves under it.
+  "stream\\.rs:19.*replace exit_code -> i32 with",
+  # session::save renames a staged file over the destination, which replaces it
+  # on unix; the AlreadyExists arm exists for windows, where rename cannot
+  # replace. The arm is unreachable on a CI runner, so its three mutants cannot
+  # be killed here.
+  "session\\.rs:71.*",
+  # bounded_join's grace loop compares the clock against a 500ms deadline; `<`
+  # and `<=` differ only when a child finishes exactly at that boundary, a
+  # race no deterministic test can win, and the joined output is identical
+  # either way.
+  "interrupt\\.rs:53.*",
+  # A gate.toml comment line keeps its '#' in the key, so it can never parse
+  # as the key "enabled"; the filter's `&&` and `||` variants therefore select
+  # the same gate from every real file.
+  "state\\.rs:27.*",
   # run_command_text's capture branch executes only inside the tui (screen
   # active); headless runners take the inherit branch, so its two trim
   # guards and the capture flip are unkillable there. The in-frame capture

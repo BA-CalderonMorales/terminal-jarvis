@@ -39,6 +39,12 @@ it, and anything future work must respect.
 
 ## Records
 
+### Close the mutation gaps the nightly found, and re-anchor the exclusion that drifted (fix/mutation-gaps-from-develop -> 2026-10-24)
+
+Recorded in [mutation-gaps-2026-10-24.md](mutation-gaps-2026-10-24.md): the
+scheduled Mutations run on `main` was red for three nights on ten surviving
+mutants, one of them an exclusion whose line had drifted out of reach.
+
 ### Ship one npm publisher that waits for the registry (release/0.1.22 -> 2026-10-21)
 
 Recorded in
