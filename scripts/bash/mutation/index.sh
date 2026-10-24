@@ -14,9 +14,10 @@ files() {
 }
 
 usage() {
-  echo "usage: scripts/bash/mutation/index.sh <list|run DOMAIN [args...]>"
+  echo "usage: scripts/bash/mutation/index.sh <list|run|exclusions DOMAIN [args...]>"
   echo "DOMAIN: one of the shard keys in constants/shards.txt"
   echo "Partition a domain with --shard 0/4 (zero-based index/total)."
+  echo "exclusions: fail when an exclude_re entry no longer matches a mutant."
 }
 
 case "$cmd" in
@@ -43,6 +44,9 @@ case "$cmd" in
     # native --shard arguments passed through below. No tests are skipped.
     RUST_TEST_THREADS=1 cargo mutants --config mutants.toml \
       --minimum-test-timeout 30 --jobs 1 --no-shuffle $base "$@"
+    ;;
+  exclusions)
+    exec "$here/logic/exclusions.sh" "$@"
     ;;
   -h | --help)
     usage

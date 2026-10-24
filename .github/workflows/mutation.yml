@@ -112,3 +112,22 @@ jobs:
           name: mutation-${{ matrix.domain }}-${{ matrix.part }}
           path: mutants.out/**
           if-no-files-found: ignore
+
+  exclusions:
+    name: Mutation Exclusions
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: dtolnay/rust-toolchain@stable
+
+      - name: Install cargo-mutants
+        run: command -v cargo-mutants >/dev/null || cargo install cargo-mutants --locked
+
+      # An exclude_re entry that matches no mutant hides nothing: the mutant
+      # it was written to suppress is generated and tested again, and the
+      # reason it was excluded is forgotten. The gate is cheap, so it runs
+      # on every pull request rather than only on the nightly.
+      - name: Fail on stale exclusions
+        run: scripts/bash/mutation/index.sh exclusions
