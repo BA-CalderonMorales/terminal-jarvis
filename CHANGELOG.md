@@ -1,4 +1,24 @@
 # Changelog
+## [0.1.23] - 2026-10-24
+
+### Fixed
+
+- The scheduled mutation run no longer fails on ten surviving mutants. The
+  nightly was red on `main` for three nights while every pull request stayed
+  green: a pull request mutates only its own diff and the full suite runs only
+  nightly, so a gap in unchanged code was invisible until the schedule found
+  it. Two of the ten were killable and now are -- the auth note's env-mode
+  comparison and the candidate list's platform guard each have a test that
+  separates the two branches. The rest are paths a linux runner cannot observe
+  (a Windows-only rename arm, a deadline boundary only a race can hit, a
+  comment filter whose two variants parse identically) and are excluded with
+  their reasoning attached. One exclusion had silently stopped matching after
+  the file moved under it; it is re-anchored, and it was the schedule that
+  caught that.
+- The tui names the terminal window. The window and the tab said `foot` -- the
+  terminal that launched the tui -- because nothing set a title, and the README
+  recording shows it. It reads `terminal-jarvis` now.
+
 ## [0.1.22] - 2026-10-21
 
 ### Fixed
