@@ -57,6 +57,26 @@ fn auth_help_and_set_report_distinct_notes() {
 }
 
 #[test]
+fn auth_note_follows_the_harness_env_mode() {
+    let mut optional = harness("opencode");
+    optional.env_mode = EnvMode::Optional;
+    let help = auth(&["help".to_string(), "opencode".to_string()], &[optional]).unwrap();
+    assert!(
+        help.contains("uses its own login flow"),
+        "an optional-env harness has a login of its own: {help}"
+    );
+    let none = auth(
+        &["help".to_string(), "opencode".to_string()],
+        &[harness("opencode")],
+    )
+    .unwrap();
+    assert!(
+        none.contains("export env vars in your shell"),
+        "a harness without optional env vars is told to export them: {none}"
+    );
+}
+
+#[test]
 fn config_routes() {
     let p = std::path::Path::new("/cat");
     let h = std::path::Path::new("/home");
