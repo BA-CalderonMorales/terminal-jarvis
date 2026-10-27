@@ -9,14 +9,15 @@ use std::path::Path;
 /// First-run gate + opener: `Ok` pairs the live session with its opening
 /// bubble body; `Err` shows the warning once and asks for the re-run.
 pub fn open(
-    seed: Option<(usize, String, String, String)>,
+    seed: Option<crate::converse::Seed>,
     state_home: &Path,
     width: usize,
 ) -> Result<(Live, Vec<String>), Vec<String>> {
-    let (turns, a, b, topic) =
+    let (turns, a, b, topic, allow_dangerous) =
         seed.ok_or_else(|| vec!["no conversation is running".to_string()])?;
     if super::consent::seen(state_home) {
-        let live = Live::new(&a, &b, &topic, turns);
+        let mut live = Live::new(&a, &b, &topic, turns);
+        live.allow_dangerous = allow_dangerous;
         let mut lines = render::header(&live.transcript);
         lines.extend(render::turns(&live.transcript, 0, width));
         Ok((live, lines))

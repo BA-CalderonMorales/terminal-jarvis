@@ -18,6 +18,7 @@ pub enum Step {
 
 /// The live conversation: sides, topic, transcript, and remaining budget.
 pub struct Live {
+    pub allow_dangerous: bool,
     pub a: String,
     pub b: String,
     pub topic: String,
@@ -31,6 +32,7 @@ pub struct Live {
 impl Live {
     pub fn new(a: &str, b: &str, topic: &str, turns: usize) -> Self {
         Self {
+            allow_dangerous: false,
             a: a.to_string(),
             b: b.to_string(),
             topic: topic.to_string(),

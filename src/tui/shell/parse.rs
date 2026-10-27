@@ -1,7 +1,3 @@
-//! Slash-command and selection resolution for the shell: every line maps
-//! onto the same Action grammar the headless cli parses, options included
-//! (`--no-input`, `--confirm=...` typed in-frame reach the same guards).
-
 use crate::{cli::args, contracts::Harness};
 pub enum Resolved {
     Empty,
@@ -11,7 +7,7 @@ pub enum Resolved {
     Run(args::Action, args::Options),
     Debug(Option<bool>),
     Theme(Option<String>),
-    Converse(Option<(usize, String, String, String)>),
+    Converse(Option<crate::converse::Seed>),
     Error(String),
 }
 
@@ -24,7 +20,7 @@ pub enum Next {
         reset: bool,
     },
     Debug(Option<bool>),
-    Converse(Option<(usize, String, String, String)>),
+    Converse(Option<crate::converse::Seed>),
     /// A streaming action plus its typed options (session-overlaid).
     Stream {
         action: args::Action,
@@ -45,9 +41,13 @@ pub fn resolve(input: &str, harnesses: &[Harness]) -> Resolved {
         rest if rest == "converse" || rest.starts_with("converse ") => {
             return match crate::converse::parse(rest, harnesses) {
                 crate::converse::Parsed::Continue => Resolved::Converse(None),
-                crate::converse::Parsed::Start { turns, a, b, topic } => {
-                    Resolved::Converse(Some((turns, a, b, topic)))
-                }
+                crate::converse::Parsed::Start {
+                    turns,
+                    a,
+                    b,
+                    topic,
+                    allow_dangerous,
+                } => Resolved::Converse(Some((turns, a, b, topic, allow_dangerous))),
                 crate::converse::Parsed::Error(message) => Resolved::Error(message),
             };
         }

@@ -1,9 +1,3 @@
-//! Converse: two coding harnesses talking to each other in a tui tab. Each
-//! turn is one one-shot headless invocation (`opencode run`, `hermes -z`),
-//! captured and painted into the frame between turns so the exchange is
-//! watchable and Ctrl-C always stops the current child, never the session
-//! scaffold. The token bill is explicit: a fixed turn cap per conversation.
-
 #[path = "logic/consent.rs"]
 pub mod consent;
 
@@ -30,14 +24,13 @@ pub use prompt::{reply, seed, WORD_CAP};
 pub use session::{advance, Live, Step};
 pub use transcript::Transcript;
 
-/// The hard turn cap per conversation, so the token bill stays bounded.
 pub const MAX_TURNS: usize = 12;
 
-/// The `converse` grammar: bare, or `<turns> <a> <b> <topic...>` to start.
 pub enum Parsed {
     Continue,
     Start {
         turns: usize,
+        allow_dangerous: bool,
         a: String,
         b: String,
         topic: String,
@@ -46,7 +39,11 @@ pub enum Parsed {
 }
 
 pub fn parse(input: &str, harnesses: &[Harness]) -> Parsed {
-    let words: Vec<&str> = input.split_whitespace().skip(1).collect();
+    let mut words: Vec<&str> = input.split_whitespace().skip(1).collect();
+    let allow_dangerous = words.first() == Some(&"--allow-dangerous");
+    if allow_dangerous {
+        words.remove(0);
+    }
     match words.as_slice() {
         [] => Parsed::Continue,
         [turns, a, b, topic @ ..] if !topic.is_empty() => match turns.parse::<usize>() {
@@ -58,6 +55,7 @@ pub fn parse(input: &str, harnesses: &[Harness]) -> Parsed {
                 }
                 Parsed::Start {
                     turns,
+                    allow_dangerous,
                     a: (*a).to_string(),
                     b: (*b).to_string(),
                     topic: topic.join(" "),
@@ -65,7 +63,7 @@ pub fn parse(input: &str, harnesses: &[Harness]) -> Parsed {
             }
             _ => Parsed::Error(format!("converse turns must be 1..={MAX_TURNS}")),
         },
-        _ => Parsed::Error("converse <turns> <a> <b> <topic...>".to_string()),
+        _ => Parsed::Error("converse [--allow-dangerous] <turns> <a> <b> <topic...>".to_string()),
     }
 }
 
@@ -77,8 +75,6 @@ mod session_tests;
 #[path = "tests/bubble.rs"]
 mod bubble_tests;
 
-/// Seed-time validation: the harness must exist and expose a real (non-stub)
-/// headless plan, or the conversation cannot hold both sides up.
 pub fn headless_ready(harnesses: &[Harness], name: &str) -> Result<(), String> {
     let Some(harness) = harnesses.iter().find(|harness| harness.name == name) else {
         return Err(format!(
@@ -95,3 +91,6 @@ pub fn headless_ready(harnesses: &[Harness], name: &str) -> Result<(), String> {
     }
     Ok(())
 }
+
+/// A bounded conversation request, including its explicit dangerous opt-in.
+pub type Seed = (usize, String, String, String, bool);
