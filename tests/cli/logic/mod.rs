@@ -11,6 +11,8 @@ pub mod pty;
 // pty_io is the PTY reader owned by `pty`; both are unix-only, so the helper
 // is scoped the same way rather than left dead on Windows.
 #[cfg(unix)]
+mod pty_child;
+#[cfg(unix)]
 mod pty_io;
 pub mod screen;
 pub mod tui;

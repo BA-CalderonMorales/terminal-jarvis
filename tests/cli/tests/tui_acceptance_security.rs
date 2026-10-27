@@ -47,7 +47,7 @@ fn debug_toggle_restores_the_verbose_view_on_demand() {
     let _serial = SERIAL.lock().unwrap_or_else(|error| error.into_inner());
     let fixture = booted();
     let (_, bytes) = pty::run_pty_probe(
-        launch(&fixture, &[]),
+        launch(&fixture, &[("TJ_DEBUG_SIZE", "80x2")]),
         &[
             (b"", Some(FRAME)),
             (b"/debug on\n", None),

@@ -1,3 +1,4 @@
+use super::pty_child::SessionChild;
 use super::pty_io::{drain, wait_until};
 use std::ffi::CStr;
 use std::fs::{File, OpenOptions};
@@ -6,7 +7,6 @@ use std::os::fd::FromRawFd;
 use std::os::unix::process::CommandExt;
 use std::process::{Command, ExitStatus, Stdio};
 use std::sync::{Arc, Mutex};
-
 unsafe extern "C" {
     fn posix_openpt(flags: i32) -> i32;
     fn grantpt(fd: i32) -> i32;
@@ -15,7 +15,6 @@ unsafe extern "C" {
     fn setsid() -> i32;
     fn ioctl(fd: i32, request: u64, ...) -> i32;
 }
-
 #[repr(C)]
 #[derive(Default, Clone, Copy)]
 struct Winsize {
@@ -52,21 +51,23 @@ pub fn run_pty_probe(
         .stdin(Stdio::from(slave.try_clone().unwrap()))
         .stdout(Stdio::from(slave.try_clone().unwrap()))
         .stderr(Stdio::from(slave));
-    let mut child = command.spawn().expect("CLI starts in pseudo-terminal");
+    let child = command.spawn().expect("CLI starts in pseudo-terminal");
+    let mut child = SessionChild::new(child);
     drop(command);
     let bytes = Arc::new(Mutex::new(Vec::new()));
     let mut writer = master.try_clone().expect("pseudo-terminal writer clones");
     let reader_bytes = bytes.clone();
-    let reader = std::thread::spawn(move || drain(master, reader_bytes));
+    let stop = child.stopped.clone();
+    let reader = std::thread::spawn(move || drain(master, reader_bytes, stop));
     for (input, after) in stages {
         if let Some(marker) = after {
-            wait_until(&bytes, marker);
+            wait_until(&bytes, marker, child.deadline);
         }
         let _ = writer.write_all(input);
         std::thread::sleep(std::time::Duration::from_millis(200));
     }
     drop(writer);
-    let status = child.wait().expect("CLI exits in pseudo-terminal");
+    let status = child.wait();
     reader.join().expect("pseudo-terminal reader joins");
     let final_bytes = bytes.lock().unwrap().clone();
     (status, final_bytes)
@@ -79,17 +80,16 @@ fn open_pair() -> (File, File) {
     assert_eq!(unsafe { unlockpt(fd) }, 0, "unlockpt failed");
     // A real size so the viewport boots in the pty; without this the child
     // sees a 0x0 window and every acceptance test silently runs chat mode.
-    // NOTE: 0x5413 is TIOCGWINSZ (the GET); the viewport tests use TJ_DEBUG_SIZE.
     let size = Winsize {
         row: 24,
         col: 80,
         ..Default::default()
     };
     #[cfg(target_os = "linux")]
-    const TIOCSWINSZ: u64 = 0x5413;
+    const TIOCSWINSZ: u64 = 0x5414;
     #[cfg(not(target_os = "linux"))]
     const TIOCSWINSZ: u64 = 0x4008_7474;
-    unsafe { ioctl(fd, TIOCSWINSZ, &size as *const Winsize) };
+    assert_eq!(unsafe { ioctl(fd, TIOCSWINSZ, &size as *const Winsize) }, 0);
     let path = unsafe { CStr::from_ptr(ptsname(fd)) }.to_string_lossy();
     let slave = OpenOptions::new()
         .read(true)
