@@ -16,6 +16,9 @@ pub fn collect(
         redact,
         false,
     );
+    if input.catalog == Path::new(crate::context::EMBEDDED_CATALOG) {
+        catalog = Record::new("state.catalog", Code::Ready, Severity::Info, "embedded");
+    }
     if catalog.code == Code::Ready && input.harnesses.is_empty() {
         catalog.code = Code::Empty;
         catalog.severity = Severity::Error;
@@ -43,7 +46,6 @@ pub fn collect(
         valid,
     )
 }
-
 fn cache(input: &DiagnosticInput, redact: &Redactor<'_>) -> Record {
     let state = input.environment.state("TERMINAL_JARVIS_CACHE");
     if state != ValueState::Present {
@@ -74,7 +76,6 @@ fn cache(input: &DiagnosticInput, redact: &Redactor<'_>) -> Record {
         record
     }
 }
-
 fn path_record(
     key: &str,
     path: &Path,
@@ -87,7 +88,6 @@ fn path_record(
     let code = super::inspect::path(path, kind, input.now, limit);
     Record::new(key, code, severity(code), redact.full(path))
 }
-
 fn severity(code: Code) -> Severity {
     match code {
         Code::Ready => Severity::Info,

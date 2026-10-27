@@ -22,7 +22,9 @@ pub fn load(root: &Path) -> io::Result<Vec<Harness>> {
 }
 
 fn should_use_embedded(root: &Path) -> bool {
-    !catalog_env_set() && root == Path::new("harnesses") && !root.is_dir()
+    !catalog_env_set()
+        && (root == Path::new(crate::context::EMBEDDED_CATALOG)
+            || (root == Path::new("harnesses") && !root.is_dir()))
 }
 
 fn catalog_env_set() -> bool {

@@ -85,14 +85,15 @@ fn catalog_root_uses_explicit_env_path() {
 }
 
 #[test]
-fn catalog_root_finds_repo_catalog() {
+fn catalog_root_uses_bundled_data_without_a_workspace_override() {
     let _guard = ENV_LOCK.lock().unwrap();
     let previous = var_os("TERMINAL_JARVIS_CATALOG");
     remove_var("TERMINAL_JARVIS_CATALOG");
     let root = context::catalog_root();
-    assert!(root.is_absolute());
-    assert!(root.is_dir());
-    assert!(root.ends_with("harnesses"));
+    assert!(
+        root == PathBuf::from(context::EMBEDDED_CATALOG)
+            || (root.is_absolute() && root.ends_with("harnesses"))
+    );
     if let Some(value) = previous {
         set_var("TERMINAL_JARVIS_CATALOG", value);
     }

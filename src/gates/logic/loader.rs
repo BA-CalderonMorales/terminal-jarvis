@@ -16,7 +16,7 @@ pub struct Gate {
 }
 
 pub fn load(root: &Path) -> io::Result<Vec<Gate>> {
-    if !root.is_dir() {
+    if root == Path::new(crate::context::EMBEDDED_GATES) || !root.is_dir() {
         if configured_root() {
             return Err(io::Error::new(
                 io::ErrorKind::NotFound,
