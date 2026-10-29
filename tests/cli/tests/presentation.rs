@@ -1,9 +1,7 @@
 use std::process::{Command, Output};
 use std::sync::atomic::{AtomicUsize, Ordering};
-
 static TEMP_ID: AtomicUsize = AtomicUsize::new(0);
-
-fn home() -> String {
+pub(super) fn home() -> String {
     std::env::temp_dir()
         .join(format!(
             "terminal-jarvis-presentation-{}-{}",
@@ -13,8 +11,7 @@ fn home() -> String {
         .to_string_lossy()
         .to_string()
 }
-
-fn tj(args: &[&str], home: &str) -> Output {
+pub(super) fn tj(args: &[&str], home: &str) -> Output {
     Command::new(env!("CARGO_BIN_EXE_terminal-jarvis"))
         .args(args)
         .env("TERMINAL_JARVIS_HOME", home)
@@ -23,18 +20,15 @@ fn tj(args: &[&str], home: &str) -> Output {
         .output()
         .expect("terminal-jarvis runs")
 }
-
-fn stdout(output: &Output) -> String {
+pub(super) fn stdout(output: &Output) -> String {
     String::from_utf8_lossy(&output.stdout).to_string()
 }
-
-fn assert_table(output: &Output, title: &str) {
+pub(super) fn assert_table(output: &Output, title: &str) {
     assert!(output.status.success(), "{output:?}");
     let body = stdout(output);
     assert!(body.contains(title), "{body}");
     assert!(body.contains('+') && body.contains('|'), "{body}");
 }
-
 #[test]
 fn default_output_is_structured_across_the_core_read_only_surface() {
     let home = home();
@@ -98,13 +92,4 @@ fn rich_mode_handles_selection_and_plain_mode_stays_script_friendly() {
     let no_color = tj(&["--no-color", "list"], &home);
     assert_table(&no_color, "Available Harnesses");
     assert!(!stdout(&no_color).contains('\x1b'));
-}
-
-#[test]
-fn headless_tables_wrap_without_losing_their_frame() {
-    let output = tj(&["security", "audit"], &home());
-    assert_table(&output, "Security Audit");
-    assert!(stdout(&output)
-        .lines()
-        .all(|line| line.chars().count() <= 100));
 }

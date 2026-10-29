@@ -14,6 +14,8 @@ pub mod pty;
 mod pty_child;
 #[cfg(unix)]
 mod pty_io;
+#[cfg(unix)]
+mod pty_tree;
 pub mod screen;
 pub mod tui;
 pub mod width;

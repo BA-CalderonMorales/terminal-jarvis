@@ -1,4 +1,4 @@
-use super::{Group, Row, card};
+use super::{card, Group, Row};
 
 fn group(heading: &str, rows: Vec<Row>) -> Group {
     Group::new(heading, rows)

@@ -1,12 +1,10 @@
 //! Start suspended, assign to a kill-on-close job, then resume its thread.
 //! Assignment precedes execution, so descendants cannot escape that race.
 use super::windows_ffi::*;
+use std::io;
+use std::mem::size_of;
 use std::os::windows::{io::AsRawHandle, process::CommandExt};
-use std::{
-    io,
-    mem::size_of,
-    process::{Child, Command},
-};
+use std::process::{Child, Command};
 pub struct Tree(Handle);
 pub fn spawn(command: &mut Command) -> io::Result<(Child, Tree)> {
     let tree = Tree(unsafe { CreateJobObjectW(std::ptr::null(), std::ptr::null()) });

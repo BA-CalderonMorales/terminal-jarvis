@@ -38,6 +38,9 @@ impl SessionChild {
 
 impl Drop for SessionChild {
     fn drop(&mut self) {
+        if !self.stopped.load(Ordering::Acquire) {
+            super::pty_tree::stop_descendants(self.child.id());
+        }
         unsafe {
             kill(-(self.child.id() as i32), 9);
         }

@@ -14,6 +14,7 @@ unsafe extern "C" {
     fn ptsname(fd: i32) -> *mut std::ffi::c_char;
     fn setsid() -> i32;
     fn ioctl(fd: i32, request: u64, ...) -> i32;
+    fn fcntl(fd: i32, cmd: i32, arg: i32) -> i32;
 }
 #[repr(C)]
 #[derive(Default, Clone, Copy)]
@@ -76,10 +77,9 @@ pub fn run_pty_probe(
 fn open_pair() -> (File, File) {
     let fd = unsafe { posix_openpt(2) };
     assert!(fd >= 0, "posix_openpt failed");
+    assert_eq!(unsafe { fcntl(fd, 2, 1) }, 0); // FD_CLOEXEC
     assert_eq!(unsafe { grantpt(fd) }, 0, "grantpt failed");
     assert_eq!(unsafe { unlockpt(fd) }, 0, "unlockpt failed");
-    // A real size so the viewport boots in the pty; without this the child
-    // sees a 0x0 window and every acceptance test silently runs chat mode.
     let size = Winsize {
         row: 24,
         col: 80,

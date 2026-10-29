@@ -31,7 +31,7 @@ exclude_re = [
   # on unix; the AlreadyExists arm exists for windows, where rename cannot
   # replace. The arm is unreachable on a CI runner, so its three mutants cannot
   # be killed here.
-  "session\\.rs:71.*",
+  "src/context/logic/session\\.rs:68:.*",
   # bounded_join's grace loop compares the clock against a 500ms deadline; `<`
   # and `<=` differ only when a child finishes exactly at that boundary, a
   # race no deterministic test can win, and the joined output is identical

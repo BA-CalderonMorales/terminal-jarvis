@@ -1,5 +1,4 @@
-//! Wire: the tui-side application of the conversation state machine. The
-//! shell loop calls `pending` once per frame; each call runs at most one
+//! Wire: applies conversation state to one rendered turn.
 //! one-shot turn so the frame repaints between every exchange.
 
 use super::render;

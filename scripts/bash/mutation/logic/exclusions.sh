@@ -48,40 +48,7 @@ command -v "${tool%% *}" >/dev/null 2>&1 ||
 # ledger actually uses resolved. An escape the ledger does not use is a
 # hard failure rather than a guess: a pattern the gate reads differently
 # from cargo-mutants is a gate that does not gate.
-patterns=$(awk '
-  /^[[:space:]]*exclude_re[[:space:]]*=/ { collecting = 1 }
-  collecting {
-    line = $0
-    sub(/#.*/, "", line)
-    while (match(line, /"([^"\\]|\\.)*"/)) {
-      raw = substr(line, RSTART, RLENGTH)
-      line = substr(line, RSTART + RLENGTH)
-      body = substr(raw, 2, length(raw) - 2)
-      out = ""
-      index_ = 1
-      while (index_ <= length(body)) {
-        character = substr(body, index_, 1)
-        if (character != "\\") {
-          out = out character
-          index_++
-          continue
-        }
-        escape = substr(body, index_ + 1, 1)
-        if (escape == "\\") {
-          out = out "\\"
-        } else if (escape == "\"") {
-          out = out "\""
-        } else {
-          printf "mutation exclusions: unsupported escape \\%s in %s\n", escape, raw > "/dev/stderr"
-          exit 3
-        }
-        index_ = index_ + 2
-      }
-      print out
-    }
-    if (/^[[:space:]]*\]/) { collecting = 0 }
-  }
-' "$config") || fail "the exclude_re ledger could not be read"
+patterns=$(sh "$here/exclusion-patterns.sh" "$config") || fail "the exclude_re ledger could not be read"
 
 test -n "$patterns" || fail "the exclude_re ledger is empty"
 

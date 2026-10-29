@@ -91,7 +91,7 @@ fn catalog_root_uses_bundled_data_without_a_workspace_override() {
     remove_var("TERMINAL_JARVIS_CATALOG");
     let root = context::catalog_root();
     assert!(
-        root == PathBuf::from(context::EMBEDDED_CATALOG)
+        root == std::path::Path::new(context::EMBEDDED_CATALOG)
             || (root.is_absolute() && root.ends_with("harnesses"))
     );
     if let Some(value) = previous {

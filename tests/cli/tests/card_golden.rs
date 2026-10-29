@@ -1,3 +1,4 @@
+#![cfg(unix)] // The snapshot fixture uses Unix shell scripts.
 //! The headless cards, pinned as text.
 //!
 //! The tui frame and the terminal read the same card, so both are pinned:
