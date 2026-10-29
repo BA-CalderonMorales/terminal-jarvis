@@ -1,4 +1,29 @@
 # Changelog
+## [0.1.24] - 2026-10-29
+
+### Added
+
+- The path picker is now an overlay: arrows move a cursor, typing narrows the
+  fleet live, Enter selects, Esc closes, and digits still jump by picker
+  position while the filter is empty. The frame's status rule always names the
+  active harness, fleet readiness, and gate posture.
+- `--json` for `list`, `show`, and `plan` publishes structured catalog fields
+  beside the rendered text, so a tool can decide from fields.
+- `Tab` completes command and agent names in the prompt, `?` opens help, and
+  the first-use conversation notice is accepted with a bare `Enter` instead of
+  a retyped command.
+
+### Changed
+
+- `?` opens help and `q` leaves from normal mode; a terminal that shrinks below
+  the frame announces the switch to the line prompt instead of changing
+  silently.
+
+### Fixed
+
+- Arrow keys decode again: the escape replay fed the already-consumed `Esc`
+  back into the decoder, so every CSI key arrived as `Ignored`.
+
 ## [0.1.23] - 2026-10-29
 
 ### Fixed
