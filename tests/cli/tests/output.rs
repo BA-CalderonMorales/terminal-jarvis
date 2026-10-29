@@ -35,6 +35,20 @@ fn non_tty_output_modes_and_color_disablers_are_deterministic() {
     assert_eq!(rich(&fixture, None, &["--no-color", "list"]), baseline);
     let json = assert_json_document(&fixture.run(&["--json", "list"]), 0);
     assert!(json.contains("\"command\":\"list\""));
+    assert!(json.contains("\"harnesses\":[{\"name\":\"fixture\""));
+    assert!(json.contains("\"capabilities\":["));
+}
+
+#[test]
+fn json_documents_expose_the_catalog_data_agents_decide_with() {
+    let fixture = Fixture::new(State::Unknown);
+    let plan = assert_json_document(&fixture.run(&["--json", "plan", "fixture", "headless"]), 0);
+    assert!(plan.contains("\"capability\":\"headless\""));
+    assert!(plan.contains("\"command\":["));
+    assert!(plan.contains("\"effect\":"));
+    let show = assert_json_document(&fixture.run(&["--json", "show", "fixture"]), 0);
+    assert!(show.contains("\"harness\":{\"name\":\"fixture\""));
+    assert!(show.contains("\"verified_at\":"));
 }
 
 #[test]
