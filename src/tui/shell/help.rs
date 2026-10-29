@@ -30,7 +30,7 @@ pub fn text(inner: usize) -> String {
         ("/debug [on|off]", "raw, verbose view"),
         (
             "converse <turns> <a> <b> <topic...>",
-            "two agents talk (1..=12 turns)",
+            "two agents talk; dangerous plans need --allow-dangerous",
         ),
         ("home | clear", "reset the frame"),
         ("exit | quit", "leave without state changes"),

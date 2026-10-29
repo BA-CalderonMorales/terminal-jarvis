@@ -1,7 +1,23 @@
 # Changelog
-## [0.1.23] - 2026-10-24
+## [0.1.23] - 2026-10-29
 
 ### Fixed
+
+- Conversation turns now pass the ordinary launch guards and workspace gate.
+  Dangerous turns require `converse --allow-dangerous ...`; state-changing
+  turns confirm before running. Ctrl+C and Esc end the conversation and leave
+  cancellation usable for subsequent commands.
+- Current-directory `harnesses/` and `gates/` no longer replace installed or
+  bundled policy. Set explicit catalog environment overrides for custom data.
+- Freshness uses the runtime UTC date. Stale rows remain inspectable but cannot
+  execute. Seven expired verified rows are downgraded to expected, retaining
+  their actual evidence dates; no upstream verification is claimed by this bump.
+- Streamed commands own ordinary descendants on Unix and use suspended-start
+  Job Objects on Windows. Output queues, long-line chunks, and conversation
+  replies are bounded. Interactive terminal launches keep terminal ownership.
+- PTY fixtures isolate terminal settings and UI mode, set real geometry, and
+  clean up on failure. Unix-only card snapshots no longer break Windows builds.
+
 
 - The scheduled mutation run no longer fails on ten surviving mutants. The
   nightly was red on `main` for three nights while every pull request stayed

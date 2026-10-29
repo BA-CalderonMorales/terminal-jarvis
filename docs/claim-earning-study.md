@@ -1,5 +1,12 @@
 # Study: earning the claims terminal-jarvis makes about other agents' tools
 
+> Historical study of 0.1.21. Release 0.1.23 replaces the frozen freshness
+> comparison with a runtime UTC clock and downgrades expired verification.
+> The current inventory uses `runtime-gate`; counts and `frozen` findings
+> below describe the original audit. See the
+> [launch-policy decision](architecture-decision-records/launch-policy-and-lifecycle-2026-10-29.md).
+
+
 `release/0.1.21`, working tree on top of `0c312d6`. Windows (`win32-x64`) is a
 first-class target and this study was mostly executed on a Windows host with a
 clean `PATH`. Three deliverables, each with a re-runnable artifact and a proof

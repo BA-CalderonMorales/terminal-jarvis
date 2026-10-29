@@ -1,5 +1,5 @@
 //! Prompt protocol: what each harness is asked per turn. Kept short and
-//! one-shot; the word cap keeps the token bill visible and bounded.
+//! one-shot; word count and tool-use requests are advisory.
 
 pub const WORD_CAP: &str = "80 words or fewer";
 

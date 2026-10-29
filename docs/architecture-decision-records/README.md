@@ -39,6 +39,14 @@ it, and anything future work must respect.
 
 ## Records
 
+### Unify launch policy and own streamed process trees (release/0.1.23 -> 2026-10-29)
+
+**Decision:** Conversations share ordinary consent and workspace-gate checks;
+workspace policy overrides are explicit. Evidence age uses the runtime clock,
+and streamed invocations own cancellation and descendant cleanup. The
+[decision and tradeoffs](launch-policy-and-lifecycle-2026-10-29.md) record why
+these boundaries must hold across both CLI and experimental UI routes.
+
 ### Name the terminal window after the product (fix/terminal-title-from-develop -> 2026-10-24)
 
 **Decision:** The tui sets the terminal title (OSC 2) when the viewport takes
