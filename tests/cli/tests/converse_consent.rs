@@ -10,9 +10,7 @@ fn dangerous_conversations_require_an_opt_in_and_a_visible_confirmation() {
         let fixture = Fixture::new(
             "expected",
             "expected",
-            concat!(
-                "#!/bin/sh\nif [ $# -gt 0 ]; then : > \"$TJ_FIXTURE_MARKER\"; fi\necho reply\n"
-            ),
+            "#!/bin/sh\nif [ $# -gt 0 ]; then : > \"$TJ_FIXTURE_MARKER\"; fi\necho reply\n",
         );
         let path = fixture.root.join("catalog/fixture/headless/index.toml");
         let source = std::fs::read_to_string(&path).unwrap();
