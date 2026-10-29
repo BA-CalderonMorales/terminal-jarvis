@@ -9,6 +9,9 @@ pub struct LoopState {
     pub body: Vec<String>,
     pub history: Vec<String>,
     pub converse: Option<crate::converse::Live>,
+    /// A first-use notice already shown: Enter accepts it, anything else
+    /// cancels. The seed is kept so the notice never costs a retype.
+    pub pending_converse: Option<crate::converse::Seed>,
     /// The shared scroll position: turns and prompts move the same view.
     pub offset: usize,
     pub hint: String,
@@ -18,6 +21,17 @@ pub struct LoopState {
     pub options: args::Options,
     pub debug: bool,
     pub indicator: crate::tui::input::Indicator,
+}
+
+/// An empty line accepts a pending first-use notice; any typed command
+/// cancels it. The seed survives the notice so accepting costs one Enter
+/// rather than a retyped command line.
+pub fn notice(state: &mut LoopState, input: &str) -> Option<crate::converse::Seed> {
+    if !input.is_empty() {
+        state.pending_converse = None;
+        return None;
+    }
+    state.pending_converse.take()
 }
 
 /// Flags typed on a command line overlay the session's for that command:
@@ -34,3 +48,7 @@ pub fn overlay(base: &args::Options, typed: &args::Options) -> args::Options {
         ..base.clone()
     }
 }
+
+#[cfg(test)]
+#[path = "../tests/state.rs"]
+mod tests;

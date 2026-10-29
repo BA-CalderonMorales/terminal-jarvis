@@ -8,9 +8,8 @@
 
 
 
-      Available Harnesses
-       1  fixture  [ready]    Disposable acceptance harness  (current)
-      pick a number to switch agents · list <text> filters · home resets
+
+      ▸  1  fixture  [ready]    Disposable acceptance harness  (current)
 
 
 
@@ -21,4 +20,5 @@
 
 
 
-[>_]::[tj:<version>]::[harness:fixture]:
+
+filter>                   ↑↓ move · type to filter · enter select · esc close

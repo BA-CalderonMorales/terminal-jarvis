@@ -39,6 +39,15 @@ it, and anything future work must respect.
 
 ## Records
 
+### Make the picker an object, the status rule permanent, and the keys explicit (release/0.1.24 -> 2026-10-29)
+
+**Decision:** The fleet picker is a modal state machine that owns arrows,
+typing, and Enter while open; the frame carries a permanent active/readiness/
+gate rule; and the keys it honours are advertised. The
+[decision and tradeoffs](interactive-surface-2026-10-29.md) record why the
+surface was rebuilt around an object instead of printed rows, and why arrow
+decoding had to be repaired underneath it.
+
 ### Let the picker answer "what can I run" and the json answer "in what shape" (release/0.1.23 -> 2026-10-29)
 
 **Decision:** The tui picker carries the dashboard's readiness verdict per row

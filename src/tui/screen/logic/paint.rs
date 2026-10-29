@@ -30,7 +30,7 @@ pub fn frame(size: Size, draft: &Draft) -> String {
     let body_rows = size.rows.saturating_sub(if compact { 2 } else { 3 }).max(1);
     let mut rows = vec![layout::header(draft, inner, body_rows, compact)];
     if !compact {
-        rows.push(layout::rule(inner));
+        rows.push(layout::status_rule(&draft.tagline, inner));
     }
     let window = scroll::window(&draft.body, draft.offset, body_rows);
     let block = body_block(window, inner);

@@ -7,7 +7,7 @@ pub fn resolve(input: &str, harnesses: &[Harness]) -> Resolved {
     let input = input.trim();
     match input {
         "" => return Resolved::Empty,
-        "help" | "/help" => return Resolved::Help,
+        "help" | "/help" | "?" => return Resolved::Help,
         "/exit" | "/quit" | "exit" | "quit" => return Resolved::Exit,
         "/home" | "/clear" | "home" | "clear" => return Resolved::Home,
         rest if rest == "list" || rest.starts_with("list ") => {
