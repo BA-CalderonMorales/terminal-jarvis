@@ -43,8 +43,10 @@ pub fn tick(
     };
     let width = crate::tui::screen::size().inner_cols();
     let lines = crate::converse::wire::pending(converse, &mut speak, width);
-    if thinking.is_some() {
-        state.body.pop();
+    if let Some(marker) = thinking {
+        if let Some(index) = state.body.iter().position(|row| row == &marker) {
+            state.body.remove(index);
+        }
     }
     let lines = lines?;
     state.hint = crate::converse::wire::hint(&state.converse)

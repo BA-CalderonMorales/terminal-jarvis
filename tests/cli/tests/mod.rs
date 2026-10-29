@@ -53,3 +53,5 @@ mod update_dry_run;
 mod version;
 
 mod converse_cancel;
+
+mod converse_consent;

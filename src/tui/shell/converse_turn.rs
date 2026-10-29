@@ -17,7 +17,10 @@ pub(super) fn speak_turn(
         prompt,
         &home,
         allow_dangerous,
-        &mut |line| turn.push_row(line, &mut since_paint),
+        &mut |line| {
+            turn.push_row(line, &mut since_paint);
+            turn.push_flush();
+        },
     )?;
     let _raw = crate::tui::term::enable_raw();
     crate::tui::input::spawn_watcher();

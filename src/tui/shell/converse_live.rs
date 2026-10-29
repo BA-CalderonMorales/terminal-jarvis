@@ -40,9 +40,11 @@ impl Turn<'_> {
         let rows = crate::tui::screen::size().body_rows();
         let pin = *self.offset == crate::tui::screen::max_offset(self.body.len(), rows);
         self.body.push(row.to_string());
+        super::stream_rows::cap(self.body);
         if pin {
             *self.offset = crate::tui::screen::max_offset(self.body.len(), rows);
         }
+        *self.offset = (*self.offset).min(crate::tui::screen::max_offset(self.body.len(), rows));
         self.repaint(since_paint);
     }
 
