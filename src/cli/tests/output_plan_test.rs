@@ -33,10 +33,15 @@ fn intent_is_exact_per_effect() {
         let h = harness(case);
         let plan = &h.capabilities[0];
         assert_eq!(intent(&h, plan), expected);
-        let fields = fields(&h, plan, &plan.command);
+        let card = groups(&h, plan, &plan.command);
+        let intent_row = card
+            .iter()
+            .flat_map(|group| group.rows.iter())
+            .find(|row| row.label == "intent");
         assert_eq!(
-            fields.iter().find(|(name, _)| *name == "INTENT"),
-            Some(&("INTENT", expected.to_string()))
+            intent_row.map(|row| row.value.as_str()),
+            Some(expected),
+            "the card carries the same intent the plain contract does"
         );
     }
 }

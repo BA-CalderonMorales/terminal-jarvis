@@ -30,7 +30,7 @@ pub fn walk_catalog() -> Report {
         }
     }
     assert_eq!(keys.len(), 225, "catalog denominator changed");
-    assert_eq!(states.len(), 5, "support-state denominator changed");
+    assert_eq!(states.len(), 4, "support-state denominator changed");
     sandbox.verify_guards(&probes);
     sandbox.assert_zero_effects();
     Report::new(rows)

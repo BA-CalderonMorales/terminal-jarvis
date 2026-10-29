@@ -1,8 +1,8 @@
 summary = "Print the installed OpenCode version."
 command = "opencode"
 args = ["--version"]
-support = "verified"
-evidence = "disposable-real"
+support = "expected"
+evidence = "deterministic"
 effect = "read-only"
 network = false
 interaction = "noninteractive"

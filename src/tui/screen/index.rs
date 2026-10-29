@@ -22,6 +22,7 @@ pub fn boot() -> Option<Session> {
         BOOTED.store(true, Ordering::Release);
         ACTIVE.store(true, Ordering::Release);
         print!("\x1b[?1049h");
+        print!("{}", crate::tui::term::set_title("terminal-jarvis"));
         io::stdout().flush().ok();
         Session
     })

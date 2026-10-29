@@ -69,13 +69,7 @@ pub fn run(
     }
     match action {
         crate::cli::args::Action::List => {
-            let active = crate::context::load(state_home)
-                .ok()
-                .flatten()
-                .map(|session| session.active_harness);
-            let body = crate::tui::switcher::pick(harnesses, active.as_deref());
-            let _ = writeln!(out, "{}", paint(Role::Accent, "Available Harnesses"));
-            let _ = write!(out, "{body}");
+            super::picker::show(out, harnesses, catalog_root, state_home, None);
             true
         }
         crate::cli::args::Action::Check => {

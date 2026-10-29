@@ -3,25 +3,21 @@ use crate::contracts::Harness;
 use crate::diagnostics::RuntimeInput;
 use std::fs;
 use std::path::{Path, PathBuf};
-
 fn tempdir(tag: &str) -> PathBuf {
     let dir = std::env::temp_dir().join(format!("tj-storage-{}-{tag}", std::process::id()));
     let _ = fs::remove_dir_all(&dir);
     fs::create_dir_all(&dir).unwrap();
     dir
 }
-
 fn catalog(dir: &Path) -> PathBuf {
     let catalog = dir.join("catalog");
     fs::create_dir_all(&catalog).unwrap();
     fs::write(catalog.join("index.toml"), "harness = \"opencode\"\n").unwrap();
     catalog
 }
-
 fn input(catalog: &Path, dir: &Path, harnesses: &[Harness]) -> DiagnosticInput {
     DiagnosticInput::local(catalog, dir, None, harnesses, RuntimeInput::default())
 }
-
 fn harness() -> Harness {
     Harness {
         name: "opencode".into(),
@@ -98,3 +94,6 @@ fn absent_cache_state_is_not_applicable() {
     assert_eq!(cache.code, Code::Ready);
     assert_eq!(cache.value, "not-applicable");
 }
+
+#[path = "storage_embedded.rs"]
+mod embedded;

@@ -10,13 +10,6 @@ use crate::contracts::Harness;
 use std::io::Write;
 use std::path::Path;
 
-fn again_plain() -> Next {
-    Next::Again {
-        picker_shown: false,
-        reset: false,
-    }
-}
-
 pub fn handle(
     out: &mut dyn Write,
     harnesses: &[Harness],
@@ -32,6 +25,13 @@ pub fn handle(
             let inner = crate::tui::screen::size().inner_cols();
             let _ = write!(out, "{}", super::help::text(inner));
             again_plain()
+        }
+        Resolved::List(filter) => {
+            super::picker::show(out, harnesses, catalog_root, state_home, filter.as_deref());
+            Next::Again {
+                picker_shown: true,
+                reset: false,
+            }
         }
         Resolved::Home => {
             let _ = write!(out, "{}", crate::tui::term::clear_screen());
@@ -65,7 +65,7 @@ pub fn handle(
             }
         }
         Resolved::Theme(choice) => {
-            let _ = write!(out, "{}", theme_reply(choice.as_deref()));
+            let _ = write!(out, "{}", super::reply::theme(choice.as_deref()));
             again_plain()
         }
         Resolved::Converse(seed) => Next::Converse(seed),
@@ -77,16 +77,10 @@ pub fn handle(
     }
 }
 
-/// `/theme` reply: with no argument, cycle to the next theme; with one,
-/// pin it. Unknown names keep the list discoverable.
-fn theme_reply(choice: Option<&str>) -> String {
-    match choice {
-        None => format!("theme '{}' applied", crate::tui::screen::cycle_theme()),
-        Some(name) if crate::tui::screen::apply_theme(name) => format!("theme '{name}' applied"),
-        Some(name) => format!(
-            "unknown theme '{name}'; themes: {}",
-            crate::tui::screen::theme_names().join(", ")
-        ),
+fn again_plain() -> Next {
+    Next::Again {
+        picker_shown: false,
+        reset: false,
     }
 }
 

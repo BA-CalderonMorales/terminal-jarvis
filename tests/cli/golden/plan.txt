@@ -1,0 +1,24 @@
+            Terminal Jarvis · ACTIVE fixture · READY 1/1 ready · /
+
+
+
+      Plan: fixture headless
+        the facts
+          summary    Disposable fixture capability
+          support    expected
+          evidence   deterministic
+          effect     read-only network=false interaction=noninteractive
+          platforms  linux-x64-gnu
+          executable fixture-child
+          source     internal:test
+          verified   <verified-at> (fresh)
+
+        the command
+          command     fixture-child
+          environment no API key required
+          intent      none
+
+
+
+
+[>_]::[tj:<version>]::[harness:fixture]:

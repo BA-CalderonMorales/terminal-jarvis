@@ -31,7 +31,13 @@ fn pick_rows_round_trip_to_selection(names: Vec<String>) -> bool {
         return true;
     }
     let harnesses: Vec<Harness> = names.iter().map(|name| to_harness(name)).collect();
-    let rendered = pick(&harnesses, None);
+    let rendered = pick(
+        &harnesses,
+        None,
+        &std::collections::BTreeSet::new(),
+        None,
+        80,
+    );
     (0..names.len()).all(|index| {
         let Some(line) = rendered.lines().nth(index) else {
             return false;

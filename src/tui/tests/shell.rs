@@ -61,7 +61,11 @@ fn bare_numbers_and_names_select_the_harness() {
 
 #[test]
 fn bare_command_words_work_without_the_slash() {
-    assert_eq!(action_of("list", &[]), Some(args::Action::List));
+    assert!(matches!(resolve("list", &[]), Resolved::List(None)));
+    assert!(matches!(
+        resolve("list code", &[]),
+        Resolved::List(Some(filter)) if filter == "code"
+    ));
     assert_eq!(action_of("status", &[]), Some(args::Action::Check));
     assert_eq!(
         action_of("use codex", &[]),

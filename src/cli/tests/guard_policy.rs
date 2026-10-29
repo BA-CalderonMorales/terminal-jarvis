@@ -7,7 +7,7 @@ fn rejects_manual_support() {
     let harness = dummy_harness();
     let plan = dummy_plan(
         SupportState::Manual,
-        "2026-07-17T04:59:27Z",
+        &crate::catalog::today_utc(),
         vec![platform_str().into()],
     );
     let result = check(&harness, &plan, false);
@@ -20,7 +20,7 @@ fn rejects_manual_support() {
 #[test]
 fn rejects_stub_support() {
     let harness = dummy_harness();
-    let plan = dummy_plan(SupportState::Stub, "2026-07-17T04:59:27Z", vec![]);
+    let plan = dummy_plan(SupportState::Stub, &crate::catalog::today_utc(), vec![]);
     let result = check(&harness, &plan, false);
     assert!(result.is_err());
     let err = result.unwrap_err();
@@ -30,7 +30,11 @@ fn rejects_stub_support() {
 #[test]
 fn rejects_unsupported_support() {
     let harness = dummy_harness();
-    let plan = dummy_plan(SupportState::Unsupported, "2026-07-17T04:59:27Z", vec![]);
+    let plan = dummy_plan(
+        SupportState::Unsupported,
+        &crate::catalog::today_utc(),
+        vec![],
+    );
     let result = check(&harness, &plan, false);
     assert!(result.is_err());
     let err = result.unwrap_err();
@@ -40,7 +44,7 @@ fn rejects_unsupported_support() {
 #[test]
 fn rejects_disabled_support() {
     let harness = dummy_harness();
-    let plan = dummy_plan(SupportState::Disabled, "2026-07-17T04:59:27Z", vec![]);
+    let plan = dummy_plan(SupportState::Disabled, &crate::catalog::today_utc(), vec![]);
     let result = check(&harness, &plan, false);
     assert!(result.is_err());
     let err = result.unwrap_err();

@@ -21,15 +21,6 @@ pub fn validate(harness: &str, plan: &CapabilityPlan, errors: &mut Vec<String>) 
     if !freshness::valid_utc(&plan.verified_at) {
         errors.push(format!("{prefix} verified_at must be a UTC timestamp"));
     }
-    if matches!(
-        plan.support,
-        SupportState::Verified | SupportState::Expected | SupportState::Manual
-    ) && freshness::status(plan) != "fresh"
-    {
-        errors.push(format!(
-            "{prefix} executable support evidence must be fresh"
-        ));
-    }
     validate_evidence(&prefix, plan, errors);
     validate_platforms(&prefix, plan, errors);
     super::command_truth::validate(&prefix, plan, errors);

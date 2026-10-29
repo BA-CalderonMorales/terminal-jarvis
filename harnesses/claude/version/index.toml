@@ -1,8 +1,8 @@
 summary = "Print or verify the installed Claude version."
 command = "claude"
 args = ["--version"]
-support = "verified"
-evidence = "disposable-real"
+support = "expected"
+evidence = "deterministic"
 effect = "read-only"
 network = false
 interaction = "noninteractive"

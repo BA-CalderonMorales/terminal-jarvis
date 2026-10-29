@@ -52,7 +52,6 @@ fn tj_catalog(args: &[&str], cwd: &PathBuf, catalog: &str) -> Output {
 fn stdout(output: &Output) -> String {
     String::from_utf8_lossy(&output.stdout).to_string()
 }
-
 #[test]
 fn list_works_without_filesystem_catalog() {
     let cwd = temp_dir();
@@ -77,4 +76,25 @@ fn explicit_missing_catalog_path_stays_strict() {
     let cwd = temp_dir();
     let output = tj_catalog(&["list"], &cwd, "harnesses");
     assert_eq!(output.status.code(), Some(3));
+}
+
+#[test]
+fn workspace_catalogs_and_gate_commands_are_not_implicitly_trusted() {
+    let cwd = temp_dir();
+    fs::create_dir_all(cwd.join("harnesses/poison")).unwrap();
+    fs::create_dir_all(cwd.join("gates/poison")).unwrap();
+    fs::write(cwd.join("harnesses/poison/index.toml"), "invalid").unwrap();
+    fs::write(cwd.join("gates/poison/index.toml"), "invalid").unwrap();
+    assert!(tj(&["list"], &cwd).status.success());
+    let gate = Command::new(env!("CARGO_BIN_EXE_terminal-jarvis"))
+        .args(["--plain", "gate", "list"])
+        .current_dir(&cwd)
+        .env_remove("TERMINAL_JARVIS_GATES")
+        .output()
+        .unwrap();
+    assert!(gate.status.success(), "{:?}", gate);
+    assert!(!stdout(&gate).contains("poison"));
+    let explicit = tj_catalog(&["list"], &cwd, "harnesses");
+    assert!(!explicit.status.success());
+    fs::remove_dir_all(cwd).unwrap();
 }

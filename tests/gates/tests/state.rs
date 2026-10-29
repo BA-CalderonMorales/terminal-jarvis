@@ -44,5 +44,5 @@ fn selection_lifecycle_round_trips_through_config() {
 #[test]
 fn gates_root_resolves_to_a_gates_directory() {
     let root = context::gates_root();
-    assert!(root.ends_with("gates"));
+    assert!(root == std::path::Path::new(context::EMBEDDED_GATES) || root.ends_with("gates"));
 }

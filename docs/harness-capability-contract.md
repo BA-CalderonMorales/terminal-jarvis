@@ -6,19 +6,37 @@ changes.
 
 ## Capabilities
 
-| Capability | Safety | Behavior |
+| Capability | Effect policy | Behavior |
 |---|---|---|
-| `download` | safe | Install the agent without sudo |
-| `update` | safe | Upgrade without interactive auth |
-| `headless` | safe | Run in non-interactive / command mode |
-| `version` | safe | Print the installed agent version |
-| `stats` | safe | Show local agent statistics |
-| `models` | safe | List available models |
-| `security` | safe | Review sandbox and approval settings |
-| `ui` | safe | Open the interactive terminal UI |
-| `yolo` | **dangerous** | Bypass all safeguards and approvals |
+| `download` | state-changing | Install without sudo |
+| `update` | state-changing | Upgrade without interactive auth |
+| `headless` | descriptor-specific | Run noninteractively; some agents are classified dangerous |
+| `version` | descriptor-specific | Inspect the installed version |
+| `stats` | descriptor-specific | Inspect local statistics |
+| `models` | descriptor-specific | Inspect available models |
+| `security` | descriptor-specific | Inspect sandbox and approval settings |
+| `ui` | state-changing | Open an interactive terminal UI |
+| `yolo` | dangerous | Bypass upstream safeguards and approvals |
 
-8 safe capabilities, 1 dangerous. Every harness implements all 9.
+All nine descriptors are required by the schema. Their presence does not mean
+all nine operations work: `stub`, `disabled`, `manual`, `unsupported`, and
+`unknown` rows retain their own guards. Use `show` and `plan` to inspect the
+support state and effect of the exact operation. The `effect` field controls
+consent; capability names alone do not establish safety.
+
+### Evidence lifetime
+
+Freshness uses the current UTC date at runtime. `verified` evidence lasts 30
+days; `expected` and `manual` evidence last 90 days, with a one-day allowance
+for future dates. Stale descriptors still load for inspection. Execution and
+readiness checks reject stale executable claims. Invalid calendar dates are
+schema errors. There is no build-time freshness override.
+
+Before claiming fresh evidence, repeat the documented verification in a
+disposable environment and retain its provenance. A package version bump or a
+fake executable test does not renew upstream evidence. Release 0.1.23 retains
+the August 5 evidence dates and downgrades the seven expired `verified` rows to
+`expected`; it does not claim new real-agent verification.
 
 ## Per-Harness Metadata
 

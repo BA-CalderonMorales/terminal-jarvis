@@ -1,0 +1,24 @@
+            Terminal Jarvis · ACTIVE fixture · READY 1/1 ready · /
+
+
+
+
+
+
+
+
+
+      Available Harnesses
+       1  fixture  [ready]    Disposable acceptance harness  (current)
+      pick a number to switch agents · list <text> filters · home resets
+
+
+
+
+
+
+
+
+
+
+[>_]::[tj:<version>]::[harness:fixture]:

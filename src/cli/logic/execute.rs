@@ -2,7 +2,7 @@
 mod catalog_load;
 
 use super::{
-    args, dispatch, error, help_command, output, response::Response, self_update,
+    args, dispatch, error, help_command, json_catalog, output, response::Response, self_update,
     self_update_intent, style, table, version,
 };
 use crate::{catalog, cli::args::Action, diagnostics};
@@ -72,6 +72,11 @@ pub fn run(parsed: args::Parsed, catalog_root: &Path, home: &Path) -> error::Res
             output::diagnostics(&display),
             document,
         ));
+    }
+    if options.output == args::OutputMode::Json {
+        if let Some(document) = json_catalog::document(&action, &harnesses, home) {
+            return Ok(Response::document(0, String::new(), document));
+        }
     }
     dispatch::dispatch(action, &options, &harnesses, catalog_root, home).map(Response::from)
 }

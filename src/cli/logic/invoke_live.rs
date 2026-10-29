@@ -1,26 +1,38 @@
-//! InvokeLive: the headless one-shot that streams. Same policy gate and
-//! plan resolution as `headless_one_shot`, but the caller drives the wait
-//! loop, so the tui can paint stderr rows and keep scrolling while the
-//! child thinks. Stdout accumulates as the reply.
+//! Conversation turns use the ordinary authorization chain before spawn.
+use super::{args::Options, guard_authorize, guard_prompt};
+use crate::contracts::{Capability, Effect, Harness};
+use std::path::Path;
 
-use crate::contracts::{Capability, Harness};
-
-/// Policy-checked streaming headless run: guards first, then a piped child
-/// whose tagged lines arrive via [`crate::runtime::LiveRunning`]. The
-/// caller pumps `next` (draining keys and repainting as it goes) and then
-/// waits; exit 0 means the collected stdout is the reply.
 pub fn headless_stream(
     harnesses: &[Harness],
     name: &str,
     prompt: &str,
+    home: &Path,
+    allow_dangerous: bool,
+    paint: &mut dyn FnMut(&str),
 ) -> Result<crate::runtime::LiveRunning, String> {
-    let selected = super::invoke::find(harnesses, name)?;
-    let plan = selected
+    let harness = super::invoke::find(harnesses, name)?;
+    let plan = harness
         .plan(Capability::Headless)
         .ok_or_else(|| format!("{name} lacks headless"))?;
-    if let Err(failure) = super::guard_policy::check(selected, plan, true) {
-        return Err(format!("{}: {}", failure.code, failure.message));
-    }
-    crate::runtime::spawn_live(plan, &[prompt.to_string()])
-        .map_err(|cause| format!("{name} cannot run {}: {cause}", plan.command.command))
+    let extra = vec![prompt.to_string()];
+    let options = Options {
+        allow_dangerous: allow_dangerous && plan.effect != Effect::ReadOnly,
+        narrate: false,
+        ..Options::default()
+    };
+    let request = guard_authorize::Request {
+        harness,
+        plan,
+        extra: &extra,
+        options: &options,
+        home,
+        explicit: true,
+    };
+    guard_authorize::check(request, &mut |lead, token, default_yes| {
+        guard_prompt::ask(paint, lead, token, default_yes)
+    })
+    .map_err(|failure| format!("{}: {}", failure.code, failure.message))?
+    .spawn()
+    .map_err(|cause| format!("{name} cannot run {}: {cause}", plan.command.command))
 }

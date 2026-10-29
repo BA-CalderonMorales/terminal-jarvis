@@ -33,14 +33,11 @@ pub fn catalog_root() -> PathBuf {
     catalog_candidates()
         .into_iter()
         .find(|path| path.is_dir())
-        .unwrap_or_else(|| PathBuf::from("harnesses"))
+        .unwrap_or_else(|| PathBuf::from(env_const::EMBEDDED_CATALOG))
 }
 
 fn catalog_candidates() -> Vec<PathBuf> {
     let mut candidates = Vec::new();
-    if let Ok(cwd) = env::current_dir() {
-        candidates.push(cwd.join("harnesses"));
-    }
     if let Ok(exe) = env::current_exe() {
         if let Some(bin) = exe.parent() {
             candidates.push(bin.join("harnesses"));

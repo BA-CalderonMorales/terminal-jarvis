@@ -85,6 +85,12 @@ table() {
   contains "$tmp/$1.out" "|"
 }
 
+card() {
+  contains "$tmp/$1.out" "  the facts"
+  contains "$tmp/$1.out" "  the command"
+  contains "$tmp/$1.out" "    command"
+}
+
 for command in --help -h help; do
   label=help-$(printf '%s' "$command" | tr -d '-')
   ok "$label" "$command"
@@ -126,13 +132,13 @@ contains "$tmp/plain-current.out" "active harness = codex"
 
 ok show show codex
 ok info info codex
-contains "$tmp/show.out" "  support "
+contains "$tmp/show.out" "  the support"
 contains "$tmp/show.out" "  binary "
 contains "$tmp/info.out" "  setup "
 for capability in download update headless version stats models security yolo ui; do
   label=plan-$capability
   ok "$label" plan codex "$capability"
-  table "$label"
+  card "$label"
   contains "$tmp/$label.out" "Plan: codex $capability"
 done
 
@@ -172,7 +178,7 @@ ok security-harness security codex
 table security
 table security-status
 table security-audit
-table security-harness
+card security-harness
 ok gate gate status
 ok gate-list gate list
 ok gate-enable gate enable trivy

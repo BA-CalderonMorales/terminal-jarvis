@@ -63,34 +63,6 @@ pub fn capability(
     }
 }
 
-/// One-shot headless run for the converse loop: policy-checked, then
-/// executed; a nonzero exit becomes the failure string the session shows.
-pub fn headless_one_shot(
-    harnesses: &[Harness],
-    name: &str,
-    prompt: &str,
-) -> Result<String, String> {
-    let selected = find(harnesses, name)?;
-    let plan = selected
-        .plan(Capability::Headless)
-        .ok_or_else(|| format!("{name} lacks headless"))?;
-    if let Err(failure) = super::guard_policy::check(selected, plan, true) {
-        return Err(format!("{}: {}", failure.code, failure.message));
-    }
-    let (code, text) = capability(
-        harnesses,
-        name,
-        Capability::Headless,
-        &[prompt.to_string()],
-        false,
-    )?;
-    if code == 0 {
-        Ok(text)
-    } else {
-        Err(format!("exit {code}"))
-    }
-}
-
 #[path = "invoke_error.rs"]
 mod errors;
 

@@ -79,6 +79,7 @@ fn tui_idle_ctrl_c_leaves_the_session_open() {
     let fixture = Fixture::new(State::Expected);
     let mut command = fixture.command();
     command.args(["tui"]);
+    command.env("TJ_DEBUG_SIZE", "80x2"); // This scenario exercises chat fallback.
     let stages: [(&[u8], Option<&[u8]>); 2] = [(b"\x03", Some(b"::[tj:")), (b"exit\n", None)];
     let (status, output) = run_pty_probe(command, &stages);
     assert_eq!(status.code(), Some(0), "idle Ctrl+C must not kill the tui");

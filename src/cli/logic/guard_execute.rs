@@ -2,12 +2,9 @@
 //! switches the final hop from the blocking runner to the streaming one.
 
 use crate::cli::logic::{
-    args::Options, dispatch_support, error, gate_skip, guard_ask, guard_intent, guard_policy,
-    invoke, output, package_advisory, resolve,
+    args::Options, dispatch_support, error, guard_ask, invoke, output, package_advisory, resolve,
 };
 use crate::contracts::Harness;
-use crate::gates;
-use std::io::IsTerminal;
 use std::path::Path;
 
 type Lines<'a> = Option<&'a mut dyn FnMut(&str)>;
@@ -28,52 +25,29 @@ pub(super) fn execute(
             "repair the harness catalog",
         )
     })?;
-    guard_policy::check(harness, plan, std::io::stdin().is_terminal())?;
     let asked = on_line.is_some();
-    let intent = match on_line.as_mut() {
-        Some(paint) => guard_intent::check_with(
-            harness,
-            plan,
-            &invocation.extra,
-            options,
-            explicit,
-            &mut |lead: &str, token: &str, default_yes: bool| {
-                let question =
-                    format!("Continue with {token}? {}", guard_ask::bracket(default_yes));
-                let short = format!("Continue? {}", guard_ask::bracket(default_yes));
-                // The decision lives at the cursor: the prompt row carries it.
-                let _ask = crate::tui::input::ask(&question, &short);
-                for line in lead.lines() {
-                    paint(line);
-                }
-                // one keystroke answers: raw mode, never a cooked Enter hang
-                let _raw = crate::tui::term::enable_raw();
-                let mut key = crate::tui::input::read_key();
-                // A resize is not an answer: repaint the frame and read again.
-                while matches!(key, Some(crate::tui::input::Key::Resized)) {
-                    paint("");
-                    key = crate::tui::input::read_key();
-                }
-                // a typed answer's tail must never leak into the prompt buffer
-                crate::tui::input::drain_answer(std::time::Duration::from_millis(150));
-                let (row, answer) = guard_ask::in_frame(key, default_yes);
-                paint(row);
-                guard_ask::consent(answer)
-            },
-        ),
-        None => guard_intent::check(harness, plan, &invocation.extra, options, explicit),
+    let request = super::super::guard_authorize::Request {
+        harness,
+        plan,
+        extra: &invocation.extra,
+        options,
+        home,
+        explicit,
     };
-    intent?;
+    let _authorized = match on_line.as_mut() {
+        Some(paint) => {
+            super::super::guard_authorize::check(request, &mut |lead, token, default_yes| {
+                super::super::guard_prompt::ask(paint, lead, token, default_yes)
+            })
+        }
+        None => super::super::guard_authorize::check(request, &mut guard_ask::ask_in_terminal),
+    }?;
     if options.dry_run {
         return Ok((
             0,
             output::plan_with_extra(harness, invocation.capability, &invocation.extra),
         ));
     }
-    let target = format!("{}:{}", invocation.capability, invocation.harness);
-    gates::preflight(home, options.narrate)
-        .map_err(|m| error::Failure::safety("gate_blocked", m, "run `terminal-jarvis gate status`"))
-        .and_then(|verdict| gate_skip::route(options, verdict, &target))?;
     package_advisory::check_quiet(harness, plan, options, home, asked, &mut |line| {
         if let Some(paint) = on_line.as_deref_mut() {
             paint(line);

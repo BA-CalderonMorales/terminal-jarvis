@@ -122,7 +122,7 @@ def verdict(kind, support, platforms, held_by):
     if kind == "provenance":
         return "external"
     if kind == "freshness":
-        return "frozen"
+        return "runtime-gate"
     if kind == "platform-scope":
         if support in UNREACHABLE:
             return "inert"

@@ -45,8 +45,15 @@ impl Fixture {
     }
 
     pub fn run(&self, args: &[&str]) -> Output {
+        self.run_with(args, &[])
+    }
+
+    /// The same run with extra environment, for the cases that need the
+    /// terminal width or another knob pinned rather than inherited.
+    pub fn run_with(&self, args: &[&str], extra: &[(&str, &str)]) -> Output {
         let path = prepend_to_path(&self.root.join("bin"));
-        Command::new(env!("CARGO_BIN_EXE_terminal-jarvis"))
+        let mut command = Command::new(env!("CARGO_BIN_EXE_terminal-jarvis"));
+        command
             .args(args)
             .env("PATH", path)
             .env("TERMINAL_JARVIS_CATALOG", self.root.join("catalog"))
@@ -54,9 +61,11 @@ impl Fixture {
             .env("TERMINAL_JARVIS_GATES", self.root.join("gates"))
             .env("TERMINAL_JARVIS_HOME", self.root.join("home"))
             .env("TJ_FIXTURE_MARKER", &self.marker)
-            .env("TJ_FIXTURE_GATE_MARKER", &self.gate_marker)
-            .output()
-            .expect("terminal-jarvis runs")
+            .env("TJ_FIXTURE_GATE_MARKER", &self.gate_marker);
+        for (key, value) in extra {
+            command.env(key, value);
+        }
+        command.output().expect("terminal-jarvis runs")
     }
 
     pub fn spawned(&self) -> bool {

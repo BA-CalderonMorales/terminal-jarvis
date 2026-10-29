@@ -39,6 +39,48 @@ it, and anything future work must respect.
 
 ## Records
 
+### Let the picker answer "what can I run" and the json answer "in what shape" (release/0.1.23 -> 2026-10-29)
+
+**Decision:** The tui picker carries the dashboard's readiness verdict per row
+and accepts `list <text>`, keeping picker numbers stable; `--json` for `list`,
+`show`, and `plan` publishes structured catalog fields beside `text`. The
+[decision and tradeoffs](agent-parity-and-picker-truth-2026-10-29.md) record why
+field-level parity matters for agents and why reordering was refused.
+
+### Unify launch policy and own streamed process trees (release/0.1.23 -> 2026-10-29)
+
+**Decision:** Conversations share ordinary consent and workspace-gate checks;
+workspace policy overrides are explicit. Evidence age uses the runtime clock,
+and streamed invocations own cancellation and descendant cleanup. The
+[decision and tradeoffs](launch-policy-and-lifecycle-2026-10-29.md) record why
+these boundaries must hold across both CLI and experimental UI routes.
+
+### Name the terminal window after the product (fix/terminal-title-from-develop -> 2026-10-24)
+
+**Decision:** The tui sets the terminal title (OSC 2) when the viewport takes
+the terminal, so the window and the tab say `terminal-jarvis` instead of the
+shell that launched it.
+
+**Context:** Nothing set a title, so the window read `foot` -- the terminal
+that hosted the tui, not the product the user launched. The README recording
+shows it plainly: the demo window is labelled with the shell.
+
+**Considered:** Renaming the terminal's process (a `tj` symlink, a different
+shell) changes the user's environment to fix a cosmetic detail, and it only
+works for the people who do it. Setting the title is what a terminal
+application does for itself, and the next program to set one replaces it.
+
+**Consequence:** The window and the tab name the tool. `term::set_title` joins
+the other control sequences in that module, and the viewport boot -- the one
+place that takes the terminal -- is where it is emitted, so it appears only
+where the rest of the control codes do.
+
+### Close the mutation gaps the nightly found, and re-anchor the exclusion that drifted (fix/mutation-gaps-from-develop -> 2026-10-24)
+
+Recorded in [mutation-gaps-2026-10-24.md](mutation-gaps-2026-10-24.md): the
+scheduled Mutations run on `main` was red for three nights on ten surviving
+mutants, one of them an exclusion whose line had drifted out of reach.
+
 ### Ship one npm publisher that waits for the registry (release/0.1.22 -> 2026-10-21)
 
 Recorded in

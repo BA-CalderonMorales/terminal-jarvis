@@ -1,58 +1,69 @@
-//! Live: a piped child whose stdout and stderr arrive as tagged lines while
-//! the caller drives the wait loop -- so a streaming surface can keep
-//! painting (and scrolling) in step with the child, silence included.
-
+//! A piped invocation owns its process tree and bounded output queue.
 use super::stream::status_code;
+#[cfg(unix)]
+use super::tree_unix as tree;
+#[cfg(windows)]
+use super::tree_windows as tree;
 use crate::contracts::CapabilityPlan;
-use std::io::{self, BufRead};
-use std::process::{Child, Command, Stdio};
 use std::sync::mpsc::{self, Receiver, RecvTimeoutError};
 use std::time::Duration;
+use std::{
+    io,
+    process::{Child, Command, Stdio},
+};
 
-/// One tagged child line: the reply stream or the noise stream.
 pub enum Line {
     Out(String),
     Err(String),
 }
-
-/// What one wait step saw: a line, an idle tick, or the end of the pipe.
 pub enum Event {
     Line(Line),
     Idle,
     Done,
 }
-
-/// A spawned child with tagged line pumps; `wait` joins the child.
 pub struct Running {
     child: Child,
     rx: Receiver<Line>,
+    tree: tree::Tree,
 }
-
 impl Running {
-    /// The next line within `timeout`: `Idle` keeps the caller's ticker
-    /// alive while the child thinks, `Done` means both pipes closed.
     pub fn next(&mut self, timeout: Duration) -> Event {
+        if self.child.try_wait().ok().flatten().is_some() {
+            self.tree.kill();
+        }
         match self.rx.recv_timeout(timeout) {
             Ok(line) => Event::Line(line),
-            Err(RecvTimeoutError::Timeout) => Event::Idle,
-            Err(RecvTimeoutError::Disconnected) => Event::Done,
+            Err(RecvTimeoutError::Timeout) => {
+                if self.child.try_wait().ok().flatten().is_some() {
+                    self.tree.kill();
+                }
+                Event::Idle
+            }
+            Err(RecvTimeoutError::Disconnected) => {
+                if self.child.try_wait().ok().flatten().is_some() {
+                    Event::Done
+                } else {
+                    std::thread::sleep(timeout);
+                    Event::Idle
+                }
+            }
         }
     }
-
-    /// The exit status once the pipes have closed.
     pub fn wait(&mut self) -> i32 {
-        status_code(self.child.wait().expect("child status"))
+        self.child.wait().map(status_code).unwrap_or(3)
     }
-
-    /// Kills the child outright: the cancel path must not wait for a polite
-    /// shutdown the child may never take.
     pub fn kill(&mut self) {
+        self.tree.kill();
         let _ = self.child.kill();
     }
 }
+impl Drop for Running {
+    fn drop(&mut self) {
+        self.kill();
+        let _ = self.child.wait();
+    }
+}
 
-/// Spawns the plan fully piped (stdin null, so headless runs never prompt)
-/// with one pump thread per stream feeding tagged lines.
 pub fn spawn(plan: &CapabilityPlan, extra: &[String]) -> io::Result<Running> {
     let mut command = Command::new(crate::security::resolved(&plan.command.command).as_ref());
     command
@@ -61,40 +72,17 @@ pub fn spawn(plan: &CapabilityPlan, extra: &[String]) -> io::Result<Running> {
         .stdin(Stdio::null())
         .stdout(Stdio::piped())
         .stderr(Stdio::piped());
-    // Unix-only: the SIGINT reset does not exist on Windows (see runner.rs);
-    // the spawned child inherits the parent's handler there.
-    #[cfg(unix)]
-    super::runner::harden_child(&mut command);
-    let mut child = command.spawn()?;
-    let (tx, rx) = mpsc::channel::<Line>();
-    for lines in child
-        .stdout
-        .take()
-        .map(|pipe| pump(pipe, Line::Out))
-        .into_iter()
-        .chain(child.stderr.take().map(|pipe| pump(pipe, Line::Err)))
-    {
-        let tx = tx.clone();
-        std::thread::spawn(move || {
-            for line in lines {
-                if tx.send(line).is_err() {
-                    return;
-                }
-            }
-        });
-    }
-    drop(tx);
-    Ok(Running { child, rx })
+    let (mut child, tree) = tree::spawn(&mut command)?;
+    let (tx, rx) = mpsc::sync_channel(128);
+    super::live_pump::pump(
+        child.stdout.take().expect("piped stdout"),
+        Line::Out,
+        tx.clone(),
+    );
+    super::live_pump::pump(child.stderr.take().expect("piped stderr"), Line::Err, tx);
+    Ok(Running { child, rx, tree })
 }
 
-fn pump<R: io::Read + Send + 'static>(pipe: R, tag: fn(String) -> Line) -> mpsc::IntoIter<Line> {
-    let (tx, rx) = mpsc::channel();
-    std::thread::spawn(move || {
-        for line in io::BufReader::new(pipe).lines().map_while(Result::ok) {
-            if tx.send(tag(line)).is_err() {
-                return;
-            }
-        }
-    });
-    rx.into_iter()
-}
+#[cfg(all(test, unix))]
+#[path = "../tests/live_drop.rs"]
+mod drop_tests;

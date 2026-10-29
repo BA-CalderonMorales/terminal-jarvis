@@ -21,7 +21,7 @@ fn stub_plan(capability: Capability) -> CapabilityPlan {
         platforms: vec![],
         executable: "sh".into(),
         source: "internal:test-fixture".into(),
-        verified_at: "2026-08-06T00:00:00Z".into(),
+        verified_at: crate::catalog::today_utc(),
         package: None,
     };
     plan.support = SupportState::Stub;

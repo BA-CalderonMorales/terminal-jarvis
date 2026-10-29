@@ -10,14 +10,11 @@ pub fn gates_root() -> PathBuf {
     candidates()
         .into_iter()
         .find(|path| path.is_dir())
-        .unwrap_or_else(|| PathBuf::from("gates"))
+        .unwrap_or_else(|| PathBuf::from(crate::context::EMBEDDED_GATES))
 }
 
 fn candidates() -> Vec<PathBuf> {
     let mut roots = Vec::new();
-    if let Ok(cwd) = env::current_dir() {
-        roots.push(cwd.join("gates"));
-    }
     if let Ok(exe) = env::current_exe() {
         if let Some(bin) = exe.parent() {
             roots.push(bin.join("gates"));

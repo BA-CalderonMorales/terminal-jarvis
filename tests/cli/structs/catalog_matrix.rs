@@ -49,7 +49,14 @@ fn write_capability(root: &Path, capability: &str, state: State) {
          executable = \"fixture-child\"\nsource = \"internal:fixture-cli\"\n\
          verified_at = \"2026-07-17T00:00:00Z\"\n"
     );
-    std::fs::write(directory.join("index.toml"), body).unwrap();
+    std::fs::write(
+        directory.join("index.toml"),
+        body.replace(
+            "2026-07-17T00:00:00Z",
+            &terminal_jarvis::catalog::today_utc(),
+        ),
+    )
+    .unwrap();
 }
 
 fn behavior(capability: &str) -> (&'static str, bool, &'static str) {
