@@ -22,9 +22,16 @@ pub fn load(root: &Path) -> io::Result<Vec<Harness>> {
 }
 
 fn should_use_embedded(root: &Path) -> bool {
-    !catalog_env_set()
-        && (root == Path::new(crate::context::EMBEDDED_CATALOG)
-            || (root == Path::new("harnesses") && !root.is_dir()))
+    !catalog_env_set() && embedded_for(root, root.is_dir())
+}
+
+// The policy is split from the filesystem probe it depends on: whether a
+// selected root is served from embedded data is a pure decision on the root
+// and its existence, so it can be witnessed without borrowing the process
+// working directory or the process environment.
+fn embedded_for(root: &Path, root_exists: bool) -> bool {
+    root == Path::new(crate::context::EMBEDDED_CATALOG)
+        || (root == Path::new("harnesses") && !root_exists)
 }
 
 fn catalog_env_set() -> bool {
@@ -62,3 +69,7 @@ fn dirs(root: &Path) -> io::Result<Vec<PathBuf>> {
 fn invalid(message: String) -> io::Error {
     io::Error::new(io::ErrorKind::InvalidData, message)
 }
+
+#[cfg(test)]
+#[path = "../tests/embedded_policy.rs"]
+mod tests;
