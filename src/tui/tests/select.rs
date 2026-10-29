@@ -12,6 +12,10 @@ fn harness(name: &str) -> Harness {
     }
 }
 
+fn tokens(line: &str) -> Vec<&str> {
+    line.split_whitespace().collect()
+}
+
 #[test]
 fn selection_uses_the_visible_order() {
     let harnesses = [harness("alpha"), harness("beta")];
@@ -35,14 +39,27 @@ fn selection_refuses_zero_out_of_range_and_garbage() {
 }
 
 #[test]
-fn pick_is_numbered_with_the_active_row_marked() {
+fn pick_is_numbered_with_readiness_and_the_active_row_marked() {
     let harnesses = [harness("alpha"), harness("beta")];
-    let rendered = pick(&harnesses, Some("beta"));
-    assert!(rendered.starts_with(" 1  alpha  probe\n"));
-    assert!(rendered.lines().nth(1).unwrap().starts_with(" 2  beta"));
-    assert!(rendered.contains("probe  (current)"));
+    let ready = BTreeSet::from(["alpha".to_string()]);
+    let rendered = pick(&harnesses, Some("beta"), &ready, None, 80);
+    let alpha = rendered.lines().next().unwrap();
+    let beta = rendered.lines().nth(1).unwrap();
+    assert_eq!(tokens(alpha), ["1", "alpha", "[ready]", "probe"]);
+    assert_eq!(
+        tokens(beta),
+        ["2", "beta", "[install]", "probe", "(current)"]
+    );
     assert!(rendered.contains("pick a number to switch agents"));
     assert_eq!(rendered.lines().count(), 3);
+}
+
+#[test]
+fn narrow_frames_drop_the_description_before_the_verdict() {
+    let harnesses = [harness("alpha")];
+    let rendered = pick(&harnesses, None, &BTreeSet::new(), None, 30);
+    assert!(rendered.contains("[install]"));
+    assert!(!rendered.contains("probe"));
 }
 
 fn long_harness() -> Harness {
@@ -61,7 +78,7 @@ fn long_harness() -> Harness {
 
 #[test]
 fn pick_truncates_overlong_descriptions() {
-    let rendered = pick(&[long_harness()], None);
+    let rendered = pick(&[long_harness()], None, &BTreeSet::new(), None, 80);
     assert!(rendered.contains("..."));
     assert!(!rendered.contains("and then some more"));
 }

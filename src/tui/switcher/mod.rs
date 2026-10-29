@@ -1,12 +1,17 @@
-//! Switcher: the numbered harness picker. The welcome stays clean, but once
-//! a tool list is visible -- `/list`, or the catalog table -- a bare number
-//! maps straight to the same `use` action the headless cli would parse, so
-//! flipping between tools stays a single keystroke. `pick` renders the list
-//! as numbered, single-line rows with the current agent marked -- a picker,
-//! not a dump.
+//! Switcher: the numbered harness picker. A bare number maps straight to the
+//! same `use` action the headless cli parses, so flipping tools is a single
+//! keystroke. Each row carries the dashboard's readiness verdict, so the
+//! picker answers "what can I run now?" without a second command, and a
+//! filter narrows 25 rows while the numbers keep their picker positions.
 
 use crate::cli::args;
 use crate::contracts::Harness;
+use std::collections::BTreeSet;
+
+#[path = "filter.rs"]
+mod filter;
+#[path = "rows.rs"]
+mod rows;
 
 pub fn select(input: &str, harnesses: &[Harness]) -> Option<args::Action> {
     let index = input.parse::<usize>().ok()?;
@@ -18,35 +23,56 @@ pub fn select(input: &str, harnesses: &[Harness]) -> Option<args::Action> {
         .map(|harness| args::Action::Use(harness.name.clone()))
 }
 
-pub fn pick(harnesses: &[Harness], active: Option<&str>) -> String {
-    let width = harnesses
-        .iter()
-        .map(|harness| harness.name.chars().count())
-        .max()
-        .unwrap_or(0);
-    let mut lines: Vec<String> = harnesses
+pub fn pick(
+    harnesses: &[Harness],
+    active: Option<&str>,
+    ready: &BTreeSet<String>,
+    filter: Option<&str>,
+    inner: usize,
+) -> String {
+    let needle = filter.unwrap_or("").trim().to_lowercase();
+    let shown: Vec<(usize, &Harness)> = harnesses
         .iter()
         .enumerate()
-        .map(|(index, harness)| row(index + 1, width, harness, active))
+        .filter(|(_, harness)| filter::matches(harness, &needle))
         .collect();
-    let tip = "pick a number to switch agents, or type 'home' to go back".to_string();
-    lines.push(crate::cli::style::dim(&tip));
+    let name_width = shown
+        .iter()
+        .map(|(_, harness)| harness.name.chars().count())
+        .max()
+        .unwrap_or(0);
+    let marker = if active.is_some() { rows::MARKER } else { 0 };
+    let fixed = 2 + 2 + name_width + 2 + rows::CHIP + 2 + marker;
+    let room = inner
+        .checked_sub(fixed)
+        .filter(|room| *room >= rows::MIN_DESCRIPTION);
+    let mut lines: Vec<String> = shown
+        .iter()
+        .map(|(offset, harness)| {
+            let chip = if ready.contains(&harness.name) {
+                "[ready]"
+            } else {
+                "[install]"
+            };
+            rows::row(
+                offset + 1,
+                name_width,
+                harness,
+                chip,
+                room,
+                active == Some(harness.name.as_str()),
+            )
+        })
+        .collect();
+    lines.push(filter::tip(
+        &needle,
+        shown.len(),
+        harnesses.len(),
+        filter.is_some(),
+    ));
     let mut body = lines.join("\n");
     body.push('\n');
     body
-}
-
-fn row(index: usize, width: usize, harness: &Harness, active: Option<&str>) -> String {
-    let marker = if active == Some(harness.name.as_str()) {
-        format!("  {}", crate::cli::style::dim("(current)"))
-    } else {
-        String::new()
-    };
-    format!(
-        "{index:>2}  {:<width$}  {}{marker}",
-        harness.name,
-        clip(&harness.description, 66)
-    )
 }
 
 pub fn clip(description: &str, limit: usize) -> String {
@@ -63,6 +89,9 @@ pub fn clip(description: &str, limit: usize) -> String {
     clipped
 }
 
+#[cfg(test)]
+#[path = "../tests/select_filter.rs"]
+mod filter_tests;
 #[cfg(test)]
 #[path = "../tests/select_props.rs"]
 mod props;

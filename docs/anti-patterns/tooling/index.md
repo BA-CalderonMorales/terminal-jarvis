@@ -5,6 +5,20 @@ exists.
 
 ## Entries
 
+### Terminal tests inherit the operator's UI mode (0.1.23)
+
+**Pattern:** PTY tests inherited `NO_COLOR`, used the GET ioctl while trying
+to set a window size, and waited for markers from a UI mode they never opened.
+Failed tests could leave a child running.
+
+**Why it is wrong:** A green run can exercise the fallback instead of the
+screen under test. An environment change produces failures unrelated to the
+intended behavior, and orphaned fixtures interfere with later work.
+
+**Fix:** Set terminal variables and geometry explicitly, choose viewport or
+chat per scenario, bound waits, and own cleanup through panic and timeout.
+
+
 ### Release logic embedded in workflow YAML cannot be rehearsed
 
 **Pattern:** The npm publish body -- version guard, publish/retag, and the

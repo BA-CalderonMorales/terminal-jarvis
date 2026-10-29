@@ -26,6 +26,12 @@ pre-fix half fails and the working tree passes, so `windows-clippy` belongs on a
 host where the pre-fix tree fails (a Windows checkout) and reports
 `there is no warning to deny` anywhere else.
 
+PTY fixtures own their UI mode and terminal environment. Run the same CLI
+suite with `NO_COLOR=1 TERM=dumb cargo test --test cli` to check isolation.
+Fixtures bound marker waits and scenario duration, close the master across
+exec, and terminate owned descendants during panic cleanup. Real third-party
+agent commands are not required for these tests.
+
 ## Domain shape
 
 Every Rust domain mirrors the scripts/ bucketing: `src/<domain>/index.rs` is

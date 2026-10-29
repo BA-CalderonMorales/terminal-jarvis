@@ -1,4 +1,16 @@
-exclude_globs = ["src/cli/compat.rs"]
+# File-scoped exclusions: these files either carry a compatibility shim the
+# release binary never reaches or are cfg(windows)-only, so no mutant in them
+# can change behaviour of a Linux mutation binary. A file glob, not a pattern,
+# because cargo-mutants 27.1.0 does not apply exclude_re to "delete field ...
+# from struct ... expression" mutants: even `.*` leaves them in the run, which
+# is how tree_windows.rs:48 escaped the narrower pattern below.
+exclude_globs = [
+  "src/cli/compat.rs",
+  # Mutation runners are Linux-only. This entire module is cfg(windows), so
+  # changing it cannot affect those binaries. Native Windows Verify exercises
+  # suspended startup and kill-on-close descendant cleanup; keep that gate.
+  "src/runtime/logic/tree_windows.rs",
+]
 
 # Mutations that cannot change observable behavior on CI runners are never
 # generated for the raw release binary; keep this list as narrow as the
@@ -8,7 +20,6 @@ exclude_globs = ["src/cli/compat.rs"]
 # entry names the mutant family and why it is unkillable. Keep narrow.
 exclude_re = [
   "self_update\\.rs.*\\b(run|npm_update|brew_update|cargo_update)\\b",
-  "table_layout\\.rs.*replace > with >= in wrap",
   # The cfg(not(unix)) executable_mode stub never compiles on Linux
   # runners; the unix variant is witnessed by the execute-bit probe tests.
   "path\\.rs.*replace executable_mode -> bool with false",
@@ -32,7 +43,7 @@ exclude_re = [
   # on unix; the AlreadyExists arm exists for windows, where rename cannot
   # replace. The arm is unreachable on a CI runner, so its three mutants cannot
   # be killed here.
-  "session\\.rs:71.*",
+  "src/context/logic/session\\.rs:68:.*",
   # bounded_join's grace loop compares the clock against a 500ms deadline; `<`
   # and `<=` differ only when a child finishes exactly at that boundary, a
   # race no deterministic test can win, and the joined output is identical

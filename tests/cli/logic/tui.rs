@@ -25,6 +25,8 @@ pub fn booted() -> Fixture {
 pub fn launch(fixture: &Fixture, extra: &[(&str, &str)]) -> Command {
     let mut command = Command::new(env!("CARGO_BIN_EXE_terminal-jarvis"));
     command.arg("tui");
+    command.env_remove("NO_COLOR");
+    command.env("TERM", "xterm-256color");
     command.env("PATH", prepend_to_path(&fixture.root.join("bin")));
     command.env("TERMINAL_JARVIS_CATALOG", fixture.root.join("catalog"));
     command.env("TERMINAL_JARVIS_GATE", "acceptance");

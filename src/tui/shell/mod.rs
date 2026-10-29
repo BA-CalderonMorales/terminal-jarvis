@@ -1,16 +1,18 @@
 //! Shell: the read-prompt loop -- frame repaints per command, chat fallback.
-
 use crate::{cli::args, contracts::Harness};
 use std::path::Path;
-
 mod canonical;
 mod converse;
 mod converse_live;
+mod converse_turn;
 mod dispatch;
+mod fleet;
 mod handle;
 pub(crate) mod help;
 mod live_nav;
 mod outcome;
+mod picker;
+mod reply;
 mod run_action;
 mod session;
 mod state;
@@ -24,7 +26,6 @@ mod viewport;
 mod viewport_nav;
 mod viewport_page;
 mod viewport_raw;
-
 pub use handle::handle;
 pub fn run(harnesses: &[Harness], catalog_root: &Path, state_home: &Path, options: args::Options) {
     let debug = false;
@@ -95,6 +96,5 @@ pub fn run(harnesses: &[Harness], catalog_root: &Path, state_home: &Path, option
         println!();
     }
 }
-
 mod parse;
 pub use parse::{resolve, Next, Resolved};

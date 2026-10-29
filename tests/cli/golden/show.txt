@@ -1,0 +1,24 @@
+            Terminal Jarvis · ACTIVE fixture · READY 1/1 ready · /
+
+             Fixture (fixture)
+             Disposable acceptance harness
+
+               the facts
+                 binary   fixture-child
+                 setup    no API key required
+
+               the support
+                 expected 9
+
+               what it can do
+                 download Disposable fixture capability
+                 update   Disposable fixture capability
+                 headless Disposable fixture capability
+                 version  Disposable fixture capability
+                 stats    Disposable fixture capability
+                 models   Disposable fixture capability
+                 security Disposable fixture capability
+                 yolo     Dangerous disposable fixture capability
+                 ui       Disposable fixture capability
+
+[>_]::[tj:<version>]::[harness:fixture]:

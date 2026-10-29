@@ -39,6 +39,22 @@ it, and anything future work must respect.
 
 ## Records
 
+### Let the picker answer "what can I run" and the json answer "in what shape" (release/0.1.23 -> 2026-10-29)
+
+**Decision:** The tui picker carries the dashboard's readiness verdict per row
+and accepts `list <text>`, keeping picker numbers stable; `--json` for `list`,
+`show`, and `plan` publishes structured catalog fields beside `text`. The
+[decision and tradeoffs](agent-parity-and-picker-truth-2026-10-29.md) record why
+field-level parity matters for agents and why reordering was refused.
+
+### Unify launch policy and own streamed process trees (release/0.1.23 -> 2026-10-29)
+
+**Decision:** Conversations share ordinary consent and workspace-gate checks;
+workspace policy overrides are explicit. Evidence age uses the runtime clock,
+and streamed invocations own cancellation and descendant cleanup. The
+[decision and tradeoffs](launch-policy-and-lifecycle-2026-10-29.md) record why
+these boundaries must hold across both CLI and experimental UI routes.
+
 ### Name the terminal window after the product (fix/terminal-title-from-develop -> 2026-10-24)
 
 **Decision:** The tui sets the terminal title (OSC 2) when the viewport takes

@@ -7,7 +7,7 @@ fn accepts_verified_support_with_fresh_evidence_and_matching_platform() {
     let harness = dummy_harness();
     let plan = dummy_plan(
         SupportState::Verified,
-        "2026-07-17T04:59:27Z",
+        &crate::catalog::today_utc(),
         vec![platform_str().into()],
     );
     let result = check(&harness, &plan, false);
@@ -19,7 +19,7 @@ fn accepts_expected_support_with_fresh_evidence_and_matching_platform() {
     let harness = dummy_harness();
     let plan = dummy_plan(
         SupportState::Expected,
-        "2026-07-17T04:59:27Z",
+        &crate::catalog::today_utc(),
         vec![platform_str().into()],
     );
     let result = check(&harness, &plan, false);

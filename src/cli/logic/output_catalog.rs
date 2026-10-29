@@ -1,4 +1,4 @@
-use crate::cli::logic::{output_plan, style, table};
+use crate::cli::logic::{output_fields as fields, output_plan, style, table, value_block};
 use crate::contracts::{Capability, CommandPlan, Harness};
 
 pub fn list(harnesses: &[Harness]) -> String {
@@ -45,8 +45,11 @@ pub fn plan_with_extra(harness: &Harness, capability: Capability, extra: &[Strin
     if style::plain() {
         return output_plan::plain(harness, plan, &command);
     }
-    table::fields(
-        &format!("Plan: {} {capability}", harness.name),
-        &output_plan::fields(harness, plan, &command),
-    )
+    let width = fields::width();
+    let mut lines = vec![format!("Plan: {} {capability}", harness.name)];
+    lines.extend(value_block::card(
+        &output_plan::groups(harness, plan, &command),
+        width,
+    ));
+    lines.join("\n")
 }

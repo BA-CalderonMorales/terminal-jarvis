@@ -17,3 +17,5 @@ pub use crate::context::logic::platform;
 pub use crate::context::logic::session::{catalog_root, default_home, load, save};
 pub use crate::context::logic::session_parse::{parse as parse_session, ParseError};
 pub use crate::context::structs::session::Session;
+
+pub use crate::context::constants::env::{EMBEDDED_CATALOG, EMBEDDED_GATES};

@@ -1,10 +1,5 @@
 use crate::contracts::{CapabilityPlan, SupportState};
 
-const AS_OF: &str = match option_env!("TERMINAL_JARVIS_EVIDENCE_AS_OF") {
-    Some(value) => value,
-    None => "2026-08-05T00:00:00Z",
-};
-
 pub fn valid_utc(value: &str) -> bool {
     let bytes = value.as_bytes();
     if bytes.len() != 20
@@ -29,13 +24,14 @@ pub fn valid_utc(value: &str) -> bool {
         && valid_range(value, 11, 13, 0, 23)
         && valid_range(value, 14, 16, 0, 59)
         && valid_range(value, 17, 19, 0, 59)
+        && super::freshness_clock::valid_date(value)
 }
 
 pub fn status(plan: &CapabilityPlan) -> &'static str {
-    status_at(plan, AS_OF)
+    status_at(plan, &super::freshness_clock::today_utc())
 }
 
-fn status_at(plan: &CapabilityPlan, as_of: &str) -> &'static str {
+pub fn status_at(plan: &CapabilityPlan, as_of: &str) -> &'static str {
     let max_age = match plan.support {
         SupportState::Verified => 30,
         SupportState::Expected | SupportState::Manual => 90,
@@ -98,3 +94,7 @@ mod tests {
         assert!(age_days("2026-01-01T00:00:00Z", "2026-13-01T00:00:00Z").is_none());
     }
 }
+
+#[cfg(test)]
+#[path = "../tests/calendar.rs"]
+mod calendar_tests;

@@ -1,8 +1,8 @@
 summary = "Run Hermes Agent headlessly with a one-shot prompt (-z)."
 command = "hermes"
 args = ["-z"]
-support = "verified"
-evidence = "disposable-real"
+support = "expected"
+evidence = "deterministic"
 effect = "dangerous"
 network = true
 interaction = "noninteractive"

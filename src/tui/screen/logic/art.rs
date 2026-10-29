@@ -13,7 +13,7 @@ pub fn welcome(active: &str, ready: usize, total: usize, inner: usize) -> Vec<St
     let commands: [(&str, &str); 10] = [
         ("home", "the command center"),
         ("status", "readiness dashboard"),
-        ("list", "numbered fleet picker"),
+        ("list [filter]", "numbered fleet picker"),
         ("<number|harness>", "instant switch"),
         ("plan <h> <cap>", "preview before running"),
         ("install <h>", "add a harness to the fleet"),

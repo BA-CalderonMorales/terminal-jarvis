@@ -1,10 +1,16 @@
 pub fn outcome(command: &str, code: i32, body: &str) -> String {
+    envelope(command, code, &format!("{{\"text\":\"{}\"}}", escape(body)))
+}
+
+/// The one envelope every json response wears, with `data` supplied whole so
+/// a command can publish structured fields beside `text` instead of prose
+/// only. Machines read the fields; humans keep the rendered text.
+pub fn envelope(command: &str, code: i32, data: &str) -> String {
     format!(
-        "{{\"schema_version\":1,\"command\":\"{}\",\"ok\":{},\"exit_code\":{},\"data\":{{\"text\":\"{}\"}},\"error\":null}}\n",
+        "{{\"schema_version\":1,\"command\":\"{}\",\"ok\":{},\"exit_code\":{},\"data\":{data},\"error\":null}}\n",
         escape(command),
         code == 0,
-        code,
-        escape(body)
+        code
     )
 }
 
@@ -25,7 +31,7 @@ pub fn failure(
     )
 }
 
-fn escape(value: &str) -> String {
+pub fn escape(value: &str) -> String {
     let mut out = String::new();
     for character in value.chars() {
         match character {

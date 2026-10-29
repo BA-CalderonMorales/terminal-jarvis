@@ -17,14 +17,19 @@ pub(crate) mod gate_cmd;
 pub(crate) mod gate_skip;
 pub(crate) mod guard;
 pub(crate) mod guard_ask;
+pub(crate) mod guard_authorize;
 pub(crate) mod guard_intent;
 pub(crate) mod guard_policy;
+pub(crate) mod guard_prompt;
 pub(crate) mod help;
 pub(crate) mod help_command;
 pub(crate) mod help_text;
 pub(crate) mod invoke;
 pub(crate) mod invoke_live;
 pub(crate) mod json;
+pub(crate) mod json_capability;
+pub(crate) mod json_catalog;
+pub(crate) mod json_shape;
 pub(crate) mod output;
 pub(crate) mod output_fields;
 pub(crate) mod output_plan;
@@ -38,6 +43,7 @@ pub mod style;
 pub(crate) mod table;
 pub(crate) mod text_wrap;
 pub(crate) mod uninstall;
+pub(crate) mod value_block;
 pub(crate) mod version;
 
 #[cfg(test)]

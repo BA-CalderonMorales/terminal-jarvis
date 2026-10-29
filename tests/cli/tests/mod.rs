@@ -1,6 +1,7 @@
 mod args;
 mod auth_cache;
 mod boundary;
+mod card_golden;
 mod catalog_fallback;
 mod child_argv;
 mod compat_surface;
@@ -29,6 +30,7 @@ mod package_check_fixture;
 mod package_check_scripts;
 mod plan;
 mod presentation;
+mod presentation_width;
 mod red;
 mod run_compat;
 mod self_update;
@@ -45,6 +47,13 @@ mod tui_acceptance_interrupt;
 mod tui_acceptance_security;
 mod tui_cancel;
 mod tui_frame;
+mod tui_golden;
 mod tui_keys;
 mod update_dry_run;
 mod version;
+
+mod converse_cancel;
+
+mod converse_consent;
+
+mod catalog_installed;

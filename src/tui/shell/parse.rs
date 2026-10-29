@@ -1,36 +1,7 @@
-//! Slash-command and selection resolution for the shell: every line maps
-//! onto the same Action grammar the headless cli parses, options included
-//! (`--no-input`, `--confirm=...` typed in-frame reach the same guards).
-
 use crate::{cli::args, contracts::Harness};
-pub enum Resolved {
-    Empty,
-    Help,
-    Exit,
-    Home,
-    Run(args::Action, args::Options),
-    Debug(Option<bool>),
-    Theme(Option<String>),
-    Converse(Option<(usize, String, String, String)>),
-    Error(String),
-}
-
-#[derive(Debug)]
-pub enum Next {
-    Exit,
-    /// `reset` restores the pristine body (the home primer).
-    Again {
-        picker_shown: bool,
-        reset: bool,
-    },
-    Debug(Option<bool>),
-    Converse(Option<(usize, String, String, String)>),
-    /// A streaming action plus its typed options (session-overlaid).
-    Stream {
-        action: args::Action,
-        options: args::Options,
-    },
-}
+#[path = "next.rs"]
+mod next;
+pub use next::{Next, Resolved};
 
 pub fn resolve(input: &str, harnesses: &[Harness]) -> Resolved {
     let input = input.trim();
@@ -39,15 +10,22 @@ pub fn resolve(input: &str, harnesses: &[Harness]) -> Resolved {
         "help" | "/help" => return Resolved::Help,
         "/exit" | "/quit" | "exit" | "quit" => return Resolved::Exit,
         "/home" | "/clear" | "home" | "clear" => return Resolved::Home,
+        rest if rest == "list" || rest.starts_with("list ") => {
+            return Resolved::List(super::picker::filter(rest));
+        }
         "/debug" | "debug" => return Resolved::Debug(None),
         "/debug on" => return Resolved::Debug(Some(true)),
         "/debug off" => return Resolved::Debug(Some(false)),
         rest if rest == "converse" || rest.starts_with("converse ") => {
             return match crate::converse::parse(rest, harnesses) {
                 crate::converse::Parsed::Continue => Resolved::Converse(None),
-                crate::converse::Parsed::Start { turns, a, b, topic } => {
-                    Resolved::Converse(Some((turns, a, b, topic)))
-                }
+                crate::converse::Parsed::Start {
+                    turns,
+                    a,
+                    b,
+                    topic,
+                    allow_dangerous,
+                } => Resolved::Converse(Some((turns, a, b, topic, allow_dangerous))),
                 crate::converse::Parsed::Error(message) => Resolved::Error(message),
             };
         }
@@ -66,9 +44,7 @@ pub fn resolve(input: &str, harnesses: &[Harness]) -> Resolved {
     if let Ok(number) = input.parse::<usize>() {
         return match crate::tui::switcher::select(input, harnesses) {
             Some(selection) => Resolved::Run(selection, args::Options::default()),
-            None => Resolved::Error(format!(
-                "no harness at position {number}; /list shows the numbered tools"
-            )),
+            None => Resolved::Error(format!("no harness at position {number}; list shows all")),
         };
     }
     if harnesses.iter().any(|harness| harness.name == input) {

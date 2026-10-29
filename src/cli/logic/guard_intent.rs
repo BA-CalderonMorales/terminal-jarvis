@@ -3,28 +3,11 @@
 //! question is a strategy -- stderr+stdin in a terminal, in-frame rows and
 //! one raw key inside the tui's streaming surface.
 
-use super::guard_ask::{ask_in_terminal, confirm_error, default_yes, reject_irrelevant};
+use super::guard_ask::{confirm_error, default_yes, reject_irrelevant};
 use super::{args::Options, error};
 use crate::cli::logic::prompt_lead;
 use crate::contracts::{CapabilityPlan, Effect, Harness, Interaction};
 use std::io::IsTerminal;
-
-pub fn check(
-    harness: &Harness,
-    plan: &CapabilityPlan,
-    extra: &[String],
-    options: &Options,
-    explicit: bool,
-) -> error::Result<()> {
-    check_with(
-        harness,
-        plan,
-        extra,
-        options,
-        explicit,
-        &mut ask_in_terminal,
-    )
-}
 
 /// The confirm step is a strategy: `ask(lead, token, default_yes)` presents
 /// the plan and resolves to Ok on consent.

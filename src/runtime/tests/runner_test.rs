@@ -2,7 +2,7 @@ use super::*;
 use crate::contracts::{Capability, CommandPlan, Effect, EvidenceMode, Interaction, SupportState};
 
 fn code_of(script: &str) -> i32 {
-    status_code(
+    exit_code(
         std::process::Command::new("sh")
             .arg("-c")
             .arg(script)
@@ -64,4 +64,21 @@ fn headless_stderr_is_never_folded_into_the_body_text() {
     let (_code, text) =
         run_command_text(&plan("echo out-marker; echo err-marker >&2"), &[]).unwrap();
     assert!(text.is_empty(), "headless must not capture: {text:?}");
+}
+
+#[test]
+fn failure_to_detach_prevents_execution() {
+    use std::os::unix::process::CommandExt;
+    let mut command = std::process::Command::new("true");
+    unsafe {
+        command.pre_exec(|| {
+            if setsid() == -1 {
+                return Err(std::io::Error::last_os_error());
+            }
+            Ok(())
+        });
+    }
+    harden_child(&mut command, true);
+    let result = command.spawn();
+    assert!(result.is_err(), "a session leader cannot detach twice");
 }

@@ -1,9 +1,7 @@
 #![cfg(unix)] // PTY-driven + kill/permission-bit semantics; see tui_acceptance.rs.
-
 use crate::logic::tui::{booted, launch, EXIT, FRAME, SERIAL};
 use crate::logic::{pty, screen};
 use std::os::unix::fs::PermissionsExt;
-
 fn slow_gate(fixture: &crate::logic::cli_driver::Fixture, name: &str, script: &str) {
     let gates = fixture.root.join("slow-gates");
     std::fs::create_dir_all(gates.join("acceptance")).unwrap();
@@ -18,7 +16,6 @@ fn slow_gate(fixture: &crate::logic::cli_driver::Fixture, name: &str, script: &s
     permissions.set_mode(0o755);
     std::fs::set_permissions(&slow, permissions).unwrap();
 }
-
 #[test]
 fn a_stuck_scanner_dies_fast_on_ctrl_c_and_the_run_continues_on_skip() {
     let _serial = SERIAL.lock().unwrap_or_else(|error| error.into_inner());
@@ -28,10 +25,13 @@ fn a_stuck_scanner_dies_fast_on_ctrl_c_and_the_run_continues_on_skip() {
     let (_, bytes) = pty::run_pty_probe(
         launch(
             &fixture,
-            &[(
-                "TERMINAL_JARVIS_GATES",
-                fixture.root.join("slow-gates").to_str().unwrap(),
-            )],
+            &[
+                ("TJ_DEBUG_SIZE", "80x2"),
+                (
+                    "TERMINAL_JARVIS_GATES",
+                    fixture.root.join("slow-gates").to_str().unwrap(),
+                ),
+            ],
         ),
         &[
             (b"", Some(FRAME)),
@@ -65,7 +65,6 @@ fn a_stuck_scanner_dies_fast_on_ctrl_c_and_the_run_continues_on_skip() {
         "scanner survived Ctrl+C for {elapsed:?}; the kill is missing"
     );
 }
-
 #[test]
 fn a_slow_but_finishing_scan_redraws_a_patient_heartbeat_and_passes() {
     let _serial = SERIAL.lock().unwrap_or_else(|error| error.into_inner());
@@ -74,10 +73,13 @@ fn a_slow_but_finishing_scan_redraws_a_patient_heartbeat_and_passes() {
     let (_, bytes) = pty::run_pty_probe(
         launch(
             &fixture,
-            &[(
-                "TERMINAL_JARVIS_GATES",
-                fixture.root.join("slow-gates").to_str().unwrap(),
-            )],
+            &[
+                ("TJ_DEBUG_SIZE", "80x2"),
+                (
+                    "TERMINAL_JARVIS_GATES",
+                    fixture.root.join("slow-gates").to_str().unwrap(),
+                ),
+            ],
         ),
         &[
             (b"", Some(FRAME)),

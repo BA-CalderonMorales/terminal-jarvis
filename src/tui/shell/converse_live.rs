@@ -40,22 +40,33 @@ impl Turn<'_> {
         let rows = crate::tui::screen::size().body_rows();
         let pin = *self.offset == crate::tui::screen::max_offset(self.body.len(), rows);
         self.body.push(row.to_string());
+        super::stream_rows::cap(self.body);
         if pin {
             *self.offset = crate::tui::screen::max_offset(self.body.len(), rows);
         }
+        *self.offset = (*self.offset).min(crate::tui::screen::max_offset(self.body.len(), rows));
         self.repaint(since_paint);
     }
 
     /// Applies every parked navigation key, repainting on movement.
-    pub fn drain_keys(&mut self, since_paint: &mut Instant) {
+    pub fn drain_keys(&mut self, since_paint: &mut Instant) -> bool {
         let rows = crate::tui::screen::size().body_rows();
-        let moved = crate::tui::input::poll::drained()
-            .into_iter()
-            .any(|key| super::live_nav::navigate(&key, self.offset, self.body, rows));
+        let mut moved = false;
+        let mut cancelled = false;
+        for key in crate::tui::input::poll::drained() {
+            cancelled |= matches!(
+                key,
+                crate::tui::input::Key::Interrupt
+                    | crate::tui::input::Key::Escape
+                    | crate::tui::input::Key::Dead
+            );
+            moved |= super::live_nav::navigate(&key, self.offset, self.body, rows);
+        }
         if moved {
             self.push_flush();
             *since_paint = Instant::now();
         }
+        cancelled
     }
 
     /// Repaints the frame at the current offset, throttled by the caller.

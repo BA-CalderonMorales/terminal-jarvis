@@ -85,7 +85,7 @@ fn plan(command: &str, args: Vec<String>) -> crate::contracts::CapabilityPlan {
         platforms: vec![],
         executable: command.into(),
         source: "internal:test-fixture".into(),
-        verified_at: "2026-08-06T00:00:00Z".to_string(),
+        verified_at: crate::catalog::today_utc(),
         package: None,
     }
 }
