@@ -1,44 +1,44 @@
 use std::path::Path;
-use terminal_jarvis::catalog;
-use terminal_jarvis::contracts::SupportState;
+use terminal_jarvis::{catalog, contracts::SupportState};
 
 #[test]
-fn catalog_rows_report_freshness_matching_their_support() {
-    let harnesses = catalog::load(Path::new("harnesses")).unwrap();
-    for plan in harnesses.iter().flat_map(|harness| &harness.capabilities) {
-        let supported = matches!(
-            plan.support,
-            SupportState::Verified | SupportState::Expected | SupportState::Manual
-        );
-        let status = catalog::freshness_status(plan);
-        if supported {
-            assert_eq!(
-                status, "fresh",
-                "{}:{:?} revision must be fresh",
-                plan.capability, plan.support
-            );
-        } else {
-            assert_eq!(status, "policy-reviewed");
-        }
-    }
-}
-
-#[test]
-fn executable_support_claims_expose_stale_evidence() {
-    let harnesses = catalog::load(Path::new("harnesses")).unwrap();
-    let mut plan = harnesses[0].capabilities[0].clone();
-    plan.support = SupportState::Expected;
-    plan.verified_at = "2000-01-01T00:00:00Z".to_string();
-    assert_eq!(catalog::freshness_status(&plan), "stale");
-}
-
-#[test]
-fn stale_executable_support_claims_fail_catalog_validation() {
+fn stale_evidence_remains_inspectable_but_is_reported_stale() {
     let mut harnesses = catalog::load(Path::new("harnesses")).unwrap();
     let plan = &mut harnesses[0].capabilities[0];
     plan.support = SupportState::Expected;
-    plan.platforms = vec![terminal_jarvis::context::platform::id().unwrap().into()];
     plan.verified_at = "2000-01-01T00:00:00Z".into();
-    let errors = catalog::validate(&harnesses).join("\n");
-    assert!(errors.contains("evidence must be fresh"), "{errors}");
+    assert_eq!(catalog::freshness_status(plan), "stale");
+    assert!(catalog::validate(&harnesses).is_empty());
+}
+
+#[test]
+fn freshness_expiration_and_future_dates_use_an_injected_reference_date() {
+    let harnesses = catalog::load(Path::new("harnesses")).unwrap();
+    let mut plan = harnesses[0].capabilities[0].clone();
+    plan.verified_at = "2026-01-01T00:00:00Z".into();
+    for (support, last, expired) in [
+        (
+            SupportState::Verified,
+            "2026-01-31T00:00:00Z",
+            "2026-02-01T00:00:00Z",
+        ),
+        (
+            SupportState::Expected,
+            "2026-04-01T00:00:00Z",
+            "2026-04-02T00:00:00Z",
+        ),
+    ] {
+        plan.support = support;
+        assert_eq!(catalog::freshness_at(&plan, last), "fresh");
+        assert_eq!(catalog::freshness_at(&plan, expired), "stale");
+        assert_eq!(
+            catalog::freshness_at(&plan, "2025-12-30T00:00:00Z"),
+            "stale"
+        );
+    }
+    plan.verified_at = "2025-02-29T00:00:00Z".into();
+    assert_eq!(
+        catalog::freshness_at(&plan, "2026-01-01T00:00:00Z"),
+        "invalid"
+    );
 }

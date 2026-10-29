@@ -40,7 +40,7 @@ pub fn harnesses() -> Vec<Harness> {
     let (command, args) = command();
     let mut plan = crate::cli::logic::test_support::plan(Capability::Download, &command, args);
     plan.support = crate::contracts::SupportState::Verified;
-    plan.verified_at = "2026-08-06T00:00:00Z".to_string();
+    plan.verified_at = crate::catalog::today_utc();
     vec![Harness {
         name: "vibe".into(),
         display: "Vibe".into(),

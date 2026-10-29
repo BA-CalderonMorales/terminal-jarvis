@@ -56,7 +56,7 @@ fn streaming_invocation_preserves_the_child_exit_code() {
         crate::cli::logic::test_support::shell("printf streamed; exit 7", "echo streamed& exit 7");
     let mut plan = crate::cli::logic::test_support::plan(Capability::Headless, &command, args);
     plan.support = crate::contracts::SupportState::Verified;
-    plan.verified_at = "2026-08-05T00:00:00Z".into();
+    plan.verified_at = crate::catalog::today_utc();
     let harnesses = vec![Harness {
         name: "vibe".into(),
         display: "Vibe".into(),

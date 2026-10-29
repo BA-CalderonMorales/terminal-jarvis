@@ -22,7 +22,7 @@ harness:aider/download	platforms	platform-scope	[]	gate:platform-name	evidence	a
 harness:aider/download	source	provenance	internal:phase-01@fab5848	none	assertion	external
 harness:aider/download	summary	narration	Install Aider from its documented distribution channel.	none	assertion	asserted
 harness:aider/download	support	support-state	expected	gate:evidence-pairing	evidence	gate
-harness:aider/download	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	frozen
+harness:aider/download	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	runtime-gate
 harness:aider/headless	args	execution-shape	["--help"]	gate:command-shape	evidence	gate
 harness:aider/headless	command	execution-shape	aider	gate:command-shape	evidence	gate
 harness:aider/headless	effect	risk-class	read-only	gate:effect-class	evidence	gate
@@ -34,7 +34,7 @@ harness:aider/headless	platforms	platform-scope	["linux-x64-gnu"]	gate:platform-
 harness:aider/headless	source	provenance	internal:phase-01@fab5848	none	assertion	external
 harness:aider/headless	summary	narration	Review Aider headless invocation options.	none	assertion	asserted
 harness:aider/headless	support	support-state	stub	gate:evidence-pairing	evidence	gate
-harness:aider/headless	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	frozen
+harness:aider/headless	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	runtime-gate
 harness:aider/models	args	execution-shape	["--help"]	gate:command-shape	evidence	gate
 harness:aider/models	command	execution-shape	aider	gate:command-shape	evidence	gate
 harness:aider/models	effect	risk-class	read-only	gate:effect-class	evidence	gate
@@ -46,7 +46,7 @@ harness:aider/models	platforms	platform-scope	["linux-x64-gnu"]	gate:platform-na
 harness:aider/models	source	provenance	internal:phase-01@fab5848	none	assertion	external
 harness:aider/models	summary	narration	Review Aider model selection command surface.	none	assertion	asserted
 harness:aider/models	support	support-state	stub	gate:evidence-pairing	evidence	gate
-harness:aider/models	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	frozen
+harness:aider/models	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	runtime-gate
 harness:aider/security	args	execution-shape	["--help"]	gate:command-shape	evidence	gate
 harness:aider/security	command	execution-shape	aider	gate:command-shape	evidence	gate
 harness:aider/security	effect	risk-class	read-only	gate:effect-class	evidence	gate
@@ -58,7 +58,7 @@ harness:aider/security	platforms	platform-scope	["linux-x64-gnu"]	gate:platform-
 harness:aider/security	source	provenance	internal:phase-01@fab5848	none	assertion	external
 harness:aider/security	summary	narration	Review Aider security and auth command surface.	none	assertion	asserted
 harness:aider/security	support	support-state	stub	gate:evidence-pairing	evidence	gate
-harness:aider/security	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	frozen
+harness:aider/security	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	runtime-gate
 harness:aider/stats	args	execution-shape	["--help"]	gate:command-shape	evidence	gate
 harness:aider/stats	command	execution-shape	aider	gate:command-shape	evidence	gate
 harness:aider/stats	effect	risk-class	read-only	gate:effect-class	evidence	gate
@@ -70,7 +70,7 @@ harness:aider/stats	platforms	platform-scope	["linux-x64-gnu"]	gate:platform-nam
 harness:aider/stats	source	provenance	internal:phase-01@fab5848	none	assertion	external
 harness:aider/stats	summary	narration	Review Aider local status and usage command surface.	none	assertion	asserted
 harness:aider/stats	support	support-state	stub	gate:evidence-pairing	evidence	gate
-harness:aider/stats	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	frozen
+harness:aider/stats	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	runtime-gate
 harness:aider/ui	args	execution-shape	[]	gate:command-shape	evidence	gate
 harness:aider/ui	command	execution-shape	aider	gate:command-shape	evidence	gate
 harness:aider/ui	effect	risk-class	state-changing	gate:effect-class	evidence	gate
@@ -82,7 +82,7 @@ harness:aider/ui	platforms	platform-scope	[]	gate:platform-name	evidence	asserte
 harness:aider/ui	source	provenance	internal:phase-01@fab5848	none	assertion	external
 harness:aider/ui	summary	narration	Open the interactive Aider interface.	none	assertion	asserted
 harness:aider/ui	support	support-state	expected	gate:evidence-pairing	evidence	gate
-harness:aider/ui	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	frozen
+harness:aider/ui	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	runtime-gate
 harness:aider/update	args	execution-shape	["tool", "upgrade", "aider-chat"]	gate:command-shape	evidence	gate
 harness:aider/update	command	execution-shape	uv	gate:command-shape	evidence	gate
 harness:aider/update	effect	risk-class	state-changing	gate:effect-class	evidence	gate
@@ -94,19 +94,19 @@ harness:aider/update	platforms	platform-scope	[]	gate:platform-name	evidence	ass
 harness:aider/update	source	provenance	internal:phase-01@fab5848	none	assertion	external
 harness:aider/update	summary	narration	Update Aider without interactive setup flows.	none	assertion	asserted
 harness:aider/update	support	support-state	expected	gate:evidence-pairing	evidence	gate
-harness:aider/update	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	frozen
-harness:aider/version	args	execution-shape	["--version"]	gate:command-shape	evidence	witnessed
-harness:aider/version	command	execution-shape	aider	gate:command-shape	evidence	witnessed
+harness:aider/update	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	runtime-gate
+harness:aider/version	args	execution-shape	["--version"]	gate:command-shape	evidence	gate
+harness:aider/version	command	execution-shape	aider	gate:command-shape	evidence	gate
 harness:aider/version	effect	risk-class	read-only	none	assertion	asserted
-harness:aider/version	evidence	support-state	disposable-real	gate:evidence-pairing	evidence	witnessed
+harness:aider/version	evidence	support-state	deterministic	gate:evidence-pairing	evidence	gate
 harness:aider/version	executable	identity	aider	gate:identity	evidence	gate
 harness:aider/version	interaction	risk-class	noninteractive	none	assertion	asserted
 harness:aider/version	network	risk-class	false	none	assertion	asserted
 harness:aider/version	platforms	platform-scope	[]	gate:platform-name	evidence	asserted
 harness:aider/version	source	provenance	internal:phase-01@fab5848	none	assertion	external
 harness:aider/version	summary	narration	Print or verify the installed Aider version.	none	assertion	asserted
-harness:aider/version	support	support-state	verified	gate:evidence-pairing	evidence	witnessed
-harness:aider/version	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	frozen
+harness:aider/version	support	support-state	expected	gate:evidence-pairing	evidence	gate
+harness:aider/version	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	runtime-gate
 harness:aider/yolo	args	execution-shape	["-c", "echo danger yolo mode is not configured for aider; exit 1"]	gate:command-shape	evidence	gate
 harness:aider/yolo	command	execution-shape	sh	gate:command-shape	evidence	gate
 harness:aider/yolo	effect	risk-class	dangerous	gate:effect-class	evidence	gate
@@ -118,7 +118,7 @@ harness:aider/yolo	platforms	platform-scope	["linux-x64-gnu"]	gate:platform-name
 harness:aider/yolo	source	provenance	internal:phase-01@fab5848	none	assertion	external
 harness:aider/yolo	summary	narration	Dangerous mode is not normalized for Aider yet.	none	assertion	asserted
 harness:aider/yolo	support	support-state	disabled	gate:evidence-pairing	evidence	gate
-harness:aider/yolo	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	frozen
+harness:aider/yolo	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	runtime-gate
 harness:amp	binary	identity	amp	gate:identity	evidence	gate
 harness:amp	description	narration	Sourcegraph's AI-powered code assistant with advanced context awareness	none	assertion	asserted
 harness:amp	display	narration	Amp	none	assertion	asserted
@@ -137,7 +137,7 @@ harness:amp/download	platforms	platform-scope	[]	gate:platform-name	evidence	ass
 harness:amp/download	source	provenance	internal:phase-01@fab5848	none	assertion	external
 harness:amp/download	summary	narration	Install Amp from its documented distribution channel.	none	assertion	asserted
 harness:amp/download	support	support-state	expected	gate:evidence-pairing	evidence	gate
-harness:amp/download	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	frozen
+harness:amp/download	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	runtime-gate
 harness:amp/headless	args	execution-shape	["--help"]	gate:command-shape	evidence	gate
 harness:amp/headless	command	execution-shape	amp	gate:command-shape	evidence	gate
 harness:amp/headless	effect	risk-class	read-only	gate:effect-class	evidence	gate
@@ -149,7 +149,7 @@ harness:amp/headless	platforms	platform-scope	["linux-x64-gnu"]	gate:platform-na
 harness:amp/headless	source	provenance	internal:phase-01@fab5848	none	assertion	external
 harness:amp/headless	summary	narration	Review Amp headless invocation options.	none	assertion	asserted
 harness:amp/headless	support	support-state	stub	gate:evidence-pairing	evidence	gate
-harness:amp/headless	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	frozen
+harness:amp/headless	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	runtime-gate
 harness:amp/models	args	execution-shape	["--help"]	gate:command-shape	evidence	gate
 harness:amp/models	command	execution-shape	amp	gate:command-shape	evidence	gate
 harness:amp/models	effect	risk-class	read-only	gate:effect-class	evidence	gate
@@ -161,7 +161,7 @@ harness:amp/models	platforms	platform-scope	["linux-x64-gnu"]	gate:platform-name
 harness:amp/models	source	provenance	internal:phase-01@fab5848	none	assertion	external
 harness:amp/models	summary	narration	Review Amp model selection command surface.	none	assertion	asserted
 harness:amp/models	support	support-state	stub	gate:evidence-pairing	evidence	gate
-harness:amp/models	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	frozen
+harness:amp/models	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	runtime-gate
 harness:amp/security	args	execution-shape	["--help"]	gate:command-shape	evidence	gate
 harness:amp/security	command	execution-shape	amp	gate:command-shape	evidence	gate
 harness:amp/security	effect	risk-class	read-only	gate:effect-class	evidence	gate
@@ -173,7 +173,7 @@ harness:amp/security	platforms	platform-scope	["linux-x64-gnu"]	gate:platform-na
 harness:amp/security	source	provenance	internal:phase-01@fab5848	none	assertion	external
 harness:amp/security	summary	narration	Review Amp security and auth command surface.	none	assertion	asserted
 harness:amp/security	support	support-state	stub	gate:evidence-pairing	evidence	gate
-harness:amp/security	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	frozen
+harness:amp/security	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	runtime-gate
 harness:amp/stats	args	execution-shape	["--help"]	gate:command-shape	evidence	gate
 harness:amp/stats	command	execution-shape	amp	gate:command-shape	evidence	gate
 harness:amp/stats	effect	risk-class	read-only	gate:effect-class	evidence	gate
@@ -185,7 +185,7 @@ harness:amp/stats	platforms	platform-scope	["linux-x64-gnu"]	gate:platform-name	
 harness:amp/stats	source	provenance	internal:phase-01@fab5848	none	assertion	external
 harness:amp/stats	summary	narration	Review Amp local status and usage command surface.	none	assertion	asserted
 harness:amp/stats	support	support-state	stub	gate:evidence-pairing	evidence	gate
-harness:amp/stats	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	frozen
+harness:amp/stats	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	runtime-gate
 harness:amp/ui	args	execution-shape	[]	gate:command-shape	evidence	gate
 harness:amp/ui	command	execution-shape	amp	gate:command-shape	evidence	gate
 harness:amp/ui	effect	risk-class	state-changing	gate:effect-class	evidence	gate
@@ -197,7 +197,7 @@ harness:amp/ui	platforms	platform-scope	[]	gate:platform-name	evidence	asserted
 harness:amp/ui	source	provenance	internal:phase-01@fab5848	none	assertion	external
 harness:amp/ui	summary	narration	Open the interactive Amp interface.	none	assertion	asserted
 harness:amp/ui	support	support-state	expected	gate:evidence-pairing	evidence	gate
-harness:amp/ui	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	frozen
+harness:amp/ui	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	runtime-gate
 harness:amp/update	args	execution-shape	["update", "-g", "@sourcegraph/amp"]	gate:command-shape	evidence	gate
 harness:amp/update	command	execution-shape	npm	gate:command-shape	evidence	gate
 harness:amp/update	effect	risk-class	state-changing	gate:effect-class	evidence	gate
@@ -210,7 +210,7 @@ harness:amp/update	platforms	platform-scope	[]	gate:platform-name	evidence	asser
 harness:amp/update	source	provenance	internal:phase-01@fab5848	none	assertion	external
 harness:amp/update	summary	narration	Update Amp without interactive setup flows.	none	assertion	asserted
 harness:amp/update	support	support-state	expected	gate:evidence-pairing	evidence	gate
-harness:amp/update	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	frozen
+harness:amp/update	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	runtime-gate
 harness:amp/version	args	execution-shape	["--version"]	gate:command-shape	evidence	gate
 harness:amp/version	command	execution-shape	amp	gate:command-shape	evidence	gate
 harness:amp/version	effect	risk-class	read-only	none	assertion	asserted
@@ -222,7 +222,7 @@ harness:amp/version	platforms	platform-scope	[]	gate:platform-name	evidence	asse
 harness:amp/version	source	provenance	internal:phase-01@fab5848	none	assertion	external
 harness:amp/version	summary	narration	Print or verify the installed Amp version.	none	assertion	asserted
 harness:amp/version	support	support-state	expected	gate:evidence-pairing	evidence	gate
-harness:amp/version	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	frozen
+harness:amp/version	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	runtime-gate
 harness:amp/yolo	args	execution-shape	["-c", "echo danger yolo mode is not configured for amp; exit 1"]	gate:command-shape	evidence	gate
 harness:amp/yolo	command	execution-shape	sh	gate:command-shape	evidence	gate
 harness:amp/yolo	effect	risk-class	dangerous	gate:effect-class	evidence	gate
@@ -234,7 +234,7 @@ harness:amp/yolo	platforms	platform-scope	["linux-x64-gnu"]	gate:platform-name	e
 harness:amp/yolo	source	provenance	internal:phase-01@fab5848	none	assertion	external
 harness:amp/yolo	summary	narration	Dangerous mode is not normalized for Amp yet.	none	assertion	asserted
 harness:amp/yolo	support	support-state	disabled	gate:evidence-pairing	evidence	gate
-harness:amp/yolo	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	frozen
+harness:amp/yolo	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	runtime-gate
 harness:claude	binary	identity	claude	gate:identity	evidence	gate
 harness:claude	description	narration	Anthropic's Claude for code assistance	none	assertion	asserted
 harness:claude	display	narration	Claude	none	assertion	asserted
@@ -252,7 +252,7 @@ harness:claude/download	platforms	platform-scope	[]	gate:platform-name	evidence	
 harness:claude/download	source	provenance	internal:phase-01@fab5848	none	assertion	external
 harness:claude/download	summary	narration	Install Claude from its documented distribution channel.	none	assertion	asserted
 harness:claude/download	support	support-state	unknown	gate:evidence-pairing	evidence	gate
-harness:claude/download	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	frozen
+harness:claude/download	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	runtime-gate
 harness:claude/headless	args	execution-shape	["--help"]	gate:command-shape	evidence	gate
 harness:claude/headless	command	execution-shape	claude	gate:command-shape	evidence	gate
 harness:claude/headless	effect	risk-class	read-only	gate:effect-class	evidence	gate
@@ -264,7 +264,7 @@ harness:claude/headless	platforms	platform-scope	["linux-x64-gnu"]	gate:platform
 harness:claude/headless	source	provenance	internal:phase-01@fab5848	none	assertion	external
 harness:claude/headless	summary	narration	Review Claude headless invocation options.	none	assertion	asserted
 harness:claude/headless	support	support-state	stub	gate:evidence-pairing	evidence	gate
-harness:claude/headless	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	frozen
+harness:claude/headless	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	runtime-gate
 harness:claude/models	args	execution-shape	["--help"]	gate:command-shape	evidence	gate
 harness:claude/models	command	execution-shape	claude	gate:command-shape	evidence	gate
 harness:claude/models	effect	risk-class	read-only	gate:effect-class	evidence	gate
@@ -276,7 +276,7 @@ harness:claude/models	platforms	platform-scope	["linux-x64-gnu"]	gate:platform-n
 harness:claude/models	source	provenance	internal:phase-01@fab5848	none	assertion	external
 harness:claude/models	summary	narration	Review Claude model selection command surface.	none	assertion	asserted
 harness:claude/models	support	support-state	stub	gate:evidence-pairing	evidence	gate
-harness:claude/models	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	frozen
+harness:claude/models	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	runtime-gate
 harness:claude/security	args	execution-shape	["--help"]	gate:command-shape	evidence	gate
 harness:claude/security	command	execution-shape	claude	gate:command-shape	evidence	gate
 harness:claude/security	effect	risk-class	read-only	gate:effect-class	evidence	gate
@@ -288,7 +288,7 @@ harness:claude/security	platforms	platform-scope	["linux-x64-gnu"]	gate:platform
 harness:claude/security	source	provenance	internal:phase-01@fab5848	none	assertion	external
 harness:claude/security	summary	narration	Review Claude security and auth command surface.	none	assertion	asserted
 harness:claude/security	support	support-state	stub	gate:evidence-pairing	evidence	gate
-harness:claude/security	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	frozen
+harness:claude/security	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	runtime-gate
 harness:claude/stats	args	execution-shape	["--help"]	gate:command-shape	evidence	gate
 harness:claude/stats	command	execution-shape	claude	gate:command-shape	evidence	gate
 harness:claude/stats	effect	risk-class	read-only	gate:effect-class	evidence	gate
@@ -300,7 +300,7 @@ harness:claude/stats	platforms	platform-scope	["linux-x64-gnu"]	gate:platform-na
 harness:claude/stats	source	provenance	internal:phase-01@fab5848	none	assertion	external
 harness:claude/stats	summary	narration	Review Claude local status and usage command surface.	none	assertion	asserted
 harness:claude/stats	support	support-state	stub	gate:evidence-pairing	evidence	gate
-harness:claude/stats	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	frozen
+harness:claude/stats	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	runtime-gate
 harness:claude/ui	args	execution-shape	[]	gate:command-shape	evidence	gate
 harness:claude/ui	command	execution-shape	claude	gate:command-shape	evidence	gate
 harness:claude/ui	effect	risk-class	state-changing	gate:effect-class	evidence	gate
@@ -312,7 +312,7 @@ harness:claude/ui	platforms	platform-scope	[]	gate:platform-name	evidence	assert
 harness:claude/ui	source	provenance	internal:phase-01@fab5848	none	assertion	external
 harness:claude/ui	summary	narration	Open the interactive Claude interface.	none	assertion	asserted
 harness:claude/ui	support	support-state	expected	gate:evidence-pairing	evidence	gate
-harness:claude/ui	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	frozen
+harness:claude/ui	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	runtime-gate
 harness:claude/update	args	execution-shape	["update"]	gate:command-shape	evidence	gate
 harness:claude/update	command	execution-shape	claude	gate:command-shape	evidence	gate
 harness:claude/update	effect	risk-class	state-changing	gate:effect-class	evidence	gate
@@ -324,19 +324,19 @@ harness:claude/update	platforms	platform-scope	[]	gate:platform-name	evidence	as
 harness:claude/update	source	provenance	internal:phase-01@fab5848	none	assertion	external
 harness:claude/update	summary	narration	Update Claude without interactive setup flows.	none	assertion	asserted
 harness:claude/update	support	support-state	expected	gate:evidence-pairing	evidence	gate
-harness:claude/update	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	frozen
-harness:claude/version	args	execution-shape	["--version"]	gate:command-shape	evidence	witnessed
-harness:claude/version	command	execution-shape	claude	gate:command-shape	evidence	witnessed
+harness:claude/update	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	runtime-gate
+harness:claude/version	args	execution-shape	["--version"]	gate:command-shape	evidence	gate
+harness:claude/version	command	execution-shape	claude	gate:command-shape	evidence	gate
 harness:claude/version	effect	risk-class	read-only	none	assertion	asserted
-harness:claude/version	evidence	support-state	disposable-real	gate:evidence-pairing	evidence	witnessed
+harness:claude/version	evidence	support-state	deterministic	gate:evidence-pairing	evidence	gate
 harness:claude/version	executable	identity	claude	gate:identity	evidence	gate
 harness:claude/version	interaction	risk-class	noninteractive	none	assertion	asserted
 harness:claude/version	network	risk-class	false	none	assertion	asserted
 harness:claude/version	platforms	platform-scope	[]	gate:platform-name	evidence	asserted
 harness:claude/version	source	provenance	internal:phase-01@fab5848	none	assertion	external
 harness:claude/version	summary	narration	Print or verify the installed Claude version.	none	assertion	asserted
-harness:claude/version	support	support-state	verified	gate:evidence-pairing	evidence	witnessed
-harness:claude/version	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	frozen
+harness:claude/version	support	support-state	expected	gate:evidence-pairing	evidence	gate
+harness:claude/version	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	runtime-gate
 harness:claude/yolo	args	execution-shape	["-c", "echo danger yolo mode is not configured for claude; exit 1"]	gate:command-shape	evidence	gate
 harness:claude/yolo	command	execution-shape	sh	gate:command-shape	evidence	gate
 harness:claude/yolo	effect	risk-class	dangerous	gate:effect-class	evidence	gate
@@ -348,7 +348,7 @@ harness:claude/yolo	platforms	platform-scope	["linux-x64-gnu"]	gate:platform-nam
 harness:claude/yolo	source	provenance	internal:phase-01@fab5848	none	assertion	external
 harness:claude/yolo	summary	narration	Dangerous mode is not normalized for Claude yet.	none	assertion	asserted
 harness:claude/yolo	support	support-state	disabled	gate:evidence-pairing	evidence	gate
-harness:claude/yolo	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	frozen
+harness:claude/yolo	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	runtime-gate
 harness:code	binary	identity	coder	gate:identity	evidence	gate
 harness:code	description	narration	Fork of Codex AI - multi-provider coding agent	none	assertion	asserted
 harness:code	display	narration	Code	none	assertion	asserted
@@ -367,7 +367,7 @@ harness:code/download	platforms	platform-scope	[]	gate:platform-name	evidence	as
 harness:code/download	source	provenance	internal:phase-01@fab5848	none	assertion	external
 harness:code/download	summary	narration	Install Code from its documented distribution channel.	none	assertion	asserted
 harness:code/download	support	support-state	expected	gate:evidence-pairing	evidence	gate
-harness:code/download	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	frozen
+harness:code/download	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	runtime-gate
 harness:code/headless	args	execution-shape	["--help"]	gate:command-shape	evidence	gate
 harness:code/headless	command	execution-shape	coder	gate:command-shape	evidence	gate
 harness:code/headless	effect	risk-class	read-only	gate:effect-class	evidence	gate
@@ -379,7 +379,7 @@ harness:code/headless	platforms	platform-scope	["linux-x64-gnu"]	gate:platform-n
 harness:code/headless	source	provenance	internal:phase-01@fab5848	none	assertion	external
 harness:code/headless	summary	narration	Review Code headless invocation options.	none	assertion	asserted
 harness:code/headless	support	support-state	stub	gate:evidence-pairing	evidence	gate
-harness:code/headless	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	frozen
+harness:code/headless	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	runtime-gate
 harness:code/models	args	execution-shape	["--help"]	gate:command-shape	evidence	gate
 harness:code/models	command	execution-shape	coder	gate:command-shape	evidence	gate
 harness:code/models	effect	risk-class	read-only	gate:effect-class	evidence	gate
@@ -391,7 +391,7 @@ harness:code/models	platforms	platform-scope	["linux-x64-gnu"]	gate:platform-nam
 harness:code/models	source	provenance	internal:phase-01@fab5848	none	assertion	external
 harness:code/models	summary	narration	Review Code model selection command surface.	none	assertion	asserted
 harness:code/models	support	support-state	stub	gate:evidence-pairing	evidence	gate
-harness:code/models	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	frozen
+harness:code/models	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	runtime-gate
 harness:code/security	args	execution-shape	["--help"]	gate:command-shape	evidence	gate
 harness:code/security	command	execution-shape	coder	gate:command-shape	evidence	gate
 harness:code/security	effect	risk-class	read-only	gate:effect-class	evidence	gate
@@ -403,7 +403,7 @@ harness:code/security	platforms	platform-scope	["linux-x64-gnu"]	gate:platform-n
 harness:code/security	source	provenance	internal:phase-01@fab5848	none	assertion	external
 harness:code/security	summary	narration	Review Code security and auth command surface.	none	assertion	asserted
 harness:code/security	support	support-state	stub	gate:evidence-pairing	evidence	gate
-harness:code/security	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	frozen
+harness:code/security	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	runtime-gate
 harness:code/stats	args	execution-shape	["--help"]	gate:command-shape	evidence	gate
 harness:code/stats	command	execution-shape	coder	gate:command-shape	evidence	gate
 harness:code/stats	effect	risk-class	read-only	gate:effect-class	evidence	gate
@@ -415,7 +415,7 @@ harness:code/stats	platforms	platform-scope	["linux-x64-gnu"]	gate:platform-name
 harness:code/stats	source	provenance	internal:phase-01@fab5848	none	assertion	external
 harness:code/stats	summary	narration	Review Code local status and usage command surface.	none	assertion	asserted
 harness:code/stats	support	support-state	stub	gate:evidence-pairing	evidence	gate
-harness:code/stats	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	frozen
+harness:code/stats	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	runtime-gate
 harness:code/ui	args	execution-shape	[]	gate:command-shape	evidence	gate
 harness:code/ui	command	execution-shape	coder	gate:command-shape	evidence	gate
 harness:code/ui	effect	risk-class	state-changing	gate:effect-class	evidence	gate
@@ -427,7 +427,7 @@ harness:code/ui	platforms	platform-scope	[]	gate:platform-name	evidence	asserted
 harness:code/ui	source	provenance	internal:phase-01@fab5848	none	assertion	external
 harness:code/ui	summary	narration	Open the interactive Code interface.	none	assertion	asserted
 harness:code/ui	support	support-state	expected	gate:evidence-pairing	evidence	gate
-harness:code/ui	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	frozen
+harness:code/ui	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	runtime-gate
 harness:code/update	args	execution-shape	["update", "-g", "@just-every/code"]	gate:command-shape	evidence	gate
 harness:code/update	command	execution-shape	npm	gate:command-shape	evidence	gate
 harness:code/update	effect	risk-class	state-changing	gate:effect-class	evidence	gate
@@ -440,7 +440,7 @@ harness:code/update	platforms	platform-scope	[]	gate:platform-name	evidence	asse
 harness:code/update	source	provenance	internal:phase-01@fab5848	none	assertion	external
 harness:code/update	summary	narration	Update Code without interactive setup flows.	none	assertion	asserted
 harness:code/update	support	support-state	expected	gate:evidence-pairing	evidence	gate
-harness:code/update	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	frozen
+harness:code/update	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	runtime-gate
 harness:code/version	args	execution-shape	["--version"]	gate:command-shape	evidence	gate
 harness:code/version	command	execution-shape	coder	gate:command-shape	evidence	gate
 harness:code/version	effect	risk-class	read-only	none	assertion	asserted
@@ -452,7 +452,7 @@ harness:code/version	platforms	platform-scope	[]	gate:platform-name	evidence	ass
 harness:code/version	source	provenance	internal:phase-01@fab5848	none	assertion	external
 harness:code/version	summary	narration	Print or verify the installed Code version.	none	assertion	asserted
 harness:code/version	support	support-state	expected	gate:evidence-pairing	evidence	gate
-harness:code/version	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	frozen
+harness:code/version	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	runtime-gate
 harness:code/yolo	args	execution-shape	["-c", "echo danger yolo mode is not configured for code; exit 1"]	gate:command-shape	evidence	gate
 harness:code/yolo	command	execution-shape	sh	gate:command-shape	evidence	gate
 harness:code/yolo	effect	risk-class	dangerous	gate:effect-class	evidence	gate
@@ -464,7 +464,7 @@ harness:code/yolo	platforms	platform-scope	["linux-x64-gnu"]	gate:platform-name	
 harness:code/yolo	source	provenance	internal:phase-01@fab5848	none	assertion	external
 harness:code/yolo	summary	narration	Dangerous mode is not normalized for Code yet.	none	assertion	asserted
 harness:code/yolo	support	support-state	disabled	gate:evidence-pairing	evidence	gate
-harness:code/yolo	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	frozen
+harness:code/yolo	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	runtime-gate
 harness:codex	binary	identity	codex	gate:identity	evidence	gate
 harness:codex	description	narration	OpenAI coding agent CLI	none	assertion	asserted
 harness:codex	display	narration	OpenAI Codex	none	assertion	asserted
@@ -483,7 +483,7 @@ harness:codex/download	platforms	platform-scope	[]	gate:platform-name	evidence	a
 harness:codex/download	source	provenance	internal:phase-01@fab5848	none	assertion	external
 harness:codex/download	summary	narration	Install Codex with npm without sudo.	none	assertion	asserted
 harness:codex/download	support	support-state	expected	gate:evidence-pairing	evidence	gate
-harness:codex/download	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	frozen
+harness:codex/download	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	runtime-gate
 harness:codex/headless	args	execution-shape	["exec"]	gate:command-shape	evidence	gate
 harness:codex/headless	command	execution-shape	codex	gate:command-shape	evidence	gate
 harness:codex/headless	effect	risk-class	dangerous	none	assertion	asserted
@@ -495,7 +495,7 @@ harness:codex/headless	platforms	platform-scope	[]	gate:platform-name	evidence	a
 harness:codex/headless	source	provenance	internal:phase-01@fab5848	none	assertion	external
 harness:codex/headless	summary	narration	Run Codex in a headless command mode when the CLI supports it.	none	assertion	asserted
 harness:codex/headless	support	support-state	expected	gate:evidence-pairing	evidence	gate
-harness:codex/headless	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	frozen
+harness:codex/headless	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	runtime-gate
 harness:codex/models	args	execution-shape	["--help"]	gate:command-shape	evidence	gate
 harness:codex/models	command	execution-shape	codex	gate:command-shape	evidence	gate
 harness:codex/models	effect	risk-class	read-only	gate:effect-class	evidence	gate
@@ -507,7 +507,7 @@ harness:codex/models	platforms	platform-scope	["linux-x64-gnu"]	gate:platform-na
 harness:codex/models	source	provenance	internal:phase-01@fab5848	none	assertion	external
 harness:codex/models	summary	narration	Show local Codex help until model listing is normalized.	none	assertion	asserted
 harness:codex/models	support	support-state	stub	gate:evidence-pairing	evidence	gate
-harness:codex/models	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	frozen
+harness:codex/models	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	runtime-gate
 harness:codex/security	args	execution-shape	["--help"]	gate:command-shape	evidence	gate
 harness:codex/security	command	execution-shape	codex	gate:command-shape	evidence	gate
 harness:codex/security	effect	risk-class	read-only	gate:effect-class	evidence	gate
@@ -519,7 +519,7 @@ harness:codex/security	platforms	platform-scope	["linux-x64-gnu"]	gate:platform-
 harness:codex/security	source	provenance	internal:phase-01@fab5848	none	assertion	external
 harness:codex/security	summary	narration	Review Codex sandbox and approval settings before running.	none	assertion	asserted
 harness:codex/security	support	support-state	stub	gate:evidence-pairing	evidence	gate
-harness:codex/security	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	frozen
+harness:codex/security	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	runtime-gate
 harness:codex/stats	args	execution-shape	["--help"]	gate:command-shape	evidence	gate
 harness:codex/stats	command	execution-shape	codex	gate:command-shape	evidence	gate
 harness:codex/stats	effect	risk-class	read-only	gate:effect-class	evidence	gate
@@ -531,7 +531,7 @@ harness:codex/stats	platforms	platform-scope	["linux-x64-gnu"]	gate:platform-nam
 harness:codex/stats	source	provenance	internal:phase-01@fab5848	none	assertion	external
 harness:codex/stats	summary	narration	Show local Codex help until a stable stats command is defined.	none	assertion	asserted
 harness:codex/stats	support	support-state	stub	gate:evidence-pairing	evidence	gate
-harness:codex/stats	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	frozen
+harness:codex/stats	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	runtime-gate
 harness:codex/ui	args	execution-shape	[]	gate:command-shape	evidence	gate
 harness:codex/ui	command	execution-shape	codex	gate:command-shape	evidence	gate
 harness:codex/ui	effect	risk-class	state-changing	gate:effect-class	evidence	gate
@@ -543,7 +543,7 @@ harness:codex/ui	platforms	platform-scope	[]	gate:platform-name	evidence	asserte
 harness:codex/ui	source	provenance	internal:phase-01@fab5848	none	assertion	external
 harness:codex/ui	summary	narration	Open the interactive Codex terminal UI.	none	assertion	asserted
 harness:codex/ui	support	support-state	expected	gate:evidence-pairing	evidence	gate
-harness:codex/ui	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	frozen
+harness:codex/ui	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	runtime-gate
 harness:codex/update	args	execution-shape	["update", "-g", "@openai/codex"]	gate:command-shape	evidence	gate
 harness:codex/update	command	execution-shape	npm	gate:command-shape	evidence	gate
 harness:codex/update	effect	risk-class	state-changing	gate:effect-class	evidence	gate
@@ -556,19 +556,19 @@ harness:codex/update	platforms	platform-scope	[]	gate:platform-name	evidence	ass
 harness:codex/update	source	provenance	internal:phase-01@fab5848	none	assertion	external
 harness:codex/update	summary	narration	Update the npm-installed Codex package without interactive auth.	none	assertion	asserted
 harness:codex/update	support	support-state	expected	gate:evidence-pairing	evidence	gate
-harness:codex/update	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	frozen
-harness:codex/version	args	execution-shape	["--version"]	gate:command-shape	evidence	witnessed
-harness:codex/version	command	execution-shape	codex	gate:command-shape	evidence	witnessed
+harness:codex/update	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	runtime-gate
+harness:codex/version	args	execution-shape	["--version"]	gate:command-shape	evidence	gate
+harness:codex/version	command	execution-shape	codex	gate:command-shape	evidence	gate
 harness:codex/version	effect	risk-class	read-only	none	assertion	asserted
-harness:codex/version	evidence	support-state	disposable-real	gate:evidence-pairing	evidence	witnessed
+harness:codex/version	evidence	support-state	deterministic	gate:evidence-pairing	evidence	gate
 harness:codex/version	executable	identity	codex	gate:identity	evidence	gate
 harness:codex/version	interaction	risk-class	noninteractive	none	assertion	asserted
 harness:codex/version	network	risk-class	false	none	assertion	asserted
 harness:codex/version	platforms	platform-scope	[]	gate:platform-name	evidence	asserted
 harness:codex/version	source	provenance	internal:phase-01@fab5848	none	assertion	external
 harness:codex/version	summary	narration	Print the installed Codex version.	none	assertion	asserted
-harness:codex/version	support	support-state	verified	gate:evidence-pairing	evidence	witnessed
-harness:codex/version	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	frozen
+harness:codex/version	support	support-state	expected	gate:evidence-pairing	evidence	gate
+harness:codex/version	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	runtime-gate
 harness:codex/yolo	args	execution-shape	["--dangerously-bypass-approvals-and-sandbox"]	gate:command-shape	evidence	gate
 harness:codex/yolo	command	execution-shape	codex	gate:command-shape	evidence	gate
 harness:codex/yolo	effect	risk-class	dangerous	gate:effect-class	evidence	gate
@@ -580,7 +580,7 @@ harness:codex/yolo	platforms	platform-scope	[]	gate:platform-name	evidence	inert
 harness:codex/yolo	source	provenance	internal:phase-01@fab5848	none	assertion	external
 harness:codex/yolo	summary	narration	Dangerous mode: bypass Codex approvals and sandboxing.	none	assertion	asserted
 harness:codex/yolo	support	support-state	disabled	gate:evidence-pairing	evidence	gate
-harness:codex/yolo	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	frozen
+harness:codex/yolo	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	runtime-gate
 harness:copilot	binary	identity	copilot	gate:identity	evidence	gate
 harness:copilot	description	narration	GitHub Copilot CLI - AI pair programming directly in your terminal	none	assertion	asserted
 harness:copilot	display	narration	Copilot	none	assertion	asserted
@@ -599,7 +599,7 @@ harness:copilot/download	platforms	platform-scope	[]	gate:platform-name	evidence
 harness:copilot/download	source	provenance	internal:phase-01@fab5848	none	assertion	external
 harness:copilot/download	summary	narration	Install Copilot from its documented distribution channel.	none	assertion	asserted
 harness:copilot/download	support	support-state	expected	gate:evidence-pairing	evidence	gate
-harness:copilot/download	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	frozen
+harness:copilot/download	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	runtime-gate
 harness:copilot/headless	args	execution-shape	["--help"]	gate:command-shape	evidence	gate
 harness:copilot/headless	command	execution-shape	copilot	gate:command-shape	evidence	gate
 harness:copilot/headless	effect	risk-class	read-only	gate:effect-class	evidence	gate
@@ -611,7 +611,7 @@ harness:copilot/headless	platforms	platform-scope	["linux-x64-gnu"]	gate:platfor
 harness:copilot/headless	source	provenance	internal:phase-01@fab5848	none	assertion	external
 harness:copilot/headless	summary	narration	Review Copilot headless invocation options.	none	assertion	asserted
 harness:copilot/headless	support	support-state	stub	gate:evidence-pairing	evidence	gate
-harness:copilot/headless	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	frozen
+harness:copilot/headless	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	runtime-gate
 harness:copilot/models	args	execution-shape	["--help"]	gate:command-shape	evidence	gate
 harness:copilot/models	command	execution-shape	copilot	gate:command-shape	evidence	gate
 harness:copilot/models	effect	risk-class	read-only	gate:effect-class	evidence	gate
@@ -623,7 +623,7 @@ harness:copilot/models	platforms	platform-scope	["linux-x64-gnu"]	gate:platform-
 harness:copilot/models	source	provenance	internal:phase-01@fab5848	none	assertion	external
 harness:copilot/models	summary	narration	Review Copilot model selection command surface.	none	assertion	asserted
 harness:copilot/models	support	support-state	stub	gate:evidence-pairing	evidence	gate
-harness:copilot/models	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	frozen
+harness:copilot/models	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	runtime-gate
 harness:copilot/security	args	execution-shape	["--help"]	gate:command-shape	evidence	gate
 harness:copilot/security	command	execution-shape	copilot	gate:command-shape	evidence	gate
 harness:copilot/security	effect	risk-class	read-only	gate:effect-class	evidence	gate
@@ -635,7 +635,7 @@ harness:copilot/security	platforms	platform-scope	["linux-x64-gnu"]	gate:platfor
 harness:copilot/security	source	provenance	internal:phase-01@fab5848	none	assertion	external
 harness:copilot/security	summary	narration	Review Copilot security and auth command surface.	none	assertion	asserted
 harness:copilot/security	support	support-state	stub	gate:evidence-pairing	evidence	gate
-harness:copilot/security	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	frozen
+harness:copilot/security	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	runtime-gate
 harness:copilot/stats	args	execution-shape	["--help"]	gate:command-shape	evidence	gate
 harness:copilot/stats	command	execution-shape	copilot	gate:command-shape	evidence	gate
 harness:copilot/stats	effect	risk-class	read-only	gate:effect-class	evidence	gate
@@ -647,7 +647,7 @@ harness:copilot/stats	platforms	platform-scope	["linux-x64-gnu"]	gate:platform-n
 harness:copilot/stats	source	provenance	internal:phase-01@fab5848	none	assertion	external
 harness:copilot/stats	summary	narration	Review Copilot local status and usage command surface.	none	assertion	asserted
 harness:copilot/stats	support	support-state	stub	gate:evidence-pairing	evidence	gate
-harness:copilot/stats	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	frozen
+harness:copilot/stats	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	runtime-gate
 harness:copilot/ui	args	execution-shape	[]	gate:command-shape	evidence	gate
 harness:copilot/ui	command	execution-shape	copilot	gate:command-shape	evidence	gate
 harness:copilot/ui	effect	risk-class	state-changing	gate:effect-class	evidence	gate
@@ -659,7 +659,7 @@ harness:copilot/ui	platforms	platform-scope	[]	gate:platform-name	evidence	asser
 harness:copilot/ui	source	provenance	internal:phase-01@fab5848	none	assertion	external
 harness:copilot/ui	summary	narration	Open the interactive Copilot interface.	none	assertion	asserted
 harness:copilot/ui	support	support-state	expected	gate:evidence-pairing	evidence	gate
-harness:copilot/ui	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	frozen
+harness:copilot/ui	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	runtime-gate
 harness:copilot/update	args	execution-shape	["update", "-g", "@github/copilot"]	gate:command-shape	evidence	gate
 harness:copilot/update	command	execution-shape	npm	gate:command-shape	evidence	gate
 harness:copilot/update	effect	risk-class	state-changing	gate:effect-class	evidence	gate
@@ -672,7 +672,7 @@ harness:copilot/update	platforms	platform-scope	[]	gate:platform-name	evidence	a
 harness:copilot/update	source	provenance	internal:phase-01@fab5848	none	assertion	external
 harness:copilot/update	summary	narration	Update Copilot without interactive setup flows.	none	assertion	asserted
 harness:copilot/update	support	support-state	expected	gate:evidence-pairing	evidence	gate
-harness:copilot/update	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	frozen
+harness:copilot/update	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	runtime-gate
 harness:copilot/version	args	execution-shape	["--version"]	gate:command-shape	evidence	gate
 harness:copilot/version	command	execution-shape	copilot	gate:command-shape	evidence	gate
 harness:copilot/version	effect	risk-class	read-only	none	assertion	asserted
@@ -684,7 +684,7 @@ harness:copilot/version	platforms	platform-scope	[]	gate:platform-name	evidence	
 harness:copilot/version	source	provenance	internal:phase-01@fab5848	none	assertion	external
 harness:copilot/version	summary	narration	Print or verify the installed Copilot version.	none	assertion	asserted
 harness:copilot/version	support	support-state	expected	gate:evidence-pairing	evidence	gate
-harness:copilot/version	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	frozen
+harness:copilot/version	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	runtime-gate
 harness:copilot/yolo	args	execution-shape	["-c", "echo danger yolo mode is not configured for copilot; exit 1"]	gate:command-shape	evidence	gate
 harness:copilot/yolo	command	execution-shape	sh	gate:command-shape	evidence	gate
 harness:copilot/yolo	effect	risk-class	dangerous	gate:effect-class	evidence	gate
@@ -696,7 +696,7 @@ harness:copilot/yolo	platforms	platform-scope	["linux-x64-gnu"]	gate:platform-na
 harness:copilot/yolo	source	provenance	internal:phase-01@fab5848	none	assertion	external
 harness:copilot/yolo	summary	narration	Dangerous mode is not normalized for Copilot yet.	none	assertion	asserted
 harness:copilot/yolo	support	support-state	disabled	gate:evidence-pairing	evidence	gate
-harness:copilot/yolo	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	frozen
+harness:copilot/yolo	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	runtime-gate
 harness:crush	binary	identity	crush	gate:identity	evidence	gate
 harness:crush	description	narration	Charm's multi-model AI assistant with LSP	none	assertion	asserted
 harness:crush	display	narration	Crush	none	assertion	asserted
@@ -715,7 +715,7 @@ harness:crush/download	platforms	platform-scope	[]	gate:platform-name	evidence	a
 harness:crush/download	source	provenance	internal:phase-01@fab5848	none	assertion	external
 harness:crush/download	summary	narration	Install Crush from its documented distribution channel.	none	assertion	asserted
 harness:crush/download	support	support-state	expected	gate:evidence-pairing	evidence	gate
-harness:crush/download	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	frozen
+harness:crush/download	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	runtime-gate
 harness:crush/headless	args	execution-shape	["--help"]	gate:command-shape	evidence	gate
 harness:crush/headless	command	execution-shape	crush	gate:command-shape	evidence	gate
 harness:crush/headless	effect	risk-class	read-only	gate:effect-class	evidence	gate
@@ -727,7 +727,7 @@ harness:crush/headless	platforms	platform-scope	["linux-x64-gnu"]	gate:platform-
 harness:crush/headless	source	provenance	internal:phase-01@fab5848	none	assertion	external
 harness:crush/headless	summary	narration	Review Crush headless invocation options.	none	assertion	asserted
 harness:crush/headless	support	support-state	stub	gate:evidence-pairing	evidence	gate
-harness:crush/headless	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	frozen
+harness:crush/headless	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	runtime-gate
 harness:crush/models	args	execution-shape	["--help"]	gate:command-shape	evidence	gate
 harness:crush/models	command	execution-shape	crush	gate:command-shape	evidence	gate
 harness:crush/models	effect	risk-class	read-only	gate:effect-class	evidence	gate
@@ -739,7 +739,7 @@ harness:crush/models	platforms	platform-scope	["linux-x64-gnu"]	gate:platform-na
 harness:crush/models	source	provenance	internal:phase-01@fab5848	none	assertion	external
 harness:crush/models	summary	narration	Review Crush model selection command surface.	none	assertion	asserted
 harness:crush/models	support	support-state	stub	gate:evidence-pairing	evidence	gate
-harness:crush/models	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	frozen
+harness:crush/models	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	runtime-gate
 harness:crush/security	args	execution-shape	["--help"]	gate:command-shape	evidence	gate
 harness:crush/security	command	execution-shape	crush	gate:command-shape	evidence	gate
 harness:crush/security	effect	risk-class	read-only	gate:effect-class	evidence	gate
@@ -751,7 +751,7 @@ harness:crush/security	platforms	platform-scope	["linux-x64-gnu"]	gate:platform-
 harness:crush/security	source	provenance	internal:phase-01@fab5848	none	assertion	external
 harness:crush/security	summary	narration	Review Crush security and auth command surface.	none	assertion	asserted
 harness:crush/security	support	support-state	stub	gate:evidence-pairing	evidence	gate
-harness:crush/security	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	frozen
+harness:crush/security	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	runtime-gate
 harness:crush/stats	args	execution-shape	["--help"]	gate:command-shape	evidence	gate
 harness:crush/stats	command	execution-shape	crush	gate:command-shape	evidence	gate
 harness:crush/stats	effect	risk-class	read-only	gate:effect-class	evidence	gate
@@ -763,7 +763,7 @@ harness:crush/stats	platforms	platform-scope	["linux-x64-gnu"]	gate:platform-nam
 harness:crush/stats	source	provenance	internal:phase-01@fab5848	none	assertion	external
 harness:crush/stats	summary	narration	Review Crush local status and usage command surface.	none	assertion	asserted
 harness:crush/stats	support	support-state	stub	gate:evidence-pairing	evidence	gate
-harness:crush/stats	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	frozen
+harness:crush/stats	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	runtime-gate
 harness:crush/ui	args	execution-shape	[]	gate:command-shape	evidence	gate
 harness:crush/ui	command	execution-shape	crush	gate:command-shape	evidence	gate
 harness:crush/ui	effect	risk-class	state-changing	gate:effect-class	evidence	gate
@@ -775,7 +775,7 @@ harness:crush/ui	platforms	platform-scope	[]	gate:platform-name	evidence	asserte
 harness:crush/ui	source	provenance	internal:phase-01@fab5848	none	assertion	external
 harness:crush/ui	summary	narration	Open the interactive Crush interface.	none	assertion	asserted
 harness:crush/ui	support	support-state	expected	gate:evidence-pairing	evidence	gate
-harness:crush/ui	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	frozen
+harness:crush/ui	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	runtime-gate
 harness:crush/update	args	execution-shape	["update", "-g", "@charmland/crush"]	gate:command-shape	evidence	gate
 harness:crush/update	command	execution-shape	npm	gate:command-shape	evidence	gate
 harness:crush/update	effect	risk-class	state-changing	gate:effect-class	evidence	gate
@@ -788,7 +788,7 @@ harness:crush/update	platforms	platform-scope	[]	gate:platform-name	evidence	ass
 harness:crush/update	source	provenance	internal:phase-01@fab5848	none	assertion	external
 harness:crush/update	summary	narration	Update Crush without interactive setup flows.	none	assertion	asserted
 harness:crush/update	support	support-state	expected	gate:evidence-pairing	evidence	gate
-harness:crush/update	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	frozen
+harness:crush/update	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	runtime-gate
 harness:crush/version	args	execution-shape	["--version"]	gate:command-shape	evidence	gate
 harness:crush/version	command	execution-shape	crush	gate:command-shape	evidence	gate
 harness:crush/version	effect	risk-class	read-only	none	assertion	asserted
@@ -800,7 +800,7 @@ harness:crush/version	platforms	platform-scope	[]	gate:platform-name	evidence	as
 harness:crush/version	source	provenance	internal:phase-01@fab5848	none	assertion	external
 harness:crush/version	summary	narration	Print or verify the installed Crush version.	none	assertion	asserted
 harness:crush/version	support	support-state	expected	gate:evidence-pairing	evidence	gate
-harness:crush/version	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	frozen
+harness:crush/version	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	runtime-gate
 harness:crush/yolo	args	execution-shape	["-c", "echo danger yolo mode is not configured for crush; exit 1"]	gate:command-shape	evidence	gate
 harness:crush/yolo	command	execution-shape	sh	gate:command-shape	evidence	gate
 harness:crush/yolo	effect	risk-class	dangerous	gate:effect-class	evidence	gate
@@ -812,7 +812,7 @@ harness:crush/yolo	platforms	platform-scope	["linux-x64-gnu"]	gate:platform-name
 harness:crush/yolo	source	provenance	internal:phase-01@fab5848	none	assertion	external
 harness:crush/yolo	summary	narration	Dangerous mode is not normalized for Crush yet.	none	assertion	asserted
 harness:crush/yolo	support	support-state	disabled	gate:evidence-pairing	evidence	gate
-harness:crush/yolo	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	frozen
+harness:crush/yolo	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	runtime-gate
 harness:cursor-agent	binary	identity	cursor-agent	gate:identity	evidence	gate
 harness:cursor-agent	description	narration	AI agent replicating Cursor's capabilities in the CLI	none	assertion	asserted
 harness:cursor-agent	display	narration	Cursor Agent	none	assertion	asserted
@@ -830,7 +830,7 @@ harness:cursor-agent/download	platforms	platform-scope	[]	gate:platform-name	evi
 harness:cursor-agent/download	source	provenance	internal:phase-01@fab5848	none	assertion	external
 harness:cursor-agent/download	summary	narration	Install Cursor Agent from its documented distribution channel.	none	assertion	asserted
 harness:cursor-agent/download	support	support-state	expected	gate:evidence-pairing	evidence	gate
-harness:cursor-agent/download	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	frozen
+harness:cursor-agent/download	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	runtime-gate
 harness:cursor-agent/headless	args	execution-shape	["--help"]	gate:command-shape	evidence	gate
 harness:cursor-agent/headless	command	execution-shape	cursor-agent	gate:command-shape	evidence	gate
 harness:cursor-agent/headless	effect	risk-class	read-only	gate:effect-class	evidence	gate
@@ -842,7 +842,7 @@ harness:cursor-agent/headless	platforms	platform-scope	["linux-x64-gnu"]	gate:pl
 harness:cursor-agent/headless	source	provenance	internal:phase-01@fab5848	none	assertion	external
 harness:cursor-agent/headless	summary	narration	Review Cursor Agent headless invocation options.	none	assertion	asserted
 harness:cursor-agent/headless	support	support-state	stub	gate:evidence-pairing	evidence	gate
-harness:cursor-agent/headless	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	frozen
+harness:cursor-agent/headless	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	runtime-gate
 harness:cursor-agent/models	args	execution-shape	["--help"]	gate:command-shape	evidence	gate
 harness:cursor-agent/models	command	execution-shape	cursor-agent	gate:command-shape	evidence	gate
 harness:cursor-agent/models	effect	risk-class	read-only	gate:effect-class	evidence	gate
@@ -854,7 +854,7 @@ harness:cursor-agent/models	platforms	platform-scope	["linux-x64-gnu"]	gate:plat
 harness:cursor-agent/models	source	provenance	internal:phase-01@fab5848	none	assertion	external
 harness:cursor-agent/models	summary	narration	Review Cursor Agent model selection command surface.	none	assertion	asserted
 harness:cursor-agent/models	support	support-state	stub	gate:evidence-pairing	evidence	gate
-harness:cursor-agent/models	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	frozen
+harness:cursor-agent/models	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	runtime-gate
 harness:cursor-agent/security	args	execution-shape	["--help"]	gate:command-shape	evidence	gate
 harness:cursor-agent/security	command	execution-shape	cursor-agent	gate:command-shape	evidence	gate
 harness:cursor-agent/security	effect	risk-class	read-only	gate:effect-class	evidence	gate
@@ -866,7 +866,7 @@ harness:cursor-agent/security	platforms	platform-scope	["linux-x64-gnu"]	gate:pl
 harness:cursor-agent/security	source	provenance	internal:phase-01@fab5848	none	assertion	external
 harness:cursor-agent/security	summary	narration	Review Cursor Agent security and auth command surface.	none	assertion	asserted
 harness:cursor-agent/security	support	support-state	stub	gate:evidence-pairing	evidence	gate
-harness:cursor-agent/security	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	frozen
+harness:cursor-agent/security	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	runtime-gate
 harness:cursor-agent/stats	args	execution-shape	["--help"]	gate:command-shape	evidence	gate
 harness:cursor-agent/stats	command	execution-shape	cursor-agent	gate:command-shape	evidence	gate
 harness:cursor-agent/stats	effect	risk-class	read-only	gate:effect-class	evidence	gate
@@ -878,7 +878,7 @@ harness:cursor-agent/stats	platforms	platform-scope	["linux-x64-gnu"]	gate:platf
 harness:cursor-agent/stats	source	provenance	internal:phase-01@fab5848	none	assertion	external
 harness:cursor-agent/stats	summary	narration	Review Cursor Agent local status and usage command surface.	none	assertion	asserted
 harness:cursor-agent/stats	support	support-state	stub	gate:evidence-pairing	evidence	gate
-harness:cursor-agent/stats	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	frozen
+harness:cursor-agent/stats	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	runtime-gate
 harness:cursor-agent/ui	args	execution-shape	[]	gate:command-shape	evidence	gate
 harness:cursor-agent/ui	command	execution-shape	cursor-agent	gate:command-shape	evidence	gate
 harness:cursor-agent/ui	effect	risk-class	state-changing	gate:effect-class	evidence	gate
@@ -890,7 +890,7 @@ harness:cursor-agent/ui	platforms	platform-scope	[]	gate:platform-name	evidence	
 harness:cursor-agent/ui	source	provenance	internal:phase-01@fab5848	none	assertion	external
 harness:cursor-agent/ui	summary	narration	Open the interactive Cursor Agent interface.	none	assertion	asserted
 harness:cursor-agent/ui	support	support-state	expected	gate:evidence-pairing	evidence	gate
-harness:cursor-agent/ui	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	frozen
+harness:cursor-agent/ui	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	runtime-gate
 harness:cursor-agent/update	args	execution-shape	["install", "--upgrade", "cursor-agent-tools"]	gate:command-shape	evidence	gate
 harness:cursor-agent/update	command	execution-shape	pip	gate:command-shape	evidence	gate
 harness:cursor-agent/update	effect	risk-class	state-changing	gate:effect-class	evidence	gate
@@ -902,7 +902,7 @@ harness:cursor-agent/update	platforms	platform-scope	[]	gate:platform-name	evide
 harness:cursor-agent/update	source	provenance	internal:phase-01@fab5848	none	assertion	external
 harness:cursor-agent/update	summary	narration	Update Cursor Agent without interactive setup flows.	none	assertion	asserted
 harness:cursor-agent/update	support	support-state	expected	gate:evidence-pairing	evidence	gate
-harness:cursor-agent/update	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	frozen
+harness:cursor-agent/update	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	runtime-gate
 harness:cursor-agent/version	args	execution-shape	["--help"]	gate:command-shape	evidence	gate
 harness:cursor-agent/version	command	execution-shape	cursor-agent	gate:command-shape	evidence	gate
 harness:cursor-agent/version	effect	risk-class	read-only	gate:effect-class	evidence	gate
@@ -914,7 +914,7 @@ harness:cursor-agent/version	platforms	platform-scope	["linux-x64-gnu"]	gate:pla
 harness:cursor-agent/version	source	provenance	internal:phase-01@fab5848	none	assertion	external
 harness:cursor-agent/version	summary	narration	Print or verify the installed Cursor Agent version.	none	assertion	asserted
 harness:cursor-agent/version	support	support-state	stub	gate:evidence-pairing	evidence	gate
-harness:cursor-agent/version	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	frozen
+harness:cursor-agent/version	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	runtime-gate
 harness:cursor-agent/yolo	args	execution-shape	["-c", "echo danger yolo mode is not configured for cursor-agent; exit 1"]	gate:command-shape	evidence	gate
 harness:cursor-agent/yolo	command	execution-shape	sh	gate:command-shape	evidence	gate
 harness:cursor-agent/yolo	effect	risk-class	dangerous	gate:effect-class	evidence	gate
@@ -926,7 +926,7 @@ harness:cursor-agent/yolo	platforms	platform-scope	["linux-x64-gnu"]	gate:platfo
 harness:cursor-agent/yolo	source	provenance	internal:phase-01@fab5848	none	assertion	external
 harness:cursor-agent/yolo	summary	narration	Dangerous mode is not normalized for Cursor Agent yet.	none	assertion	asserted
 harness:cursor-agent/yolo	support	support-state	disabled	gate:evidence-pairing	evidence	gate
-harness:cursor-agent/yolo	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	frozen
+harness:cursor-agent/yolo	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	runtime-gate
 harness:droid	binary	identity	droid	gate:identity	evidence	gate
 harness:droid	description	narration	Factory AI's Droid - Automated coding engineer	none	assertion	asserted
 harness:droid	display	narration	Droid	none	assertion	asserted
@@ -944,7 +944,7 @@ harness:droid/download	platforms	platform-scope	[]	gate:platform-name	evidence	a
 harness:droid/download	source	provenance	internal:phase-01@fab5848	none	assertion	external
 harness:droid/download	summary	narration	Install Droid from its documented distribution channel.	none	assertion	asserted
 harness:droid/download	support	support-state	unknown	gate:evidence-pairing	evidence	gate
-harness:droid/download	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	frozen
+harness:droid/download	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	runtime-gate
 harness:droid/headless	args	execution-shape	["--help"]	gate:command-shape	evidence	gate
 harness:droid/headless	command	execution-shape	droid	gate:command-shape	evidence	gate
 harness:droid/headless	effect	risk-class	read-only	gate:effect-class	evidence	gate
@@ -956,7 +956,7 @@ harness:droid/headless	platforms	platform-scope	["linux-x64-gnu"]	gate:platform-
 harness:droid/headless	source	provenance	internal:phase-01@fab5848	none	assertion	external
 harness:droid/headless	summary	narration	Review Droid headless invocation options.	none	assertion	asserted
 harness:droid/headless	support	support-state	stub	gate:evidence-pairing	evidence	gate
-harness:droid/headless	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	frozen
+harness:droid/headless	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	runtime-gate
 harness:droid/models	args	execution-shape	["--help"]	gate:command-shape	evidence	gate
 harness:droid/models	command	execution-shape	droid	gate:command-shape	evidence	gate
 harness:droid/models	effect	risk-class	read-only	gate:effect-class	evidence	gate
@@ -968,7 +968,7 @@ harness:droid/models	platforms	platform-scope	["linux-x64-gnu"]	gate:platform-na
 harness:droid/models	source	provenance	internal:phase-01@fab5848	none	assertion	external
 harness:droid/models	summary	narration	Review Droid model selection command surface.	none	assertion	asserted
 harness:droid/models	support	support-state	stub	gate:evidence-pairing	evidence	gate
-harness:droid/models	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	frozen
+harness:droid/models	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	runtime-gate
 harness:droid/security	args	execution-shape	["--help"]	gate:command-shape	evidence	gate
 harness:droid/security	command	execution-shape	droid	gate:command-shape	evidence	gate
 harness:droid/security	effect	risk-class	read-only	gate:effect-class	evidence	gate
@@ -980,7 +980,7 @@ harness:droid/security	platforms	platform-scope	["linux-x64-gnu"]	gate:platform-
 harness:droid/security	source	provenance	internal:phase-01@fab5848	none	assertion	external
 harness:droid/security	summary	narration	Review Droid security and auth command surface.	none	assertion	asserted
 harness:droid/security	support	support-state	stub	gate:evidence-pairing	evidence	gate
-harness:droid/security	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	frozen
+harness:droid/security	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	runtime-gate
 harness:droid/stats	args	execution-shape	["--help"]	gate:command-shape	evidence	gate
 harness:droid/stats	command	execution-shape	droid	gate:command-shape	evidence	gate
 harness:droid/stats	effect	risk-class	read-only	gate:effect-class	evidence	gate
@@ -992,7 +992,7 @@ harness:droid/stats	platforms	platform-scope	["linux-x64-gnu"]	gate:platform-nam
 harness:droid/stats	source	provenance	internal:phase-01@fab5848	none	assertion	external
 harness:droid/stats	summary	narration	Review Droid local status and usage command surface.	none	assertion	asserted
 harness:droid/stats	support	support-state	stub	gate:evidence-pairing	evidence	gate
-harness:droid/stats	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	frozen
+harness:droid/stats	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	runtime-gate
 harness:droid/ui	args	execution-shape	[]	gate:command-shape	evidence	gate
 harness:droid/ui	command	execution-shape	droid	gate:command-shape	evidence	gate
 harness:droid/ui	effect	risk-class	state-changing	gate:effect-class	evidence	gate
@@ -1004,7 +1004,7 @@ harness:droid/ui	platforms	platform-scope	[]	gate:platform-name	evidence	asserte
 harness:droid/ui	source	provenance	internal:phase-01@fab5848	none	assertion	external
 harness:droid/ui	summary	narration	Open the interactive Droid interface.	none	assertion	asserted
 harness:droid/ui	support	support-state	expected	gate:evidence-pairing	evidence	gate
-harness:droid/ui	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	frozen
+harness:droid/ui	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	runtime-gate
 harness:droid/update	args	execution-shape	["update"]	gate:command-shape	evidence	gate
 harness:droid/update	command	execution-shape	droid	gate:command-shape	evidence	gate
 harness:droid/update	effect	risk-class	state-changing	gate:effect-class	evidence	gate
@@ -1016,7 +1016,7 @@ harness:droid/update	platforms	platform-scope	[]	gate:platform-name	evidence	ass
 harness:droid/update	source	provenance	internal:phase-01@fab5848	none	assertion	external
 harness:droid/update	summary	narration	Update Droid without interactive setup flows.	none	assertion	asserted
 harness:droid/update	support	support-state	expected	gate:evidence-pairing	evidence	gate
-harness:droid/update	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	frozen
+harness:droid/update	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	runtime-gate
 harness:droid/version	args	execution-shape	["--version"]	gate:command-shape	evidence	gate
 harness:droid/version	command	execution-shape	droid	gate:command-shape	evidence	gate
 harness:droid/version	effect	risk-class	read-only	none	assertion	asserted
@@ -1028,7 +1028,7 @@ harness:droid/version	platforms	platform-scope	[]	gate:platform-name	evidence	as
 harness:droid/version	source	provenance	internal:phase-01@fab5848	none	assertion	external
 harness:droid/version	summary	narration	Print or verify the installed Droid version.	none	assertion	asserted
 harness:droid/version	support	support-state	expected	gate:evidence-pairing	evidence	gate
-harness:droid/version	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	frozen
+harness:droid/version	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	runtime-gate
 harness:droid/yolo	args	execution-shape	["-c", "echo danger yolo mode is not configured for droid; exit 1"]	gate:command-shape	evidence	gate
 harness:droid/yolo	command	execution-shape	sh	gate:command-shape	evidence	gate
 harness:droid/yolo	effect	risk-class	dangerous	gate:effect-class	evidence	gate
@@ -1040,7 +1040,7 @@ harness:droid/yolo	platforms	platform-scope	["linux-x64-gnu"]	gate:platform-name
 harness:droid/yolo	source	provenance	internal:phase-01@fab5848	none	assertion	external
 harness:droid/yolo	summary	narration	Dangerous mode is not normalized for Droid yet.	none	assertion	asserted
 harness:droid/yolo	support	support-state	disabled	gate:evidence-pairing	evidence	gate
-harness:droid/yolo	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	frozen
+harness:droid/yolo	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	runtime-gate
 harness:eca	binary	identity	eca	gate:identity	evidence	gate
 harness:eca	description	narration	Editor Code Assistant	none	assertion	asserted
 harness:eca	display	narration	ECA	none	assertion	asserted
@@ -1058,7 +1058,7 @@ harness:eca/download	platforms	platform-scope	[]	gate:platform-name	evidence	ass
 harness:eca/download	source	provenance	internal:phase-01@fab5848	none	assertion	external
 harness:eca/download	summary	narration	Install ECA from its documented distribution channel.	none	assertion	asserted
 harness:eca/download	support	support-state	unknown	gate:evidence-pairing	evidence	gate
-harness:eca/download	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	frozen
+harness:eca/download	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	runtime-gate
 harness:eca/headless	args	execution-shape	["--help"]	gate:command-shape	evidence	gate
 harness:eca/headless	command	execution-shape	eca	gate:command-shape	evidence	gate
 harness:eca/headless	effect	risk-class	read-only	gate:effect-class	evidence	gate
@@ -1070,7 +1070,7 @@ harness:eca/headless	platforms	platform-scope	["linux-x64-gnu"]	gate:platform-na
 harness:eca/headless	source	provenance	internal:phase-01@fab5848	none	assertion	external
 harness:eca/headless	summary	narration	Review ECA headless invocation options.	none	assertion	asserted
 harness:eca/headless	support	support-state	stub	gate:evidence-pairing	evidence	gate
-harness:eca/headless	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	frozen
+harness:eca/headless	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	runtime-gate
 harness:eca/models	args	execution-shape	["--help"]	gate:command-shape	evidence	gate
 harness:eca/models	command	execution-shape	eca	gate:command-shape	evidence	gate
 harness:eca/models	effect	risk-class	read-only	gate:effect-class	evidence	gate
@@ -1082,7 +1082,7 @@ harness:eca/models	platforms	platform-scope	["linux-x64-gnu"]	gate:platform-name
 harness:eca/models	source	provenance	internal:phase-01@fab5848	none	assertion	external
 harness:eca/models	summary	narration	Review ECA model selection command surface.	none	assertion	asserted
 harness:eca/models	support	support-state	stub	gate:evidence-pairing	evidence	gate
-harness:eca/models	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	frozen
+harness:eca/models	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	runtime-gate
 harness:eca/security	args	execution-shape	["--help"]	gate:command-shape	evidence	gate
 harness:eca/security	command	execution-shape	eca	gate:command-shape	evidence	gate
 harness:eca/security	effect	risk-class	read-only	gate:effect-class	evidence	gate
@@ -1094,7 +1094,7 @@ harness:eca/security	platforms	platform-scope	["linux-x64-gnu"]	gate:platform-na
 harness:eca/security	source	provenance	internal:phase-01@fab5848	none	assertion	external
 harness:eca/security	summary	narration	Review ECA security and auth command surface.	none	assertion	asserted
 harness:eca/security	support	support-state	stub	gate:evidence-pairing	evidence	gate
-harness:eca/security	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	frozen
+harness:eca/security	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	runtime-gate
 harness:eca/stats	args	execution-shape	["--help"]	gate:command-shape	evidence	gate
 harness:eca/stats	command	execution-shape	eca	gate:command-shape	evidence	gate
 harness:eca/stats	effect	risk-class	read-only	gate:effect-class	evidence	gate
@@ -1106,7 +1106,7 @@ harness:eca/stats	platforms	platform-scope	["linux-x64-gnu"]	gate:platform-name	
 harness:eca/stats	source	provenance	internal:phase-01@fab5848	none	assertion	external
 harness:eca/stats	summary	narration	Review ECA local status and usage command surface.	none	assertion	asserted
 harness:eca/stats	support	support-state	stub	gate:evidence-pairing	evidence	gate
-harness:eca/stats	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	frozen
+harness:eca/stats	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	runtime-gate
 harness:eca/ui	args	execution-shape	[]	gate:command-shape	evidence	gate
 harness:eca/ui	command	execution-shape	eca	gate:command-shape	evidence	gate
 harness:eca/ui	effect	risk-class	state-changing	gate:effect-class	evidence	gate
@@ -1118,7 +1118,7 @@ harness:eca/ui	platforms	platform-scope	[]	gate:platform-name	evidence	asserted
 harness:eca/ui	source	provenance	internal:phase-01@fab5848	none	assertion	external
 harness:eca/ui	summary	narration	Open the interactive ECA interface.	none	assertion	asserted
 harness:eca/ui	support	support-state	expected	gate:evidence-pairing	evidence	gate
-harness:eca/ui	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	frozen
+harness:eca/ui	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	runtime-gate
 harness:eca/update	args	execution-shape	["upgrade"]	gate:command-shape	evidence	gate
 harness:eca/update	command	execution-shape	eca	gate:command-shape	evidence	gate
 harness:eca/update	effect	risk-class	state-changing	gate:effect-class	evidence	gate
@@ -1130,7 +1130,7 @@ harness:eca/update	platforms	platform-scope	[]	gate:platform-name	evidence	asser
 harness:eca/update	source	provenance	internal:phase-01@fab5848	none	assertion	external
 harness:eca/update	summary	narration	Update ECA without interactive setup flows.	none	assertion	asserted
 harness:eca/update	support	support-state	expected	gate:evidence-pairing	evidence	gate
-harness:eca/update	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	frozen
+harness:eca/update	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	runtime-gate
 harness:eca/version	args	execution-shape	["--version"]	gate:command-shape	evidence	gate
 harness:eca/version	command	execution-shape	eca	gate:command-shape	evidence	gate
 harness:eca/version	effect	risk-class	read-only	none	assertion	asserted
@@ -1142,7 +1142,7 @@ harness:eca/version	platforms	platform-scope	[]	gate:platform-name	evidence	asse
 harness:eca/version	source	provenance	internal:phase-01@fab5848	none	assertion	external
 harness:eca/version	summary	narration	Print or verify the installed ECA version.	none	assertion	asserted
 harness:eca/version	support	support-state	expected	gate:evidence-pairing	evidence	gate
-harness:eca/version	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	frozen
+harness:eca/version	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	runtime-gate
 harness:eca/yolo	args	execution-shape	["-c", "echo danger yolo mode is not configured for eca; exit 1"]	gate:command-shape	evidence	gate
 harness:eca/yolo	command	execution-shape	sh	gate:command-shape	evidence	gate
 harness:eca/yolo	effect	risk-class	dangerous	gate:effect-class	evidence	gate
@@ -1154,7 +1154,7 @@ harness:eca/yolo	platforms	platform-scope	["linux-x64-gnu"]	gate:platform-name	e
 harness:eca/yolo	source	provenance	internal:phase-01@fab5848	none	assertion	external
 harness:eca/yolo	summary	narration	Dangerous mode is not normalized for ECA yet.	none	assertion	asserted
 harness:eca/yolo	support	support-state	disabled	gate:evidence-pairing	evidence	gate
-harness:eca/yolo	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	frozen
+harness:eca/yolo	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	runtime-gate
 harness:forge	binary	identity	forge	gate:identity	evidence	gate
 harness:forge	description	narration	AI-Enhanced Terminal Development Environment	none	assertion	asserted
 harness:forge	display	narration	Forge	none	assertion	asserted
@@ -1173,7 +1173,7 @@ harness:forge/download	platforms	platform-scope	[]	gate:platform-name	evidence	a
 harness:forge/download	source	provenance	internal:phase-01@fab5848	none	assertion	external
 harness:forge/download	summary	narration	Install Forge from its documented distribution channel.	none	assertion	asserted
 harness:forge/download	support	support-state	expected	gate:evidence-pairing	evidence	gate
-harness:forge/download	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	frozen
+harness:forge/download	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	runtime-gate
 harness:forge/headless	args	execution-shape	["--help"]	gate:command-shape	evidence	gate
 harness:forge/headless	command	execution-shape	forge	gate:command-shape	evidence	gate
 harness:forge/headless	effect	risk-class	read-only	gate:effect-class	evidence	gate
@@ -1185,7 +1185,7 @@ harness:forge/headless	platforms	platform-scope	["linux-x64-gnu"]	gate:platform-
 harness:forge/headless	source	provenance	internal:phase-01@fab5848	none	assertion	external
 harness:forge/headless	summary	narration	Review Forge headless invocation options.	none	assertion	asserted
 harness:forge/headless	support	support-state	stub	gate:evidence-pairing	evidence	gate
-harness:forge/headless	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	frozen
+harness:forge/headless	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	runtime-gate
 harness:forge/models	args	execution-shape	["--help"]	gate:command-shape	evidence	gate
 harness:forge/models	command	execution-shape	forge	gate:command-shape	evidence	gate
 harness:forge/models	effect	risk-class	read-only	gate:effect-class	evidence	gate
@@ -1197,7 +1197,7 @@ harness:forge/models	platforms	platform-scope	["linux-x64-gnu"]	gate:platform-na
 harness:forge/models	source	provenance	internal:phase-01@fab5848	none	assertion	external
 harness:forge/models	summary	narration	Review Forge model selection command surface.	none	assertion	asserted
 harness:forge/models	support	support-state	stub	gate:evidence-pairing	evidence	gate
-harness:forge/models	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	frozen
+harness:forge/models	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	runtime-gate
 harness:forge/security	args	execution-shape	["--help"]	gate:command-shape	evidence	gate
 harness:forge/security	command	execution-shape	forge	gate:command-shape	evidence	gate
 harness:forge/security	effect	risk-class	read-only	gate:effect-class	evidence	gate
@@ -1209,7 +1209,7 @@ harness:forge/security	platforms	platform-scope	["linux-x64-gnu"]	gate:platform-
 harness:forge/security	source	provenance	internal:phase-01@fab5848	none	assertion	external
 harness:forge/security	summary	narration	Review Forge security and auth command surface.	none	assertion	asserted
 harness:forge/security	support	support-state	stub	gate:evidence-pairing	evidence	gate
-harness:forge/security	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	frozen
+harness:forge/security	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	runtime-gate
 harness:forge/stats	args	execution-shape	["--help"]	gate:command-shape	evidence	gate
 harness:forge/stats	command	execution-shape	forge	gate:command-shape	evidence	gate
 harness:forge/stats	effect	risk-class	read-only	gate:effect-class	evidence	gate
@@ -1221,7 +1221,7 @@ harness:forge/stats	platforms	platform-scope	["linux-x64-gnu"]	gate:platform-nam
 harness:forge/stats	source	provenance	internal:phase-01@fab5848	none	assertion	external
 harness:forge/stats	summary	narration	Review Forge local status and usage command surface.	none	assertion	asserted
 harness:forge/stats	support	support-state	stub	gate:evidence-pairing	evidence	gate
-harness:forge/stats	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	frozen
+harness:forge/stats	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	runtime-gate
 harness:forge/ui	args	execution-shape	[]	gate:command-shape	evidence	gate
 harness:forge/ui	command	execution-shape	forge	gate:command-shape	evidence	gate
 harness:forge/ui	effect	risk-class	state-changing	gate:effect-class	evidence	gate
@@ -1233,7 +1233,7 @@ harness:forge/ui	platforms	platform-scope	[]	gate:platform-name	evidence	asserte
 harness:forge/ui	source	provenance	internal:phase-01@fab5848	none	assertion	external
 harness:forge/ui	summary	narration	Open the interactive Forge interface.	none	assertion	asserted
 harness:forge/ui	support	support-state	expected	gate:evidence-pairing	evidence	gate
-harness:forge/ui	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	frozen
+harness:forge/ui	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	runtime-gate
 harness:forge/update	args	execution-shape	["update", "-g", "forgecode"]	gate:command-shape	evidence	gate
 harness:forge/update	command	execution-shape	npm	gate:command-shape	evidence	gate
 harness:forge/update	effect	risk-class	state-changing	gate:effect-class	evidence	gate
@@ -1246,7 +1246,7 @@ harness:forge/update	platforms	platform-scope	[]	gate:platform-name	evidence	ass
 harness:forge/update	source	provenance	internal:phase-01@fab5848	none	assertion	external
 harness:forge/update	summary	narration	Update Forge without interactive setup flows.	none	assertion	asserted
 harness:forge/update	support	support-state	expected	gate:evidence-pairing	evidence	gate
-harness:forge/update	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	frozen
+harness:forge/update	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	runtime-gate
 harness:forge/version	args	execution-shape	["--version"]	gate:command-shape	evidence	gate
 harness:forge/version	command	execution-shape	forge	gate:command-shape	evidence	gate
 harness:forge/version	effect	risk-class	read-only	none	assertion	asserted
@@ -1258,7 +1258,7 @@ harness:forge/version	platforms	platform-scope	[]	gate:platform-name	evidence	as
 harness:forge/version	source	provenance	internal:phase-01@fab5848	none	assertion	external
 harness:forge/version	summary	narration	Print or verify the installed Forge version.	none	assertion	asserted
 harness:forge/version	support	support-state	expected	gate:evidence-pairing	evidence	gate
-harness:forge/version	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	frozen
+harness:forge/version	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	runtime-gate
 harness:forge/yolo	args	execution-shape	["-c", "echo danger yolo mode is not configured for forge; exit 1"]	gate:command-shape	evidence	gate
 harness:forge/yolo	command	execution-shape	sh	gate:command-shape	evidence	gate
 harness:forge/yolo	effect	risk-class	dangerous	gate:effect-class	evidence	gate
@@ -1270,7 +1270,7 @@ harness:forge/yolo	platforms	platform-scope	["linux-x64-gnu"]	gate:platform-name
 harness:forge/yolo	source	provenance	internal:phase-01@fab5848	none	assertion	external
 harness:forge/yolo	summary	narration	Dangerous mode is not normalized for Forge yet.	none	assertion	asserted
 harness:forge/yolo	support	support-state	disabled	gate:evidence-pairing	evidence	gate
-harness:forge/yolo	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	frozen
+harness:forge/yolo	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	runtime-gate
 harness:gemini	binary	identity	gemini	gate:identity	evidence	gate
 harness:gemini	description	narration	Google's Gemini CLI tool	none	assertion	asserted
 harness:gemini	display	narration	Gemini	none	assertion	asserted
@@ -1289,7 +1289,7 @@ harness:gemini/download	platforms	platform-scope	[]	gate:platform-name	evidence	
 harness:gemini/download	source	provenance	internal:phase-01@fab5848	none	assertion	external
 harness:gemini/download	summary	narration	Install Gemini from its documented distribution channel.	none	assertion	asserted
 harness:gemini/download	support	support-state	expected	gate:evidence-pairing	evidence	gate
-harness:gemini/download	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	frozen
+harness:gemini/download	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	runtime-gate
 harness:gemini/headless	args	execution-shape	["--help"]	gate:command-shape	evidence	gate
 harness:gemini/headless	command	execution-shape	gemini	gate:command-shape	evidence	gate
 harness:gemini/headless	effect	risk-class	read-only	gate:effect-class	evidence	gate
@@ -1301,7 +1301,7 @@ harness:gemini/headless	platforms	platform-scope	["linux-x64-gnu"]	gate:platform
 harness:gemini/headless	source	provenance	internal:phase-01@fab5848	none	assertion	external
 harness:gemini/headless	summary	narration	Review Gemini headless invocation options.	none	assertion	asserted
 harness:gemini/headless	support	support-state	stub	gate:evidence-pairing	evidence	gate
-harness:gemini/headless	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	frozen
+harness:gemini/headless	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	runtime-gate
 harness:gemini/models	args	execution-shape	["--help"]	gate:command-shape	evidence	gate
 harness:gemini/models	command	execution-shape	gemini	gate:command-shape	evidence	gate
 harness:gemini/models	effect	risk-class	read-only	gate:effect-class	evidence	gate
@@ -1313,7 +1313,7 @@ harness:gemini/models	platforms	platform-scope	["linux-x64-gnu"]	gate:platform-n
 harness:gemini/models	source	provenance	internal:phase-01@fab5848	none	assertion	external
 harness:gemini/models	summary	narration	Review Gemini model selection command surface.	none	assertion	asserted
 harness:gemini/models	support	support-state	stub	gate:evidence-pairing	evidence	gate
-harness:gemini/models	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	frozen
+harness:gemini/models	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	runtime-gate
 harness:gemini/security	args	execution-shape	["--help"]	gate:command-shape	evidence	gate
 harness:gemini/security	command	execution-shape	gemini	gate:command-shape	evidence	gate
 harness:gemini/security	effect	risk-class	read-only	gate:effect-class	evidence	gate
@@ -1325,7 +1325,7 @@ harness:gemini/security	platforms	platform-scope	["linux-x64-gnu"]	gate:platform
 harness:gemini/security	source	provenance	internal:phase-01@fab5848	none	assertion	external
 harness:gemini/security	summary	narration	Review Gemini security and auth command surface.	none	assertion	asserted
 harness:gemini/security	support	support-state	stub	gate:evidence-pairing	evidence	gate
-harness:gemini/security	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	frozen
+harness:gemini/security	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	runtime-gate
 harness:gemini/stats	args	execution-shape	["--help"]	gate:command-shape	evidence	gate
 harness:gemini/stats	command	execution-shape	gemini	gate:command-shape	evidence	gate
 harness:gemini/stats	effect	risk-class	read-only	gate:effect-class	evidence	gate
@@ -1337,7 +1337,7 @@ harness:gemini/stats	platforms	platform-scope	["linux-x64-gnu"]	gate:platform-na
 harness:gemini/stats	source	provenance	internal:phase-01@fab5848	none	assertion	external
 harness:gemini/stats	summary	narration	Review Gemini local status and usage command surface.	none	assertion	asserted
 harness:gemini/stats	support	support-state	stub	gate:evidence-pairing	evidence	gate
-harness:gemini/stats	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	frozen
+harness:gemini/stats	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	runtime-gate
 harness:gemini/ui	args	execution-shape	[]	gate:command-shape	evidence	gate
 harness:gemini/ui	command	execution-shape	gemini	gate:command-shape	evidence	gate
 harness:gemini/ui	effect	risk-class	state-changing	gate:effect-class	evidence	gate
@@ -1349,7 +1349,7 @@ harness:gemini/ui	platforms	platform-scope	[]	gate:platform-name	evidence	assert
 harness:gemini/ui	source	provenance	internal:phase-01@fab5848	none	assertion	external
 harness:gemini/ui	summary	narration	Open the interactive Gemini interface.	none	assertion	asserted
 harness:gemini/ui	support	support-state	expected	gate:evidence-pairing	evidence	gate
-harness:gemini/ui	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	frozen
+harness:gemini/ui	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	runtime-gate
 harness:gemini/update	args	execution-shape	["update", "-g", "@google/gemini-cli"]	gate:command-shape	evidence	gate
 harness:gemini/update	command	execution-shape	npm	gate:command-shape	evidence	gate
 harness:gemini/update	effect	risk-class	state-changing	gate:effect-class	evidence	gate
@@ -1362,7 +1362,7 @@ harness:gemini/update	platforms	platform-scope	[]	gate:platform-name	evidence	as
 harness:gemini/update	source	provenance	internal:phase-01@fab5848	none	assertion	external
 harness:gemini/update	summary	narration	Update Gemini without interactive setup flows.	none	assertion	asserted
 harness:gemini/update	support	support-state	expected	gate:evidence-pairing	evidence	gate
-harness:gemini/update	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	frozen
+harness:gemini/update	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	runtime-gate
 harness:gemini/version	args	execution-shape	["--version"]	gate:command-shape	evidence	gate
 harness:gemini/version	command	execution-shape	gemini	gate:command-shape	evidence	gate
 harness:gemini/version	effect	risk-class	read-only	none	assertion	asserted
@@ -1374,7 +1374,7 @@ harness:gemini/version	platforms	platform-scope	[]	gate:platform-name	evidence	a
 harness:gemini/version	source	provenance	internal:phase-01@fab5848	none	assertion	external
 harness:gemini/version	summary	narration	Print or verify the installed Gemini version.	none	assertion	asserted
 harness:gemini/version	support	support-state	expected	gate:evidence-pairing	evidence	gate
-harness:gemini/version	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	frozen
+harness:gemini/version	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	runtime-gate
 harness:gemini/yolo	args	execution-shape	["-c", "echo danger yolo mode is not configured for gemini; exit 1"]	gate:command-shape	evidence	gate
 harness:gemini/yolo	command	execution-shape	sh	gate:command-shape	evidence	gate
 harness:gemini/yolo	effect	risk-class	dangerous	gate:effect-class	evidence	gate
@@ -1386,7 +1386,7 @@ harness:gemini/yolo	platforms	platform-scope	["linux-x64-gnu"]	gate:platform-nam
 harness:gemini/yolo	source	provenance	internal:phase-01@fab5848	none	assertion	external
 harness:gemini/yolo	summary	narration	Dangerous mode is not normalized for Gemini yet.	none	assertion	asserted
 harness:gemini/yolo	support	support-state	disabled	gate:evidence-pairing	evidence	gate
-harness:gemini/yolo	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	frozen
+harness:gemini/yolo	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	runtime-gate
 harness:goose	binary	identity	goose	gate:identity	evidence	gate
 harness:goose	description	narration	Block's AI-powered coding assistant with developer toolkit integration	none	assertion	asserted
 harness:goose	display	narration	Goose	none	assertion	asserted
@@ -1404,7 +1404,7 @@ harness:goose/download	platforms	platform-scope	[]	gate:platform-name	evidence	a
 harness:goose/download	source	provenance	internal:phase-01@fab5848	none	assertion	external
 harness:goose/download	summary	narration	Install Goose from its documented distribution channel.	none	assertion	asserted
 harness:goose/download	support	support-state	unknown	gate:evidence-pairing	evidence	gate
-harness:goose/download	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	frozen
+harness:goose/download	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	runtime-gate
 harness:goose/headless	args	execution-shape	["--help"]	gate:command-shape	evidence	gate
 harness:goose/headless	command	execution-shape	goose	gate:command-shape	evidence	gate
 harness:goose/headless	effect	risk-class	read-only	gate:effect-class	evidence	gate
@@ -1416,7 +1416,7 @@ harness:goose/headless	platforms	platform-scope	["linux-x64-gnu"]	gate:platform-
 harness:goose/headless	source	provenance	internal:phase-01@fab5848	none	assertion	external
 harness:goose/headless	summary	narration	Review Goose headless invocation options.	none	assertion	asserted
 harness:goose/headless	support	support-state	stub	gate:evidence-pairing	evidence	gate
-harness:goose/headless	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	frozen
+harness:goose/headless	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	runtime-gate
 harness:goose/models	args	execution-shape	["--help"]	gate:command-shape	evidence	gate
 harness:goose/models	command	execution-shape	goose	gate:command-shape	evidence	gate
 harness:goose/models	effect	risk-class	read-only	gate:effect-class	evidence	gate
@@ -1428,7 +1428,7 @@ harness:goose/models	platforms	platform-scope	["linux-x64-gnu"]	gate:platform-na
 harness:goose/models	source	provenance	internal:phase-01@fab5848	none	assertion	external
 harness:goose/models	summary	narration	Review Goose model selection command surface.	none	assertion	asserted
 harness:goose/models	support	support-state	stub	gate:evidence-pairing	evidence	gate
-harness:goose/models	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	frozen
+harness:goose/models	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	runtime-gate
 harness:goose/security	args	execution-shape	["--help"]	gate:command-shape	evidence	gate
 harness:goose/security	command	execution-shape	goose	gate:command-shape	evidence	gate
 harness:goose/security	effect	risk-class	read-only	gate:effect-class	evidence	gate
@@ -1440,7 +1440,7 @@ harness:goose/security	platforms	platform-scope	["linux-x64-gnu"]	gate:platform-
 harness:goose/security	source	provenance	internal:phase-01@fab5848	none	assertion	external
 harness:goose/security	summary	narration	Review Goose security and auth command surface.	none	assertion	asserted
 harness:goose/security	support	support-state	stub	gate:evidence-pairing	evidence	gate
-harness:goose/security	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	frozen
+harness:goose/security	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	runtime-gate
 harness:goose/stats	args	execution-shape	["--help"]	gate:command-shape	evidence	gate
 harness:goose/stats	command	execution-shape	goose	gate:command-shape	evidence	gate
 harness:goose/stats	effect	risk-class	read-only	gate:effect-class	evidence	gate
@@ -1452,7 +1452,7 @@ harness:goose/stats	platforms	platform-scope	["linux-x64-gnu"]	gate:platform-nam
 harness:goose/stats	source	provenance	internal:phase-01@fab5848	none	assertion	external
 harness:goose/stats	summary	narration	Review Goose local status and usage command surface.	none	assertion	asserted
 harness:goose/stats	support	support-state	stub	gate:evidence-pairing	evidence	gate
-harness:goose/stats	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	frozen
+harness:goose/stats	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	runtime-gate
 harness:goose/ui	args	execution-shape	[]	gate:command-shape	evidence	gate
 harness:goose/ui	command	execution-shape	goose	gate:command-shape	evidence	gate
 harness:goose/ui	effect	risk-class	state-changing	gate:effect-class	evidence	gate
@@ -1464,7 +1464,7 @@ harness:goose/ui	platforms	platform-scope	[]	gate:platform-name	evidence	asserte
 harness:goose/ui	source	provenance	internal:phase-01@fab5848	none	assertion	external
 harness:goose/ui	summary	narration	Open the interactive Goose interface.	none	assertion	asserted
 harness:goose/ui	support	support-state	expected	gate:evidence-pairing	evidence	gate
-harness:goose/ui	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	frozen
+harness:goose/ui	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	runtime-gate
 harness:goose/update	args	execution-shape	["update"]	gate:command-shape	evidence	gate
 harness:goose/update	command	execution-shape	goose	gate:command-shape	evidence	gate
 harness:goose/update	effect	risk-class	state-changing	gate:effect-class	evidence	gate
@@ -1476,7 +1476,7 @@ harness:goose/update	platforms	platform-scope	[]	gate:platform-name	evidence	ass
 harness:goose/update	source	provenance	internal:phase-01@fab5848	none	assertion	external
 harness:goose/update	summary	narration	Update Goose without interactive setup flows.	none	assertion	asserted
 harness:goose/update	support	support-state	expected	gate:evidence-pairing	evidence	gate
-harness:goose/update	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	frozen
+harness:goose/update	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	runtime-gate
 harness:goose/version	args	execution-shape	["--version"]	gate:command-shape	evidence	gate
 harness:goose/version	command	execution-shape	goose	gate:command-shape	evidence	gate
 harness:goose/version	effect	risk-class	read-only	none	assertion	asserted
@@ -1488,7 +1488,7 @@ harness:goose/version	platforms	platform-scope	[]	gate:platform-name	evidence	as
 harness:goose/version	source	provenance	internal:phase-01@fab5848	none	assertion	external
 harness:goose/version	summary	narration	Print or verify the installed Goose version.	none	assertion	asserted
 harness:goose/version	support	support-state	expected	gate:evidence-pairing	evidence	gate
-harness:goose/version	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	frozen
+harness:goose/version	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	runtime-gate
 harness:goose/yolo	args	execution-shape	["-c", "echo danger yolo mode is not configured for goose; exit 1"]	gate:command-shape	evidence	gate
 harness:goose/yolo	command	execution-shape	sh	gate:command-shape	evidence	gate
 harness:goose/yolo	effect	risk-class	dangerous	gate:effect-class	evidence	gate
@@ -1500,7 +1500,7 @@ harness:goose/yolo	platforms	platform-scope	["linux-x64-gnu"]	gate:platform-name
 harness:goose/yolo	source	provenance	internal:phase-01@fab5848	none	assertion	external
 harness:goose/yolo	summary	narration	Dangerous mode is not normalized for Goose yet.	none	assertion	asserted
 harness:goose/yolo	support	support-state	disabled	gate:evidence-pairing	evidence	gate
-harness:goose/yolo	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	frozen
+harness:goose/yolo	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	runtime-gate
 harness:hermes	binary	identity	hermes	gate:identity	evidence	gate
 harness:hermes	description	narration	Nous Research's terminal AI agent with CLI, TUI, tools, skills, and messaging gateway support	none	assertion	asserted
 harness:hermes	display	narration	Hermes Agent	none	assertion	asserted
@@ -1518,19 +1518,19 @@ harness:hermes/download	platforms	platform-scope	[]	gate:platform-name	evidence	
 harness:hermes/download	source	provenance	internal:phase-01@fab5848	none	assertion	external
 harness:hermes/download	summary	narration	Install Hermes Agent from its documented distribution channel.	none	assertion	asserted
 harness:hermes/download	support	support-state	unknown	gate:evidence-pairing	evidence	gate
-harness:hermes/download	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	frozen
-harness:hermes/headless	args	execution-shape	["-z"]	gate:command-shape	evidence	witnessed
-harness:hermes/headless	command	execution-shape	hermes	gate:command-shape	evidence	witnessed
+harness:hermes/download	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	runtime-gate
+harness:hermes/headless	args	execution-shape	["-z"]	gate:command-shape	evidence	gate
+harness:hermes/headless	command	execution-shape	hermes	gate:command-shape	evidence	gate
 harness:hermes/headless	effect	risk-class	dangerous	none	assertion	asserted
-harness:hermes/headless	evidence	support-state	disposable-real	gate:evidence-pairing	evidence	witnessed
+harness:hermes/headless	evidence	support-state	deterministic	gate:evidence-pairing	evidence	gate
 harness:hermes/headless	executable	identity	hermes	gate:identity	evidence	gate
 harness:hermes/headless	interaction	risk-class	noninteractive	none	assertion	asserted
 harness:hermes/headless	network	risk-class	true	none	assertion	asserted
-harness:hermes/headless	platforms	platform-scope	["linux-x64-gnu"]	gate:platform-name	evidence	witnessed
+harness:hermes/headless	platforms	platform-scope	["linux-x64-gnu"]	gate:platform-name	evidence	gate
 harness:hermes/headless	source	provenance	internal:phase-01@fab5848	none	assertion	external
 harness:hermes/headless	summary	narration	Run Hermes Agent headlessly with a one-shot prompt (-z).	none	assertion	asserted
-harness:hermes/headless	support	support-state	verified	gate:evidence-pairing	evidence	witnessed
-harness:hermes/headless	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	frozen
+harness:hermes/headless	support	support-state	expected	gate:evidence-pairing	evidence	gate
+harness:hermes/headless	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	runtime-gate
 harness:hermes/models	args	execution-shape	["--help"]	gate:command-shape	evidence	gate
 harness:hermes/models	command	execution-shape	hermes	gate:command-shape	evidence	gate
 harness:hermes/models	effect	risk-class	read-only	gate:effect-class	evidence	gate
@@ -1542,7 +1542,7 @@ harness:hermes/models	platforms	platform-scope	["linux-x64-gnu"]	gate:platform-n
 harness:hermes/models	source	provenance	internal:phase-01@fab5848	none	assertion	external
 harness:hermes/models	summary	narration	Review Hermes Agent model selection command surface.	none	assertion	asserted
 harness:hermes/models	support	support-state	stub	gate:evidence-pairing	evidence	gate
-harness:hermes/models	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	frozen
+harness:hermes/models	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	runtime-gate
 harness:hermes/security	args	execution-shape	["--help"]	gate:command-shape	evidence	gate
 harness:hermes/security	command	execution-shape	hermes	gate:command-shape	evidence	gate
 harness:hermes/security	effect	risk-class	read-only	gate:effect-class	evidence	gate
@@ -1554,7 +1554,7 @@ harness:hermes/security	platforms	platform-scope	["linux-x64-gnu"]	gate:platform
 harness:hermes/security	source	provenance	internal:phase-01@fab5848	none	assertion	external
 harness:hermes/security	summary	narration	Review Hermes Agent security and auth command surface.	none	assertion	asserted
 harness:hermes/security	support	support-state	stub	gate:evidence-pairing	evidence	gate
-harness:hermes/security	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	frozen
+harness:hermes/security	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	runtime-gate
 harness:hermes/stats	args	execution-shape	["--help"]	gate:command-shape	evidence	gate
 harness:hermes/stats	command	execution-shape	hermes	gate:command-shape	evidence	gate
 harness:hermes/stats	effect	risk-class	read-only	gate:effect-class	evidence	gate
@@ -1566,7 +1566,7 @@ harness:hermes/stats	platforms	platform-scope	["linux-x64-gnu"]	gate:platform-na
 harness:hermes/stats	source	provenance	internal:phase-01@fab5848	none	assertion	external
 harness:hermes/stats	summary	narration	Review Hermes Agent local status and usage command surface.	none	assertion	asserted
 harness:hermes/stats	support	support-state	stub	gate:evidence-pairing	evidence	gate
-harness:hermes/stats	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	frozen
+harness:hermes/stats	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	runtime-gate
 harness:hermes/ui	args	execution-shape	[]	gate:command-shape	evidence	gate
 harness:hermes/ui	command	execution-shape	hermes	gate:command-shape	evidence	gate
 harness:hermes/ui	effect	risk-class	state-changing	gate:effect-class	evidence	gate
@@ -1578,7 +1578,7 @@ harness:hermes/ui	platforms	platform-scope	[]	gate:platform-name	evidence	assert
 harness:hermes/ui	source	provenance	internal:phase-01@fab5848	none	assertion	external
 harness:hermes/ui	summary	narration	Open the interactive Hermes Agent interface.	none	assertion	asserted
 harness:hermes/ui	support	support-state	expected	gate:evidence-pairing	evidence	gate
-harness:hermes/ui	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	frozen
+harness:hermes/ui	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	runtime-gate
 harness:hermes/update	args	execution-shape	["update"]	gate:command-shape	evidence	gate
 harness:hermes/update	command	execution-shape	hermes	gate:command-shape	evidence	gate
 harness:hermes/update	effect	risk-class	state-changing	gate:effect-class	evidence	gate
@@ -1590,7 +1590,7 @@ harness:hermes/update	platforms	platform-scope	[]	gate:platform-name	evidence	as
 harness:hermes/update	source	provenance	internal:phase-01@fab5848	none	assertion	external
 harness:hermes/update	summary	narration	Update Hermes Agent without interactive setup flows.	none	assertion	asserted
 harness:hermes/update	support	support-state	expected	gate:evidence-pairing	evidence	gate
-harness:hermes/update	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	frozen
+harness:hermes/update	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	runtime-gate
 harness:hermes/version	args	execution-shape	["--version"]	gate:command-shape	evidence	gate
 harness:hermes/version	command	execution-shape	hermes	gate:command-shape	evidence	gate
 harness:hermes/version	effect	risk-class	read-only	none	assertion	asserted
@@ -1602,7 +1602,7 @@ harness:hermes/version	platforms	platform-scope	[]	gate:platform-name	evidence	a
 harness:hermes/version	source	provenance	internal:phase-01@fab5848	none	assertion	external
 harness:hermes/version	summary	narration	Print or verify the installed Hermes Agent version.	none	assertion	asserted
 harness:hermes/version	support	support-state	expected	gate:evidence-pairing	evidence	gate
-harness:hermes/version	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	frozen
+harness:hermes/version	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	runtime-gate
 harness:hermes/yolo	args	execution-shape	["-c", "echo danger yolo mode is not configured for hermes; exit 1"]	gate:command-shape	evidence	gate
 harness:hermes/yolo	command	execution-shape	sh	gate:command-shape	evidence	gate
 harness:hermes/yolo	effect	risk-class	dangerous	gate:effect-class	evidence	gate
@@ -1614,7 +1614,7 @@ harness:hermes/yolo	platforms	platform-scope	["linux-x64-gnu"]	gate:platform-nam
 harness:hermes/yolo	source	provenance	internal:phase-01@fab5848	none	assertion	external
 harness:hermes/yolo	summary	narration	Dangerous mode is not normalized for Hermes Agent yet.	none	assertion	asserted
 harness:hermes/yolo	support	support-state	disabled	gate:evidence-pairing	evidence	gate
-harness:hermes/yolo	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	frozen
+harness:hermes/yolo	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	runtime-gate
 harness:jules	binary	identity	jules	gate:identity	evidence	gate
 harness:jules	description	narration	Google's asynchronous coding agent in the terminal	none	assertion	asserted
 harness:jules	display	narration	Jules	none	assertion	asserted
@@ -1633,7 +1633,7 @@ harness:jules/download	platforms	platform-scope	[]	gate:platform-name	evidence	a
 harness:jules/download	source	provenance	internal:phase-01@fab5848	none	assertion	external
 harness:jules/download	summary	narration	Install Jules from its documented distribution channel.	none	assertion	asserted
 harness:jules/download	support	support-state	expected	gate:evidence-pairing	evidence	gate
-harness:jules/download	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	frozen
+harness:jules/download	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	runtime-gate
 harness:jules/headless	args	execution-shape	["--help"]	gate:command-shape	evidence	gate
 harness:jules/headless	command	execution-shape	jules	gate:command-shape	evidence	gate
 harness:jules/headless	effect	risk-class	read-only	gate:effect-class	evidence	gate
@@ -1645,7 +1645,7 @@ harness:jules/headless	platforms	platform-scope	["linux-x64-gnu"]	gate:platform-
 harness:jules/headless	source	provenance	internal:phase-01@fab5848	none	assertion	external
 harness:jules/headless	summary	narration	Review Jules headless invocation options.	none	assertion	asserted
 harness:jules/headless	support	support-state	stub	gate:evidence-pairing	evidence	gate
-harness:jules/headless	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	frozen
+harness:jules/headless	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	runtime-gate
 harness:jules/models	args	execution-shape	["--help"]	gate:command-shape	evidence	gate
 harness:jules/models	command	execution-shape	jules	gate:command-shape	evidence	gate
 harness:jules/models	effect	risk-class	read-only	gate:effect-class	evidence	gate
@@ -1657,7 +1657,7 @@ harness:jules/models	platforms	platform-scope	["linux-x64-gnu"]	gate:platform-na
 harness:jules/models	source	provenance	internal:phase-01@fab5848	none	assertion	external
 harness:jules/models	summary	narration	Review Jules model selection command surface.	none	assertion	asserted
 harness:jules/models	support	support-state	stub	gate:evidence-pairing	evidence	gate
-harness:jules/models	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	frozen
+harness:jules/models	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	runtime-gate
 harness:jules/security	args	execution-shape	["--help"]	gate:command-shape	evidence	gate
 harness:jules/security	command	execution-shape	jules	gate:command-shape	evidence	gate
 harness:jules/security	effect	risk-class	read-only	gate:effect-class	evidence	gate
@@ -1669,7 +1669,7 @@ harness:jules/security	platforms	platform-scope	["linux-x64-gnu"]	gate:platform-
 harness:jules/security	source	provenance	internal:phase-01@fab5848	none	assertion	external
 harness:jules/security	summary	narration	Review Jules security and auth command surface.	none	assertion	asserted
 harness:jules/security	support	support-state	stub	gate:evidence-pairing	evidence	gate
-harness:jules/security	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	frozen
+harness:jules/security	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	runtime-gate
 harness:jules/stats	args	execution-shape	["--help"]	gate:command-shape	evidence	gate
 harness:jules/stats	command	execution-shape	jules	gate:command-shape	evidence	gate
 harness:jules/stats	effect	risk-class	read-only	gate:effect-class	evidence	gate
@@ -1681,7 +1681,7 @@ harness:jules/stats	platforms	platform-scope	["linux-x64-gnu"]	gate:platform-nam
 harness:jules/stats	source	provenance	internal:phase-01@fab5848	none	assertion	external
 harness:jules/stats	summary	narration	Review Jules local status and usage command surface.	none	assertion	asserted
 harness:jules/stats	support	support-state	stub	gate:evidence-pairing	evidence	gate
-harness:jules/stats	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	frozen
+harness:jules/stats	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	runtime-gate
 harness:jules/ui	args	execution-shape	[]	gate:command-shape	evidence	gate
 harness:jules/ui	command	execution-shape	jules	gate:command-shape	evidence	gate
 harness:jules/ui	effect	risk-class	state-changing	gate:effect-class	evidence	gate
@@ -1693,7 +1693,7 @@ harness:jules/ui	platforms	platform-scope	[]	gate:platform-name	evidence	asserte
 harness:jules/ui	source	provenance	internal:phase-01@fab5848	none	assertion	external
 harness:jules/ui	summary	narration	Open the interactive Jules interface.	none	assertion	asserted
 harness:jules/ui	support	support-state	expected	gate:evidence-pairing	evidence	gate
-harness:jules/ui	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	frozen
+harness:jules/ui	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	runtime-gate
 harness:jules/update	args	execution-shape	["update", "-g", "@google/jules"]	gate:command-shape	evidence	gate
 harness:jules/update	command	execution-shape	npm	gate:command-shape	evidence	gate
 harness:jules/update	effect	risk-class	state-changing	gate:effect-class	evidence	gate
@@ -1706,7 +1706,7 @@ harness:jules/update	platforms	platform-scope	[]	gate:platform-name	evidence	ass
 harness:jules/update	source	provenance	internal:phase-01@fab5848	none	assertion	external
 harness:jules/update	summary	narration	Update Jules without interactive setup flows.	none	assertion	asserted
 harness:jules/update	support	support-state	expected	gate:evidence-pairing	evidence	gate
-harness:jules/update	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	frozen
+harness:jules/update	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	runtime-gate
 harness:jules/version	args	execution-shape	["version"]	gate:command-shape	evidence	gate
 harness:jules/version	command	execution-shape	jules	gate:command-shape	evidence	gate
 harness:jules/version	effect	risk-class	read-only	none	assertion	asserted
@@ -1718,7 +1718,7 @@ harness:jules/version	platforms	platform-scope	[]	gate:platform-name	evidence	as
 harness:jules/version	source	provenance	internal:phase-01@fab5848	none	assertion	external
 harness:jules/version	summary	narration	Print or verify the installed Jules version.	none	assertion	asserted
 harness:jules/version	support	support-state	expected	gate:evidence-pairing	evidence	gate
-harness:jules/version	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	frozen
+harness:jules/version	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	runtime-gate
 harness:jules/yolo	args	execution-shape	["-c", "echo danger yolo mode is not configured for jules; exit 1"]	gate:command-shape	evidence	gate
 harness:jules/yolo	command	execution-shape	sh	gate:command-shape	evidence	gate
 harness:jules/yolo	effect	risk-class	dangerous	gate:effect-class	evidence	gate
@@ -1730,7 +1730,7 @@ harness:jules/yolo	platforms	platform-scope	["linux-x64-gnu"]	gate:platform-name
 harness:jules/yolo	source	provenance	internal:phase-01@fab5848	none	assertion	external
 harness:jules/yolo	summary	narration	Dangerous mode is not normalized for Jules yet.	none	assertion	asserted
 harness:jules/yolo	support	support-state	disabled	gate:evidence-pairing	evidence	gate
-harness:jules/yolo	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	frozen
+harness:jules/yolo	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	runtime-gate
 harness:kilocode	binary	identity	kilocode	gate:identity	evidence	gate
 harness:kilocode	description	narration	Open-source AI coding agent	none	assertion	asserted
 harness:kilocode	display	narration	Kilocode	none	assertion	asserted
@@ -1749,7 +1749,7 @@ harness:kilocode/download	platforms	platform-scope	[]	gate:platform-name	evidenc
 harness:kilocode/download	source	provenance	internal:phase-01@fab5848	none	assertion	external
 harness:kilocode/download	summary	narration	Install Kilocode from its documented distribution channel.	none	assertion	asserted
 harness:kilocode/download	support	support-state	expected	gate:evidence-pairing	evidence	gate
-harness:kilocode/download	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	frozen
+harness:kilocode/download	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	runtime-gate
 harness:kilocode/headless	args	execution-shape	["--help"]	gate:command-shape	evidence	gate
 harness:kilocode/headless	command	execution-shape	kilocode	gate:command-shape	evidence	gate
 harness:kilocode/headless	effect	risk-class	read-only	gate:effect-class	evidence	gate
@@ -1761,7 +1761,7 @@ harness:kilocode/headless	platforms	platform-scope	["linux-x64-gnu"]	gate:platfo
 harness:kilocode/headless	source	provenance	internal:phase-01@fab5848	none	assertion	external
 harness:kilocode/headless	summary	narration	Review Kilocode headless invocation options.	none	assertion	asserted
 harness:kilocode/headless	support	support-state	stub	gate:evidence-pairing	evidence	gate
-harness:kilocode/headless	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	frozen
+harness:kilocode/headless	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	runtime-gate
 harness:kilocode/models	args	execution-shape	["--help"]	gate:command-shape	evidence	gate
 harness:kilocode/models	command	execution-shape	kilocode	gate:command-shape	evidence	gate
 harness:kilocode/models	effect	risk-class	read-only	gate:effect-class	evidence	gate
@@ -1773,7 +1773,7 @@ harness:kilocode/models	platforms	platform-scope	["linux-x64-gnu"]	gate:platform
 harness:kilocode/models	source	provenance	internal:phase-01@fab5848	none	assertion	external
 harness:kilocode/models	summary	narration	Review Kilocode model selection command surface.	none	assertion	asserted
 harness:kilocode/models	support	support-state	stub	gate:evidence-pairing	evidence	gate
-harness:kilocode/models	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	frozen
+harness:kilocode/models	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	runtime-gate
 harness:kilocode/security	args	execution-shape	["--help"]	gate:command-shape	evidence	gate
 harness:kilocode/security	command	execution-shape	kilocode	gate:command-shape	evidence	gate
 harness:kilocode/security	effect	risk-class	read-only	gate:effect-class	evidence	gate
@@ -1785,7 +1785,7 @@ harness:kilocode/security	platforms	platform-scope	["linux-x64-gnu"]	gate:platfo
 harness:kilocode/security	source	provenance	internal:phase-01@fab5848	none	assertion	external
 harness:kilocode/security	summary	narration	Review Kilocode security and auth command surface.	none	assertion	asserted
 harness:kilocode/security	support	support-state	stub	gate:evidence-pairing	evidence	gate
-harness:kilocode/security	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	frozen
+harness:kilocode/security	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	runtime-gate
 harness:kilocode/stats	args	execution-shape	["--help"]	gate:command-shape	evidence	gate
 harness:kilocode/stats	command	execution-shape	kilocode	gate:command-shape	evidence	gate
 harness:kilocode/stats	effect	risk-class	read-only	gate:effect-class	evidence	gate
@@ -1797,7 +1797,7 @@ harness:kilocode/stats	platforms	platform-scope	["linux-x64-gnu"]	gate:platform-
 harness:kilocode/stats	source	provenance	internal:phase-01@fab5848	none	assertion	external
 harness:kilocode/stats	summary	narration	Review Kilocode local status and usage command surface.	none	assertion	asserted
 harness:kilocode/stats	support	support-state	stub	gate:evidence-pairing	evidence	gate
-harness:kilocode/stats	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	frozen
+harness:kilocode/stats	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	runtime-gate
 harness:kilocode/ui	args	execution-shape	[]	gate:command-shape	evidence	gate
 harness:kilocode/ui	command	execution-shape	kilocode	gate:command-shape	evidence	gate
 harness:kilocode/ui	effect	risk-class	state-changing	gate:effect-class	evidence	gate
@@ -1809,7 +1809,7 @@ harness:kilocode/ui	platforms	platform-scope	[]	gate:platform-name	evidence	asse
 harness:kilocode/ui	source	provenance	internal:phase-01@fab5848	none	assertion	external
 harness:kilocode/ui	summary	narration	Open the interactive Kilocode interface.	none	assertion	asserted
 harness:kilocode/ui	support	support-state	expected	gate:evidence-pairing	evidence	gate
-harness:kilocode/ui	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	frozen
+harness:kilocode/ui	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	runtime-gate
 harness:kilocode/update	args	execution-shape	["update", "-g", "@kilocode/cli"]	gate:command-shape	evidence	gate
 harness:kilocode/update	command	execution-shape	npm	gate:command-shape	evidence	gate
 harness:kilocode/update	effect	risk-class	state-changing	gate:effect-class	evidence	gate
@@ -1822,7 +1822,7 @@ harness:kilocode/update	platforms	platform-scope	[]	gate:platform-name	evidence	
 harness:kilocode/update	source	provenance	internal:phase-01@fab5848	none	assertion	external
 harness:kilocode/update	summary	narration	Update Kilocode without interactive setup flows.	none	assertion	asserted
 harness:kilocode/update	support	support-state	expected	gate:evidence-pairing	evidence	gate
-harness:kilocode/update	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	frozen
+harness:kilocode/update	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	runtime-gate
 harness:kilocode/version	args	execution-shape	["--version"]	gate:command-shape	evidence	gate
 harness:kilocode/version	command	execution-shape	kilocode	gate:command-shape	evidence	gate
 harness:kilocode/version	effect	risk-class	read-only	none	assertion	asserted
@@ -1834,7 +1834,7 @@ harness:kilocode/version	platforms	platform-scope	[]	gate:platform-name	evidence
 harness:kilocode/version	source	provenance	internal:phase-01@fab5848	none	assertion	external
 harness:kilocode/version	summary	narration	Print or verify the installed Kilocode version.	none	assertion	asserted
 harness:kilocode/version	support	support-state	expected	gate:evidence-pairing	evidence	gate
-harness:kilocode/version	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	frozen
+harness:kilocode/version	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	runtime-gate
 harness:kilocode/yolo	args	execution-shape	["-c", "echo danger yolo mode is not configured for kilocode; exit 1"]	gate:command-shape	evidence	gate
 harness:kilocode/yolo	command	execution-shape	sh	gate:command-shape	evidence	gate
 harness:kilocode/yolo	effect	risk-class	dangerous	gate:effect-class	evidence	gate
@@ -1846,7 +1846,7 @@ harness:kilocode/yolo	platforms	platform-scope	["linux-x64-gnu"]	gate:platform-n
 harness:kilocode/yolo	source	provenance	internal:phase-01@fab5848	none	assertion	external
 harness:kilocode/yolo	summary	narration	Dangerous mode is not normalized for Kilocode yet.	none	assertion	asserted
 harness:kilocode/yolo	support	support-state	disabled	gate:evidence-pairing	evidence	gate
-harness:kilocode/yolo	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	frozen
+harness:kilocode/yolo	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	runtime-gate
 harness:letta	binary	identity	letta	gate:identity	evidence	gate
 harness:letta	description	narration	Memory-first coding agent	none	assertion	asserted
 harness:letta	display	narration	Letta	none	assertion	asserted
@@ -1865,7 +1865,7 @@ harness:letta/download	platforms	platform-scope	[]	gate:platform-name	evidence	a
 harness:letta/download	source	provenance	internal:phase-01@fab5848	none	assertion	external
 harness:letta/download	summary	narration	Install Letta from its documented distribution channel.	none	assertion	asserted
 harness:letta/download	support	support-state	expected	gate:evidence-pairing	evidence	gate
-harness:letta/download	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	frozen
+harness:letta/download	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	runtime-gate
 harness:letta/headless	args	execution-shape	["--help"]	gate:command-shape	evidence	gate
 harness:letta/headless	command	execution-shape	letta	gate:command-shape	evidence	gate
 harness:letta/headless	effect	risk-class	read-only	gate:effect-class	evidence	gate
@@ -1877,7 +1877,7 @@ harness:letta/headless	platforms	platform-scope	["linux-x64-gnu"]	gate:platform-
 harness:letta/headless	source	provenance	internal:phase-01@fab5848	none	assertion	external
 harness:letta/headless	summary	narration	Review Letta headless invocation options.	none	assertion	asserted
 harness:letta/headless	support	support-state	stub	gate:evidence-pairing	evidence	gate
-harness:letta/headless	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	frozen
+harness:letta/headless	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	runtime-gate
 harness:letta/models	args	execution-shape	["--help"]	gate:command-shape	evidence	gate
 harness:letta/models	command	execution-shape	letta	gate:command-shape	evidence	gate
 harness:letta/models	effect	risk-class	read-only	gate:effect-class	evidence	gate
@@ -1889,7 +1889,7 @@ harness:letta/models	platforms	platform-scope	["linux-x64-gnu"]	gate:platform-na
 harness:letta/models	source	provenance	internal:phase-01@fab5848	none	assertion	external
 harness:letta/models	summary	narration	Review Letta model selection command surface.	none	assertion	asserted
 harness:letta/models	support	support-state	stub	gate:evidence-pairing	evidence	gate
-harness:letta/models	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	frozen
+harness:letta/models	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	runtime-gate
 harness:letta/security	args	execution-shape	["--help"]	gate:command-shape	evidence	gate
 harness:letta/security	command	execution-shape	letta	gate:command-shape	evidence	gate
 harness:letta/security	effect	risk-class	read-only	gate:effect-class	evidence	gate
@@ -1901,7 +1901,7 @@ harness:letta/security	platforms	platform-scope	["linux-x64-gnu"]	gate:platform-
 harness:letta/security	source	provenance	internal:phase-01@fab5848	none	assertion	external
 harness:letta/security	summary	narration	Review Letta security and auth command surface.	none	assertion	asserted
 harness:letta/security	support	support-state	stub	gate:evidence-pairing	evidence	gate
-harness:letta/security	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	frozen
+harness:letta/security	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	runtime-gate
 harness:letta/stats	args	execution-shape	["--help"]	gate:command-shape	evidence	gate
 harness:letta/stats	command	execution-shape	letta	gate:command-shape	evidence	gate
 harness:letta/stats	effect	risk-class	read-only	gate:effect-class	evidence	gate
@@ -1913,7 +1913,7 @@ harness:letta/stats	platforms	platform-scope	["linux-x64-gnu"]	gate:platform-nam
 harness:letta/stats	source	provenance	internal:phase-01@fab5848	none	assertion	external
 harness:letta/stats	summary	narration	Review Letta local status and usage command surface.	none	assertion	asserted
 harness:letta/stats	support	support-state	stub	gate:evidence-pairing	evidence	gate
-harness:letta/stats	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	frozen
+harness:letta/stats	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	runtime-gate
 harness:letta/ui	args	execution-shape	[]	gate:command-shape	evidence	gate
 harness:letta/ui	command	execution-shape	letta	gate:command-shape	evidence	gate
 harness:letta/ui	effect	risk-class	state-changing	gate:effect-class	evidence	gate
@@ -1925,7 +1925,7 @@ harness:letta/ui	platforms	platform-scope	[]	gate:platform-name	evidence	asserte
 harness:letta/ui	source	provenance	internal:phase-01@fab5848	none	assertion	external
 harness:letta/ui	summary	narration	Open the interactive Letta interface.	none	assertion	asserted
 harness:letta/ui	support	support-state	expected	gate:evidence-pairing	evidence	gate
-harness:letta/ui	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	frozen
+harness:letta/ui	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	runtime-gate
 harness:letta/update	args	execution-shape	["update", "-g", "@letta-ai/letta-code"]	gate:command-shape	evidence	gate
 harness:letta/update	command	execution-shape	npm	gate:command-shape	evidence	gate
 harness:letta/update	effect	risk-class	state-changing	gate:effect-class	evidence	gate
@@ -1938,7 +1938,7 @@ harness:letta/update	platforms	platform-scope	[]	gate:platform-name	evidence	ass
 harness:letta/update	source	provenance	internal:phase-01@fab5848	none	assertion	external
 harness:letta/update	summary	narration	Update Letta without interactive setup flows.	none	assertion	asserted
 harness:letta/update	support	support-state	expected	gate:evidence-pairing	evidence	gate
-harness:letta/update	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	frozen
+harness:letta/update	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	runtime-gate
 harness:letta/version	args	execution-shape	["--version"]	gate:command-shape	evidence	gate
 harness:letta/version	command	execution-shape	letta	gate:command-shape	evidence	gate
 harness:letta/version	effect	risk-class	read-only	none	assertion	asserted
@@ -1950,7 +1950,7 @@ harness:letta/version	platforms	platform-scope	[]	gate:platform-name	evidence	as
 harness:letta/version	source	provenance	internal:phase-01@fab5848	none	assertion	external
 harness:letta/version	summary	narration	Print or verify the installed Letta version.	none	assertion	asserted
 harness:letta/version	support	support-state	expected	gate:evidence-pairing	evidence	gate
-harness:letta/version	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	frozen
+harness:letta/version	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	runtime-gate
 harness:letta/yolo	args	execution-shape	["-c", "echo danger yolo mode is not configured for letta; exit 1"]	gate:command-shape	evidence	gate
 harness:letta/yolo	command	execution-shape	sh	gate:command-shape	evidence	gate
 harness:letta/yolo	effect	risk-class	dangerous	gate:effect-class	evidence	gate
@@ -1962,7 +1962,7 @@ harness:letta/yolo	platforms	platform-scope	["linux-x64-gnu"]	gate:platform-name
 harness:letta/yolo	source	provenance	internal:phase-01@fab5848	none	assertion	external
 harness:letta/yolo	summary	narration	Dangerous mode is not normalized for Letta yet.	none	assertion	asserted
 harness:letta/yolo	support	support-state	disabled	gate:evidence-pairing	evidence	gate
-harness:letta/yolo	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	frozen
+harness:letta/yolo	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	runtime-gate
 harness:llxprt	binary	identity	llxprt	gate:identity	evidence	gate
 harness:llxprt	description	narration	Multi-provider AI coding assistant	none	assertion	asserted
 harness:llxprt	display	narration	LLXPRT	none	assertion	asserted
@@ -1981,7 +1981,7 @@ harness:llxprt/download	platforms	platform-scope	[]	gate:platform-name	evidence	
 harness:llxprt/download	source	provenance	internal:phase-01@fab5848	none	assertion	external
 harness:llxprt/download	summary	narration	Install LLXPRT from its documented distribution channel.	none	assertion	asserted
 harness:llxprt/download	support	support-state	expected	gate:evidence-pairing	evidence	gate
-harness:llxprt/download	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	frozen
+harness:llxprt/download	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	runtime-gate
 harness:llxprt/headless	args	execution-shape	["--help"]	gate:command-shape	evidence	gate
 harness:llxprt/headless	command	execution-shape	llxprt	gate:command-shape	evidence	gate
 harness:llxprt/headless	effect	risk-class	read-only	gate:effect-class	evidence	gate
@@ -1993,7 +1993,7 @@ harness:llxprt/headless	platforms	platform-scope	["linux-x64-gnu"]	gate:platform
 harness:llxprt/headless	source	provenance	internal:phase-01@fab5848	none	assertion	external
 harness:llxprt/headless	summary	narration	Review LLXPRT headless invocation options.	none	assertion	asserted
 harness:llxprt/headless	support	support-state	stub	gate:evidence-pairing	evidence	gate
-harness:llxprt/headless	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	frozen
+harness:llxprt/headless	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	runtime-gate
 harness:llxprt/models	args	execution-shape	["--help"]	gate:command-shape	evidence	gate
 harness:llxprt/models	command	execution-shape	llxprt	gate:command-shape	evidence	gate
 harness:llxprt/models	effect	risk-class	read-only	gate:effect-class	evidence	gate
@@ -2005,7 +2005,7 @@ harness:llxprt/models	platforms	platform-scope	["linux-x64-gnu"]	gate:platform-n
 harness:llxprt/models	source	provenance	internal:phase-01@fab5848	none	assertion	external
 harness:llxprt/models	summary	narration	Review LLXPRT model selection command surface.	none	assertion	asserted
 harness:llxprt/models	support	support-state	stub	gate:evidence-pairing	evidence	gate
-harness:llxprt/models	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	frozen
+harness:llxprt/models	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	runtime-gate
 harness:llxprt/security	args	execution-shape	["--help"]	gate:command-shape	evidence	gate
 harness:llxprt/security	command	execution-shape	llxprt	gate:command-shape	evidence	gate
 harness:llxprt/security	effect	risk-class	read-only	gate:effect-class	evidence	gate
@@ -2017,7 +2017,7 @@ harness:llxprt/security	platforms	platform-scope	["linux-x64-gnu"]	gate:platform
 harness:llxprt/security	source	provenance	internal:phase-01@fab5848	none	assertion	external
 harness:llxprt/security	summary	narration	Review LLXPRT security and auth command surface.	none	assertion	asserted
 harness:llxprt/security	support	support-state	stub	gate:evidence-pairing	evidence	gate
-harness:llxprt/security	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	frozen
+harness:llxprt/security	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	runtime-gate
 harness:llxprt/stats	args	execution-shape	["--help"]	gate:command-shape	evidence	gate
 harness:llxprt/stats	command	execution-shape	llxprt	gate:command-shape	evidence	gate
 harness:llxprt/stats	effect	risk-class	read-only	gate:effect-class	evidence	gate
@@ -2029,7 +2029,7 @@ harness:llxprt/stats	platforms	platform-scope	["linux-x64-gnu"]	gate:platform-na
 harness:llxprt/stats	source	provenance	internal:phase-01@fab5848	none	assertion	external
 harness:llxprt/stats	summary	narration	Review LLXPRT local status and usage command surface.	none	assertion	asserted
 harness:llxprt/stats	support	support-state	stub	gate:evidence-pairing	evidence	gate
-harness:llxprt/stats	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	frozen
+harness:llxprt/stats	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	runtime-gate
 harness:llxprt/ui	args	execution-shape	[]	gate:command-shape	evidence	gate
 harness:llxprt/ui	command	execution-shape	llxprt	gate:command-shape	evidence	gate
 harness:llxprt/ui	effect	risk-class	state-changing	gate:effect-class	evidence	gate
@@ -2041,7 +2041,7 @@ harness:llxprt/ui	platforms	platform-scope	[]	gate:platform-name	evidence	assert
 harness:llxprt/ui	source	provenance	internal:phase-01@fab5848	none	assertion	external
 harness:llxprt/ui	summary	narration	Open the interactive LLXPRT interface.	none	assertion	asserted
 harness:llxprt/ui	support	support-state	expected	gate:evidence-pairing	evidence	gate
-harness:llxprt/ui	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	frozen
+harness:llxprt/ui	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	runtime-gate
 harness:llxprt/update	args	execution-shape	["update", "-g", "@vybestack/llxprt-code"]	gate:command-shape	evidence	gate
 harness:llxprt/update	command	execution-shape	npm	gate:command-shape	evidence	gate
 harness:llxprt/update	effect	risk-class	state-changing	gate:effect-class	evidence	gate
@@ -2054,7 +2054,7 @@ harness:llxprt/update	platforms	platform-scope	[]	gate:platform-name	evidence	as
 harness:llxprt/update	source	provenance	internal:phase-01@fab5848	none	assertion	external
 harness:llxprt/update	summary	narration	Update LLXPRT without interactive setup flows.	none	assertion	asserted
 harness:llxprt/update	support	support-state	expected	gate:evidence-pairing	evidence	gate
-harness:llxprt/update	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	frozen
+harness:llxprt/update	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	runtime-gate
 harness:llxprt/version	args	execution-shape	["--version"]	gate:command-shape	evidence	gate
 harness:llxprt/version	command	execution-shape	llxprt	gate:command-shape	evidence	gate
 harness:llxprt/version	effect	risk-class	read-only	none	assertion	asserted
@@ -2066,7 +2066,7 @@ harness:llxprt/version	platforms	platform-scope	[]	gate:platform-name	evidence	a
 harness:llxprt/version	source	provenance	internal:phase-01@fab5848	none	assertion	external
 harness:llxprt/version	summary	narration	Print or verify the installed LLXPRT version.	none	assertion	asserted
 harness:llxprt/version	support	support-state	expected	gate:evidence-pairing	evidence	gate
-harness:llxprt/version	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	frozen
+harness:llxprt/version	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	runtime-gate
 harness:llxprt/yolo	args	execution-shape	["-c", "echo danger yolo mode is not configured for llxprt; exit 1"]	gate:command-shape	evidence	gate
 harness:llxprt/yolo	command	execution-shape	sh	gate:command-shape	evidence	gate
 harness:llxprt/yolo	effect	risk-class	dangerous	gate:effect-class	evidence	gate
@@ -2078,7 +2078,7 @@ harness:llxprt/yolo	platforms	platform-scope	["linux-x64-gnu"]	gate:platform-nam
 harness:llxprt/yolo	source	provenance	internal:phase-01@fab5848	none	assertion	external
 harness:llxprt/yolo	summary	narration	Dangerous mode is not normalized for LLXPRT yet.	none	assertion	asserted
 harness:llxprt/yolo	support	support-state	disabled	gate:evidence-pairing	evidence	gate
-harness:llxprt/yolo	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	frozen
+harness:llxprt/yolo	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	runtime-gate
 harness:nanocoder	binary	identity	nanocoder	gate:identity	evidence	gate
 harness:nanocoder	description	narration	Local-first coding agent	none	assertion	asserted
 harness:nanocoder	display	narration	Nanocoder	none	assertion	asserted
@@ -2097,7 +2097,7 @@ harness:nanocoder/download	platforms	platform-scope	[]	gate:platform-name	eviden
 harness:nanocoder/download	source	provenance	internal:phase-01@fab5848	none	assertion	external
 harness:nanocoder/download	summary	narration	Install Nanocoder from its documented distribution channel.	none	assertion	asserted
 harness:nanocoder/download	support	support-state	expected	gate:evidence-pairing	evidence	gate
-harness:nanocoder/download	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	frozen
+harness:nanocoder/download	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	runtime-gate
 harness:nanocoder/headless	args	execution-shape	["--help"]	gate:command-shape	evidence	gate
 harness:nanocoder/headless	command	execution-shape	nanocoder	gate:command-shape	evidence	gate
 harness:nanocoder/headless	effect	risk-class	read-only	gate:effect-class	evidence	gate
@@ -2109,7 +2109,7 @@ harness:nanocoder/headless	platforms	platform-scope	["linux-x64-gnu"]	gate:platf
 harness:nanocoder/headless	source	provenance	internal:phase-01@fab5848	none	assertion	external
 harness:nanocoder/headless	summary	narration	Review Nanocoder headless invocation options.	none	assertion	asserted
 harness:nanocoder/headless	support	support-state	stub	gate:evidence-pairing	evidence	gate
-harness:nanocoder/headless	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	frozen
+harness:nanocoder/headless	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	runtime-gate
 harness:nanocoder/models	args	execution-shape	["--help"]	gate:command-shape	evidence	gate
 harness:nanocoder/models	command	execution-shape	nanocoder	gate:command-shape	evidence	gate
 harness:nanocoder/models	effect	risk-class	read-only	gate:effect-class	evidence	gate
@@ -2121,7 +2121,7 @@ harness:nanocoder/models	platforms	platform-scope	["linux-x64-gnu"]	gate:platfor
 harness:nanocoder/models	source	provenance	internal:phase-01@fab5848	none	assertion	external
 harness:nanocoder/models	summary	narration	Review Nanocoder model selection command surface.	none	assertion	asserted
 harness:nanocoder/models	support	support-state	stub	gate:evidence-pairing	evidence	gate
-harness:nanocoder/models	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	frozen
+harness:nanocoder/models	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	runtime-gate
 harness:nanocoder/security	args	execution-shape	["--help"]	gate:command-shape	evidence	gate
 harness:nanocoder/security	command	execution-shape	nanocoder	gate:command-shape	evidence	gate
 harness:nanocoder/security	effect	risk-class	read-only	gate:effect-class	evidence	gate
@@ -2133,7 +2133,7 @@ harness:nanocoder/security	platforms	platform-scope	["linux-x64-gnu"]	gate:platf
 harness:nanocoder/security	source	provenance	internal:phase-01@fab5848	none	assertion	external
 harness:nanocoder/security	summary	narration	Review Nanocoder security and auth command surface.	none	assertion	asserted
 harness:nanocoder/security	support	support-state	stub	gate:evidence-pairing	evidence	gate
-harness:nanocoder/security	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	frozen
+harness:nanocoder/security	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	runtime-gate
 harness:nanocoder/stats	args	execution-shape	["--help"]	gate:command-shape	evidence	gate
 harness:nanocoder/stats	command	execution-shape	nanocoder	gate:command-shape	evidence	gate
 harness:nanocoder/stats	effect	risk-class	read-only	gate:effect-class	evidence	gate
@@ -2145,7 +2145,7 @@ harness:nanocoder/stats	platforms	platform-scope	["linux-x64-gnu"]	gate:platform
 harness:nanocoder/stats	source	provenance	internal:phase-01@fab5848	none	assertion	external
 harness:nanocoder/stats	summary	narration	Review Nanocoder local status and usage command surface.	none	assertion	asserted
 harness:nanocoder/stats	support	support-state	stub	gate:evidence-pairing	evidence	gate
-harness:nanocoder/stats	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	frozen
+harness:nanocoder/stats	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	runtime-gate
 harness:nanocoder/ui	args	execution-shape	[]	gate:command-shape	evidence	gate
 harness:nanocoder/ui	command	execution-shape	nanocoder	gate:command-shape	evidence	gate
 harness:nanocoder/ui	effect	risk-class	state-changing	gate:effect-class	evidence	gate
@@ -2157,7 +2157,7 @@ harness:nanocoder/ui	platforms	platform-scope	[]	gate:platform-name	evidence	ass
 harness:nanocoder/ui	source	provenance	internal:phase-01@fab5848	none	assertion	external
 harness:nanocoder/ui	summary	narration	Open the interactive Nanocoder interface.	none	assertion	asserted
 harness:nanocoder/ui	support	support-state	expected	gate:evidence-pairing	evidence	gate
-harness:nanocoder/ui	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	frozen
+harness:nanocoder/ui	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	runtime-gate
 harness:nanocoder/update	args	execution-shape	["update", "-g", "@nanocollective/nanocoder"]	gate:command-shape	evidence	gate
 harness:nanocoder/update	command	execution-shape	npm	gate:command-shape	evidence	gate
 harness:nanocoder/update	effect	risk-class	state-changing	gate:effect-class	evidence	gate
@@ -2170,7 +2170,7 @@ harness:nanocoder/update	platforms	platform-scope	[]	gate:platform-name	evidence
 harness:nanocoder/update	source	provenance	internal:phase-01@fab5848	none	assertion	external
 harness:nanocoder/update	summary	narration	Update Nanocoder without interactive setup flows.	none	assertion	asserted
 harness:nanocoder/update	support	support-state	expected	gate:evidence-pairing	evidence	gate
-harness:nanocoder/update	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	frozen
+harness:nanocoder/update	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	runtime-gate
 harness:nanocoder/version	args	execution-shape	["--version"]	gate:command-shape	evidence	gate
 harness:nanocoder/version	command	execution-shape	nanocoder	gate:command-shape	evidence	gate
 harness:nanocoder/version	effect	risk-class	read-only	none	assertion	asserted
@@ -2182,7 +2182,7 @@ harness:nanocoder/version	platforms	platform-scope	[]	gate:platform-name	evidenc
 harness:nanocoder/version	source	provenance	internal:phase-01@fab5848	none	assertion	external
 harness:nanocoder/version	summary	narration	Print or verify the installed Nanocoder version.	none	assertion	asserted
 harness:nanocoder/version	support	support-state	expected	gate:evidence-pairing	evidence	gate
-harness:nanocoder/version	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	frozen
+harness:nanocoder/version	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	runtime-gate
 harness:nanocoder/yolo	args	execution-shape	["-c", "echo danger yolo mode is not configured for nanocoder; exit 1"]	gate:command-shape	evidence	gate
 harness:nanocoder/yolo	command	execution-shape	sh	gate:command-shape	evidence	gate
 harness:nanocoder/yolo	effect	risk-class	dangerous	gate:effect-class	evidence	gate
@@ -2194,7 +2194,7 @@ harness:nanocoder/yolo	platforms	platform-scope	["linux-x64-gnu"]	gate:platform-
 harness:nanocoder/yolo	source	provenance	internal:phase-01@fab5848	none	assertion	external
 harness:nanocoder/yolo	summary	narration	Dangerous mode is not normalized for Nanocoder yet.	none	assertion	asserted
 harness:nanocoder/yolo	support	support-state	disabled	gate:evidence-pairing	evidence	gate
-harness:nanocoder/yolo	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	frozen
+harness:nanocoder/yolo	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	runtime-gate
 harness:ollama	binary	identity	ollama	gate:identity	evidence	gate
 harness:ollama	description	narration	Get up and running with large language models locally	none	assertion	asserted
 harness:ollama	display	narration	Ollama	none	assertion	asserted
@@ -2212,7 +2212,7 @@ harness:ollama/download	platforms	platform-scope	[]	gate:platform-name	evidence	
 harness:ollama/download	source	provenance	internal:phase-01@fab5848	none	assertion	external
 harness:ollama/download	summary	narration	Install Ollama from its documented distribution channel.	none	assertion	asserted
 harness:ollama/download	support	support-state	unknown	gate:evidence-pairing	evidence	gate
-harness:ollama/download	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	frozen
+harness:ollama/download	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	runtime-gate
 harness:ollama/headless	args	execution-shape	["--help"]	gate:command-shape	evidence	gate
 harness:ollama/headless	command	execution-shape	ollama	gate:command-shape	evidence	gate
 harness:ollama/headless	effect	risk-class	read-only	gate:effect-class	evidence	gate
@@ -2224,7 +2224,7 @@ harness:ollama/headless	platforms	platform-scope	["linux-x64-gnu"]	gate:platform
 harness:ollama/headless	source	provenance	internal:phase-01@fab5848	none	assertion	external
 harness:ollama/headless	summary	narration	Review Ollama headless invocation options.	none	assertion	asserted
 harness:ollama/headless	support	support-state	stub	gate:evidence-pairing	evidence	gate
-harness:ollama/headless	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	frozen
+harness:ollama/headless	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	runtime-gate
 harness:ollama/models	args	execution-shape	["--help"]	gate:command-shape	evidence	gate
 harness:ollama/models	command	execution-shape	ollama	gate:command-shape	evidence	gate
 harness:ollama/models	effect	risk-class	read-only	gate:effect-class	evidence	gate
@@ -2236,7 +2236,7 @@ harness:ollama/models	platforms	platform-scope	["linux-x64-gnu"]	gate:platform-n
 harness:ollama/models	source	provenance	internal:phase-01@fab5848	none	assertion	external
 harness:ollama/models	summary	narration	Review Ollama model selection command surface.	none	assertion	asserted
 harness:ollama/models	support	support-state	stub	gate:evidence-pairing	evidence	gate
-harness:ollama/models	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	frozen
+harness:ollama/models	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	runtime-gate
 harness:ollama/security	args	execution-shape	["--help"]	gate:command-shape	evidence	gate
 harness:ollama/security	command	execution-shape	ollama	gate:command-shape	evidence	gate
 harness:ollama/security	effect	risk-class	read-only	gate:effect-class	evidence	gate
@@ -2248,7 +2248,7 @@ harness:ollama/security	platforms	platform-scope	["linux-x64-gnu"]	gate:platform
 harness:ollama/security	source	provenance	internal:phase-01@fab5848	none	assertion	external
 harness:ollama/security	summary	narration	Review Ollama security and auth command surface.	none	assertion	asserted
 harness:ollama/security	support	support-state	stub	gate:evidence-pairing	evidence	gate
-harness:ollama/security	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	frozen
+harness:ollama/security	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	runtime-gate
 harness:ollama/stats	args	execution-shape	["--help"]	gate:command-shape	evidence	gate
 harness:ollama/stats	command	execution-shape	ollama	gate:command-shape	evidence	gate
 harness:ollama/stats	effect	risk-class	read-only	gate:effect-class	evidence	gate
@@ -2260,7 +2260,7 @@ harness:ollama/stats	platforms	platform-scope	["linux-x64-gnu"]	gate:platform-na
 harness:ollama/stats	source	provenance	internal:phase-01@fab5848	none	assertion	external
 harness:ollama/stats	summary	narration	Review Ollama local status and usage command surface.	none	assertion	asserted
 harness:ollama/stats	support	support-state	stub	gate:evidence-pairing	evidence	gate
-harness:ollama/stats	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	frozen
+harness:ollama/stats	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	runtime-gate
 harness:ollama/ui	args	execution-shape	[]	gate:command-shape	evidence	gate
 harness:ollama/ui	command	execution-shape	ollama	gate:command-shape	evidence	gate
 harness:ollama/ui	effect	risk-class	state-changing	gate:effect-class	evidence	gate
@@ -2272,7 +2272,7 @@ harness:ollama/ui	platforms	platform-scope	[]	gate:platform-name	evidence	assert
 harness:ollama/ui	source	provenance	internal:phase-01@fab5848	none	assertion	external
 harness:ollama/ui	summary	narration	Open the interactive Ollama interface.	none	assertion	asserted
 harness:ollama/ui	support	support-state	expected	gate:evidence-pairing	evidence	gate
-harness:ollama/ui	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	frozen
+harness:ollama/ui	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	runtime-gate
 harness:ollama/update	args	execution-shape	["-c", "curl -fsSL https://ollama.com/install.sh | sh"]	gate:command-shape	evidence	gate
 harness:ollama/update	command	execution-shape	sh	gate:command-shape	evidence	gate
 harness:ollama/update	effect	risk-class	state-changing	gate:effect-class	evidence	gate
@@ -2284,19 +2284,19 @@ harness:ollama/update	platforms	platform-scope	[]	gate:platform-name	evidence	as
 harness:ollama/update	source	provenance	internal:phase-01@fab5848	none	assertion	external
 harness:ollama/update	summary	narration	Update Ollama without interactive setup flows.	none	assertion	asserted
 harness:ollama/update	support	support-state	unknown	gate:evidence-pairing	evidence	gate
-harness:ollama/update	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	frozen
-harness:ollama/version	args	execution-shape	["--version"]	gate:command-shape	evidence	witnessed
-harness:ollama/version	command	execution-shape	ollama	gate:command-shape	evidence	witnessed
+harness:ollama/update	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	runtime-gate
+harness:ollama/version	args	execution-shape	["--version"]	gate:command-shape	evidence	gate
+harness:ollama/version	command	execution-shape	ollama	gate:command-shape	evidence	gate
 harness:ollama/version	effect	risk-class	read-only	none	assertion	asserted
-harness:ollama/version	evidence	support-state	disposable-real	gate:evidence-pairing	evidence	witnessed
+harness:ollama/version	evidence	support-state	deterministic	gate:evidence-pairing	evidence	gate
 harness:ollama/version	executable	identity	ollama	gate:identity	evidence	gate
 harness:ollama/version	interaction	risk-class	noninteractive	none	assertion	asserted
 harness:ollama/version	network	risk-class	false	none	assertion	asserted
 harness:ollama/version	platforms	platform-scope	[]	gate:platform-name	evidence	asserted
 harness:ollama/version	source	provenance	internal:phase-01@fab5848	none	assertion	external
 harness:ollama/version	summary	narration	Print or verify the installed Ollama version.	none	assertion	asserted
-harness:ollama/version	support	support-state	verified	gate:evidence-pairing	evidence	witnessed
-harness:ollama/version	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	frozen
+harness:ollama/version	support	support-state	expected	gate:evidence-pairing	evidence	gate
+harness:ollama/version	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	runtime-gate
 harness:ollama/yolo	args	execution-shape	["-c", "echo danger yolo mode is not configured for ollama; exit 1"]	gate:command-shape	evidence	gate
 harness:ollama/yolo	command	execution-shape	sh	gate:command-shape	evidence	gate
 harness:ollama/yolo	effect	risk-class	dangerous	gate:effect-class	evidence	gate
@@ -2308,7 +2308,7 @@ harness:ollama/yolo	platforms	platform-scope	["linux-x64-gnu"]	gate:platform-nam
 harness:ollama/yolo	source	provenance	internal:phase-01@fab5848	none	assertion	external
 harness:ollama/yolo	summary	narration	Dangerous mode is not normalized for Ollama yet.	none	assertion	asserted
 harness:ollama/yolo	support	support-state	disabled	gate:evidence-pairing	evidence	gate
-harness:ollama/yolo	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	frozen
+harness:ollama/yolo	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	runtime-gate
 harness:openclaw	binary	identity	openclaw	gate:identity	evidence	gate
 harness:openclaw	description	narration	Open-source AI coding assistant and multi-channel local gateway	none	assertion	asserted
 harness:openclaw	display	narration	OpenClaw	none	assertion	asserted
@@ -2327,7 +2327,7 @@ harness:openclaw/download	platforms	platform-scope	[]	gate:platform-name	evidenc
 harness:openclaw/download	source	provenance	internal:phase-01@fab5848	none	assertion	external
 harness:openclaw/download	summary	narration	Install OpenClaw from its documented distribution channel.	none	assertion	asserted
 harness:openclaw/download	support	support-state	expected	gate:evidence-pairing	evidence	gate
-harness:openclaw/download	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	frozen
+harness:openclaw/download	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	runtime-gate
 harness:openclaw/headless	args	execution-shape	["--help"]	gate:command-shape	evidence	gate
 harness:openclaw/headless	command	execution-shape	openclaw	gate:command-shape	evidence	gate
 harness:openclaw/headless	effect	risk-class	read-only	gate:effect-class	evidence	gate
@@ -2339,7 +2339,7 @@ harness:openclaw/headless	platforms	platform-scope	["linux-x64-gnu"]	gate:platfo
 harness:openclaw/headless	source	provenance	internal:phase-01@fab5848	none	assertion	external
 harness:openclaw/headless	summary	narration	Review OpenClaw headless invocation options.	none	assertion	asserted
 harness:openclaw/headless	support	support-state	stub	gate:evidence-pairing	evidence	gate
-harness:openclaw/headless	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	frozen
+harness:openclaw/headless	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	runtime-gate
 harness:openclaw/models	args	execution-shape	["--help"]	gate:command-shape	evidence	gate
 harness:openclaw/models	command	execution-shape	openclaw	gate:command-shape	evidence	gate
 harness:openclaw/models	effect	risk-class	read-only	gate:effect-class	evidence	gate
@@ -2351,7 +2351,7 @@ harness:openclaw/models	platforms	platform-scope	["linux-x64-gnu"]	gate:platform
 harness:openclaw/models	source	provenance	internal:phase-01@fab5848	none	assertion	external
 harness:openclaw/models	summary	narration	Review OpenClaw model selection command surface.	none	assertion	asserted
 harness:openclaw/models	support	support-state	stub	gate:evidence-pairing	evidence	gate
-harness:openclaw/models	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	frozen
+harness:openclaw/models	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	runtime-gate
 harness:openclaw/security	args	execution-shape	["--help"]	gate:command-shape	evidence	gate
 harness:openclaw/security	command	execution-shape	openclaw	gate:command-shape	evidence	gate
 harness:openclaw/security	effect	risk-class	read-only	gate:effect-class	evidence	gate
@@ -2363,7 +2363,7 @@ harness:openclaw/security	platforms	platform-scope	["linux-x64-gnu"]	gate:platfo
 harness:openclaw/security	source	provenance	internal:phase-01@fab5848	none	assertion	external
 harness:openclaw/security	summary	narration	Review OpenClaw security and auth command surface.	none	assertion	asserted
 harness:openclaw/security	support	support-state	stub	gate:evidence-pairing	evidence	gate
-harness:openclaw/security	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	frozen
+harness:openclaw/security	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	runtime-gate
 harness:openclaw/stats	args	execution-shape	["--help"]	gate:command-shape	evidence	gate
 harness:openclaw/stats	command	execution-shape	openclaw	gate:command-shape	evidence	gate
 harness:openclaw/stats	effect	risk-class	read-only	gate:effect-class	evidence	gate
@@ -2375,7 +2375,7 @@ harness:openclaw/stats	platforms	platform-scope	["linux-x64-gnu"]	gate:platform-
 harness:openclaw/stats	source	provenance	internal:phase-01@fab5848	none	assertion	external
 harness:openclaw/stats	summary	narration	Review OpenClaw local status and usage command surface.	none	assertion	asserted
 harness:openclaw/stats	support	support-state	stub	gate:evidence-pairing	evidence	gate
-harness:openclaw/stats	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	frozen
+harness:openclaw/stats	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	runtime-gate
 harness:openclaw/ui	args	execution-shape	[]	gate:command-shape	evidence	gate
 harness:openclaw/ui	command	execution-shape	openclaw	gate:command-shape	evidence	gate
 harness:openclaw/ui	effect	risk-class	state-changing	gate:effect-class	evidence	gate
@@ -2387,7 +2387,7 @@ harness:openclaw/ui	platforms	platform-scope	[]	gate:platform-name	evidence	asse
 harness:openclaw/ui	source	provenance	internal:phase-01@fab5848	none	assertion	external
 harness:openclaw/ui	summary	narration	Open the interactive OpenClaw interface.	none	assertion	asserted
 harness:openclaw/ui	support	support-state	expected	gate:evidence-pairing	evidence	gate
-harness:openclaw/ui	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	frozen
+harness:openclaw/ui	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	runtime-gate
 harness:openclaw/update	args	execution-shape	["update", "--yes", "--no-restart"]	gate:command-shape	evidence	gate
 harness:openclaw/update	command	execution-shape	openclaw	gate:command-shape	evidence	gate
 harness:openclaw/update	effect	risk-class	state-changing	gate:effect-class	evidence	gate
@@ -2399,7 +2399,7 @@ harness:openclaw/update	platforms	platform-scope	[]	gate:platform-name	evidence	
 harness:openclaw/update	source	provenance	internal:phase-01@fab5848	none	assertion	external
 harness:openclaw/update	summary	narration	Update OpenClaw without interactive setup flows.	none	assertion	asserted
 harness:openclaw/update	support	support-state	expected	gate:evidence-pairing	evidence	gate
-harness:openclaw/update	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	frozen
+harness:openclaw/update	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	runtime-gate
 harness:openclaw/version	args	execution-shape	["--version"]	gate:command-shape	evidence	gate
 harness:openclaw/version	command	execution-shape	openclaw	gate:command-shape	evidence	gate
 harness:openclaw/version	effect	risk-class	read-only	none	assertion	asserted
@@ -2411,7 +2411,7 @@ harness:openclaw/version	platforms	platform-scope	[]	gate:platform-name	evidence
 harness:openclaw/version	source	provenance	internal:phase-01@fab5848	none	assertion	external
 harness:openclaw/version	summary	narration	Print or verify the installed OpenClaw version.	none	assertion	asserted
 harness:openclaw/version	support	support-state	expected	gate:evidence-pairing	evidence	gate
-harness:openclaw/version	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	frozen
+harness:openclaw/version	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	runtime-gate
 harness:openclaw/yolo	args	execution-shape	["-c", "echo danger yolo mode is not configured for openclaw; exit 1"]	gate:command-shape	evidence	gate
 harness:openclaw/yolo	command	execution-shape	sh	gate:command-shape	evidence	gate
 harness:openclaw/yolo	effect	risk-class	dangerous	gate:effect-class	evidence	gate
@@ -2423,7 +2423,7 @@ harness:openclaw/yolo	platforms	platform-scope	["linux-x64-gnu"]	gate:platform-n
 harness:openclaw/yolo	source	provenance	internal:phase-01@fab5848	none	assertion	external
 harness:openclaw/yolo	summary	narration	Dangerous mode is not normalized for OpenClaw yet.	none	assertion	asserted
 harness:openclaw/yolo	support	support-state	disabled	gate:evidence-pairing	evidence	gate
-harness:openclaw/yolo	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	frozen
+harness:openclaw/yolo	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	runtime-gate
 harness:opencode	binary	identity	opencode	gate:identity	evidence	gate
 harness:opencode	description	narration	Terminal-based AI coding agent	none	assertion	asserted
 harness:opencode	display	narration	OpenCode	none	assertion	asserted
@@ -2442,7 +2442,7 @@ harness:opencode/download	platforms	platform-scope	[]	gate:platform-name	evidenc
 harness:opencode/download	source	provenance	internal:phase-01@fab5848	none	assertion	external
 harness:opencode/download	summary	narration	Install OpenCode with npm without sudo.	none	assertion	asserted
 harness:opencode/download	support	support-state	expected	gate:evidence-pairing	evidence	gate
-harness:opencode/download	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	frozen
+harness:opencode/download	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	runtime-gate
 harness:opencode/headless	args	execution-shape	["run"]	gate:command-shape	evidence	gate
 harness:opencode/headless	command	execution-shape	opencode	gate:command-shape	evidence	gate
 harness:opencode/headless	effect	risk-class	dangerous	none	assertion	asserted
@@ -2454,7 +2454,7 @@ harness:opencode/headless	platforms	platform-scope	[]	gate:platform-name	evidenc
 harness:opencode/headless	source	provenance	internal:phase-01@fab5848	none	assertion	external
 harness:opencode/headless	summary	narration	Run OpenCode headlessly when the local CLI supports it.	none	assertion	asserted
 harness:opencode/headless	support	support-state	expected	gate:evidence-pairing	evidence	gate
-harness:opencode/headless	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	frozen
+harness:opencode/headless	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	runtime-gate
 harness:opencode/models	args	execution-shape	["--help"]	gate:command-shape	evidence	gate
 harness:opencode/models	command	execution-shape	opencode	gate:command-shape	evidence	gate
 harness:opencode/models	effect	risk-class	read-only	gate:effect-class	evidence	gate
@@ -2466,7 +2466,7 @@ harness:opencode/models	platforms	platform-scope	["linux-x64-gnu"]	gate:platform
 harness:opencode/models	source	provenance	internal:phase-01@fab5848	none	assertion	external
 harness:opencode/models	summary	narration	Show local OpenCode help until model listing is normalized.	none	assertion	asserted
 harness:opencode/models	support	support-state	stub	gate:evidence-pairing	evidence	gate
-harness:opencode/models	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	frozen
+harness:opencode/models	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	runtime-gate
 harness:opencode/security	args	execution-shape	["--help"]	gate:command-shape	evidence	gate
 harness:opencode/security	command	execution-shape	opencode	gate:command-shape	evidence	gate
 harness:opencode/security	effect	risk-class	read-only	gate:effect-class	evidence	gate
@@ -2478,7 +2478,7 @@ harness:opencode/security	platforms	platform-scope	["linux-x64-gnu"]	gate:platfo
 harness:opencode/security	source	provenance	internal:phase-01@fab5848	none	assertion	external
 harness:opencode/security	summary	narration	Review OpenCode auth, terminal, and provider settings before running.	none	assertion	asserted
 harness:opencode/security	support	support-state	stub	gate:evidence-pairing	evidence	gate
-harness:opencode/security	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	frozen
+harness:opencode/security	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	runtime-gate
 harness:opencode/stats	args	execution-shape	["--help"]	gate:command-shape	evidence	gate
 harness:opencode/stats	command	execution-shape	opencode	gate:command-shape	evidence	gate
 harness:opencode/stats	effect	risk-class	read-only	gate:effect-class	evidence	gate
@@ -2490,7 +2490,7 @@ harness:opencode/stats	platforms	platform-scope	["linux-x64-gnu"]	gate:platform-
 harness:opencode/stats	source	provenance	internal:phase-01@fab5848	none	assertion	external
 harness:opencode/stats	summary	narration	Show local OpenCode help until a stable stats command is defined.	none	assertion	asserted
 harness:opencode/stats	support	support-state	stub	gate:evidence-pairing	evidence	gate
-harness:opencode/stats	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	frozen
+harness:opencode/stats	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	runtime-gate
 harness:opencode/ui	args	execution-shape	[]	gate:command-shape	evidence	gate
 harness:opencode/ui	command	execution-shape	opencode	gate:command-shape	evidence	gate
 harness:opencode/ui	effect	risk-class	state-changing	gate:effect-class	evidence	gate
@@ -2502,7 +2502,7 @@ harness:opencode/ui	platforms	platform-scope	[]	gate:platform-name	evidence	asse
 harness:opencode/ui	source	provenance	internal:phase-01@fab5848	none	assertion	external
 harness:opencode/ui	summary	narration	Open the interactive OpenCode terminal UI.	none	assertion	asserted
 harness:opencode/ui	support	support-state	expected	gate:evidence-pairing	evidence	gate
-harness:opencode/ui	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	frozen
+harness:opencode/ui	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	runtime-gate
 harness:opencode/update	args	execution-shape	["update", "-g", "opencode-ai"]	gate:command-shape	evidence	gate
 harness:opencode/update	command	execution-shape	npm	gate:command-shape	evidence	gate
 harness:opencode/update	effect	risk-class	state-changing	gate:effect-class	evidence	gate
@@ -2515,19 +2515,19 @@ harness:opencode/update	platforms	platform-scope	[]	gate:platform-name	evidence	
 harness:opencode/update	source	provenance	internal:phase-01@fab5848	none	assertion	external
 harness:opencode/update	summary	narration	Update the npm-installed OpenCode package without interactive auth.	none	assertion	asserted
 harness:opencode/update	support	support-state	expected	gate:evidence-pairing	evidence	gate
-harness:opencode/update	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	frozen
-harness:opencode/version	args	execution-shape	["--version"]	gate:command-shape	evidence	witnessed
-harness:opencode/version	command	execution-shape	opencode	gate:command-shape	evidence	witnessed
+harness:opencode/update	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	runtime-gate
+harness:opencode/version	args	execution-shape	["--version"]	gate:command-shape	evidence	gate
+harness:opencode/version	command	execution-shape	opencode	gate:command-shape	evidence	gate
 harness:opencode/version	effect	risk-class	read-only	none	assertion	asserted
-harness:opencode/version	evidence	support-state	disposable-real	gate:evidence-pairing	evidence	witnessed
+harness:opencode/version	evidence	support-state	deterministic	gate:evidence-pairing	evidence	gate
 harness:opencode/version	executable	identity	opencode	gate:identity	evidence	gate
 harness:opencode/version	interaction	risk-class	noninteractive	none	assertion	asserted
 harness:opencode/version	network	risk-class	false	none	assertion	asserted
 harness:opencode/version	platforms	platform-scope	[]	gate:platform-name	evidence	asserted
 harness:opencode/version	source	provenance	internal:phase-01@fab5848	none	assertion	external
 harness:opencode/version	summary	narration	Print the installed OpenCode version.	none	assertion	asserted
-harness:opencode/version	support	support-state	verified	gate:evidence-pairing	evidence	witnessed
-harness:opencode/version	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	frozen
+harness:opencode/version	support	support-state	expected	gate:evidence-pairing	evidence	gate
+harness:opencode/version	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	runtime-gate
 harness:opencode/yolo	args	execution-shape	["--dangerously-disable-safeguards"]	gate:command-shape	evidence	gate
 harness:opencode/yolo	command	execution-shape	opencode	gate:command-shape	evidence	gate
 harness:opencode/yolo	effect	risk-class	dangerous	gate:effect-class	evidence	gate
@@ -2539,7 +2539,7 @@ harness:opencode/yolo	platforms	platform-scope	[]	gate:platform-name	evidence	in
 harness:opencode/yolo	source	provenance	internal:phase-01@fab5848	none	assertion	external
 harness:opencode/yolo	summary	narration	Dangerous mode: run OpenCode with local safeguards disabled if supported.	none	assertion	asserted
 harness:opencode/yolo	support	support-state	disabled	gate:evidence-pairing	evidence	gate
-harness:opencode/yolo	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	frozen
+harness:opencode/yolo	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	runtime-gate
 harness:pi	binary	identity	pi	gate:identity	evidence	gate
 harness:pi	description	narration	Terminal-based coding agent	none	assertion	asserted
 harness:pi	display	narration	Pi	none	assertion	asserted
@@ -2558,7 +2558,7 @@ harness:pi/download	platforms	platform-scope	[]	gate:platform-name	evidence	asse
 harness:pi/download	source	provenance	internal:phase-01@fab5848	none	assertion	external
 harness:pi/download	summary	narration	Install Pi from its documented distribution channel.	none	assertion	asserted
 harness:pi/download	support	support-state	expected	gate:evidence-pairing	evidence	gate
-harness:pi/download	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	frozen
+harness:pi/download	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	runtime-gate
 harness:pi/headless	args	execution-shape	["--help"]	gate:command-shape	evidence	gate
 harness:pi/headless	command	execution-shape	pi	gate:command-shape	evidence	gate
 harness:pi/headless	effect	risk-class	read-only	gate:effect-class	evidence	gate
@@ -2570,7 +2570,7 @@ harness:pi/headless	platforms	platform-scope	["linux-x64-gnu"]	gate:platform-nam
 harness:pi/headless	source	provenance	internal:phase-01@fab5848	none	assertion	external
 harness:pi/headless	summary	narration	Review Pi headless invocation options.	none	assertion	asserted
 harness:pi/headless	support	support-state	stub	gate:evidence-pairing	evidence	gate
-harness:pi/headless	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	frozen
+harness:pi/headless	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	runtime-gate
 harness:pi/models	args	execution-shape	["--help"]	gate:command-shape	evidence	gate
 harness:pi/models	command	execution-shape	pi	gate:command-shape	evidence	gate
 harness:pi/models	effect	risk-class	read-only	gate:effect-class	evidence	gate
@@ -2582,7 +2582,7 @@ harness:pi/models	platforms	platform-scope	["linux-x64-gnu"]	gate:platform-name	
 harness:pi/models	source	provenance	internal:phase-01@fab5848	none	assertion	external
 harness:pi/models	summary	narration	Review Pi model selection command surface.	none	assertion	asserted
 harness:pi/models	support	support-state	stub	gate:evidence-pairing	evidence	gate
-harness:pi/models	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	frozen
+harness:pi/models	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	runtime-gate
 harness:pi/security	args	execution-shape	["--help"]	gate:command-shape	evidence	gate
 harness:pi/security	command	execution-shape	pi	gate:command-shape	evidence	gate
 harness:pi/security	effect	risk-class	read-only	gate:effect-class	evidence	gate
@@ -2594,7 +2594,7 @@ harness:pi/security	platforms	platform-scope	["linux-x64-gnu"]	gate:platform-nam
 harness:pi/security	source	provenance	internal:phase-01@fab5848	none	assertion	external
 harness:pi/security	summary	narration	Review Pi security and auth command surface.	none	assertion	asserted
 harness:pi/security	support	support-state	stub	gate:evidence-pairing	evidence	gate
-harness:pi/security	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	frozen
+harness:pi/security	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	runtime-gate
 harness:pi/stats	args	execution-shape	["--help"]	gate:command-shape	evidence	gate
 harness:pi/stats	command	execution-shape	pi	gate:command-shape	evidence	gate
 harness:pi/stats	effect	risk-class	read-only	gate:effect-class	evidence	gate
@@ -2606,7 +2606,7 @@ harness:pi/stats	platforms	platform-scope	["linux-x64-gnu"]	gate:platform-name	e
 harness:pi/stats	source	provenance	internal:phase-01@fab5848	none	assertion	external
 harness:pi/stats	summary	narration	Review Pi local status and usage command surface.	none	assertion	asserted
 harness:pi/stats	support	support-state	stub	gate:evidence-pairing	evidence	gate
-harness:pi/stats	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	frozen
+harness:pi/stats	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	runtime-gate
 harness:pi/ui	args	execution-shape	[]	gate:command-shape	evidence	gate
 harness:pi/ui	command	execution-shape	pi	gate:command-shape	evidence	gate
 harness:pi/ui	effect	risk-class	state-changing	gate:effect-class	evidence	gate
@@ -2618,7 +2618,7 @@ harness:pi/ui	platforms	platform-scope	[]	gate:platform-name	evidence	asserted
 harness:pi/ui	source	provenance	internal:phase-01@fab5848	none	assertion	external
 harness:pi/ui	summary	narration	Open the interactive Pi interface.	none	assertion	asserted
 harness:pi/ui	support	support-state	expected	gate:evidence-pairing	evidence	gate
-harness:pi/ui	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	frozen
+harness:pi/ui	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	runtime-gate
 harness:pi/update	args	execution-shape	["update", "-g", "@earendil-works/pi-coding-agent"]	gate:command-shape	evidence	gate
 harness:pi/update	command	execution-shape	npm	gate:command-shape	evidence	gate
 harness:pi/update	effect	risk-class	state-changing	gate:effect-class	evidence	gate
@@ -2631,19 +2631,19 @@ harness:pi/update	platforms	platform-scope	[]	gate:platform-name	evidence	assert
 harness:pi/update	source	provenance	internal:phase-01@fab5848	none	assertion	external
 harness:pi/update	summary	narration	Update Pi without interactive setup flows.	none	assertion	asserted
 harness:pi/update	support	support-state	expected	gate:evidence-pairing	evidence	gate
-harness:pi/update	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	frozen
-harness:pi/version	args	execution-shape	["--version"]	gate:command-shape	evidence	witnessed
-harness:pi/version	command	execution-shape	pi	gate:command-shape	evidence	witnessed
+harness:pi/update	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	runtime-gate
+harness:pi/version	args	execution-shape	["--version"]	gate:command-shape	evidence	gate
+harness:pi/version	command	execution-shape	pi	gate:command-shape	evidence	gate
 harness:pi/version	effect	risk-class	read-only	none	assertion	asserted
-harness:pi/version	evidence	support-state	disposable-real	gate:evidence-pairing	evidence	witnessed
+harness:pi/version	evidence	support-state	deterministic	gate:evidence-pairing	evidence	gate
 harness:pi/version	executable	identity	pi	gate:identity	evidence	gate
 harness:pi/version	interaction	risk-class	noninteractive	none	assertion	asserted
 harness:pi/version	network	risk-class	false	none	assertion	asserted
 harness:pi/version	platforms	platform-scope	[]	gate:platform-name	evidence	asserted
 harness:pi/version	source	provenance	internal:phase-01@fab5848	none	assertion	external
 harness:pi/version	summary	narration	Print or verify the installed Pi version.	none	assertion	asserted
-harness:pi/version	support	support-state	verified	gate:evidence-pairing	evidence	witnessed
-harness:pi/version	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	frozen
+harness:pi/version	support	support-state	expected	gate:evidence-pairing	evidence	gate
+harness:pi/version	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	runtime-gate
 harness:pi/yolo	args	execution-shape	["-c", "echo danger yolo mode is not configured for pi; exit 1"]	gate:command-shape	evidence	gate
 harness:pi/yolo	command	execution-shape	sh	gate:command-shape	evidence	gate
 harness:pi/yolo	effect	risk-class	dangerous	gate:effect-class	evidence	gate
@@ -2655,7 +2655,7 @@ harness:pi/yolo	platforms	platform-scope	["linux-x64-gnu"]	gate:platform-name	ev
 harness:pi/yolo	source	provenance	internal:phase-01@fab5848	none	assertion	external
 harness:pi/yolo	summary	narration	Dangerous mode is not normalized for Pi yet.	none	assertion	asserted
 harness:pi/yolo	support	support-state	disabled	gate:evidence-pairing	evidence	gate
-harness:pi/yolo	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	frozen
+harness:pi/yolo	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	runtime-gate
 harness:qwen	binary	identity	qwen	gate:identity	evidence	gate
 harness:qwen	description	narration	Qwen coding assistant	none	assertion	asserted
 harness:qwen	display	narration	Qwen	none	assertion	asserted
@@ -2674,7 +2674,7 @@ harness:qwen/download	platforms	platform-scope	[]	gate:platform-name	evidence	as
 harness:qwen/download	source	provenance	internal:phase-01@fab5848	none	assertion	external
 harness:qwen/download	summary	narration	Install Qwen from its documented distribution channel.	none	assertion	asserted
 harness:qwen/download	support	support-state	expected	gate:evidence-pairing	evidence	gate
-harness:qwen/download	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	frozen
+harness:qwen/download	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	runtime-gate
 harness:qwen/headless	args	execution-shape	["--help"]	gate:command-shape	evidence	gate
 harness:qwen/headless	command	execution-shape	qwen	gate:command-shape	evidence	gate
 harness:qwen/headless	effect	risk-class	read-only	gate:effect-class	evidence	gate
@@ -2686,7 +2686,7 @@ harness:qwen/headless	platforms	platform-scope	["linux-x64-gnu"]	gate:platform-n
 harness:qwen/headless	source	provenance	internal:phase-01@fab5848	none	assertion	external
 harness:qwen/headless	summary	narration	Review Qwen headless invocation options.	none	assertion	asserted
 harness:qwen/headless	support	support-state	stub	gate:evidence-pairing	evidence	gate
-harness:qwen/headless	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	frozen
+harness:qwen/headless	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	runtime-gate
 harness:qwen/models	args	execution-shape	["--help"]	gate:command-shape	evidence	gate
 harness:qwen/models	command	execution-shape	qwen	gate:command-shape	evidence	gate
 harness:qwen/models	effect	risk-class	read-only	gate:effect-class	evidence	gate
@@ -2698,7 +2698,7 @@ harness:qwen/models	platforms	platform-scope	["linux-x64-gnu"]	gate:platform-nam
 harness:qwen/models	source	provenance	internal:phase-01@fab5848	none	assertion	external
 harness:qwen/models	summary	narration	Review Qwen model selection command surface.	none	assertion	asserted
 harness:qwen/models	support	support-state	stub	gate:evidence-pairing	evidence	gate
-harness:qwen/models	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	frozen
+harness:qwen/models	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	runtime-gate
 harness:qwen/security	args	execution-shape	["--help"]	gate:command-shape	evidence	gate
 harness:qwen/security	command	execution-shape	qwen	gate:command-shape	evidence	gate
 harness:qwen/security	effect	risk-class	read-only	gate:effect-class	evidence	gate
@@ -2710,7 +2710,7 @@ harness:qwen/security	platforms	platform-scope	["linux-x64-gnu"]	gate:platform-n
 harness:qwen/security	source	provenance	internal:phase-01@fab5848	none	assertion	external
 harness:qwen/security	summary	narration	Review Qwen security and auth command surface.	none	assertion	asserted
 harness:qwen/security	support	support-state	stub	gate:evidence-pairing	evidence	gate
-harness:qwen/security	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	frozen
+harness:qwen/security	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	runtime-gate
 harness:qwen/stats	args	execution-shape	["--help"]	gate:command-shape	evidence	gate
 harness:qwen/stats	command	execution-shape	qwen	gate:command-shape	evidence	gate
 harness:qwen/stats	effect	risk-class	read-only	gate:effect-class	evidence	gate
@@ -2722,7 +2722,7 @@ harness:qwen/stats	platforms	platform-scope	["linux-x64-gnu"]	gate:platform-name
 harness:qwen/stats	source	provenance	internal:phase-01@fab5848	none	assertion	external
 harness:qwen/stats	summary	narration	Review Qwen local status and usage command surface.	none	assertion	asserted
 harness:qwen/stats	support	support-state	stub	gate:evidence-pairing	evidence	gate
-harness:qwen/stats	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	frozen
+harness:qwen/stats	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	runtime-gate
 harness:qwen/ui	args	execution-shape	[]	gate:command-shape	evidence	gate
 harness:qwen/ui	command	execution-shape	qwen	gate:command-shape	evidence	gate
 harness:qwen/ui	effect	risk-class	state-changing	gate:effect-class	evidence	gate
@@ -2734,7 +2734,7 @@ harness:qwen/ui	platforms	platform-scope	[]	gate:platform-name	evidence	asserted
 harness:qwen/ui	source	provenance	internal:phase-01@fab5848	none	assertion	external
 harness:qwen/ui	summary	narration	Open the interactive Qwen interface.	none	assertion	asserted
 harness:qwen/ui	support	support-state	expected	gate:evidence-pairing	evidence	gate
-harness:qwen/ui	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	frozen
+harness:qwen/ui	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	runtime-gate
 harness:qwen/update	args	execution-shape	["update", "-g", "@qwen-code/qwen-code"]	gate:command-shape	evidence	gate
 harness:qwen/update	command	execution-shape	npm	gate:command-shape	evidence	gate
 harness:qwen/update	effect	risk-class	state-changing	gate:effect-class	evidence	gate
@@ -2747,7 +2747,7 @@ harness:qwen/update	platforms	platform-scope	[]	gate:platform-name	evidence	asse
 harness:qwen/update	source	provenance	internal:phase-01@fab5848	none	assertion	external
 harness:qwen/update	summary	narration	Update Qwen without interactive setup flows.	none	assertion	asserted
 harness:qwen/update	support	support-state	expected	gate:evidence-pairing	evidence	gate
-harness:qwen/update	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	frozen
+harness:qwen/update	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	runtime-gate
 harness:qwen/version	args	execution-shape	["--version"]	gate:command-shape	evidence	gate
 harness:qwen/version	command	execution-shape	qwen	gate:command-shape	evidence	gate
 harness:qwen/version	effect	risk-class	read-only	none	assertion	asserted
@@ -2759,7 +2759,7 @@ harness:qwen/version	platforms	platform-scope	[]	gate:platform-name	evidence	ass
 harness:qwen/version	source	provenance	internal:phase-01@fab5848	none	assertion	external
 harness:qwen/version	summary	narration	Print or verify the installed Qwen version.	none	assertion	asserted
 harness:qwen/version	support	support-state	expected	gate:evidence-pairing	evidence	gate
-harness:qwen/version	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	frozen
+harness:qwen/version	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	runtime-gate
 harness:qwen/yolo	args	execution-shape	["-c", "echo danger yolo mode is not configured for qwen; exit 1"]	gate:command-shape	evidence	gate
 harness:qwen/yolo	command	execution-shape	sh	gate:command-shape	evidence	gate
 harness:qwen/yolo	effect	risk-class	dangerous	gate:effect-class	evidence	gate
@@ -2771,7 +2771,7 @@ harness:qwen/yolo	platforms	platform-scope	["linux-x64-gnu"]	gate:platform-name	
 harness:qwen/yolo	source	provenance	internal:phase-01@fab5848	none	assertion	external
 harness:qwen/yolo	summary	narration	Dangerous mode is not normalized for Qwen yet.	none	assertion	asserted
 harness:qwen/yolo	support	support-state	disabled	gate:evidence-pairing	evidence	gate
-harness:qwen/yolo	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	frozen
+harness:qwen/yolo	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	runtime-gate
 harness:vibe	binary	identity	vibe	gate:identity	evidence	gate
 harness:vibe	description	narration	Minimal CLI coding agent by Mistral AI	none	assertion	asserted
 harness:vibe	display	narration	Mistral Vibe	none	assertion	asserted
@@ -2789,7 +2789,7 @@ harness:vibe/download	platforms	platform-scope	[]	gate:platform-name	evidence	as
 harness:vibe/download	source	provenance	internal:phase-01@fab5848	none	assertion	external
 harness:vibe/download	summary	narration	Install Mistral Vibe from its documented distribution channel.	none	assertion	asserted
 harness:vibe/download	support	support-state	unknown	gate:evidence-pairing	evidence	gate
-harness:vibe/download	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	frozen
+harness:vibe/download	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	runtime-gate
 harness:vibe/headless	args	execution-shape	["--help"]	gate:command-shape	evidence	gate
 harness:vibe/headless	command	execution-shape	vibe	gate:command-shape	evidence	gate
 harness:vibe/headless	effect	risk-class	read-only	gate:effect-class	evidence	gate
@@ -2801,7 +2801,7 @@ harness:vibe/headless	platforms	platform-scope	["linux-x64-gnu"]	gate:platform-n
 harness:vibe/headless	source	provenance	internal:phase-01@fab5848	none	assertion	external
 harness:vibe/headless	summary	narration	Review Mistral Vibe headless invocation options.	none	assertion	asserted
 harness:vibe/headless	support	support-state	stub	gate:evidence-pairing	evidence	gate
-harness:vibe/headless	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	frozen
+harness:vibe/headless	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	runtime-gate
 harness:vibe/models	args	execution-shape	["--help"]	gate:command-shape	evidence	gate
 harness:vibe/models	command	execution-shape	vibe	gate:command-shape	evidence	gate
 harness:vibe/models	effect	risk-class	read-only	gate:effect-class	evidence	gate
@@ -2813,7 +2813,7 @@ harness:vibe/models	platforms	platform-scope	["linux-x64-gnu"]	gate:platform-nam
 harness:vibe/models	source	provenance	internal:phase-01@fab5848	none	assertion	external
 harness:vibe/models	summary	narration	Review Mistral Vibe model selection command surface.	none	assertion	asserted
 harness:vibe/models	support	support-state	stub	gate:evidence-pairing	evidence	gate
-harness:vibe/models	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	frozen
+harness:vibe/models	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	runtime-gate
 harness:vibe/security	args	execution-shape	["--help"]	gate:command-shape	evidence	gate
 harness:vibe/security	command	execution-shape	vibe	gate:command-shape	evidence	gate
 harness:vibe/security	effect	risk-class	read-only	gate:effect-class	evidence	gate
@@ -2825,7 +2825,7 @@ harness:vibe/security	platforms	platform-scope	["linux-x64-gnu"]	gate:platform-n
 harness:vibe/security	source	provenance	internal:phase-01@fab5848	none	assertion	external
 harness:vibe/security	summary	narration	Review Mistral Vibe security and auth command surface.	none	assertion	asserted
 harness:vibe/security	support	support-state	stub	gate:evidence-pairing	evidence	gate
-harness:vibe/security	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	frozen
+harness:vibe/security	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	runtime-gate
 harness:vibe/stats	args	execution-shape	["--help"]	gate:command-shape	evidence	gate
 harness:vibe/stats	command	execution-shape	vibe	gate:command-shape	evidence	gate
 harness:vibe/stats	effect	risk-class	read-only	gate:effect-class	evidence	gate
@@ -2837,7 +2837,7 @@ harness:vibe/stats	platforms	platform-scope	["linux-x64-gnu"]	gate:platform-name
 harness:vibe/stats	source	provenance	internal:phase-01@fab5848	none	assertion	external
 harness:vibe/stats	summary	narration	Review Mistral Vibe local status and usage command surface.	none	assertion	asserted
 harness:vibe/stats	support	support-state	stub	gate:evidence-pairing	evidence	gate
-harness:vibe/stats	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	frozen
+harness:vibe/stats	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	runtime-gate
 harness:vibe/ui	args	execution-shape	[]	gate:command-shape	evidence	gate
 harness:vibe/ui	command	execution-shape	vibe	gate:command-shape	evidence	gate
 harness:vibe/ui	effect	risk-class	state-changing	gate:effect-class	evidence	gate
@@ -2849,7 +2849,7 @@ harness:vibe/ui	platforms	platform-scope	[]	gate:platform-name	evidence	asserted
 harness:vibe/ui	source	provenance	internal:phase-01@fab5848	none	assertion	external
 harness:vibe/ui	summary	narration	Open the interactive Mistral Vibe interface.	none	assertion	asserted
 harness:vibe/ui	support	support-state	expected	gate:evidence-pairing	evidence	gate
-harness:vibe/ui	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	frozen
+harness:vibe/ui	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	runtime-gate
 harness:vibe/update	args	execution-shape	["update"]	gate:command-shape	evidence	gate
 harness:vibe/update	command	execution-shape	vibe	gate:command-shape	evidence	gate
 harness:vibe/update	effect	risk-class	state-changing	gate:effect-class	evidence	gate
@@ -2861,7 +2861,7 @@ harness:vibe/update	platforms	platform-scope	[]	gate:platform-name	evidence	asse
 harness:vibe/update	source	provenance	internal:phase-01@fab5848	none	assertion	external
 harness:vibe/update	summary	narration	Update Mistral Vibe without interactive setup flows.	none	assertion	asserted
 harness:vibe/update	support	support-state	expected	gate:evidence-pairing	evidence	gate
-harness:vibe/update	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	frozen
+harness:vibe/update	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	runtime-gate
 harness:vibe/version	args	execution-shape	["--version"]	gate:command-shape	evidence	gate
 harness:vibe/version	command	execution-shape	vibe	gate:command-shape	evidence	gate
 harness:vibe/version	effect	risk-class	read-only	none	assertion	asserted
@@ -2873,7 +2873,7 @@ harness:vibe/version	platforms	platform-scope	[]	gate:platform-name	evidence	ass
 harness:vibe/version	source	provenance	internal:phase-01@fab5848	none	assertion	external
 harness:vibe/version	summary	narration	Print or verify the installed Mistral Vibe version.	none	assertion	asserted
 harness:vibe/version	support	support-state	expected	gate:evidence-pairing	evidence	gate
-harness:vibe/version	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	frozen
+harness:vibe/version	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	runtime-gate
 harness:vibe/yolo	args	execution-shape	["-c", "echo danger yolo mode is not configured for vibe; exit 1"]	gate:command-shape	evidence	gate
 harness:vibe/yolo	command	execution-shape	sh	gate:command-shape	evidence	gate
 harness:vibe/yolo	effect	risk-class	dangerous	gate:effect-class	evidence	gate
@@ -2885,4 +2885,4 @@ harness:vibe/yolo	platforms	platform-scope	["linux-x64-gnu"]	gate:platform-name	
 harness:vibe/yolo	source	provenance	internal:phase-01@fab5848	none	assertion	external
 harness:vibe/yolo	summary	narration	Dangerous mode is not normalized for Mistral Vibe yet.	none	assertion	asserted
 harness:vibe/yolo	support	support-state	disabled	gate:evidence-pairing	evidence	gate
-harness:vibe/yolo	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	frozen
+harness:vibe/yolo	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	runtime-gate

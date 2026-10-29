@@ -1,8 +1,6 @@
 use std::process::{Command, Output};
 use std::sync::atomic::{AtomicUsize, Ordering};
-
 static TEMP_ID: AtomicUsize = AtomicUsize::new(0);
-
 fn tj(args: &[&str]) -> Output {
     Command::new(env!("CARGO_BIN_EXE_terminal-jarvis"))
         .args(["--plain"])
@@ -12,7 +10,6 @@ fn tj(args: &[&str]) -> Output {
         .output()
         .expect("terminal-jarvis runs")
 }
-
 fn tj_with_home(args: &[&str], home: &str) -> Output {
     Command::new(env!("CARGO_BIN_EXE_terminal-jarvis"))
         .args(["--plain"])
@@ -21,7 +18,6 @@ fn tj_with_home(args: &[&str], home: &str) -> Output {
         .output()
         .expect("terminal-jarvis runs")
 }
-
 fn temp_home() -> String {
     std::env::temp_dir()
         .join(format!(
@@ -32,7 +28,6 @@ fn temp_home() -> String {
         .to_string_lossy()
         .to_string()
 }
-
 #[rustfmt::skip] fn stdout(output: &Output) -> String { String::from_utf8_lossy(&output.stdout).to_string() }
 #[rustfmt::skip] fn stderr(output: &Output) -> String { String::from_utf8_lossy(&output.stderr).to_string() }
 #[test]
@@ -40,9 +35,9 @@ fn list_outputs_catalog_truth_with_live_claims() {
     let body = stdout(&tj(&["list"]));
     assert!(body.lines().count() == 25);
     assert!(body.contains("codex support=") && body.contains("vibe support="));
-    assert!(body.contains("verified=1"));
+    assert!(body.contains("expected="));
+    assert!(!body.contains("verified="));
 }
-
 #[test]
 fn show_includes_setup_and_capability_truth() {
     let body = stdout(&tj(&["show", "aider"]));

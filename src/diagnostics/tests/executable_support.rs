@@ -16,7 +16,7 @@ fn plan(support: SupportState, platforms: Vec<String>) -> CapabilityPlan {
         platforms,
         executable: "probe".into(),
         source: "probe".into(),
-        verified_at: "2026-08-05T00:00:00Z".into(),
+        verified_at: crate::catalog::today_utc(),
         package: None,
     }
 }

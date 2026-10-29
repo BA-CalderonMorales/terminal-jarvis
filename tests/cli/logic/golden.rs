@@ -20,7 +20,9 @@ pub fn normalize(rows: &[String], fixture_root: &str) -> Vec<String> {
     let version = env!("CARGO_PKG_VERSION");
     rows.iter()
         .map(|row| {
-            let row = row.trim_end();
+            let row = row
+                .trim_end()
+                .replace(&terminal_jarvis::catalog::today_utc(), "<verified-at>");
             let row = row.replace(env!("CARGO_MANIFEST_DIR"), "<repo>");
             let row = row.replace(fixture_root, "<fixture>");
             let row = if home.is_empty() {

@@ -1,8 +1,8 @@
 summary = "Print or verify the installed Pi version."
 command = "pi"
 args = ["--version"]
-support = "verified"
-evidence = "disposable-real"
+support = "expected"
+evidence = "deterministic"
 effect = "read-only"
 network = false
 interaction = "noninteractive"

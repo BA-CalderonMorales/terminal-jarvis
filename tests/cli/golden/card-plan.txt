@@ -7,7 +7,7 @@ Plan: fixture headless
     platforms  linux-x64-gnu
     executable fixture-child
     source     internal:test
-    verified   2026-07-17T00:00:00Z (fresh)
+    verified   <verified-at> (fresh)
 
   the command
     command     fixture-child

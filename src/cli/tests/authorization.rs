@@ -18,7 +18,7 @@ fn dangerous_opt_in_is_checked_before_any_prompt_or_spawn() {
     let harness = harness();
     let mut plan = test_support::plan(Capability::Headless, "unused", vec![]);
     plan.support = SupportState::Expected;
-    plan.verified_at = "2026-08-05T00:00:00Z".into();
+    plan.verified_at = crate::catalog::today_utc();
     plan.effect = Effect::Dangerous;
     let home = std::env::temp_dir();
     let options = Options::default();
@@ -67,7 +67,7 @@ fn conversation_stream_cannot_bypass_a_blocked_workspace_gate() {
     std::env::set_var(names[1], root.join("gates"));
     let mut plan = test_support::plan(Capability::Headless, "unused", vec![]);
     plan.support = SupportState::Expected;
-    plan.verified_at = "2026-08-05T00:00:00Z".into();
+    plan.verified_at = crate::catalog::today_utc();
     let mut harness = harness();
     harness.capabilities = vec![plan];
     let result =

@@ -5,7 +5,6 @@ use std::path::{Path, PathBuf};
 
 fn main() {
     println!("cargo:rerun-if-changed=harnesses");
-    println!("cargo:rerun-if-env-changed=TERMINAL_JARVIS_EVIDENCE_AS_OF");
     println!("cargo:rerun-if-env-changed=TERMINAL_JARVIS_DISTRIBUTION");
     if let Some(value) = env::var("TERMINAL_JARVIS_DISTRIBUTION")
         .ok()

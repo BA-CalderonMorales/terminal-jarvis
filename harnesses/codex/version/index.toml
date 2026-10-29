@@ -1,8 +1,8 @@
 summary = "Print the installed Codex version."
 command = "codex"
 args = ["--version"]
-support = "verified"
-evidence = "disposable-real"
+support = "expected"
+evidence = "deterministic"
 effect = "read-only"
 network = false
 interaction = "noninteractive"
