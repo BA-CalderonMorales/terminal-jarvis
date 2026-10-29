@@ -12,11 +12,14 @@ use crate::logic::tui::{launch, EXIT, FRAME, MARKER_SCRIPT, SERIAL};
 /// boot marker is its own stage and the command marker follows the command.
 fn screen(fixture: &Fixture, command: &str, marker: &[u8]) -> Vec<String> {
     let command = format!("{command}\n");
+    let mut process = launch(
+        fixture,
+        &[("TERM", "xterm-256color"), ("TJ_DEBUG_SIZE", "80x24")],
+    );
+    // Layout depends on CWD width before snapshot normalization runs.
+    process.current_dir("/");
     let (_, bytes) = pty::run_pty_probe(
-        launch(
-            fixture,
-            &[("TERM", "xterm-256color"), ("TJ_DEBUG_SIZE", "80x24")],
-        ),
+        process,
         &[
             (b"", Some(FRAME)),
             (command.as_bytes(), None),
