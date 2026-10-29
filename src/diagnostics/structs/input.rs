@@ -19,6 +19,9 @@ pub struct HarnessInput {
     pub env: Vec<String>,
     pub support: Vec<(String, String, bool)>,
     pub version: Option<(String, Vec<String>)>,
+    /// Upstream retired the tool; it stays in the report but never counts as
+    /// part of the maintained, ready fleet.
+    pub sunset: bool,
 }
 
 #[derive(Clone, Debug, Eq, PartialEq)]

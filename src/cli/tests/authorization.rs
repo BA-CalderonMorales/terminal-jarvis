@@ -11,6 +11,7 @@ fn harness() -> Harness {
         env_mode: EnvMode::None,
         env: vec![],
         capabilities: vec![],
+        sunset: None,
     }
 }
 #[test]

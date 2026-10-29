@@ -1,6 +1,6 @@
 use super::*;
 use crate::contracts::EnvMode;
-use crate::diagnostics::{Environment, RuntimeInput};
+use crate::diagnostics::{Environment, HarnessInput, RuntimeInput};
 use std::fs;
 use std::path::{Path, PathBuf};
 
@@ -28,6 +28,7 @@ fn probing_harness() -> HarnessInput {
         env: Vec::new(),
         support: vec![("run".into(), "ok".into(), true)],
         version: Some(crate::cli::logic::test_support::version_probe()),
+        sunset: false,
     }
 }
 
@@ -55,15 +56,6 @@ fn input(bin: &Path) -> DiagnosticInput {
     local
 }
 
-fn resolution(code: Code) -> super::super::resolve::Resolution {
-    super::super::resolve::Resolution {
-        code,
-        path: None,
-        paths: Vec::new(),
-        matches: 0,
-    }
-}
-
 #[test]
 fn collect_reports_ready_harness() {
     let bin = temp_bin("xh");
@@ -77,22 +69,4 @@ fn collect_reports_ready_harness() {
     assert_eq!(exec.action, None);
     assert!(result.ready.contains("xh"));
     let _ = fs::remove_dir_all(&bin);
-}
-
-fn probe(code: Code, probes: bool) -> (Code, String) {
-    let record = version_record("harness.xh", &probing_harness(), &resolution(code), probes);
-    (record.code, record.value)
-}
-
-#[test]
-fn version_record_gates_probing() {
-    assert_eq!(probe(Code::Ready, true), (Code::Ready, "v1.2.3".into()));
-    assert_eq!(
-        probe(Code::Missing, true),
-        (Code::Unknown, "unknown:not-probed".into())
-    );
-    assert_eq!(
-        probe(Code::Ready, false),
-        (Code::Unknown, "unknown:not-probed".into())
-    );
 }

@@ -54,6 +54,13 @@ pub fn show(harness: &Harness) -> String {
             harness.setup_hint(),
             crate::cli::logic::output_truth::support_summary(harness)
         );
+        if let Some(sunset) = &harness.sunset {
+            out.push_str(&format!(
+                "retirement: retired {} · replaced by {}\n",
+                sunset.at,
+                sunset.successor()
+            ));
+        }
         for plan in &harness.capabilities {
             out.push_str(&crate::cli::logic::output_truth::plain_capability(plan));
         }
@@ -67,10 +74,13 @@ pub fn show(harness: &Harness) -> String {
         &[
             Group::new(
                 "the facts",
-                vec![
+                [
                     Row::new("binary", &harness.binary),
                     Row::new("setup", harness.setup_hint()),
-                ],
+                ]
+                .into_iter()
+                .chain(super::graveyard::retirement(harness))
+                .collect(),
             ),
             Group::new("the support", support_rows(harness)),
             Group::new("what it can do", capability_rows(harness)),

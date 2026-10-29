@@ -1,6 +1,6 @@
 summary = "Install Pi from its documented distribution channel."
 command = "npm"
-args = ["install", "-g", "@earendil-works/pi-coding-agent"]
+args = ["install", "-g", "--ignore-scripts", "@earendil-works/pi-coding-agent"]
 support = "expected"
 evidence = "deterministic"
 effect = "state-changing"
@@ -8,6 +8,6 @@ network = true
 interaction = "noninteractive"
 platforms = []
 executable = "npm"
-source = "internal:phase-01@fab5848"
-verified_at = "2026-08-05T00:00:00Z"
+source = "https://pi.dev/docs/latest/quickstart"
+verified_at = "2026-10-29T00:00:00Z"
 package = "@earendil-works/pi-coding-agent"

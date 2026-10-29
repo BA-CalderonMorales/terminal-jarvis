@@ -7,7 +7,7 @@ use crate::catalog::logic::parser::{self, Fields};
 use crate::catalog::structs::keys;
 
 pub fn harness(fields: &Fields, capabilities: Vec<CapabilityPlan>) -> Result<Harness, String> {
-    keys::exact_fields(fields, keys::harness_keys())?;
+    keys::harness_keys_match(fields)?;
     Ok(Harness {
         name: parser::string(fields, "name")?,
         display: parser::string(fields, "display")?,
@@ -16,6 +16,7 @@ pub fn harness(fields: &Fields, capabilities: Vec<CapabilityPlan>) -> Result<Har
         env_mode: EnvMode::parse(&parser::string(fields, "env_mode")?)?,
         env: parser::list(fields, "env")?,
         capabilities,
+        sunset: super::sunset::parse(fields)?,
     })
 }
 
@@ -36,7 +37,28 @@ pub fn capability(fields: &Fields, capability: Capability) -> Result<CapabilityP
         source: parser::string(fields, "source")?,
         verified_at: parser::string(fields, "verified_at")?,
         package: parser::optional_string(fields, "package")?,
+        uninstall: uninstall_plan(fields, capability)?,
     })
+}
+
+/// `uninstall_command` + `uninstall_args` are one optional pair, and only the
+/// download plan may carry them: removal is the inverse of installation, not a
+/// capability a caller plans against.
+fn uninstall_plan(fields: &Fields, capability: Capability) -> Result<Option<CommandPlan>, String> {
+    let command = parser::optional_string(fields, "uninstall_command")?;
+    let args = if fields.contains_key("uninstall_args") {
+        Some(parser::list(fields, "uninstall_args")?)
+    } else {
+        None
+    };
+    match (command, args) {
+        (None, None) => Ok(None),
+        (Some(command), Some(args)) if capability == Capability::Download => {
+            Ok(Some(CommandPlan::new(command, args)))
+        }
+        (Some(_), Some(_)) => Err("uninstall keys belong only on download".to_string()),
+        _ => Err("uninstall_command and uninstall_args must appear together".to_string()),
+    }
 }
 
 fn boolean(fields: &Fields, key: &str) -> Result<bool, String> {
@@ -51,3 +73,7 @@ fn boolean(fields: &Fields, key: &str) -> Result<bool, String> {
 #[cfg(test)]
 #[path = "../tests/metadata_test.rs"]
 mod tests;
+
+#[cfg(test)]
+#[path = "../tests/metadata_harness_test.rs"]
+mod harness_tests;

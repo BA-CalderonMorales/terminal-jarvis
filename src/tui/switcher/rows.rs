@@ -4,7 +4,6 @@
 //! too narrow to carry a useful description, the row drops it rather than
 //! clipping the verdict.
 
-use super::clip;
 use crate::contracts::Harness;
 
 /// Cells reserved for the widest chip, so columns hold across both verdicts.
@@ -32,4 +31,18 @@ pub fn row(
         name = harness.name,
         chip = chip,
     )
+}
+
+pub fn clip(description: &str, limit: usize) -> String {
+    let mut remaining = limit;
+    let mut clipped = String::new();
+    for character in description.chars() {
+        if remaining == 0 {
+            clipped.extend(['.', '.', '.']);
+            break;
+        }
+        clipped.push(character);
+        remaining -= 1;
+    }
+    clipped
 }

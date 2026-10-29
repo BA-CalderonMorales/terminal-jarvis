@@ -24,6 +24,7 @@ fn plan(
         source,
         verified_at: "2026-07-17T04:59:27Z".into(),
         package: None,
+        uninstall: None,
     }
 }
 
@@ -49,7 +50,7 @@ fn empty_required_fields_error(executable: String, source: String) -> bool {
     count == expected
 }
 
-fn fresh_support_has_no_freshness_error(seed: u8) -> bool {
+fn fresh_support_has_no_freshness_error() -> bool {
     let candidate = plan(
         "x".into(),
         "y".into(),
@@ -57,7 +58,6 @@ fn fresh_support_has_no_freshness_error(seed: u8) -> bool {
         EvidenceMode::DisposableReal,
         vec!["linux-x64-gnu".into()],
     );
-    let _ = seed;
     errors(&candidate)
         .iter()
         .all(|e| !e.contains("must be fresh"))
@@ -94,7 +94,7 @@ fn platforms_must_be_known(platforms: Vec<String>) -> bool {
 #[test]
 fn truth_properties() {
     quickcheck::quickcheck(empty_required_fields_error as fn(String, String) -> bool);
-    quickcheck::quickcheck(fresh_support_has_no_freshness_error as fn(u8) -> bool);
+    quickcheck::quickcheck(fresh_support_has_no_freshness_error as fn() -> bool);
     quickcheck::quickcheck(evidence_must_match_support as fn(SupportState, EvidenceMode) -> bool);
     quickcheck::quickcheck(platforms_must_be_known as fn(Vec<String>) -> bool);
 }

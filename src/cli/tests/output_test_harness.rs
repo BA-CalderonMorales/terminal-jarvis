@@ -55,5 +55,6 @@ pub fn mock_harness(binary: &str, env_mode: EnvMode, env: Vec<String>) -> Harnes
         env_mode,
         env,
         capabilities: vec![plan],
+        sunset: None,
     }
 }

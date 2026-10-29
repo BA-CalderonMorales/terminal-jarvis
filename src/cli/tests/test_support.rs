@@ -72,5 +72,6 @@ pub fn plan(capability: Capability, command: &str, args: Vec<String>) -> Capabil
         source: "internal:test-fixture".to_string(),
         verified_at: "2026-07-17T04:59:27Z".to_string(),
         package: None,
+        uninstall: None,
     }
 }

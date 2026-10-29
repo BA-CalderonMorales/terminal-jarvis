@@ -819,18 +819,18 @@ harness:cursor-agent	display	narration	Cursor Agent	none	assertion	asserted
 harness:cursor-agent	env	environment	["OPENAI_API_KEY", "ANTHROPIC_API_KEY"]	gate:env	evidence	gate
 harness:cursor-agent	env_mode	environment	any	gate:env	evidence	gate
 harness:cursor-agent	name	identity	cursor-agent	gate:identity	evidence	gate
-harness:cursor-agent/download	args	execution-shape	["install", "cursor-agent-tools"]	gate:command-shape	evidence	gate
-harness:cursor-agent/download	command	execution-shape	pip	gate:command-shape	evidence	gate
+harness:cursor-agent/download	args	execution-shape	["-c", "curl https://cursor.com/install -fsS | bash"]	gate:command-shape	evidence	gate
+harness:cursor-agent/download	command	execution-shape	sh	gate:command-shape	evidence	gate
 harness:cursor-agent/download	effect	risk-class	state-changing	gate:effect-class	evidence	gate
 harness:cursor-agent/download	evidence	support-state	deterministic	gate:evidence-pairing	evidence	gate
-harness:cursor-agent/download	executable	identity	pip	gate:identity	evidence	gate
+harness:cursor-agent/download	executable	identity	sh	gate:identity	evidence	gate
 harness:cursor-agent/download	interaction	risk-class	noninteractive	gate:effect-class	evidence	gate
 harness:cursor-agent/download	network	risk-class	true	gate:effect-class	evidence	gate
 harness:cursor-agent/download	platforms	platform-scope	[]	gate:platform-name	evidence	asserted
-harness:cursor-agent/download	source	provenance	internal:phase-01@fab5848	none	assertion	external
-harness:cursor-agent/download	summary	narration	Install Cursor Agent from its documented distribution channel.	none	assertion	asserted
-harness:cursor-agent/download	support	support-state	expected	gate:evidence-pairing	evidence	gate
-harness:cursor-agent/download	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	runtime-gate
+harness:cursor-agent/download	source	provenance	https://cursor.com/docs/cli	none	assertion	external
+harness:cursor-agent/download	summary	narration	Install Cursor CLI from the official installer, which links `agent` and the legacy `cursor-agent`.	none	assertion	asserted
+harness:cursor-agent/download	support	support-state	unknown	gate:evidence-pairing	evidence	gate
+harness:cursor-agent/download	verified_at	freshness	2026-10-29T00:00:00Z	constant:freshness	evidence	runtime-gate
 harness:cursor-agent/headless	args	execution-shape	["--help"]	gate:command-shape	evidence	gate
 harness:cursor-agent/headless	command	execution-shape	cursor-agent	gate:command-shape	evidence	gate
 harness:cursor-agent/headless	effect	risk-class	read-only	gate:effect-class	evidence	gate
@@ -891,18 +891,18 @@ harness:cursor-agent/ui	source	provenance	internal:phase-01@fab5848	none	asserti
 harness:cursor-agent/ui	summary	narration	Open the interactive Cursor Agent interface.	none	assertion	asserted
 harness:cursor-agent/ui	support	support-state	expected	gate:evidence-pairing	evidence	gate
 harness:cursor-agent/ui	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	runtime-gate
-harness:cursor-agent/update	args	execution-shape	["install", "--upgrade", "cursor-agent-tools"]	gate:command-shape	evidence	gate
-harness:cursor-agent/update	command	execution-shape	pip	gate:command-shape	evidence	gate
+harness:cursor-agent/update	args	execution-shape	["-c", "curl https://cursor.com/install -fsS | bash"]	gate:command-shape	evidence	gate
+harness:cursor-agent/update	command	execution-shape	sh	gate:command-shape	evidence	gate
 harness:cursor-agent/update	effect	risk-class	state-changing	gate:effect-class	evidence	gate
 harness:cursor-agent/update	evidence	support-state	deterministic	gate:evidence-pairing	evidence	gate
-harness:cursor-agent/update	executable	identity	pip	gate:identity	evidence	gate
+harness:cursor-agent/update	executable	identity	sh	gate:identity	evidence	gate
 harness:cursor-agent/update	interaction	risk-class	noninteractive	gate:effect-class	evidence	gate
 harness:cursor-agent/update	network	risk-class	true	gate:effect-class	evidence	gate
 harness:cursor-agent/update	platforms	platform-scope	[]	gate:platform-name	evidence	asserted
-harness:cursor-agent/update	source	provenance	internal:phase-01@fab5848	none	assertion	external
-harness:cursor-agent/update	summary	narration	Update Cursor Agent without interactive setup flows.	none	assertion	asserted
-harness:cursor-agent/update	support	support-state	expected	gate:evidence-pairing	evidence	gate
-harness:cursor-agent/update	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	runtime-gate
+harness:cursor-agent/update	source	provenance	https://cursor.com/docs/cli	none	assertion	external
+harness:cursor-agent/update	summary	narration	Update Cursor CLI by re-running the official installer, which always links the current release.	none	assertion	asserted
+harness:cursor-agent/update	support	support-state	unknown	gate:evidence-pairing	evidence	gate
+harness:cursor-agent/update	verified_at	freshness	2026-10-29T00:00:00Z	constant:freshness	evidence	runtime-gate
 harness:cursor-agent/version	args	execution-shape	["--help"]	gate:command-shape	evidence	gate
 harness:cursor-agent/version	command	execution-shape	cursor-agent	gate:command-shape	evidence	gate
 harness:cursor-agent/version	effect	risk-class	read-only	gate:effect-class	evidence	gate
@@ -1277,6 +1277,9 @@ harness:gemini	display	narration	Gemini	none	assertion	asserted
 harness:gemini	env	environment	["GOOGLE_API_KEY", "GEMINI_API_KEY"]	gate:env	evidence	gate
 harness:gemini	env_mode	environment	any	gate:env	evidence	gate
 harness:gemini	name	identity	gemini	gate:identity	evidence	gate
+harness:gemini	sunset_at	lifecycle	2026-06-18	gate:sunset-pairing	evidence	gate
+harness:gemini	sunset_note	narration	Google retired Gemini CLI for consumers and points users to Antigravity; enterprise access continues through Gemini Code Assist and paid API keys.	gate:sunset-pairing	evidence	asserted
+harness:gemini	sunset_replaced_by	narration	antigravity	none	assertion	asserted
 harness:gemini/download	args	execution-shape	["install", "-g", "@google/gemini-cli"]	gate:command-shape	evidence	gate
 harness:gemini/download	command	execution-shape	npm	gate:command-shape	evidence	gate
 harness:gemini/download	effect	risk-class	state-changing	gate:effect-class	evidence	gate
@@ -2442,6 +2445,8 @@ harness:opencode/download	platforms	platform-scope	[]	gate:platform-name	evidenc
 harness:opencode/download	source	provenance	internal:phase-01@fab5848	none	assertion	external
 harness:opencode/download	summary	narration	Install OpenCode with npm without sudo.	none	assertion	asserted
 harness:opencode/download	support	support-state	expected	gate:evidence-pairing	evidence	gate
+harness:opencode/download	uninstall_args	execution-shape	["uninstall", "--force", "--keep-config", "--keep-data"]	gate:uninstall-pairing	evidence	gate
+harness:opencode/download	uninstall_command	execution-shape	opencode	gate:uninstall-pairing	evidence	gate
 harness:opencode/download	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	runtime-gate
 harness:opencode/headless	args	execution-shape	["run"]	gate:command-shape	evidence	gate
 harness:opencode/headless	command	execution-shape	opencode	gate:command-shape	evidence	gate
@@ -2546,7 +2551,7 @@ harness:pi	display	narration	Pi	none	assertion	asserted
 harness:pi	env	environment	["OPENAI_API_KEY", "ANTHROPIC_API_KEY"]	gate:env	evidence	gate
 harness:pi	env_mode	environment	any	gate:env	evidence	gate
 harness:pi	name	identity	pi	gate:identity	evidence	gate
-harness:pi/download	args	execution-shape	["install", "-g", "@earendil-works/pi-coding-agent"]	gate:command-shape	evidence	gate
+harness:pi/download	args	execution-shape	["install", "-g", "--ignore-scripts", "@earendil-works/pi-coding-agent"]	gate:command-shape	evidence	gate
 harness:pi/download	command	execution-shape	npm	gate:command-shape	evidence	gate
 harness:pi/download	effect	risk-class	state-changing	gate:effect-class	evidence	gate
 harness:pi/download	evidence	support-state	deterministic	gate:evidence-pairing	evidence	gate
@@ -2555,10 +2560,10 @@ harness:pi/download	interaction	risk-class	noninteractive	gate:effect-class	evid
 harness:pi/download	network	risk-class	true	gate:effect-class	evidence	gate
 harness:pi/download	package	install-source	@earendil-works/pi-coding-agent	none	assertion	asserted
 harness:pi/download	platforms	platform-scope	[]	gate:platform-name	evidence	asserted
-harness:pi/download	source	provenance	internal:phase-01@fab5848	none	assertion	external
+harness:pi/download	source	provenance	https://pi.dev/docs/latest/quickstart	none	assertion	external
 harness:pi/download	summary	narration	Install Pi from its documented distribution channel.	none	assertion	asserted
 harness:pi/download	support	support-state	expected	gate:evidence-pairing	evidence	gate
-harness:pi/download	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	runtime-gate
+harness:pi/download	verified_at	freshness	2026-10-29T00:00:00Z	constant:freshness	evidence	runtime-gate
 harness:pi/headless	args	execution-shape	["--help"]	gate:command-shape	evidence	gate
 harness:pi/headless	command	execution-shape	pi	gate:command-shape	evidence	gate
 harness:pi/headless	effect	risk-class	read-only	gate:effect-class	evidence	gate
@@ -2619,7 +2624,7 @@ harness:pi/ui	source	provenance	internal:phase-01@fab5848	none	assertion	externa
 harness:pi/ui	summary	narration	Open the interactive Pi interface.	none	assertion	asserted
 harness:pi/ui	support	support-state	expected	gate:evidence-pairing	evidence	gate
 harness:pi/ui	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	runtime-gate
-harness:pi/update	args	execution-shape	["update", "-g", "@earendil-works/pi-coding-agent"]	gate:command-shape	evidence	gate
+harness:pi/update	args	execution-shape	["update", "-g", "--ignore-scripts", "@earendil-works/pi-coding-agent"]	gate:command-shape	evidence	gate
 harness:pi/update	command	execution-shape	npm	gate:command-shape	evidence	gate
 harness:pi/update	effect	risk-class	state-changing	gate:effect-class	evidence	gate
 harness:pi/update	evidence	support-state	deterministic	gate:evidence-pairing	evidence	gate
@@ -2628,10 +2633,10 @@ harness:pi/update	interaction	risk-class	noninteractive	gate:effect-class	eviden
 harness:pi/update	network	risk-class	true	gate:effect-class	evidence	gate
 harness:pi/update	package	install-source	@earendil-works/pi-coding-agent	none	assertion	asserted
 harness:pi/update	platforms	platform-scope	[]	gate:platform-name	evidence	asserted
-harness:pi/update	source	provenance	internal:phase-01@fab5848	none	assertion	external
+harness:pi/update	source	provenance	https://pi.dev/docs/latest/quickstart	none	assertion	external
 harness:pi/update	summary	narration	Update Pi without interactive setup flows.	none	assertion	asserted
 harness:pi/update	support	support-state	expected	gate:evidence-pairing	evidence	gate
-harness:pi/update	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	runtime-gate
+harness:pi/update	verified_at	freshness	2026-10-29T00:00:00Z	constant:freshness	evidence	runtime-gate
 harness:pi/version	args	execution-shape	["--version"]	gate:command-shape	evidence	gate
 harness:pi/version	command	execution-shape	pi	gate:command-shape	evidence	gate
 harness:pi/version	effect	risk-class	read-only	none	assertion	asserted

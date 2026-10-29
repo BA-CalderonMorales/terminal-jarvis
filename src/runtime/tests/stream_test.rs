@@ -16,6 +16,7 @@ fn plan(command: &str, args: Vec<String>) -> CapabilityPlan {
         source: String::new(),
         verified_at: String::new(),
         package: None,
+        uninstall: None,
     }
 }
 
@@ -78,7 +79,6 @@ fn a_cancelled_run_kills_the_child_and_reports_it() {
         "cancel must not wait for the child"
     );
 }
-
 #[cfg(unix)]
 #[test]
 fn a_piped_child_cannot_reach_the_terminal() {

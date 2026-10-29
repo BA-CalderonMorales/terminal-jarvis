@@ -13,6 +13,8 @@ mod filter;
 #[path = "rows.rs"]
 mod rows;
 
+pub use rows::clip;
+
 pub fn select(input: &str, harnesses: &[Harness]) -> Option<args::Action> {
     let index = input.parse::<usize>().ok()?;
     if index == 0 {
@@ -21,6 +23,19 @@ pub fn select(input: &str, harnesses: &[Harness]) -> Option<args::Action> {
     harnesses
         .get(index - 1)
         .map(|harness| args::Action::Use(harness.name.clone()))
+}
+
+/// The one readiness chip rule: a retired tool says so before readiness,
+/// because "ready" for a tool nobody maintains is not the question being
+/// asked. Both pickers call this so a row cannot read two ways.
+pub fn chip(harness: &Harness, ready: &BTreeSet<String>) -> &'static str {
+    if harness.is_sunset() {
+        "[sunset]"
+    } else if ready.contains(&harness.name) {
+        "[ready]"
+    } else {
+        "[install]"
+    }
 }
 
 pub fn pick(
@@ -49,11 +64,7 @@ pub fn pick(
     let mut lines: Vec<String> = shown
         .iter()
         .map(|(offset, harness)| {
-            let chip = if ready.contains(&harness.name) {
-                "[ready]"
-            } else {
-                "[install]"
-            };
+            let chip = chip(harness, ready);
             rows::row(
                 offset + 1,
                 name_width,
@@ -73,20 +84,6 @@ pub fn pick(
     let mut body = lines.join("\n");
     body.push('\n');
     body
-}
-
-pub fn clip(description: &str, limit: usize) -> String {
-    let mut remaining = limit;
-    let mut clipped = String::new();
-    for character in description.chars() {
-        if remaining == 0 {
-            clipped.extend(['.', '.', '.']);
-            break;
-        }
-        clipped.push(character);
-        remaining -= 1;
-    }
-    clipped
 }
 
 #[cfg(test)]

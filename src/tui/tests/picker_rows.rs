@@ -72,3 +72,17 @@ fn the_list_starts_at_the_top_until_the_cursor_reaches_the_edge() {
         "the first screen shows the fleet from the top"
     );
 }
+
+#[test]
+fn a_retired_harness_reads_sunset_before_its_readiness() {
+    let mut harnesses = fleet().to_vec();
+    harnesses[0].sunset = Some(crate::contracts::Sunset {
+        at: "2026-06-18".into(),
+        note: "the vendor retired it".into(),
+        replaced_by: None,
+    });
+    let picker = Picker::new(&harnesses, None, ready(&["alpha"]), None);
+    let rows = picker.rows(80);
+    assert!(rows[0].contains("[sunset]"), "{}", rows[0]);
+    assert!(!rows[0].contains("[ready]"), "{}", rows[0]);
+}

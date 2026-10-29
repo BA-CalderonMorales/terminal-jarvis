@@ -3,6 +3,12 @@
 
 ### Added
 
+- `graveyard` lists retired harnesses with the retirement date, what happened,
+  and the vendor's successor; `--plain` and `--json` carry the same record.
+  Gemini CLI was retired for consumers on 2026-06-18 and is the first entry.
+  Retired tools keep their install and removal truth but are counted apart
+  from the maintained fleet, shown with a `[sunset]` chip in the picker, and
+  never reported as ready.
 - The path picker is now an overlay: arrows move a cursor, typing narrows the
   fleet live, Enter selects, Esc closes, and digits still jump by picker
   position while the filter is empty. The frame's status rule always names the
@@ -21,6 +27,12 @@
 
 ### Fixed
 
+- Uninstall prefers a harness's own documented remover, inverts npm/uv/cargo
+  installs otherwise, and re-checks the binary so a copy from another channel
+  is reported as incomplete instead of removed.
+- `cursor-agent` installed a third-party PyPI package instead of Cursor's CLI;
+  it now uses Cursor's official installer. `pi` installs with the
+  `--ignore-scripts` flag its docs require.
 - Arrow keys decode again: the escape replay fed the already-consumed `Esc`
   back into the decoder, so every CSI key arrived as `Ignored`.
 

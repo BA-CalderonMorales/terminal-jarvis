@@ -60,6 +60,9 @@ terminal-jarvis tui
 # List every coding agent
 terminal-jarvis list
 
+# See which agents upstream has retired, and what replaced them
+terminal-jarvis graveyard
+
 # Inspect a harness
 terminal-jarvis show opencode
 
@@ -95,6 +98,7 @@ invocation, for scripts, CI, and one-shot tasks:
 | Command | Purpose |
 |---|---|
 | `list` | Show all coding agents |
+| `graveyard` | Retired agents, their date, and their successor |
 | `check` | Report binary + env readiness |
 | `show <harness>` | Inspect a harness's capabilities |
 | `install <harness>` | Install a harness |

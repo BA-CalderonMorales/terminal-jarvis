@@ -12,6 +12,7 @@ pub(crate) fn harness(env_mode: EnvMode, names: &[&str]) -> HarnessInput {
         env: names.iter().map(|name| name.to_string()).collect(),
         support: Vec::new(),
         version: None,
+        sunset: false,
     }
 }
 pub(crate) fn input(environment: Environment) -> DiagnosticInput {

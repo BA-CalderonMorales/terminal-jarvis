@@ -4,44 +4,27 @@ mod catalog;
 mod detail;
 #[path = "output_diagnostics.rs"]
 mod diagnostics;
+#[path = "output_graveyard.rs"]
+mod graveyard;
 #[path = "output_readiness.rs"]
 mod readiness;
+#[path = "output_session.rs"]
+mod session;
 #[path = "output_summary.rs"]
 mod summary;
 
 use super::{style, table};
 use crate::contracts::EnvMode;
 use crate::contracts::Harness;
-use crate::{context::Session, security};
+use crate::security;
 
 pub use catalog::{list, plan, plan_with_extra};
 pub use detail::show;
 pub use diagnostics::diagnostics;
+pub use graveyard::graveyard;
 pub use readiness::is_harness_ready;
+pub use session::{current, help, selected};
 pub use summary::{audit, status};
-
-pub fn help() -> String {
-    super::help::text()
-}
-
-pub fn current(session: Option<Session>) -> String {
-    let active = session.map(|s| s.active_harness).unwrap_or("none".into());
-    if style::plain() {
-        return format!("active harness = {active}\n");
-    }
-    table::fields("Active Harness", &[("HARNESS", active)])
-}
-
-pub fn selected(name: &str) -> String {
-    if style::plain() {
-        return format!("active harness = {name}\n");
-    }
-    format!(
-        "{}\n{}",
-        style::success("Active harness updated"),
-        table::fields("Active Harness", &[("HARNESS", name.to_string())])
-    )
-}
 
 pub fn checks(harnesses: &[Harness]) -> String {
     if style::plain() {
@@ -97,3 +80,7 @@ fn env_status(harness: &Harness, missing: &[String]) -> String {
 #[cfg(test)]
 #[path = "../tests/output_test.rs"]
 mod tests;
+
+#[cfg(test)]
+#[path = "../tests/output_graveyard_test.rs"]
+mod graveyard_tests;
