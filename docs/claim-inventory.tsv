@@ -1277,6 +1277,9 @@ harness:gemini	display	narration	Gemini	none	assertion	asserted
 harness:gemini	env	environment	["GOOGLE_API_KEY", "GEMINI_API_KEY"]	gate:env	evidence	gate
 harness:gemini	env_mode	environment	any	gate:env	evidence	gate
 harness:gemini	name	identity	gemini	gate:identity	evidence	gate
+harness:gemini	sunset_at	lifecycle	2026-06-18	gate:sunset-pairing	evidence	gate
+harness:gemini	sunset_note	narration	Google retired Gemini CLI for consumers and points users to Antigravity; enterprise access continues through Gemini Code Assist and paid API keys.	gate:sunset-pairing	evidence	asserted
+harness:gemini	sunset_replaced_by	narration	antigravity	none	assertion	asserted
 harness:gemini/download	args	execution-shape	["install", "-g", "@google/gemini-cli"]	gate:command-shape	evidence	gate
 harness:gemini/download	command	execution-shape	npm	gate:command-shape	evidence	gate
 harness:gemini/download	effect	risk-class	state-changing	gate:effect-class	evidence	gate

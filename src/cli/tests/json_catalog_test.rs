@@ -27,6 +27,7 @@ fn harness() -> Harness {
             package: Some("alpha-cli".into()),
             uninstall: None,
         }],
+        sunset: None,
     }
 }
 

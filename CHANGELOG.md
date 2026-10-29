@@ -3,6 +3,12 @@
 
 ### Added
 
+- `graveyard` lists retired harnesses with the retirement date, what happened,
+  and the vendor's successor; `--plain` and `--json` carry the same record.
+  Gemini CLI was retired for consumers on 2026-06-18 and is the first entry.
+  Retired tools keep their install and removal truth but are counted apart
+  from the maintained fleet, shown with a `[sunset]` chip in the picker, and
+  never reported as ready.
 - The path picker is now an overlay: arrows move a cursor, typing narrows the
   fleet live, Enter selects, Esc closes, and digits still jump by picker
   position while the filter is empty. The frame's status rule always names the

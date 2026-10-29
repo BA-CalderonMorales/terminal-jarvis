@@ -16,6 +16,7 @@ fn harness(command: &str, args: Vec<String>) -> Vec<Harness> {
             command,
             args,
         )],
+        sunset: None,
     }]
 }
 

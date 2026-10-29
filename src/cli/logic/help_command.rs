@@ -26,6 +26,10 @@ fn entry(name: &str) -> (&'static str, &'static str) {
             "terminal-jarvis list",
             "List catalog harnesses and support summaries.",
         ),
+        "graveyard" => (
+            "terminal-jarvis graveyard",
+            "List retired harnesses, when they were retired, and their successor.",
+        ),
         "check" => (
             "terminal-jarvis check [--verbose]",
             "Diagnose local Terminal Jarvis and harness readiness.",

@@ -42,6 +42,7 @@ fn rejects_truth_contradictions_and_duplicate_rows() {
         env_mode: EnvMode::None,
         env: Vec::new(),
         capabilities: plans,
+        sunset: None,
     };
     let errors = catalog::validate(&[bad]).join("\n");
     for expected in [
@@ -54,7 +55,6 @@ fn rejects_truth_contradictions_and_duplicate_rows() {
         assert!(errors.contains(expected), "missing {expected}: {errors}");
     }
 }
-
 #[test]
 fn support_claims_reject_fallbacks_and_unsafe_installers() {
     let mut plans = Capability::ALL.map(plan).to_vec();
@@ -89,6 +89,7 @@ fn support_claims_reject_fallbacks_and_unsafe_installers() {
         env_mode: EnvMode::None,
         env: Vec::new(),
         capabilities: plans,
+        sunset: None,
     };
     let errors = catalog::validate(&[harness]).join("\n");
     assert!(errors.contains("curl-pipe installer"), "{errors}");

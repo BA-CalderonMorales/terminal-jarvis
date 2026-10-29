@@ -17,7 +17,7 @@ records why each channel is the official one.
 | droid | `https://app.factory.ai/cli` | Factory's documented installer |
 | eca | `editor-code-assistant/eca` install script | Project's own GitHub installer |
 | forge | `npm install -g forgecode` | npm bin `forge`, repo `antinomyhq/forge` |
-| gemini | `npm install -g @google/gemini-cli` | npm bin `gemini`, repo `google-gemini/gemini-cli` (see graveyard note below) |
+| gemini | `npm install -g @google/gemini-cli` | npm bin `gemini`, repo `google-gemini/gemini-cli`; **retired 2026-06-18** -- see [graveyard](usage.md) |
 | goose | `block/goose` stable installer | Block's documented installer |
 | hermes | `NousResearch/hermes-agent` installer | Project's own GitHub installer |
 | jules | `npm install -g @google/jules` | npm maintained by Google (`google-wombot`), homepage `jules.google` |

@@ -13,6 +13,7 @@ mod tests;
 pub fn text(inner: usize) -> String {
     let rows = [
         ("list [filter]", "numbered fleet picker; text narrows it"),
+        ("graveyard", "retired harnesses, why, and their successor"),
         ("show <harness>", "one harness in detail"),
         ("plan [harness] <cap>", "preview, don't run"),
         (

@@ -20,6 +20,7 @@ fn harness(name: &str) -> Harness {
         env_mode: crate::contracts::EnvMode::None,
         env: vec![],
         capabilities: vec![],
+        sunset: None,
     }
 }
 

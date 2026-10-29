@@ -13,6 +13,7 @@ fn harness(binary: &str) -> Harness {
         env_mode: EnvMode::None,
         env: vec![],
         capabilities: vec![],
+        sunset: None,
     }
 }
 

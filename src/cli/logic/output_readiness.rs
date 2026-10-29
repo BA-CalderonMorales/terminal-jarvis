@@ -2,7 +2,8 @@ use crate::contracts::{CapabilityPlan, Harness, SupportState};
 use crate::{catalog, context::platform, security};
 
 pub fn is_harness_ready(harness: &Harness) -> bool {
-    security::command_on_path(&harness.binary)
+    !harness.is_sunset()
+        && security::command_on_path(&harness.binary)
         && security::missing_env(harness).is_empty()
         && harness.capabilities.iter().any(executable_support)
 }

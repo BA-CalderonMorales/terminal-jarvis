@@ -39,6 +39,16 @@ it, and anything future work must respect.
 
 ## Records
 
+### Keep retired tools in the catalog behind a graveyard (feat/graveyard-lifecycle -> 2026-10-29)
+
+**Decision:** A retired harness keeps its catalog row and its capability truth,
+gains a dated retirement record (`sunset_at`, `sunset_note`,
+`sunset_replaced_by`), and is surfaced by `graveyard` rather than deleted. It is
+counted apart from the maintained fleet and never reported as ready. The
+[decision and tradeoffs](catalog-graveyard-2026-10-29.md) record why deletion
+would have hidden the one thing users actually need: what happened, and what to
+use instead.
+
 ### Make install sources auditable and removal honest (fix/uninstall-and-sources -> 2026-10-29)
 
 **Decision:** Install channels are checked against each upstream project, and

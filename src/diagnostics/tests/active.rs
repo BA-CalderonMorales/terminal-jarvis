@@ -23,6 +23,7 @@ fn input(active: Option<&str>, names: &[&str]) -> DiagnosticInput {
                 env: Vec::new(),
                 support: Vec::new(),
                 version: None,
+                sunset: false,
             })
             .collect(),
         platform: PlatformInput {

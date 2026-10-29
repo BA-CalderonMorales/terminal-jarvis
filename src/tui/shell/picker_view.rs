@@ -61,11 +61,7 @@ impl<'a> Picker<'a> {
             .iter()
             .enumerate()
             .map(|(row, (position, harness))| {
-                let chip = if self.ready.contains(&harness.name) {
-                    "[ready]"
-                } else {
-                    "[install]"
-                };
+                let chip = crate::tui::switcher::chip(harness, &self.ready);
                 let line = self.row(*position + 1, name_width, harness, chip, room);
                 format!("{} {line}", if row == self.cursor { "▸" } else { " " })
             })

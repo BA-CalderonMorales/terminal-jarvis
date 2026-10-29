@@ -50,6 +50,24 @@ Each harness `index.toml` declares:
 | `binary` | Expected executable name |
 | `env_mode` | `none`, `optional`, `any`, or `all`; `optional` lists credentials a login-based harness can use but does not require, so readiness never gates on them |
 | `env` | List of environment variables (`optional` mode: advisory only) |
+| `sunset_at` | Optional `YYYY-MM-DD`: the day the vendor retired the tool |
+| `sunset_note` | Required with `sunset_at`: what happened, in the vendor's terms |
+| `sunset_replaced_by` | Optional with `sunset_at`: the tool the vendor points to |
+
+### Retirement
+
+A retired tool stays in the catalog: its binary, install channel, and removal
+path are still true statements, and a user who already installed it needs the
+ledger more than a deletion. `sunset_at` and `sunset_note` appear together; a
+successor alone, or a date without a note, is a schema error, and the date must
+be a real calendar day. `terminal-jarvis graveyard` renders the record (rich,
+`--plain` key=value, `--json`), and the tui names retired tools in the picker
+with a `[sunset]` chip.
+
+A retired harness never counts as part of the maintained fleet: readiness
+reports its `readiness` record as `retired`, the dashboard counts it apart
+(`RETIRED n`) instead of inside `READY n/m`, and `list` names it `(sunset)`.
+Saying "ready" for a tool nobody maintains is the claim this contract refuses.
 
 ### Removal
 

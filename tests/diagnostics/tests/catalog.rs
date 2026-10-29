@@ -61,8 +61,19 @@ fn real_catalog_readiness_comes_from_support_claims() {
         .iter()
         .filter(|record| record.key.ends_with(".readiness") && record.code == Code::Unsupported)
         .count();
-    assert_eq!(ready, 25, "every sandboxed claim resolves ready");
-    assert_eq!(unavailable, 0);
+    // A retired tool is installed in this sandbox too, and it must still not
+    // count as ready: availability is not maintenance.
+    let retired = catalog.iter().filter(|harness| harness.is_sunset()).count();
+    assert!(retired > 0, "the catalog records at least one retirement");
+    assert_eq!(
+        ready,
+        catalog.len() - retired,
+        "every maintained sandboxed claim resolves ready"
+    );
+    assert_eq!(
+        unavailable, retired,
+        "retired tools are reported, not recommended"
+    );
     assert!(!report.json().contains("seeded-secret"));
     fs::remove_dir_all(root).unwrap();
 }

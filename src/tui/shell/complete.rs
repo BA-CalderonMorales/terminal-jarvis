@@ -13,6 +13,7 @@ pub const COMMANDS: &[&str] = &[
     "converse",
     "exit",
     "gate",
+    "graveyard",
     "help",
     "home",
     "install",

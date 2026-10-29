@@ -7,7 +7,7 @@ use crate::catalog::logic::parser::{self, Fields};
 use crate::catalog::structs::keys;
 
 pub fn harness(fields: &Fields, capabilities: Vec<CapabilityPlan>) -> Result<Harness, String> {
-    keys::exact_fields(fields, keys::harness_keys())?;
+    keys::harness_keys_match(fields)?;
     Ok(Harness {
         name: parser::string(fields, "name")?,
         display: parser::string(fields, "display")?,
@@ -16,6 +16,7 @@ pub fn harness(fields: &Fields, capabilities: Vec<CapabilityPlan>) -> Result<Har
         env_mode: EnvMode::parse(&parser::string(fields, "env_mode")?)?,
         env: parser::list(fields, "env")?,
         capabilities,
+        sunset: super::sunset::parse(fields)?,
     })
 }
 

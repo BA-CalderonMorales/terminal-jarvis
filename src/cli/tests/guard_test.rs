@@ -9,6 +9,7 @@ fn harnesses() -> Vec<Harness> {
         env_mode: crate::contracts::EnvMode::None,
         env: vec![],
         capabilities: vec![],
+        sunset: None,
     }]
 }
 
@@ -65,6 +66,7 @@ fn streaming_invocation_preserves_the_child_exit_code() {
         env_mode: crate::contracts::EnvMode::None,
         env: vec![],
         capabilities: vec![plan],
+        sunset: None,
     }];
     let home = std::env::temp_dir().join(format!("tj-stream-{}", std::process::id()));
     let _ = std::fs::remove_dir_all(&home);

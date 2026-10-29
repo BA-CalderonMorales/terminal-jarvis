@@ -11,6 +11,7 @@ fn harness(plans: Vec<CapabilityPlan>) -> Harness {
         env_mode: EnvMode::None,
         env: vec![],
         capabilities: plans,
+        sunset: None,
     }
 }
 

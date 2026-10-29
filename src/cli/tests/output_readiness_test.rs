@@ -26,6 +26,7 @@ fn harness(state: SupportState, verified_at: &str, platform: &str) -> Harness {
         env_mode: EnvMode::None,
         env: vec![],
         capabilities: vec![plan],
+        sunset: None,
     }
 }
 
