@@ -1,53 +1,10 @@
-//! ViewportRaw: the raw prompt session chrome.
+//! ViewportRaw: one raw-mode prompt session over the frozen chrome. The
+//! scroll offset lives in the caller's state (turns and prompts share one).
+
+use super::viewport_chrome::ViewportState;
 use super::viewport_nav::{self, Mode};
-use crate::contracts::Harness;
-use crate::tui::home;
-use crate::tui::input::{read_key, Editor, Indicator, Key};
-use crate::tui::screen::Draft;
+use crate::tui::input::{read_key, Editor, Key};
 use std::io::Write;
-use std::path::Path;
-
-/// The frozen frame chrome for one prompt session: what does not change while
-/// keys edit the line or scroll the body.
-pub struct ViewportState {
-    pub header: String,
-    pub cwd: String,
-    pub tagline: String,
-    pub prefix: String,
-    pub prefix_cells: usize,
-}
-
-impl ViewportState {
-    pub fn collect(
-        indicator: &Indicator,
-        harnesses: &[Harness],
-        catalog_root: &Path,
-        state_home: &Path,
-    ) -> Self {
-        let o = home::collect(harnesses, catalog_root, state_home);
-        let prefix = indicator.render(true);
-        Self {
-            header: home::header(&o),
-            cwd: o.cwd,
-            tagline: crate::tui::screen::tagline(&o.name, o.ready, o.total),
-            prefix_cells: crate::tui::screen::visible_width(&prefix) + 1,
-            prefix,
-        }
-    }
-
-    pub fn base_draft(&self, hint: &str, body: &[String], bottom: bool) -> Draft {
-        Draft {
-            header: self.header.clone(),
-            cwd: self.cwd.clone(),
-            tagline: self.tagline.clone(),
-            body: body.to_vec(),
-            prompt: self.prefix.clone(),
-            offset: 0,
-            hint: hint.to_string(),
-            bottom,
-        }
-    }
-}
 
 /// One raw-mode prompt session over the frozen chrome. The scroll offset lives
 /// in the caller's state (turns and prompts share one position).
@@ -57,6 +14,8 @@ pub struct Session<'a> {
     pub body: &'a [String],
     pub history: &'a [String],
     pub offset: &'a mut usize,
+    /// The harness names Tab completes against.
+    pub names: &'a [String],
 }
 
 pub fn run(session: &mut Session<'_>, bottom: bool) -> Option<String> {

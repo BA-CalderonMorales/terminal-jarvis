@@ -74,10 +74,21 @@ pub fn resolve_and_decode(first: u8) -> Option<Key> {
     }
     // A CSI/SS3 introducer: the final byte reads directly.
     let final_byte = super::raw_stdin::read_byte();
-    let mut bytes = vec![first, second];
-    if let Some(third) = final_byte {
-        bytes.push(third);
-    }
-    let mut replay = io::Cursor::new(bytes);
+    let tail = match final_byte {
+        Some(third) => vec![second, third],
+        None => vec![second],
+    };
+    replayed(first, &tail)
+}
+
+/// Decodes an Esc plus its continuation bytes. The Esc reaches the decoder
+/// exactly once, as `first`: replaying it inside the buffer would make every
+/// arrow decode as a second Esc and vanish as `Ignored`.
+pub(crate) fn replayed(first: u8, tail: &[u8]) -> Option<Key> {
+    let mut replay = io::Cursor::new(tail.to_vec());
     super::keys::decode(&mut replay, first)
 }
+
+#[cfg(test)]
+#[path = "../../tests/input_escape.rs"]
+mod tests;

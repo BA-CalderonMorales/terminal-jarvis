@@ -27,9 +27,16 @@ pub fn handle(
             again_plain()
         }
         Resolved::List(filter) => {
-            super::picker::show(out, harnesses, catalog_root, state_home, filter.as_deref());
+            let shown = super::picker::listing(
+                out,
+                options,
+                harnesses,
+                catalog_root,
+                state_home,
+                filter.as_deref(),
+            );
             Next::Again {
-                picker_shown: true,
+                picker_shown: shown,
                 reset: false,
             }
         }

@@ -62,10 +62,6 @@ fn shortest(hint: &str) -> &str {
         .unwrap_or(hint)
 }
 
-pub fn rule(inner: usize) -> String {
-    theme::dim(&"─".repeat(inner))
-}
-
 pub fn pad(line: &str, inner: usize) -> String {
     let width = canvas::visible_width(line);
     let fill = inner.saturating_sub(width);

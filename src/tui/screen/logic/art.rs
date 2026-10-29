@@ -78,12 +78,6 @@ fn center(styled: &str, axis: usize, visible: usize) -> String {
     format!("{}{styled}", " ".repeat(pad))
 }
 
-/// The header tagline: purpose plus the live fleet state, right-aligned on
-/// the header row.
-pub fn tagline(_active: &str, _ready: usize, _total: usize) -> String {
-    "context command center".to_string()
-}
-
 #[cfg(test)]
 #[path = "../../tests/screen_art.rs"]
 mod tests;
