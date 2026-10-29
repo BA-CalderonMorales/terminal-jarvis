@@ -51,6 +51,22 @@ Each harness `index.toml` declares:
 | `env_mode` | `none`, `optional`, `any`, or `all`; `optional` lists credentials a login-based harness can use but does not require, so readiness never gates on them |
 | `env` | List of environment variables (`optional` mode: advisory only) |
 
+### Removal
+
+A `download/index.toml` may declare the tool's own remover as an optional
+pair, preferred over any package-manager guess:
+
+| Field | Purpose |
+|---|---|
+| `uninstall_command` | Executable to run, e.g. `opencode` |
+| `uninstall_args` | Its argv, e.g. `["uninstall", "--force", "--keep-config"]` |
+
+Both keys appear together and only on `download`; anything else is a schema
+error. Without the pair, removal inverts the install channel -- `npm uninstall
+-g`, `uv tool uninstall`, `cargo uninstall` -- and never guesses for a script
+installer. After a successful removal Terminal Jarvis re-checks the binary: a
+survivor owned by another channel is reported as incomplete, not as success.
+
 Auth guidance stays at the harness level. Terminal Jarvis never retains
 credentials -- it tells you what each harness needs and lets you manage
 your own provider keys.

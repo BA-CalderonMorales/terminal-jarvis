@@ -30,8 +30,8 @@ fn all_catalog_rows_have_honest_truth_metadata() {
     assert_eq!(rows, 225);
     assert_eq!(states[&SupportState::Stub], 98);
     assert_eq!(states[&SupportState::Disabled], 25);
-    assert_eq!(states[&SupportState::Unknown], 8);
-    assert_eq!(states[&SupportState::Expected], 94);
+    assert_eq!(states[&SupportState::Unknown], 10);
+    assert_eq!(states[&SupportState::Expected], 92);
     assert!(!states.contains_key(&SupportState::Verified));
     assert_eq!(effects[&Effect::ReadOnly], 122);
     assert_eq!(effects[&Effect::StateChanging], 75);

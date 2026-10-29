@@ -27,6 +27,13 @@ with a bare `Enter`. A slashed name (`/codex`) launches an agent behind the same
 guarded plan-plus-confirm as headless. Ctrl+C aimed at a running agent never
 kills the switcher.
 
+`uninstall <harness>` prints the removal command and waits for an explicit
+`y`. The tool's own uninstaller runs when its catalog entry documents one;
+otherwise the install channel's inverse runs (npm, uv, or cargo). The binary is
+re-checked afterward, so a copy installed by another channel is reported as
+incomplete instead of being called removed. See
+[harness sources](harness-sources.md) for the channel each agent installs from.
+
 ## Automation
 
 `--json` wraps every command in one envelope

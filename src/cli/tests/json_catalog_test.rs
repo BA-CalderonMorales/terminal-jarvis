@@ -25,6 +25,7 @@ fn harness() -> Harness {
             source: "internal:catalog".into(),
             verified_at: "2026-10-01".into(),
             package: Some("alpha-cli".into()),
+            uninstall: None,
         }],
     }
 }

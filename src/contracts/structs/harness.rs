@@ -19,6 +19,10 @@ pub struct CapabilityPlan {
     pub source: String,
     pub verified_at: String,
     pub package: Option<String>,
+    /// The tool's own uninstaller, when its docs provide one. Removal prefers
+    /// this over a guessed package-manager inverse, so a script install can
+    /// still be removed by the channel that owns it.
+    pub uninstall: Option<CommandPlan>,
 }
 
 #[derive(Clone, Debug, Eq, PartialEq)]

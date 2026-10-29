@@ -22,7 +22,7 @@ const PLAN_KEYS: [&str; 12] = [
     "source",
     "verified_at",
 ];
-const OPTIONAL_PLAN_KEYS: [&str; 1] = ["package"];
+const OPTIONAL_PLAN_KEYS: [&str; 3] = ["package", "uninstall_command", "uninstall_args"];
 
 pub fn exact_fields(fields: &Fields, expected: &[&str]) -> Result<(), String> {
     let actual = fields.keys().map(String::as_str).collect::<Vec<_>>();

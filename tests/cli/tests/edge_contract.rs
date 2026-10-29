@@ -28,6 +28,7 @@ fn plan(capability: Capability, summary: &str, command: &str) -> CapabilityPlan 
         source: "internal:test".to_string(),
         verified_at: "2026-07-17T00:00:00Z".to_string(),
         package: None,
+        uninstall: None,
     }
 }
 
@@ -45,7 +46,6 @@ fn harness(name: &str, mode: EnvMode, env: Vec<String>) -> Harness {
             .collect(),
     }
 }
-
 #[test]
 fn validation_reports_contract_errors() {
     let bad = Harness {

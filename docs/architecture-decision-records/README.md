@@ -39,6 +39,14 @@ it, and anything future work must respect.
 
 ## Records
 
+### Make install sources auditable and removal honest (fix/uninstall-and-sources -> 2026-10-29)
+
+**Decision:** Install channels are checked against each upstream project, and
+uninstall prefers a declared tool-owned remover, then inverts npm/uv/cargo, and
+verifies the binary is gone. The [decision and tradeoffs](catalog-source-and-removal-truth-2026-10-29.md)
+record why a third-party Cursor package and a false-success uninstall were the
+same defect: a claim nobody held.
+
 ### Make the picker an object, the status rule permanent, and the keys explicit (release/0.1.24 -> 2026-10-29)
 
 **Decision:** The fleet picker is a modal state machine that owns arrows,

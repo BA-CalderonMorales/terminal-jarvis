@@ -31,6 +31,7 @@ pub fn dummy_plan(
         source: "test".into(),
         verified_at: verified_at.into(),
         package: None,
+        uninstall: None,
     }
 }
 

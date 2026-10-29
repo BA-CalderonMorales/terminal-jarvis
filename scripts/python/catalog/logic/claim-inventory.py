@@ -66,6 +66,8 @@ KIND = {
     "env_mode": "environment",
     "env": "environment",
     "package": "install-source",
+    "uninstall_command": "execution-shape",
+    "uninstall_args": "execution-shape",
 }
 
 # A mechanism is selected by manifest schema, capability, and support state: the
@@ -89,6 +91,8 @@ CAPABILITY_HELD_BY = {
     "command": "gate:command-shape",
     "args": "gate:command-shape",
     "verified_at": "constant:freshness",
+    "uninstall_command": "gate:uninstall-pairing",
+    "uninstall_args": "gate:uninstall-pairing",
 }
 EFFECT_ARMS = {"download", "update", "ui", "yolo"}
 EFFECT_SUPPORT = {"stub", "manual"}

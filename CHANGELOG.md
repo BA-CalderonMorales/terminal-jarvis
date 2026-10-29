@@ -21,6 +21,12 @@
 
 ### Fixed
 
+- Uninstall prefers a harness's own documented remover, inverts npm/uv/cargo
+  installs otherwise, and re-checks the binary so a copy from another channel
+  is reported as incomplete instead of removed.
+- `cursor-agent` installed a third-party PyPI package instead of Cursor's CLI;
+  it now uses Cursor's official installer. `pi` installs with the
+  `--ignore-scripts` flag its docs require.
 - Arrow keys decode again: the escape replay fed the already-consumed `Esc`
   back into the decoder, so every CSI key arrived as `Ignored`.
 

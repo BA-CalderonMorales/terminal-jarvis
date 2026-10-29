@@ -17,6 +17,7 @@ fn plan(command: String, args: Vec<String>, support: SupportState) -> Capability
         source: "test".into(),
         verified_at: "2026-07-17T04:59:27Z".into(),
         package: None,
+        uninstall: None,
     }
 }
 

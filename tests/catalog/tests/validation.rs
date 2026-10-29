@@ -23,6 +23,7 @@ fn plan(capability: Capability) -> CapabilityPlan {
         source: "internal:test".to_string(),
         verified_at: "2026-07-17T00:00:00Z".to_string(),
         package: None,
+        uninstall: None,
     }
 }
 
