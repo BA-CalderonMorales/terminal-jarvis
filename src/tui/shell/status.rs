@@ -6,20 +6,15 @@
 
 use crate::contracts::Harness;
 use crate::tui::screen::{pair, section, visible_width, Role};
-use crate::{context, diagnostics};
 use std::path::Path;
 
 pub fn active_name(state_home: &Path) -> String {
-    context::load(state_home)
-        .ok()
-        .flatten()
-        .map(|session| session.active_harness)
-        .unwrap_or_else(|| "none".to_string())
+    super::fleet::active(state_home).unwrap_or_else(|| "none".to_string())
 }
 
 pub fn modeline(state_home: &Path, picker_shown: bool, debug: bool) -> String {
     if picker_shown {
-        return "pick a number to switch agents, or type 'home' to go back".to_string();
+        return "pick a number to switch agents · list <text> filters · home resets".to_string();
     }
     let active = active_name(state_home);
     let debug = if debug { " (debug)" } else { "" };
@@ -44,23 +39,9 @@ pub fn refresh_indicator(
 }
 
 pub fn render(harnesses: &[Harness], catalog_root: &Path, state_home: &Path) -> String {
-    let mut runtime = diagnostics::RuntimeInput::local(false, false, false, 100, "tui");
-    runtime.probes = false;
-    let input =
-        diagnostics::DiagnosticInput::local(catalog_root, state_home, None, harnesses, runtime);
-    let report = diagnostics::collect(&input);
     let active = active_name(state_home);
-    // Repeated installs append duplicate readiness records to the cache;
-    // the fleet list is a set, so a tool is named once no matter what.
-    let ready: Vec<&str> = report
-        .records
-        .iter()
-        .filter(|record| record.key.ends_with(".readiness") && record.value == "ready")
-        .filter_map(|record| record.key.strip_prefix("harness."))
-        .map(|key| key.strip_suffix(".readiness").unwrap_or(key))
-        .collect::<std::collections::BTreeSet<&str>>()
-        .into_iter()
-        .collect();
+    let ready = super::fleet::ready(harnesses, catalog_root, state_home);
+    let ready: Vec<&str> = ready.iter().map(String::as_str).collect();
     let not_ready: Vec<&str> = harnesses
         .iter()
         .map(|harness| harness.name.as_str())

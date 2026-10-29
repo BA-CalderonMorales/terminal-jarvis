@@ -1,32 +1,7 @@
 use crate::{cli::args, contracts::Harness};
-pub enum Resolved {
-    Empty,
-    Help,
-    Exit,
-    Home,
-    Run(args::Action, args::Options),
-    Debug(Option<bool>),
-    Theme(Option<String>),
-    Converse(Option<crate::converse::Seed>),
-    Error(String),
-}
-
-#[derive(Debug)]
-pub enum Next {
-    Exit,
-    /// `reset` restores the pristine body (the home primer).
-    Again {
-        picker_shown: bool,
-        reset: bool,
-    },
-    Debug(Option<bool>),
-    Converse(Option<crate::converse::Seed>),
-    /// A streaming action plus its typed options (session-overlaid).
-    Stream {
-        action: args::Action,
-        options: args::Options,
-    },
-}
+#[path = "next.rs"]
+mod next;
+pub use next::{Next, Resolved};
 
 pub fn resolve(input: &str, harnesses: &[Harness]) -> Resolved {
     let input = input.trim();
@@ -35,6 +10,9 @@ pub fn resolve(input: &str, harnesses: &[Harness]) -> Resolved {
         "help" | "/help" => return Resolved::Help,
         "/exit" | "/quit" | "exit" | "quit" => return Resolved::Exit,
         "/home" | "/clear" | "home" | "clear" => return Resolved::Home,
+        rest if rest == "list" || rest.starts_with("list ") => {
+            return Resolved::List(super::picker::filter(rest));
+        }
         "/debug" | "debug" => return Resolved::Debug(None),
         "/debug on" => return Resolved::Debug(Some(true)),
         "/debug off" => return Resolved::Debug(Some(false)),
@@ -66,9 +44,7 @@ pub fn resolve(input: &str, harnesses: &[Harness]) -> Resolved {
     if let Ok(number) = input.parse::<usize>() {
         return match crate::tui::switcher::select(input, harnesses) {
             Some(selection) => Resolved::Run(selection, args::Options::default()),
-            None => Resolved::Error(format!(
-                "no harness at position {number}; /list shows the numbered tools"
-            )),
+            None => Resolved::Error(format!("no harness at position {number}; list shows all")),
         };
     }
     if harnesses.iter().any(|harness| harness.name == input) {

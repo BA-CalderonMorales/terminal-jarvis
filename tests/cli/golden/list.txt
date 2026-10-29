@@ -8,9 +8,9 @@
 
 
 
-          Available Harnesses
-           1  fixture  Disposable acceptance harness  (current)
-          pick a number to switch agents, or type 'home' to go back
+      Available Harnesses
+       1  fixture  [ready]    Disposable acceptance harness  (current)
+      pick a number to switch agents · list <text> filters · home resets
 
 
 

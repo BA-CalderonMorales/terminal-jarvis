@@ -8,7 +8,7 @@ use crate::tui::screen::{paint, section, Role};
 
 pub fn text(inner: usize) -> String {
     let rows = [
-        ("list", "numbered fleet picker"),
+        ("list [filter]", "numbered fleet picker; text narrows it"),
         ("show <harness>", "one harness in detail"),
         ("plan [harness] <cap>", "preview, don't run"),
         (
