@@ -94,3 +94,7 @@ mod tests {
         assert!(age_days("2026-01-01T00:00:00Z", "2026-13-01T00:00:00Z").is_none());
     }
 }
+
+#[cfg(test)]
+#[path = "../tests/calendar.rs"]
+mod calendar_tests;

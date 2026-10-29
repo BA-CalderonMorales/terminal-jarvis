@@ -31,3 +31,7 @@ unsafe extern "C" {
 #[cfg(test)]
 #[path = "../tests/tree.rs"]
 mod tests;
+
+#[cfg(test)]
+#[path = "../tests/tree_drop.rs"]
+mod drop_tests;

@@ -2,7 +2,7 @@
 use super::live::Line;
 use std::io::{self, BufRead};
 use std::sync::mpsc::SyncSender;
-pub const CHUNK: u64 = 16 * 1024;
+pub const CHUNK: u64 = 16_384;
 
 pub fn pump<R: io::Read + Send + 'static>(pipe: R, tag: fn(String) -> Line, tx: SyncSender<Line>) {
     std::thread::spawn(move || {

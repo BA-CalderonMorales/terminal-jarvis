@@ -8,7 +8,7 @@ pub fn today_utc() -> String {
     from_day((elapsed.as_secs() / 86_400) as i64)
 }
 
-fn from_day(day: i64) -> String {
+pub(super) fn from_day(day: i64) -> String {
     let z = day + 719_468;
     let era = z.div_euclid(146_097);
     let doe = z - era * 146_097;

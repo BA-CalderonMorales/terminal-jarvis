@@ -48,7 +48,7 @@ pub(crate) fn harden_child(command: &mut Command, detached: bool) {
     unsafe {
         command.pre_exec(move || {
             signal(SIGINT, SIG_DFL);
-            if detached && setsid() < 0 {
+            if detached && setsid() == -1 {
                 return Err(io::Error::last_os_error());
             }
             Ok(())

@@ -82,3 +82,7 @@ pub fn spawn(plan: &CapabilityPlan, extra: &[String]) -> io::Result<Running> {
     super::live_pump::pump(child.stderr.take().expect("piped stderr"), Line::Err, tx);
     Ok(Running { child, rx, tree })
 }
+
+#[cfg(all(test, unix))]
+#[path = "../tests/live_drop.rs"]
+mod drop_tests;
