@@ -10,11 +10,25 @@
 Headless runs one command per invocation, prints stable line-oriented output
 with `--plain`. Noninteractive state-changing runs require their exact
 `--no-input --confirm=<capability>:<agent>` token. The interactive tui is a chat-style
-switcher: `list` shows the numbered picker, a number or an agent name switches
-instantly, `status` shows readiness, `home` resets the frame, and `exit`
-leaves. A slashed name (`/codex`) launches an agent behind the same guarded
-plan-plus-confirm as headless. Ctrl+C aimed at a running agent never kills the
-switcher.
+switcher: `list` shows the numbered picker with each tool's readiness chip, a
+number or an agent name switches instantly, `list <text>` narrows the picker by
+name or description while the numbers keep their picker positions, `status`
+shows readiness, `home` resets the frame, and `exit` leaves. A slashed name
+(`/codex`) launches an agent behind the same guarded plan-plus-confirm as
+headless. Ctrl+C aimed at a running agent never kills the switcher.
+
+## Automation
+
+`--json` wraps every command in one envelope
+(`{"schema_version":1,"command":…,"ok":…,"exit_code":…,"data":…,"error":…}`).
+`list`, `show`, and `plan` publish the catalog as structure beside the rendered
+`text`: `harnesses[]` with `name`, `display`, `description`, `binary`, `setup`,
+`support` counts, and capability names; `show` adds each capability's
+`support`, `evidence`, `effect`, `network`, `interaction`, `platforms`,
+`command_line`, `source`, `verified_at`, and `package`; `plan` adds the argv as
+`command[]`. `check` publishes diagnostics the same way. A tool can therefore
+decide what to run from fields instead of re-parsing prose, while `text` on its
+own stays exactly what a human would have seen.
 
 The demo recording, the full agent-handover script, and how to make new demos:
 [Demo](demo.md).

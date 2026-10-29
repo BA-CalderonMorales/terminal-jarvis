@@ -39,6 +39,14 @@ it, and anything future work must respect.
 
 ## Records
 
+### Let the picker answer "what can I run" and the json answer "in what shape" (release/0.1.23 -> 2026-10-29)
+
+**Decision:** The tui picker carries the dashboard's readiness verdict per row
+and accepts `list <text>`, keeping picker numbers stable; `--json` for `list`,
+`show`, and `plan` publishes structured catalog fields beside `text`. The
+[decision and tradeoffs](agent-parity-and-picker-truth-2026-10-29.md) record why
+field-level parity matters for agents and why reordering was refused.
+
 ### Unify launch policy and own streamed process trees (release/0.1.23 -> 2026-10-29)
 
 **Decision:** Conversations share ordinary consent and workspace-gate checks;
