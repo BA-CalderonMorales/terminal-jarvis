@@ -7,6 +7,11 @@ exclude_globs = ["src/cli/compat.rs"]
 # Mutations that cannot change observable behavior on CI runners; each
 # entry names the mutant family and why it is unkillable. Keep narrow.
 exclude_re = [
+  # Mutation runners are Linux-only. This entire module is cfg(windows), so
+  # changing it cannot affect those binaries. Native Windows Verify exercises
+  # suspended startup and kill-on-close descendant cleanup; keep that gate.
+  "src/runtime/logic/tree_windows\\.rs.*",
+
   "self_update\\.rs.*\\b(run|npm_update|brew_update|cargo_update)\\b",
   # The cfg(not(unix)) executable_mode stub never compiles on Linux
   # runners; the unix variant is witnessed by the execute-bit probe tests.

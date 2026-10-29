@@ -53,8 +53,14 @@ jobs:
           - {domain: diagnostics-core, shard: 1/2, part: 1}
           - {domain: diagnostics-report, shard: 0/2, part: 0}
           - {domain: diagnostics-report, shard: 1/2, part: 1}
-          - {domain: catalog, shard: 0/2, part: 0}
-          - {domain: catalog, shard: 1/2, part: 1}
+          - {domain: catalog, shard: 0/8, part: 0}
+          - {domain: catalog, shard: 1/8, part: 1}
+          - {domain: catalog, shard: 2/8, part: 2}
+          - {domain: catalog, shard: 3/8, part: 3}
+          - {domain: catalog, shard: 4/8, part: 4}
+          - {domain: catalog, shard: 5/8, part: 5}
+          - {domain: catalog, shard: 6/8, part: 6}
+          - {domain: catalog, shard: 7/8, part: 7}
           - {domain: env-aux, shard: 0/8, part: 0}
           - {domain: env-aux, shard: 1/8, part: 1}
           - {domain: env-aux, shard: 2/8, part: 2}

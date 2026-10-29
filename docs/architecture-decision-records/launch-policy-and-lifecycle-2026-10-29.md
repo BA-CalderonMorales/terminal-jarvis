@@ -53,6 +53,22 @@ PTY cancellation followed by another command, platform compile/lint checks,
 and the existing native Windows CI suite. Real-agent installation and paid
 model calls remain disposable-environment work, outside these regressions.
 
+## Mutation follow-up
+
+Calendar tests cover every day in a Gregorian cycle, century leap boundaries,
+and calibration against the system clock. Lifecycle tests distinguish killing
+from reaping and exercise cleanup without the outer runner. Installed-package
+tests verify search priority, rather than only the bundled fallback. Snapshot
+captures fix their working directory before layout; normalization afterward
+cannot undo a path-dependent layout choice.
+
+The mutation workflow runs on Linux. The Windows-only process module is not
+compiled there and has a documented exclusion; native Windows verification
+still exercises suspended startup and descendant cleanup. The 99 changed
+catalog mutations use eight partitions to fit the existing 30-minute job
+budget without dropping cases. Literal chunk sizing and the exact POSIX
+`setsid` error return avoid equivalent arithmetic/comparison mutations.
+
 ## Implementation references
 
 - [Rust RAII guards](https://rust-unofficial.github.io/patterns/patterns/behavioural/RAII.html)
@@ -63,3 +79,6 @@ model calls remain disposable-environment work, outside these regressions.
   documents `CREATE_SUSPENDED`.
 - [ResumeThread](https://learn.microsoft.com/en-us/windows/win32/api/processthreadsapi/nf-processthreadsapi-resumethread)
   documents the thread access right and resume result.
+
+- [Linux setsid contract](https://man7.org/linux/man-pages/man2/setsid.2.html)
+  identifies the positive session ID on success and `-1` on failure.
