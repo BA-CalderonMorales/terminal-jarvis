@@ -2,7 +2,7 @@ use super::*;
 use crate::contracts::{Capability, CommandPlan, Effect, EvidenceMode, Interaction, SupportState};
 
 fn code_of(script: &str) -> i32 {
-    status_code(
+    exit_code(
         std::process::Command::new("sh")
             .arg("-c")
             .arg(script)

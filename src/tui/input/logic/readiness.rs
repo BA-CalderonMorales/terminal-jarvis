@@ -61,6 +61,9 @@ pub fn cancel_requested() -> bool {
 
 /// A key already waiting, without blocking.
 fn try_key() -> Option<super::Key> {
+    if super::poll::watcher_active() {
+        return super::poll::take();
+    }
     if !stdin_ready(Duration::ZERO) {
         return None;
     }

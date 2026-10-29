@@ -20,11 +20,11 @@ pub fn run_command_text(plan: &CapabilityPlan, extra: &[String]) -> io::Result<(
         command.stdout(Stdio::inherit()).stderr(Stdio::inherit());
     }
     #[cfg(unix)]
-    harden_child(&mut command);
+    harden_child(&mut command, tui_capture);
     if !tui_capture {
         return command
             .status()
-            .map(|status| (status_code(status), String::new()));
+            .map(|status| (exit_code(status), String::new()));
     }
     let output = command.output()?;
     let mut text = String::from_utf8_lossy(&output.stdout).to_string();
@@ -35,7 +35,7 @@ pub fn run_command_text(plan: &CapabilityPlan, extra: &[String]) -> io::Result<(
         }
         text.push_str(err.trim());
     }
-    Ok((status_code(output.status), text))
+    Ok((exit_code(output.status), text))
 }
 
 #[cfg(unix)]
@@ -43,13 +43,14 @@ pub fn run_command_text(plan: &CapabilityPlan, extra: &[String]) -> io::Result<(
 /// from the tui's handler, and a new session, so the child has no controlling
 /// terminal. An installer that reads `/dev/tty` (hermes does) can then not
 /// reach past our pipes and prompt over the frame -- it fails closed instead.
-pub(crate) fn harden_child(command: &mut Command) {
+pub(crate) fn harden_child(command: &mut Command, detached: bool) {
     use std::os::unix::process::CommandExt;
     unsafe {
-        command.pre_exec(|| {
+        command.pre_exec(move || {
             signal(SIGINT, SIG_DFL);
-            // Fails when the child already leads a group; it is detached then.
-            let _ = setsid();
+            if detached && setsid() < 0 {
+                return Err(io::Error::last_os_error());
+            }
             Ok(())
         });
     }
@@ -68,7 +69,7 @@ const SIG_IGN: usize = 1;
 #[cfg(unix)]
 const SIG_DFL: usize = 0;
 
-fn status_code(status: std::process::ExitStatus) -> i32 {
+pub(crate) fn exit_code(status: std::process::ExitStatus) -> i32 {
     status.code().unwrap_or_else(|| signal_code(&status))
 }
 

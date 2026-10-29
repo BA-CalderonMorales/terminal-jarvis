@@ -30,6 +30,7 @@ mod package_check_fixture;
 mod package_check_scripts;
 mod plan;
 mod presentation;
+mod presentation_width;
 mod red;
 mod run_compat;
 mod self_update;
@@ -50,3 +51,5 @@ mod tui_golden;
 mod tui_keys;
 mod update_dry_run;
 mod version;
+
+mod converse_cancel;

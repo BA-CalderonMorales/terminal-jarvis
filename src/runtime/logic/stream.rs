@@ -37,7 +37,7 @@ pub fn run(
 }
 
 pub(crate) fn status_code(status: std::process::ExitStatus) -> i32 {
-    status.code().unwrap_or(3)
+    super::runner::exit_code(status)
 }
 
 /// The level labels the frame knows, padded to one width so a column of rows
