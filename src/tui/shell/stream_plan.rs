@@ -44,13 +44,17 @@ pub fn for_action(
             }
         },
         args::Action::Direct { harness, extra } => {
-            let mut invocation = one(harness.clone(), Capability::Headless);
-            invocation.extra = extra.clone();
-            Some(Planned {
-                invocation,
-                label: format!("{harness} {}", extra.join(" ")),
-                lifecycle: None,
-            })
+            match resolve::direct(harness, extra, harnesses) {
+                Ok(invocation) => Some(Planned {
+                    invocation,
+                    label: format!("{harness} {}", extra.join(" ")),
+                    lifecycle: None,
+                }),
+                Err(message) => {
+                    state.body.push(format!("✗ {message}"));
+                    None
+                }
+            }
         }
         _ => None,
     }
@@ -63,3 +67,7 @@ pub struct Planned {
     pub label: String,
     pub lifecycle: Option<(String, &'static str)>,
 }
+
+#[cfg(test)]
+#[path = "../tests/stream_plan.rs"]
+mod tests;

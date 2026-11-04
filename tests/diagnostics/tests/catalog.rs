@@ -65,15 +65,18 @@ fn real_catalog_readiness_comes_from_support_claims() {
     // count as ready: availability is not maintenance.
     let retired = catalog.iter().filter(|harness| harness.is_sunset()).count();
     assert!(retired > 0, "the catalog records at least one retirement");
+    let expected = input
+        .harnesses
+        .iter()
+        .filter(|harness| {
+            !harness.sunset && harness.support.iter().any(|(_, _, supported)| *supported)
+        })
+        .count();
     assert_eq!(
-        ready,
-        catalog.len() - retired,
-        "every maintained sandboxed claim resolves ready"
+        ready, expected,
+        "only maintained, fresh, platform-compatible claims are ready"
     );
-    assert_eq!(
-        unavailable, retired,
-        "retired tools are reported, not recommended"
-    );
+    assert_eq!(unavailable, catalog.len() - expected);
     assert!(!report.json().contains("seeded-secret"));
     fs::remove_dir_all(root).unwrap();
 }

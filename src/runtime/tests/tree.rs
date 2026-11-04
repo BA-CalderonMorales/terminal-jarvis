@@ -61,6 +61,10 @@ fn an_exited_parent_cannot_leave_the_pipe_open_forever() {
         }
     }
     assert_eq!(running.wait(), 0);
+    // Pipe EOF can precede the descendant becoming observably stopped.
+    while !stopped(pid) && Instant::now() < deadline {
+        std::thread::sleep(Duration::from_millis(20));
+    }
     assert!(stopped(pid));
 }
 #[test]

@@ -1,37 +1,32 @@
-use std::io::Read;
-use std::process::{Command, Stdio};
 use std::time::{Duration, Instant};
 
 const PROBE_TIMEOUT: Duration = Duration::from_secs(3);
 const PROBE_POLL: Duration = Duration::from_millis(50);
 
 pub fn version(command: &str, args: &[String]) -> Option<String> {
-    let Ok(mut child) = Command::new(command)
-        .args(args)
-        .stdin(Stdio::null())
-        .stdout(Stdio::piped())
-        .stderr(Stdio::null())
-        .spawn()
-    else {
-        return None;
-    };
+    let mut child = crate::runtime::spawn_program(command, args).ok()?;
     let started = Instant::now();
-    let finished = loop {
-        match child.try_wait() {
-            Ok(Some(status)) => break Some(status),
-            Ok(None) if started.elapsed() < PROBE_TIMEOUT => std::thread::sleep(PROBE_POLL),
-            Ok(None) => break None,
-            Err(_) => return None,
+    let mut text = String::new();
+    loop {
+        if started.elapsed() >= PROBE_TIMEOUT {
+            return None;
         }
-    };
-    if finished.is_none() {
-        let _ = child.kill();
-        let _ = child.wait();
+        match child.next(PROBE_POLL) {
+            crate::runtime::LiveEvent::Line(crate::runtime::LiveLine::Out(line)) => {
+                if text.len() + line.len() + 1 > 64 * 1024 {
+                    return None;
+                }
+                text.push_str(&line);
+                text.push('\n');
+            }
+            crate::runtime::LiveEvent::Line(crate::runtime::LiveLine::Err(_)) => {}
+            crate::runtime::LiveEvent::Idle => {}
+            crate::runtime::LiveEvent::Done => break,
+        }
+    }
+    if child.wait() != 0 {
         return None;
     }
-    let mut output = child.stdout.take()?;
-    let mut text = String::new();
-    output.read_to_string(&mut text).ok()?;
     let lines = text
         .lines()
         .map(str::trim)

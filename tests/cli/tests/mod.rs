@@ -57,3 +57,4 @@ mod converse_cancel;
 mod converse_consent;
 
 mod catalog_installed;
+mod tui_terminal;

@@ -1,4 +1,16 @@
 # Changelog
+
+## [Unreleased]
+
+### Fixed
+
+- Interactive agent launches keep the terminal even when a capability is named
+  explicitly; piped output follows the resolved capability and interaction mode.
+- Install and update receipts check the agent binary, rather than treating an
+  available package manager as proof the agent can be launched.
+- Local version probes drain both output streams within a three-second deadline,
+  cap captured output, clean up ordinary descendants, and reject failed commands.
+
 ## [0.1.24] - 2026-10-29
 
 ### Added
