@@ -43,3 +43,7 @@ pub fn version(command: &str, args: &[String]) -> Option<String> {
 #[cfg(test)]
 #[path = "../tests/probe.rs"]
 mod tests;
+
+#[cfg(all(test, unix))]
+#[path = "../tests/probe_limits.rs"]
+mod limits;
