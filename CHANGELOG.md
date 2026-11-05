@@ -1,20 +1,6 @@
 # Changelog
 
-## [Unreleased]
-
-### Fixed
-
-- Streaming preserves the original dangerous-execution intent requirements.
-  Direct and run-style install/update commands verify the agent binary without
-  changing the active selection.
-- Interactive agent launches keep the terminal even when a capability is named
-  explicitly; piped output follows the resolved capability and interaction mode.
-- Install and update receipts check the agent binary, rather than treating an
-  available package manager as proof the agent can be launched.
-- Local version probes drain both output streams within a three-second deadline,
-  cap captured output, clean up ordinary descendants, and reject failed commands.
-
-## [0.1.24] - 2026-10-29
+## [0.1.24] - 2026-11-04
 
 ### Added
 
@@ -41,6 +27,16 @@
   silently.
 
 ### Fixed
+
+- Streaming preserves the original dangerous-execution intent requirements.
+  Direct and run-style install/update commands verify the agent binary without
+  changing the active selection.
+- Interactive agent launches keep the terminal even when a capability is named
+  explicitly; piped output follows the resolved capability and interaction mode.
+- Install and update receipts check the agent binary, rather than treating an
+  available package manager as proof the agent can be launched.
+- Local version probes drain both output streams within a three-second deadline,
+  cap captured output, clean up ordinary descendants, and reject failed commands.
 
 - Uninstall prefers a harness's own documented remover, inverts npm/uv/cargo
   installs otherwise, and re-checks the binary so a copy from another channel
