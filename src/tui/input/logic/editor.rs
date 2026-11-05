@@ -24,8 +24,8 @@ pub enum Feed {
     Dead,
 }
 
-/// The draft command line; chars are pushed and popped whole so unicode
-/// never splits mid-glyph.
+/// The draft command line; chars are pushed and popped whole so unicode never
+/// splits mid-glyph.
 #[derive(Default)]
 pub struct Editor {
     buf: String,
@@ -61,8 +61,28 @@ impl Editor {
         }
     }
 
-    /// The visible tail of the buffer that fits beside a prefix of
-    /// `prefix_cells` within `inner` columns -- cursor-at-end editing.
+    /// The whole draft line, as completion sees it.
+    pub fn line(&self) -> &str {
+        &self.buf
+    }
+
+    /// Replaces the line wholesale (completion); whole strings, no split glyph.
+    pub fn rewrite(&mut self, text: &str) {
+        self.buf = text.to_string();
+    }
+
+    /// Replaces the line with a recalled history entry.
+    pub fn recall(&mut self, text: Option<&String>) {
+        self.feed(Key::ClearLine);
+        if let Some(text) = text {
+            for character in text.chars() {
+                self.feed(Key::Char(character));
+            }
+        }
+    }
+
+    /// The visible tail that fits beside a prefix of
+    /// `prefix_cells` within `inner` -- cursor-at-end editing.
     pub fn tail_view(&self, prefix_cells: usize, inner: usize) -> String {
         let budget = inner.saturating_sub(prefix_cells);
         let mut width = 0;

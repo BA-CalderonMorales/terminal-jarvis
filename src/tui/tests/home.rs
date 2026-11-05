@@ -23,3 +23,17 @@ fn home_renders_with_or_without_an_active_harness() {
     render(&[], Path::new("harnesses"), &root);
     crate::cli::style::restore(previous);
 }
+
+#[test]
+fn a_retired_harness_is_counted_apart_from_the_maintained_fleet() {
+    let overview = Overview {
+        name: "none".into(),
+        cwd: "~".into(),
+        ready: 1,
+        total: 2,
+        sunset: 1,
+    };
+    let line = plain(&overview);
+    assert!(line.contains("READY 1/2 ready"), "{line}");
+    assert!(line.contains("1 retired"), "{line}");
+}

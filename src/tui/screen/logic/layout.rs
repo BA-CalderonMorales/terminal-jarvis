@@ -5,6 +5,7 @@
 
 use super::canvas::{self, fit};
 use super::modeline;
+use super::roles::Role;
 use super::sanitize;
 use super::scroll;
 use super::theme;
@@ -23,10 +24,9 @@ pub fn header(draft: &Draft, inner: usize, body_rows: usize, compact: bool) -> S
     let badge_width = canvas::visible_width(&badge);
     let core = sanitize::keep_color(&draft.header);
     let cwd = format!(" · {}", sanitize::keep_color(&draft.cwd));
-    let tagline = format!("  {}", sanitize::keep_color(&draft.tagline));
-    // The working directory is live signal; the brand tagline is the
-    // lowest-priority tail, so it only spends width a roomy terminal has.
-    let mut candidates = vec![format!("{core}{cwd}"), format!("{core}{tagline}")];
+    // The working directory is live signal and rides the header; the status
+    // rule below owns the fleet truth, so the header never repeats it.
+    let mut candidates = vec![format!("{core}{cwd}")];
     candidates.push(core.clone());
     if inner <= 40 {
         candidates.extend(degraded(&core));
@@ -59,4 +59,33 @@ fn finish(line: &str, inner: usize, compact: bool) -> String {
     theme::dim(&modeline::pad(&centered, inner))
 }
 
-pub use modeline::{pad, prompt, rule};
+/// The status rule under the header: the fleet truth, then a dim rule to the
+/// frame edge. A narrow terminal keeps the words and drops the ink.
+pub fn status_rule(tagline: &str, inner: usize) -> String {
+    let text = sanitize::keep_color(tagline);
+    let width = canvas::visible_width(&text);
+    if width + 3 > inner {
+        let fitted = fit(&text, inner);
+        return if text.contains('\x1b') {
+            format!("{fitted}\x1b[0m")
+        } else {
+            fitted
+        };
+    }
+    format!(
+        "{} {text} {}",
+        theme::paint(Role::Rule, "─"),
+        theme::paint(Role::Rule, &"─".repeat(inner - width - 3))
+    )
+}
+
+pub use modeline::{pad, prompt};
+
+#[cfg(test)]
+#[test]
+fn clipped_status_does_not_leak_color_into_the_body() {
+    let line = status_rule("\x1b[32mgate trivy · active codex · fleet 1/25", 18);
+    assert!(line.ends_with("\x1b[0m"));
+    assert!(line.contains("trivy"));
+    assert!(canvas::visible_width(&line) <= 18);
+}

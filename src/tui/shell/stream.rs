@@ -8,7 +8,6 @@ use crate::contracts::Harness;
 use crate::tui::screen::{paint, Role};
 use std::path::Path;
 use std::time::Instant;
-
 pub fn apply(
     action: &args::Action,
     options: &args::Options,
@@ -46,6 +45,7 @@ pub fn apply(
             options,
             harnesses,
             state_home,
+            planned.explicit,
             &mut |line| {
                 let rows = line.split('\n').count();
                 for row in line.split('\n') {

@@ -35,7 +35,7 @@ pub fn step(
         ),
         Next::Converse(seed) => {
             let width = crate::tui::screen::size().inner_cols();
-            match crate::converse::wire::open(seed, state_home, width) {
+            match crate::converse::wire::open(seed.clone(), state_home, width) {
                 Ok((live, lines)) if crate::tui::screen::active() => {
                     state.body = lines;
                     state.converse = Some(live);
@@ -46,7 +46,8 @@ pub fn step(
                 Err(lines) => {
                     state.body = lines;
                     state.offset = super::viewport::pinned(&state.body);
-                    state.hint = status::modeline(state_home, false, state.debug);
+                    state.pending_converse = seed.clone();
+                    state.hint = "enter accepts the notice · any other command cancels".to_string();
                 }
             }
             // a transcript reads as a log: it grows from the prompt
@@ -70,8 +71,7 @@ pub fn step(
 }
 
 /// Viewport absorbs captured output as the next body; chat prints it above
-/// the prompt. A reset restores the primer and a fresh card re-centers; a log
-/// keeps its bottom anchor.
+/// the prompt. A reset restores the primer and re-centers; a log stays put.
 pub fn absorb(
     state: &mut super::state::LoopState,
     sink: Vec<u8>,

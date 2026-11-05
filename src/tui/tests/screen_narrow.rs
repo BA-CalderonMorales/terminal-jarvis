@@ -69,3 +69,18 @@ fn the_primer_drops_the_purpose_column_when_narrow() {
         "the roomy primer keeps its purposes"
     );
 }
+
+#[test]
+fn compact_frames_keep_gate_posture_visible() {
+    for size in [
+        Size { cols: 20, rows: 10 },
+        Size { cols: 60, rows: 18 },
+        Size { cols: 80, rows: 24 },
+    ] {
+        let mut draft = super::tests::draft();
+        draft.tagline = crate::tui::screen::tagline("fixture", 1, 1, Some("trivy"));
+        let painted = frame(size, &draft);
+        assert!(painted.contains("trivy"), "gate missing at {size:?}");
+        assert_eq!(painted.lines().count(), size.rows);
+    }
+}

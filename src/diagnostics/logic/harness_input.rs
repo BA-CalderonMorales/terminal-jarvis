@@ -32,6 +32,7 @@ impl From<&Harness> for HarnessInput {
             env: harness.env.clone(),
             support,
             version,
+            sunset: harness.is_sunset(),
         }
     }
 }

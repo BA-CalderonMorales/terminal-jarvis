@@ -18,7 +18,16 @@ pub fn modeline(state_home: &Path, picker_shown: bool, debug: bool) -> String {
     }
     let active = active_name(state_home);
     let debug = if debug { " (debug)" } else { "" };
-    format!("active: {active}{debug} | a number or name switches, list, status, help, home, exit")
+    format!("active: {active}{debug} | number or name switches · list, status, help, home, exit")
+}
+
+/// Announces a frame -> chat downgrade instead of letting the surface change
+/// under the reader: a stranger who shrank the terminal learns why the chrome
+/// left and what brings it back.
+pub fn announce(framed_before: bool) {
+    if framed_before && !crate::tui::screen::active() {
+        println!("frame paused: this terminal is too small; enlarge it and the frame returns");
+    }
 }
 
 /// (coverage) builds and caches the indicator; probes the harness version

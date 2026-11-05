@@ -1,4 +1,57 @@
 # Changelog
+
+## [0.1.24] - 2026-11-04
+
+### Added
+
+- `graveyard` lists retired harnesses with the retirement date, what happened,
+  and the vendor's successor; `--plain` and `--json` carry the same record.
+  Gemini CLI was retired for consumers on 2026-06-18 and is the first entry.
+  Retired tools keep their install and removal truth but are counted apart
+  from the maintained fleet, shown with a `[sunset]` chip in the picker, and
+  never reported as ready.
+- The path picker is now an overlay: arrows move a cursor, typing narrows the
+  fleet live, Enter selects, Esc closes, and digits still jump by picker
+  position while the filter is empty. The frame's status rule always names the
+  active harness, fleet readiness, and gate posture.
+- `--json` for `list`, `show`, and `plan` publishes structured catalog fields
+  beside the rendered text, so a tool can decide from fields.
+- `Tab` completes command and agent names in the prompt, `?` opens help, and
+  the first-use conversation notice is accepted with a bare `Enter` instead of
+  a retyped command.
+
+### Changed
+
+- `?` opens help and `q` leaves from normal mode; a terminal that shrinks below
+  the frame announces the switch to the line prompt instead of changing
+  silently.
+
+### Fixed
+
+- Paging and Tab decode through the real terminal input path; completion after
+  Unicode whitespace stays on valid character boundaries.
+- Compact frames keep gate posture visible. Frame navigation shares the painted
+  row budget, and picker rows retain the active marker within their cell budget,
+  including clipped wide-character descriptions.
+- Streaming preserves the original dangerous-execution intent requirements.
+  Direct and run-style install/update commands verify the agent binary without
+  changing the active selection.
+- Interactive agent launches keep the terminal even when a capability is named
+  explicitly; piped output follows the resolved capability and interaction mode.
+- Install and update receipts check the agent binary, rather than treating an
+  available package manager as proof the agent can be launched.
+- Local version probes drain both output streams within a three-second deadline,
+  cap captured output, clean up ordinary descendants, and reject failed commands.
+
+- Uninstall prefers a harness's own documented remover, inverts npm/uv/cargo
+  installs otherwise, and re-checks the binary so a copy from another channel
+  is reported as incomplete instead of removed.
+- `cursor-agent` installed a third-party PyPI package instead of Cursor's CLI;
+  it now uses Cursor's official installer. `pi` installs with the
+  `--ignore-scripts` flag its docs require.
+- Arrow keys decode again: the escape replay fed the already-consumed `Esc`
+  back into the decoder, so every CSI key arrived as `Ignored`.
+
 ## [0.1.23] - 2026-10-29
 
 ### Fixed

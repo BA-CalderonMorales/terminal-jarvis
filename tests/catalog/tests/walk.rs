@@ -44,9 +44,9 @@ fn catalog_walk_records_all_rows_once_without_effects() {
         support,
         BTreeMap::from([
             ("disabled", 25),
-            ("expected", 94),
+            ("expected", 92),
             ("stub", 98),
-            ("unknown", 8),
+            ("unknown", 10),
         ])
     );
     assert_eq!(

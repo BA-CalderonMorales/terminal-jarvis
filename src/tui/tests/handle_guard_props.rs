@@ -23,6 +23,7 @@ fn stub_plan(capability: Capability) -> CapabilityPlan {
         source: "internal:test-fixture".into(),
         verified_at: crate::catalog::today_utc(),
         package: None,
+        uninstall: None,
     };
     plan.support = SupportState::Stub;
     plan

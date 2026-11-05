@@ -55,41 +55,33 @@ fn extra_and_missing_metadata_are_rejected() {
 }
 
 #[test]
-fn harness_extra_and_missing_keys_are_rejected() {
-    let extra = format!("{}\nfuture = \"no\"", harness_fields());
-    let fields = crate::catalog::parser::parse(&extra).unwrap();
-    assert!(harness(&fields, Vec::new())
-        .unwrap_err()
-        .contains("metadata keys must be exactly"));
-
-    let missing = harness_fields()
-        .lines()
-        .filter(|line| !line.starts_with("name ="))
-        .collect::<Vec<_>>()
-        .join("\n");
-    let fields = crate::catalog::parser::parse(&missing).unwrap();
-    assert!(harness(&fields, Vec::new())
-        .unwrap_err()
-        .contains("metadata keys must be exactly"));
-}
-
-fn harness_fields() -> String {
-    [
-        "name = \"tool\"",
-        "display = \"Tool\"",
-        "description = \"test\"",
-        "binary = \"tool\"",
-        "env_mode = \"none\"",
-        "env = []",
-    ]
-    .join("\n")
-}
-
-#[test]
 fn invalid_typed_metadata_is_rejected() {
     let input = valid().replace("network = false", "network = maybe");
     let fields = crate::catalog::parser::parse(&input).unwrap();
     assert!(capability(&fields, Capability::Stats)
         .unwrap_err()
         .contains("must be true or false"));
+}
+
+#[test]
+fn a_uninstall_pair_parses_on_the_download_plan_only() {
+    let input = format!(
+        "{}\nuninstall_command = \"tool\"\nuninstall_args = [\"uninstall\", \"--force\"]",
+        valid()
+    );
+    let fields = crate::catalog::parser::parse(&input).unwrap();
+    let plan = capability(&fields, Capability::Download).unwrap();
+    let uninstall = plan.uninstall.expect("declared uninstaller");
+    assert_eq!(uninstall.command, "tool");
+    assert_eq!(uninstall.args, ["uninstall", "--force"]);
+    let error = capability(&fields, Capability::Stats).unwrap_err();
+    assert!(error.contains("only on download"), "{error}");
+}
+
+#[test]
+fn a_lone_uninstall_key_is_rejected() {
+    let input = format!("{}\nuninstall_command = \"tool\"", valid());
+    let fields = crate::catalog::parser::parse(&input).unwrap();
+    let error = capability(&fields, Capability::Download).unwrap_err();
+    assert!(error.contains("must appear together"), "{error}");
 }

@@ -2,6 +2,8 @@
 use crate::{cli::args, contracts::Harness};
 use std::path::Path;
 mod canonical;
+mod command;
+mod complete;
 mod converse;
 mod converse_live;
 mod converse_turn;
@@ -23,8 +25,10 @@ mod stream_plan;
 mod stream_rows;
 mod verdict;
 mod viewport;
+mod viewport_chrome;
 mod viewport_nav;
 mod viewport_page;
+mod viewport_paint;
 mod viewport_raw;
 pub use handle::handle;
 pub fn run(harnesses: &[Harness], catalog_root: &Path, state_home: &Path, options: args::Options) {
@@ -41,6 +45,7 @@ pub fn run(harnesses: &[Harness], catalog_root: &Path, state_home: &Path, option
     super::sigint::guarded(move || {
         let mut state = state::LoopState {
             converse: None,
+            pending_converse: None,
             offset: 0,
             history: Vec::new(),
             body: viewport::welcome(harnesses, catalog_root, state_home),
@@ -52,7 +57,9 @@ pub fn run(harnesses: &[Harness], catalog_root: &Path, state_home: &Path, option
         };
         status::refresh_indicator(&mut state.indicator, state_home, state.debug);
         loop {
+            let framed = crate::tui::screen::active();
             crate::tui::screen::ensure_usable();
+            status::announce(framed);
             if let Some(lines) = converse::tick(&mut state, harnesses, catalog_root, state_home) {
                 state.body.extend(lines);
                 state.offset = viewport::pinned(&state.body);
@@ -77,16 +84,7 @@ pub fn run(harnesses: &[Harness], catalog_root: &Path, state_home: &Path, option
             if state.history.last() != Some(&input) {
                 state.history.push(input.clone());
             }
-            let mut sink = Vec::new();
-            let next = handle(
-                &mut sink,
-                harnesses,
-                catalog_root,
-                state_home,
-                &state.options,
-                &input,
-            );
-            if !outcome::step(next, sink, &mut state, state_home, harnesses, catalog_root) {
+            if !command::run(&input, &mut state, harnesses, catalog_root, state_home) {
                 break;
             }
         }

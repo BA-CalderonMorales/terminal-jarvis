@@ -5,7 +5,7 @@
 use super::Key;
 use std::io;
 use std::sync::mpsc;
-use std::time::Duration;
+use std::time::{Duration, Instant};
 
 static PENDING: std::sync::Mutex<Vec<u8>> = std::sync::Mutex::new(Vec::new());
 
@@ -72,12 +72,27 @@ pub fn resolve_and_decode(first: u8) -> Option<Key> {
         // Replaying the pair would decode to `Ignored` and eat the key too.
         return super::keys::decode(&mut io::Cursor::new(vec![second]), second);
     }
-    // A CSI/SS3 introducer: the final byte reads directly.
-    let final_byte = super::raw_stdin::read_byte();
-    let mut bytes = vec![first, second];
-    if let Some(third) = final_byte {
-        bytes.push(third);
-    }
-    let mut replay = io::Cursor::new(bytes);
+    let started = Instant::now();
+    let tail = sequence::continuation(second, || {
+        let remaining = WINDOW.checked_sub(started.elapsed())?;
+        super::readiness::stdin_ready(remaining)
+            .then(super::raw_stdin::read_byte)
+            .flatten()
+    });
+    replayed(first, &tail)
+}
+
+/// Decodes an Esc plus its continuation bytes. The Esc reaches the decoder
+/// exactly once, as `first`: replaying it inside the buffer would make every
+/// arrow decode as a second Esc and vanish as `Ignored`.
+pub(crate) fn replayed(first: u8, tail: &[u8]) -> Option<Key> {
+    let mut replay = io::Cursor::new(tail.to_vec());
     super::keys::decode(&mut replay, first)
 }
+
+#[cfg(test)]
+#[path = "../../tests/input_escape.rs"]
+mod tests;
+
+#[path = "escape_sequence.rs"]
+mod sequence;

@@ -8,7 +8,7 @@ pub fn list(harnesses: &[Harness]) -> String {
             .map(|harness| {
                 format!(
                     "{} support={} - {}\n",
-                    harness.name,
+                    label(harness),
                     crate::cli::logic::output_truth::support_summary(harness),
                     harness.description
                 )
@@ -19,7 +19,7 @@ pub fn list(harnesses: &[Harness]) -> String {
         .iter()
         .map(|harness| {
             vec![
-                harness.name.clone(),
+                label(harness),
                 crate::cli::logic::output_truth::support_summary(harness),
                 harness.description.clone(),
             ]
@@ -30,6 +30,14 @@ pub fn list(harnesses: &[Harness]) -> String {
         &["NAME", "SUPPORT", "DESCRIPTION"],
         &rows,
     )
+}
+
+fn label(harness: &Harness) -> String {
+    if harness.is_sunset() {
+        format!("{} (sunset)", harness.name)
+    } else {
+        harness.name.clone()
+    }
 }
 
 pub fn plan(harness: &Harness, capability: Capability) -> String {

@@ -2,6 +2,7 @@ use super::capability::Capability;
 use super::command::CommandPlan;
 use super::effect::{Effect, Interaction};
 use super::environment::EnvMode;
+use super::sunset::Sunset;
 use super::support::{EvidenceMode, SupportState};
 
 #[derive(Clone, Debug, Eq, PartialEq)]
@@ -19,6 +20,10 @@ pub struct CapabilityPlan {
     pub source: String,
     pub verified_at: String,
     pub package: Option<String>,
+    /// The tool's own uninstaller, when its docs provide one. Removal prefers
+    /// this over a guessed package-manager inverse, so a script install can
+    /// still be removed by the channel that owns it.
+    pub uninstall: Option<CommandPlan>,
 }
 
 #[derive(Clone, Debug, Eq, PartialEq)]
@@ -30,6 +35,10 @@ pub struct Harness {
     pub env_mode: EnvMode,
     pub env: Vec<String>,
     pub capabilities: Vec<CapabilityPlan>,
+    /// Present once the upstream project retired the tool. A sunset harness
+    /// stays in the catalog so its install channel and removal stay legible,
+    /// but it is not part of the maintained fleet.
+    pub sunset: Option<Sunset>,
 }
 
 impl Harness {
@@ -37,6 +46,10 @@ impl Harness {
         self.capabilities
             .iter()
             .find(|plan| plan.capability == capability)
+    }
+
+    pub fn is_sunset(&self) -> bool {
+        self.sunset.is_some()
     }
 
     pub fn has_all_capabilities(&self) -> bool {

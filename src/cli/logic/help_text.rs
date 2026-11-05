@@ -6,6 +6,7 @@ pub const PLAIN: &str = "Terminal Jarvis\n\
        terminal-jarvis run [harness] [capability] [args...] [-- child-args...]\n\
        terminal-jarvis version [--verbose|--info|-v]\n\
        terminal-jarvis list\n\
+       terminal-jarvis graveyard\n\
        terminal-jarvis check [--verbose]\n\
        terminal-jarvis use <harness>\n\
        terminal-jarvis current\n\

@@ -7,6 +7,7 @@ fn action(line: &str) -> args::Action {
 #[test]
 fn slash_lines_parse_with_the_cli_grammar() {
     assert_eq!(action("list"), args::Action::List);
+    assert_eq!(action("graveyard"), args::Action::Graveyard);
     assert_eq!(action("status"), args::Action::Check);
     assert_eq!(action("use codex"), args::Action::Use("codex".into()));
     assert_eq!(

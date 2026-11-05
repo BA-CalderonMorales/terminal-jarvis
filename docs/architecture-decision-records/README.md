@@ -39,6 +39,94 @@ it, and anything future work must respect.
 
 ## Records
 
+### Verify physical input and share frame budgets (v0.1.24 integration -> 2026-11-04)
+
+**Decision:** CSI/SS3 continuations are consumed through a bounded final byte,
+Tab enters the existing completion path, and completion offsets follow Unicode
+character boundaries. Every frame reserves status space; rendering and navigation
+share one body budget. Narrow status prioritizes gate posture, and picker rows
+reserve their cursor, metadata and ellipsis before optional text.
+
+**Context:** Release review found helper-only tests passing while physical paging
+and Tab input failed. Compact frames lost the gate indicator; byte/character/cell
+counts were mixed in completion and clipping, hiding the active picker marker.
+
+**Considered:** More synthetic Key events would preserve the blind spot. Parsing
+rendered status back into facts would add a second truth source. Keep the existing
+input and status models, use one geometry budget, and verify actual terminal bytes
+and bounded rendered cells. Narrow rows drop optional fields before active state.
+
+**Consequence:** Terminal, Unicode, geometry and snapshot regressions cover the
+reported cases; snapshots add the status row without changing the other content.
+Escape capture has a byte cap and a shared time window. No new runtime or model
+calls are introduced.
+
+### Test retirement independently of evidence age (v0.1.24 integration -> 2026-11-04)
+
+**Decision:** Retirement readiness tests exercise fresh support with both present
+and absent binaries, alongside the corresponding maintained-tool cases.
+
+**Context:** The release-wide mutation run could remove the retirement guard
+without failing tests: real retired catalog entries were already blocked by stale
+support, so those fixtures did not witness the retirement classification itself.
+
+**Considered:** Excluding the mutation would conceal a real diagnostic distinction.
+Use four semantic state combinations, without refreshing production evidence or
+changing execution policy.
+
+**Consequence:** A retired tool remains distinct from an uninstalled maintained
+tool regardless of binary presence. The previously missed mutation is caught.
+
+### Preserve request intent and verify bounded execution (v0.1.24 integration -> 2026-11-04)
+
+**Decision:** Terminal transport follows resolved interaction requirements while
+original request intent remains an input to authorization. Every lifecycle entry
+path verifies the agent binary; only the explicit install action adopts it.
+Version probes reuse owned process trees, drain bounded output within a deadline,
+and require successful exit before reporting a version.
+
+**Context:** Argument-count routing could detach interactive agents from their
+terminal. Streaming reconstructed consent as explicit and direct lifecycle paths
+could confuse installer success with agent availability. Probe output could also
+outlive the apparent timeout or come from a failed command.
+
+**Considered:** Separate streaming policy or a new process runtime would duplicate
+rules and increase resource use. Repainting stale evidence dates would conceal
+unverified compatibility. Preserve the existing guards and process ownership,
+carry intent through planning, and record only postconditions actually observed.
+
+**Consequence:** Regression scenarios exercise terminal ownership, refusal before
+execution, explicit consent, missing binaries and unchanged active selection.
+Catalog freshness remains fail-closed. This is the execution foundation; durable
+work records, native continuation and scoped evidence renewal remain future work.
+
+### Keep retired tools in the catalog behind a graveyard (feat/graveyard-lifecycle -> 2026-10-29)
+
+**Decision:** A retired harness keeps its catalog row and its capability truth,
+gains a dated retirement record (`sunset_at`, `sunset_note`,
+`sunset_replaced_by`), and is surfaced by `graveyard` rather than deleted. It is
+counted apart from the maintained fleet and never reported as ready. The
+[decision and tradeoffs](catalog-graveyard-2026-10-29.md) record why deletion
+would have hidden the one thing users actually need: what happened, and what to
+use instead.
+
+### Make install sources auditable and removal honest (fix/uninstall-and-sources -> 2026-10-29)
+
+**Decision:** Install channels are checked against each upstream project, and
+uninstall prefers a declared tool-owned remover, then inverts npm/uv/cargo, and
+verifies the binary is gone. The [decision and tradeoffs](catalog-source-and-removal-truth-2026-10-29.md)
+record why a third-party Cursor package and a false-success uninstall were the
+same defect: a claim nobody held.
+
+### Make the picker an object, the status rule permanent, and the keys explicit (release/0.1.24 -> 2026-10-29)
+
+**Decision:** The fleet picker is a modal state machine that owns arrows,
+typing, and Enter while open; the frame carries a permanent active/readiness/
+gate rule; and the keys it honours are advertised. The
+[decision and tradeoffs](interactive-surface-2026-10-29.md) record why the
+surface was rebuilt around an object instead of printed rows, and why arrow
+decoding had to be repaired underneath it.
+
 ### Let the picker answer "what can I run" and the json answer "in what shape" (release/0.1.23 -> 2026-10-29)
 
 **Decision:** The tui picker carries the dashboard's readiness verdict per row

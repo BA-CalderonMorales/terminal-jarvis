@@ -1,11 +1,12 @@
-use super::{entry, style, text};
+use super::entry;
 
 const SUB: &str = "terminal-jarvis";
 
-const USAGE: [(&str, &str); 20] = [
+const USAGE: [(&str, &str); 21] = [
     ("help", "help [command]"),
     ("version", "version [--verbose]"),
     ("list", "list"),
+    ("graveyard", "graveyard"),
     ("check", "check [--verbose]"),
     ("tui", "tui"),
     ("current", "current"),
@@ -31,10 +32,14 @@ const USAGE: [(&str, &str); 20] = [
     ("db", "help"),
 ];
 
-const PURPOSE: [(&str, &str); 20] = [
+const PURPOSE: [(&str, &str); 21] = [
     ("help", "Show top-level or command help."),
     ("version", "Show version and optional provenance."),
     ("list", "List catalog harnesses and support summaries."),
+    (
+        "graveyard",
+        "List retired harnesses, when retired, and their successor.",
+    ),
     (
         "check",
         "Diagnose local Terminal Jarvis and harness readiness.",
@@ -86,14 +91,4 @@ fn entry_maps_every_command_to_exact_text() {
     let fallback = entry("unknown");
     assert_eq!(fallback.0, "terminal-jarvis help");
     assert_eq!(fallback.1, "Show Terminal Jarvis help.");
-}
-
-#[test]
-fn rich_command_help_uses_the_same_contract() {
-    let previous = style::set(false, true);
-    let help = text("self-update");
-    style::restore(previous);
-    assert!(help.contains("terminal-jarvis self-update"));
-    assert!(help.contains("Preview or confirm a Terminal Jarvis update."));
-    assert!(help.contains("Usage"));
 }

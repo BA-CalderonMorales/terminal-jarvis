@@ -28,6 +28,7 @@ fn canonical(value: &str) -> Option<String> {
         "help",
         "version",
         "list",
+        "graveyard",
         "check",
         "current",
         "use",

@@ -4,3 +4,6 @@ description = "Google's Gemini CLI tool"
 binary = "gemini"
 env_mode = "any"
 env = ["GOOGLE_API_KEY", "GEMINI_API_KEY"]
+sunset_at = "2026-06-18"
+sunset_note = "Google retired Gemini CLI for consumers and points users to Antigravity; enterprise access continues through Gemini Code Assist and paid API keys."
+sunset_replaced_by = "antigravity"

@@ -13,6 +13,7 @@ fn to_harness(name: &str) -> Harness {
         env_mode: crate::contracts::EnvMode::None,
         env: vec![],
         capabilities: vec![],
+        sunset: None,
     }
 }
 
@@ -50,17 +51,26 @@ fn pick_rows_round_trip_to_selection(names: Vec<String>) -> bool {
 }
 
 fn clip_passes_short_text_through(description: String) -> bool {
-    clip(&description, 10_000) == description
+    clip(
+        &description,
+        crate::tui::screen::visible_width(&description),
+    ) == description
 }
 
 fn clip_truncates_bounded(description: String, limit: usize) -> bool {
     let limit = limit % 200;
     let clipped = clip(&description, limit);
-    let count = description.chars().count();
+    let count = crate::tui::screen::visible_width(&description);
     if count <= limit {
         clipped == description
     } else {
-        clipped.chars().count() == limit + 3 && clipped.ends_with("...")
+        crate::tui::screen::visible_width(&clipped) <= limit
+            && if limit < 3 {
+                clipped == ".".repeat(limit)
+            } else {
+                clipped.ends_with("...")
+                    && description.starts_with(clipped.strip_suffix("...").unwrap())
+            }
     }
 }
 

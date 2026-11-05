@@ -17,16 +17,6 @@ pub enum Flow {
     Dead,
 }
 
-/// Replaces the editor buffer with a recalled history entry.
-pub fn recall(editor: &mut Editor, text: Option<&String>) {
-    editor.feed(Key::ClearLine);
-    if let Some(text) = text {
-        for character in text.chars() {
-            editor.feed(Key::Char(character));
-        }
-    }
-}
-
 pub fn key(
     mode: &mut Mode,
     editor: &mut Editor,
@@ -46,12 +36,8 @@ pub fn key(
             *offset = crate::tui::screen::step(*offset, toward, session.body.len(), rows);
             Flow::Continue(history_at)
         }
-        (Mode::Normal, Key::PageUp) => {
-            *offset = page(session.body, *offset, false);
-            Flow::Continue(history_at)
-        }
-        (Mode::Normal, Key::PageDown) => {
-            *offset = page(session.body, *offset, true);
+        (Mode::Normal, Key::PageUp | Key::PageDown) => {
+            *offset = page(session.body, *offset, key == Key::PageDown);
             Flow::Continue(history_at)
         }
         (Mode::Normal, Key::Char(mark @ ('g' | 'G'))) => {
@@ -61,6 +47,8 @@ pub fn key(
             };
             Flow::Continue(history_at)
         }
+        (Mode::Normal, Key::Char('?')) => Flow::Submit("help".to_string()),
+        (Mode::Normal, Key::Char('q')) => Flow::Dead,
         (Mode::Normal, Key::Escape | Key::Char('i')) => {
             // The way back: without it Normal is a trap, where nothing typed
             // reaches the line and no key returns to Insert.
@@ -73,14 +61,18 @@ pub fn key(
             *mode = Mode::Normal;
             Flow::Continue(history_at)
         }
+        (Mode::Insert, Key::Char('\t')) => {
+            super::complete::apply(editor, session.names);
+            Flow::Continue(history_at)
+        }
         (Mode::Insert, Key::Up) => {
             let at = history_at.saturating_sub(1);
-            recall(editor, session.history.get(at));
+            editor.recall(session.history.get(at));
             Flow::Continue(at)
         }
         (Mode::Insert, Key::Down) => {
             let at = (history_at + 1).min(session.history.len());
-            recall(editor, session.history.get(at));
+            editor.recall(session.history.get(at));
             Flow::Continue(at)
         }
         (Mode::Insert, key) => match editor.feed(key) {
@@ -98,3 +90,7 @@ pub fn key(
 #[cfg(test)]
 #[path = "../tests/viewport_nav.rs"]
 mod tests;
+
+#[cfg(test)]
+#[path = "../tests/viewport_resize.rs"]
+mod resize_tests;

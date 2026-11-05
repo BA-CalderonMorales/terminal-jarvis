@@ -5,6 +5,10 @@ fn tj(args: &[&str]) -> Output {
     Command::new(env!("CARGO_BIN_EXE_terminal-jarvis"))
         .args(["--plain"])
         .args(args)
+        .env(
+            "TERMINAL_JARVIS_CATALOG",
+            crate::structs::fresh_catalog::root(),
+        )
         .env("TERMINAL_JARVIS_HOME", temp_home())
         .env("PATH", "")
         .output()
@@ -48,7 +52,6 @@ fn show_includes_setup_and_capability_truth() {
     assert!(body.contains("summary=Install Aider"));
     assert!(body.contains("capability=ui support=expected"));
 }
-
 #[test]
 fn help_announces_the_tui() {
     let body = stdout(&tj(&["--plain", "help"]));

@@ -5,6 +5,7 @@ pub enum Action {
     Help,
     CommandHelp(String),
     List,
+    Graveyard,
     Check,
     Tui,
     Current,

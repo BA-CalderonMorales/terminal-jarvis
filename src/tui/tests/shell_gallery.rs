@@ -12,6 +12,7 @@ fn harness(name: &str, description: &str) -> Harness {
         env_mode: crate::contracts::EnvMode::None,
         env: vec![],
         capabilities: vec![],
+        sunset: None,
     }
 }
 fn strip(text: &str) -> String {

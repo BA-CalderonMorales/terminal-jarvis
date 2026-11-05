@@ -66,6 +66,11 @@ KIND = {
     "env_mode": "environment",
     "env": "environment",
     "package": "install-source",
+    "uninstall_command": "execution-shape",
+    "uninstall_args": "execution-shape",
+    "sunset_at": "lifecycle",
+    "sunset_note": "narration",
+    "sunset_replaced_by": "narration",
 }
 
 # A mechanism is selected by manifest schema, capability, and support state: the
@@ -77,6 +82,8 @@ FACADE_HELD_BY = {
     "binary": "gate:identity",
     "env_mode": "gate:env",
     "env": "gate:env",
+    "sunset_at": "gate:sunset-pairing",
+    "sunset_note": "gate:sunset-pairing",
 }
 CAPABILITY_HELD_BY = {
     "executable": "gate:identity",
@@ -89,6 +96,8 @@ CAPABILITY_HELD_BY = {
     "command": "gate:command-shape",
     "args": "gate:command-shape",
     "verified_at": "constant:freshness",
+    "uninstall_command": "gate:uninstall-pairing",
+    "uninstall_args": "gate:uninstall-pairing",
 }
 EFFECT_ARMS = {"download", "update", "ui", "yolo"}
 EFFECT_SUPPORT = {"stub", "manual"}
@@ -129,6 +138,8 @@ def verdict(kind, support, platforms, held_by):
         if not platforms:
             return "asserted"
         return "witnessed" if support == "verified" else "gate"
+    if kind == "lifecycle":
+        return "gate" if held_by != "none" else "asserted"
     if kind == "narration" or held_by == "none":
         return "asserted"
     if support == "verified" and kind in BEHAVIOUR:

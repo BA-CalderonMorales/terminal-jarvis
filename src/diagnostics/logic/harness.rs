@@ -1,5 +1,5 @@
 use super::redact::{segment, Redactor};
-use super::{Code, DiagnosticInput, HarnessInput, Record, Severity};
+use super::{Code, DiagnosticInput, Record, Severity};
 use std::collections::BTreeSet;
 use std::path::Path;
 
@@ -19,7 +19,7 @@ pub fn collect(input: &DiagnosticInput, redact: &Redactor<'_>) -> HarnessResult 
         let (support, support_ready) = super::harness_support::collect(harness, &base);
         records.push(support);
         let resolution = super::resolve::binary_with(&harness.binary, input, &index);
-        records.push(version_record(
+        records.push(super::harness_version::record(
             &base,
             harness,
             &resolution,
@@ -51,12 +51,16 @@ pub fn collect(input: &DiagnosticInput, redact: &Redactor<'_>) -> HarnessResult 
         let (mut environment, _) = super::harness_env::collect(harness, input, &base);
         records.append(&mut environment);
 
-        // Available = installed and runnable; creds never gate the count.
-        let harness_ready =
-            matches!(resolution.code, Code::Ready | Code::Conflicting) && support_ready;
+        // Available = installed, runnable, and maintained; creds never gate
+        // the count. A retired tool is reported as such instead of being
+        // recommended, even when its binary still resolves.
+        let harness_ready = !harness.sunset
+            && matches!(resolution.code, Code::Ready | Code::Conflicting)
+            && support_ready;
         let readiness_code = match (harness_ready, support_ready) {
             (true, _) => Code::Ready,
             (false, false) => Code::Unsupported,
+            (false, true) if harness.sunset => Code::Unsupported,
             (false, true) => Code::Missing,
         };
         records.push(Record::new(
@@ -64,35 +68,24 @@ pub fn collect(input: &DiagnosticInput, redact: &Redactor<'_>) -> HarnessResult 
             readiness_code,
             if harness_ready {
                 Severity::Info
+            } else if harness.sunset {
+                Severity::Warning
             } else {
                 Severity::Error
             },
-            if harness_ready { "ready" } else { "not-ready" },
+            if harness_ready {
+                "ready"
+            } else if harness.sunset {
+                "retired"
+            } else {
+                "not-ready"
+            },
         ));
         if harness_ready {
             ready.insert(harness.name.clone());
         }
     }
     HarnessResult { records, ready }
-}
-
-fn version_record(
-    base: &str,
-    harness: &HarnessInput,
-    resolution: &super::resolve::Resolution,
-    probes: bool,
-) -> Record {
-    let key = format!("{base}.version");
-    if resolution.code != Code::Ready || !probes {
-        return Record::new(key, Code::Unknown, Severity::Info, "unknown:not-probed");
-    }
-    let Some((command, args)) = &harness.version else {
-        return Record::new(key, Code::Unknown, Severity::Info, "unknown:not-probed");
-    };
-    match super::probe::version(command, args) {
-        Some(value) => Record::new(key, Code::Ready, Severity::Info, value),
-        None => Record::new(key, Code::Unknown, Severity::Info, "unknown:probe-failed"),
-    }
 }
 
 #[cfg(test)]

@@ -27,6 +27,7 @@ fn every_named_command_has_matching_help_forms() {
         "help",
         "version",
         "list",
+        "graveyard",
         "check",
         "current",
         "use",

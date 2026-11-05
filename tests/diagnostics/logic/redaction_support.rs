@@ -58,6 +58,7 @@ fn harness(name: &str, binary: &str) -> HarnessInput {
         ],
         support: vec![("headless".into(), "expected".into(), true)],
         version: None,
+        sunset: false,
     }
 }
 
