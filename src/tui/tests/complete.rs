@@ -62,3 +62,13 @@ fn apply_rewrites_the_editor_and_reports_whether_it_moved() {
     assert_eq!(editor.line(), "install");
     assert!(!apply(&mut editor, &fleet()), "a second Tab adds nothing");
 }
+
+#[test]
+fn unicode_whitespace_keeps_completion_on_character_boundaries() {
+    for separator in [" ", "\t", "\u{00a0}", "\u{2003}", "\u{3000}"] {
+        assert_eq!(
+            line(&format!("run{separator}co"), &fleet()),
+            Some(format!("run{separator}codex"))
+        );
+    }
+}

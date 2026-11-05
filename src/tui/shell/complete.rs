@@ -40,7 +40,11 @@ pub fn apply(editor: &mut Editor, names: &[String]) -> bool {
 /// The line with its last token extended to the longest prefix its candidate
 /// words share; `None` when nothing matches or the token already goes that far.
 pub fn line(text: &str, names: &[String]) -> Option<String> {
-    let start = text.rfind(char::is_whitespace).map_or(0, |at| at + 1);
+    let start = text
+        .char_indices()
+        .rev()
+        .find(|(_, c)| c.is_whitespace())
+        .map_or(0, |(at, c)| at + c.len_utf8());
     let token = &text[start..];
     if token.is_empty() {
         return None;

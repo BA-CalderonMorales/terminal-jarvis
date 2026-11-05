@@ -4,6 +4,7 @@
 
 use super::Picker;
 use crate::contracts::Harness;
+use crate::tui::switcher::MIN_DESCRIPTION;
 
 impl<'a> Picker<'a> {
     /// The visible fleet and each row's original picker position.
@@ -51,17 +52,32 @@ impl<'a> Picker<'a> {
         let shown = self.shown();
         let name_width = shown
             .iter()
-            .map(|(_, harness)| harness.name.chars().count())
+            .map(|(_, harness)| crate::tui::screen::visible_width(&harness.name))
             .max()
             .unwrap_or(0);
-        let marker = if self.active.is_some() { 11 } else { 0 };
-        let fixed = 2 + 2 + name_width + 2 + 7 + 2 + marker;
-        let room = inner.checked_sub(fixed).filter(|room| *room >= 12);
+        let number_width = shown
+            .iter()
+            .map(|(index, _)| (index + 1).to_string().len())
+            .max()
+            .unwrap_or(2)
+            .max(2);
+        let marker = if self.active.is_some() {
+            crate::tui::screen::visible_width(row::CURRENT)
+        } else {
+            0
+        };
+        let base = 2 + number_width + 2 + marker;
+        let show_chip = base + name_width + 2 + row::CHIP <= inner;
+        let fixed = base + if show_chip { 2 + row::CHIP } else { 0 };
+        let name_width = name_width.min(inner.saturating_sub(fixed));
+        let room = inner
+            .checked_sub(fixed + name_width + 2)
+            .filter(|room| *room >= MIN_DESCRIPTION);
         shown
             .iter()
             .enumerate()
             .map(|(row, (position, harness))| {
-                let chip = crate::tui::switcher::chip(harness, &self.ready);
+                let chip = show_chip.then(|| crate::tui::switcher::chip(harness, &self.ready));
                 let line = self.row(*position + 1, name_width, harness, chip, room);
                 format!("{} {line}", if row == self.cursor { "▸" } else { " " })
             })
@@ -75,3 +91,7 @@ mod row;
 #[cfg(test)]
 #[path = "../tests/picker_rows.rs"]
 mod tests;
+
+#[cfg(test)]
+#[path = "../tests/picker_width.rs"]
+mod width_tests;

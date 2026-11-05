@@ -21,12 +21,12 @@ pub fn tagline(active: &str, ready: usize, total: usize, gate: Option<&str>) -> 
     };
     format!(
         "{} {} · {} {} · {} {}",
+        paint(Role::Dim, "gate"),
+        gate,
         paint(Role::Dim, "active"),
         paint(Role::Accent, active),
         paint(Role::Dim, "fleet"),
-        paint(if all { Role::Ok } else { Role::Warn }, &fleet),
-        paint(Role::Dim, "gate"),
-        gate
+        paint(if all { Role::Ok } else { Role::Warn }, &fleet)
     )
 }
 

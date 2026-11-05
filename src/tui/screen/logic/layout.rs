@@ -65,7 +65,12 @@ pub fn status_rule(tagline: &str, inner: usize) -> String {
     let text = sanitize::keep_color(tagline);
     let width = canvas::visible_width(&text);
     if width + 3 > inner {
-        return fit(&text, inner);
+        let fitted = fit(&text, inner);
+        return if text.contains('\x1b') {
+            format!("{fitted}\x1b[0m")
+        } else {
+            fitted
+        };
     }
     format!(
         "{} {text} {}",
@@ -75,3 +80,12 @@ pub fn status_rule(tagline: &str, inner: usize) -> String {
 }
 
 pub use modeline::{pad, prompt};
+
+#[cfg(test)]
+#[test]
+fn clipped_status_does_not_leak_color_into_the_body() {
+    let line = status_rule("\x1b[32mgate trivy · active codex · fleet 1/25", 18);
+    assert!(line.ends_with("\x1b[0m"));
+    assert!(line.contains("trivy"));
+    assert!(canvas::visible_width(&line) <= 18);
+}
