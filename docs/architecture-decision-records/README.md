@@ -39,6 +39,29 @@ it, and anything future work must respect.
 
 ## Records
 
+### Preserve request intent and verify bounded execution (v0.1.24 integration -> 2026-11-04)
+
+**Decision:** Terminal transport follows resolved interaction requirements while
+original request intent remains an input to authorization. Every lifecycle entry
+path verifies the agent binary; only the explicit install action adopts it.
+Version probes reuse owned process trees, drain bounded output within a deadline,
+and require successful exit before reporting a version.
+
+**Context:** Argument-count routing could detach interactive agents from their
+terminal. Streaming reconstructed consent as explicit and direct lifecycle paths
+could confuse installer success with agent availability. Probe output could also
+outlive the apparent timeout or come from a failed command.
+
+**Considered:** Separate streaming policy or a new process runtime would duplicate
+rules and increase resource use. Repainting stale evidence dates would conceal
+unverified compatibility. Preserve the existing guards and process ownership,
+carry intent through planning, and record only postconditions actually observed.
+
+**Consequence:** Regression scenarios exercise terminal ownership, refusal before
+execution, explicit consent, missing binaries and unchanged active selection.
+Catalog freshness remains fail-closed. This is the execution foundation; durable
+work records, native continuation and scoped evidence renewal remain future work.
+
 ### Keep retired tools in the catalog behind a graveyard (feat/graveyard-lifecycle -> 2026-10-29)
 
 **Decision:** A retired harness keeps its catalog row and its capability truth,

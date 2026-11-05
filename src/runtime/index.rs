@@ -8,3 +8,6 @@ pub use crate::runtime::logic::live::Running as LiveRunning;
 pub use crate::runtime::logic::live::{spawn as spawn_live, Event as LiveEvent, Line as LiveLine};
 pub use crate::runtime::logic::runner::{run_command, run_command_text};
 pub use crate::runtime::logic::stream::{classify, run as run_streaming, CANCELLED};
+
+/// Owned noninteractive execution used by bounded local diagnostics.
+pub(crate) use crate::runtime::logic::live::spawn_program;

@@ -65,10 +65,21 @@ impl Drop for Running {
 }
 
 pub fn spawn(plan: &CapabilityPlan, extra: &[String]) -> io::Result<Running> {
-    let mut command = Command::new(crate::security::resolved(&plan.command.command).as_ref());
+    let args = plan
+        .command
+        .args
+        .iter()
+        .chain(extra)
+        .cloned()
+        .collect::<Vec<_>>();
+    spawn_program(&plan.command.command, &args)
+}
+
+/// Starts a noninteractive program with the same owned tree and bounded pumps.
+pub fn spawn_program(program: &str, args: &[String]) -> io::Result<Running> {
+    let mut command = Command::new(crate::security::resolved(program).as_ref());
     command
-        .args(&plan.command.args)
-        .args(extra)
+        .args(args)
         .stdin(Stdio::null())
         .stdout(Stdio::piped())
         .stderr(Stdio::piped());

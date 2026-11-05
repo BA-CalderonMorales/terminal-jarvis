@@ -24,11 +24,33 @@ pub fn normalized(action: args::Action, state_home: &Path) -> Option<args::Actio
 
 /// In-frame streaming: one-shot invocations (installs, updates, prompted
 /// runs). Interactive agent uis keep the suspended full-terminal frame.
-pub fn eligible(action: &args::Action) -> bool {
-    match action {
-        args::Action::Install(_) | args::Action::Update(_) => true,
-        args::Action::Run(words) => words.len() > 1,
-        args::Action::Direct { extra, .. } => !extra.is_empty(),
-        _ => false,
-    }
+pub fn eligible(
+    action: &args::Action,
+    harnesses: &[crate::contracts::Harness],
+    home: &Path,
+) -> bool {
+    use crate::contracts::{Capability, Interaction};
+    let invocation = match action {
+        args::Action::Install(_) | args::Action::Update(_) => return true,
+        args::Action::Run(words) => crate::cli::resolve::run(words, harnesses, home),
+        args::Action::Direct { harness, extra } if !extra.is_empty() => {
+            crate::cli::resolve::direct(harness, extra, harnesses)
+        }
+        _ => return false,
+    };
+    invocation
+        .ok()
+        .and_then(|invocation| {
+            harnesses
+                .iter()
+                .find(|h| h.name == invocation.harness)
+                .and_then(|h| h.plan(invocation.capability))
+        })
+        .is_some_and(|plan| {
+            plan.capability != Capability::Ui && plan.interaction != Interaction::Interactive
+        })
 }
+
+#[cfg(test)]
+#[path = "../tests/stream_gate.rs"]
+mod tests;

@@ -10,6 +10,10 @@ mod unix {
         Command::new(env!("CARGO_BIN_EXE_terminal-jarvis"))
             .arg("--plain")
             .args(args)
+            .env(
+                "TERMINAL_JARVIS_CATALOG",
+                crate::structs::fresh_catalog::root(),
+            )
             .env("TERMINAL_JARVIS_HOME", home)
             .env("PATH", path)
             .output()

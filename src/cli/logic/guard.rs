@@ -51,10 +51,18 @@ pub fn stream_invocation(
     options: &Options,
     harnesses: &[Harness],
     home: &Path,
+    explicit: bool,
     on_line: &mut dyn FnMut(&str),
 ) -> error::Result<i32> {
-    execute::execute(invocation, options, harnesses, home, true, Some(on_line))
-        .map(|(code, _)| code)
+    execute::execute(
+        invocation,
+        options,
+        harnesses,
+        home,
+        explicit,
+        Some(on_line),
+    )
+    .map(|(code, _)| code)
 }
 
 /// True when the words name a known harness plus a parsable capability, so

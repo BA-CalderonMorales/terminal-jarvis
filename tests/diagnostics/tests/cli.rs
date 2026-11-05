@@ -12,14 +12,27 @@ fn tj(args: &[&str], home: &std::path::Path) -> Output {
 #[test]
 fn check_is_canonical_in_plain_rich_and_json_modes() {
     let home = std::env::temp_dir().join(format!("tj-check-cli-{}", std::process::id()));
+    let catalog = terminal_jarvis::catalog::load(std::path::Path::new("harnesses")).unwrap();
+    let codex = catalog.iter().find(|h| h.name == "codex").unwrap();
+    let supported = terminal_jarvis::diagnostics::HarnessInput::from(codex)
+        .support
+        .iter()
+        .any(|(_, _, supported)| *supported);
+    let readiness = if supported { "missing" } else { "unsupported" };
+    let support = if supported {
+        "ready\tinfo"
+    } else {
+        "unsupported\terror"
+    };
     let plain = tj(&["--plain", "check"], &home);
     assert_eq!(plain.status.code(), Some(4));
     assert!(plain.stderr.is_empty());
     let text = String::from_utf8(plain.stdout).unwrap();
     assert!(text.contains("tj.version\tready\tinfo"));
-    assert!(text.contains("harness.codex.readiness\tmissing\terror"));
+    assert!(text.contains(&format!("harness.codex.readiness\t{readiness}\terror")));
     let verbose = tj(&["--plain", "check", "--verbose"], &home);
-    assert!(String::from_utf8_lossy(&verbose.stdout).contains("harness.codex.support\tready\tinfo"));
+    assert!(String::from_utf8_lossy(&verbose.stdout)
+        .contains(&format!("harness.codex.support\t{support}")));
 
     let rich = tj(&["--no-color", "check"], &home);
     assert_eq!(rich.status.code(), Some(4));

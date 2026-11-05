@@ -61,7 +61,8 @@ pub fn handle(
                     return again_plain();
                 }
             };
-            if crate::tui::screen::active() && stream_gate::eligible(&action) {
+            if crate::tui::screen::active() && stream_gate::eligible(&action, harnesses, state_home)
+            {
                 return Next::Stream { action, options };
             }
             let picker_shown =
