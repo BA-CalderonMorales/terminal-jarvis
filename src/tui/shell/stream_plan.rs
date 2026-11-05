@@ -26,17 +26,20 @@ pub fn for_action(
             invocation: one(name.clone(), Capability::Download),
             label: format!("install {name}"),
             lifecycle: Some((name.clone(), "installed")),
+            explicit: true,
         }),
         args::Action::Update(Some(name)) => Some(Planned {
             invocation: one(name.clone(), Capability::Update),
             label: format!("update {name}"),
             lifecycle: Some((name.clone(), "updated")),
+            explicit: true,
         }),
         args::Action::Run(words) => match resolve::run(words, harnesses, state_home) {
             Ok(invocation) => Some(Planned {
+                lifecycle: postcondition(&invocation),
                 invocation,
                 label: words.join(" "),
-                lifecycle: None,
+                explicit: crate::cli::explicit_capability(words, harnesses),
             }),
             Err(message) => {
                 state.body.push(format!("✗ {message}"));
@@ -46,9 +49,10 @@ pub fn for_action(
         args::Action::Direct { harness, extra } => {
             match resolve::direct(harness, extra, harnesses) {
                 Ok(invocation) => Some(Planned {
+                    lifecycle: postcondition(&invocation),
                     invocation,
                     label: format!("{harness} {}", extra.join(" ")),
-                    lifecycle: None,
+                    explicit: false,
                 }),
                 Err(message) => {
                     state.body.push(format!("✗ {message}"));
@@ -64,6 +68,8 @@ pub fn for_action(
 /// and update -- the lifecycle pair the verdict card speaks.
 pub struct Planned {
     pub invocation: Invocation,
+    /// Original request intent, matching the blocking guard path.
+    pub explicit: bool,
     pub label: String,
     pub lifecycle: Option<(String, &'static str)>,
 }
@@ -71,3 +77,13 @@ pub struct Planned {
 #[cfg(test)]
 #[path = "../tests/stream_plan.rs"]
 mod tests;
+
+// Only the top-level install adopts a harness; run/direct merely verify it.
+fn postcondition(invocation: &Invocation) -> Option<(String, &'static str)> {
+    let verb = match invocation.capability {
+        Capability::Download => "downloaded",
+        Capability::Update => "updated",
+        _ => return None,
+    };
+    Some((invocation.harness.clone(), verb))
+}

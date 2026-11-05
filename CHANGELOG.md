@@ -4,6 +4,9 @@
 
 ### Fixed
 
+- Streaming preserves the original dangerous-execution intent requirements.
+  Direct and run-style install/update commands verify the agent binary without
+  changing the active selection.
 - Interactive agent launches keep the terminal even when a capability is named
   explicitly; piped output follows the resolved capability and interaction mode.
 - Install and update receipts check the agent binary, rather than treating an

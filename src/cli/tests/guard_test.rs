@@ -80,6 +80,7 @@ fn streaming_invocation_preserves_the_child_exit_code() {
         &Options::default(),
         &harnesses,
         &home,
+        false,
         &mut |line| lines.push(line.to_string()),
     );
     assert_eq!(result, Ok(7));
