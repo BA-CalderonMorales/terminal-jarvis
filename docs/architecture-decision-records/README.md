@@ -39,6 +39,28 @@ it, and anything future work must respect.
 
 ## Records
 
+### Verify physical input and share frame budgets (v0.1.24 integration -> 2026-11-04)
+
+**Decision:** CSI/SS3 continuations are consumed through a bounded final byte,
+Tab enters the existing completion path, and completion offsets follow Unicode
+character boundaries. Every frame reserves status space; rendering and navigation
+share one body budget. Narrow status prioritizes gate posture, and picker rows
+reserve their cursor, metadata and ellipsis before optional text.
+
+**Context:** Release review found helper-only tests passing while physical paging
+and Tab input failed. Compact frames lost the gate indicator; byte/character/cell
+counts were mixed in completion and clipping, hiding the active picker marker.
+
+**Considered:** More synthetic Key events would preserve the blind spot. Parsing
+rendered status back into facts would add a second truth source. Keep the existing
+input and status models, use one geometry budget, and verify actual terminal bytes
+and bounded rendered cells. Narrow rows drop optional fields before active state.
+
+**Consequence:** Terminal, Unicode, geometry and snapshot regressions cover the
+reported cases; snapshots add the status row without changing the other content.
+Escape capture has a byte cap and a shared time window. No new runtime or model
+calls are introduced.
+
 ### Test retirement independently of evidence age (v0.1.24 integration -> 2026-11-04)
 
 **Decision:** Retirement readiness tests exercise fresh support with both present

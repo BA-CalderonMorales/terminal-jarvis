@@ -5,17 +5,20 @@
 use super::super::Picker;
 use crate::contracts::Harness;
 
+pub(super) use crate::tui::switcher::CHIP;
+pub(super) const CURRENT: &str = "  (current)";
+
 impl<'a> Picker<'a> {
     pub(crate) fn row(
         &self,
         index: usize,
         name_width: usize,
         harness: &Harness,
-        chip: &str,
+        chip: Option<&str>,
         room: Option<usize>,
     ) -> String {
         let marker = if self.active.as_deref() == Some(harness.name.as_str()) {
-            "  (current)"
+            CURRENT
         } else {
             ""
         };
@@ -26,9 +29,12 @@ impl<'a> Picker<'a> {
             ),
             None => String::new(),
         };
-        format!(
-            "{index:>2}  {name:<name_width$}  {chip:<9}{description}{marker}",
-            name = harness.name
-        )
+        let name = crate::tui::switcher::clip(&harness.name, name_width);
+        let padding =
+            " ".repeat(name_width.saturating_sub(crate::tui::screen::visible_width(&name)));
+        let chip = chip
+            .map(|label| format!("  {label:<CHIP$}"))
+            .unwrap_or_default();
+        format!("{index:>2}  {name}{padding}{chip}{description}{marker}")
     }
 }

@@ -33,16 +33,24 @@ pub fn row(
     )
 }
 
+/// Clips plain description text within a cell budget, including the ellipsis.
 pub fn clip(description: &str, limit: usize) -> String {
-    let mut remaining = limit;
+    if crate::tui::screen::visible_width(description) <= limit {
+        return description.to_string();
+    }
+    if limit < 3 {
+        return ".".repeat(limit);
+    }
     let mut clipped = String::new();
+    let mut width = 0;
     for character in description.chars() {
-        if remaining == 0 {
-            clipped.extend(['.', '.', '.']);
+        let cells = crate::cli::char_cells(character);
+        if width + cells > limit - 3 {
             break;
         }
         clipped.push(character);
-        remaining -= 1;
+        width += cells;
     }
+    clipped.push_str("...");
     clipped
 }

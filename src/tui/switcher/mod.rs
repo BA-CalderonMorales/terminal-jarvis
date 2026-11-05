@@ -13,7 +13,7 @@ mod filter;
 #[path = "rows.rs"]
 mod rows;
 
-pub use rows::clip;
+pub use rows::{clip, CHIP, MIN_DESCRIPTION};
 
 pub fn select(input: &str, harnesses: &[Harness]) -> Option<args::Action> {
     let index = input.parse::<usize>().ok()?;

@@ -57,6 +57,7 @@ mod converse_cancel;
 mod converse_consent;
 
 mod catalog_installed;
+mod tui_input_bytes;
 mod tui_stream_consent;
 mod tui_stream_lifecycle;
 mod tui_terminal;

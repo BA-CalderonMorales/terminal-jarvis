@@ -25,7 +25,7 @@ fn hint_sits_on_the_prompt_row_with_the_scroll_badge() {
     let painted = frame(size, &d);
     let prompt_row = painted.split('\n').nth(size.rows - 1).unwrap();
     assert!(
-        prompt_row.contains("\u{2191} 28"),
+        prompt_row.contains(&format!("\u{2191} {}", d.body.len() - size.body_rows())),
         "scroll badge: {prompt_row}"
     );
     // at 80 cols the badge wins the row and the long hint yields

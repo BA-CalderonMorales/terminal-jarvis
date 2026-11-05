@@ -46,3 +46,8 @@ fn utf8_leads_consume_their_continuation_bytes() {
     assert_eq!(decoded(b"\xc3"), Some(Key::Ignored));
     assert_eq!(decoded(b"\xc3\xff"), Some(Key::Ignored));
 }
+
+#[test]
+fn tab_bytes_reach_completion() {
+    assert_eq!(decoded(b"\t"), Some(Key::Char('\t')));
+}

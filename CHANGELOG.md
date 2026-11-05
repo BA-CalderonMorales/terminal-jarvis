@@ -28,6 +28,11 @@
 
 ### Fixed
 
+- Paging and Tab decode through the real terminal input path; completion after
+  Unicode whitespace stays on valid character boundaries.
+- Compact frames keep gate posture visible. Frame navigation shares the painted
+  row budget, and picker rows retain the active marker within their cell budget,
+  including clipped wide-character descriptions.
 - Streaming preserves the original dangerous-execution intent requirements.
   Direct and run-style install/update commands verify the agent binary without
   changing the active selection.
