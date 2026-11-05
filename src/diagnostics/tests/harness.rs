@@ -70,3 +70,6 @@ fn collect_reports_ready_harness() {
     assert!(result.ready.contains("xh"));
     let _ = fs::remove_dir_all(&bin);
 }
+
+#[path = "harness_retirement.rs"]
+mod retirement;

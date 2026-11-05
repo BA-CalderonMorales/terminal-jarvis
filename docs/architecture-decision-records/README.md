@@ -39,6 +39,22 @@ it, and anything future work must respect.
 
 ## Records
 
+### Test retirement independently of evidence age (v0.1.24 integration -> 2026-11-04)
+
+**Decision:** Retirement readiness tests exercise fresh support with both present
+and absent binaries, alongside the corresponding maintained-tool cases.
+
+**Context:** The release-wide mutation run could remove the retirement guard
+without failing tests: real retired catalog entries were already blocked by stale
+support, so those fixtures did not witness the retirement classification itself.
+
+**Considered:** Excluding the mutation would conceal a real diagnostic distinction.
+Use four semantic state combinations, without refreshing production evidence or
+changing execution policy.
+
+**Consequence:** A retired tool remains distinct from an uninstalled maintained
+tool regardless of binary presence. The previously missed mutation is caught.
+
 ### Preserve request intent and verify bounded execution (v0.1.24 integration -> 2026-11-04)
 
 **Decision:** Terminal transport follows resolved interaction requirements while
