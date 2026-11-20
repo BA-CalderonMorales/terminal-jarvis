@@ -88,9 +88,12 @@ ZIP bundle for npm. Each platform additionally publishes a checksummed direct
 native executable for users who prefer a single-file download; the executable
 contains the default harness and gate data as a fallback.
 
-Release preparation stops at a verified `release/X.Y.Z` branch. Tagging,
-publishing, protected merges, and the mandatory release Trivy scans use the
-separate release workflow and require operator approval.
+`main` is always releasable: every change lands there as a squash-merged PR
+that passed the required checks, and unfinished work merges behind a flag.
+Releasing is a version bump on `main` followed by a `vX.Y.Z` tag; tagging,
+publishing, and the mandatory release Trivy scans use the separate release
+workflow and require operator approval. There are no `develop` or
+`release/X.Y.Z` branches.
 
 ### npm Trusted Publishing
 

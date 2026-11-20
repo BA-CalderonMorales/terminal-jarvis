@@ -1,14 +1,10 @@
 name: CI
 
 on:
+  # No paths-ignore: these checks are required on main, and a required check
+  # that never starts leaves a docs-only PR waiting forever.
   pull_request:
-    branches: [main, develop]
-    paths-ignore:
-      - 'docs/**'
-      - 'plan/**'
-      - 'README.md'
-      - 'AGENTS.md'
-      - 'CLAUDE.md'
+    branches: [main]
   push:
     branches: [main]
   workflow_dispatch:
@@ -205,3 +201,22 @@ jobs:
           findings="$(node -e "const fs=require('fs'); const s=JSON.parse(fs.readFileSync(process.argv[1], 'utf8')); console.log((s.runs || []).reduce((n, run) => n + ((run.results || []).length), 0));" "$sarif_file")"
           echo "Grype findings: $findings"
           test "$findings" -eq 0
+
+  exclusions:
+    name: Mutation Exclusions
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: dtolnay/rust-toolchain@stable
+
+      - name: Install cargo-mutants
+        run: command -v cargo-mutants >/dev/null || cargo install cargo-mutants --locked
+
+      # An exclude_re entry that matches no mutant hides nothing: the mutant
+      # it was written to suppress is generated and tested again, and the
+      # reason it was excluded is forgotten. The gate is cheap, so it runs
+      # on every pull request even while mutation runs are manual.
+      - name: Fail on stale exclusions
+        run: scripts/bash/mutation/index.sh exclusions

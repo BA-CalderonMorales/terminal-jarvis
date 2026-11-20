@@ -22,5 +22,5 @@ It reads as provisional CI scratch, not owned engineering.
 them. `adversarial-report.sh`, `catalog-report.sh`, and `parity-catalog.sh`
 name what the script does; test files name the behavior they witness
 (`exit_matrix.rs`, `catalog_walk.rs`). Phase-named content stays inside
-`plan/`, which is developer-local and never merges to `develop` or `main`.
+`plan/`, which is developer-local and never merges to `main`.
 The phase vocabulary also disappears from workflow and artifact names.

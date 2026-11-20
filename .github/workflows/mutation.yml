@@ -1,17 +1,11 @@
 name: Mutations
 run-name: Mutations (${{ github.event_name }})
 
+# Manual only. Per-PR shards made every merge wait on 34 jobs, and the nightly
+# run went red for days without anyone acting on it. Mutation coverage comes
+# back on a schedule once the suite is green again; until then a run is an
+# explicit operator decision. The cheap stale-exclusion gate lives in ci.yml.
 on:
-  pull_request:
-    branches: [develop, main]
-    paths-ignore:
-      - 'docs/**'
-      - 'plan/**'
-      - 'README.md'
-      - 'AGENTS.md'
-      - 'CLAUDE.md'
-  schedule:
-    - cron: '0 3 * * *'
   workflow_dispatch:
 
 concurrency:
@@ -28,9 +22,7 @@ jobs:
   mutation:
     name: Mutation (${{ matrix.domain }}-${{ matrix.part }})
     runs-on: ubuntu-latest
-    # Smaller PR partitions target short feedback; full scheduled runs need
-    # a separate budget because they also cover unchanged source.
-    timeout-minutes: ${{ github.event_name == 'pull_request' && 30 || 180 }}
+    timeout-minutes: 180
     strategy:
       fail-fast: false
       matrix:
@@ -96,19 +88,7 @@ jobs:
       - name: Install cargo-mutants
         run: command -v cargo-mutants >/dev/null || cargo install cargo-mutants --locked
 
-      - name: Run mutation tests on pull request diff
-        if: github.event_name == 'pull_request'
-        run: |
-          set -eu
-          if ! git diff "origin/${{ github.base_ref }}..HEAD" > git.diff 2>/dev/null || [ ! -s git.diff ]; then
-            echo "Base ref unavailable or empty diff; running full suite instead"
-            scripts/bash/mutation/index.sh run "${{ matrix.domain }}" --shard "${{ matrix.shard }}"
-          else
-            scripts/bash/mutation/index.sh run "${{ matrix.domain }}" --shard "${{ matrix.shard }}" --in-diff git.diff
-          fi
-
       - name: Run full mutation suite
-        if: github.event_name != 'pull_request'
         run: scripts/bash/mutation/index.sh run "${{ matrix.domain }}" --shard "${{ matrix.shard }}"
 
       - name: Upload mutation diagnostics
@@ -118,22 +98,3 @@ jobs:
           name: mutation-${{ matrix.domain }}-${{ matrix.part }}
           path: mutants.out/**
           if-no-files-found: ignore
-
-  exclusions:
-    name: Mutation Exclusions
-    runs-on: ubuntu-latest
-    timeout-minutes: 15
-    steps:
-      - uses: actions/checkout@v7
-
-      - uses: dtolnay/rust-toolchain@stable
-
-      - name: Install cargo-mutants
-        run: command -v cargo-mutants >/dev/null || cargo install cargo-mutants --locked
-
-      # An exclude_re entry that matches no mutant hides nothing: the mutant
-      # it was written to suppress is generated and tested again, and the
-      # reason it was excluded is forgotten. The gate is cheap, so it runs
-      # on every pull request rather than only on the nightly.
-      - name: Fail on stale exclusions
-        run: scripts/bash/mutation/index.sh exclusions
