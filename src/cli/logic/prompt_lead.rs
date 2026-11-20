@@ -23,7 +23,7 @@ pub fn confirm_lead_on(
     today: &str,
 ) -> String {
     if options.narrate {
-        return output::plan_with_extra(harness, plan.capability, extra);
+        return output::plan_with_extra_on(harness, plan.capability, extra, today);
     }
     // The one line carries the retirement before the user answers.
     let retirement = output_plan::retirement(harness, today)

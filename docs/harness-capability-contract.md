@@ -82,8 +82,10 @@ today's UTC date:
 | `Scheduled` | `sunset_at` is still ahead | `retiring` / `retires` |
 
 Both states leave the maintained fleet: neither counts inside `READY n/m`, the
-dashboard counts each apart, and `list` names the tool `(retired)` or
-`(retiring)`. `graveyard` prints `retired 2026-06-18` or `retires 2026-12-31`
+dashboard counts each apart, and `list` keeps the NAME column the bare name and
+shows a separate STATUS column (`maintained`, `retiring`, `retired`) in the
+styled table, with a footer counting retired and retiring apart; `--plain`
+appends `status=` after `support=`. `graveyard` prints `retired 2026-06-18` or `retires 2026-12-31`
 and counts the two apart, and `--plain`/`--json` add `state=retired|scheduled`
 beside the date so a script need not compare dates itself. `check` reports a
 `retired` harness as a warning and a `retiring` one as information; a retiring

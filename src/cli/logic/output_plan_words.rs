@@ -21,3 +21,7 @@ mod tests;
 #[cfg(test)]
 #[path = "../tests/retirement_list_test.rs"]
 mod list_tests;
+
+#[cfg(test)]
+#[path = "../tests/retirement_narrate_test.rs"]
+mod narrate_tests;

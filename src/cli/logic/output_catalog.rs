@@ -63,18 +63,28 @@ pub fn plan(harness: &Harness, capability: Capability) -> String {
 }
 
 pub fn plan_with_extra(harness: &Harness, capability: Capability, extra: &[String]) -> String {
+    plan_with_extra_on(harness, capability, extra, &crate::catalog::today_utc())
+}
+
+/// `today` is a parameter so the narrated plan's retirement verb is pinned.
+pub fn plan_with_extra_on(
+    harness: &Harness,
+    capability: Capability,
+    extra: &[String],
+    today: &str,
+) -> String {
     let plan = harness
         .plan(capability)
         .expect("validated harness capability");
     let mut command = CommandPlan::new(plan.command.command.clone(), plan.command.args.clone());
     command.args.extend_from_slice(extra);
     if style::plain() {
-        return output_plan::plain(harness, plan, &command);
+        return output_plan::plain_on(harness, plan, &command, today);
     }
     let width = fields::width();
     let mut lines = vec![format!("Plan: {} {capability}", harness.name)];
     lines.extend(value_block::card(
-        &output_plan::groups(harness, plan, &command),
+        &output_plan::groups_on(harness, plan, &command, today),
         width,
     ));
     lines.join("\n")

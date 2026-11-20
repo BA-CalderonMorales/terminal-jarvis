@@ -8,6 +8,7 @@ pub fn retirement(harness: &Harness, today: &str) -> Option<String> {
     words::retirement(harness, today)
 }
 
+#[cfg(test)]
 pub fn plain(harness: &Harness, plan: &CapabilityPlan, command: &CommandPlan) -> String {
     plain_on(harness, plan, command, &crate::catalog::today_utc())
 }
@@ -41,6 +42,7 @@ pub fn plain_on(
 
 /// The plan as a card: the facts about the capability, then the command that
 /// would run it.
+#[cfg(test)]
 pub fn groups(harness: &Harness, plan: &CapabilityPlan, command: &CommandPlan) -> Vec<Group> {
     groups_on(harness, plan, command, &crate::catalog::today_utc())
 }

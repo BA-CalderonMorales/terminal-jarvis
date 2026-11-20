@@ -22,7 +22,7 @@ use crate::security;
 
 #[cfg(test)]
 pub use catalog::list_on;
-pub use catalog::{list, plan, plan_with_extra};
+pub use catalog::{list, plan, plan_with_extra, plan_with_extra_on};
 pub use detail::show;
 pub use diagnostics::diagnostics;
 pub use graveyard::graveyard;

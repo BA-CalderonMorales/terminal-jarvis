@@ -24,7 +24,7 @@ pub(super) fn harness(name: &str, sunset: Option<(&str, Option<&str>)>) -> Harne
     }
 }
 
-fn quiet() -> Options {
+pub(super) fn quiet() -> Options {
     Options {
         output: OutputMode::Plain,
         no_color: false,
