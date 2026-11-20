@@ -1,6 +1,6 @@
 summary = "Install Claude Code with Anthropic's native installer; it needs no sudo and no Node."
 command = "sh"
-args = ["-c", "curl -fsSL https://claude.ai/install.sh | bash"]
+args = ["-c", "set -f; IFS=; script=$(curl -fsSL https://claude.ai/install.sh) && printf %s $script | bash"]
 support = "unknown"
 evidence = "deterministic"
 effect = "state-changing"

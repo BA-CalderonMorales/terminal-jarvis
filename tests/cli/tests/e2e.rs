@@ -61,8 +61,8 @@ fn help_announces_the_tui() {
 #[test]
 fn plan_renders_copyable_shell_command() {
     let output = tj(&["plan", "claude", "download"]);
-    assert!(output.status.success());
-    assert!(stdout(&output).contains("sh -c 'curl -fsSL https://claude.ai/install.sh | bash'"));
+    let shell = "(curl -fsSL https://claude.ai/install.sh) && printf %s $script | bash'";
+    assert!(output.status.success() && stdout(&output).contains(shell));
 }
 
 #[test]

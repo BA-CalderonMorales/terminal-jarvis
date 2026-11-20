@@ -53,3 +53,23 @@ fn a_preview_never_unlocks_a_stub() {
     assert_eq!(code, 4, "{stdout}");
     assert!(stderr.contains(" is stub"), "{stderr}");
 }
+
+#[cfg(unix)]
+#[test]
+fn uninstall_dry_run_wins_over_a_matching_confirm_token() {
+    let script = "#!/bin/sh\n: > \"$TJ_FIXTURE_MARKER\"\n";
+    let fixture = crate::logic::cli_driver::Fixture::new("expected", "expected", script);
+    let row = fixture.root.join("catalog/fixture/download/index.toml");
+    let mut body = std::fs::read_to_string(&row).unwrap();
+    body.push_str("uninstall_command = \"fixture-child\"\nuninstall_args = [\"uninstall\"]\n");
+    std::fs::write(&row, body).unwrap();
+    let args = ["--plain", "--no-input", "uninstall", "fixture"];
+    let token = "--confirm=uninstall:fixture";
+    let preview = fixture.run(&[&args[..], &[token, "--dry-run"]].concat());
+    assert_eq!(preview.status.code(), Some(0), "{preview:?}");
+    assert!(String::from_utf8_lossy(&preview.stdout).contains("fixture-child uninstall"));
+    assert!(!fixture.spawned(), "a preview must never run the removal");
+    // Control: the same token without --dry-run does reach the remover.
+    fixture.run(&[&args[..], &[token]].concat());
+    assert!(fixture.spawned(), "the fixture remover is observable");
+}

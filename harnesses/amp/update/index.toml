@@ -1,6 +1,6 @@
 summary = "Update the Amp CLI with Amp's own installer."
 command = "sh"
-args = ["-c", "curl -fsSL https://ampcode.com/install.sh | bash"]
+args = ["-c", "set -f; IFS=; script=$(curl -fsSL https://ampcode.com/install.sh) && printf %s $script | bash"]
 support = "unknown"
 evidence = "deterministic"
 effect = "state-changing"

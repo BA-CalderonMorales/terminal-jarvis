@@ -1,6 +1,6 @@
 summary = "Install the Amp CLI with Amp's own installer; it lands in ~/.local/bin without sudo."
 command = "sh"
-args = ["-c", "curl -fsSL https://ampcode.com/install.sh | bash"]
+args = ["-c", "set -f; IFS=; script=$(curl -fsSL https://ampcode.com/install.sh) && printf %s $script | bash"]
 support = "unknown"
 evidence = "deterministic"
 effect = "state-changing"

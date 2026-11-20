@@ -125,7 +125,7 @@ harness:amp	display	narration	Amp	none	assertion	asserted
 harness:amp	env	environment	["ANTHROPIC_API_KEY", "OPENAI_API_KEY", "AMP_API_KEY"]	gate:env	evidence	gate
 harness:amp	env_mode	environment	any	gate:env	evidence	gate
 harness:amp	name	identity	amp	gate:identity	evidence	gate
-harness:amp/download	args	execution-shape	["-c", "curl -fsSL https://ampcode.com/install.sh | bash"]	gate:command-shape	evidence	gate
+harness:amp/download	args	execution-shape	["-c", "set -f; IFS=; script=$(curl -fsSL https://ampcode.com/install.sh) && printf %s $script | bash"]	gate:command-shape	evidence	gate
 harness:amp/download	command	execution-shape	sh	gate:command-shape	evidence	gate
 harness:amp/download	effect	risk-class	state-changing	gate:effect-class	evidence	gate
 harness:amp/download	evidence	support-state	deterministic	gate:evidence-pairing	evidence	gate
@@ -197,7 +197,7 @@ harness:amp/ui	source	provenance	internal:phase-01@fab5848	none	assertion	extern
 harness:amp/ui	summary	narration	Open the interactive Amp interface.	none	assertion	asserted
 harness:amp/ui	support	support-state	expected	gate:evidence-pairing	evidence	gate
 harness:amp/ui	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	runtime-gate
-harness:amp/update	args	execution-shape	["-c", "curl -fsSL https://ampcode.com/install.sh | bash"]	gate:command-shape	evidence	gate
+harness:amp/update	args	execution-shape	["-c", "set -f; IFS=; script=$(curl -fsSL https://ampcode.com/install.sh) && printf %s $script | bash"]	gate:command-shape	evidence	gate
 harness:amp/update	command	execution-shape	sh	gate:command-shape	evidence	gate
 harness:amp/update	effect	risk-class	state-changing	gate:effect-class	evidence	gate
 harness:amp/update	evidence	support-state	deterministic	gate:evidence-pairing	evidence	gate
@@ -239,7 +239,7 @@ harness:claude	display	narration	Claude	none	assertion	asserted
 harness:claude	env	environment	["ANTHROPIC_API_KEY", "CLAUDE_API_KEY"]	gate:env	evidence	gate
 harness:claude	env_mode	environment	any	gate:env	evidence	gate
 harness:claude	name	identity	claude	gate:identity	evidence	gate
-harness:claude/download	args	execution-shape	["-c", "curl -fsSL https://claude.ai/install.sh | bash"]	gate:command-shape	evidence	gate
+harness:claude/download	args	execution-shape	["-c", "set -f; IFS=; script=$(curl -fsSL https://claude.ai/install.sh) && printf %s $script | bash"]	gate:command-shape	evidence	gate
 harness:claude/download	command	execution-shape	sh	gate:command-shape	evidence	gate
 harness:claude/download	effect	risk-class	state-changing	gate:effect-class	evidence	gate
 harness:claude/download	evidence	support-state	deterministic	gate:evidence-pairing	evidence	gate
