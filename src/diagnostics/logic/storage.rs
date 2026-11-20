@@ -1,8 +1,12 @@
 use super::config::ConfigResult;
 use super::inspect::Kind;
 use super::redact::Redactor;
-use super::{Code, DiagnosticInput, Record, Severity, ValueState};
+use super::{Code, DiagnosticInput, Record, Severity};
 use std::path::Path;
+
+#[path = "storage_records.rs"]
+mod records;
+use records::{cache, path_record, severity};
 
 pub fn collect(
     input: &DiagnosticInput,
@@ -27,10 +31,17 @@ pub fn collect(
         catalog.action = Some("restore a valid harness catalog".into());
     }
     let home_code = super::inspect::writable(&input.home, Kind::Directory, input.now, None);
+    // A config directory that does not exist yet -- or exists and is still
+    // empty -- is the first-run state: TJ fills it on the first write. It only
+    // needs attention when it cannot be written.
+    let home_severity = match home_code {
+        Code::Missing | Code::Ready | Code::Empty => Severity::Info,
+        _ => severity(home_code),
+    };
     let mut home = Record::new(
         "state.home",
         home_code,
-        severity(home_code),
+        home_severity,
         redact.full(&input.home),
     );
     if home_code == Code::PermissionDenied {
@@ -45,55 +56,6 @@ pub fn collect(
         config,
         valid,
     )
-}
-fn cache(input: &DiagnosticInput, redact: &Redactor<'_>) -> Record {
-    let state = input.environment.state("TERMINAL_JARVIS_CACHE");
-    if state != ValueState::Present {
-        if crate::context::distribution::channel() != Some("npm") {
-            return Record::new("state.cache", Code::Ready, Severity::Info, "not-applicable");
-        }
-        return Record::new(
-            "state.cache",
-            state.code(),
-            Severity::Warning,
-            state.as_str(),
-        );
-    }
-    let Some(value) = input.environment.text("TERMINAL_JARVIS_CACHE") else {
-        return Record::new(
-            "state.cache",
-            Code::Malformed,
-            Severity::Warning,
-            "malformed",
-        );
-    };
-    let path = Path::new(value);
-    let code = super::inspect::writable(path, Kind::Any, input.now, Some(input.stale_after));
-    let record = Record::new("state.cache", code, severity(code), redact.full(path));
-    if matches!(code, Code::Stale | Code::Malformed | Code::PermissionDenied) {
-        record.action("refresh or remove the local wrapper cache")
-    } else {
-        record
-    }
-}
-fn path_record(
-    key: &str,
-    path: &Path,
-    kind: Kind,
-    input: &DiagnosticInput,
-    redact: &Redactor<'_>,
-    stale: bool,
-) -> Record {
-    let limit = stale.then_some(input.stale_after);
-    let code = super::inspect::path(path, kind, input.now, limit);
-    Record::new(key, code, severity(code), redact.full(path))
-}
-fn severity(code: Code) -> Severity {
-    match code {
-        Code::Ready => Severity::Info,
-        Code::Missing | Code::Empty | Code::Stale | Code::Unknown => Severity::Warning,
-        _ => Severity::Error,
-    }
 }
 #[cfg(test)]
 #[path = "../tests/storage.rs"]

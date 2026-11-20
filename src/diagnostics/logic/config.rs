@@ -53,9 +53,11 @@ fn parse(data: &str) -> Result<Option<String>, Code> {
 }
 
 fn record(code: Code, value: String) -> Record {
+    // A session file that does not exist yet is the first-run state: nothing
+    // is selected until `use` writes one. An empty file is also fine. Only
+    // malformed or conflicting content needs the user.
     let severity = match code {
-        Code::Ready => Severity::Info,
-        Code::Missing | Code::Empty => Severity::Warning,
+        Code::Ready | Code::Missing | Code::Empty => Severity::Info,
         _ => Severity::Error,
     };
     let record = Record::new("state.config", code, severity, value);

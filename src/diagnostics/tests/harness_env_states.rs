@@ -44,45 +44,21 @@ fn env_record<'a>(records: &'a [Record], key: &str) -> &'a Record {
 }
 
 #[test]
-fn collect_marks_env_state_by_mode() {
-    let mut with_env = Environment::default();
-    with_env.insert("TOKEN", "token-value");
-    for (mode, environment, ready_expected, severity) in [
-        (EnvMode::All, with_env, true, Severity::Info),
-        (
-            EnvMode::Optional,
-            Environment::default(),
-            true,
-            Severity::Info,
-        ),
-        (
-            EnvMode::All,
-            Environment::default(),
-            false,
-            Severity::Warning,
-        ),
-    ] {
-        let (records, ready) = collect(
-            &harness(mode, &["TOKEN"]),
-            &input(environment),
-            "harness.xh",
-        );
-        assert_eq!(ready, ready_expected, "mode={mode:?}");
-        assert_eq!(
-            env_record(&records, "harness.xh.env.TOKEN").severity,
-            severity,
-            "mode={mode:?}"
-        );
-    }
-    let (records, _) = collect(
-        &harness(EnvMode::All, &["TOKEN"]),
+fn collect_reports_absent_credentials_once_not_per_name() {
+    let (records, ready) = collect(
+        &harness(EnvMode::Any, &["A", "B"]),
         &input(Environment::default()),
         "harness.xh",
     );
-    let summary = env_record(&records, "harness.xh.environment");
-    assert_eq!(summary.code, Code::Missing);
+    assert!(!ready);
+    let per_name = records
+        .iter()
+        .filter(|record| record.key.starts_with("harness.xh.env."))
+        .count();
     assert_eq!(
-        summary.action.as_deref(),
-        Some("set the required credential environment names")
+        per_name, 0,
+        "unset names are summarized once; flooding the report hides the real signal"
     );
+    let summary = env_record(&records, "harness.xh.environment");
+    assert_eq!(summary.action.as_deref(), Some("set one of: A, B"));
 }

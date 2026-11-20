@@ -3,7 +3,12 @@ use super::redact::Redactor;
 use super::{Code, DiagnosticInput, Record, Severity};
 
 pub fn collect(input: &DiagnosticInput, redact: &Redactor<'_>) -> (Vec<Record>, bool) {
-    let gate_code = super::inspect::path(&input.runtime.gate, Kind::Directory, input.now, None);
+    // The embedded gate catalog is a sentinel path, not a directory on disk.
+    let gate_code = if input.runtime.gate == std::path::Path::new(crate::context::EMBEDDED_GATES) {
+        Code::Ready
+    } else {
+        super::inspect::path(&input.runtime.gate, Kind::Directory, input.now, None)
+    };
     let route_ok = matches!(
         input.runtime.update_route.as_str(),
         "cargo" | "npm" | "homebrew" | "direct"
@@ -60,10 +65,14 @@ pub fn collect(input: &DiagnosticInput, redact: &Redactor<'_>) -> (Vec<Record>, 
         checksum.code = Code::Unknown;
         checksum.severity = Severity::Warning;
     }
-    (
-        records,
-        gate_code == Code::Ready && route_ok && checksum_ok && width_ok,
-    )
+    // An unknown channel only matters to `update`, which refuses with guidance.
+    if let Some(route) = records
+        .iter_mut()
+        .find(|r| r.key == "update.route" && !route_ok)
+    {
+        route.severity = Severity::Warning;
+    }
+    (records, gate_code == Code::Ready && checksum_ok && width_ok)
 }
 
 fn fact(key: &str, value: impl Into<String>) -> Record {

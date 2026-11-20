@@ -73,7 +73,7 @@ fn default_output_is_structured_across_the_core_read_only_surface() {
     assert!(body.contains("  status     disabled"), "{body}");
     assert!(!body.contains('+'), "gate is line-based: {body}");
     let check = tj(&["check"], &home);
-    assert_eq!(check.status.code(), Some(4));
+    assert_eq!(check.status.code(), Some(0));
     assert!(stdout(&check).contains("Terminal Jarvis Diagnostics"));
     let removed = tj(&["templates"], &home);
     assert_eq!(removed.status.code(), Some(4));

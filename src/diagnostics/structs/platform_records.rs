@@ -58,7 +58,15 @@ fn shell(input: &DiagnosticInput) -> Record {
     } else {
         state.as_str().to_string()
     };
-    Record::new("platform.shell", state.code(), Severity::Warning, value)
+    // The shell TJ found is a fact about the machine, not a problem. It only
+    // matters when it is absent (Windows without COMSPEC), which `state.code`
+    // already distinguishes.
+    let severity = if state == ValueState::Present {
+        Severity::Info
+    } else {
+        Severity::Warning
+    };
+    Record::new("platform.shell", state.code(), severity, value)
 }
 
 fn wsl(input: &DiagnosticInput) -> Record {

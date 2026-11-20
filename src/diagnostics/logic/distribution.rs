@@ -2,16 +2,29 @@ use super::{Code, DiagnosticInput, Record, Severity, ValueState};
 
 pub fn collect(input: &DiagnosticInput) -> (Record, bool) {
     let state = input.environment.state("TERMINAL_JARVIS_DISTRIBUTION");
-    if state != ValueState::Present {
+    if state == ValueState::Missing {
+        // Source builds and extracted archives carry no channel metadata. That
+        // is how they are meant to work, so it is a fact, not a warning; it
+        // does not say how the binary was built, so the value claims nothing.
         return (
             Record::new(
                 "tj.distribution",
-                state.code(),
-                Severity::Warning,
-                state.as_str(),
+                Code::Missing,
+                Severity::Info,
+                "not declared",
             ),
             true,
         );
+    }
+    if state != ValueState::Present {
+        // Set but blank or unreadable: someone meant to declare a channel.
+        let record = Record::new(
+            "tj.distribution",
+            state.code(),
+            Severity::Warning,
+            state.as_str(),
+        );
+        return (record, true);
     }
     let value = input
         .environment
@@ -52,3 +65,7 @@ pub fn wrapper(input: &DiagnosticInput) -> Record {
     let state = input.environment.state("TERMINAL_JARVIS_WRAPPER");
     Record::new("tj.wrapper", state.code(), Severity::Info, state.as_str())
 }
+
+#[cfg(test)]
+#[path = "../tests/distribution_metadata.rs"]
+mod tests;

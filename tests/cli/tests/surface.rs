@@ -38,7 +38,9 @@ fn every_canonical_surface_has_a_deterministic_safe_outcome() {
     ] {
         assert_data(fixture.run(args), 0);
     }
-    assert_data(fixture.run(&["--plain", "check"]), 4);
+    // The fixture catalog is intact and nothing being installed is the
+    // first-run state, so `check` is healthy.
+    assert_data(fixture.run(&["--plain", "check"]), 0);
     assert_data(fixture.run(&["--plain", "use", "fixture"]), 0);
     assert!(text(&fixture.run(&["--plain", "current"]).stdout).contains("fixture"));
     for args in [

@@ -1,5 +1,30 @@
 # Execution Anti-Patterns
 
+### Provenance age used as a user-facing lock (UX audit, 0.1.25)
+
+**Pattern:** `install`, `update` and every lifecycle command consulted the
+capability's `verified_at` and refused when the evidence was older than the
+refresh window -- 24 of 25 harnesses became uninstallable on a release build,
+`--dry-run` included. Readiness did the same, so installed binaries read
+`not-ready` because their catalog row was stale. A verification gate then
+codified the bug: `integration-hardening.sh` asserted `exit 4` for a fleet with
+nothing installed, so the one machine that had to pass failed.
+
+**Why it is wrong:** Evidence age is a statement about the maintainer's work
+queue, and the catalog ships inside the binary. The user cannot refresh it, so
+the refusal is unactionable: it blocks a working install to report a fact only
+the maintainer can change. "Nothing is installed yet" is a normal first-run
+state, not a fault, so a diagnostic that exits non-zero on every fresh machine
+teaches users to ignore exit codes.
+
+**Fix:** Keep provenance in the report, never in the decision. Block on what
+the user can act on -- platform incompatibility, an unclaimed capability
+(`stub`, `manual`, `unsupported`, `disabled`), a required interactive terminal
+-- and surface staleness as a footnote and a `check` row. Make `--dry-run` and
+every preview unconditional past consent. Never assert a failure exit for the
+empty-fleet state; assert `exit 0` and add a regression check that no
+`executable missing` row is an error.
+
 ### Synthetic events that bypass the input protocol (v0.1.24 release review)
 
 **Pattern:** Completion tests constructed a Tab event that the decoder never

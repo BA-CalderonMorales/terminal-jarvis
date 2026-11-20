@@ -73,15 +73,15 @@ fn use_and_current_round_trip_active_harness() {
     assert!(current.status.success() && stdout(&current).contains("active harness = codex"));
 }
 
+// Nothing installed is the first-run state: healthy, and never an error.
 #[test]
 fn check_reports_setup_readiness() {
     let output = tj(&["check", "--verbose"]);
-    assert_eq!(output.status.code(), Some(4));
+    assert_eq!(output.status.code(), Some(0));
     let body = stdout(&output);
-    assert!(
-        body.contains("harness.jules.readiness\tmissing\terror")
-            && body.contains("harness.aider.executable")
-    );
+    assert!(body.contains("harness.jules.readiness\tmissing\tinfo"));
+    assert!(body.contains("harness.aider.executable"));
+    assert!(!body.contains("\tmissing\terror"), "{body}");
 }
 
 #[test]

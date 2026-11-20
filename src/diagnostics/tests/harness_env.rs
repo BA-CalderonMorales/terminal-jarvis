@@ -62,3 +62,33 @@ fn aggregate_maps_state_sets() {
     assert_eq!(aggregate(&[ValueState::Empty]), Code::Empty);
     assert_eq!(aggregate(&[ValueState::Missing]), Code::Missing);
 }
+
+#[test]
+fn collect_reports_absent_credentials_once_not_per_name() {
+    let (records, ready) = collect(
+        &harness(EnvMode::Any, &["A", "B"]),
+        &input(Environment::default()),
+        "harness.xh",
+    );
+    assert!(!ready);
+    let per_name = records
+        .iter()
+        .filter(|record| record.key.starts_with("harness.xh.env."))
+        .count();
+    assert_eq!(
+        per_name, 0,
+        "unset names are summarized once; flooding the report hides the real signal"
+    );
+    let summary = env_record(&records, "harness.xh.environment");
+    assert_eq!(summary.action.as_deref(), Some("set one of: A, B"));
+}
+
+#[test]
+fn a_set_but_blank_credential_warns_on_its_own_row() {
+    let mut environment = Environment::default();
+    environment.insert("A", "  ");
+    let harness = harness(EnvMode::Any, &["A"]);
+    let (records, _) = collect(&harness, &input(environment), "harness.xh");
+    let row = env_record(&records, "harness.xh.env.A");
+    assert_eq!((row.code, row.severity), (Code::Empty, Severity::Warning));
+}

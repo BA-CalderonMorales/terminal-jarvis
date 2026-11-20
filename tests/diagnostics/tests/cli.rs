@@ -22,31 +22,33 @@ fn check_is_canonical_in_plain_rich_and_json_modes() {
     let support = if supported {
         "ready\tinfo"
     } else {
-        "unsupported\terror"
+        "unsupported\tinfo"
     };
+    // An intact binary, catalog and gate set is healthy even when no harness
+    // is installed on this machine: that is the normal state of a fresh host.
     let plain = tj(&["--plain", "check"], &home);
-    assert_eq!(plain.status.code(), Some(4));
+    assert_eq!(plain.status.code(), Some(0));
     assert!(plain.stderr.is_empty());
     let text = String::from_utf8(plain.stdout).unwrap();
     assert!(text.contains("tj.version\tready\tinfo"));
-    assert!(text.contains(&format!("harness.codex.readiness\t{readiness}\terror")));
+    assert!(text.contains(&format!("harness.codex.readiness\t{readiness}\tinfo")));
     let verbose = tj(&["--plain", "check", "--verbose"], &home);
     assert!(String::from_utf8_lossy(&verbose.stdout)
         .contains(&format!("harness.codex.support\t{support}")));
 
     let rich = tj(&["--no-color", "check"], &home);
-    assert_eq!(rich.status.code(), Some(4));
+    assert_eq!(rich.status.code(), Some(0));
     assert!(String::from_utf8(rich.stdout)
         .unwrap()
         .contains("Terminal Jarvis Diagnostics"));
 
     let json = tj(&["--json", "check"], &home);
-    assert_eq!(json.status.code(), Some(4));
+    assert_eq!(json.status.code(), Some(0));
     assert!(json.stderr.is_empty());
     let document = String::from_utf8(json.stdout).unwrap();
     assert_eq!(document.lines().count(), 1);
     assert!(document
-        .starts_with("{\"schema_version\":1,\"command\":\"check\",\"ok\":false,\"exit_code\":4"));
+        .starts_with("{\"schema_version\":1,\"command\":\"check\",\"ok\":true,\"exit_code\":0"));
     assert!(document.contains("\"diagnostics\":["));
     assert!(!document.contains("\"text\":"));
 }
@@ -56,8 +58,8 @@ fn verbose_check_expands_per_harness_details() {
     let home = std::env::temp_dir().join(format!("tj-check-verbose-{}", std::process::id()));
     let concise = tj(&["--plain", "check"], &home);
     let verbose = tj(&["--plain", "check", "--verbose"], &home);
-    assert_eq!(concise.status.code(), Some(4));
-    assert_eq!(verbose.status.code(), Some(4));
+    assert_eq!(concise.status.code(), Some(0));
+    assert_eq!(verbose.status.code(), Some(0));
     assert!(verbose.stdout.len() > concise.stdout.len());
     assert!(!String::from_utf8(concise.stdout)
         .unwrap()

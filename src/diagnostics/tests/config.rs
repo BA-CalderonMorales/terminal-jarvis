@@ -34,14 +34,13 @@ fn parse_rejects_conflicting_values() {
 #[test]
 fn record_maps_severity_by_code() {
     assert_eq!(record(Code::Ready, String::new()).severity, Severity::Info);
+    // A session file that does not exist yet is the first-run state: TJ writes
+    // one on the first `use`. Only broken content needs the user.
     assert_eq!(
         record(Code::Missing, String::new()).severity,
-        Severity::Warning
+        Severity::Info
     );
-    assert_eq!(
-        record(Code::Empty, String::new()).severity,
-        Severity::Warning
-    );
+    assert_eq!(record(Code::Empty, String::new()).severity, Severity::Info);
     assert_eq!(
         record(Code::Malformed, String::new()).severity,
         Severity::Error
