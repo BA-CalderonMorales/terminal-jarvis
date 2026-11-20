@@ -1,7 +1,7 @@
 summary = "Update Goose without interactive setup flows."
 command = "goose"
 args = ["update"]
-support = "expected"
+support = "unknown"
 evidence = "deterministic"
 effect = "state-changing"
 network = true

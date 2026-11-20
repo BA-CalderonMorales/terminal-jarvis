@@ -1,6 +1,6 @@
 summary = "Install Crush from its documented distribution channel."
 command = "npm"
-args = ["install", "-g", "@charmland/crush"]
+args = ["install", "-g", "@charmland/crush@latest"]
 support = "expected"
 evidence = "deterministic"
 effect = "state-changing"

@@ -1,6 +1,6 @@
 summary = "Install Codex with npm without sudo."
 command = "npm"
-args = ["install", "-g", "@openai/codex"]
+args = ["install", "-g", "@openai/codex@latest"]
 support = "expected"
 evidence = "deterministic"
 effect = "state-changing"

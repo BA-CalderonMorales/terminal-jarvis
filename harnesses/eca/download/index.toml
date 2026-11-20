@@ -1,6 +1,6 @@
-summary = "Install ECA from its documented distribution channel."
+summary = "Install the ECA CLI (the `eca` binary) into ~/.local/bin; the upstream installer defaults to /usr/local/bin and needs root."
 command = "sh"
-args = ["-c", "curl -s https://raw.githubusercontent.com/editor-code-assistant/eca/master/install | bash"]
+args = ["-c", "set -f; IFS=; script=$(curl -fsSL https://raw.githubusercontent.com/editor-code-assistant/eca/master/install) && printf %s $script | bash -s -- --dir $HOME/.local/bin"]
 support = "unknown"
 evidence = "deterministic"
 effect = "state-changing"
@@ -8,5 +8,5 @@ network = true
 interaction = "noninteractive"
 platforms = []
 executable = "sh"
-source = "internal:phase-01@fab5848"
-verified_at = "2026-08-05T00:00:00Z"
+source = "https://eca.dev/install"
+verified_at = "2026-11-15T00:00:00Z"

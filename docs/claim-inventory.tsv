@@ -353,7 +353,7 @@ harness:code	display	narration	Code	none	assertion	asserted
 harness:code	env	environment	["OPENAI_API_KEY"]	gate:env	evidence	gate
 harness:code	env_mode	environment	any	gate:env	evidence	gate
 harness:code	name	identity	code	gate:identity	evidence	gate
-harness:code/download	args	execution-shape	["install", "-g", "@just-every/code"]	gate:command-shape	evidence	gate
+harness:code/download	args	execution-shape	["install", "-g", "@just-every/code@latest"]	gate:command-shape	evidence	gate
 harness:code/download	command	execution-shape	npm	gate:command-shape	evidence	gate
 harness:code/download	effect	risk-class	state-changing	gate:effect-class	evidence	gate
 harness:code/download	evidence	support-state	deterministic	gate:evidence-pairing	evidence	gate
@@ -469,7 +469,7 @@ harness:codex	display	narration	OpenAI Codex	none	assertion	asserted
 harness:codex	env	environment	["OPENAI_API_KEY", "CODEX_API_KEY"]	gate:env	evidence	gate
 harness:codex	env_mode	environment	optional	gate:env	evidence	gate
 harness:codex	name	identity	codex	gate:identity	evidence	gate
-harness:codex/download	args	execution-shape	["install", "-g", "@openai/codex"]	gate:command-shape	evidence	gate
+harness:codex/download	args	execution-shape	["install", "-g", "@openai/codex@latest"]	gate:command-shape	evidence	gate
 harness:codex/download	command	execution-shape	npm	gate:command-shape	evidence	gate
 harness:codex/download	effect	risk-class	state-changing	gate:effect-class	evidence	gate
 harness:codex/download	evidence	support-state	deterministic	gate:evidence-pairing	evidence	gate
@@ -585,7 +585,7 @@ harness:copilot	display	narration	Copilot	none	assertion	asserted
 harness:copilot	env	environment	["GITHUB_TOKEN", "GH_TOKEN"]	gate:env	evidence	gate
 harness:copilot	env_mode	environment	any	gate:env	evidence	gate
 harness:copilot	name	identity	copilot	gate:identity	evidence	gate
-harness:copilot/download	args	execution-shape	["install", "-g", "@github/copilot"]	gate:command-shape	evidence	gate
+harness:copilot/download	args	execution-shape	["install", "-g", "@github/copilot@latest"]	gate:command-shape	evidence	gate
 harness:copilot/download	command	execution-shape	npm	gate:command-shape	evidence	gate
 harness:copilot/download	effect	risk-class	state-changing	gate:effect-class	evidence	gate
 harness:copilot/download	evidence	support-state	deterministic	gate:evidence-pairing	evidence	gate
@@ -701,7 +701,7 @@ harness:crush	display	narration	Crush	none	assertion	asserted
 harness:crush	env	environment	["ANTHROPIC_API_KEY", "OPENAI_API_KEY", "CHARM_API_KEY"]	gate:env	evidence	gate
 harness:crush	env_mode	environment	any	gate:env	evidence	gate
 harness:crush	name	identity	crush	gate:identity	evidence	gate
-harness:crush/download	args	execution-shape	["install", "-g", "@charmland/crush"]	gate:command-shape	evidence	gate
+harness:crush/download	args	execution-shape	["install", "-g", "@charmland/crush@latest"]	gate:command-shape	evidence	gate
 harness:crush/download	command	execution-shape	npm	gate:command-shape	evidence	gate
 harness:crush/download	effect	risk-class	state-changing	gate:effect-class	evidence	gate
 harness:crush/download	evidence	support-state	deterministic	gate:evidence-pairing	evidence	gate
@@ -1045,7 +1045,7 @@ harness:eca	display	narration	ECA	none	assertion	asserted
 harness:eca	env	environment	["ANTHROPIC_API_KEY", "OPENAI_API_KEY", "ECA_API_KEY"]	gate:env	evidence	gate
 harness:eca	env_mode	environment	any	gate:env	evidence	gate
 harness:eca	name	identity	eca	gate:identity	evidence	gate
-harness:eca/download	args	execution-shape	["-c", "curl -s https://raw.githubusercontent.com/editor-code-assistant/eca/master/install | bash"]	gate:command-shape	evidence	gate
+harness:eca/download	args	execution-shape	["-c", "set -f; IFS=; script=$(curl -fsSL https://raw.githubusercontent.com/editor-code-assistant/eca/master/install) && printf %s $script | bash -s -- --dir $HOME/.local/bin"]	gate:command-shape	evidence	gate
 harness:eca/download	command	execution-shape	sh	gate:command-shape	evidence	gate
 harness:eca/download	effect	risk-class	state-changing	gate:effect-class	evidence	gate
 harness:eca/download	evidence	support-state	deterministic	gate:evidence-pairing	evidence	gate
@@ -1053,10 +1053,10 @@ harness:eca/download	executable	identity	sh	gate:identity	evidence	gate
 harness:eca/download	interaction	risk-class	noninteractive	gate:effect-class	evidence	gate
 harness:eca/download	network	risk-class	true	gate:effect-class	evidence	gate
 harness:eca/download	platforms	platform-scope	[]	gate:platform-name	evidence	asserted
-harness:eca/download	source	provenance	internal:phase-01@fab5848	none	assertion	external
-harness:eca/download	summary	narration	Install ECA from its documented distribution channel.	none	assertion	asserted
+harness:eca/download	source	provenance	https://eca.dev/install	none	assertion	external
+harness:eca/download	summary	narration	Install the ECA CLI (the `eca` binary) into ~/.local/bin; the upstream installer defaults to /usr/local/bin and needs root.	none	assertion	asserted
 harness:eca/download	support	support-state	unknown	gate:evidence-pairing	evidence	gate
-harness:eca/download	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	runtime-gate
+harness:eca/download	verified_at	freshness	2026-11-15T00:00:00Z	constant:freshness	evidence	runtime-gate
 harness:eca/headless	args	execution-shape	["--help"]	gate:command-shape	evidence	gate
 harness:eca/headless	command	execution-shape	eca	gate:command-shape	evidence	gate
 harness:eca/headless	effect	risk-class	read-only	gate:effect-class	evidence	gate
@@ -1127,7 +1127,7 @@ harness:eca/update	network	risk-class	true	gate:effect-class	evidence	gate
 harness:eca/update	platforms	platform-scope	[]	gate:platform-name	evidence	asserted
 harness:eca/update	source	provenance	internal:phase-01@fab5848	none	assertion	external
 harness:eca/update	summary	narration	Update ECA without interactive setup flows.	none	assertion	asserted
-harness:eca/update	support	support-state	expected	gate:evidence-pairing	evidence	gate
+harness:eca/update	support	support-state	unknown	gate:evidence-pairing	evidence	gate
 harness:eca/update	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	runtime-gate
 harness:eca/version	args	execution-shape	["--version"]	gate:command-shape	evidence	gate
 harness:eca/version	command	execution-shape	eca	gate:command-shape	evidence	gate
@@ -1159,19 +1159,18 @@ harness:forge	display	narration	Forge	none	assertion	asserted
 harness:forge	env	environment	["ANTHROPIC_API_KEY", "OPENAI_API_KEY", "FORGE_API_KEY"]	gate:env	evidence	gate
 harness:forge	env_mode	environment	any	gate:env	evidence	gate
 harness:forge	name	identity	forge	gate:identity	evidence	gate
-harness:forge/download	args	execution-shape	["install", "-g", "forgecode"]	gate:command-shape	evidence	gate
-harness:forge/download	command	execution-shape	npm	gate:command-shape	evidence	gate
+harness:forge/download	args	execution-shape	["-c", "set -f; IFS=; script=$(curl -fsSL https://antinomy.ai/cli) && printf %s $script | sh"]	gate:command-shape	evidence	gate
+harness:forge/download	command	execution-shape	sh	gate:command-shape	evidence	gate
 harness:forge/download	effect	risk-class	state-changing	gate:effect-class	evidence	gate
 harness:forge/download	evidence	support-state	deterministic	gate:evidence-pairing	evidence	gate
-harness:forge/download	executable	identity	npm	gate:identity	evidence	gate
+harness:forge/download	executable	identity	sh	gate:identity	evidence	gate
 harness:forge/download	interaction	risk-class	noninteractive	gate:effect-class	evidence	gate
 harness:forge/download	network	risk-class	true	gate:effect-class	evidence	gate
-harness:forge/download	package	install-source	forgecode	none	assertion	asserted
 harness:forge/download	platforms	platform-scope	[]	gate:platform-name	evidence	asserted
-harness:forge/download	source	provenance	internal:phase-01@fab5848	none	assertion	external
-harness:forge/download	summary	narration	Install Forge from its documented distribution channel.	none	assertion	asserted
-harness:forge/download	support	support-state	expected	gate:evidence-pairing	evidence	gate
-harness:forge/download	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	runtime-gate
+harness:forge/download	source	provenance	https://github.com/tailcallhq/forgecode	none	assertion	external
+harness:forge/download	summary	narration	Install Forge with Forge's own installer; the npm package lags the GitHub release line.	none	assertion	asserted
+harness:forge/download	support	support-state	unknown	gate:evidence-pairing	evidence	gate
+harness:forge/download	verified_at	freshness	2026-11-15T00:00:00Z	constant:freshness	evidence	runtime-gate
 harness:forge/headless	args	execution-shape	["--help"]	gate:command-shape	evidence	gate
 harness:forge/headless	command	execution-shape	forge	gate:command-shape	evidence	gate
 harness:forge/headless	effect	risk-class	read-only	gate:effect-class	evidence	gate
@@ -1232,19 +1231,18 @@ harness:forge/ui	source	provenance	internal:phase-01@fab5848	none	assertion	exte
 harness:forge/ui	summary	narration	Open the interactive Forge interface.	none	assertion	asserted
 harness:forge/ui	support	support-state	expected	gate:evidence-pairing	evidence	gate
 harness:forge/ui	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	runtime-gate
-harness:forge/update	args	execution-shape	["update", "-g", "forgecode"]	gate:command-shape	evidence	gate
-harness:forge/update	command	execution-shape	npm	gate:command-shape	evidence	gate
+harness:forge/update	args	execution-shape	["-c", "set -f; IFS=; script=$(curl -fsSL https://antinomy.ai/cli) && printf %s $script | sh"]	gate:command-shape	evidence	gate
+harness:forge/update	command	execution-shape	sh	gate:command-shape	evidence	gate
 harness:forge/update	effect	risk-class	state-changing	gate:effect-class	evidence	gate
 harness:forge/update	evidence	support-state	deterministic	gate:evidence-pairing	evidence	gate
-harness:forge/update	executable	identity	npm	gate:identity	evidence	gate
+harness:forge/update	executable	identity	sh	gate:identity	evidence	gate
 harness:forge/update	interaction	risk-class	noninteractive	gate:effect-class	evidence	gate
 harness:forge/update	network	risk-class	true	gate:effect-class	evidence	gate
-harness:forge/update	package	install-source	forgecode	none	assertion	asserted
 harness:forge/update	platforms	platform-scope	[]	gate:platform-name	evidence	asserted
-harness:forge/update	source	provenance	internal:phase-01@fab5848	none	assertion	external
-harness:forge/update	summary	narration	Update Forge without interactive setup flows.	none	assertion	asserted
-harness:forge/update	support	support-state	expected	gate:evidence-pairing	evidence	gate
-harness:forge/update	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	runtime-gate
+harness:forge/update	source	provenance	https://github.com/tailcallhq/forgecode	none	assertion	external
+harness:forge/update	summary	narration	Update Forge with Forge's own installer.	none	assertion	asserted
+harness:forge/update	support	support-state	unknown	gate:evidence-pairing	evidence	gate
+harness:forge/update	verified_at	freshness	2026-11-15T00:00:00Z	constant:freshness	evidence	runtime-gate
 harness:forge/version	args	execution-shape	["--version"]	gate:command-shape	evidence	gate
 harness:forge/version	command	execution-shape	forge	gate:command-shape	evidence	gate
 harness:forge/version	effect	risk-class	read-only	none	assertion	asserted
@@ -1278,7 +1276,7 @@ harness:gemini	name	identity	gemini	gate:identity	evidence	gate
 harness:gemini	sunset_at	lifecycle	2026-06-18	gate:sunset-pairing	evidence	gate
 harness:gemini	sunset_note	narration	Google retired Gemini CLI for consumers and points users to Antigravity; enterprise access continues through Gemini Code Assist and paid API keys.	gate:sunset-pairing	evidence	asserted
 harness:gemini	sunset_replaced_by	narration	antigravity	none	assertion	asserted
-harness:gemini/download	args	execution-shape	["install", "-g", "@google/gemini-cli"]	gate:command-shape	evidence	gate
+harness:gemini/download	args	execution-shape	["install", "-g", "@google/gemini-cli@latest"]	gate:command-shape	evidence	gate
 harness:gemini/download	command	execution-shape	npm	gate:command-shape	evidence	gate
 harness:gemini/download	effect	risk-class	state-changing	gate:effect-class	evidence	gate
 harness:gemini/download	evidence	support-state	deterministic	gate:evidence-pairing	evidence	gate
@@ -1394,7 +1392,7 @@ harness:goose	display	narration	Goose	none	assertion	asserted
 harness:goose	env	environment	["OPENAI_API_KEY", "ANTHROPIC_API_KEY", "GEMINI_API_KEY", "GOOGLE_API_KEY"]	gate:env	evidence	gate
 harness:goose	env_mode	environment	any	gate:env	evidence	gate
 harness:goose	name	identity	goose	gate:identity	evidence	gate
-harness:goose/download	args	execution-shape	["-c", "curl -fsSL https://github.com/block/goose/releases/download/stable/download_cli.sh | bash"]	gate:command-shape	evidence	gate
+harness:goose/download	args	execution-shape	["-c", "set -f; IFS=; script=$(curl -fsSL https://github.com/aaif-goose/goose/releases/download/stable/download_cli.sh) && printf %s $script | bash"]	gate:command-shape	evidence	gate
 harness:goose/download	command	execution-shape	sh	gate:command-shape	evidence	gate
 harness:goose/download	effect	risk-class	state-changing	gate:effect-class	evidence	gate
 harness:goose/download	evidence	support-state	deterministic	gate:evidence-pairing	evidence	gate
@@ -1402,10 +1400,10 @@ harness:goose/download	executable	identity	sh	gate:identity	evidence	gate
 harness:goose/download	interaction	risk-class	noninteractive	gate:effect-class	evidence	gate
 harness:goose/download	network	risk-class	true	gate:effect-class	evidence	gate
 harness:goose/download	platforms	platform-scope	[]	gate:platform-name	evidence	asserted
-harness:goose/download	source	provenance	internal:phase-01@fab5848	none	assertion	external
-harness:goose/download	summary	narration	Install Goose from its documented distribution channel.	none	assertion	asserted
+harness:goose/download	source	provenance	https://goose-docs.ai/docs/getting-started/installation	none	assertion	external
+harness:goose/download	summary	narration	Install the Goose CLI with Goose's own installer; it needs no sudo.	none	assertion	asserted
 harness:goose/download	support	support-state	unknown	gate:evidence-pairing	evidence	gate
-harness:goose/download	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	runtime-gate
+harness:goose/download	verified_at	freshness	2026-11-15T00:00:00Z	constant:freshness	evidence	runtime-gate
 harness:goose/headless	args	execution-shape	["--help"]	gate:command-shape	evidence	gate
 harness:goose/headless	command	execution-shape	goose	gate:command-shape	evidence	gate
 harness:goose/headless	effect	risk-class	read-only	gate:effect-class	evidence	gate
@@ -1476,7 +1474,7 @@ harness:goose/update	network	risk-class	true	gate:effect-class	evidence	gate
 harness:goose/update	platforms	platform-scope	[]	gate:platform-name	evidence	asserted
 harness:goose/update	source	provenance	internal:phase-01@fab5848	none	assertion	external
 harness:goose/update	summary	narration	Update Goose without interactive setup flows.	none	assertion	asserted
-harness:goose/update	support	support-state	expected	gate:evidence-pairing	evidence	gate
+harness:goose/update	support	support-state	unknown	gate:evidence-pairing	evidence	gate
 harness:goose/update	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	runtime-gate
 harness:goose/version	args	execution-shape	["--version"]	gate:command-shape	evidence	gate
 harness:goose/version	command	execution-shape	goose	gate:command-shape	evidence	gate
@@ -1508,7 +1506,7 @@ harness:hermes	display	narration	Hermes Agent	none	assertion	asserted
 harness:hermes	env	environment	["OPENROUTER_API_KEY", "AI_GATEWAY_API_KEY", "HF_TOKEN", "ANTHROPIC_API_KEY", "OPENAI_API_KEY", "GOOGLE_API_KEY", "GEMINI_API_KEY"]	gate:env	evidence	gate
 harness:hermes	env_mode	environment	any	gate:env	evidence	gate
 harness:hermes	name	identity	hermes	gate:identity	evidence	gate
-harness:hermes/download	args	execution-shape	["-lc", "curl -fsSL https://raw.githubusercontent.com/NousResearch/hermes-agent/main/scripts/install.sh | bash -s -- --skip-setup"]	gate:command-shape	evidence	gate
+harness:hermes/download	args	execution-shape	["-lc", "set -f; IFS=; script=$(curl -fsSL https://hermes-agent.nousresearch.com/install.sh) && printf %s $script | bash -s -- --skip-setup"]	gate:command-shape	evidence	gate
 harness:hermes/download	command	execution-shape	bash	gate:command-shape	evidence	gate
 harness:hermes/download	effect	risk-class	state-changing	gate:effect-class	evidence	gate
 harness:hermes/download	evidence	support-state	deterministic	gate:evidence-pairing	evidence	gate
@@ -1516,10 +1514,10 @@ harness:hermes/download	executable	identity	bash	gate:identity	evidence	gate
 harness:hermes/download	interaction	risk-class	noninteractive	gate:effect-class	evidence	gate
 harness:hermes/download	network	risk-class	true	gate:effect-class	evidence	gate
 harness:hermes/download	platforms	platform-scope	[]	gate:platform-name	evidence	asserted
-harness:hermes/download	source	provenance	internal:phase-01@fab5848	none	assertion	external
-harness:hermes/download	summary	narration	Install Hermes Agent from its documented distribution channel.	none	assertion	asserted
+harness:hermes/download	source	provenance	https://hermes-agent.nousresearch.com/docs/getting-started/installation	none	assertion	external
+harness:hermes/download	summary	narration	Install the Hermes CLI from Nous Research's own installer into ~/.local/bin.	none	assertion	asserted
 harness:hermes/download	support	support-state	unknown	gate:evidence-pairing	evidence	gate
-harness:hermes/download	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	runtime-gate
+harness:hermes/download	verified_at	freshness	2026-11-15T00:00:00Z	constant:freshness	evidence	runtime-gate
 harness:hermes/headless	args	execution-shape	["-z"]	gate:command-shape	evidence	gate
 harness:hermes/headless	command	execution-shape	hermes	gate:command-shape	evidence	gate
 harness:hermes/headless	effect	risk-class	dangerous	none	assertion	asserted
@@ -1590,7 +1588,7 @@ harness:hermes/update	network	risk-class	true	gate:effect-class	evidence	gate
 harness:hermes/update	platforms	platform-scope	[]	gate:platform-name	evidence	asserted
 harness:hermes/update	source	provenance	internal:phase-01@fab5848	none	assertion	external
 harness:hermes/update	summary	narration	Update Hermes Agent without interactive setup flows.	none	assertion	asserted
-harness:hermes/update	support	support-state	expected	gate:evidence-pairing	evidence	gate
+harness:hermes/update	support	support-state	unknown	gate:evidence-pairing	evidence	gate
 harness:hermes/update	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	runtime-gate
 harness:hermes/version	args	execution-shape	["--version"]	gate:command-shape	evidence	gate
 harness:hermes/version	command	execution-shape	hermes	gate:command-shape	evidence	gate
@@ -1625,7 +1623,7 @@ harness:jules	name	identity	jules	gate:identity	evidence	gate
 harness:jules	sunset_at	lifecycle	2026-12-31	gate:sunset-pairing	evidence	gate
 harness:jules	sunset_note	narration	Google is winding Jules down: the product has been read-only since 2026-11-11 and shuts down on 2026-12-31. The departing client still installs, so it stays catalogued for data export, but it is not part of the maintained fleet.	gate:sunset-pairing	evidence	asserted
 harness:jules	sunset_replaced_by	narration	antigravity	none	assertion	asserted
-harness:jules/download	args	execution-shape	["install", "-g", "@google/jules"]	gate:command-shape	evidence	gate
+harness:jules/download	args	execution-shape	["install", "-g", "@google/jules@latest"]	gate:command-shape	evidence	gate
 harness:jules/download	command	execution-shape	npm	gate:command-shape	evidence	gate
 harness:jules/download	effect	risk-class	state-changing	gate:effect-class	evidence	gate
 harness:jules/download	evidence	support-state	deterministic	gate:evidence-pairing	evidence	gate
@@ -1634,10 +1632,10 @@ harness:jules/download	interaction	risk-class	noninteractive	gate:effect-class	e
 harness:jules/download	network	risk-class	true	gate:effect-class	evidence	gate
 harness:jules/download	package	install-source	@google/jules	none	assertion	asserted
 harness:jules/download	platforms	platform-scope	[]	gate:platform-name	evidence	asserted
-harness:jules/download	source	provenance	internal:phase-01@fab5848	none	assertion	external
-harness:jules/download	summary	narration	Install Jules from its documented distribution channel.	none	assertion	asserted
+harness:jules/download	source	provenance	https://jules.google/docs/changelog/2026-10-29	none	assertion	external
+harness:jules/download	summary	narration	Install the retiring Jules client (shuts down 2026-12-31) so data can be exported.	none	assertion	asserted
 harness:jules/download	support	support-state	expected	gate:evidence-pairing	evidence	gate
-harness:jules/download	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	runtime-gate
+harness:jules/download	verified_at	freshness	2026-11-15T00:00:00Z	constant:freshness	evidence	runtime-gate
 harness:jules/headless	args	execution-shape	["--help"]	gate:command-shape	evidence	gate
 harness:jules/headless	command	execution-shape	jules	gate:command-shape	evidence	gate
 harness:jules/headless	effect	risk-class	read-only	gate:effect-class	evidence	gate
@@ -1707,10 +1705,10 @@ harness:jules/update	interaction	risk-class	noninteractive	gate:effect-class	evi
 harness:jules/update	network	risk-class	true	gate:effect-class	evidence	gate
 harness:jules/update	package	install-source	@google/jules	none	assertion	asserted
 harness:jules/update	platforms	platform-scope	[]	gate:platform-name	evidence	asserted
-harness:jules/update	source	provenance	internal:phase-01@fab5848	none	assertion	external
-harness:jules/update	summary	narration	Update Jules without interactive setup flows.	none	assertion	asserted
+harness:jules/update	source	provenance	https://jules.google/docs/changelog/2026-10-29	none	assertion	external
+harness:jules/update	summary	narration	Jules winds down on 2026-12-31; this row keeps the retiring client updated so data can be exported.	none	assertion	asserted
 harness:jules/update	support	support-state	expected	gate:evidence-pairing	evidence	gate
-harness:jules/update	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	runtime-gate
+harness:jules/update	verified_at	freshness	2026-11-15T00:00:00Z	constant:freshness	evidence	runtime-gate
 harness:jules/version	args	execution-shape	["version"]	gate:command-shape	evidence	gate
 harness:jules/version	command	execution-shape	jules	gate:command-shape	evidence	gate
 harness:jules/version	effect	risk-class	read-only	none	assertion	asserted
@@ -1741,7 +1739,7 @@ harness:kilocode	display	narration	Kilocode	none	assertion	asserted
 harness:kilocode	env	environment	["ANTHROPIC_API_KEY", "OPENAI_API_KEY", "KILO_API_KEY"]	gate:env	evidence	gate
 harness:kilocode	env_mode	environment	any	gate:env	evidence	gate
 harness:kilocode	name	identity	kilocode	gate:identity	evidence	gate
-harness:kilocode/download	args	execution-shape	["install", "-g", "@kilocode/cli"]	gate:command-shape	evidence	gate
+harness:kilocode/download	args	execution-shape	["install", "-g", "@kilocode/cli@latest"]	gate:command-shape	evidence	gate
 harness:kilocode/download	command	execution-shape	npm	gate:command-shape	evidence	gate
 harness:kilocode/download	effect	risk-class	state-changing	gate:effect-class	evidence	gate
 harness:kilocode/download	evidence	support-state	deterministic	gate:evidence-pairing	evidence	gate
@@ -1973,7 +1971,7 @@ harness:llxprt	display	narration	LLXPRT	none	assertion	asserted
 harness:llxprt	env	environment	["LLXPRT_API_KEY", "OPENAI_API_KEY"]	gate:env	evidence	gate
 harness:llxprt	env_mode	environment	any	gate:env	evidence	gate
 harness:llxprt	name	identity	llxprt	gate:identity	evidence	gate
-harness:llxprt/download	args	execution-shape	["install", "-g", "@vybestack/llxprt-code"]	gate:command-shape	evidence	gate
+harness:llxprt/download	args	execution-shape	["install", "-g", "@vybestack/llxprt-code@latest"]	gate:command-shape	evidence	gate
 harness:llxprt/download	command	execution-shape	npm	gate:command-shape	evidence	gate
 harness:llxprt/download	effect	risk-class	state-changing	gate:effect-class	evidence	gate
 harness:llxprt/download	evidence	support-state	deterministic	gate:evidence-pairing	evidence	gate
@@ -2089,7 +2087,7 @@ harness:nanocoder	display	narration	Nanocoder	none	assertion	asserted
 harness:nanocoder	env	environment	[]	gate:env	evidence	gate
 harness:nanocoder	env_mode	environment	none	gate:env	evidence	gate
 harness:nanocoder	name	identity	nanocoder	gate:identity	evidence	gate
-harness:nanocoder/download	args	execution-shape	["install", "-g", "@nanocollective/nanocoder"]	gate:command-shape	evidence	gate
+harness:nanocoder/download	args	execution-shape	["install", "-g", "@nanocollective/nanocoder@latest"]	gate:command-shape	evidence	gate
 harness:nanocoder/download	command	execution-shape	npm	gate:command-shape	evidence	gate
 harness:nanocoder/download	effect	risk-class	state-changing	gate:effect-class	evidence	gate
 harness:nanocoder/download	evidence	support-state	deterministic	gate:evidence-pairing	evidence	gate
@@ -2319,19 +2317,20 @@ harness:openclaw	display	narration	OpenClaw	none	assertion	asserted
 harness:openclaw	env	environment	["OPENROUTER_API_KEY"]	gate:env	evidence	gate
 harness:openclaw	env_mode	environment	any	gate:env	evidence	gate
 harness:openclaw	name	identity	openclaw	gate:identity	evidence	gate
-harness:openclaw/download	args	execution-shape	["install", "-g", "openclaw"]	gate:command-shape	evidence	gate
-harness:openclaw/download	command	execution-shape	npm	gate:command-shape	evidence	gate
+harness:openclaw/download	args	execution-shape	["-c", "set -f; IFS=; script=$(curl -fsSL https://openclaw.ai/install.sh) && printf %s $script | bash"]	gate:command-shape	evidence	gate
+harness:openclaw/download	command	execution-shape	sh	gate:command-shape	evidence	gate
 harness:openclaw/download	effect	risk-class	state-changing	gate:effect-class	evidence	gate
 harness:openclaw/download	evidence	support-state	deterministic	gate:evidence-pairing	evidence	gate
-harness:openclaw/download	executable	identity	npm	gate:identity	evidence	gate
+harness:openclaw/download	executable	identity	sh	gate:identity	evidence	gate
 harness:openclaw/download	interaction	risk-class	noninteractive	gate:effect-class	evidence	gate
 harness:openclaw/download	network	risk-class	true	gate:effect-class	evidence	gate
-harness:openclaw/download	package	install-source	openclaw	none	assertion	asserted
 harness:openclaw/download	platforms	platform-scope	[]	gate:platform-name	evidence	asserted
-harness:openclaw/download	source	provenance	internal:phase-01@fab5848	none	assertion	external
-harness:openclaw/download	summary	narration	Install OpenClaw from its documented distribution channel.	none	assertion	asserted
-harness:openclaw/download	support	support-state	expected	gate:evidence-pairing	evidence	gate
-harness:openclaw/download	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	runtime-gate
+harness:openclaw/download	source	provenance	https://docs.openclaw.ai/install	none	assertion	external
+harness:openclaw/download	summary	narration	Install OpenClaw with its own installer; npm 11+ needs --allow-scripts for this package.	none	assertion	asserted
+harness:openclaw/download	support	support-state	unknown	gate:evidence-pairing	evidence	gate
+harness:openclaw/download	uninstall_args	execution-shape	["uninstall", "-g", "openclaw"]	gate:uninstall-pairing	evidence	gate
+harness:openclaw/download	uninstall_command	execution-shape	npm	gate:uninstall-pairing	evidence	gate
+harness:openclaw/download	verified_at	freshness	2026-11-15T00:00:00Z	constant:freshness	evidence	runtime-gate
 harness:openclaw/headless	args	execution-shape	["--help"]	gate:command-shape	evidence	gate
 harness:openclaw/headless	command	execution-shape	openclaw	gate:command-shape	evidence	gate
 harness:openclaw/headless	effect	risk-class	read-only	gate:effect-class	evidence	gate
@@ -2402,7 +2401,7 @@ harness:openclaw/update	network	risk-class	true	gate:effect-class	evidence	gate
 harness:openclaw/update	platforms	platform-scope	[]	gate:platform-name	evidence	asserted
 harness:openclaw/update	source	provenance	internal:phase-01@fab5848	none	assertion	external
 harness:openclaw/update	summary	narration	Update OpenClaw without interactive setup flows.	none	assertion	asserted
-harness:openclaw/update	support	support-state	expected	gate:evidence-pairing	evidence	gate
+harness:openclaw/update	support	support-state	unknown	gate:evidence-pairing	evidence	gate
 harness:openclaw/update	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	runtime-gate
 harness:openclaw/version	args	execution-shape	["--version"]	gate:command-shape	evidence	gate
 harness:openclaw/version	command	execution-shape	openclaw	gate:command-shape	evidence	gate
@@ -2434,21 +2433,19 @@ harness:opencode	display	narration	OpenCode	none	assertion	asserted
 harness:opencode	env	environment	["OPENCODE_API_KEY", "OPENAI_API_KEY"]	gate:env	evidence	gate
 harness:opencode	env_mode	environment	optional	gate:env	evidence	gate
 harness:opencode	name	identity	opencode	gate:identity	evidence	gate
-harness:opencode/download	args	execution-shape	["install", "-g", "opencode-ai@latest"]	gate:command-shape	evidence	gate
+harness:opencode/download	args	execution-shape	["install", "-g", "@opencode/cli@latest"]	gate:command-shape	evidence	gate
 harness:opencode/download	command	execution-shape	npm	gate:command-shape	evidence	gate
 harness:opencode/download	effect	risk-class	state-changing	gate:effect-class	evidence	gate
 harness:opencode/download	evidence	support-state	deterministic	gate:evidence-pairing	evidence	gate
 harness:opencode/download	executable	identity	npm	gate:identity	evidence	gate
 harness:opencode/download	interaction	risk-class	noninteractive	gate:effect-class	evidence	gate
 harness:opencode/download	network	risk-class	true	gate:effect-class	evidence	gate
-harness:opencode/download	package	install-source	opencode-ai	none	assertion	asserted
+harness:opencode/download	package	install-source	@opencode/cli	none	assertion	asserted
 harness:opencode/download	platforms	platform-scope	[]	gate:platform-name	evidence	asserted
-harness:opencode/download	source	provenance	internal:phase-01@fab5848	none	assertion	external
-harness:opencode/download	summary	narration	Install OpenCode with npm without sudo.	none	assertion	asserted
+harness:opencode/download	source	provenance	https://opencode.ai/docs/migrate-v1	none	assertion	external
+harness:opencode/download	summary	narration	Install OpenCode V2 with npm. The opencode-ai package still installs V1.	none	assertion	asserted
 harness:opencode/download	support	support-state	expected	gate:evidence-pairing	evidence	gate
-harness:opencode/download	uninstall_args	execution-shape	["uninstall", "--force", "--keep-config", "--keep-data"]	gate:uninstall-pairing	evidence	gate
-harness:opencode/download	uninstall_command	execution-shape	opencode	gate:uninstall-pairing	evidence	gate
-harness:opencode/download	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	runtime-gate
+harness:opencode/download	verified_at	freshness	2026-11-15T00:00:00Z	constant:freshness	evidence	runtime-gate
 harness:opencode/headless	args	execution-shape	["run"]	gate:command-shape	evidence	gate
 harness:opencode/headless	command	execution-shape	opencode	gate:command-shape	evidence	gate
 harness:opencode/headless	effect	risk-class	dangerous	none	assertion	asserted
@@ -2509,19 +2506,19 @@ harness:opencode/ui	source	provenance	internal:phase-01@fab5848	none	assertion	e
 harness:opencode/ui	summary	narration	Open the interactive OpenCode terminal UI.	none	assertion	asserted
 harness:opencode/ui	support	support-state	expected	gate:evidence-pairing	evidence	gate
 harness:opencode/ui	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	runtime-gate
-harness:opencode/update	args	execution-shape	["update", "-g", "opencode-ai"]	gate:command-shape	evidence	gate
+harness:opencode/update	args	execution-shape	["update", "-g", "@opencode/cli"]	gate:command-shape	evidence	gate
 harness:opencode/update	command	execution-shape	npm	gate:command-shape	evidence	gate
 harness:opencode/update	effect	risk-class	state-changing	gate:effect-class	evidence	gate
 harness:opencode/update	evidence	support-state	deterministic	gate:evidence-pairing	evidence	gate
 harness:opencode/update	executable	identity	npm	gate:identity	evidence	gate
 harness:opencode/update	interaction	risk-class	noninteractive	gate:effect-class	evidence	gate
 harness:opencode/update	network	risk-class	true	gate:effect-class	evidence	gate
-harness:opencode/update	package	install-source	opencode-ai	none	assertion	asserted
+harness:opencode/update	package	install-source	@opencode/cli	none	assertion	asserted
 harness:opencode/update	platforms	platform-scope	[]	gate:platform-name	evidence	asserted
-harness:opencode/update	source	provenance	internal:phase-01@fab5848	none	assertion	external
-harness:opencode/update	summary	narration	Update the npm-installed OpenCode package without interactive auth.	none	assertion	asserted
+harness:opencode/update	source	provenance	https://opencode.ai/docs/migrate-v1	none	assertion	external
+harness:opencode/update	summary	narration	Update the npm-installed OpenCode V2 package without interactive auth.	none	assertion	asserted
 harness:opencode/update	support	support-state	expected	gate:evidence-pairing	evidence	gate
-harness:opencode/update	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	runtime-gate
+harness:opencode/update	verified_at	freshness	2026-11-15T00:00:00Z	constant:freshness	evidence	runtime-gate
 harness:opencode/version	args	execution-shape	["--version"]	gate:command-shape	evidence	gate
 harness:opencode/version	command	execution-shape	opencode	gate:command-shape	evidence	gate
 harness:opencode/version	effect	risk-class	read-only	none	assertion	asserted
@@ -2552,7 +2549,7 @@ harness:pi	display	narration	Pi	none	assertion	asserted
 harness:pi	env	environment	["OPENAI_API_KEY", "ANTHROPIC_API_KEY"]	gate:env	evidence	gate
 harness:pi	env_mode	environment	any	gate:env	evidence	gate
 harness:pi	name	identity	pi	gate:identity	evidence	gate
-harness:pi/download	args	execution-shape	["install", "-g", "--ignore-scripts", "@earendil-works/pi-coding-agent"]	gate:command-shape	evidence	gate
+harness:pi/download	args	execution-shape	["install", "-g", "--ignore-scripts", "@earendil-works/pi-coding-agent@latest"]	gate:command-shape	evidence	gate
 harness:pi/download	command	execution-shape	npm	gate:command-shape	evidence	gate
 harness:pi/download	effect	risk-class	state-changing	gate:effect-class	evidence	gate
 harness:pi/download	evidence	support-state	deterministic	gate:evidence-pairing	evidence	gate

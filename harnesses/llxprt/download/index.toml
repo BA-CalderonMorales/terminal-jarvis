@@ -1,6 +1,6 @@
 summary = "Install LLXPRT from its documented distribution channel."
 command = "npm"
-args = ["install", "-g", "@vybestack/llxprt-code"]
+args = ["install", "-g", "@vybestack/llxprt-code@latest"]
 support = "expected"
 evidence = "deterministic"
 effect = "state-changing"

@@ -1,4 +1,4 @@
-summary = "Update Jules without interactive setup flows."
+summary = "Jules winds down on 2026-12-31; this row keeps the retiring client updated so data can be exported."
 command = "npm"
 args = ["update", "-g", "@google/jules"]
 support = "expected"
@@ -8,6 +8,6 @@ network = true
 interaction = "noninteractive"
 platforms = []
 executable = "npm"
-source = "internal:phase-01@fab5848"
-verified_at = "2026-08-05T00:00:00Z"
+source = "https://jules.google/docs/changelog/2026-10-29"
+verified_at = "2026-11-15T00:00:00Z"
 package = "@google/jules"

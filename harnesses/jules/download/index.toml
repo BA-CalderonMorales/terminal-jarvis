@@ -1,6 +1,6 @@
-summary = "Install Jules from its documented distribution channel."
+summary = "Install the retiring Jules client (shuts down 2026-12-31) so data can be exported."
 command = "npm"
-args = ["install", "-g", "@google/jules"]
+args = ["install", "-g", "@google/jules@latest"]
 support = "expected"
 evidence = "deterministic"
 effect = "state-changing"
@@ -8,6 +8,6 @@ network = true
 interaction = "noninteractive"
 platforms = []
 executable = "npm"
-source = "internal:phase-01@fab5848"
-verified_at = "2026-08-05T00:00:00Z"
+source = "https://jules.google/docs/changelog/2026-10-29"
+verified_at = "2026-11-15T00:00:00Z"
 package = "@google/jules"

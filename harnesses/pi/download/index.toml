@@ -1,6 +1,6 @@
 summary = "Install Pi from its documented distribution channel."
 command = "npm"
-args = ["install", "-g", "--ignore-scripts", "@earendil-works/pi-coding-agent"]
+args = ["install", "-g", "--ignore-scripts", "@earendil-works/pi-coding-agent@latest"]
 support = "expected"
 evidence = "deterministic"
 effect = "state-changing"

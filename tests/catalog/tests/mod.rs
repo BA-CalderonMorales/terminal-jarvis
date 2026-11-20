@@ -3,6 +3,7 @@ mod freshness;
 mod installer_pipe;
 mod loader_edge;
 mod loader_strict;
+mod script_uninstall;
 mod truth;
 mod validation;
 mod walk;

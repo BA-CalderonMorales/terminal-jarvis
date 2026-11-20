@@ -41,7 +41,7 @@ mod unix {
         let home = temp_home();
         let update = stdout(&tj(&["update", "--dry-run"], &home, None));
         assert!(update.contains("updates are per harness"));
-        assert!(update.contains("npm update -g opencode-ai"));
+        assert!(update.contains("npm update -g @opencode/cli"));
         assert!(update.contains("ollama: support=unknown evidence=deterministic command=withheld"));
 
         assert!(stdout(&tj(&["info", "opencode"], &home, None)).contains("OpenCode"));

@@ -1,13 +1,12 @@
-summary = "Update Forge without interactive setup flows."
-command = "npm"
-args = ["update", "-g", "forgecode"]
-support = "expected"
+summary = "Update Forge with Forge's own installer."
+command = "sh"
+args = ["-c", "set -f; IFS=; script=$(curl -fsSL https://antinomy.ai/cli) && printf %s $script | sh"]
+support = "unknown"
 evidence = "deterministic"
 effect = "state-changing"
 network = true
 interaction = "noninteractive"
 platforms = []
-executable = "npm"
-source = "internal:phase-01@fab5848"
-verified_at = "2026-08-05T00:00:00Z"
-package = "forgecode"
+executable = "sh"
+source = "https://github.com/tailcallhq/forgecode"
+verified_at = "2026-11-15T00:00:00Z"

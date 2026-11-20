@@ -87,22 +87,22 @@ Catalog presence is not a support claim. Each row reports its own guard state an
 | droid | update | expected | deterministic | state-changing | true | noninteractive | none | `droid` | `internal:phase-01@fab5848` | 2026-08-05T00:00:00Z |
 | droid | version | expected | deterministic | read-only | false | noninteractive | none | `droid` | `internal:phase-01@fab5848` | 2026-08-05T00:00:00Z |
 | droid | yolo | disabled | deterministic | dangerous | true | noninteractive | linux-x64-gnu | `sh` | `internal:phase-01@fab5848` | 2026-08-05T00:00:00Z |
-| eca | download | unknown | deterministic | state-changing | true | noninteractive | none | `sh` | `internal:phase-01@fab5848` | 2026-08-05T00:00:00Z |
+| eca | download | unknown | deterministic | state-changing | true | noninteractive | none | `sh` | `https://eca.dev/install` | 2026-11-15T00:00:00Z |
 | eca | headless | stub | deterministic | read-only | false | noninteractive | linux-x64-gnu | `eca` | `internal:phase-01@fab5848` | 2026-08-05T00:00:00Z |
 | eca | models | stub | deterministic | read-only | false | noninteractive | linux-x64-gnu | `eca` | `internal:phase-01@fab5848` | 2026-08-05T00:00:00Z |
 | eca | security | stub | deterministic | read-only | false | noninteractive | linux-x64-gnu | `eca` | `internal:phase-01@fab5848` | 2026-08-05T00:00:00Z |
 | eca | stats | stub | deterministic | read-only | false | noninteractive | linux-x64-gnu | `eca` | `internal:phase-01@fab5848` | 2026-08-05T00:00:00Z |
 | eca | ui | expected | deterministic | state-changing | true | interactive | none | `eca` | `internal:phase-01@fab5848` | 2026-08-05T00:00:00Z |
-| eca | update | expected | deterministic | state-changing | true | noninteractive | none | `eca` | `internal:phase-01@fab5848` | 2026-08-05T00:00:00Z |
+| eca | update | unknown | deterministic | state-changing | true | noninteractive | none | `eca` | `internal:phase-01@fab5848` | 2026-08-05T00:00:00Z |
 | eca | version | expected | deterministic | read-only | false | noninteractive | none | `eca` | `internal:phase-01@fab5848` | 2026-08-05T00:00:00Z |
 | eca | yolo | disabled | deterministic | dangerous | true | noninteractive | linux-x64-gnu | `sh` | `internal:phase-01@fab5848` | 2026-08-05T00:00:00Z |
-| forge | download | expected | deterministic | state-changing | true | noninteractive | none | `npm` | `internal:phase-01@fab5848` | 2026-08-05T00:00:00Z |
+| forge | download | unknown | deterministic | state-changing | true | noninteractive | none | `sh` | `https://github.com/tailcallhq/forgecode` | 2026-11-15T00:00:00Z |
 | forge | headless | stub | deterministic | read-only | false | noninteractive | linux-x64-gnu | `forge` | `internal:phase-01@fab5848` | 2026-08-05T00:00:00Z |
 | forge | models | stub | deterministic | read-only | false | noninteractive | linux-x64-gnu | `forge` | `internal:phase-01@fab5848` | 2026-08-05T00:00:00Z |
 | forge | security | stub | deterministic | read-only | false | noninteractive | linux-x64-gnu | `forge` | `internal:phase-01@fab5848` | 2026-08-05T00:00:00Z |
 | forge | stats | stub | deterministic | read-only | false | noninteractive | linux-x64-gnu | `forge` | `internal:phase-01@fab5848` | 2026-08-05T00:00:00Z |
 | forge | ui | expected | deterministic | state-changing | true | interactive | none | `forge` | `internal:phase-01@fab5848` | 2026-08-05T00:00:00Z |
-| forge | update | expected | deterministic | state-changing | true | noninteractive | none | `npm` | `internal:phase-01@fab5848` | 2026-08-05T00:00:00Z |
+| forge | update | unknown | deterministic | state-changing | true | noninteractive | none | `sh` | `https://github.com/tailcallhq/forgecode` | 2026-11-15T00:00:00Z |
 | forge | version | expected | deterministic | read-only | false | noninteractive | none | `forge` | `internal:phase-01@fab5848` | 2026-08-05T00:00:00Z |
 | forge | yolo | disabled | deterministic | dangerous | true | noninteractive | linux-x64-gnu | `sh` | `internal:phase-01@fab5848` | 2026-08-05T00:00:00Z |
 | gemini | download | expected | deterministic | state-changing | true | noninteractive | none | `npm` | `internal:phase-01@fab5848` | 2026-08-05T00:00:00Z |
@@ -114,31 +114,31 @@ Catalog presence is not a support claim. Each row reports its own guard state an
 | gemini | update | expected | deterministic | state-changing | true | noninteractive | none | `npm` | `internal:phase-01@fab5848` | 2026-08-05T00:00:00Z |
 | gemini | version | expected | deterministic | read-only | false | noninteractive | none | `gemini` | `internal:phase-01@fab5848` | 2026-08-05T00:00:00Z |
 | gemini | yolo | disabled | deterministic | dangerous | true | noninteractive | linux-x64-gnu | `sh` | `internal:phase-01@fab5848` | 2026-08-05T00:00:00Z |
-| goose | download | unknown | deterministic | state-changing | true | noninteractive | none | `sh` | `internal:phase-01@fab5848` | 2026-08-05T00:00:00Z |
+| goose | download | unknown | deterministic | state-changing | true | noninteractive | none | `sh` | `https://goose-docs.ai/docs/getting-started/installation` | 2026-11-15T00:00:00Z |
 | goose | headless | stub | deterministic | read-only | false | noninteractive | linux-x64-gnu | `goose` | `internal:phase-01@fab5848` | 2026-08-05T00:00:00Z |
 | goose | models | stub | deterministic | read-only | false | noninteractive | linux-x64-gnu | `goose` | `internal:phase-01@fab5848` | 2026-08-05T00:00:00Z |
 | goose | security | stub | deterministic | read-only | false | noninteractive | linux-x64-gnu | `goose` | `internal:phase-01@fab5848` | 2026-08-05T00:00:00Z |
 | goose | stats | stub | deterministic | read-only | false | noninteractive | linux-x64-gnu | `goose` | `internal:phase-01@fab5848` | 2026-08-05T00:00:00Z |
 | goose | ui | expected | deterministic | state-changing | true | interactive | none | `goose` | `internal:phase-01@fab5848` | 2026-08-05T00:00:00Z |
-| goose | update | expected | deterministic | state-changing | true | noninteractive | none | `goose` | `internal:phase-01@fab5848` | 2026-08-05T00:00:00Z |
+| goose | update | unknown | deterministic | state-changing | true | noninteractive | none | `goose` | `internal:phase-01@fab5848` | 2026-08-05T00:00:00Z |
 | goose | version | expected | deterministic | read-only | false | noninteractive | none | `goose` | `internal:phase-01@fab5848` | 2026-08-05T00:00:00Z |
 | goose | yolo | disabled | deterministic | dangerous | true | noninteractive | linux-x64-gnu | `sh` | `internal:phase-01@fab5848` | 2026-08-05T00:00:00Z |
-| hermes | download | unknown | deterministic | state-changing | true | noninteractive | none | `bash` | `internal:phase-01@fab5848` | 2026-08-05T00:00:00Z |
+| hermes | download | unknown | deterministic | state-changing | true | noninteractive | none | `bash` | `https://hermes-agent.nousresearch.com/docs/getting-started/installation` | 2026-11-15T00:00:00Z |
 | hermes | headless | expected | deterministic | dangerous | true | noninteractive | linux-x64-gnu | `hermes` | `internal:phase-01@fab5848` | 2026-08-05T00:00:00Z |
 | hermes | models | stub | deterministic | read-only | false | noninteractive | linux-x64-gnu | `hermes` | `internal:phase-01@fab5848` | 2026-08-05T00:00:00Z |
 | hermes | security | stub | deterministic | read-only | false | noninteractive | linux-x64-gnu | `hermes` | `internal:phase-01@fab5848` | 2026-08-05T00:00:00Z |
 | hermes | stats | stub | deterministic | read-only | false | noninteractive | linux-x64-gnu | `hermes` | `internal:phase-01@fab5848` | 2026-08-05T00:00:00Z |
 | hermes | ui | expected | deterministic | state-changing | true | interactive | none | `hermes` | `internal:phase-01@fab5848` | 2026-08-05T00:00:00Z |
-| hermes | update | expected | deterministic | state-changing | true | noninteractive | none | `hermes` | `internal:phase-01@fab5848` | 2026-08-05T00:00:00Z |
+| hermes | update | unknown | deterministic | state-changing | true | noninteractive | none | `hermes` | `internal:phase-01@fab5848` | 2026-08-05T00:00:00Z |
 | hermes | version | expected | deterministic | read-only | false | noninteractive | none | `hermes` | `internal:phase-01@fab5848` | 2026-08-05T00:00:00Z |
 | hermes | yolo | disabled | deterministic | dangerous | true | noninteractive | linux-x64-gnu | `sh` | `internal:phase-01@fab5848` | 2026-08-05T00:00:00Z |
-| jules | download | expected | deterministic | state-changing | true | noninteractive | none | `npm` | `internal:phase-01@fab5848` | 2026-08-05T00:00:00Z |
+| jules | download | expected | deterministic | state-changing | true | noninteractive | none | `npm` | `https://jules.google/docs/changelog/2026-10-29` | 2026-11-15T00:00:00Z |
 | jules | headless | stub | deterministic | read-only | false | noninteractive | linux-x64-gnu | `jules` | `internal:phase-01@fab5848` | 2026-08-05T00:00:00Z |
 | jules | models | stub | deterministic | read-only | false | noninteractive | linux-x64-gnu | `jules` | `internal:phase-01@fab5848` | 2026-08-05T00:00:00Z |
 | jules | security | stub | deterministic | read-only | false | noninteractive | linux-x64-gnu | `jules` | `internal:phase-01@fab5848` | 2026-08-05T00:00:00Z |
 | jules | stats | stub | deterministic | read-only | false | noninteractive | linux-x64-gnu | `jules` | `internal:phase-01@fab5848` | 2026-08-05T00:00:00Z |
 | jules | ui | expected | deterministic | state-changing | true | interactive | none | `jules` | `internal:phase-01@fab5848` | 2026-08-05T00:00:00Z |
-| jules | update | expected | deterministic | state-changing | true | noninteractive | none | `npm` | `internal:phase-01@fab5848` | 2026-08-05T00:00:00Z |
+| jules | update | expected | deterministic | state-changing | true | noninteractive | none | `npm` | `https://jules.google/docs/changelog/2026-10-29` | 2026-11-15T00:00:00Z |
 | jules | version | expected | deterministic | read-only | false | noninteractive | none | `jules` | `internal:phase-01@fab5848` | 2026-08-05T00:00:00Z |
 | jules | yolo | disabled | deterministic | dangerous | true | noninteractive | linux-x64-gnu | `sh` | `internal:phase-01@fab5848` | 2026-08-05T00:00:00Z |
 | kilocode | download | expected | deterministic | state-changing | true | noninteractive | none | `npm` | `internal:phase-01@fab5848` | 2026-08-05T00:00:00Z |
@@ -186,22 +186,22 @@ Catalog presence is not a support claim. Each row reports its own guard state an
 | ollama | update | unknown | deterministic | state-changing | true | noninteractive | none | `sh` | `internal:phase-01@fab5848` | 2026-08-05T00:00:00Z |
 | ollama | version | expected | deterministic | read-only | false | noninteractive | none | `ollama` | `internal:phase-01@fab5848` | 2026-08-05T00:00:00Z |
 | ollama | yolo | disabled | deterministic | dangerous | true | noninteractive | linux-x64-gnu | `sh` | `internal:phase-01@fab5848` | 2026-08-05T00:00:00Z |
-| openclaw | download | expected | deterministic | state-changing | true | noninteractive | none | `npm` | `internal:phase-01@fab5848` | 2026-08-05T00:00:00Z |
+| openclaw | download | unknown | deterministic | state-changing | true | noninteractive | none | `sh` | `https://docs.openclaw.ai/install` | 2026-11-15T00:00:00Z |
 | openclaw | headless | stub | deterministic | read-only | false | noninteractive | linux-x64-gnu | `openclaw` | `internal:phase-01@fab5848` | 2026-08-05T00:00:00Z |
 | openclaw | models | stub | deterministic | read-only | false | noninteractive | linux-x64-gnu | `openclaw` | `internal:phase-01@fab5848` | 2026-08-05T00:00:00Z |
 | openclaw | security | stub | deterministic | read-only | false | noninteractive | linux-x64-gnu | `openclaw` | `internal:phase-01@fab5848` | 2026-08-05T00:00:00Z |
 | openclaw | stats | stub | deterministic | read-only | false | noninteractive | linux-x64-gnu | `openclaw` | `internal:phase-01@fab5848` | 2026-08-05T00:00:00Z |
 | openclaw | ui | expected | deterministic | state-changing | true | interactive | none | `openclaw` | `internal:phase-01@fab5848` | 2026-08-05T00:00:00Z |
-| openclaw | update | expected | deterministic | state-changing | true | noninteractive | none | `openclaw` | `internal:phase-01@fab5848` | 2026-08-05T00:00:00Z |
+| openclaw | update | unknown | deterministic | state-changing | true | noninteractive | none | `openclaw` | `internal:phase-01@fab5848` | 2026-08-05T00:00:00Z |
 | openclaw | version | expected | deterministic | read-only | false | noninteractive | none | `openclaw` | `internal:phase-01@fab5848` | 2026-08-05T00:00:00Z |
 | openclaw | yolo | disabled | deterministic | dangerous | true | noninteractive | linux-x64-gnu | `sh` | `internal:phase-01@fab5848` | 2026-08-05T00:00:00Z |
-| opencode | download | expected | deterministic | state-changing | true | noninteractive | none | `npm` | `internal:phase-01@fab5848` | 2026-08-05T00:00:00Z |
+| opencode | download | expected | deterministic | state-changing | true | noninteractive | none | `npm` | `https://opencode.ai/docs/migrate-v1` | 2026-11-15T00:00:00Z |
 | opencode | headless | expected | deterministic | dangerous | true | noninteractive | none | `opencode` | `internal:phase-01@fab5848` | 2026-08-05T00:00:00Z |
 | opencode | models | stub | deterministic | read-only | false | noninteractive | linux-x64-gnu | `opencode` | `internal:phase-01@fab5848` | 2026-08-05T00:00:00Z |
 | opencode | security | stub | deterministic | read-only | false | noninteractive | linux-x64-gnu | `opencode` | `internal:phase-01@fab5848` | 2026-08-05T00:00:00Z |
 | opencode | stats | stub | deterministic | read-only | false | noninteractive | linux-x64-gnu | `opencode` | `internal:phase-01@fab5848` | 2026-08-05T00:00:00Z |
 | opencode | ui | expected | deterministic | state-changing | true | interactive | none | `opencode` | `internal:phase-01@fab5848` | 2026-08-05T00:00:00Z |
-| opencode | update | expected | deterministic | state-changing | true | noninteractive | none | `npm` | `internal:phase-01@fab5848` | 2026-08-05T00:00:00Z |
+| opencode | update | expected | deterministic | state-changing | true | noninteractive | none | `npm` | `https://opencode.ai/docs/migrate-v1` | 2026-11-15T00:00:00Z |
 | opencode | version | expected | deterministic | read-only | false | noninteractive | none | `opencode` | `internal:phase-01@fab5848` | 2026-08-05T00:00:00Z |
 | opencode | yolo | disabled | deterministic | dangerous | true | interactive | none | `opencode` | `internal:phase-01@fab5848` | 2026-08-05T00:00:00Z |
 | pi | download | expected | deterministic | state-changing | true | noninteractive | none | `npm` | `https://pi.dev/docs/latest/quickstart` | 2026-10-29T00:00:00Z |
@@ -242,6 +242,6 @@ Promotion is fail-closed. Catalog data may prove a candidate is not eligible; it
 | codex | 9 | 0 | 0 | 4 | not promoted; catalog prerequisites fail |
 | claude | 9 | 0 | 0 | 6 | not promoted; catalog prerequisites fail |
 | gemini | 9 | 0 | 0 | 5 | not promoted; catalog prerequisites fail |
-| hermes | 9 | 0 | 0 | 5 | not promoted; catalog prerequisites fail |
+| hermes | 9 | 0 | 0 | 6 | not promoted; catalog prerequisites fail |
 
 The five decisions above are derived from current catalog rows. Fake execution alone never promotes a candidate.

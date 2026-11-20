@@ -1,6 +1,6 @@
 summary = "Install Gemini from its documented distribution channel."
 command = "npm"
-args = ["install", "-g", "@google/gemini-cli"]
+args = ["install", "-g", "@google/gemini-cli@latest"]
 support = "expected"
 evidence = "deterministic"
 effect = "state-changing"

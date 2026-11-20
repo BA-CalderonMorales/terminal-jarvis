@@ -1,6 +1,6 @@
-summary = "Install Hermes Agent from its documented distribution channel."
+summary = "Install the Hermes CLI from Nous Research's own installer into ~/.local/bin."
 command = "bash"
-args = ["-lc", "curl -fsSL https://raw.githubusercontent.com/NousResearch/hermes-agent/main/scripts/install.sh | bash -s -- --skip-setup"]
+args = ["-lc", "set -f; IFS=; script=$(curl -fsSL https://hermes-agent.nousresearch.com/install.sh) && printf %s $script | bash -s -- --skip-setup"]
 support = "unknown"
 evidence = "deterministic"
 effect = "state-changing"
@@ -8,5 +8,5 @@ network = true
 interaction = "noninteractive"
 platforms = []
 executable = "bash"
-source = "internal:phase-01@fab5848"
-verified_at = "2026-08-05T00:00:00Z"
+source = "https://hermes-agent.nousresearch.com/docs/getting-started/installation"
+verified_at = "2026-11-15T00:00:00Z"

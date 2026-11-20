@@ -1,6 +1,6 @@
 summary = "Install Code from its documented distribution channel."
 command = "npm"
-args = ["install", "-g", "@just-every/code"]
+args = ["install", "-g", "@just-every/code@latest"]
 support = "expected"
 evidence = "deterministic"
 effect = "state-changing"
