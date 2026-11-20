@@ -26,9 +26,11 @@ fn stopped(pid: i32) -> bool {
     if unsafe { kill(pid, 0) } != 0 {
         return true;
     }
+    // A pid can exit between `kill` and the `/proc` read; a missing entry is a
+    // stop, not a survivor. Treating it as a survivor flaked under load.
     #[cfg(target_os = "linux")]
     return std::fs::read_to_string(format!("/proc/{pid}/stat"))
-        .is_ok_and(|stat| stat.split_whitespace().nth(2) == Some("Z"));
+        .map_or(true, |stat| stat.split_whitespace().nth(2) == Some("Z"));
     #[cfg(not(target_os = "linux"))]
     false
 }
