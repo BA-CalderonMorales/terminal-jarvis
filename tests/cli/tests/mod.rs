@@ -31,6 +31,7 @@ mod package_check_scripts;
 mod plan;
 mod presentation;
 mod presentation_width;
+mod previews;
 mod red;
 mod run_compat;
 mod self_update;

@@ -67,7 +67,8 @@ fn red_green_matrix_covers_all_action_variants() {
         (&["--bogus"], 2),
         (&["use"], 2),
         (&["install", "nonexistent"], 4),
-        (&["install", "claude"], 4),
+        // claude ships an unverified upstream installer: consent, not refusal.
+        (&["install", "claude"], 5),
         (&["plan", "aider", "bogus"], 2),
         (&["plan", "headless"], 3),
     ];

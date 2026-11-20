@@ -31,6 +31,7 @@ pub fn check<'a>(request: Request<'a>, ask: &mut Ask<'_>) -> error::Result<Autho
     guard_policy::check(
         harness,
         plan,
+        options,
         std::io::IsTerminal::is_terminal(&std::io::stdin()),
     )?;
     guard_intent::check_with(harness, plan, extra, options, explicit, ask)?;

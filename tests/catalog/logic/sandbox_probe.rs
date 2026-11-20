@@ -1,7 +1,7 @@
 use super::Sandbox;
 use crate::structs::input;
 use std::process::Command;
-use terminal_jarvis::contracts::{Capability, CapabilityPlan, Effect, SupportState};
+use terminal_jarvis::contracts::{Capability, CapabilityPlan, SupportState};
 
 impl Sandbox {
     pub(super) fn probe(&self, harness: &str, capability: Capability) -> std::process::Output {
@@ -44,6 +44,7 @@ impl Sandbox {
                         let output = self.probe(harness, capability);
                         let supported =
                             matches!(state, SupportState::Verified | SupportState::Expected);
+                        let runnable = supported || state == SupportState::Unknown;
                         let claimed = plan.platforms.is_empty()
                             || plan
                                 .platforms
@@ -51,7 +52,7 @@ impl Sandbox {
                                 .any(|name| Some(name.as_str()) == platform);
                         // Evidence age is reported, never enforced, so a stale
                         // row follows the same branches as a fresh one.
-                        if supported && !claimed {
+                        if runnable && !claimed {
                             assert_eq!(
                                 output.status.code(),
                                 Some(4),
@@ -63,18 +64,16 @@ impl Sandbox {
                                 diagnostic.contains("does not support platform"),
                                 "{harness}:{capability}: {diagnostic}"
                             );
-                        } else if supported && effect == Effect::ReadOnly {
-                            assert_eq!(
-                                output.status.code(),
-                                Some(2),
-                                "{harness}:{capability} read-only row"
-                            );
-                            assert!(output.stdout.is_empty());
-                        } else if supported {
+                        } else if runnable {
+                            // `--dry-run` is a preview: a read-only command
+                            // and an unverified remote installer both print
+                            // their plan and exit 0, because nothing runs.
+                            // Consent is enforced at execution, not preview.
                             assert_eq!(
                                 output.status.code(),
                                 Some(0),
-                                "{harness}:{capability} executable row"
+                                "{harness}:{capability} {} preview",
+                                effect.as_str()
                             );
                             assert!(!output.stdout.is_empty());
                         } else {

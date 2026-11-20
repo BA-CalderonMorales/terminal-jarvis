@@ -43,14 +43,17 @@ fn every_canonical_surface_has_a_deterministic_safe_outcome() {
     assert_data(fixture.run(&["--plain", "check"]), 0);
     assert_data(fixture.run(&["--plain", "use", "fixture"]), 0);
     assert!(text(&fixture.run(&["--plain", "current"]).stdout).contains("fixture"));
+    // An unknown claim previews (nothing runs) and asks for consent (5) when
+    // it would actually run headless; removed commands stay unavailable (4).
     for args in [
-        &["--plain", "run", "fixture", "headless"][..],
-        &["--plain", "install", "fixture", "--dry-run"],
+        &["--plain", "install", "fixture", "--dry-run"][..],
         &["--plain", "update", "fixture", "--dry-run"],
-        &["--plain", "fixture", "--help"],
-        &["--plain", "templates"],
-        &["--plain", "db"],
     ] {
+        assert_data(fixture.run(args), 0);
+    }
+    assert_error(fixture.run(&["--plain", "run", "fixture", "headless"]), 5);
+    assert_error(fixture.run(&["--plain", "fixture", "--help"]), 5);
+    for args in [&["--plain", "templates"][..], &["--plain", "db"]] {
         assert_error(fixture.run(args), 4);
     }
 }

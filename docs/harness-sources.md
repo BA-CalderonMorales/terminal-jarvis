@@ -7,8 +7,8 @@ records why each channel is the official one.
 | Harness | Channel | Evidence |
 |---|---|---|
 | aider | `uv tool install aider-chat` | PyPI `aider-chat`, project `Aider-AI/aider`; uv form is the documented install |
-| amp | `npm install -g @sourcegraph/amp` | npm package exists; Sourcegraph publishes it |
-| claude | `https://claude.ai/install.sh` | Anthropic's installer, linked from Claude Code docs |
+| amp | `https://ampcode.com/install.sh` | Amp's own installer; Amp moved off npm (ampcode.com/news/npm-package-changes) |
+| claude | `https://claude.ai/install.sh` | Anthropic's native installer, documented at docs.claude.com/en/docs/claude-code/setup |
 | code | `npm install -g @just-every/code` | npm bin `coder`, repo `just-every/code` |
 | codex | `npm install -g @openai/codex` | npm bin `codex`, repo `openai/codex` |
 | copilot | `npm install -g @github/copilot` | npm bin `copilot`, repo `github/copilot-cli` |
