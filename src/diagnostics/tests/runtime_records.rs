@@ -90,3 +90,6 @@ fn every_health_flag_must_be_true_for_a_clean_report() {
     let (_, ok) = collect(&input(gates, narrow), &Redactor::new(None, None));
     assert!(!ok);
 }
+
+#[path = "runtime_route.rs"]
+mod route;

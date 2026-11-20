@@ -7,7 +7,9 @@
 - `check` exits 0 on a fresh machine. An uninstalled harness, an unset
   credential, no selected harness, a config directory not created yet, a
   source build without distribution metadata, and the embedded gate catalog
-  are reported as information instead of errors or warnings; only broken
+  are reported as information instead of errors or warnings, and an install
+  channel that cannot be identified (an extracted archive) warns instead of
+  failing, since `update` already refuses with guidance; only broken
   state (a shadowed or unreadable executable, an unknown or retired
   selection, a set-but-malformed credential) asks for attention. An
   uninstalled harness now suggests `terminal-jarvis install <name>`.
