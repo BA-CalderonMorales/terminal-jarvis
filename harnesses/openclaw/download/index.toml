@@ -1,13 +1,12 @@
-summary = "Install OpenClaw from its documented distribution channel."
-command = "npm"
-args = ["install", "-g", "openclaw"]
-support = "expected"
+summary = "Install OpenClaw with its own installer; npm 11+ needs --allow-scripts for this package."
+command = "sh"
+args = ["-c", "set -f; IFS=; script=$(curl -fsSL https://openclaw.ai/install.sh) && printf %s $script | bash"]
+support = "unknown"
 evidence = "deterministic"
 effect = "state-changing"
 network = true
 interaction = "noninteractive"
 platforms = []
-executable = "npm"
-source = "internal:phase-01@fab5848"
-verified_at = "2026-08-05T00:00:00Z"
-package = "openclaw"
+executable = "sh"
+source = "https://docs.openclaw.ai/install"
+verified_at = "2026-11-15T00:00:00Z"

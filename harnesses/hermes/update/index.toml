@@ -1,7 +1,7 @@
 summary = "Update Hermes Agent without interactive setup flows."
 command = "hermes"
 args = ["update"]
-support = "expected"
+support = "unknown"
 evidence = "deterministic"
 effect = "state-changing"
 network = true

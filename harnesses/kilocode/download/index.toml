@@ -1,6 +1,6 @@
 summary = "Install Kilocode from its documented distribution channel."
 command = "npm"
-args = ["install", "-g", "@kilocode/cli"]
+args = ["install", "-g", "@kilocode/cli@latest"]
 support = "expected"
 evidence = "deterministic"
 effect = "state-changing"

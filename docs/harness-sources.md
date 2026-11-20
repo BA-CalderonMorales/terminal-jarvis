@@ -1,7 +1,7 @@
 # Harness Install Sources
 
 Which channel each harness installs from, verified against the upstream project
-on 2026-10-29 (amp and claude on 2026-11-15). The catalog's `download` rows are the executable truth; this page
+on 2026-10-29 (amp, claude, eca, forge, goose, hermes, jules, openclaw and opencode on 2026-11-15). The catalog's `download` rows are the executable truth; this page
 records why each channel is the official one.
 
 | Harness | Channel | Evidence |
@@ -15,19 +15,19 @@ records why each channel is the official one.
 | crush | `npm install -g @charmland/crush` | npm bin `crush`, repo `charmbracelet/crush` |
 | cursor-agent | `curl https://cursor.com/install -fsS \| bash` | Cursor's CLI docs; installer links both `agent` and legacy `cursor-agent` |
 | droid | `https://app.factory.ai/cli` | Factory's documented installer |
-| eca | `editor-code-assistant/eca` install script | Project's own GitHub installer |
-| forge | `npm install -g forgecode` | npm bin `forge`, repo `antinomyhq/forge` |
+| eca | `editor-code-assistant/eca-cli` install script, `--dir ~/.local/bin` | Project's own installer (eca.dev/install); the default `/usr/local/bin` needs root |
+| forge | `https://antinomy.ai/cli` | Forge's own installer; the npm package lags the release line (repo `tailcallhq/forgecode`) |
 | gemini | `npm install -g @google/gemini-cli` | npm bin `gemini`, repo `google-gemini/gemini-cli`; **retired 2026-06-18** -- see [graveyard](usage.md) |
-| goose | `block/goose` stable installer | Block's documented installer |
-| hermes | `NousResearch/hermes-agent` installer | Project's own GitHub installer |
-| jules | `npm install -g @google/jules` | npm maintained by Google (`google-wombot`), homepage `jules.google` |
+| goose | `aaif-goose/goose` stable installer | Documented at goose-docs.ai; needs no sudo |
+| hermes | `https://hermes-agent.nousresearch.com/install.sh` | Nous Research's own installer, installs to `~/.local/bin` |
+| jules | `npm install -g @google/jules` | npm maintained by Google (`google-wombot`); **retiring 2026-12-31** (jules.google/docs/changelog/2026-10-29), kept for data export |
 | kilocode | `npm install -g @kilocode/cli` | npm bins `kilo`/`kilocode`, repo `Kilo-Org/kilocode` |
 | letta | `npm install -g @letta-ai/letta-code` | npm bin `letta`, repo `letta-ai/letta-code` |
 | llxprt | `npm install -g @vybestack/llxprt-code` | npm bin `llxprt`, repo `vybestack/llxprt-code` |
 | nanocoder | `npm install -g @nanocollective/nanocoder` | npm bin `nanocoder`, repo `Nano-Collective/nanocoder` |
 | ollama | `https://ollama.com/install.sh` | Ollama's documented installer |
-| openclaw | `npm install -g openclaw` | npm bin `openclaw`, repo `openclaw/openclaw` |
-| opencode | `npm install -g opencode-ai` | npm bin `opencode`; OpenCode docs list npm alongside its installer |
+| openclaw | `https://openclaw.ai/install.sh` | OpenClaw's own installer (docs.openclaw.ai/install); npm 11+ needs `--allow-scripts` for the package |
+| opencode | `npm install -g @opencode/cli@latest` | OpenCode V2 (opencode.ai/docs/migrate-v1); the `opencode-ai` package still installs V1 |
 | pi | `npm install -g --ignore-scripts @earendil-works/pi-coding-agent` | Pi docs require `--ignore-scripts` for npm; installer is the pinned alternative |
 | qwen | `npm install -g @qwen-code/qwen-code` | npm bin `qwen`, repo `QwenLM/qwen-code` |
 | vibe | `https://mistral.ai/vibe/install.sh` | Mistral's documented installer |
@@ -40,9 +40,11 @@ records why each channel is the official one.
   script is not deterministically verifiable.
 - **pi** now passes `--ignore-scripts`, as the upstream docs require for a
   normal npm installation.
-- **opencode** declares its own noninteractive remover
-  (`opencode uninstall --force --keep-config --keep-data`), so a script install
-  is removed by the channel that owns it.
+- **opencode** moved to the V2 package `@opencode/cli`. The V1 remover
+  declaration was dropped because it is unverified for V2.
+- **eca, forge, goose, hermes, openclaw** install through their own scripts,
+  run fail-closed (a failed download never reaches the shell) and marked
+  `unknown`.
 
 Verification method: npm registry metadata (`name`, `version`, `repository.url`,
 `bin`), PyPI JSON, HTTP status of each installer URL, and the upstream install

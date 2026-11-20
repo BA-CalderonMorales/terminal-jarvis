@@ -1,6 +1,6 @@
 summary = "Install Nanocoder from its documented distribution channel."
 command = "npm"
-args = ["install", "-g", "@nanocollective/nanocoder"]
+args = ["install", "-g", "@nanocollective/nanocoder@latest"]
 support = "expected"
 evidence = "deterministic"
 effect = "state-changing"

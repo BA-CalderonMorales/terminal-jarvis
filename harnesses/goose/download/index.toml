@@ -1,6 +1,6 @@
-summary = "Install Goose from its documented distribution channel."
+summary = "Install the Goose CLI with Goose's own installer; it needs no sudo."
 command = "sh"
-args = ["-c", "curl -fsSL https://github.com/block/goose/releases/download/stable/download_cli.sh | bash"]
+args = ["-c", "set -f; IFS=; script=$(curl -fsSL https://github.com/aaif-goose/goose/releases/download/stable/download_cli.sh) && printf %s $script | bash"]
 support = "unknown"
 evidence = "deterministic"
 effect = "state-changing"
@@ -8,5 +8,5 @@ network = true
 interaction = "noninteractive"
 platforms = []
 executable = "sh"
-source = "internal:phase-01@fab5848"
-verified_at = "2026-08-05T00:00:00Z"
+source = "https://goose-docs.ai/docs/getting-started/installation"
+verified_at = "2026-11-15T00:00:00Z"

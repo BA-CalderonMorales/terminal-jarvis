@@ -1,7 +1,7 @@
 summary = "Update ECA without interactive setup flows."
 command = "eca"
 args = ["upgrade"]
-support = "expected"
+support = "unknown"
 evidence = "deterministic"
 effect = "state-changing"
 network = true
