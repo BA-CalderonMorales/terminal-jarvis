@@ -1,10 +1,28 @@
+#[path = "output_plan_words.rs"]
+mod words;
 use super::output_truth;
 use crate::cli::structs::value_block::{Group, Row};
 use crate::contracts::{CapabilityPlan, CommandPlan, Effect, Harness};
 
+pub fn retirement(harness: &Harness, today: &str) -> Option<String> {
+    words::retirement(harness, today)
+}
+
 pub fn plain(harness: &Harness, plan: &CapabilityPlan, command: &CommandPlan) -> String {
+    plain_on(harness, plan, command, &crate::catalog::today_utc())
+}
+
+pub fn plain_on(
+    harness: &Harness,
+    plan: &CapabilityPlan,
+    command: &CommandPlan,
+    today: &str,
+) -> String {
+    let retirement = words::retirement(harness, today)
+        .map(|line| format!("retirement: {line}\n"))
+        .unwrap_or_default();
     format!(
-        "{}:{}\nsummary: {}\nsupport: {}\nevidence: {}\neffect: {}\nplatforms: {}\nexecutable: {}\nsource: {}\nverified_at: {}\ncommand: {}\nenv: {}\nintent: {}\n",
+        "{}:{}\nsummary: {}\nsupport: {}\nevidence: {}\neffect: {}\nplatforms: {}\nexecutable: {}\nsource: {}\nverified_at: {}\ncommand: {}\n{retirement}env: {}\nintent: {}\n",
         harness.name,
         plan.capability,
         plan.summary,
@@ -24,6 +42,22 @@ pub fn plain(harness: &Harness, plan: &CapabilityPlan, command: &CommandPlan) ->
 /// The plan as a card: the facts about the capability, then the command that
 /// would run it.
 pub fn groups(harness: &Harness, plan: &CapabilityPlan, command: &CommandPlan) -> Vec<Group> {
+    groups_on(harness, plan, command, &crate::catalog::today_utc())
+}
+
+pub fn groups_on(
+    harness: &Harness,
+    plan: &CapabilityPlan,
+    command: &CommandPlan,
+    today: &str,
+) -> Vec<Group> {
+    // Before the flags: nobody should install a departing tool unread.
+    let mut run = vec![Row::new("command", command.render())];
+    if let Some(line) = words::retirement(harness, today) {
+        run.push(Row::new("retirement", line));
+    }
+    run.push(Row::new("environment", harness.setup_hint()));
+    run.push(Row::new("intent", intent(harness, plan)));
     vec![
         Group::new(
             "the facts",
@@ -38,14 +72,7 @@ pub fn groups(harness: &Harness, plan: &CapabilityPlan, command: &CommandPlan) -
                 Row::new("verified", output_truth::freshness(plan)),
             ],
         ),
-        Group::new(
-            "the command",
-            vec![
-                Row::new("command", command.render()),
-                Row::new("environment", harness.setup_hint()),
-                Row::new("intent", intent(harness, plan)),
-            ],
-        ),
+        Group::new("the command", run),
     ]
 }
 

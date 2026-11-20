@@ -20,6 +20,8 @@ use crate::contracts::EnvMode;
 use crate::contracts::Harness;
 use crate::security;
 
+#[cfg(test)]
+pub use catalog::list_on;
 pub use catalog::{list, plan, plan_with_extra};
 pub use detail::show;
 pub use diagnostics::diagnostics;
