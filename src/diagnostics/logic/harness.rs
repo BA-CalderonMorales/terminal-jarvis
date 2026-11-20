@@ -3,6 +3,9 @@ use super::{Code, DiagnosticInput, Record, Severity};
 use std::collections::BTreeSet;
 use std::path::Path;
 
+#[path = "harness_readiness.rs"]
+mod readiness;
+
 pub struct HarnessResult {
     pub records: Vec<Record>,
     pub ready: BTreeSet<String>,
@@ -62,27 +65,13 @@ pub fn collect(input: &DiagnosticInput, redact: &Redactor<'_>) -> HarnessResult 
         let harness_ready = !harness.sunset
             && matches!(resolution.code, Code::Ready | Code::Conflicting)
             && support_ready;
-        let readiness_code = match (harness_ready, support_ready) {
-            (true, _) => Code::Ready,
-            (false, false) => Code::Unsupported,
-            (false, true) if harness.sunset => Code::Unsupported,
-            (false, true) => Code::Missing,
-        };
-        records.push(Record::new(
-            format!("{base}.readiness"),
-            readiness_code,
-            if harness.sunset && !harness_ready {
-                Severity::Warning
-            } else {
-                Severity::Info
-            },
-            if harness_ready {
-                "ready"
-            } else if harness.sunset {
-                "retired"
-            } else {
-                "not-ready"
-            },
+        let missing_here = resolution.code == Code::Missing;
+        records.push(readiness::record(
+            &base,
+            harness,
+            harness_ready,
+            support_ready,
+            missing_here,
         ));
         if harness_ready {
             ready.insert(harness.name.clone());

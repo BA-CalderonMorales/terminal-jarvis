@@ -10,17 +10,17 @@ fn with(environment: Environment) -> (Record, bool) {
 }
 
 #[test]
-fn absent_metadata_is_a_source_build() {
+fn absent_metadata_is_information_that_claims_nothing() {
     let (record, ok) = with(Environment::default());
     assert!(ok);
     assert_eq!(
         (record.severity, record.value.as_str()),
-        (Severity::Info, "source build")
+        (Severity::Info, "not declared")
     );
 }
 
 /// Set but blank means someone meant to declare a channel; say so instead of
-/// calling it a healthy source build.
+/// reporting it as merely undeclared.
 #[test]
 fn blank_metadata_warns_instead_of_reading_as_a_source_build() {
     let mut environment = Environment::default();
