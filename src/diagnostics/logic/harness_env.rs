@@ -13,12 +13,16 @@ pub fn collect(harness: &HarnessInput, input: &DiagnosticInput, base: &str) -> (
         // An unset credential is a setup step, not a defect: it is reported
         // once, in the summary row below, not as one warning per name. A name
         // that is set but empty or malformed is the case that actually needs
-        // a look, so it keeps its own row.
+        // a look, so it keeps its own row and warns.
         if state != ValueState::Missing {
             records.push(Record::new(
                 format!("{base}.env.{}", segment(name)),
                 state.code(),
-                Severity::Info,
+                if state == ValueState::Present {
+                    Severity::Info
+                } else {
+                    Severity::Warning
+                },
                 state.as_str(),
             ));
         }
@@ -46,7 +50,12 @@ pub fn collect(harness: &HarnessInput, input: &DiagnosticInput, base: &str) -> (
         if ready { "ready" } else { code.as_str() },
     );
     if !ready {
-        summary.action = Some(format!("set one of: {}", harness.env.join(", ")));
+        let which = if harness.env_mode == EnvMode::All {
+            "all"
+        } else {
+            "one"
+        };
+        summary.action = Some(format!("set {which} of: {}", harness.env.join(", ")));
     }
     records.push(summary);
     (records, ready)

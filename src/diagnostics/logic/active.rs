@@ -6,6 +6,7 @@ pub fn collect(
     input: &DiagnosticInput,
     config: Option<String>,
     ready: &BTreeSet<String>,
+    missing: &BTreeSet<String>,
 ) -> (Record, bool) {
     let active = input.active_harness.as_ref().cloned().or(config);
     let Some(active) = active else {
@@ -34,12 +35,14 @@ pub fn collect(
         "harness.active",
         if usable { Code::Ready } else { Code::Missing },
         // Selecting a harness you have not installed yet is a legitimate
-        // first step: `use codex` then `install`. It is only worth flagging
-        // when the harness is known to be retired.
-        if usable || !retired(input, &active) {
+        // first step: `use codex` then `install`. A retired selection warns;
+        // an executable that is present but broken is still a failure.
+        if usable || (missing.contains(&active) && !retired(input, &active)) {
             Severity::Info
-        } else {
+        } else if retired(input, &active) {
             Severity::Warning
+        } else {
+            Severity::Error
         },
         segment(&active),
     );
@@ -50,8 +53,10 @@ pub fn collect(
             record.action("this harness is retired; select a maintained one"),
             false,
         )
-    } else {
+    } else if missing.contains(&active) {
         (record.action("install it, then run again"), true)
+    } else {
+        (record.action("repair the selected harness"), false)
     }
 }
 

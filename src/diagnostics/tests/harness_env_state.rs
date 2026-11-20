@@ -36,5 +36,5 @@ fn collect_marks_env_state_by_mode() {
     );
     let summary = env_record(&records, "harness.xh.environment");
     assert_eq!(summary.code, Code::Missing);
-    assert_eq!(summary.action.as_deref(), Some("set one of: TOKEN"));
+    assert_eq!(summary.action.as_deref(), Some("set all of: TOKEN"));
 }

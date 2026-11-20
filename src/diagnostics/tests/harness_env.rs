@@ -82,3 +82,13 @@ fn collect_reports_absent_credentials_once_not_per_name() {
     let summary = env_record(&records, "harness.xh.environment");
     assert_eq!(summary.action.as_deref(), Some("set one of: A, B"));
 }
+
+#[test]
+fn a_set_but_blank_credential_warns_on_its_own_row() {
+    let mut environment = Environment::default();
+    environment.insert("A", "  ");
+    let harness = harness(EnvMode::Any, &["A"]);
+    let (records, _) = collect(&harness, &input(environment), "harness.xh");
+    let row = env_record(&records, "harness.xh.env.A");
+    assert_eq!((row.code, row.severity), (Code::Empty, Severity::Warning));
+}

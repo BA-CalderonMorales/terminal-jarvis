@@ -6,6 +6,7 @@ use std::path::Path;
 pub struct HarnessResult {
     pub records: Vec<Record>,
     pub ready: BTreeSet<String>,
+    pub missing: BTreeSet<String>, // absent, as opposed to present but broken
 }
 
 pub fn collect(input: &DiagnosticInput, redact: &Redactor<'_>) -> HarnessResult {
@@ -14,6 +15,7 @@ pub fn collect(input: &DiagnosticInput, redact: &Redactor<'_>) -> HarnessResult 
     let index = super::dir_index::DirIndex::from_paths(&input.environment.paths());
     let mut records = Vec::new();
     let mut ready = BTreeSet::new();
+    let mut missing = BTreeSet::new();
     for harness in harnesses {
         let base = format!("harness.{}", segment(&harness.name));
         let (support, support_ready) = super::harness_support::collect(harness, &base);
@@ -37,8 +39,7 @@ pub fn collect(input: &DiagnosticInput, redact: &Redactor<'_>) -> HarnessResult 
         let mut executable = Record::new(
             format!("{base}.executable"),
             resolution.code,
-            // Not installed is the first-run state for most of the catalog, so
-            // it is information; only a broken installation needs the user.
+            // Not installed is the first-run state; only a broken install warns.
             match resolution.code {
                 Code::Ready | Code::Missing => Severity::Info,
                 _ => Severity::Warning,
@@ -46,6 +47,7 @@ pub fn collect(input: &DiagnosticInput, redact: &Redactor<'_>) -> HarnessResult 
             value,
         );
         if resolution.code == Code::Missing {
+            missing.insert(harness.name.clone());
             executable.action = Some(format!("terminal-jarvis install {}", harness.name));
         } else if resolution.code != Code::Ready {
             executable.action = Some("repair the harness executable".into());
@@ -86,7 +88,11 @@ pub fn collect(input: &DiagnosticInput, redact: &Redactor<'_>) -> HarnessResult 
             ready.insert(harness.name.clone());
         }
     }
-    HarnessResult { records, ready }
+    HarnessResult {
+        records,
+        ready,
+        missing,
+    }
 }
 
 #[cfg(test)]
