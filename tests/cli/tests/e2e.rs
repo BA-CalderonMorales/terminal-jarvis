@@ -79,8 +79,8 @@ fn check_reports_setup_readiness() {
     let output = tj(&["check", "--verbose"]);
     assert_eq!(output.status.code(), Some(0));
     let body = stdout(&output);
-    assert!(body.contains("harness.jules.readiness\tmissing\tinfo"));
-    assert!(body.contains("harness.aider.executable"));
+    assert!(body.contains("harness.aider.readiness\tmissing\tinfo"));
+    assert!(body.contains("harness.jules.readiness\tunsupported\tinfo\tretiring"));
     assert!(!body.contains("\tmissing\terror"), "{body}");
 }
 

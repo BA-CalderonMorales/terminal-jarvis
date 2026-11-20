@@ -69,7 +69,8 @@ fn real_catalog_readiness_comes_from_support_claims() {
         .harnesses
         .iter()
         .filter(|harness| {
-            !harness.sunset && harness.support.iter().any(|(_, _, supported)| *supported)
+            harness.retirement.is_none()
+                && harness.support.iter().any(|(_, _, supported)| *supported)
         })
         .count();
     assert_eq!(

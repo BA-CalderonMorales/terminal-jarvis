@@ -52,7 +52,7 @@ Each harness `index.toml` declares:
 | `binary` | Expected executable name |
 | `env_mode` | `none`, `optional`, `any`, or `all`; `optional` lists credentials a login-based harness can use but does not require, so readiness never gates on them |
 | `env` | List of environment variables (`optional` mode: advisory only) |
-| `sunset_at` | Optional `YYYY-MM-DD`: the day the vendor retired the tool |
+| `sunset_at` | Optional `YYYY-MM-DD`: the day the vendor retires the tool; may be ahead, since vendors announce shutdowns early |
 | `sunset_note` | Required with `sunset_at`: what happened, in the vendor's terms |
 | `sunset_replaced_by` | Optional with `sunset_at`: the tool the vendor points to |
 
@@ -66,10 +66,22 @@ be a real calendar day. `terminal-jarvis graveyard` renders the record (rich,
 `--plain` key=value, `--json`), and the tui names retired tools in the picker
 with a `[sunset]` chip.
 
-A retired harness never counts as part of the maintained fleet: readiness
-reports its `readiness` record as `retired`, the dashboard counts it apart
-(`RETIRED n`) instead of inside `READY n/m`, and `list` names it `(sunset)`.
-Saying "ready" for a tool nobody maintains is the claim this contract refuses.
+`sunset_at` is a date, not a status, so the state is derived from it against
+today's UTC date:
+
+| State | Meaning | Wording |
+|---|---|---|
+| `Done` | `sunset_at` is today or earlier | `retired` |
+| `Scheduled` | `sunset_at` is still ahead | `retiring` / `retires` |
+
+Both states leave the maintained fleet: neither counts inside `READY n/m`, the
+dashboard counts each apart, and `list` names the tool `(retired)` or
+`(retiring)`. `graveyard` prints `retired 2026-06-18` or `retires 2026-12-31`
+and counts the two apart, and `--plain`/`--json` add `state=retired|scheduled`
+beside the date so a script need not compare dates itself. `check` reports a
+`retired` harness as a warning and a `retiring` one as information; a retiring
+selection stays healthy, since the tool still runs. Saying "ready" for a tool
+nobody maintains is the claim this contract refuses.
 
 ### Removal
 

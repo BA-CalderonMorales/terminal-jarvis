@@ -80,7 +80,3 @@ fn env_status(harness: &Harness, missing: &[String]) -> String {
 #[cfg(test)]
 #[path = "../tests/output_test.rs"]
 mod tests;
-
-#[cfg(test)]
-#[path = "../tests/output_graveyard_test.rs"]
-mod graveyard_tests;

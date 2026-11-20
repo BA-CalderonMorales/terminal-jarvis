@@ -62,7 +62,7 @@ pub fn collect(input: &DiagnosticInput, redact: &Redactor<'_>) -> HarnessResult 
         // Available = installed, runnable, and maintained; creds never gate
         // the count. A retired tool is reported as such instead of being
         // recommended, even when its binary still resolves.
-        let harness_ready = !harness.sunset
+        let harness_ready = harness.retirement.is_none()
             && matches!(resolution.code, Code::Ready | Code::Conflicting)
             && support_ready;
         let missing_here = resolution.code == Code::Missing;

@@ -33,10 +33,9 @@ pub fn list(harnesses: &[Harness]) -> String {
 }
 
 fn label(harness: &Harness) -> String {
-    if harness.is_sunset() {
-        format!("{} (sunset)", harness.name)
-    } else {
-        harness.name.clone()
+    match harness.retirement_adjective(&crate::catalog::today_utc()) {
+        Some(word) => format!("{} ({word})", harness.name),
+        None => harness.name.clone(),
     }
 }
 

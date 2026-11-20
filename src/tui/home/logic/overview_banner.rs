@@ -5,13 +5,16 @@
 use super::overview::Overview;
 
 /// Only a catalog that has retirements pays for the extra clause, so a
-/// maintained-only fleet keeps the header it always had.
-pub(super) fn retired(o: &Overview) -> String {
-    if o.sunset == 0 {
-        String::new()
-    } else {
-        format!(" · {} retired", o.sunset)
+/// maintained-only fleet keeps the header it always had. A scheduled
+/// retirement is its own word: the tool still runs today.
+pub fn retirement(o: &Overview) -> String {
+    let mut tail = String::new();
+    for (count, word) in [(o.retired, "retired"), (o.retiring, "retiring")] {
+        if count > 0 {
+            tail.push_str(&format!(" · {count} {word}"));
+        }
     }
+    tail
 }
 
 /// The viewport header: one merged line, priority-ordered so a narrow
@@ -31,16 +34,25 @@ pub fn header(o: &Overview) -> String {
         paint(Role::Accent, &o.name),
         paint(Role::Dim, "READY"),
         paint(ready_role, &format!("{}/{} ready", o.ready, o.total)),
-        if o.sunset == 0 {
+        if o.retired + o.retiring == 0 {
             String::new()
         } else {
             format!(
                 " · {} {}",
                 paint(Role::Dim, "RETIRED"),
-                paint(Role::Warn, &o.sunset.to_string())
+                paint(Role::Warn, &format!("{}{}", o.retired, retiring_clause(o)))
             )
         }
     )
+}
+
+/// `· 1 retiring` after the retired count, empty when nothing is scheduled.
+fn retiring_clause(o: &Overview) -> String {
+    if o.retiring == 0 {
+        String::new()
+    } else {
+        format!(" · {} retiring", o.retiring)
+    }
 }
 
 fn verdict(o: &Overview) -> String {
@@ -63,13 +75,13 @@ pub fn styled(o: &Overview) -> String {
         o.cwd,
         style::label("READY"),
         verdict(o),
-        if o.sunset == 0 {
+        if o.retired + o.retiring == 0 {
             String::new()
         } else {
             format!(
                 " · {} {}",
                 style::label("RETIRED"),
-                style::warning(&o.sunset.to_string())
+                style::warning(&format!("{}{}", o.retired, retiring_clause(o)))
             )
         }
     )

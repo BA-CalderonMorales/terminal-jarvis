@@ -1624,6 +1624,9 @@ harness:jules	display	narration	Jules	none	assertion	asserted
 harness:jules	env	environment	[]	gate:env	evidence	gate
 harness:jules	env_mode	environment	none	gate:env	evidence	gate
 harness:jules	name	identity	jules	gate:identity	evidence	gate
+harness:jules	sunset_at	lifecycle	2026-12-31	gate:sunset-pairing	evidence	gate
+harness:jules	sunset_note	narration	Google is winding Jules down: the product has been read-only since 2026-11-11 and shuts down on 2026-12-31. The departing client still installs, so it stays catalogued for data export, but it is not part of the maintained fleet.	gate:sunset-pairing	evidence	asserted
+harness:jules	sunset_replaced_by	narration	antigravity	none	assertion	asserted
 harness:jules/download	args	execution-shape	["install", "-g", "@google/jules"]	gate:command-shape	evidence	gate
 harness:jules/download	command	execution-shape	npm	gate:command-shape	evidence	gate
 harness:jules/download	effect	risk-class	state-changing	gate:effect-class	evidence	gate

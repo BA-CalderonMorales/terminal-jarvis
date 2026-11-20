@@ -1,5 +1,6 @@
 use super::redact::segment;
 use super::{Code, DiagnosticInput, Record, Severity};
+use crate::contracts::SunsetState;
 use std::collections::BTreeSet;
 
 pub fn collect(
@@ -31,40 +32,38 @@ pub fn collect(
         );
     }
     let usable = ready.contains(&active);
-    let record = Record::new(
-        "harness.active",
-        if usable { Code::Ready } else { Code::Missing },
-        // Selecting a harness you have not installed yet is a legitimate
-        // first step: `use codex` then `install`. A retired selection warns;
-        // an executable that is present but broken is still a failure.
-        if usable || (missing.contains(&active) && !retired(input, &active)) {
-            Severity::Info
-        } else if retired(input, &active) {
-            Severity::Warning
-        } else {
-            Severity::Error
-        },
-        segment(&active),
-    );
-    if usable {
-        (record, true)
-    } else if retired(input, &active) {
-        (
-            record.action("this harness is retired; select a maintained one"),
-            false,
-        )
-    } else if missing.contains(&active) {
-        (record.action("install it, then run again"), true)
-    } else {
-        (record.action("repair the selected harness"), false)
-    }
+    let retirement = retirement(input, &active);
+    // Selecting a harness you have not installed yet is a legitimate first
+    // step: `use codex` then `install`. A retiring tool still runs, so it stays
+    // healthy with a heads-up; a retired one or a broken executable does not.
+    let healthy = usable
+        || retirement == Some(SunsetState::Scheduled)
+        || (retirement.is_none() && missing.contains(&active));
+    let severity = match (healthy, retirement) {
+        (true, _) => Severity::Info,
+        (false, Some(SunsetState::Done)) => Severity::Warning,
+        (false, _) => Severity::Error,
+    };
+    let code = if usable { Code::Ready } else { Code::Missing };
+    let record = Record::new("harness.active", code, severity, segment(&active));
+    let action = match retirement {
+        _ if usable => return (record, true),
+        Some(SunsetState::Done) => "this harness is retired; select a maintained one",
+        Some(SunsetState::Scheduled) => {
+            "it is retiring; `terminal-jarvis graveyard` names its successor"
+        }
+        None if missing.contains(&active) => "install it, then run again",
+        None => "repair the selected harness",
+    };
+    (record.action(action), healthy)
 }
 
-fn retired(input: &DiagnosticInput, name: &str) -> bool {
-    input
+fn retirement(input: &DiagnosticInput, name: &str) -> Option<SunsetState> {
+    let harness = input
         .harnesses
         .iter()
-        .any(|harness| harness.name == name && harness.sunset)
+        .find(|harness| harness.name == name)?;
+    harness.retirement
 }
 
 #[cfg(test)]
