@@ -32,7 +32,10 @@ impl From<&Harness> for HarnessInput {
             env: harness.env.clone(),
             support,
             version,
-            sunset: harness.is_sunset(),
+            retirement: harness
+                .sunset
+                .as_ref()
+                .map(|record| record.state(&crate::catalog::today_utc())),
         }
     }
 }

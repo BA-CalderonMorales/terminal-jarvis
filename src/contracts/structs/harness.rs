@@ -48,8 +48,21 @@ impl Harness {
             .find(|plan| plan.capability == capability)
     }
 
+    /// Whether upstream has announced or completed a retirement. Both states
+    /// keep the tool out of the maintained fleet; only the wording differs,
+    /// and `Sunset::verb`/`adjective` own that.
     pub fn is_sunset(&self) -> bool {
         self.sunset.is_some()
+    }
+
+    /// The verb for this tool's retirement, or `None` while it is maintained.
+    pub fn retirement_verb(&self, today: &str) -> Option<&'static str> {
+        self.sunset.as_ref().map(|record| record.verb(today))
+    }
+
+    /// The adjective for this tool's retirement, or `None` while maintained.
+    pub fn retirement_adjective(&self, today: &str) -> Option<&'static str> {
+        self.sunset.as_ref().map(|record| record.adjective(today))
     }
 
     pub fn has_all_capabilities(&self) -> bool {

@@ -24,10 +24,18 @@ use std::path::Path;
 pub fn render(out: &mut dyn Write, harnesses: &[Harness], catalog_root: &Path, state_home: &Path) {
     let o = collect(harnesses, catalog_root, state_home);
     let status = styled(&o);
-    let retired = if o.sunset == 0 {
+    let retired = if o.retired + o.retiring == 0 {
         String::new()
     } else {
-        format!("type graveyard · {} retired harness", o.sunset)
+        format!(
+            "type graveyard · {}{}",
+            o.retired + o.retiring,
+            if o.retiring > 0 {
+                " retired or retiring harnesses"
+            } else {
+                " retired harness"
+            }
+        )
     };
     let title = "Terminal Jarvis";
     let subtitle =

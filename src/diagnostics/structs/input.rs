@@ -1,5 +1,5 @@
 use super::Environment;
-use crate::contracts::EnvMode;
+use crate::contracts::{EnvMode, SunsetState};
 use std::path::PathBuf;
 use std::time::{Duration, SystemTime};
 
@@ -19,9 +19,10 @@ pub struct HarnessInput {
     pub env: Vec<String>,
     pub support: Vec<(String, String, bool)>,
     pub version: Option<(String, Vec<String>)>,
-    /// Upstream retired the tool; it stays in the report but never counts as
-    /// part of the maintained, ready fleet.
-    pub sunset: bool,
+    /// Upstream has retired the tool, or announced a date. Either way it stays
+    /// in the report but never counts as part of the maintained, ready fleet;
+    /// the state is carried so the report can say `retired` or `retiring`.
+    pub retirement: Option<SunsetState>,
 }
 
 #[derive(Clone, Debug, Eq, PartialEq)]

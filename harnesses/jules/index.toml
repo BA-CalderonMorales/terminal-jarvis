@@ -4,3 +4,6 @@ description = "Google's asynchronous coding agent in the terminal"
 binary = "jules"
 env_mode = "none"
 env = []
+sunset_at = "2026-12-31"
+sunset_note = "Google is winding Jules down: the product has been read-only since 2026-11-11 and shuts down on 2026-12-31. The departing client still installs, so it stays catalogued for data export, but it is not part of the maintained fleet."
+sunset_replaced_by = "antigravity"

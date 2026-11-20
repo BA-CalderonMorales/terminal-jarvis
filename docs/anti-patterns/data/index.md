@@ -1,3 +1,25 @@
+### A date read as a status (0.1.25 UX audit)
+
+**Pattern:** `sunset_at` was treated as a boolean. `jules` carries
+`sunset_at = "2026-12-31"` and, in November 2026, the graveyard printed
+`retired 2026-12-31`, `list` said `(retired)`, `check` warned `found retired`,
+and the dashboard counted it as gone -- for a tool whose binary still installs
+and runs.
+
+**Why it is wrong:** The user reads a date in the past tense and can see it has
+not arrived. That single visible falsehood makes every other count on the
+screen suspect, and it silently drops a working tool from the fleet the user is
+told is maintained. A vendor announcement is the useful news; a fabricated
+completion discards it.
+
+**Fix:** Derive the state from the date instead of storing one: `Done` when
+`sunset_at` is today or earlier, `Scheduled` when it is ahead. Say `retired`
+for the first and `retires`/`retiring` for the second, and keep both out of the
+maintained fleet so the count stays honest. Publish the derived state (`--plain`
+`state=retired|scheduled`, `--json` `state`) so a script does not have to
+compare a date against its own clock. Severity follows the same split: done is
+a warning, scheduled is information.
+
 # Data Anti-Patterns
 
 Ledger entries for mistakes in the `harnesses/` data plane (capability

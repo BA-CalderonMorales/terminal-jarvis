@@ -29,6 +29,8 @@ pub fn select(input: &str, harnesses: &[Harness]) -> Option<args::Action> {
 /// because "ready" for a tool nobody maintains is not the question being
 /// asked. Both pickers call this so a row cannot read two ways.
 pub fn chip(harness: &Harness, ready: &BTreeSet<String>) -> &'static str {
+    // The chip has nine cells (`CHIP`), so a scheduled retirement and a
+    // completed one share the word: the graveyard carries the date.
     if harness.is_sunset() {
         "[sunset]"
     } else if ready.contains(&harness.name) {

@@ -2,6 +2,17 @@
 
 ## [Unreleased]
 
+### Changed
+
+- A retirement is a date, not a status. A `sunset_at` still ahead reads as
+  `retiring`/`retires`; one already reached reads as `retired`. Both stay out
+  of the maintained fleet, and `list`, `show`, `graveyard`, the dashboard and
+  `check` say which. `check` warns about a retired harness and only informs
+  about a retiring one, and a retiring selection stays healthy. `graveyard
+  --plain` and `--json` add `state=retired|scheduled`. Jules (shutting down
+  2026-12-31, successor Antigravity) is the first retiring entry; Gemini CLI
+  stays `retired`.
+
 ### Fixed
 
 - `check` exits 0 on a fresh machine. An uninstalled harness, an unset

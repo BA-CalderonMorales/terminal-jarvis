@@ -56,7 +56,8 @@ pub fn show(harness: &Harness) -> String {
         );
         if let Some(sunset) = &harness.sunset {
             out.push_str(&format!(
-                "retirement: retired {} · replaced by {}\n",
+                "retirement: {} {} · replaced by {}\n",
+                sunset.verb(&crate::catalog::today_utc()),
                 sunset.at,
                 sunset.successor()
             ));

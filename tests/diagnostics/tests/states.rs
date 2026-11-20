@@ -52,7 +52,7 @@ fn stable_codes_keep_failure_classes_distinct() {
             ],
             support: vec![("headless".into(), "unknown".into(), false)],
             version: None,
-            sunset: false,
+            retirement: None,
         }],
         platform: PlatformInput {
             os: "linux".into(),

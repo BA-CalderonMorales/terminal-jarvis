@@ -21,7 +21,7 @@ pub(super) fn input(active: Option<&str>, names: &[&str]) -> DiagnosticInput {
                 env: Vec::new(),
                 support: Vec::new(),
                 version: None,
-                sunset: false,
+                retirement: None,
             })
             .collect(),
         platform: PlatformInput {

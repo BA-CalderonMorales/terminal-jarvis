@@ -73,14 +73,16 @@ fn use_and_current_round_trip_active_harness() {
     assert!(current.status.success() && stdout(&current).contains("active harness = codex"));
 }
 
-// Nothing installed is the first-run state: healthy, and never an error.
+// A fresh machine is healthy; Jules's word follows its 2026-12-31 date.
 #[test]
 fn check_reports_setup_readiness() {
     let output = tj(&["check", "--verbose"]);
     assert_eq!(output.status.code(), Some(0));
     let body = stdout(&output);
-    assert!(body.contains("harness.jules.readiness\tmissing\tinfo"));
-    assert!(body.contains("harness.aider.executable"));
+    let past = terminal_jarvis::catalog::today_utc().as_str() >= "2026-12-31";
+    let jules = ["info\tretiring", "warning\tretired"][past as usize];
+    assert!(body.contains(&format!("jules.readiness\tunsupported\t{jules}")));
+    assert!(body.contains("harness.aider.readiness\tmissing\tinfo"));
     assert!(!body.contains("\tmissing\terror"), "{body}");
 }
 

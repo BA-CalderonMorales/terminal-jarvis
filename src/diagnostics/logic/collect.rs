@@ -9,8 +9,12 @@ pub fn collect(input: &DiagnosticInput) -> Report {
     let (mut storage, config, storage_ok) = super::storage::collect(input, &redact);
     records.append(&mut storage);
     let harnesses = super::harness::collect(input, &redact);
-    let (active, selection_ok) =
-        super::active::collect(input, config.active, &harnesses.ready, &harnesses.missing);
+    let (active, selection_ok) = super::active::collect(
+        input,
+        config.active,
+        &harnesses.ready,
+        &harnesses.executables,
+    );
     records.push(active);
     records.extend(harnesses.records);
     Report {
