@@ -19,6 +19,12 @@ pub fn run(harnesses: &[Harness], name: &str, options: &Options) -> error::Resul
     let derived = uninstall_plan::derive(download, harness)
         .ok_or_else(|| uninstall_plan::unavailable(name))?;
     let token = format!("uninstall:{name}");
+    // Removal is destructive, so its preview must exist before the consent
+    // token is known, and `--dry-run` wins even over a matching token:
+    // a preview never runs the removal.
+    if options.dry_run {
+        return Ok((0, super::output::uninstall(harness, &derived, &token)));
+    }
     if options.confirm.as_deref() == Some(token.as_str()) {
         return finish_uninstall(name, harness, &derived);
     }

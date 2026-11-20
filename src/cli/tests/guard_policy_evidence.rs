@@ -1,5 +1,6 @@
 use super::check;
 use super::guard_policy_support::*;
+use crate::cli::logic::args::Options;
 use crate::contracts::SupportState;
 
 #[test]
@@ -10,7 +11,7 @@ fn accepts_verified_support_with_fresh_evidence_and_matching_platform() {
         &crate::catalog::today_utc(),
         vec![platform_str().into()],
     );
-    let result = check(&harness, &plan, false);
+    let result = check(&harness, &plan, &Options::default(), false);
     assert!(result.is_ok());
 }
 
@@ -22,7 +23,7 @@ fn accepts_expected_support_with_fresh_evidence_and_matching_platform() {
         &crate::catalog::today_utc(),
         vec![platform_str().into()],
     );
-    let result = check(&harness, &plan, false);
+    let result = check(&harness, &plan, &Options::default(), false);
     assert!(result.is_ok());
 }
 
@@ -43,7 +44,7 @@ fn accepts_stale_evidence_and_leaves_the_warning_to_the_caller() {
         "stale",
         "staleness is still reported"
     );
-    let result = check(&harness, &plan, false);
+    let result = check(&harness, &plan, &Options::default(), false);
     assert!(
         result.is_ok(),
         "stale evidence must not block execution: {result:?}"

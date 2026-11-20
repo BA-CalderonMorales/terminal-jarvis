@@ -1,13 +1,12 @@
-summary = "Install Amp from its documented distribution channel."
-command = "npm"
-args = ["install", "-g", "@sourcegraph/amp"]
-support = "expected"
+summary = "Install the Amp CLI with Amp's own installer; it lands in ~/.local/bin without sudo."
+command = "sh"
+args = ["-c", "set -f; IFS=; script=$(curl -fsSL https://ampcode.com/install.sh) && printf %s $script | bash"]
+support = "unknown"
 evidence = "deterministic"
 effect = "state-changing"
 network = true
 interaction = "noninteractive"
 platforms = []
-executable = "npm"
-source = "internal:phase-01@fab5848"
-verified_at = "2026-08-05T00:00:00Z"
-package = "@sourcegraph/amp"
+executable = "sh"
+source = "https://ampcode.com/news/npm-package-changes"
+verified_at = "2026-11-15T00:00:00Z"

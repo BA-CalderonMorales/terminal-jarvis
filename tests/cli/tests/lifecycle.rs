@@ -6,19 +6,28 @@ use std::time::{Duration, Instant};
 const MARKER_SCRIPT: &str = "#!/bin/sh\n: > \"$TJ_FIXTURE_MARKER\"\n";
 
 #[test]
-fn unknown_lifecycle_row_fails_closed_before_spawn() {
+fn unknown_lifecycle_row_requires_bound_consent_before_spawn() {
     let fixture = Fixture::new("unknown", "expected", MARKER_SCRIPT);
-    let output = fixture.run(&[
+    let refused = fixture.run(&["--plain", "install", "fixture", "--no-input"]);
+    assert_eq!(refused.status.code(), Some(5));
+    assert!(!fixture.spawned());
+    assert!(!fixture.gate_spawned());
+    let preview = fixture.run(&["--plain", "install", "fixture", "--dry-run"]);
+    assert_eq!(preview.status.code(), Some(0));
+    assert!(!fixture.spawned(), "a preview must not run the installer");
+    // The exact bound token is the intent a terminal prompt would grant.
+    let accepted = fixture.run(&[
         "--plain",
         "install",
         "fixture",
         "--no-input",
         "--confirm=download:fixture",
     ]);
-    assert_eq!(output.status.code(), Some(4));
-    assert!(!fixture.spawned());
-    assert!(!fixture.gate_spawned());
-    assert!(String::from_utf8_lossy(&output.stderr).contains("unknown"));
+    assert_eq!(accepted.status.code(), Some(0));
+    assert!(
+        fixture.spawned(),
+        "the confirm token authorizes the install"
+    );
 }
 
 #[test]

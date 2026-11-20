@@ -1,5 +1,6 @@
 use super::check;
 use super::guard_policy_support::*;
+use crate::cli::logic::args::Options;
 use crate::contracts::SupportState;
 
 #[test]
@@ -10,7 +11,7 @@ fn rejects_manual_support() {
         &crate::catalog::today_utc(),
         vec![platform_str().into()],
     );
-    let result = check(&harness, &plan, false);
+    let result = check(&harness, &plan, &Options::default(), false);
     assert!(result.is_err());
     let err = result.unwrap_err();
     assert_eq!(err.code, "manual_procedure_required");
@@ -21,7 +22,7 @@ fn rejects_manual_support() {
 fn rejects_stub_support() {
     let harness = dummy_harness();
     let plan = dummy_plan(SupportState::Stub, &crate::catalog::today_utc(), vec![]);
-    let result = check(&harness, &plan, false);
+    let result = check(&harness, &plan, &Options::default(), false);
     assert!(result.is_err());
     let err = result.unwrap_err();
     assert_eq!(err.code, "capability_stub");
@@ -35,7 +36,7 @@ fn rejects_unsupported_support() {
         &crate::catalog::today_utc(),
         vec![],
     );
-    let result = check(&harness, &plan, false);
+    let result = check(&harness, &plan, &Options::default(), false);
     assert!(result.is_err());
     let err = result.unwrap_err();
     assert_eq!(err.code, "capability_unsupported");
@@ -45,7 +46,7 @@ fn rejects_unsupported_support() {
 fn rejects_disabled_support() {
     let harness = dummy_harness();
     let plan = dummy_plan(SupportState::Disabled, &crate::catalog::today_utc(), vec![]);
-    let result = check(&harness, &plan, false);
+    let result = check(&harness, &plan, &Options::default(), false);
     assert!(result.is_err());
     let err = result.unwrap_err();
     assert_eq!(err.code, "capability_disabled");
@@ -55,10 +56,10 @@ fn rejects_disabled_support() {
 fn rejects_unknown_support_headless_but_consents_interactively() {
     let harness = dummy_harness();
     let plan = dummy_plan(SupportState::Unknown, "2026-08-06T00:00:00Z", vec![]);
-    let result = check(&harness, &plan, false);
+    let result = check(&harness, &plan, &Options::default(), false);
     assert!(result.is_err());
     assert_eq!(result.unwrap_err().code, "capability_unknown");
-    let interactive = check(&harness, &plan, true);
+    let interactive = check(&harness, &plan, &Options::default(), true);
     assert!(
         interactive.is_ok(),
         "interactive consent failed: {interactive:?}"

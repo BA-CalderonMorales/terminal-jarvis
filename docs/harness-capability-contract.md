@@ -24,6 +24,13 @@ all nine operations work: `stub`, `disabled`, `manual`, `unsupported`, and
 support state and effect of the exact operation. The `effect` field controls
 consent; capability names alone do not establish safety.
 
+`stub`, `manual`, `unsupported`, and `disabled` mean "this will not work here"
+and block every route, `--dry-run` included (exit 4), as does a platform the
+row does not claim. `unknown` means "are you sure?": `--dry-run` previews it
+(exit 0), a terminal consents through the intent prompt, and a headless run
+needs `--no-input --confirm=<capability>:<agent>` or fails as a safety error
+(exit 5) that names the script host.
+
 ### Evidence lifetime
 
 Freshness uses the current UTC date at runtime. `verified` evidence lasts 30

@@ -11,6 +11,14 @@ Headless runs one command per invocation, prints stable line-oriented output
 with `--plain`. Noninteractive state-changing runs require their exact
 `--no-input --confirm=<capability>:<agent>` token.
 
+`--dry-run` always previews: it prints the plan and exits 0, because nothing
+runs. That includes `unknown` rows (curl-pipe and custom installers such as
+Claude Code's and Amp's). Running one asks for consent: a terminal prompts, and
+a headless run fails as a safety error (exit 5) that names the script host and
+the token, unless it passes `--no-input --confirm=<capability>:<agent>`. Rows the
+catalog does not claim (`stub`, `manual`, `unsupported`, `disabled`) and
+incompatible platforms still block, previews included.
+
 The interactive tui is a command center. `list` opens the fleet as an overlay:
 `↑`/`↓` move the cursor, typing narrows the list live, `Enter` switches, `Esc`
 closes, and digits still jump by picker position while the filter is empty.
@@ -28,7 +36,8 @@ guarded plan-plus-confirm as headless. Ctrl+C aimed at a running agent never
 kills the switcher.
 
 `uninstall <harness>` prints the removal command and waits for an explicit
-`y`. The tool's own uninstaller runs when its catalog entry documents one;
+`y`. `uninstall <harness> --dry-run` prints the removal command, its effect,
+and the `--no-input --confirm=uninstall:<harness>` token without running it. The tool's own uninstaller runs when its catalog entry documents one;
 otherwise the install channel's inverse runs (npm, uv, or cargo). The binary is
 re-checked afterward, so a copy installed by another channel is reported as
 incomplete instead of being called removed. See

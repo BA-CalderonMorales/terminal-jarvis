@@ -12,6 +12,8 @@ mod readiness;
 mod session;
 #[path = "output_summary.rs"]
 mod summary;
+#[path = "output_uninstall.rs"]
+mod uninstall;
 
 use super::{style, table};
 use crate::contracts::EnvMode;
@@ -25,6 +27,7 @@ pub use graveyard::graveyard;
 pub use readiness::is_harness_ready;
 pub use session::{current, help, selected};
 pub use summary::{audit, status};
+pub use uninstall::uninstall;
 
 pub fn checks(harnesses: &[Harness]) -> String {
     if style::plain() {

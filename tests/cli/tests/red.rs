@@ -42,10 +42,10 @@ fn install_known_harness_requires_explicit_intent() {
 fn install_unguarded_harness_is_red() {
     for harness in ["ollama", "vibe"] {
         let (code, _, stderr) = run(&["install", harness]);
-        assert_eq!(code, 4, "install {harness} should exit 4");
+        assert_eq!(code, 5, "install {harness} must be consent-gated");
         assert!(
-            stderr.contains("is unknown; Install"),
-            "install {harness} should say capability is unknown"
+            stderr.contains("cannot verify") && stderr.contains("--confirm=download:"),
+            "install {harness} should name the risk and how to accept it: {stderr}"
         );
     }
 }

@@ -68,19 +68,19 @@ mod unix {
         assert!(stderr(&removed).contains("removed"));
     }
 
+    /// Unknown claims ask for consent (5); a stub row has nothing to consent to (4).
     #[test]
-    fn unverified_catalog_rows_fail_closed_before_catalog_commands() {
+    fn unverified_catalog_rows_ask_for_consent_when_headless() {
         let home = temp_home();
-        for args in [
-            &["install", "vibe"][..],
-            &["update", "ollama"],
-            &["run", "vibe", "headless", "yo"],
-        ] {
+        for args in [&["install", "vibe"][..], &["update", "ollama"]] {
             let output = tj(args, &home, None);
-            assert_eq!(output.status.code(), Some(4));
-            assert!(stdout(&output).is_empty());
-            assert!(stderr(&output).contains("is "));
+            assert_eq!(output.status.code(), Some(5), "{args:?}");
+            let diagnostic = stderr(&output);
+            assert!(stdout(&output).is_empty() && diagnostic.contains("--confirm="));
         }
+        let stub = tj(&["run", "vibe", "headless", "yo"], &home, None);
+        assert_eq!(stub.status.code(), Some(4));
+        assert!(stderr(&stub).contains(" is stub"));
     }
 
     #[test]

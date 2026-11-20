@@ -29,10 +29,11 @@ fn reject_irrelevant_errors_on_lifecycle_options() {
 }
 
 #[test]
-fn reject_irrelevant_errors_for_dry_run_only() {
+fn dry_run_is_valid_on_a_read_only_capability() {
+    // `--dry-run` is the "show me first" request; it runs nothing, so it is
+    // applicable even when the capability itself is read-only.
     let opts = options(true, false, false, None);
-    let err = reject_irrelevant(&opts).unwrap_err();
-    assert_eq!(err.exit_code, 2);
+    assert!(reject_irrelevant(&opts).is_ok());
 }
 
 #[test]

@@ -73,7 +73,7 @@ fn guard(state: SupportState) -> &'static str {
         SupportState::Stub => "blocked:stub:exit-4",
         SupportState::Unsupported => "blocked:unsupported:exit-4",
         SupportState::Disabled => "blocked:disabled:exit-4",
-        SupportState::Unknown => "blocked:unknown:exit-4",
+        SupportState::Unknown => "consent-required:exit-5",
     }
 }
 

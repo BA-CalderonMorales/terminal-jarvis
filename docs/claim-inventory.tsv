@@ -125,19 +125,18 @@ harness:amp	display	narration	Amp	none	assertion	asserted
 harness:amp	env	environment	["ANTHROPIC_API_KEY", "OPENAI_API_KEY", "AMP_API_KEY"]	gate:env	evidence	gate
 harness:amp	env_mode	environment	any	gate:env	evidence	gate
 harness:amp	name	identity	amp	gate:identity	evidence	gate
-harness:amp/download	args	execution-shape	["install", "-g", "@sourcegraph/amp"]	gate:command-shape	evidence	gate
-harness:amp/download	command	execution-shape	npm	gate:command-shape	evidence	gate
+harness:amp/download	args	execution-shape	["-c", "set -f; IFS=; script=$(curl -fsSL https://ampcode.com/install.sh) && printf %s $script | bash"]	gate:command-shape	evidence	gate
+harness:amp/download	command	execution-shape	sh	gate:command-shape	evidence	gate
 harness:amp/download	effect	risk-class	state-changing	gate:effect-class	evidence	gate
 harness:amp/download	evidence	support-state	deterministic	gate:evidence-pairing	evidence	gate
-harness:amp/download	executable	identity	npm	gate:identity	evidence	gate
+harness:amp/download	executable	identity	sh	gate:identity	evidence	gate
 harness:amp/download	interaction	risk-class	noninteractive	gate:effect-class	evidence	gate
 harness:amp/download	network	risk-class	true	gate:effect-class	evidence	gate
-harness:amp/download	package	install-source	@sourcegraph/amp	none	assertion	asserted
 harness:amp/download	platforms	platform-scope	[]	gate:platform-name	evidence	asserted
-harness:amp/download	source	provenance	internal:phase-01@fab5848	none	assertion	external
-harness:amp/download	summary	narration	Install Amp from its documented distribution channel.	none	assertion	asserted
-harness:amp/download	support	support-state	expected	gate:evidence-pairing	evidence	gate
-harness:amp/download	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	runtime-gate
+harness:amp/download	source	provenance	https://ampcode.com/news/npm-package-changes	none	assertion	external
+harness:amp/download	summary	narration	Install the Amp CLI with Amp's own installer; it lands in ~/.local/bin without sudo.	none	assertion	asserted
+harness:amp/download	support	support-state	unknown	gate:evidence-pairing	evidence	gate
+harness:amp/download	verified_at	freshness	2026-11-15T00:00:00Z	constant:freshness	evidence	runtime-gate
 harness:amp/headless	args	execution-shape	["--help"]	gate:command-shape	evidence	gate
 harness:amp/headless	command	execution-shape	amp	gate:command-shape	evidence	gate
 harness:amp/headless	effect	risk-class	read-only	gate:effect-class	evidence	gate
@@ -198,19 +197,18 @@ harness:amp/ui	source	provenance	internal:phase-01@fab5848	none	assertion	extern
 harness:amp/ui	summary	narration	Open the interactive Amp interface.	none	assertion	asserted
 harness:amp/ui	support	support-state	expected	gate:evidence-pairing	evidence	gate
 harness:amp/ui	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	runtime-gate
-harness:amp/update	args	execution-shape	["update", "-g", "@sourcegraph/amp"]	gate:command-shape	evidence	gate
-harness:amp/update	command	execution-shape	npm	gate:command-shape	evidence	gate
+harness:amp/update	args	execution-shape	["-c", "set -f; IFS=; script=$(curl -fsSL https://ampcode.com/install.sh) && printf %s $script | bash"]	gate:command-shape	evidence	gate
+harness:amp/update	command	execution-shape	sh	gate:command-shape	evidence	gate
 harness:amp/update	effect	risk-class	state-changing	gate:effect-class	evidence	gate
 harness:amp/update	evidence	support-state	deterministic	gate:evidence-pairing	evidence	gate
-harness:amp/update	executable	identity	npm	gate:identity	evidence	gate
+harness:amp/update	executable	identity	sh	gate:identity	evidence	gate
 harness:amp/update	interaction	risk-class	noninteractive	gate:effect-class	evidence	gate
 harness:amp/update	network	risk-class	true	gate:effect-class	evidence	gate
-harness:amp/update	package	install-source	@sourcegraph/amp	none	assertion	asserted
 harness:amp/update	platforms	platform-scope	[]	gate:platform-name	evidence	asserted
-harness:amp/update	source	provenance	internal:phase-01@fab5848	none	assertion	external
-harness:amp/update	summary	narration	Update Amp without interactive setup flows.	none	assertion	asserted
-harness:amp/update	support	support-state	expected	gate:evidence-pairing	evidence	gate
-harness:amp/update	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	runtime-gate
+harness:amp/update	source	provenance	https://ampcode.com/news/npm-package-changes	none	assertion	external
+harness:amp/update	summary	narration	Update the Amp CLI with Amp's own installer.	none	assertion	asserted
+harness:amp/update	support	support-state	unknown	gate:evidence-pairing	evidence	gate
+harness:amp/update	verified_at	freshness	2026-11-15T00:00:00Z	constant:freshness	evidence	runtime-gate
 harness:amp/version	args	execution-shape	["--version"]	gate:command-shape	evidence	gate
 harness:amp/version	command	execution-shape	amp	gate:command-shape	evidence	gate
 harness:amp/version	effect	risk-class	read-only	none	assertion	asserted
@@ -241,7 +239,7 @@ harness:claude	display	narration	Claude	none	assertion	asserted
 harness:claude	env	environment	["ANTHROPIC_API_KEY", "CLAUDE_API_KEY"]	gate:env	evidence	gate
 harness:claude	env_mode	environment	any	gate:env	evidence	gate
 harness:claude	name	identity	claude	gate:identity	evidence	gate
-harness:claude/download	args	execution-shape	["-c", "curl -fsSL https://claude.ai/install.sh | bash"]	gate:command-shape	evidence	gate
+harness:claude/download	args	execution-shape	["-c", "set -f; IFS=; script=$(curl -fsSL https://claude.ai/install.sh) && printf %s $script | bash"]	gate:command-shape	evidence	gate
 harness:claude/download	command	execution-shape	sh	gate:command-shape	evidence	gate
 harness:claude/download	effect	risk-class	state-changing	gate:effect-class	evidence	gate
 harness:claude/download	evidence	support-state	deterministic	gate:evidence-pairing	evidence	gate
@@ -249,10 +247,10 @@ harness:claude/download	executable	identity	sh	gate:identity	evidence	gate
 harness:claude/download	interaction	risk-class	noninteractive	gate:effect-class	evidence	gate
 harness:claude/download	network	risk-class	true	gate:effect-class	evidence	gate
 harness:claude/download	platforms	platform-scope	[]	gate:platform-name	evidence	asserted
-harness:claude/download	source	provenance	internal:phase-01@fab5848	none	assertion	external
-harness:claude/download	summary	narration	Install Claude from its documented distribution channel.	none	assertion	asserted
+harness:claude/download	source	provenance	https://docs.claude.com/en/docs/claude-code/setup	none	assertion	external
+harness:claude/download	summary	narration	Install Claude Code with Anthropic's native installer; it needs no sudo and no Node.	none	assertion	asserted
 harness:claude/download	support	support-state	unknown	gate:evidence-pairing	evidence	gate
-harness:claude/download	verified_at	freshness	2026-08-05T00:00:00Z	constant:freshness	evidence	runtime-gate
+harness:claude/download	verified_at	freshness	2026-11-15T00:00:00Z	constant:freshness	evidence	runtime-gate
 harness:claude/headless	args	execution-shape	["--help"]	gate:command-shape	evidence	gate
 harness:claude/headless	command	execution-shape	claude	gate:command-shape	evidence	gate
 harness:claude/headless	effect	risk-class	read-only	gate:effect-class	evidence	gate

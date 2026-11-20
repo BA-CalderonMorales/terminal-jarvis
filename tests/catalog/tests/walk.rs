@@ -25,6 +25,8 @@ fn catalog_walk_records_all_rows_once_without_effects() {
         }
         if matches!(row.support.as_str(), "verified" | "expected") {
             assert_eq!(row.guard, "policy-and-platform-check");
+        } else if row.support == "unknown" {
+            assert_eq!(row.guard, "consent-required:exit-5");
         } else {
             assert_eq!(row.guard, format!("blocked:{}:exit-4", row.support));
         }
@@ -44,9 +46,9 @@ fn catalog_walk_records_all_rows_once_without_effects() {
         support,
         BTreeMap::from([
             ("disabled", 25),
-            ("expected", 92),
+            ("expected", 90),
             ("stub", 98),
-            ("unknown", 10),
+            ("unknown", 12),
         ])
     );
     assert_eq!(
