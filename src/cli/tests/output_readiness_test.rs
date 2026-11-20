@@ -31,7 +31,7 @@ fn harness(state: SupportState, verified_at: &str, platform: &str) -> Harness {
 }
 
 #[test]
-fn support_freshness_and_platform_are_part_of_readiness() {
+fn support_and_platform_are_part_of_readiness() {
     let platform = crate::context::platform::id().unwrap();
     let other = if platform == "windows-x64-msvc" {
         "linux-x64-gnu"
@@ -45,12 +45,19 @@ fn support_freshness_and_platform_are_part_of_readiness() {
     )));
     assert!(!is_harness_ready(&harness(
         SupportState::Expected,
-        "2020-01-01T00:00:00Z",
-        platform,
-    )));
-    assert!(!is_harness_ready(&harness(
-        SupportState::Expected,
         "2026-07-17T04:59:27Z",
         other,
+    )));
+}
+
+/// Readiness reports whether the tool runs here, not when its catalog row was
+/// last reviewed. Older evidence must not make a working binary look broken.
+#[test]
+fn evidence_age_is_not_part_of_readiness() {
+    let platform = crate::context::platform::id().unwrap();
+    assert!(is_harness_ready(&harness(
+        SupportState::Expected,
+        "2020-01-01T00:00:00Z",
+        platform,
     )));
 }

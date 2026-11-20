@@ -15,16 +15,10 @@ pub fn check(harness: &Harness, plan: &CapabilityPlan, terminal: bool) -> error:
         SupportState::Unknown if consented => {}
         SupportState::Unknown => return guarded(harness, plan, "capability_unknown"),
     }
-    if !consented && crate::catalog::freshness_status(plan) != "fresh" {
-        return Err(error::Failure::unavailable(
-            "evidence_stale",
-            format!(
-                "{}:{} evidence from {} is stale",
-                harness.name, plan.capability, plan.verified_at
-            ),
-            "refresh the upstream evidence before execution",
-        ));
-    }
+    // Evidence age never blocks. The catalog ships inside the binary, so the
+    // only fix for stale evidence is a maintainer refresh; refusing here would
+    // block a working install on a fact the user cannot change. `plan` and
+    // `show` still report how old the evidence is.
     let Some(platform) = crate::context::platform::id() else {
         return Err(error::Failure::unavailable(
             "platform_unsupported",

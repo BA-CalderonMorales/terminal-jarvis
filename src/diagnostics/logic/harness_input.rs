@@ -41,11 +41,9 @@ pub(super) fn executable_support(plan: &crate::contracts::CapabilityPlan) -> boo
     matches!(
         plan.support,
         crate::contracts::SupportState::Verified | crate::contracts::SupportState::Expected
-    ) && crate::catalog::freshness_status(plan) == "fresh"
-        && crate::context::platform::id().is_none_or(|platform| {
-            plan.platforms.is_empty()
-                || plan.platforms.iter().any(|candidate| candidate == platform)
-        })
+    ) && crate::context::platform::id().is_none_or(|platform| {
+        plan.platforms.is_empty() || plan.platforms.iter().any(|candidate| candidate == platform)
+    })
 }
 
 #[cfg(test)]

@@ -77,8 +77,8 @@ also supported. Invalid explicit overrides fail without silently falling back.
 
 In the viewport, `converse <turns> <a> <b> <topic...>` starts a conversation
 limited to 1–12 turns. Read the first-use notice and repeat the command to
-accept it. Every turn passes the ordinary support, freshness, platform,
-intent, and workspace-gate checks. State-changing turns ask for consent.
+accept it. Every turn passes the ordinary support, platform, intent, and
+workspace-gate checks. State-changing turns ask for consent.
 For agents whose headless operation is dangerous, explicitly use
 `converse --allow-dangerous <turns> <a> <b> <topic...>` and review each turn's
 confirmation. The first-use notice does not authorize future dangerous runs.
