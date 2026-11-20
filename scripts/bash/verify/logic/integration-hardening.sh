@@ -59,11 +59,12 @@ run_tj() {
   TERMINAL_JARVIS_CATALOG="$catalog" TERMINAL_JARVIS_HOME="$home" "$binary" --plain "$@"
 }
 
-# The diagnostics contract is about an UNAUTHENTICATED fleet: nothing installed,
-# nothing ready, exit 4. A developer machine has harnesses on PATH and the
-# binary may sit under a known install route, so the same probe would exit 0 and
-# this gate would fail on exactly the machine that has to run it. Pin the PATH
-# so the probe sees the fleet the contract describes, not the host's.
+# The diagnostics contract is about an UNAUTHENTICATED fleet: nothing installed
+# and nothing ready. That is the normal state of a fresh machine, not a fault,
+# so diagnostics exit 0 -- the tool itself is healthy; the fleet is simply
+# empty. A developer machine has harnesses on PATH and the binary may sit under
+# a known install route, so the PATH is pinned: the probe has to see the fleet
+# the contract describes, not the host's.
 run_tj_unauthenticated() {
   PATH=/usr/bin:/bin TERMINAL_JARVIS_CATALOG="$catalog" TERMINAL_JARVIS_HOME="$home" \
     "$binary" --plain "$@"
@@ -93,14 +94,20 @@ run_tj list >"$tmp/list"
 line_count_is "$tmp/list" "$expected"
 
 if run_tj_unauthenticated check --verbose >"$tmp/check" 2>"$tmp/check.err"; then
-  fail "unauthenticated catalog diagnostics unexpectedly succeeded"
+  code=0
 else
   code=$?
+  fail "an empty fleet made diagnostics exit $code; nothing installed is not a fault"
 fi
-test "$code" = 4 || fail "diagnostics exited $code, expected 4"
+test "$code" = 0 || fail "diagnostics exited $code, expected 0"
 test ! -s "$tmp/check.err" || fail "diagnostics wrote an expected outcome to stderr"
 contains "$tmp/check" "tj.version"
 contains "$tmp/check" "harness.codex.support"
+# A harness nobody installed is information. Reporting it as a failure is what
+# made `check` exit non-zero on every fresh machine.
+if grep -q "^harness\..*\.executable	missing	error" "$tmp/check"; then
+  fail "an uninstalled harness was reported as an error"
+fi
 
 run_tj use codex >"$tmp/use"
 run_tj current >"$tmp/current"

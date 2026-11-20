@@ -4,6 +4,13 @@
 
 ### Fixed
 
+- `check` exits 0 on a fresh machine. An uninstalled harness, an unset
+  credential, no selected harness, a config directory not created yet, a
+  source build without distribution metadata, and the embedded gate catalog
+  are reported as information instead of errors or warnings; only broken
+  state (a shadowed or unreadable executable, an unknown or retired
+  selection, a set-but-malformed credential) asks for attention. An
+  uninstalled harness now suggests `terminal-jarvis install <name>`.
 - Catalog evidence older than its refresh window no longer blocks install,
   update, launch, or readiness. In 0.1.23, rows that aged past 30 or 90
   days refused to run, `--dry-run` included, and installed tools read as not

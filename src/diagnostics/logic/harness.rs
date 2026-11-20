@@ -37,15 +37,18 @@ pub fn collect(input: &DiagnosticInput, redact: &Redactor<'_>) -> HarnessResult 
         let mut executable = Record::new(
             format!("{base}.executable"),
             resolution.code,
-            if resolution.code == Code::Ready {
-                Severity::Info
-            } else {
-                Severity::Error
+            // Not installed is the first-run state for most of the catalog, so
+            // it is information; only a broken installation needs the user.
+            match resolution.code {
+                Code::Ready | Code::Missing => Severity::Info,
+                _ => Severity::Warning,
             },
             value,
         );
-        if resolution.code != Code::Ready {
-            executable.action = Some("install or repair the harness executable".into());
+        if resolution.code == Code::Missing {
+            executable.action = Some(format!("terminal-jarvis install {}", harness.name));
+        } else if resolution.code != Code::Ready {
+            executable.action = Some("repair the harness executable".into());
         }
         records.push(executable);
         let (mut environment, _) = super::harness_env::collect(harness, input, &base);
@@ -66,12 +69,10 @@ pub fn collect(input: &DiagnosticInput, redact: &Redactor<'_>) -> HarnessResult 
         records.push(Record::new(
             format!("{base}.readiness"),
             readiness_code,
-            if harness_ready {
-                Severity::Info
-            } else if harness.sunset {
+            if harness.sunset && !harness_ready {
                 Severity::Warning
             } else {
-                Severity::Error
+                Severity::Info
             },
             if harness_ready {
                 "ready"

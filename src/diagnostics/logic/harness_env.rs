@@ -10,17 +10,18 @@ pub fn collect(harness: &HarnessInput, input: &DiagnosticInput, base: &str) -> (
     for name in names {
         let state = input.environment.state(name);
         states.push(state);
-        let severity = if state == ValueState::Present || harness.env_mode == EnvMode::Optional {
-            Severity::Info
-        } else {
-            Severity::Warning
-        };
-        records.push(Record::new(
-            format!("{base}.env.{}", segment(name)),
-            state.code(),
-            severity,
-            state.as_str(),
-        ));
+        // An unset credential is a setup step, not a defect: it is reported
+        // once, in the summary row below, not as one warning per name. A name
+        // that is set but empty or malformed is the case that actually needs
+        // a look, so it keeps its own row.
+        if state != ValueState::Missing {
+            records.push(Record::new(
+                format!("{base}.env.{}", segment(name)),
+                state.code(),
+                Severity::Info,
+                state.as_str(),
+            ));
+        }
     }
     let ready = ready(harness.env_mode, &states);
     let code = if ready {
@@ -31,15 +32,21 @@ pub fn collect(harness: &HarnessInput, input: &DiagnosticInput, base: &str) -> (
     let mut summary = Record::new(
         format!("{base}.environment"),
         code,
+        // A missing credential is a setup step the user has not taken yet,
+        // not a broken installation. `Any` mode means any one of the listed
+        // names works, so it is a hint; `All` mode is the only case where a
+        // missing name actually blocks the harness.
         if ready {
             Severity::Info
+        } else if harness.env_mode == EnvMode::All {
+            Severity::Warning
         } else {
-            Severity::Error
+            Severity::Info
         },
         if ready { "ready" } else { code.as_str() },
     );
     if !ready {
-        summary.action = Some("set the required credential environment names".into());
+        summary.action = Some(format!("set one of: {}", harness.env.join(", ")));
     }
     records.push(summary);
     (records, ready)

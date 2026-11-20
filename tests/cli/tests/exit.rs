@@ -56,7 +56,7 @@ fn handled_json_exit_classes_emit_one_document_and_no_stderr() {
         &fixture.run(&["--json", "gate", "enable", "missing-gate"]),
         5,
     );
-    let check = assert_json_document(&fixture.run(&["--json", "check"]), 4);
+    let check = assert_json_document(&fixture.run(&["--json", "check"]), 0);
     assert!(check.contains("\"command\":\"check\""));
 }
 

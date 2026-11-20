@@ -28,11 +28,12 @@ pub fn collect(harness: &HarnessInput, base: &str) -> (Record, bool) {
 }
 
 fn unavailable(base: &str, value: impl Into<String>) -> Record {
+    // A capability the catalog cannot execute is a catalog limitation, not a
+    // fault on the user's machine.
     Record::new(
         format!("{base}.support"),
         Code::Unsupported,
-        Severity::Error,
+        Severity::Info,
         value,
     )
-    .action("verify at least one executable capability")
 }

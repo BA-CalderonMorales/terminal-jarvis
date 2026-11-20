@@ -78,16 +78,19 @@ fn no_active_harness_reports_missing() {
     let (record, usable) = collect(&input(None, &["xh"]), None, &BTreeSet::new());
     assert_eq!(record.code, Code::Missing);
     assert_eq!(record.value, "none");
-    assert!(!usable);
+    assert!(
+        usable,
+        "no selection is a valid first-run state; the install state is a separate signal"
+    );
 }
 
 #[test]
 fn known_but_not_ready_harness_gets_action() {
     let (record, usable) = collect(&input(Some("xh"), &["xh"]), None, &BTreeSet::new());
     assert_eq!(record.code, Code::Missing);
-    assert_eq!(
-        record.action.as_deref(),
-        Some("repair active harness readiness")
+    assert_eq!(record.action.as_deref(), Some("install it, then run again"));
+    assert!(
+        usable,
+        "selecting an uninstalled harness is still a usable state"
     );
-    assert!(!usable);
 }

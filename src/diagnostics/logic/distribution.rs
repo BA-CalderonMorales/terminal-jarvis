@@ -3,12 +3,15 @@ use super::{Code, DiagnosticInput, Record, Severity, ValueState};
 pub fn collect(input: &DiagnosticInput) -> (Record, bool) {
     let state = input.environment.state("TERMINAL_JARVIS_DISTRIBUTION");
     if state != ValueState::Present {
+        // A source build and a `cargo run` have no distribution metadata at
+        // all. That is how the binary is meant to work, so it is a fact, not
+        // a warning.
         return (
             Record::new(
                 "tj.distribution",
-                state.code(),
-                Severity::Warning,
-                state.as_str(),
+                Code::Missing,
+                Severity::Info,
+                "source build",
             ),
             true,
         );

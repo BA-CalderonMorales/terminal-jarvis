@@ -79,8 +79,10 @@ fn stable_codes_keep_failure_classes_distinct() {
     assert_code(&report, "harness.fixture.support", Code::Unsupported);
     assert_code(&report, "harness.fixture.readiness", Code::Unsupported);
     assert_code(&report, "harness.fixture.env.EMPTY_TOKEN", Code::Empty);
-    assert_code(&report, "harness.fixture.env.MISSING_TOKEN", Code::Missing);
+    // An unset name is summarized once in the environment row; only a value
+    // that is set-but-wrong gets its own line.
     assert_code(&report, "harness.fixture.env.BROKEN_TOKEN", Code::Malformed);
+    assert_code(&report, "harness.fixture.environment", Code::Malformed);
     let output = format!("{}{}", report.plain(), report.json());
     assert!(!output.contains("npm-wrapper-secret"));
     fs::remove_dir_all(root).unwrap();

@@ -115,8 +115,9 @@ table tools
 plain list >"$tmp/plain-list.out"
 test "$(wc -l <"$tmp/plain-list.out" | tr -d ' ')" = "$expected" || fail "plain list count changed"
 
-outcome check 4 check
-outcome status 4 status
+# Nothing installed and nothing selected is a fresh machine, not a fault.
+outcome check 0 check
+outcome status 0 status
 table check
 table status
 ok current-before current
