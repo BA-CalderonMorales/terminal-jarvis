@@ -2,7 +2,7 @@ class TerminalJarvis < Formula
   desc "Data-driven harness switcher for AI coding agents"
   homepage "https://github.com/BA-CalderonMorales/terminal-jarvis"
   license "MIT"
-  head "https://github.com/BA-CalderonMorales/terminal-jarvis.git", branch: "develop"
+  head "https://github.com/BA-CalderonMorales/terminal-jarvis.git", branch: "main"
 
   depends_on "rust" => :build
 

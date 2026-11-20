@@ -36,34 +36,36 @@ built and verified.
 
 ## Branch Strategy
 
-- **`develop`**: default base for PRs. Faster experimentation; merges here
-  require an ADR (below).
-- **`main`**: tagged releases only. `develop` fast-forwards into `main` at
-  release time.
-- **Feature branches**: branch from `develop`, PR against `develop`.
-- **`release/X.Y.Z`**: release-prep branches. Work here accumulates, then merges
-  into `develop` with an ADR and into `main` only at tag time.
+Trunk-based. `main` is the only long-lived branch and is always releasable.
 
-### Merge-to-develop discipline
+- **Short-lived branches**: branch from `main`, open a small PR against `main`,
+  squash-merge once the required checks pass. Merged branches are deleted.
+- **Unfinished work** merges behind a flag instead of waiting on a branch.
+  The working tree never holds more than one PR's worth of change.
+- **Releases** are a version bump on `main` plus a `vX.Y.Z` tag. There are no
+  `develop` or `release/X.Y.Z` branches.
 
-- Every merge into `develop` must be accompanied by a record in
-  `docs/architecture-decision-records/README.md` capturing the decision and why
-  the merge mattered -- intent for humans and agents landing on `main`. It is
-  not a changelog.
+### Merge discipline
+
+- Write a record in `docs/architecture-decision-records/README.md` when a PR
+  makes a decision a later reader would otherwise have to re-derive. Routine
+  fixes and features do not need one; it is not a changelog.
 - **Never merge** `GOAL.md`, `plan/`, `scratch/`, or local working ledgers into
-  `develop` or `main`. They are developer-local planning spaces.
+  `main`. They are developer-local planning spaces.
 - **No root-level Rust scripts** (e.g. a root `build.rs`). Build scripts live
   under `build/`; Cargo.toml points at them with the `build` key.
 
 ## CI
 
-- Runs on every PR against `develop` or `main`.
+- Runs on every PR against `main`. Verify, Windows Verify, Package Smoke,
+  Adversarial Conformance, and Mutation Exclusions are required checks; a merge
+  waits on them, nothing else.
+- Mutation testing is manual (`workflow_dispatch`) until the suite is green
+  again. A check either blocks a merge or is not scheduled.
 - `plan/`, `scratch/`, and `GOAL.md` are developer-local: gitignored,
-  refused by the pre-commit gate on `develop`/`main`, and never merge into
-  `develop` or `main`.
-- **Docs-only PRs** (changes limited to `docs/`, `README.md`, `AGENTS.md`,
-  `CLAUDE.md`) skip CI automatically via `paths-ignore`. Trigger manually with
-  `workflow_dispatch` when needed.
+  refused by the pre-commit gate on `main`, and never merge into `main`.
+- CI runs on every PR, docs-only included: a required check that is skipped
+  never reports, and the PR would wait on it forever.
 - The harness capability contract lives in
   [docs/harness-capability-contract.md](docs/harness-capability-contract.md).
   Keep it in sync when adding capabilities or commands.
@@ -90,7 +92,7 @@ built and verified.
   test-only rule. Do not promote quickcheck to a production dependency.**
 - No root-level Rust scripts. Build scripts live in `build/`.
 - `GOAL.md`, `plan/`, and `scratch/` are developer-local. They never merge into
-  `develop` or `main`, and a merge to `develop` always carries an ADR.
+  `main`.
 - Keep docs concise and tied to migration, architecture, testing, or release
   notes.
 - Use `rg` (ripgrep) for content search when available; fall back to plain

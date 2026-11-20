@@ -1,6 +1,6 @@
 # Architecture Decision Records
 
-This directory keeps the meaning behind changes that merge into `develop`.
+This directory keeps the meaning behind decisions that land on `main`.
 
 It is not a changelog. It records the *decision* that drove a merge and *why
 that decision mattered* at the time, so the intent survives long after the
@@ -10,8 +10,9 @@ cases, tradeoffs, and intent of a change without re-deriving it from diffs.
 
 ## Rules
 
-- A new record is written **only when merging to `develop`** (release branches
-  and feature branches do not create records).
+- A new record is written when a PR to `main` carries a decision a later
+  reader would otherwise have to re-derive. Routine fixes and features do not
+  get one.
 - Records accumulate in this `README.md`, newest first. One decision per hunk
   (create `docs/architecture-decision-records/<slug>-<date>.md` when a single
   merge carries more than one significant decision, and link it from here).
@@ -25,7 +26,7 @@ cases, tradeoffs, and intent of a change without re-deriving it from diffs.
 ```markdown
 ### <Decision title> (<branch> -> <date>)
 
-**Decision:** One or two sentences. What changed on `develop` and why.
+**Decision:** One or two sentences. What changed on `main` and why.
 
 **Context:** The constraint or problem that forced the decision. What was true
 at the time that would otherwise be invisible to a reader later.
@@ -38,6 +39,36 @@ it, and anything future work must respect.
 ```
 
 ## Records
+
+### Ship from trunk (chore/trunk-based-flow -> 2026-11-20)
+
+**Decision:** `main` is the only long-lived branch. Changes land as small
+squash-merged PRs gated by required checks (Verify, Windows Verify, Package
+Smoke, Adversarial Conformance, Mutation Exclusions); unfinished work merges
+behind a flag; a
+release is a version bump and a tag on `main`. `develop`, `release/X.Y.Z`, the
+required human review, and per-PR mutation shards are gone.
+
+**Context:** The old flow protected nothing a sole maintainer could use. The
+review `main` required could only be met by an admin bypass, while no CI check
+was required at all. `develop` drifted from `main` (empty merge commits on one
+side, a direct-to-main hotfix in 0.1.16), branches were never deleted, and the
+0.1.24 release sat 14 days behind that gate while a fix for live 0.1.23 waited
+in an uncommitted working tree. Every per-PR run waited on 34 mutation shards,
+and the nightly mutation run stayed red for days unnoticed.
+
+**Considered:** Keeping `develop` with required checks added -- rejected: two
+integration branches still need syncing and still delay a fix that is ready.
+Keeping per-PR mutation shards as required -- rejected for now: they gate every
+merge on the slowest signal; mutation returns on a schedule once green.
+Keeping them advisory -- rejected: a check that cannot block is noise.
+
+**Consequence:** `main` must stay releasable, so a red `main` is the first
+thing fixed. Branch protection requires the five checks and linear history,
+allows squash merges only, blocks force pushes, and deletes merged branches.
+CI no longer skips docs-only PRs, because a required check that never starts
+blocks the merge.
+`brew install --HEAD` builds `main`. ADRs record decisions, not merges.
 
 ### Verify physical input and share frame budgets (v0.1.24 integration -> 2026-11-04)
 

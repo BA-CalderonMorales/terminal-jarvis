@@ -8,7 +8,7 @@ set -eu
 
 branch=$(git symbolic-ref --short HEAD 2>/dev/null || echo detached)
 deploy=false
-case "$branch" in develop | main) deploy=true ;; esac
+case "$branch" in main) deploy=true ;; esac
 
 staged=$(git diff --cached --name-only 2>/dev/null || true)
 [ -n "$staged" ] || exit 0
@@ -36,7 +36,7 @@ for file in $staged; do
         echo "pre-commit: refuse to commit developer-local '$file' on $branch" >&2
         failures=$((failures + 1))
       else
-        echo "pre-commit: note: '$file' rides along on the next merge to develop/main; remove it first" >&2
+        echo "pre-commit: note: '$file' rides along on the next merge to main; remove it first" >&2
         notes=$((notes + 1))
       fi
       ;;

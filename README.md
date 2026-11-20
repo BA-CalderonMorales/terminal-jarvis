@@ -22,7 +22,7 @@
 <img src="docs/demo-tui.gif" alt="Terminal Jarvis running in a terminal window on an Omarchy desktop: listing the harness fleet, switching the active harness to codex, previewing a headless plan, refusing a dangerous run, and changing theme" width="100%">
 
 <i>A real session, captured on an Omarchy desktop with
-<a href="https://github.com/BA-CalderonMorales/terminal-jarvis/blob/develop/scripts/demo/record-omarchy.sh">scripts/demo/record-omarchy.sh</a>
+<a href="https://github.com/BA-CalderonMorales/terminal-jarvis/blob/main/scripts/demo/record-omarchy.sh">scripts/demo/record-omarchy.sh</a>
 -- no compositing, and nothing installed or run. Registries that don't animate
 GIFs render the static frame
 <a href="docs/demo-tui.png">docs/demo-tui.png</a>; see
