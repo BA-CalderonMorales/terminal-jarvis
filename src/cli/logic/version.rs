@@ -4,9 +4,20 @@ use std::path::Path;
 const REPO: &str = "https://github.com/BA-CalderonMorales/terminal-jarvis";
 
 pub fn text(verbose: bool, catalog: &Path, home: &Path) -> String {
+    render(
+        verbose,
+        crate::context::distribution::channel(),
+        catalog,
+        home,
+    )
+}
+
+/// Formats the version for a channel the caller already resolved, so the
+/// output never depends on where the running binary happens to live.
+pub fn render(verbose: bool, channel: Option<&str>, catalog: &Path, home: &Path) -> String {
     let version = env!("CARGO_PKG_VERSION");
     if !verbose {
-        let suffix = crate::context::distribution::channel()
+        let suffix = channel
             .map(|channel| format!(" ({channel})"))
             .unwrap_or_default();
         return format!("terminal-jarvis {version}{suffix}\n");
@@ -15,9 +26,7 @@ pub fn text(verbose: bool, catalog: &Path, home: &Path) -> String {
         .map(|path| path.display().to_string())
         .unwrap_or_else(|_| "unknown".to_string());
     let git_sha = option_env!("TERMINAL_JARVIS_GIT_SHA").unwrap_or("unknown");
-    let distribution = crate::context::distribution::channel()
-        .unwrap_or("unknown")
-        .to_string();
+    let distribution = channel.unwrap_or("unknown").to_string();
     let wrapper = std::env::var("TERMINAL_JARVIS_WRAPPER").unwrap_or_default();
     let release = nonempty_env("TERMINAL_JARVIS_RELEASE_URL", || {
         format!("{REPO}/releases/tag/v{version}")
