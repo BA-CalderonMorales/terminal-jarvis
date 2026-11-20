@@ -10,6 +10,7 @@ fn missing_env_none_is_empty(env: Vec<String>) -> bool {
         env_mode: EnvMode::None,
         env,
         capabilities: Vec::new(),
+        sunset: None,
     };
     missing_env(&harness).is_empty()
 }

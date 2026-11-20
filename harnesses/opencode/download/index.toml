@@ -11,3 +11,5 @@ executable = "npm"
 source = "internal:phase-01@fab5848"
 verified_at = "2026-08-05T00:00:00Z"
 package = "opencode-ai"
+uninstall_command = "opencode"
+uninstall_args = ["uninstall", "--force", "--keep-config", "--keep-data"]

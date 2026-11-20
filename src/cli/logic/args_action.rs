@@ -28,6 +28,7 @@ pub(super) fn parse(
             "terminal-jarvis --info",
         )?,
         "list" | "tools" => exact(words, Action::List, "terminal-jarvis list")?,
+        "graveyard" => exact(words, Action::Graveyard, "terminal-jarvis graveyard")?,
         "check" | "status" => exact(words, Action::Check, "terminal-jarvis check")?,
         "tui" => exact(words, Action::Tui, "terminal-jarvis tui")?,
         "current" => exact(words, Action::Current, "terminal-jarvis current")?,

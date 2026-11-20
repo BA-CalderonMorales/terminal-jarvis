@@ -7,7 +7,7 @@ use crate::contracts::CapabilityPlan;
 
 pub fn capability(plan: &CapabilityPlan) -> String {
     format!(
-        "{{\"capability\":\"{}\",\"summary\":\"{}\",{},\"command\":[{}],\"command_line\":\"{}\",\"executable\":\"{}\",\"source\":\"{}\",\"verified_at\":\"{}\",\"package\":{}}}",
+        "{{\"capability\":\"{}\",\"summary\":\"{}\",{},\"command\":[{}],\"command_line\":\"{}\",\"executable\":\"{}\",\"source\":\"{}\",\"verified_at\":\"{}\",\"package\":{},\"uninstall\":{}}}",
         plan.capability.as_str(),
         json::escape(&plan.summary),
         truth(plan),
@@ -16,7 +16,8 @@ pub fn capability(plan: &CapabilityPlan) -> String {
         json::escape(&plan.executable),
         json::escape(&plan.source),
         json::escape(&plan.verified_at),
-        package(plan)
+        package(plan),
+        uninstall(plan)
     )
 }
 
@@ -53,6 +54,20 @@ fn words(plan: &CapabilityPlan) -> String {
         .map(|word| format!("\"{}\"", json::escape(word)))
         .collect::<Vec<_>>()
         .join(",")
+}
+
+fn uninstall(plan: &CapabilityPlan) -> String {
+    match &plan.uninstall {
+        Some(uninstall) => {
+            let words = std::iter::once(&uninstall.command)
+                .chain(uninstall.args.iter())
+                .map(|word| format!("\"{}\"", json::escape(word)))
+                .collect::<Vec<_>>()
+                .join(",");
+            format!("[{words}]")
+        }
+        None => "null".to_string(),
+    }
 }
 
 fn package(plan: &CapabilityPlan) -> String {

@@ -68,3 +68,26 @@ fn probes_finishing_within_the_timeout_still_report_output() {
         Some("v1.2.3")
     );
 }
+
+#[test]
+fn failed_probe_cannot_certify_a_version() {
+    assert_eq!(run("echo v9.9; exit 7", "echo v9.9& exit /b 7"), None);
+}
+
+#[cfg(unix)]
+#[test]
+fn inherited_pipes_and_floods_do_not_escape_the_deadline() {
+    let start = Instant::now();
+    assert_eq!(run("sleep 20 & echo v1.2", "").as_deref(), Some("v1.2"));
+    assert!(start.elapsed() < Duration::from_secs(5));
+    assert_eq!(run("yes version", ""), None);
+}
+
+#[cfg(unix)]
+#[test]
+fn stderr_floods_and_unterminated_output_stay_bounded() {
+    let start = Instant::now();
+    assert_eq!(run("yes error >&2", ""), None);
+    assert!(start.elapsed() < Duration::from_secs(5));
+    assert_eq!(run("printf '%131072s' x", ""), None);
+}

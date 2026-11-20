@@ -6,9 +6,14 @@
 
 use crate::tui::screen::{paint, section, Role};
 
+#[cfg(test)]
+#[path = "../tests/help.rs"]
+mod tests;
+
 pub fn text(inner: usize) -> String {
     let rows = [
         ("list [filter]", "numbered fleet picker; text narrows it"),
+        ("graveyard", "retired harnesses, why, and their successor"),
         ("show <harness>", "one harness in detail"),
         ("plan [harness] <cap>", "preview, don't run"),
         (
@@ -63,6 +68,8 @@ pub fn text(inner: usize) -> String {
             body.push_str(&format!("  {}\n", paint(Role::Label, command)));
         }
     }
+    let keys = "keys: ↑↓ or jk scroll · i types · esc normal · tab completes · ? help · q quits";
+    body.push_str(&format!("  {}\n", paint(Role::Dim, keys)));
     let footer = "installs and runs pass the Trivy gate";
     body.push_str(&format!("  {}\n", paint(Role::Dim, footer)));
     body

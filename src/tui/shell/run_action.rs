@@ -69,8 +69,7 @@ pub fn run(
     }
     match action {
         crate::cli::args::Action::List => {
-            super::picker::show(out, harnesses, catalog_root, state_home, None);
-            true
+            super::picker::listing(out, options, harnesses, catalog_root, state_home, None)
         }
         crate::cli::args::Action::Check => {
             let _ = write!(

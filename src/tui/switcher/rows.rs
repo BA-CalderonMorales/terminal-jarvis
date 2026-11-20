@@ -4,7 +4,6 @@
 //! too narrow to carry a useful description, the row drops it rather than
 //! clipping the verdict.
 
-use super::clip;
 use crate::contracts::Harness;
 
 /// Cells reserved for the widest chip, so columns hold across both verdicts.
@@ -32,4 +31,26 @@ pub fn row(
         name = harness.name,
         chip = chip,
     )
+}
+
+/// Clips plain description text within a cell budget, including the ellipsis.
+pub fn clip(description: &str, limit: usize) -> String {
+    if crate::tui::screen::visible_width(description) <= limit {
+        return description.to_string();
+    }
+    if limit < 3 {
+        return ".".repeat(limit);
+    }
+    let mut clipped = String::new();
+    let mut width = 0;
+    for character in description.chars() {
+        let cells = crate::cli::char_cells(character);
+        if width + cells > limit - 3 {
+            break;
+        }
+        clipped.push(character);
+        width += cells;
+    }
+    clipped.push_str("...");
+    clipped
 }

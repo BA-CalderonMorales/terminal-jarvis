@@ -4,19 +4,21 @@ mod unix {
     use std::sync::atomic::{AtomicUsize, Ordering};
 
     static TEMP_ID: AtomicUsize = AtomicUsize::new(0);
-
     fn tj(args: &[&str], home: &str, path: Option<&str>) -> Output {
         let mut command = Command::new(env!("CARGO_BIN_EXE_terminal-jarvis"));
         command
             .arg("--plain")
             .args(args)
+            .env(
+                "TERMINAL_JARVIS_CATALOG",
+                crate::structs::fresh_catalog::root(),
+            )
             .env("TERMINAL_JARVIS_HOME", home);
         if let Some(path) = path {
             command.env("PATH", path);
         }
         command.output().expect("terminal-jarvis runs")
     }
-
     fn temp_home() -> String {
         std::env::temp_dir()
             .join(format!(
@@ -27,7 +29,6 @@ mod unix {
             .to_string_lossy()
             .to_string()
     }
-
     fn stdout(output: &Output) -> String {
         String::from_utf8_lossy(&output.stdout).to_string()
     }

@@ -19,13 +19,7 @@ pub fn walk_catalog() -> Report {
             assert!(keys.insert(key), "catalog row was visited twice");
             sandbox.add_fake(&plan.command.command);
             states.insert(plan.support);
-            probes.push((
-                harness.name.clone(),
-                plan.capability,
-                plan.support,
-                plan.effect,
-                plan.platforms.clone(),
-            ));
+            probes.push((harness.name.clone(), plan.clone()));
             rows.push(Row::from_plan(harness, plan));
         }
     }

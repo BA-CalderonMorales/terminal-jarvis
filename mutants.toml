@@ -29,7 +29,6 @@ exclude_re = [
   "entry\\.rs.*replace \\|\\| with && in parse_failure",
   "table_wrap\\.rs.*replace > with >= in wrap",
   "table_alloc\\.rs.*replace > with >= in widths",
-  "probe\\.rs.*replace < with",
   "style_diagnostics\\.rs.*decisions",
   "args_action\\.rs.*bare_launch",
   "args_options\\.rs.*in extract",

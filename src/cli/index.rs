@@ -16,6 +16,7 @@ use std::path::Path;
 pub use crate::cli::logic::args;
 pub use crate::cli::logic::canonical;
 pub use crate::cli::logic::dispatch_support::session_write_error;
+pub(crate) use crate::cli::logic::guard::explicit_capability;
 pub use crate::cli::logic::guard::stream_invocation;
 pub use crate::cli::logic::invoke_live::headless_stream;
 pub use crate::cli::logic::output_truth;

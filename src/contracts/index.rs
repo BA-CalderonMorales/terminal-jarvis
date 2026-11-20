@@ -14,4 +14,5 @@ pub use crate::contracts::structs::command::CommandPlan;
 pub use crate::contracts::structs::effect::{Effect, Interaction};
 pub use crate::contracts::structs::environment::EnvMode;
 pub use crate::contracts::structs::harness::{CapabilityPlan, Harness};
+pub use crate::contracts::structs::sunset::Sunset;
 pub use crate::contracts::structs::support::{EvidenceMode, SupportState};

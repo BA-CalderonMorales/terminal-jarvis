@@ -13,6 +13,7 @@ fn harness(effect: Effect) -> Harness {
         env_mode: EnvMode::None,
         env: vec![],
         capabilities: vec![plan],
+        sunset: None,
     }
 }
 

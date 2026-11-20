@@ -20,6 +20,7 @@ fn harness() -> Harness {
         env_mode: crate::contracts::EnvMode::None,
         env: vec![],
         capabilities: vec![plan],
+        sunset: None,
     };
     h.capabilities
         .push(test_support::plan(Capability::Headless, "true", vec![]));

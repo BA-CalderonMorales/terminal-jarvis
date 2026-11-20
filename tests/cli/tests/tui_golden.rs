@@ -32,6 +32,34 @@ fn screen(fixture: &Fixture, command: &str, marker: &[u8]) -> Vec<String> {
     rows(painted.last().expect("a final frame"))
 }
 
+/// The picker overlay: the last frame that still carried the filter prompt.
+/// Closing it repaints the shell, so the overlay is found by its own prompt.
+fn picker_screen(fixture: &Fixture) -> Vec<String> {
+    let mut process = launch(
+        fixture,
+        &[("TERM", "xterm-256color"), ("TJ_DEBUG_SIZE", "80x24")],
+    );
+    process.current_dir("/");
+    let (_, bytes) = pty::run_pty_probe(
+        process,
+        &[
+            (b"", Some(FRAME)),
+            (b"list\n", None),
+            (b"", Some(b"filter>")),
+            (b"\x1b", None),
+            (b"", Some(FRAME)),
+            EXIT,
+        ],
+    );
+    let painted = frames(&bytes);
+    let overlay = painted
+        .iter()
+        .rev()
+        .find(|frame| frame.windows(7).any(|window| window == b"filter>"))
+        .expect("the picker painted its prompt");
+    rows(overlay)
+}
+
 /// The screens a person sees, pinned as text.
 ///
 /// A layout is a decision, so it gets a committed frame the way the site gets a
@@ -49,11 +77,7 @@ fn the_screens_are_pinned() {
         &screen(&fixture, "home", b"the command center"),
         &root,
     );
-    golden::check(
-        "list",
-        &screen(&fixture, "list", b"Available Harnesses"),
-        &root,
-    );
+    golden::check("list", &picker_screen(&fixture), &root);
     golden::check("show", &screen(&fixture, "show fixture", b"binary"), &root);
     golden::check(
         "plan",

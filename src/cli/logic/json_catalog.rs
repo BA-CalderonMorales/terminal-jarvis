@@ -4,7 +4,7 @@
 //! the fields behind it. A command that cannot resolve its harness returns
 //! `None` and lets the ordinary failure envelope explain why.
 
-use super::{dispatch_support, json, output};
+use super::{dispatch_support, json, json_graveyard, output};
 use super::{json_capability, json_shape};
 use crate::cli::args;
 use crate::contracts::{Capability, Harness};
@@ -13,6 +13,7 @@ use std::path::Path;
 pub fn document(action: &args::Action, harnesses: &[Harness], home: &Path) -> Option<String> {
     match action {
         args::Action::List => Some(list(harnesses)),
+        args::Action::Graveyard => Some(json_graveyard::document(harnesses)),
         args::Action::Show(name) => named(name.clone(), home, harnesses).map(show),
         args::Action::Plan {
             harness,

@@ -16,6 +16,7 @@ fn harness(command: &str, args: Vec<String>) -> Vec<Harness> {
             command,
             args,
         )],
+        sunset: None,
     }]
 }
 
@@ -53,4 +54,16 @@ fn narration_verb_matches_the_capability() {
     assert_eq!(verb(Capability::Update), "updating");
     assert_eq!(verb(Capability::Headless), "updating");
     assert_eq!(verb(Capability::Yolo), "updating");
+}
+
+#[test]
+fn install_checks_the_target_not_the_package_manager() {
+    let (command, args) = crate::cli::logic::test_support::fail(0);
+    let mut plans = harness(&command, args);
+    plans[0].binary = "tj-target-definitely-not-installed".into();
+    let note = super::errors::installed_note(&plans[0], Capability::Download, String::new());
+    assert!(
+        note.contains("tj-target-definitely-not-installed"),
+        "{note}"
+    );
 }

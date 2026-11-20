@@ -27,11 +27,11 @@ fn zones_never_go_negative_at_the_floor() {
         cols: Size::MIN_COLS,
         rows: Size::MIN_ROWS,
     };
-    assert_eq!(floor.body_rows(), 4);
+    assert_eq!(floor.body_rows(), 7);
     assert_eq!(floor.inner_cols(), Size::MIN_COLS - 2);
     let huge = Size {
         cols: 400,
         rows: 200,
     };
-    assert_eq!(huge.body_rows(), 194);
+    assert_eq!(huge.body_rows(), 197);
 }

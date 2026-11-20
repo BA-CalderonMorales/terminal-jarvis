@@ -6,11 +6,15 @@
 #[path = "logic/overview.rs"]
 mod overview;
 
+#[path = "logic/overview_banner.rs"]
+mod overview_banner;
+
 #[path = "cwd.rs"]
 mod cwd;
 
 pub use cwd::cwd_label;
-pub use overview::{collect, header, plain, styled, Overview};
+pub use overview::{collect, plain, Overview};
+pub use overview_banner::{header, styled};
 
 use crate::contracts::Harness;
 use std::io::Write;
@@ -20,6 +24,11 @@ use std::path::Path;
 pub fn render(out: &mut dyn Write, harnesses: &[Harness], catalog_root: &Path, state_home: &Path) {
     let o = collect(harnesses, catalog_root, state_home);
     let status = styled(&o);
+    let retired = if o.sunset == 0 {
+        String::new()
+    } else {
+        format!("type graveyard · {} retired harness", o.sunset)
+    };
     let title = "Terminal Jarvis";
     let subtitle =
         "Command center for orchestrating context switching between coding-agent harnesses";
@@ -32,6 +41,9 @@ pub fn render(out: &mut dyn Write, harnesses: &[Harness], catalog_root: &Path, s
             crate::tui::screen::dim(subtitle),
             status
         );
+        if !retired.is_empty() {
+            let _ = writeln!(out, "{}", crate::tui::screen::dim(&retired));
+        }
     } else {
         let gap = " ".repeat(width - title.chars().count() - plain(&o).chars().count());
         let _ = writeln!(
@@ -42,5 +54,8 @@ pub fn render(out: &mut dyn Write, harnesses: &[Harness], catalog_root: &Path, s
             status,
             crate::tui::screen::dim(subtitle)
         );
+        if !retired.is_empty() {
+            let _ = writeln!(out, "{}", crate::tui::screen::dim(&retired));
+        }
     }
 }

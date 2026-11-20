@@ -9,6 +9,7 @@ pub fn dummy_harness() -> Harness {
         env_mode: crate::contracts::EnvMode::None,
         env: vec![],
         capabilities: vec![],
+        sunset: None,
     }
 }
 
@@ -31,6 +32,7 @@ pub fn dummy_plan(
         source: "test".into(),
         verified_at: verified_at.into(),
         package: None,
+        uninstall: None,
     }
 }
 

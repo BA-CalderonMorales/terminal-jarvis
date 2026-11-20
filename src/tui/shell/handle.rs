@@ -27,9 +27,16 @@ pub fn handle(
             again_plain()
         }
         Resolved::List(filter) => {
-            super::picker::show(out, harnesses, catalog_root, state_home, filter.as_deref());
+            let shown = super::picker::listing(
+                out,
+                options,
+                harnesses,
+                catalog_root,
+                state_home,
+                filter.as_deref(),
+            );
             Next::Again {
-                picker_shown: true,
+                picker_shown: shown,
                 reset: false,
             }
         }
@@ -54,7 +61,8 @@ pub fn handle(
                     return again_plain();
                 }
             };
-            if crate::tui::screen::active() && stream_gate::eligible(&action) {
+            if crate::tui::screen::active() && stream_gate::eligible(&action, harnesses, state_home)
+            {
                 return Next::Stream { action, options };
             }
             let picker_shown =

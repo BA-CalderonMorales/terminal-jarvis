@@ -18,6 +18,7 @@ fn plan(support: SupportState, platforms: Vec<String>) -> CapabilityPlan {
         source: "probe".into(),
         verified_at: crate::catalog::today_utc(),
         package: None,
+        uninstall: None,
     }
 }
 

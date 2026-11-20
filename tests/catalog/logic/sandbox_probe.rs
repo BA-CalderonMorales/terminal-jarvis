@@ -1,7 +1,7 @@
 use super::Sandbox;
 use crate::structs::input;
 use std::process::Command;
-use terminal_jarvis::contracts::{Capability, Effect, SupportState};
+use terminal_jarvis::contracts::{Capability, CapabilityPlan, Effect, SupportState};
 
 impl Sandbox {
     pub(super) fn probe(&self, harness: &str, capability: Capability) -> std::process::Output {
@@ -30,24 +30,36 @@ impl Sandbox {
     }
 
     /// Every catalog descriptor gets probed. Verified/expected rows run when
-    /// the current platform is claimed; a row narrowed to another platform is
+    /// their evidence is fresh and the platform is claimed; other rows are
     /// correctly blocked, so the guard's platform gate is witnessed too.
-    pub fn verify_guards(
-        &self,
-        samples: &[(String, Capability, SupportState, Effect, Vec<String>)],
-    ) {
+    pub fn verify_guards(&self, samples: &[(String, CapabilityPlan)]) {
         assert_eq!(samples.len(), 225, "every descriptor must be probed");
         let platform = terminal_jarvis::context::platform::id();
         std::thread::scope(|scope| {
             for chunk in samples.chunks(29) {
                 scope.spawn(move || {
-                    for (harness, capability, state, effect, platforms) in chunk {
-                        let output = self.probe(harness, *capability);
+                    for (harness, plan) in chunk {
+                        let (capability, state, effect) =
+                            (plan.capability, plan.support, plan.effect);
+                        let fresh = terminal_jarvis::catalog::freshness_status(plan) == "fresh";
+                        let output = self.probe(harness, capability);
                         let supported =
                             matches!(state, SupportState::Verified | SupportState::Expected);
-                        let claimed = platforms.is_empty()
-                            || platforms.iter().any(|name| Some(name.as_str()) == platform);
-                        if supported && !claimed {
+                        let claimed = plan.platforms.is_empty()
+                            || plan
+                                .platforms
+                                .iter()
+                                .any(|name| Some(name.as_str()) == platform);
+                        if supported && !fresh {
+                            assert_eq!(output.status.code(), Some(4));
+                            assert!(output.stdout.is_empty());
+                            let diagnostic = String::from_utf8_lossy(&output.stderr);
+                            assert!(
+                                diagnostic.contains("evidence from")
+                                    && diagnostic.contains("is stale"),
+                                "{harness}:{capability}: {diagnostic}"
+                            );
+                        } else if supported && !claimed {
                             assert_eq!(
                                 output.status.code(),
                                 Some(4),
@@ -59,7 +71,7 @@ impl Sandbox {
                                 diagnostic.contains("does not support platform"),
                                 "{harness}:{capability}: {diagnostic}"
                             );
-                        } else if supported && effect == &Effect::ReadOnly {
+                        } else if supported && effect == Effect::ReadOnly {
                             assert_eq!(
                                 output.status.code(),
                                 Some(2),

@@ -9,13 +9,38 @@
 
 Headless runs one command per invocation, prints stable line-oriented output
 with `--plain`. Noninteractive state-changing runs require their exact
-`--no-input --confirm=<capability>:<agent>` token. The interactive tui is a chat-style
-switcher: `list` shows the numbered picker with each tool's readiness chip, a
-number or an agent name switches instantly, `list <text>` narrows the picker by
-name or description while the numbers keep their picker positions, `status`
-shows readiness, `home` resets the frame, and `exit` leaves. A slashed name
-(`/codex`) launches an agent behind the same guarded plan-plus-confirm as
-headless. Ctrl+C aimed at a running agent never kills the switcher.
+`--no-input --confirm=<capability>:<agent>` token.
+
+The interactive tui is a command center. `list` opens the fleet as an overlay:
+`↑`/`↓` move the cursor, typing narrows the list live, `Enter` switches, `Esc`
+closes, and digits still jump by picker position while the filter is empty.
+`list <text>` opens with the filter already applied. The status rule under the
+header always names the active agent, fleet readiness, and gate posture, so the
+frame never hides what state it is in.
+
+The prompt is vim-flavoured: `Esc` enters normal mode (`j`/`k` and
+PageUp/PageDown scroll, `g`/`G` jump to the ends), `i` or `Esc` returns to
+typing, `Tab` completes command and agent names, `?` opens help, and `q`
+leaves. A terminal that shrinks below the frame says so instead of silently
+switching to the line prompt, and a first-use conversation notice is accepted
+with a bare `Enter`. A slashed name (`/codex`) launches an agent behind the same
+guarded plan-plus-confirm as headless. Ctrl+C aimed at a running agent never
+kills the switcher.
+
+`uninstall <harness>` prints the removal command and waits for an explicit
+`y`. The tool's own uninstaller runs when its catalog entry documents one;
+otherwise the install channel's inverse runs (npm, uv, or cargo). The binary is
+re-checked afterward, so a copy installed by another channel is reported as
+incomplete instead of being called removed. See
+[harness sources](harness-sources.md) for the channel each agent installs from.
+
+`graveyard` is the retirement ledger: every catalog harness whose upstream
+vendor stopped maintaining it, dated, with what happened and the successor the
+vendor names. It is available headless (`--plain`, `--json`), in the tui
+command table, and marked in the fleet picker with a `[sunset]` chip. Retired
+tools stay installable and removable -- the catalog tells the truth about the
+tool, including how to take it off a machine -- but they are counted apart from
+the maintained fleet and never counted as ready.
 
 ## Automation
 
@@ -23,7 +48,9 @@ headless. Ctrl+C aimed at a running agent never kills the switcher.
 (`{"schema_version":1,"command":…,"ok":…,"exit_code":…,"data":…,"error":…}`).
 `list`, `show`, and `plan` publish the catalog as structure beside the rendered
 `text`: `harnesses[]` with `name`, `display`, `description`, `binary`, `setup`,
-`support` counts, and capability names; `show` adds each capability's
+`support` counts, and capability names; `graveyard` publishes `retired[]` with
+`sunset.at`, `sunset.note`, `sunset.replaced_by`, and `binary_on_path`, plus the
+catalog `total`; `show` adds each capability's
 `support`, `evidence`, `effect`, `network`, `interaction`, `platforms`,
 `command_line`, `source`, `verified_at`, and `package`; `plan` adds the argv as
 `command[]`. `check` publishes diagnostics the same way. A tool can therefore

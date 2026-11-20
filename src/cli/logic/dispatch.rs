@@ -15,6 +15,7 @@ pub fn dispatch(
 ) -> error::Result<(i32, String)> {
     match action {
         Action::List => Ok((0, output::list(harnesses))),
+        Action::Graveyard => Ok((0, output::graveyard(harnesses))),
         Action::Check => unreachable!("check handled by the canonical diagnostics route"),
         Action::Tui => unreachable!("tui handled before catalog dispatch"),
         Action::Current => Ok((0, output::current(dispatch_support::session(home)?))),

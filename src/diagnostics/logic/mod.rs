@@ -7,6 +7,7 @@ pub mod harness;
 pub mod harness_env;
 pub mod harness_input;
 pub mod harness_support;
+pub mod harness_version;
 pub mod inspect;
 pub mod json;
 pub mod local;

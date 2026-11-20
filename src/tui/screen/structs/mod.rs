@@ -20,10 +20,9 @@ impl Size {
         self.cols >= Self::MIN_COLS && self.rows >= Self::MIN_ROWS
     }
 
-    /// Body-zone height: everything minus top border, status, separator,
-    /// separator, prompt, bottom border.
+    /// Body-zone height after the header, status row, and prompt.
     pub fn body_rows(self) -> usize {
-        self.rows.saturating_sub(6).max(1)
+        self.rows.saturating_sub(3).max(1)
     }
 
     /// Inner width between the side borders.

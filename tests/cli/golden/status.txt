@@ -1,4 +1,5 @@
             Terminal Jarvis · ACTIVE fixture · READY 1/1 ready · /
+─ gate acceptance · active fixture · fleet all 1 ready ───────────────────────
 
 
 
@@ -12,7 +13,6 @@
                              READY   1 of 1 ready
                              ready now ─────────
                                fixture
-
 
 
 

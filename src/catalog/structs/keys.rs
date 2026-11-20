@@ -22,7 +22,8 @@ const PLAN_KEYS: [&str; 12] = [
     "source",
     "verified_at",
 ];
-const OPTIONAL_PLAN_KEYS: [&str; 1] = ["package"];
+const OPTIONAL_PLAN_KEYS: [&str; 3] = ["package", "uninstall_command", "uninstall_args"];
+const SUNSET_KEYS: [&str; 3] = ["sunset_at", "sunset_note", "sunset_replaced_by"];
 
 pub fn exact_fields(fields: &Fields, expected: &[&str]) -> Result<(), String> {
     let actual = fields.keys().map(String::as_str).collect::<Vec<_>>();
@@ -65,4 +66,18 @@ pub fn plan_keys(fields: &Fields) -> Result<(), String> {
 
 pub fn harness_keys() -> &'static [&'static str] {
     &HARNESS_KEYS
+}
+
+/// The facade's required keys, plus whichever retirement keys the tool
+/// carries. Retirement is optional, so a maintained tool needs none of them
+/// and a retired one still has to spell out the rest of the facade exactly.
+pub fn harness_keys_match(fields: &Fields) -> Result<(), String> {
+    let mut expected = harness_keys().to_vec();
+    expected.extend(
+        SUNSET_KEYS
+            .iter()
+            .copied()
+            .filter(|key| fields.contains_key(*key)),
+    );
+    exact_fields(fields, &expected)
 }

@@ -59,11 +59,8 @@ pub(super) fn installed_note(
     if !matches!(capability, Capability::Download | Capability::Update) {
         return captured;
     }
-    let binary = harness
-        .plan(capability)
-        .map(|plan| plan.command.command.clone())
-        .unwrap_or_default();
-    if crate::security::command_on_path(&binary) {
+    let binary = &harness.binary;
+    if crate::security::command_on_path(binary) {
         return captured;
     }
     format!(

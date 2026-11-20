@@ -13,6 +13,7 @@ fn harness(name: &str) -> Harness {
         env_mode: EnvMode::None,
         env: vec![],
         capabilities: Capability::ALL.iter().map(|c| cap(*c)).collect(),
+        sunset: None,
     }
 }
 

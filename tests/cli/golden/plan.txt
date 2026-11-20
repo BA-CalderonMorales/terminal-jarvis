@@ -1,4 +1,5 @@
             Terminal Jarvis · ACTIVE fixture · READY 1/1 ready · /
+─ gate acceptance · active fixture · fleet all 1 ready ───────────────────────
 
 
 
@@ -17,7 +18,6 @@
           command     fixture-child
           environment no API key required
           intent      none
-
 
 
 

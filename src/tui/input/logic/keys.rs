@@ -51,6 +51,7 @@ pub(crate) fn decode(sin: &mut impl Read, first: u8) -> Option<Key> {
         b'\r' | b'\n' => Key::Enter,
         0x7f | 0x08 => Key::Backspace,
         0x15 => Key::ClearLine,
+        b'\t' => Key::Char('\t'),
         0x1b => match (next_byte(sin), next_byte(sin)) {
             (Some(b'[' | b'O'), Some(last)) => csi(sin, last),
             _ => Key::Ignored,

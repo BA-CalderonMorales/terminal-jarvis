@@ -34,10 +34,11 @@ pub fn valid_date(value: &str) -> bool {
     };
     let leap = year % 4 == 0 && (year % 100 != 0 || year % 400 == 0);
     let last = match month {
+        1 | 3 | 5 | 7 | 8 | 10 | 12 => 31,
         2 if leap => 29,
         2 => 28,
         4 | 6 | 9 | 11 => 30,
-        _ => 31,
+        _ => return false,
     };
     (1..=last).contains(&day)
 }
@@ -52,5 +53,6 @@ mod tests {
         assert!(valid_date("2024-02-29T00:00:00Z"));
         assert!(!valid_date("2025-02-29T00:00:00Z"));
         assert!(!valid_date("2026-04-31T00:00:00Z"));
+        assert!(!valid_date("2026-13-01T00:00:00Z"));
     }
 }

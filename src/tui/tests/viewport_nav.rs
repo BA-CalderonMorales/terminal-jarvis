@@ -1,4 +1,5 @@
-use super::super::viewport_raw::{Session, ViewportState};
+use super::super::viewport_chrome::ViewportState;
+use super::super::viewport_raw::Session;
 use super::*;
 
 #[test]
@@ -12,6 +13,7 @@ fn eof_ends_a_normal_mode_session() {
     };
     let body = Vec::new();
     let history = Vec::new();
+    let names = vec!["codex".to_string()];
     let mut offset = 0;
     let mut session = Session {
         state: &state,
@@ -19,6 +21,7 @@ fn eof_ends_a_normal_mode_session() {
         body: &body,
         history: &history,
         offset: &mut offset,
+        names: &names,
     };
     let mut mode = Mode::Normal;
     let mut editor = Editor::default();
@@ -29,7 +32,7 @@ fn eof_ends_a_normal_mode_session() {
 }
 
 #[test]
-fn a_resize_continues_without_touching_the_prompt_mode_or_offset() {
+fn tab_completes_in_insert_and_is_inert_in_normal() {
     let state = ViewportState {
         header: String::new(),
         cwd: String::new(),
@@ -37,43 +40,34 @@ fn a_resize_continues_without_touching_the_prompt_mode_or_offset() {
         prefix: String::new(),
         prefix_cells: 0,
     };
-    let body: Vec<String> = (0..50).map(|line| line.to_string()).collect();
+    let body = Vec::new();
     let history = Vec::new();
-    let mut offset = 7;
+    let names = vec!["codex".to_string()];
+    let mut offset = 0;
     let mut session = Session {
         state: &state,
         hint: "",
         body: &body,
         history: &history,
         offset: &mut offset,
+        names: &names,
     };
     let mut editor = Editor::default();
-    editor.feed(Key::Char('h'));
-    editor.feed(Key::Char('i'));
-
+    for character in "run co".chars() {
+        editor.feed(Key::Char(character));
+    }
     let mut insert = Mode::Insert;
     assert!(matches!(
-        key(&mut insert, &mut editor, Key::Resized, &mut session, 0),
+        key(&mut insert, &mut editor, Key::Char('\t'), &mut session, 0),
         Flow::Continue(_)
     ));
-    assert!(
-        matches!(insert, Mode::Insert),
-        "a resize never leaves Insert mode"
-    );
-    assert_eq!(*session.offset, 7, "a resize never scrolls the body");
-    assert_eq!(
-        editor.tail_view(0, 40),
-        "hi",
-        "a resize never edits the line"
-    );
+    assert_eq!(editor.line(), "run codex");
 
+    let before = editor.line().to_string();
     let mut normal = Mode::Normal;
     assert!(matches!(
-        key(&mut normal, &mut editor, Key::Resized, &mut session, 0),
+        key(&mut normal, &mut editor, Key::Char('\t'), &mut session, 0),
         Flow::Continue(_)
     ));
-    assert_eq!(
-        *session.offset, 7,
-        "a resize never scrolls in Normal mode either"
-    );
+    assert_eq!(editor.line(), before, "Normal scrolls; it never edits");
 }

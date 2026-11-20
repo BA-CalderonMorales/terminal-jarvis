@@ -6,6 +6,10 @@ fn run(args: &[&str]) -> (i32, String, String) {
     let output = Command::new(BINARY)
         .args(["--plain"])
         .args(args)
+        .env(
+            "TERMINAL_JARVIS_CATALOG",
+            crate::structs::fresh_catalog::root(),
+        )
         .env("TERMINAL_JARVIS_HOME", temp_home())
         .output()
         .expect("terminal-jarvis runs");

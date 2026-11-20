@@ -69,6 +69,7 @@ fn harness() -> Vec<Harness> {
         env_mode: crate::contracts::EnvMode::None,
         env: vec![],
         capabilities: vec![plan],
+        sunset: None,
     }]
 }
 
@@ -87,5 +88,6 @@ fn plan(command: &str, args: Vec<String>) -> crate::contracts::CapabilityPlan {
         source: "internal:test-fixture".into(),
         verified_at: crate::catalog::today_utc(),
         package: None,
+        uninstall: None,
     }
 }
