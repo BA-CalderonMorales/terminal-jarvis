@@ -2,7 +2,7 @@
 //! what the action is, by which mechanism, and where the bytes come from;
 //! headless narration keeps the complete plan for review.
 use super::args::Options;
-use crate::cli::logic::output;
+use crate::cli::logic::{output, output_plan};
 use crate::contracts::{Capability, CapabilityPlan, Harness};
 
 pub fn confirm_lead(
@@ -11,11 +11,26 @@ pub fn confirm_lead(
     plan: &CapabilityPlan,
     extra: &[String],
 ) -> String {
+    confirm_lead_on(options, harness, plan, extra, &crate::catalog::today_utc())
+}
+
+/// `today` is a parameter so the retirement verb is pinned by tests.
+pub fn confirm_lead_on(
+    options: &Options,
+    harness: &Harness,
+    plan: &CapabilityPlan,
+    extra: &[String],
+    today: &str,
+) -> String {
     if options.narrate {
-        return output::plan_with_extra(harness, plan.capability, extra);
+        return output::plan_with_extra_on(harness, plan.capability, extra, today);
     }
+    // The one line carries the retirement before the user answers.
+    let retirement = output_plan::retirement(harness, today)
+        .map(|line| format!(" · {line}"))
+        .unwrap_or_default();
     format!(
-        "{} {} · {}\n",
+        "{} {} · {}{retirement}\n",
         verb(plan.capability),
         harness.name,
         source(plan)

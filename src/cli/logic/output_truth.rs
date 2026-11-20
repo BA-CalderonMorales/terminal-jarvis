@@ -1,5 +1,11 @@
 use crate::contracts::{CapabilityPlan, Harness, SupportState};
 
+/// The lifecycle word a fleet list shows: `maintained` until upstream
+/// announces a retirement, then `retiring` or `retired` by the given date.
+pub fn status(harness: &Harness, today: &str) -> &'static str {
+    harness.retirement_adjective(today).unwrap_or("maintained")
+}
+
 pub fn support_summary(harness: &Harness) -> String {
     let states = [
         SupportState::Verified,
