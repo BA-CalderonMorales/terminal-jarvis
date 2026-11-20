@@ -1,6 +1,6 @@
 use super::redact::{segment, Redactor};
 use super::{Code, DiagnosticInput, Record, Severity};
-use std::collections::BTreeSet;
+use std::collections::{BTreeMap, BTreeSet};
 use std::path::Path;
 
 #[path = "harness_readiness.rs"]
@@ -9,7 +9,7 @@ mod readiness;
 pub struct HarnessResult {
     pub records: Vec<Record>,
     pub ready: BTreeSet<String>,
-    pub missing: BTreeSet<String>, // absent, as opposed to present but broken
+    pub executables: BTreeMap<String, Code>, // absent, runnable, or broken
 }
 
 pub fn collect(input: &DiagnosticInput, redact: &Redactor<'_>) -> HarnessResult {
@@ -18,7 +18,7 @@ pub fn collect(input: &DiagnosticInput, redact: &Redactor<'_>) -> HarnessResult 
     let index = super::dir_index::DirIndex::from_paths(&input.environment.paths());
     let mut records = Vec::new();
     let mut ready = BTreeSet::new();
-    let mut missing = BTreeSet::new();
+    let mut executables = BTreeMap::new();
     for harness in harnesses {
         let base = format!("harness.{}", segment(&harness.name));
         let (support, support_ready) = super::harness_support::collect(harness, &base);
@@ -50,7 +50,6 @@ pub fn collect(input: &DiagnosticInput, redact: &Redactor<'_>) -> HarnessResult 
             value,
         );
         if resolution.code == Code::Missing {
-            missing.insert(harness.name.clone());
             executable.action = Some(format!("terminal-jarvis install {}", harness.name));
         } else if resolution.code != Code::Ready {
             executable.action = Some("repair the harness executable".into());
@@ -65,6 +64,7 @@ pub fn collect(input: &DiagnosticInput, redact: &Redactor<'_>) -> HarnessResult 
         let harness_ready = harness.retirement.is_none()
             && matches!(resolution.code, Code::Ready | Code::Conflicting)
             && support_ready;
+        executables.insert(harness.name.clone(), resolution.code);
         let missing_here = resolution.code == Code::Missing;
         records.push(readiness::record(
             &base,
@@ -80,7 +80,7 @@ pub fn collect(input: &DiagnosticInput, redact: &Redactor<'_>) -> HarnessResult 
     HarnessResult {
         records,
         ready,
-        missing,
+        executables,
     }
 }
 

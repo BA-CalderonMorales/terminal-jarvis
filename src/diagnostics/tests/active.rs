@@ -16,11 +16,18 @@ fn run(
     missing: &[&str],
 ) -> (Record, bool) {
     let input = input(active, &["xh"]);
+    let mut executables = std::collections::BTreeMap::new();
+    for name in ready {
+        executables.insert(name.to_string(), Code::Ready);
+    }
+    for name in missing {
+        executables.insert(name.to_string(), Code::Missing);
+    }
     collect(
         &input,
         config.map(str::to_string),
         &set(ready),
-        &set(missing),
+        &executables,
     )
 }
 
