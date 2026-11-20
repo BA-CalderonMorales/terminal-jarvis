@@ -6,7 +6,7 @@ use std::sync::Mutex;
 use terminal_jarvis::context;
 
 static TEMP_ID: AtomicUsize = AtomicUsize::new(0);
-static ENV_LOCK: Mutex<()> = Mutex::new(());
+pub(super) static ENV_LOCK: Mutex<()> = Mutex::new(());
 
 fn temp_home() -> PathBuf {
     let path = std::env::temp_dir().join(format!(

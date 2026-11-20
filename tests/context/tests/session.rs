@@ -2,6 +2,11 @@ use std::fs;
 use std::process::{Command, Output};
 #[rustfmt::skip]
 fn se(o: &Output) -> String { String::from_utf8_lossy(&o.stderr).to_string() }
+// The child inherits this process's environment at spawn, and the `context`
+// tests mutate HOME and TERMINAL_JARVIS_* under ENV_LOCK; spawning without it
+// let a child see another test's catalog path and fail.
+#[rustfmt::skip]
+fn lock() -> std::sync::MutexGuard<'static, ()> { super::context::ENV_LOCK.lock().unwrap_or_else(|e| e.into_inner()) }
 #[rustfmt::skip]
 fn home(name: &str) -> std::path::PathBuf { let h = std::env::temp_dir().join(format!("{}-{}", name, std::process::id())); let _ = fs::remove_dir_all(&h); fs::create_dir_all(&h).unwrap(); h }
 
@@ -9,6 +14,7 @@ fn home(name: &str) -> std::path::PathBuf { let h = std::env::temp_dir().join(fo
 fn valid_session_skips_warning() {
     let h = home("tj-v");
     fs::write(h.join("session.toml"), "active_harness = \"codex\"").unwrap();
+    let _env = lock();
     let o = Command::new(env!("CARGO_BIN_EXE_terminal-jarvis"))
         .arg("current")
         .env("TERMINAL_JARVIS_HOME", &h)
@@ -20,6 +26,7 @@ fn valid_session_skips_warning() {
 fn garbled_session_warns_on_stderr() {
     let h = home("tj-g");
     fs::write(h.join("session.toml"), "active_harness = \"codex\n").unwrap();
+    let _env = lock();
     let o = Command::new(env!("CARGO_BIN_EXE_terminal-jarvis"))
         .arg("current")
         .env("TERMINAL_JARVIS_HOME", &h)
@@ -31,6 +38,7 @@ fn garbled_session_warns_on_stderr() {
 fn corrupt_session_error_reaches_stderr() {
     let h = home("tj-c");
     fs::write(h.join("session.toml"), [0xff_u8]).unwrap();
+    let _env = lock();
     let o = Command::new(env!("CARGO_BIN_EXE_terminal-jarvis"))
         .arg("current")
         .env("TERMINAL_JARVIS_HOME", h)
