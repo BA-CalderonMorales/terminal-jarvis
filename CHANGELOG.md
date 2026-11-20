@@ -1,6 +1,9 @@
 # Changelog
 
-## [Unreleased]
+## [0.1.25] - 2026-11-20
+
+0.1.24 was prepared but never published, so its changes (below) reach
+users for the first time in this release.
 
 ### Changed
 
