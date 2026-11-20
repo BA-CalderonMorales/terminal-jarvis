@@ -5,16 +5,13 @@
 use super::super::value_block;
 use super::super::{output_fields as fields, style};
 use crate::cli::structs::value_block::{Group, Row};
-use crate::contracts::Harness;
+use crate::contracts::{CommandPlan, Harness};
 
-pub fn uninstall(
-    harness: &Harness,
-    command: &crate::contracts::CommandPlan,
-    token: &str,
-) -> String {
+pub fn uninstall(harness: &Harness, command: &CommandPlan, token: &str) -> String {
+    let effect = effect(command);
     if style::plain() {
         return format!(
-            "uninstall:{}\ncommand: {}\neffect: changes files on this machine; works offline; runs unattended\nflags: --no-input --confirm={token}\n",
+            "uninstall:{}\ncommand: {}\neffect: {effect}\nflags: --no-input --confirm={token}\n",
             harness.name,
             command.render()
         );
@@ -22,13 +19,7 @@ pub fn uninstall(
     let width = fields::width();
     let groups = [
         Group::new("what runs", vec![Row::new("command", command.render())]),
-        Group::new(
-            "what it does",
-            vec![Row::new(
-                "effect",
-                "changes files on this machine; works offline; runs unattended",
-            )],
-        ),
+        Group::new("what it does", vec![Row::new("effect", effect)]),
         Group::new(
             "to run it",
             vec![Row::new("flags", format!("--no-input --confirm={token}"))],
@@ -37,6 +28,20 @@ pub fn uninstall(
     let mut lines = vec![format!("Plan: uninstall {}", harness.name)];
     lines.extend(value_block::card(&groups, width));
     lines.join("\n")
+}
+
+/// Only a local package-manager removal is known to work offline; a tool's
+/// own uninstaller may reach the network, so nothing is claimed for it.
+fn effect(command: &CommandPlan) -> &'static str {
+    let local = matches!(
+        command.command.as_str(),
+        "npm" | "uv" | "cargo" | "pip" | "pip3" | "pipx"
+    ) && command.args.iter().any(|arg| arg == "uninstall");
+    if local {
+        "changes files on this machine; works offline; runs unattended"
+    } else {
+        "changes files on this machine; runs unattended"
+    }
 }
 
 #[cfg(test)]

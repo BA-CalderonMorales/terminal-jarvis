@@ -1,7 +1,7 @@
 # Harness Install Sources
 
 Which channel each harness installs from, verified against the upstream project
-on 2026-10-29. The catalog's `download` rows are the executable truth; this page
+on 2026-10-29 (amp and claude on 2026-11-15). The catalog's `download` rows are the executable truth; this page
 records why each channel is the official one.
 
 | Harness | Channel | Evidence |

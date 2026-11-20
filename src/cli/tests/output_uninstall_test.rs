@@ -48,3 +48,21 @@ fn rich_preview_is_a_card_a_user_can_read_before_consenting() {
         "{text}"
     );
 }
+
+#[test]
+fn a_package_manager_removal_says_it_works_offline() {
+    let previous = style::set(true, true);
+    let text = uninstall(&harness(), &removal(), "uninstall:probe");
+    style::restore(previous);
+    assert!(text.contains("effect: changes files on this machine; works offline;"));
+}
+
+#[test]
+fn a_tools_own_uninstaller_makes_no_network_claim() {
+    let own = CommandPlan::new("probe".into(), vec!["uninstall".into(), "--force".into()]);
+    let previous = style::set(true, true);
+    let text = uninstall(&harness(), &own, "uninstall:probe");
+    style::restore(previous);
+    assert!(text.contains("effect: changes files on this machine; runs unattended"));
+    assert!(!text.contains("offline"), "{text}");
+}
