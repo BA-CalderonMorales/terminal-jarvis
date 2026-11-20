@@ -28,9 +28,11 @@ consent; capability names alone do not establish safety.
 
 Freshness uses the current UTC date at runtime. `verified` evidence lasts 30
 days; `expected` and `manual` evidence last 90 days, with a one-day allowance
-for future dates. Stale descriptors still load for inspection. Execution and
-readiness checks reject stale executable claims. Invalid calendar dates are
-schema errors. There is no build-time freshness override.
+for future dates. Freshness is reported, never enforced: `plan` and `show`
+state how old a row's evidence is, while execution and readiness ignore it.
+The catalog ships inside the binary, so stale evidence is the maintainer's
+signal to refresh, not something a user can act on. Invalid calendar dates
+are schema errors. There is no build-time freshness override.
 
 Before claiming fresh evidence, repeat the documented verification in a
 disposable environment and retain its provenance. A package version bump or a

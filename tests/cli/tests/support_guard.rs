@@ -34,8 +34,11 @@ fn non_executable_support_states_fail_before_gate_or_child() {
     }
 }
 
+/// Stale evidence is a maintainer signal surfaced in `plan`, not a user-facing
+/// lock. The catalog ships inside the binary, so "refresh the upstream
+/// evidence" was an instruction the user could not carry out.
 #[test]
-fn stale_executable_claim_fails_closed_before_gate_or_child() {
+fn stale_evidence_previews_instead_of_failing_closed() {
     let fixture = Fixture::new("expected", "expected", MARKER_SCRIPT);
     set_field(
         &fixture,
@@ -44,10 +47,9 @@ fn stale_executable_claim_fails_closed_before_gate_or_child() {
         "\"2025-01-01T00:00:00Z\"",
     );
     let output = fixture.run(&["--plain", "install", "fixture", "--dry-run"]);
-    assert_ne!(output.status.code(), Some(0));
-    assert!(!fixture.spawned());
+    assert_eq!(output.status.code(), Some(0));
+    assert!(!fixture.spawned(), "a preview must not run the installer");
     assert!(!fixture.gate_spawned());
-    assert!(String::from_utf8_lossy(&output.stderr).contains("fresh"));
 }
 
 #[test]

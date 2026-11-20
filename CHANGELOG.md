@@ -1,5 +1,15 @@
 # Changelog
 
+## [Unreleased]
+
+### Fixed
+
+- Catalog evidence older than its refresh window no longer blocks install,
+  update, launch, or readiness. In 0.1.23, rows that aged past 30 or 90
+  days refused to run, `--dry-run` included, and installed tools read as not
+  ready; the only fix was a catalog refresh users cannot make. `plan` and
+  `show` still report evidence age.
+
 ## [0.1.24] - 2026-11-04
 
 ### Added

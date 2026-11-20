@@ -26,17 +26,26 @@ fn accepts_expected_support_with_fresh_evidence_and_matching_platform() {
     assert!(result.is_ok());
 }
 
+/// Stale evidence is a maintainer signal, not a user-facing lock. The catalog
+/// ships with the binary, so "refresh the upstream evidence" is an instruction
+/// the user cannot carry out; blocking on it locked installs in 0.1.23 once
+/// the catalog rows aged past their refresh window.
 #[test]
-fn rejects_stale_evidence() {
+fn accepts_stale_evidence_and_leaves_the_warning_to_the_caller() {
     let harness = dummy_harness();
-    // Use a very old date that will be stale
     let plan = dummy_plan(
         SupportState::Verified,
         "2024-01-01T00:00:00Z",
         vec![platform_str().into()],
     );
+    assert_eq!(
+        crate::catalog::freshness_status(&plan),
+        "stale",
+        "staleness is still reported"
+    );
     let result = check(&harness, &plan, false);
-    assert!(result.is_err());
-    let err = result.unwrap_err();
-    assert_eq!(err.code, "evidence_stale");
+    assert!(
+        result.is_ok(),
+        "stale evidence must not block execution: {result:?}"
+    );
 }

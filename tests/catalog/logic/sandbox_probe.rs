@@ -30,7 +30,7 @@ impl Sandbox {
     }
 
     /// Every catalog descriptor gets probed. Verified/expected rows run when
-    /// their evidence is fresh and the platform is claimed; other rows are
+    /// the platform is claimed, however old their evidence; other rows are
     /// correctly blocked, so the guard's platform gate is witnessed too.
     pub fn verify_guards(&self, samples: &[(String, CapabilityPlan)]) {
         assert_eq!(samples.len(), 225, "every descriptor must be probed");
@@ -41,7 +41,6 @@ impl Sandbox {
                     for (harness, plan) in chunk {
                         let (capability, state, effect) =
                             (plan.capability, plan.support, plan.effect);
-                        let fresh = terminal_jarvis::catalog::freshness_status(plan) == "fresh";
                         let output = self.probe(harness, capability);
                         let supported =
                             matches!(state, SupportState::Verified | SupportState::Expected);
@@ -50,16 +49,9 @@ impl Sandbox {
                                 .platforms
                                 .iter()
                                 .any(|name| Some(name.as_str()) == platform);
-                        if supported && !fresh {
-                            assert_eq!(output.status.code(), Some(4));
-                            assert!(output.stdout.is_empty());
-                            let diagnostic = String::from_utf8_lossy(&output.stderr);
-                            assert!(
-                                diagnostic.contains("evidence from")
-                                    && diagnostic.contains("is stale"),
-                                "{harness}:{capability}: {diagnostic}"
-                            );
-                        } else if supported && !claimed {
+                        // Evidence age is reported, never enforced, so a stale
+                        // row follows the same branches as a fresh one.
+                        if supported && !claimed {
                             assert_eq!(
                                 output.status.code(),
                                 Some(4),

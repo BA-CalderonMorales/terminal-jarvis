@@ -1,5 +1,5 @@
 use crate::contracts::{CapabilityPlan, Harness, SupportState};
-use crate::{catalog, context::platform, security};
+use crate::{context::platform, security};
 
 pub fn is_harness_ready(harness: &Harness) -> bool {
     !harness.is_sunset()
@@ -12,8 +12,7 @@ fn executable_support(plan: &CapabilityPlan) -> bool {
     matches!(
         plan.support,
         SupportState::Verified | SupportState::Expected
-    ) && catalog::freshness_status(plan) == "fresh"
-        && platform::id().is_some_and(|id| plan.platforms.iter().any(|candidate| candidate == id))
+    ) && platform::id().is_some_and(|id| plan.platforms.iter().any(|candidate| candidate == id))
 }
 
 #[cfg(test)]

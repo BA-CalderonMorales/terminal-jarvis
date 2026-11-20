@@ -60,8 +60,11 @@ fn guarded_states_are_never_executable() {
 }
 
 #[test]
-fn stale_evidence_is_never_executable() {
+fn stale_evidence_does_not_disqualify_a_capability() {
     let mut stale = plan(SupportState::Verified, vec![current()]);
     stale.verified_at = "2000-01-01T00:00:00Z".into();
-    assert!(!executable_support(&stale));
+    assert!(
+        executable_support(&stale),
+        "a claimed capability stays executable; freshness is a separate signal"
+    );
 }
