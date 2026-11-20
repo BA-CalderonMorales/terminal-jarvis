@@ -13,14 +13,14 @@ fn clear() {
     std::env::remove_var("TERMINAL_JARVIS_CACHE");
 }
 
+// Pass "no channel" in rather than infer it: `channel()` falls back to the
+// running binary's path, so inferring made this test read the runner's
+// filesystem. It started failing in CI when the runner moved to Rust 1.100.
 #[test]
 fn plain_version_no_channel() {
-    with_env(|| {
-        clear();
-        let out = text(false, Path::new("/cat"), Path::new("/home"));
-        assert!(out.starts_with("terminal-jarvis "));
-        assert!(!out.contains('('));
-    });
+    let out = render(false, None, Path::new("/cat"), Path::new("/home"));
+    assert!(out.starts_with("terminal-jarvis "), "{out}");
+    assert!(!out.contains('('), "{out}");
 }
 #[test]
 fn source_channel_suffix() {
@@ -79,7 +79,7 @@ fn homebrew_path_detection() {
 fn verbose_text_defaults() {
     with_env(|| {
         clear();
-        let out = text(true, Path::new("/cat"), Path::new("/home"));
+        let out = render(true, None, Path::new("/cat"), Path::new("/home"));
         assert!(out.contains("unknown") && out.contains("unavailable"));
         assert!(!out.contains("WRAPPER"));
     });
