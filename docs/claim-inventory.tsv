@@ -1045,7 +1045,7 @@ harness:eca	display	narration	ECA	none	assertion	asserted
 harness:eca	env	environment	["ANTHROPIC_API_KEY", "OPENAI_API_KEY", "ECA_API_KEY"]	gate:env	evidence	gate
 harness:eca	env_mode	environment	any	gate:env	evidence	gate
 harness:eca	name	identity	eca	gate:identity	evidence	gate
-harness:eca/download	args	execution-shape	["-c", "set -f; IFS=; script=$(curl -fsSL https://raw.githubusercontent.com/editor-code-assistant/eca-cli/main/install) && printf %s $script | bash -s -- --dir \"$HOME/.local/bin\""]	gate:command-shape	evidence	gate
+harness:eca/download	args	execution-shape	["-c", "set -f; IFS=; script=$(curl -fsSL https://raw.githubusercontent.com/editor-code-assistant/eca/master/install) && printf %s $script | bash -s -- --dir $HOME/.local/bin"]	gate:command-shape	evidence	gate
 harness:eca/download	command	execution-shape	sh	gate:command-shape	evidence	gate
 harness:eca/download	effect	risk-class	state-changing	gate:effect-class	evidence	gate
 harness:eca/download	evidence	support-state	deterministic	gate:evidence-pairing	evidence	gate
@@ -1054,7 +1054,7 @@ harness:eca/download	interaction	risk-class	noninteractive	gate:effect-class	evi
 harness:eca/download	network	risk-class	true	gate:effect-class	evidence	gate
 harness:eca/download	platforms	platform-scope	[]	gate:platform-name	evidence	asserted
 harness:eca/download	source	provenance	https://eca.dev/install	none	assertion	external
-harness:eca/download	summary	narration	Install the ECA CLI into ~/.local/bin; the upstream installer defaults to /usr/local/bin and needs root.	none	assertion	asserted
+harness:eca/download	summary	narration	Install the ECA CLI (the `eca` binary) into ~/.local/bin; the upstream installer defaults to /usr/local/bin and needs root.	none	assertion	asserted
 harness:eca/download	support	support-state	unknown	gate:evidence-pairing	evidence	gate
 harness:eca/download	verified_at	freshness	2026-11-15T00:00:00Z	constant:freshness	evidence	runtime-gate
 harness:eca/headless	args	execution-shape	["--help"]	gate:command-shape	evidence	gate
@@ -1855,7 +1855,7 @@ harness:letta	display	narration	Letta	none	assertion	asserted
 harness:letta	env	environment	["ANTHROPIC_API_KEY", "OPENAI_API_KEY", "LETTA_API_KEY"]	gate:env	evidence	gate
 harness:letta	env_mode	environment	any	gate:env	evidence	gate
 harness:letta	name	identity	letta	gate:identity	evidence	gate
-harness:letta/download	args	execution-shape	["install", "-g", "@letta-ai/letta-code@latest"]	gate:command-shape	evidence	gate
+harness:letta/download	args	execution-shape	["install", "-g", "@letta-ai/letta-code"]	gate:command-shape	evidence	gate
 harness:letta/download	command	execution-shape	npm	gate:command-shape	evidence	gate
 harness:letta/download	effect	risk-class	state-changing	gate:effect-class	evidence	gate
 harness:letta/download	evidence	support-state	deterministic	gate:evidence-pairing	evidence	gate

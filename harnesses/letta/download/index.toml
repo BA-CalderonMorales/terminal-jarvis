@@ -1,6 +1,6 @@
 summary = "Install Letta from its documented distribution channel."
 command = "npm"
-args = ["install", "-g", "@letta-ai/letta-code@latest"]
+args = ["install", "-g", "@letta-ai/letta-code"]
 support = "expected"
 evidence = "deterministic"
 effect = "state-changing"

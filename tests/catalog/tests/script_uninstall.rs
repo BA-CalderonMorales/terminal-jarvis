@@ -54,3 +54,26 @@ fn script_installers_declare_an_uninstaller_or_are_allowlisted() {
         }
     }
 }
+
+/// The catalog parser keeps inner quotes and does not unescape them, so a
+/// quoted path reaches the shell with literal quote characters. Script rows
+/// write `$HOME/...` unquoted; `set -f; IFS=` already stops word-splitting.
+#[test]
+fn shell_rows_carry_no_backslash_or_double_quote_in_args() {
+    let harnesses = catalog::load(Path::new("harnesses")).expect("catalog loads");
+    for harness in &harnesses {
+        for plan in &harness.capabilities {
+            if !matches!(plan.command.command.as_str(), "sh" | "bash") {
+                continue;
+            }
+            for arg in &plan.command.args {
+                assert!(
+                    !arg.contains('\\') && !arg.contains('"'),
+                    "{} {:?}: quote or backslash in args",
+                    harness.name,
+                    plan.capability
+                );
+            }
+        }
+    }
+}

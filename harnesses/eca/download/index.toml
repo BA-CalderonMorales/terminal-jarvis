@@ -1,6 +1,6 @@
-summary = "Install the ECA CLI into ~/.local/bin; the upstream installer defaults to /usr/local/bin and needs root."
+summary = "Install the ECA CLI (the `eca` binary) into ~/.local/bin; the upstream installer defaults to /usr/local/bin and needs root."
 command = "sh"
-args = ["-c", "set -f; IFS=; script=$(curl -fsSL https://raw.githubusercontent.com/editor-code-assistant/eca-cli/main/install) && printf %s $script | bash -s -- --dir \"$HOME/.local/bin\""]
+args = ["-c", "set -f; IFS=; script=$(curl -fsSL https://raw.githubusercontent.com/editor-code-assistant/eca/master/install) && printf %s $script | bash -s -- --dir $HOME/.local/bin"]
 support = "unknown"
 evidence = "deterministic"
 effect = "state-changing"

@@ -15,8 +15,8 @@ records why each channel is the official one.
 | crush | `npm install -g @charmland/crush` | npm bin `crush`, repo `charmbracelet/crush` |
 | cursor-agent | `curl https://cursor.com/install -fsS \| bash` | Cursor's CLI docs; installer links both `agent` and legacy `cursor-agent` |
 | droid | `https://app.factory.ai/cli` | Factory's documented installer |
-| eca | `editor-code-assistant/eca-cli` install script, `--dir ~/.local/bin` | Project's own installer (eca.dev/install); the default `/usr/local/bin` needs root |
-| forge | `https://antinomy.ai/cli` | Forge's own installer; the npm package lags the release line (repo `tailcallhq/forgecode`) |
+| eca | `editor-code-assistant/eca` install script, `--dir ~/.local/bin` | Project's own installer (eca.dev/install) writes the `eca` binary; the default `/usr/local/bin` needs root. `eca-cli` is a different binary |
+| forge | `https://antinomy.ai/cli` | Forge's own installer; the npm package lags the release line (repo `tailcallhq/forgecode`); caveat: the vendor script removes an existing npm install before downloading, and we cannot patch that |
 | gemini | `npm install -g @google/gemini-cli` | npm bin `gemini`, repo `google-gemini/gemini-cli`; **retired 2026-06-18** -- see [graveyard](usage.md) |
 | goose | `aaif-goose/goose` stable installer | Documented at goose-docs.ai; needs no sudo |
 | hermes | `https://hermes-agent.nousresearch.com/install.sh` | Nous Research's own installer, installs to `~/.local/bin` |
@@ -27,7 +27,7 @@ records why each channel is the official one.
 | nanocoder | `npm install -g @nanocollective/nanocoder` | npm bin `nanocoder`, repo `Nano-Collective/nanocoder` |
 | ollama | `https://ollama.com/install.sh` | Ollama's documented installer |
 | openclaw | `https://openclaw.ai/install.sh` | OpenClaw's own installer (docs.openclaw.ai/install); npm 11+ needs `--allow-scripts` for the package; removal `npm uninstall -g openclaw` per docs.openclaw.ai/install/uninstall |
-| opencode | `npm install -g @opencode/cli@latest` | OpenCode V2 (opencode.ai/docs/migrate-v1); the `opencode-ai` package still installs V1 |
+| opencode | `npm install -g @opencode/cli@latest` | OpenCode V2 (opencode.ai/docs/migrate-v1); the `opencode-ai` package still installs V1; caveat: `update` is a plain `npm update -g` and does not migrate a V1 install, a maintainer design call left as is |
 | pi | `npm install -g --ignore-scripts @earendil-works/pi-coding-agent` | Pi docs require `--ignore-scripts` for npm; installer is the pinned alternative |
 | qwen | `npm install -g @qwen-code/qwen-code` | npm bin `qwen`, repo `QwenLM/qwen-code` |
 | vibe | `https://mistral.ai/vibe/install.sh` | Mistral's documented installer |
