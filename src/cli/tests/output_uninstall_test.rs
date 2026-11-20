@@ -37,16 +37,21 @@ fn plain_preview_names_the_command_and_the_consent_token() {
 
 #[test]
 fn rich_preview_is_a_card_a_user_can_read_before_consenting() {
-    let previous = style::set(false, true);
-    let text = uninstall(&harness(), &removal(), "uninstall:probe");
-    style::restore(previous);
-    assert!(text.starts_with("Plan: uninstall probe"), "{text}");
-    assert!(text.contains("npm uninstall -g @scope/probe"), "{text}");
-    assert!(text.contains("changes files on this machine"), "{text}");
-    assert!(
-        text.contains("--no-input --confirm=uninstall:probe"),
-        "{text}"
-    );
+    // Pinned widths, never the caller's COLUMNS; 40 is the narrowest the
+    // table reports, where values wrap, so words are compared, not lines.
+    for width in [100, 40] {
+        let previous = style::set(false, true);
+        let text = render(&harness(), &removal(), "uninstall:probe", width);
+        style::restore(previous);
+        let words = text.split_whitespace().collect::<Vec<_>>().join(" ");
+        assert!(text.starts_with("Plan: uninstall probe"), "{text}");
+        assert!(words.contains("npm uninstall -g @scope/probe"), "{text}");
+        assert!(words.contains("changes files on this machine"), "{text}");
+        assert!(
+            words.contains("--no-input --confirm=uninstall:probe"),
+            "{text}"
+        );
+    }
 }
 
 #[test]

@@ -8,6 +8,11 @@ use crate::cli::structs::value_block::{Group, Row};
 use crate::contracts::{CommandPlan, Harness};
 
 pub fn uninstall(harness: &Harness, command: &CommandPlan, token: &str) -> String {
+    render(harness, command, token, fields::width())
+}
+
+/// The preview at an explicit width, so a test never inherits `COLUMNS`.
+fn render(harness: &Harness, command: &CommandPlan, token: &str, width: usize) -> String {
     let effect = effect(command);
     if style::plain() {
         return format!(
@@ -16,7 +21,6 @@ pub fn uninstall(harness: &Harness, command: &CommandPlan, token: &str) -> Strin
             command.render()
         );
     }
-    let width = fields::width();
     let groups = [
         Group::new("what runs", vec![Row::new("command", command.render())]),
         Group::new("what it does", vec![Row::new("effect", effect)]),
