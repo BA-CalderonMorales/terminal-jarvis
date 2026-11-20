@@ -1,4 +1,7 @@
 use super::*;
+
+#[path = "uninstall_script_hint_test.rs"]
+mod script_hint;
 use crate::contracts::{
     Capability, CapabilityPlan, CommandPlan, Effect, EnvMode, EvidenceMode, Interaction,
     SupportState,

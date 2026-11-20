@@ -10,3 +10,5 @@ platforms = []
 executable = "sh"
 source = "https://docs.openclaw.ai/install"
 verified_at = "2026-11-15T00:00:00Z"
+uninstall_command = "npm"
+uninstall_args = ["uninstall", "-g", "openclaw"]

@@ -15,9 +15,9 @@ pub fn run(harnesses: &[Harness], name: &str, options: &Options) -> error::Resul
     let harness = dispatch_support::find(harnesses, name)?;
     let download = harness
         .plan(Capability::Download)
-        .ok_or_else(|| uninstall_plan::unavailable(name))?;
+        .ok_or_else(|| uninstall_plan::unavailable(name, None))?;
     let derived = uninstall_plan::derive(download, harness)
-        .ok_or_else(|| uninstall_plan::unavailable(name))?;
+        .ok_or_else(|| uninstall_plan::unavailable(name, Some(&download.source)))?;
     let token = format!("uninstall:{name}");
     // Removal is destructive, so its preview must exist before the consent
     // token is known, and `--dry-run` wins even over a matching token:

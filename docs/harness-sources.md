@@ -26,7 +26,7 @@ records why each channel is the official one.
 | llxprt | `npm install -g @vybestack/llxprt-code` | npm bin `llxprt`, repo `vybestack/llxprt-code` |
 | nanocoder | `npm install -g @nanocollective/nanocoder` | npm bin `nanocoder`, repo `Nano-Collective/nanocoder` |
 | ollama | `https://ollama.com/install.sh` | Ollama's documented installer |
-| openclaw | `https://openclaw.ai/install.sh` | OpenClaw's own installer (docs.openclaw.ai/install); npm 11+ needs `--allow-scripts` for the package |
+| openclaw | `https://openclaw.ai/install.sh` | OpenClaw's own installer (docs.openclaw.ai/install); npm 11+ needs `--allow-scripts` for the package; removal `npm uninstall -g openclaw` per docs.openclaw.ai/install/uninstall |
 | opencode | `npm install -g @opencode/cli@latest` | OpenCode V2 (opencode.ai/docs/migrate-v1); the `opencode-ai` package still installs V1 |
 | pi | `npm install -g --ignore-scripts @earendil-works/pi-coding-agent` | Pi docs require `--ignore-scripts` for npm; installer is the pinned alternative |
 | qwen | `npm install -g @qwen-code/qwen-code` | npm bin `qwen`, repo `QwenLM/qwen-code` |

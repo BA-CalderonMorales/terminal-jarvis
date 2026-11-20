@@ -25,6 +25,23 @@ a warning, scheduled is information.
 Ledger entries for mistakes in the `harnesses/` data plane (capability
 metadata that describes a real CLI). Newest first.
 
+## A package-manager row replaced by a script row silently loses its derived uninstall
+
+(first observed in: 0.1.26 data refresh)
+
+**Pattern:** `forge` and `openclaw` download rows moved from `npm install -g`
+to a vendor `curl | bash` installer. `uninstall_plan::derive` only inverts
+npm/uv/cargo, so `terminal-jarvis uninstall forge|openclaw` started failing
+with `uninstall_unavailable`.
+
+**Why it is wrong:** Nothing in the row diff shows the lost capability; the
+removal verb just stops working for a tool that used to have it.
+
+**Fix:** A script-installer row declares `uninstall_command`/`uninstall_args`
+grounded in vendor docs, or sits on the commented allowlist in
+`tests/catalog/tests/script_uninstall.rs` with a reason. The failure message
+points at the row's `source` instead of a generic package-manager hint.
+
 ## An executing row claims to run anywhere through a POSIX shell
 
 (first observed in: 0.1.21 claim audit)

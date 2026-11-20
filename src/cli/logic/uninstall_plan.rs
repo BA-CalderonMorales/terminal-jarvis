@@ -5,11 +5,17 @@
 use super::error;
 use crate::contracts::{CapabilityPlan, Harness};
 
-pub(super) fn unavailable(name: &str) -> error::Failure {
+/// `source` is the download row's own evidence URL; a script install has no
+/// derivable inverse, so the vendor page is the honest pointer.
+pub(super) fn unavailable(name: &str, source: Option<&str>) -> error::Failure {
+    let hint = match source.filter(|url| url.starts_with("https://")) {
+        Some(url) => format!("{name} was installed by a script; follow the vendor docs at {url}"),
+        None => "remove it with the tool that installed it".to_string(),
+    };
     error::Failure::state(
         "uninstall_unavailable",
         format!("no uninstaller derivable for {name}"),
-        "remove it with its own package manager",
+        hint,
     )
 }
 

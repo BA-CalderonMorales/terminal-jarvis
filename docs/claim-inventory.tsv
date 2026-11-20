@@ -2328,6 +2328,8 @@ harness:openclaw/download	platforms	platform-scope	[]	gate:platform-name	evidenc
 harness:openclaw/download	source	provenance	https://docs.openclaw.ai/install	none	assertion	external
 harness:openclaw/download	summary	narration	Install OpenClaw with its own installer; npm 11+ needs --allow-scripts for this package.	none	assertion	asserted
 harness:openclaw/download	support	support-state	unknown	gate:evidence-pairing	evidence	gate
+harness:openclaw/download	uninstall_args	execution-shape	["uninstall", "-g", "openclaw"]	gate:uninstall-pairing	evidence	gate
+harness:openclaw/download	uninstall_command	execution-shape	npm	gate:uninstall-pairing	evidence	gate
 harness:openclaw/download	verified_at	freshness	2026-11-15T00:00:00Z	constant:freshness	evidence	runtime-gate
 harness:openclaw/headless	args	execution-shape	["--help"]	gate:command-shape	evidence	gate
 harness:openclaw/headless	command	execution-shape	openclaw	gate:command-shape	evidence	gate
