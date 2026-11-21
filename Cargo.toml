@@ -20,6 +20,7 @@ include = [
   "/src/**",
   "/harnesses/**",
   "/gates/**",
+  "/flags/**",
   "/tests/**",
   "/docs/*.md",
   "/README.md",
@@ -46,6 +47,10 @@ path = "tests/catalog/index.rs"
 [[test]]
 name = "gates"
 path = "tests/gates/index.rs"
+
+[[test]]
+name = "flags"
+path = "tests/flags/index.rs"
 
 [[test]]
 name = "diagnostics"

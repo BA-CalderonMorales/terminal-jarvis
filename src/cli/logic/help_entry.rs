@@ -77,6 +77,10 @@ pub(super) fn entry(name: &str) -> (&'static str, &'static str) {
             "terminal-jarvis gate [status|list|enable [name]|disable|run [name]]",
             "Inspect or control optional local gates.",
         ),
+        "settings" => (
+            "terminal-jarvis settings [list|set <flag> on|off|reset <flag>] [--dry-run]",
+            "List optional features, or turn one on, off, or back to its default.",
+        ),
         "templates" | "db" => (
             "terminal-jarvis help",
             "This removed command returns migration guidance.",

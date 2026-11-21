@@ -42,6 +42,7 @@ fn every_named_command_has_matching_help_forms() {
         "cache",
         "security",
         "gate",
+        "settings",
         "templates",
         "db",
     ];

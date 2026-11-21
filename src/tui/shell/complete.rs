@@ -22,6 +22,7 @@ pub const COMMANDS: &[&str] = &[
     "quit",
     "run",
     "security",
+    "settings",
     "show",
     "uninstall",
     "update",

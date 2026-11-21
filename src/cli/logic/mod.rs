@@ -40,6 +40,8 @@ pub(crate) mod prompt_lead;
 pub mod resolve;
 pub(crate) mod self_update;
 pub(crate) mod self_update_intent;
+pub(crate) mod settings_cmd;
+pub(crate) mod settings_output;
 pub mod style;
 pub(crate) mod table;
 pub(crate) mod text_wrap;
