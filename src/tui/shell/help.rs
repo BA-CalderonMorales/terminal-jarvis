@@ -32,6 +32,10 @@ pub fn text(inner: usize) -> String {
             "auth | config | cache | security",
             "inspect local setup and posture",
         ),
+        (
+            "settings [set|reset <flag>]",
+            "optional features, on or off",
+        ),
         ("/debug [on|off]", "raw, verbose view"),
         (
             "converse <turns> <a> <b> <topic...>",

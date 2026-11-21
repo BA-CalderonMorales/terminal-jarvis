@@ -7,3 +7,5 @@ pub const XDG_CONFIG_HOME: &str = "XDG_CONFIG_HOME";
 
 pub const EMBEDDED_CATALOG: &str = "embedded:terminal-jarvis";
 pub const EMBEDDED_GATES: &str = "embedded:terminal-jarvis-gates";
+pub const FLAGS: &str = "TERMINAL_JARVIS_FLAGS";
+pub const EMBEDDED_FLAGS: &str = "embedded:terminal-jarvis-flags";

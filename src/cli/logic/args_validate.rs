@@ -1,3 +1,4 @@
+pub(super) use super::settings_parser::valid_settings;
 pub(super) fn at_most_one(words: &[String], usage: &str) -> Result<Vec<String>, String> {
     (words.len() <= 1)
         .then(|| words.to_vec())
@@ -53,7 +54,9 @@ pub(super) fn validate_options(action: &Action, options: &Options) -> Result<(),
     }
     let gate_accepts_no_input = matches!(action, Action::Gate(_)) && options.no_input;
     let summary_preview = matches!(action, Action::Update(None)) && options.dry_run;
+    let settings_preview = super::settings_parser::preview_only(action, options);
     let lifecycle = !summary_preview
+        && !settings_preview
         && (options.dry_run
             || options.confirm.is_some()
             || options.allow_dangerous

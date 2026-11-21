@@ -10,6 +10,8 @@ pub mod contracts;
 pub mod converse;
 #[path = "diagnostics/index.rs"]
 pub mod diagnostics;
+#[path = "flags/index.rs"]
+pub mod flags;
 #[path = "gates/index.rs"]
 pub mod gates;
 #[path = "runtime/index.rs"]

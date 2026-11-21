@@ -1,9 +1,8 @@
 use super::child_parser;
 use super::help_parser::{command_help, help};
-use super::validators::{at_most_one, valid_auth, valid_choice, valid_gate};
+use super::validators::{at_most_one, valid_auth, valid_choice, valid_gate, valid_settings};
 use super::values::{exact, one, optional_one, plan, version};
 use super::Action;
-use std::io::IsTerminal;
 
 pub(super) fn parse(
     words: &[String],
@@ -65,6 +64,7 @@ pub(super) fn parse(
             "security [status|audit|<harness>]",
         )?),
         "gate" => Action::Gate(valid_gate(&words[1..])?),
+        "settings" => Action::Settings(valid_settings(&words[1..])?),
         "templates" | "db" => exact(
             words,
             Action::Legacy(words[0].clone()),
@@ -95,6 +95,6 @@ fn no_child(action: Action, child: Vec<String>, boundary: bool) -> Result<Action
 pub(super) fn bare_launch(words: &[String], options: &super::Options) -> bool {
     words.is_empty()
         && options == &super::Options::default()
-        && std::io::stdout().is_terminal()
-        && std::io::stdin().is_terminal()
+        && std::io::IsTerminal::is_terminal(&std::io::stdout())
+        && std::io::IsTerminal::is_terminal(&std::io::stdin())
 }
