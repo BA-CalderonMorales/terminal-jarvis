@@ -9,9 +9,15 @@ use std::process::{Child, ExitStatus};
 use std::time::{Duration, Instant};
 
 pub fn timeout_secs() -> u64 {
-    std::env::var("TERMINAL_JARVIS_GATE_TIMEOUT_SECS")
-        .ok()
-        .and_then(|value| value.trim().parse::<u64>().ok())
+    parse_timeout(
+        std::env::var("TERMINAL_JARVIS_GATE_TIMEOUT_SECS")
+            .ok()
+            .as_deref(),
+    )
+}
+
+fn parse_timeout(raw: Option<&str>) -> u64 {
+    raw.and_then(|value| value.trim().parse::<u64>().ok())
         .map(|secs| secs.min(86400))
         .unwrap_or(300)
 }
@@ -40,10 +46,10 @@ mod tests {
     #[cfg(unix)]
     use std::process::Command;
 
+    // Pure: the test never touches the process environment, so it cannot give
+    // a concurrent gate scan a zero deadline.
     #[test]
-    fn timeout_secs_defaults_and_clamps() {
-        let _guard = crate::ENV_LOCK.lock().unwrap_or_else(|e| e.into_inner()); // gate runs read this var under the same lock
-        let previous = std::env::var_os("TERMINAL_JARVIS_GATE_TIMEOUT_SECS");
+    fn timeout_defaults_and_clamps() {
         for (value, expected) in [
             (None, 300),
             (Some("1"), 1),
@@ -54,15 +60,7 @@ mod tests {
             (Some("999999999999999999999999"), 300),
             (Some("0"), 0),
         ] {
-            match value {
-                Some(value) => std::env::set_var("TERMINAL_JARVIS_GATE_TIMEOUT_SECS", value),
-                None => std::env::remove_var("TERMINAL_JARVIS_GATE_TIMEOUT_SECS"),
-            }
-            assert_eq!(timeout_secs(), expected, "value={value:?}");
-        }
-        match previous {
-            Some(value) => std::env::set_var("TERMINAL_JARVIS_GATE_TIMEOUT_SECS", value),
-            None => std::env::remove_var("TERMINAL_JARVIS_GATE_TIMEOUT_SECS"),
+            assert_eq!(parse_timeout(value), expected, "value={value:?}");
         }
     }
 
