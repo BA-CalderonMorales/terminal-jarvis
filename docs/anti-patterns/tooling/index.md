@@ -29,11 +29,13 @@ run, reproduce it under synthetic load before touching the assertion; a
 
 **Pattern:** The `gate_skip` PTY tests wrote a `fixture-gate-kill` script and
 executed it moments later, inside a test process whose other threads fork
-children. A concurrent fork inherits the still-open write fd until its own
-exec, so the kernel answers the fixture's exec with ETXTBSY. The scan then read
-as "missing" rather than interrupted: the skip prompt never appeared (the wait
-timed out) or `--no-input` exited with the wrong code. About 2% of execs in a
-standalone probe under CPU load; it never reproduced in isolation.
+children. The suspected cause is ETXTBSY: a concurrent fork inherits the
+still-open write fd until its own exec, and the kernel then refuses the
+fixture's exec. The scan would read as "missing" rather than interrupted, which
+matches both failures (the skip prompt never appeared and the wait timed out, or
+`--no-input` exited with the wrong code). This is a hypothesis: the failure
+never reproduced in the repo's own suite. Only a standalone probe (forking
+threads doing write-then-exec under CPU load) hit ETXTBSY, in about 2% of execs.
 
 **Why it is wrong:** Time-guessing (a sleep, a short deadline) was the first
 suspect and the wrong one: waiting for an observable marker with a generous

@@ -42,7 +42,7 @@ mod tests {
 
     #[test]
     fn timeout_secs_defaults_and_clamps() {
-        let _guard = crate::gates::tests_util::lock(); // gate runs read this var under the same lock
+        let _guard = crate::ENV_LOCK.lock().unwrap_or_else(|e| e.into_inner()); // gate runs read this var under the same lock
         let previous = std::env::var_os("TERMINAL_JARVIS_GATE_TIMEOUT_SECS");
         for (value, expected) in [
             (None, 300),
