@@ -8,6 +8,13 @@ fn action(line: &str) -> args::Action {
 fn slash_lines_parse_with_the_cli_grammar() {
     assert_eq!(action("list"), args::Action::List);
     assert_eq!(action("graveyard"), args::Action::Graveyard);
+    assert_eq!(action("settings"), args::Action::Settings(vec![]));
+    let set = ["set", "wild-idea", "on"].map(String::from).to_vec();
+    assert_eq!(
+        action("settings set wild-idea on"),
+        args::Action::Settings(set)
+    );
+    assert!(parse("settings set wild-idea maybe").is_err());
     assert_eq!(action("status"), args::Action::Check);
     assert_eq!(action("use codex"), args::Action::Use("codex".into()));
     assert_eq!(

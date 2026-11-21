@@ -51,6 +51,12 @@ tools stay installable and removable -- the catalog tells the truth about the
 tool, including how to take it off a machine -- but they are counted apart from
 the maintained fleet and never counted as ready.
 
+`settings` lists the optional features (stable and preview first, then an
+experimental Labs section that is off by default) with where each value came
+from. `settings set <flag> on|off` and `settings reset <flag>` write
+`settings.toml` in the Terminal Jarvis home; `--dry-run` previews. It is also a
+tui verb. See [feature flags](flags.md).
+
 ## Automation
 
 `--json` wraps every command in one envelope

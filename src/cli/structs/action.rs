@@ -34,5 +34,6 @@ pub enum Action {
     Cache(Vec<String>),
     Security(Vec<String>),
     Gate(Vec<String>),
+    Settings(Vec<String>),
     Legacy(String),
 }

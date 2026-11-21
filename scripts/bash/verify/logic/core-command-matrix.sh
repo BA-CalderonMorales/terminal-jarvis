@@ -201,6 +201,13 @@ if TERMINAL_JARVIS_CATALOG="$catalog" TERMINAL_JARVIS_HOME="$home" PATH="" \
 fi
 contains "$tmp/gate-run.err" "optional gate 'trivy'"
 
+ok settings settings
+contains "$tmp/settings.out" "No optional features yet."
+plain settings >"$tmp/plain-settings.out"
+contains "$tmp/plain-settings.out" "No optional features yet."
+outcome settings-unknown 2 settings set nope on
+contains "$tmp/settings-unknown.err" "unknown flag 'nope'"
+
 outcome templates 4 templates
 outcome db 4 db
 contains "$tmp/templates.err" "removed"

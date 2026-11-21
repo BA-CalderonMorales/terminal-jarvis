@@ -40,7 +40,8 @@ Trunk-based. `main` is the only long-lived branch and is always releasable.
 
 - **Short-lived branches**: branch from `main`, open a small PR against `main`,
   squash-merge once the required checks pass. Merged branches are deleted.
-- **Unfinished work** merges behind a flag instead of waiting on a branch.
+- **Unfinished work** merges behind a flag instead of waiting on a branch
+  (see [docs/flags.md](docs/flags.md)).
   The working tree never holds more than one PR's worth of change.
 - **Releases** are a version bump on `main` plus a `vX.Y.Z` tag. There are no
   `develop` or `release/X.Y.Z` branches.

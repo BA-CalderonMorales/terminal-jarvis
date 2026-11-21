@@ -108,6 +108,7 @@ invocation, for scripts, CI, and one-shot tasks:
 | `run [harness] [capability] [args...]` | Execute a capability |
 | `security [status\|audit\|<harness>]` | Security posture |
 | `gate [status\|list\|enable\|disable\|run]` | Optional local security gate |
+| `settings [set\|reset <flag>]` | Optional features: list, turn on or off ([flags](docs/flags.md)) |
 | `version [--verbose]` / `--version` / `-v` / `--info` | Version info |
 | `self-update [--dry-run]` / `--update` | Update Terminal Jarvis or print the update command |
 | `config show` | Active config state |

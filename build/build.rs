@@ -12,11 +12,21 @@ fn main() {
     {
         println!("cargo:rustc-env=TERMINAL_JARVIS_DISTRIBUTION_STAMPED={value}");
     }
-    let root = Path::new("harnesses");
+    embed("harnesses", "embedded_catalog.rs");
+    println!("cargo:rerun-if-changed=flags");
+    embed("flags", "embedded_flags.rs");
+}
+
+/// Embeds every `index.toml` under `dir` as `(relative path, contents)`. A
+/// missing directory embeds nothing, so an empty flag registry still builds.
+fn embed(dir: &str, module: &str) {
+    let root = Path::new(dir);
     let mut files = Vec::new();
-    collect(root, root, &mut files).expect("catalog files are readable");
+    if root.is_dir() {
+        collect(root, root, &mut files).expect("embedded data files are readable");
+    }
     files.sort_by(|left, right| left.0.cmp(&right.0));
-    write_module(files).expect("embedded catalog module is writable");
+    write_module(module, files).expect("embedded data module is writable");
 }
 
 fn collect(root: &Path, dir: &Path, files: &mut Vec<(String, PathBuf)>) -> io::Result<()> {
@@ -38,9 +48,9 @@ fn collect(root: &Path, dir: &Path, files: &mut Vec<(String, PathBuf)>) -> io::R
     Ok(())
 }
 
-fn write_module(files: Vec<(String, PathBuf)>) -> io::Result<()> {
+fn write_module(name: &str, files: Vec<(String, PathBuf)>) -> io::Result<()> {
     let out = PathBuf::from(env::var_os("OUT_DIR").expect("OUT_DIR is set"));
-    let mut module = fs::File::create(out.join("embedded_catalog.rs"))?;
+    let mut module = fs::File::create(out.join(name))?;
     writeln!(module, "pub const FILES: &[(&str, &str)] = &[")?;
     for (rel, path) in files {
         writeln!(

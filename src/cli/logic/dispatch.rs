@@ -1,7 +1,7 @@
 use super::{
     args::{Action, Options},
     compat, dispatch_compat, dispatch_security, dispatch_support, error, gate_cmd, guard, output,
-    uninstall,
+    settings_cmd, uninstall,
 };
 use crate::contracts::{Capability, Harness};
 use std::path::Path;
@@ -72,6 +72,7 @@ pub fn dispatch(
         Action::Gate(words) => gate_cmd::handle(&words, home).map_err(|message| {
             error::Failure::safety("gate_blocked", message, "run `terminal-jarvis gate status`")
         }),
+        Action::Settings(words) => settings_cmd::run(&words, options, home),
         Action::Legacy(command) => Err(error::Failure::unavailable(
             "removed_command",
             format!("{command} was removed with the v0.1 catalog rewrite"),
