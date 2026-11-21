@@ -5,6 +5,10 @@ use super::*;
 use crate::contracts::EnvMode;
 use std::path::{Path, PathBuf};
 
+pub fn env_lock() -> std::sync::MutexGuard<'static, ()> {
+    crate::ENV_LOCK.lock().unwrap_or_else(|e| e.into_inner())
+}
+
 pub fn tmpdir() -> PathBuf {
     static COUNTER: std::sync::atomic::AtomicU64 = std::sync::atomic::AtomicU64::new(0);
     let n = COUNTER.fetch_add(1, std::sync::atomic::Ordering::Relaxed);

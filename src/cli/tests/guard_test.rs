@@ -53,6 +53,9 @@ fn unknown_direct_command_advises_exactly_once() {
 
 #[test]
 fn streaming_invocation_preserves_the_child_exit_code() {
+    // Streaming a child resolves the gate policy from `TERMINAL_JARVIS_GATE(S)`;
+    // writers hold `ENV_LOCK`, so this reader must too or it sees their fixture gate.
+    let _env = crate::ENV_LOCK.lock().unwrap_or_else(|e| e.into_inner());
     let (command, args) =
         crate::cli::logic::test_support::shell("printf streamed; exit 7", "echo streamed& exit 7");
     let mut plan = crate::cli::logic::test_support::plan(Capability::Headless, &command, args);
