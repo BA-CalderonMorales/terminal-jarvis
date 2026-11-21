@@ -5,6 +5,47 @@ exists.
 
 ## Entries
 
+### A shared-state lock that only the writer holds (0.1.25 flake sweep)
+
+**Pattern:** `ENV_LOCK` protects process-global environment variables, and the
+tests that *set* `TERMINAL_JARVIS_GATES` take it. A test that only *reads* that
+state -- streaming a child, which resolves the gate policy -- took nothing, and
+inherited a fixture gate named `blocked` from a parallel test. It failed as
+"security gate blocked harness execution" with a fixture it never wrote, on
+maybe one run in ten, only under CPU load.
+
+**Why it is wrong:** A lock has one meaning: every access to the protected state
+goes through it. Writer-only locking leaves the race that the lock exists to
+close, and it burns the most time -- the failure is rare, load-dependent, and
+points at a subsystem the failing test has no relationship with, so it reads as
+a real bug in the gate.
+
+**Fix:** Take the lock on both sides, including read-only consumers of the same
+process-global state, and say in the test why. When a flake survives a stress
+run, reproduce it under synthetic load before touching the assertion; a
+"flaky test" is often a test observing state another test owns.
+
+### A fresh executable plus a marker wait that guesses the child (0.1.25 flake sweep)
+
+**Pattern:** The `gate_skip` PTY tests wrote a `fixture-gate-kill` script and
+executed it moments later, inside a test process whose other threads fork
+children. The suspected cause is ETXTBSY: a concurrent fork inherits the
+still-open write fd until its own exec, and the kernel then refuses the
+fixture's exec. The scan would read as "missing" rather than interrupted, which
+matches both failures (the skip prompt never appeared and the wait timed out, or
+`--no-input` exited with the wrong code). This is a hypothesis: the failure
+never reproduced in the repo's own suite. Only a standalone probe (forking
+threads doing write-then-exec under CPU load) hit ETXTBSY, in about 2% of execs.
+
+**Why it is wrong:** Time-guessing (a sleep, a short deadline) was the first
+suspect and the wrong one: waiting for an observable marker with a generous
+deadline is necessary, but it cannot rescue a child that never starts. The
+failure also read as a product bug in the gate.
+
+**Fix:** Do not exec a file the test just wrote when a system binary can do the
+job (`sh -c 'kill -TERM $$'`); wait on markers, never on sleeps; and reproduce
+under synthetic load (`yes > /dev/null` per core) before changing a deadline.
+
 ### Terminal tests inherit the operator's UI mode (0.1.23)
 
 **Pattern:** PTY tests inherited `NO_COLOR`, used the GET ioctl while trying

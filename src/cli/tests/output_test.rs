@@ -1,4 +1,4 @@
-use self::harness::{mock_binary_on_path, mock_harness, tmpdir};
+use self::harness::{env_lock, mock_binary_on_path, mock_harness, tmpdir};
 use super::*;
 use crate::contracts::EnvMode;
 
@@ -14,6 +14,7 @@ fn is_harness_ready_false_when_binary_missing() {
 
 #[test]
 fn is_harness_ready_false_when_env_var_missing() {
+    let _env = env_lock(); // PATH/env are process-global; writers and readers share ENV_LOCK
     let dir = tmpdir();
     let _old = mock_binary_on_path(&dir);
     let h = mock_harness(
@@ -26,6 +27,7 @@ fn is_harness_ready_false_when_env_var_missing() {
 
 #[test]
 fn is_harness_ready_true_when_binary_on_path_and_no_env_required() {
+    let _env = env_lock(); // PATH/env are process-global; writers and readers share ENV_LOCK
     let dir = tmpdir();
     let _old = mock_binary_on_path(&dir);
     let h = mock_harness("mock-harness", EnvMode::None, vec![]);
@@ -34,6 +36,7 @@ fn is_harness_ready_true_when_binary_on_path_and_no_env_required() {
 
 #[test]
 fn is_harness_ready_true_when_binary_on_path_and_env_var_set() {
+    let _env = env_lock(); // PATH/env are process-global; writers and readers share ENV_LOCK
     let dir = tmpdir();
     let _old = mock_binary_on_path(&dir);
     std::env::set_var("TJHARNESS_TEST_VAR", "1");
@@ -48,6 +51,7 @@ fn is_harness_ready_true_when_binary_on_path_and_env_var_set() {
 
 #[test]
 fn status_adds_readiness_summary_absent_from_checks() {
+    let _env = env_lock(); // PATH/env are process-global; writers and readers share ENV_LOCK
     let dir = tmpdir();
     let _old = mock_binary_on_path(&dir);
     let h = mock_harness("mock-harness", EnvMode::None, vec![]);

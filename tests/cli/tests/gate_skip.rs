@@ -2,7 +2,6 @@
 
 use crate::logic::cli_driver::Fixture;
 use crate::logic::pty;
-use std::os::unix::fs::PermissionsExt;
 use std::process::Command;
 
 const MARKER_SCRIPT: &str = "#!/bin/sh\n: > \"$TJ_FIXTURE_MARKER\"\n";
@@ -14,18 +13,19 @@ const NO_INPUT: [&str; 5] = [
     "install",
     "fixture",
 ];
+// The killer gate is the system `sh` with the self-kill as an argument. A
+// freshly written executable in a multi-threaded test process can be exec'd
+// while a concurrent fork still holds its write fd (ETXTBSY); the scan then
+// reads as "missing" instead of interrupted and the outcome flips under load.
 fn killed_fixture() -> Fixture {
     let fixture = Fixture::new("expected", "expected", MARKER_SCRIPT);
     let gates = fixture.root.join("gates");
     std::fs::create_dir_all(gates.join("acceptance")).unwrap();
     std::fs::write(
         gates.join("acceptance/index.toml"),
-        "name = \"acceptance\"\ndisplay = \"Killer gate\"\ndescription = \"self-kills on purpose\"\nbinary = \"fixture-gate-kill\"\nargs = []\ninstall_hint = \"fixture\"\n",
+        "name = \"acceptance\"\ndisplay = \"Killer gate\"\ndescription = \"self-kills on purpose\"\nbinary = \"sh\"\nargs = [\"-c\", \"kill -TERM $$\"]\ninstall_hint = \"fixture\"\n",
     )
     .unwrap();
-    let killer = fixture.root.join("bin").join("fixture-gate-kill");
-    std::fs::write(&killer, "#!/bin/sh\nkill -TERM $$\n").unwrap();
-    std::fs::set_permissions(&killer, std::fs::Permissions::from_mode(0o755)).unwrap();
     fixture
 }
 
