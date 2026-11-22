@@ -38,11 +38,11 @@ exclude_re = [
   # unix variant is witnessed by the preflight signal tests. The line is that
   # variant's body, so re-anchor it if the file moves under it.
   "stream\\.rs:19.*replace exit_code -> i32 with",
-  # session::save renames a staged file over the destination, which replaces it
-  # on unix; the AlreadyExists arm exists for windows, where rename cannot
-  # replace. The arm is unreachable on a CI runner, so its three mutants cannot
-  # be killed here.
-  "src/context/logic/session\\.rs:68:.*",
+  # context::write_atomic renames a staged file over the destination, which
+  # replaces it on unix; the AlreadyExists arm exists for windows, where rename
+  # cannot replace. The arm is unreachable on a CI runner, so its three mutants
+  # cannot be killed here. Re-anchor if the arm moves.
+  "src/context/logic/atomic\\.rs:23:.*",
   # bounded_join's grace loop compares the clock against a 500ms deadline; `<`
   # and `<=` differ only when a child finishes exactly at that boundary, a
   # race no deterministic test can win, and the joined output is identical
