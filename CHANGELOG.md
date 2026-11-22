@@ -1,6 +1,10 @@
 # Changelog
 
-## [Unreleased]
+## [0.1.25] - 2026-11-22
+
+0.1.24 was prepared but never published, so its changes (below) reach
+users for the first time in this release, together with everything merged
+since.
 
 ### Added
 
@@ -41,14 +45,6 @@
   says so and points at the vendor docs; OpenClaw declares its documented
   removal. Forge's vendor installer removes an existing npm install before it
   downloads, so a failed download can leave no forge.
-
-## [0.1.25] - 2026-11-20
-
-0.1.24 was prepared but never published, so its changes (below) reach
-users for the first time in this release.
-
-### Changed
-
 - A retirement is a date, not a status. A `sunset_at` still ahead reads as
   `retiring`/`retires`; one already reached reads as `retired`. Both stay out
   of the maintained fleet, and `list`, `show`, `graveyard`, the dashboard and
