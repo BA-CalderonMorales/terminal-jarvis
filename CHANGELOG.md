@@ -1,5 +1,47 @@
 # Changelog
 
+## [Unreleased]
+
+### Added
+
+- `uninstall --dry-run` previews the removal command, its effect and the exact
+  consent token instead of exiting 5.
+- `--no-input --confirm=<capability>:<agent>` lets a headless run consent to an
+  installer whose script cannot be pre-scanned (support `unknown`). Without it
+  the run exits 5 and names the script host and both ways forward: review it in
+  a terminal, or confirm it. A wrong token is rejected with the exact token it
+  expected.
+- `plan` and the install/update consent line carry a retirement line (verb,
+  date and successor) before the flags, so nobody installs a departing tool
+  without reading it. `list` gains a STATUS column (maintained, retiring,
+  retired) with retired and retiring counts in its footer; `--plain` appends
+  `status=` after `support=`.
+
+### Changed
+
+- `--dry-run` is unconditional past consent: an `unknown` installer previews
+  with exit 0 because nothing executes. Unclaimed capabilities (`stub`,
+  `manual`, `unsupported`, `disabled`) and incompatible platforms still block.
+- Amp and Claude Code install with their own installers, and eca, forge, goose,
+  hermes and openclaw use script installers. Every one is `unknown` (consent
+  required) and fail-closed: a failed download exits non-zero and never reaches
+  the shell.
+- Nine harnesses were re-verified on 2026-11-15 (amp, claude, eca, forge,
+  goose, hermes, jules, openclaw, opencode) and carry real sources in place of
+  the internal placeholders. Other npm installs now pin `@latest` (Letta stays
+  untagged so npm can pick a release that matches the host's Node). The Jules
+  rows say "retiring" with the 2026-12-31 shutdown date, and ECA keeps its own
+  `eca` installer, not the separate `eca-cli` one.
+- opencode moves to `@opencode/cli` (V2). `update` runs `npm update -g
+  @opencode/cli` and does not migrate an existing V1 `opencode-ai` install;
+  follow opencode's V1 migration guide to remove the old package.
+- The styled `list` table shows STATUS in place of SUPPORT; `--plain` keeps
+  `support=`.
+- `uninstall` on a script-installed harness with no documented remover (forge)
+  says so and points at the vendor docs; OpenClaw declares its documented
+  removal. Forge's vendor installer removes an existing npm install before it
+  downloads, so a failed download can leave no forge.
+
 ## [0.1.25] - 2026-11-20
 
 0.1.24 was prepared but never published, so its changes (below) reach
