@@ -56,16 +56,26 @@ fn change(
     }
     let path = flags::settings_path(home);
     if !options.dry_run {
-        flags::save(home, name, value).map_err(|cause| {
-            error::Failure::state(
-                "settings_unwritable",
-                format!("could not write {}: {cause}", path.display()),
-                "check your Terminal Jarvis home directory permissions and disk space, then retry",
-            )
-        })?;
+        flags::save(home, name, value).map_err(|cause| save_error(&path, &cause))?;
     }
     let shown = path.display().to_string();
     Ok((0, output::receipt(name, value, &shown, options.dry_run)))
+}
+
+/// A corrupt file is a state error that names it and changes nothing.
+fn save_error(path: &Path, cause: &std::io::Error) -> error::Failure {
+    if cause.kind() == std::io::ErrorKind::InvalidData {
+        return error::Failure::state(
+            "settings_invalid",
+            format!("{cause}; nothing was changed"),
+            "repair or remove settings.toml, then retry",
+        );
+    }
+    error::Failure::state(
+        "settings_unwritable",
+        format!("could not write {}: {cause}", path.display()),
+        "check your Terminal Jarvis home directory permissions and disk space, then retry",
+    )
 }
 
 fn usage_error(message: &str) -> error::Failure {

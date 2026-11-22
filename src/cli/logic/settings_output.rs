@@ -86,7 +86,7 @@ fn plain(ordered: &[&Resolved]) -> String {
 pub fn receipt(name: &str, value: Option<bool>, path: &str, dry_run: bool) -> String {
     let change = match value {
         Some(on) => format!("set {name} {}", state(on)),
-        None => format!("reset {name} to its default"),
+        None => format!("reset {name} by removing its saved choice"),
     };
     if dry_run {
         return format!("dry run: would {change} in {path}; nothing was written\n");

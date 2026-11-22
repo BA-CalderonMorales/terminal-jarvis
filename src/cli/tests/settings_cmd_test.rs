@@ -23,6 +23,8 @@ fn list_set_dry_run_reset_and_unknown_through_the_shared_dispatch() {
         .unwrap_or_else(|error| error.into_inner());
     let (flags, home) = fixture("dispatch");
     let previous = std::env::var_os("TERMINAL_JARVIS_FLAGS");
+    let inherited = std::env::var_os("TJ_FLAG_WILD_IDEA");
+    std::env::remove_var("TJ_FLAG_WILD_IDEA");
     std::env::set_var("TERMINAL_JARVIS_FLAGS", &flags);
     let before = style::set(true, true);
     let options = Options::default();
@@ -37,13 +39,23 @@ fn list_set_dry_run_reset_and_unknown_through_the_shared_dispatch() {
     assert!(!flags::settings_path(&home).exists());
     run(&words(&["set", "wild-idea", "on"]), &options, &home).unwrap();
     assert!(run(&[], &options, &home).unwrap().1.contains("state=on"));
-    run(&words(&["reset", "wild-idea"]), &options, &home).unwrap();
+    let receipt = run(&words(&["reset", "wild-idea"]), &options, &home)
+        .unwrap()
+        .1;
+    assert!(receipt.contains("change=reset_wild-idea_by_removing_its_saved_choice"));
     assert!(run(&[], &options, &home).unwrap().1.contains("state=off"));
     let unknown = run(&words(&["reset", "nope"]), &options, &home).unwrap_err();
     assert_eq!((unknown.exit_code, unknown.code), (2, "unknown_flag"));
     assert!(unknown.message.contains("valid flags: wild-idea"));
+    let corrupt = "[flags]\nwild-idea = maybe\n";
+    std::fs::write(flags::settings_path(&home), corrupt).unwrap();
+    let refused = run(&words(&["set", "wild-idea", "on"]), &options, &home).unwrap_err();
+    assert_eq!((refused.exit_code, refused.code), (3, "settings_invalid"));
 
     style::restore(before);
+    if let Some(value) = inherited {
+        std::env::set_var("TJ_FLAG_WILD_IDEA", value);
+    }
     match previous {
         Some(value) => std::env::set_var("TERMINAL_JARVIS_FLAGS", value),
         None => std::env::remove_var("TERMINAL_JARVIS_FLAGS"),

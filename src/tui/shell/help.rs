@@ -33,7 +33,7 @@ pub fn text(inner: usize) -> String {
             "inspect local setup and posture",
         ),
         (
-            "settings [set|reset <flag>]",
+            "settings [set <flag> on|off | reset <flag>]",
             "optional features, on or off",
         ),
         ("/debug [on|off]", "raw, verbose view"),

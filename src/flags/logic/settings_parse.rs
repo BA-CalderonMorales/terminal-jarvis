@@ -22,6 +22,9 @@ pub fn parse(data: &str) -> Result<Choices, String> {
             table = Some(header.trim().to_string());
             continue;
         }
+        if table.as_deref().is_some_and(|name| name != SETTINGS_TABLE) {
+            continue;
+        }
         let (key, value) = line
             .split_once('=')
             .ok_or_else(|| format!("line {} is missing '='", index + 1))?;
@@ -35,13 +38,10 @@ pub fn parse(data: &str) -> Result<Choices, String> {
                 ))
             }
         };
-        match table.as_deref() {
-            Some(SETTINGS_TABLE) => {
-                choices.insert(key.trim().to_string(), value);
-            }
-            Some(_) => {}
-            None => return Err(format!("line {} is outside a table", index + 1)),
+        if table.is_none() {
+            return Err(format!("line {} is outside a table", index + 1));
         }
+        choices.insert(key.trim().to_string(), value);
     }
     Ok(choices)
 }

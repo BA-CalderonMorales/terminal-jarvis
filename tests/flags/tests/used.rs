@@ -50,3 +50,20 @@ fn the_scan_catches_undeclared_and_dead_flags() {
         .iter()
         .any(|p| p.contains("'dead-one'") && p.contains("never used")));
 }
+
+#[test]
+fn comments_never_count_and_a_rustfmt_line_break_does() {
+    let root = Sandbox::new(None).home.join("tree");
+    fs::create_dir_all(&root).unwrap();
+    let source = "// flags::enabled(\"line-comment\")\n\
+                  /* flags::enabled(\"block-comment\") */\n\
+                  let s = \"// not a comment\"; let q = '\"';\n\
+                  if flags::enabled(\n    \"wrapped\",\n) {}\n\
+                  flags::enabled(\"after-literals\"); // trailing\n";
+    fs::write(root.join("a.rs"), source).unwrap();
+    let used = scan::used(&root);
+    assert_eq!(
+        used.iter().collect::<Vec<_>>(),
+        ["after-literals", "wrapped"]
+    );
+}

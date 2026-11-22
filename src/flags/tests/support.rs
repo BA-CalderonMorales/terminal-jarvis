@@ -56,6 +56,11 @@ impl Env {
         self.saved.push((key.to_string(), std::env::var_os(key)));
         std::env::set_var(key, value.as_ref());
     }
+
+    pub fn remove(&mut self, key: &str) {
+        self.saved.push((key.to_string(), std::env::var_os(key)));
+        std::env::remove_var(key);
+    }
 }
 
 impl Drop for Env {

@@ -1,11 +1,14 @@
 use std::collections::BTreeMap;
 
+#[path = "parser_comment.rs"]
+mod comment;
+
 pub type Fields = BTreeMap<String, String>;
 
 pub fn parse(input: &str) -> Result<Fields, String> {
     let mut fields = BTreeMap::new();
     for (index, raw) in input.lines().enumerate() {
-        let line = raw.split('#').next().unwrap_or("").trim();
+        let line = comment::strip(raw).trim();
         if line.is_empty() {
             continue;
         }

@@ -52,6 +52,8 @@ fn enabled_reads_env_then_file_then_default_over_a_fixture_registry() {
     let root = registry(&[("alpha", false, "labs"), ("beta", true, "stable")]);
     let home = temp("enabled");
     let mut env = Env::new();
+    env.remove("TJ_FLAG_ALPHA");
+    env.remove("TJ_FLAG_BETA");
     env.set("TERMINAL_JARVIS_FLAGS", &root);
     env.set("TERMINAL_JARVIS_HOME", &home);
     assert!(!enabled("alpha"));

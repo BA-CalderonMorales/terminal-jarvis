@@ -41,8 +41,10 @@ Highest wins: environment, then the settings file, then the default.
   in the tui.
 
 An unknown flag is a usage error (exit 2) that names the valid flags. A
-malformed `settings.toml` warns once on stderr and falls back to defaults;
-unknown names in it are ignored. `TERMINAL_JARVIS_FLAGS` points at a flags
+malformed `settings.toml` warns once on stderr and falls back to defaults
+when read; `settings set`/`reset` refuse it (exit 3) and leave it untouched.
+Writes hold `settings.toml.lock` so concurrent writers never lose a choice.
+Unknown names in the file are ignored. `TERMINAL_JARVIS_FLAGS` points at a flags
 directory instead of the embedded registry (used by tests).
 
 ## Promote a flag
