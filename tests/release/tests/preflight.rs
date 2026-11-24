@@ -33,3 +33,33 @@ fn tag_must_match_expected_main_tip() {
     let stderr = String::from_utf8_lossy(&output.stderr);
     assert!(stderr.contains("v0.1.5 points to") && stderr.contains("but main is"));
 }
+
+#[cfg(unix)]
+#[test]
+fn missing_python_fails_closed() {
+    let root = make_root("preflight-no-python");
+    write_metadata(&root, "0.1.5", "0.1.5", "0.1.5");
+    let bin = root.join("bin");
+    fs::create_dir_all(&bin).unwrap();
+    for tool in ["sh", "sed", "grep", "dirname", "head"] {
+        std::os::unix::fs::symlink(find_tool(tool), bin.join(tool)).unwrap();
+    }
+    let output = std::process::Command::new(bin.join("sh"))
+        .arg("scripts/bash/release/index.sh")
+        .arg("preflight")
+        .env("PATH", &bin)
+        .current_dir(&root)
+        .output()
+        .unwrap();
+    assert!(!output.status.success());
+    let stderr = String::from_utf8_lossy(&output.stderr);
+    assert!(stderr.contains("python3 is required for the changelog check"));
+}
+
+#[cfg(unix)]
+fn find_tool(name: &str) -> std::path::PathBuf {
+    std::env::split_paths(&std::env::var_os("PATH").unwrap())
+        .map(|dir| dir.join(name))
+        .find(|candidate| candidate.is_file())
+        .unwrap_or_else(|| panic!("{name} not found on PATH"))
+}

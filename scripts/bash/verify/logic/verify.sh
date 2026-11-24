@@ -20,11 +20,9 @@ cargo clippy --all-targets -- -D warnings
 
 echo "[3/12] tests"
 cargo test
-if command -v python3 >/dev/null 2>&1; then
-  python3 -m unittest discover -s scripts/python/release/tests -p 'test_*.py'
-else
-  echo "python3 not installed; skipping release generator tests"
-fi
+command -v python3 >/dev/null 2>&1 ||
+  fail "python3 is required for the release generator tests"
+python3 -m unittest discover -s scripts/python/release/tests -p 'test_*.py'
 
 echo "[4/12] rust file length"
 over_limit=$(find src tests -name '*.rs' -print0 |
