@@ -1,3 +1,4 @@
+mod declared_test;
 mod lock_test;
 mod registry_test;
 mod resolve_test;

@@ -1,0 +1,7 @@
+name = "opengrep"
+display = "Opengrep source analysis"
+description = "Local source analysis with Semgrep-style rules, including Rust. Requires .terminal-jarvis/semgrep.yml. Validate rule compatibility for your engine version. No dependency coverage is implied."
+binary = "opengrep"
+args = ["scan", "--config", ".terminal-jarvis/semgrep.yml", "--jobs", "1", "--max-memory", "512", "--timeout", "5", "--strict", "--error", "--json", "."]
+install_hint = "Install Opengrep separately from https://github.com/opengrep/opengrep and configure trusted local rules."
+flag = "scanner-choice"

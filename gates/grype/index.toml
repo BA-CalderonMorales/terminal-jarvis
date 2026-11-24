@@ -1,0 +1,7 @@
+name = "grype"
+display = "Grype dependency analysis"
+description = "Known dependency vulnerabilities in a local directory. HIGH and CRITICAL findings block. Requires a recognized lockfile for the TJ workspace adapter. No source SAST or infrastructure coverage is implied."
+binary = "grype"
+args = ["dir:.", "--fail-on", "high", "--output", "json"]
+install_hint = "Install Grype separately from https://github.com/anchore/grype; advisory downloads need network access or a prepared cache."
+flag = "scanner-choice"
