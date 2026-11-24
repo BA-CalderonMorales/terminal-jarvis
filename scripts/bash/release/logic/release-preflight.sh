@@ -50,6 +50,10 @@ test "$lock_version" = "$cargo_version" ||
   fail "npm package-lock version $lock_version does not match Cargo $cargo_version"
 grep -q "## \\[$cargo_version\\]" CHANGELOG.md ||
   fail "CHANGELOG.md missing ## [$cargo_version]"
+command -v python3 >/dev/null 2>&1 ||
+  fail "python3 is required for the changelog check"
+python3 scripts/python/release/index.py changelog --check --version "$cargo_version" ||
+  fail "changelog section for $cargo_version is not in CHANGELOG.md"
 
 if [ -n "$expected_main_ref" ] && [ -z "$tag" ]; then
   fail "--expected-main-ref requires --tag"

@@ -129,6 +129,26 @@ changing execution policy.
 **Consequence:** A retired tool remains distinct from an uninstalled maintained
 tool regardless of binary presence. The previously missed mutation is caught.
 
+### Generate the changelog from commit subjects (chore/generated-changelog -> 2026-11-23)
+
+**Decision:** Each release section in `CHANGELOG.md` is produced from the
+conventional-commit subjects between the previous tag and the release commit by
+`scripts/python/release/index.py changelog`. Release preflight fails unless the
+section for the version exists, so a tag cannot ship without one.
+
+**Context:** `CHANGELOG.md` was the most-churned file in the repository, and each
+release was written by hand from memory. Squash-merge subjects already carry the
+change type and the PR number, so the information exists before release time.
+
+**Considered:** Writing release notes from PR bodies would reintroduce free-form
+prose that drifts from the subject. A changelog tool with third-party
+dependencies would break the std-only rule. Existing sections are historical
+records and are not regenerated; only future versions use the generator.
+
+**Consequence:** Subjects are the changelog contract, so a `feat` or `fix` subject
+must describe the user-visible change. Bodies are ignored. Reverts cancel their
+original, and merge commits, docs, tests and chores are not listed.
+
 ### Preserve request intent and verify bounded execution (v0.1.24 integration -> 2026-11-04)
 
 **Decision:** Terminal transport follows resolved interaction requirements while

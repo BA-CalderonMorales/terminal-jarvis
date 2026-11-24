@@ -16,6 +16,7 @@ pub fn make_root(name: &str) -> std::path::PathBuf {
         root.join("scripts/bash/release/logic/release-preflight.sh"),
     )
     .unwrap();
+    crate::logic::generator_kit::copy_generator(&root);
     root
 }
 
