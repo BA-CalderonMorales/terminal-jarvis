@@ -12,6 +12,8 @@ mod defaults;
 mod help_parser;
 #[path = "args_options.rs"]
 mod option_parser;
+#[path = "args_settings.rs"]
+mod settings_parser;
 #[path = "args_validate.rs"]
 mod validators;
 #[path = "args_values.rs"]

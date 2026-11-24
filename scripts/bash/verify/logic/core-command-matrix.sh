@@ -201,6 +201,22 @@ if TERMINAL_JARVIS_CATALOG="$catalog" TERMINAL_JARVIS_HOME="$home" PATH="" \
 fi
 contains "$tmp/gate-run.err" "optional gate 'trivy'"
 
+# settings runs against an explicit empty registry, so a shipped flag or an
+# inherited TERMINAL_JARVIS_FLAGS cannot change what this block sees.
+mkdir "$tmp/flags-empty"
+TERMINAL_JARVIS_FLAGS="$tmp/flags-empty" tj settings >"$tmp/settings.out" ||
+  fail "settings failed"
+contains "$tmp/settings.out" "No optional features yet."
+TERMINAL_JARVIS_FLAGS="$tmp/flags-empty" plain settings >"$tmp/plain-settings.out"
+contains "$tmp/plain-settings.out" "No optional features yet."
+if TERMINAL_JARVIS_FLAGS="$tmp/flags-empty" tj settings set nope on \
+  >"$tmp/settings-unknown.out" 2>"$tmp/settings-unknown.err"; then
+  fail "settings set nope unexpectedly succeeded"
+else
+  test "$?" = 2 || fail "settings set nope did not exit 2"
+fi
+contains "$tmp/settings-unknown.err" "unknown flag 'nope'"
+
 outcome templates 4 templates
 outcome db 4 db
 contains "$tmp/templates.err" "removed"

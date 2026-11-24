@@ -11,11 +11,13 @@ mod logic;
 #[path = "structs/mod.rs"]
 mod structs;
 
+pub use crate::context::logic::atomic::write_atomic;
 pub use crate::context::logic::distribution;
+pub use crate::context::logic::flags::flags_root;
 pub use crate::context::logic::gates::gates_root;
 pub use crate::context::logic::platform;
 pub use crate::context::logic::session::{catalog_root, default_home, load, save};
 pub use crate::context::logic::session_parse::{parse as parse_session, ParseError};
 pub use crate::context::structs::session::Session;
 
-pub use crate::context::constants::env::{EMBEDDED_CATALOG, EMBEDDED_GATES};
+pub use crate::context::constants::env::{EMBEDDED_CATALOG, EMBEDDED_FLAGS, EMBEDDED_GATES};

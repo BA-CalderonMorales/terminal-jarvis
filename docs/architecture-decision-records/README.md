@@ -40,6 +40,27 @@ it, and anything future work must respect.
 
 ## Records
 
+### Declare feature flags as data (feat/flag-registry -> 2026-11-21)
+
+**Decision:** Feature flags are declared as `flags/<name>/index.toml`, embedded
+at build time like `harnesses/`, resolved as env `TJ_FLAG_<NAME>`, then
+`settings.toml`, then the declared default, and read in code only through
+`flags::enabled("<name>")`. A structural test requires every literal passed to
+`flags::enabled` to be declared and every declared flag to be used.
+
+**Context:** Trunk-based flow means unfinished work must merge while off. Flags
+scattered through code as ad hoc env checks or booleans have no owner, no
+description, and never get removed, so they rot. Users also need one place to
+see and toggle experimental features.
+
+**Considered:** A Rust `const` table -- rejected, it moves flag data into code
+and breaks "prefer data over Rust branches". Env-only flags -- rejected, they
+are undiscoverable and cannot be persisted or listed.
+
+**Consequence:** Adding a flag is a data file plus one call site; promoting a
+flag deletes both in the same change, enforced by the declared/used test. The
+registry ships empty; the first flags arrive with the features they gate.
+
 ### Ship from trunk (chore/trunk-based-flow -> 2026-11-20)
 
 **Decision:** `main` is the only long-lived branch. Changes land as small

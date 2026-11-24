@@ -20,7 +20,8 @@ pub const PLAIN: &str = "Terminal Jarvis\n\
        terminal-jarvis config show\n\
        terminal-jarvis cache status\n\
        terminal-jarvis security [status|audit|<harness>]\n\
-       terminal-jarvis gate [status|list|enable [trivy]|disable|run [trivy]]\n\n\
+       terminal-jarvis gate [status|list|enable [trivy]|disable|run [trivy]]\n\
+       terminal-jarvis settings [list|set <flag> on|off|reset <flag>]\n\n\
       global flags (anywhere before --):\n\
         --help, -h      show command help\n\
         --version, -v   print the version\n\
