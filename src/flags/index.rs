@@ -12,7 +12,7 @@ mod logic;
 #[path = "structs/mod.rs"]
 mod structs;
 
-pub use crate::flags::logic::enabled::{enabled, resolve_all};
+pub use crate::flags::logic::enabled::{enabled, is_declared, resolve_all};
 pub use crate::flags::logic::registry::{build, load};
 pub use crate::flags::logic::resolve::{env_name, parse_switch, resolve};
 pub use crate::flags::logic::settings::{load as load_choices, path as settings_path, save};

@@ -31,7 +31,7 @@ impl Drop for Pinned {
 
 /// Runs `body` with an empty home, the embedded registry, and the flag set to
 /// `flag` (or unset), then restores the caller's environment.
-fn with_flag<T>(flag: Option<&str>, body: impl FnOnce() -> T) -> T {
+pub(super) fn with_flag<T>(flag: Option<&str>, body: impl FnOnce() -> T) -> T {
     let lock = crate::ENV_LOCK
         .lock()
         .unwrap_or_else(|error| error.into_inner());

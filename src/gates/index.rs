@@ -14,6 +14,9 @@ pub use crate::gates::logic::verdict::{interrupted_message, verdict_for, Verdict
 pub use crate::gates::structs::state::{disable, enable, selected, Selection};
 
 #[cfg(test)]
+#[path = "tests/gate_flags.rs"]
+mod gate_flags_tests;
+#[cfg(test)]
 #[path = "tests/interrupt.rs"]
 mod interrupt_tests;
 #[cfg(test)]
