@@ -1,3 +1,4 @@
+use super::flag_gate;
 use crate::catalog::parser;
 use std::fs;
 use std::io;
@@ -27,17 +28,20 @@ pub fn load(root: &Path) -> io::Result<Vec<Gate>> {
                 ),
             ));
         }
-        return Ok(vec![parse(EMBEDDED_TRIVY)?]);
+        return Ok(parse(EMBEDDED_TRIVY)?.into_iter().collect());
     }
     let mut dirs = fs::read_dir(root)?
         .map(|entry| entry.map(|entry| entry.path()))
         .collect::<io::Result<Vec<PathBuf>>>()?;
     dirs.sort();
-    let gates = dirs
+    let gates: Vec<Gate> = dirs
         .into_iter()
         .filter(|path| path.is_dir())
         .map(|path| read(&path.join("index.toml")))
-        .collect::<io::Result<Vec<_>>>()?;
+        .collect::<io::Result<Vec<_>>>()?
+        .into_iter()
+        .flatten()
+        .collect();
     if gates.is_empty() {
         return Err(io::Error::new(
             io::ErrorKind::InvalidData,
@@ -51,20 +55,26 @@ fn configured_root() -> bool {
     std::env::var_os("TERMINAL_JARVIS_GATES").is_some_and(|value| !value.is_empty())
 }
 
-fn read(path: &Path) -> io::Result<Gate> {
+fn read(path: &Path) -> io::Result<Option<Gate>> {
     parse(&fs::read_to_string(path)?)
 }
 
-fn parse(data: &str) -> io::Result<Gate> {
+/// `None` when the gate's optional `flag` key names a flag that is off.
+fn parse(data: &str) -> io::Result<Option<Gate>> {
     let fields = parser::parse(data).map_err(invalid)?;
-    Ok(Gate {
+    if let Some(flag) = parser::optional_string(&fields, "flag").map_err(invalid)? {
+        if !flag_gate::admitted(&flag)? {
+            return Ok(None);
+        }
+    }
+    Ok(Some(Gate {
         name: parser::string(&fields, "name").map_err(invalid)?,
         display: parser::string(&fields, "display").map_err(invalid)?,
         description: parser::string(&fields, "description").map_err(invalid)?,
         binary: parser::string(&fields, "binary").map_err(invalid)?,
         args: parser::list(&fields, "args").map_err(invalid)?,
         install_hint: parser::string(&fields, "install_hint").map_err(invalid)?,
-    })
+    }))
 }
 
 fn invalid(message: String) -> io::Error {

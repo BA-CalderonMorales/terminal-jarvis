@@ -1,0 +1,7 @@
+name = "semgrep"
+display = "Semgrep source analysis"
+description = "Local source rules, including Rust. Requires .terminal-jarvis/semgrep.yml in the workspace. Community Edition and commercial analyses differ. No dependency or secret coverage is implied."
+binary = "semgrep"
+args = ["scan", "--config", ".terminal-jarvis/semgrep.yml", "--metrics", "off", "--disable-version-check", "--jobs", "1", "--max-memory", "512", "--timeout", "5", "--strict", "--error", "--json", "."]
+install_hint = "Install Semgrep separately; create trusted local rules at .terminal-jarvis/semgrep.yml. See https://docs.semgrep.dev/semgrep-ce-overview"
+flag = "scanner-choice"

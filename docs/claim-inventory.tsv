@@ -1,4 +1,25 @@
 subject	field	kind	value	held_by	basis	verdict
+gate:grype	args	execution-shape	["dir:.", "--fail-on", "high", "--output", "json"]	none	assertion	asserted
+gate:grype	binary	identity	grype	none	assertion	asserted
+gate:grype	description	narration	Known dependency vulnerabilities in a local directory. HIGH and CRITICAL findings block. Requires a recognized lockfile for the TJ workspace adapter. No source SAST or infrastructure coverage is implied.	none	assertion	asserted
+gate:grype	display	narration	Grype dependency analysis	none	assertion	asserted
+gate:grype	flag	availability	scanner-choice	none	assertion	asserted
+gate:grype	install_hint	narration	Install Grype separately from https://github.com/anchore/grype; advisory downloads need network access or a prepared cache.	none	assertion	asserted
+gate:grype	name	identity	grype	none	assertion	asserted
+gate:opengrep	args	execution-shape	["scan", "--config", ".terminal-jarvis/semgrep.yml", "--jobs", "1", "--max-memory", "512", "--timeout", "5", "--strict", "--error", "--json", "."]	none	assertion	asserted
+gate:opengrep	binary	identity	opengrep	none	assertion	asserted
+gate:opengrep	description	narration	Local source analysis with Semgrep-style rules, including Rust. Requires .terminal-jarvis/semgrep.yml. Validate rule compatibility for your engine version. No dependency coverage is implied.	none	assertion	asserted
+gate:opengrep	display	narration	Opengrep source analysis	none	assertion	asserted
+gate:opengrep	flag	availability	scanner-choice	none	assertion	asserted
+gate:opengrep	install_hint	narration	Install Opengrep separately from https://github.com/opengrep/opengrep and configure trusted local rules.	none	assertion	asserted
+gate:opengrep	name	identity	opengrep	none	assertion	asserted
+gate:semgrep	args	execution-shape	["scan", "--config", ".terminal-jarvis/semgrep.yml", "--metrics", "off", "--disable-version-check", "--jobs", "1", "--max-memory", "512", "--timeout", "5", "--strict", "--error", "--json", "."]	none	assertion	asserted
+gate:semgrep	binary	identity	semgrep	none	assertion	asserted
+gate:semgrep	description	narration	Local source rules, including Rust. Requires .terminal-jarvis/semgrep.yml in the workspace. Community Edition and commercial analyses differ. No dependency or secret coverage is implied.	none	assertion	asserted
+gate:semgrep	display	narration	Semgrep source analysis	none	assertion	asserted
+gate:semgrep	flag	availability	scanner-choice	none	assertion	asserted
+gate:semgrep	install_hint	narration	Install Semgrep separately; create trusted local rules at .terminal-jarvis/semgrep.yml. See https://docs.semgrep.dev/semgrep-ce-overview	none	assertion	asserted
+gate:semgrep	name	identity	semgrep	none	assertion	asserted
 gate:trivy	args	execution-shape	["fs", "--scanners", "vuln,misconfig", "--severity", "HIGH,CRITICAL", "--exit-code", "1", "--skip-dirs", "node_modules", "--skip-dirs", "target", "--skip-dirs", ".git", "--skip-dirs", "dist", "--skip-dirs", "build", "--skip-dirs", "vendor", "--skip-dirs", ".venv", "--skip-dirs", "venv", "--skip-dirs", "npm", "--skip-dirs", "mutants.out", "--skip-dirs", "mutants.out.old", "--skip-dirs", "graphify-out", "--skip-dirs", "**/~*", "--skip-files", "**/~*", "."]	none	assertion	asserted
 gate:trivy	binary	identity	trivy	none	assertion	asserted
 gate:trivy	description	narration	Scans the current workspace for high and critical vulnerabilities and misconfigurations before a harness command runs. Secret scanning is off (slowest scanner, lowest download risk); dependency and build directories are skipped so the walk stays fast, and Windows delete-pending entries (files and directories whose names start with '~') are skipped so the walk cannot crash on them.	none	assertion	asserted

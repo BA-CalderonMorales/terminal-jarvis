@@ -1,0 +1,5 @@
+name = "scanner-choice"
+default = false
+stage = "labs"
+description = "Offer Semgrep, Opengrep and Grype next to Trivy in security gates."
+since = "0.1.26"
