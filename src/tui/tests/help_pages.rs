@@ -28,7 +28,7 @@ fn every_command_row_is_grouped_once_and_wears_the_table_wording() {
         .iter()
         .flat_map(|(_, cmds)| cmds.iter().copied())
         .collect();
-    for (command, purpose) in ROWS {
+    for (command, _) in ROWS {
         assert_eq!(
             grouped.iter().filter(|name| *name == command).count(),
             1,
