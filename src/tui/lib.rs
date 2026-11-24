@@ -54,3 +54,7 @@ pub fn guard(plain: bool, stdin_terminal: bool, stdout_terminal: bool) -> Result
 #[cfg(test)]
 #[path = "tests/guard.rs"]
 mod tests;
+
+#[cfg(test)]
+#[path = "tests/pages_env.rs"]
+mod pages_env;

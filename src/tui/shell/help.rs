@@ -11,6 +11,9 @@ use crate::tui::screen::{paint, section, Role};
 mod tests;
 
 pub fn text(inner: usize) -> String {
+    if crate::flags::enabled("tui-pages") {
+        return super::help_pages::text(inner);
+    }
     let rows = [
         ("list [filter]", "numbered fleet picker; text narrows it"),
         ("graveyard", "retired harnesses, why, and their successor"),

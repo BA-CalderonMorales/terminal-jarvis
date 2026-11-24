@@ -29,7 +29,7 @@ pub fn header(draft: &Draft, inner: usize, body_rows: usize, compact: bool) -> S
     let mut candidates = vec![format!("{core}{cwd}")];
     candidates.push(core.clone());
     if inner <= 40 {
-        candidates.extend(degraded(&core));
+        candidates.extend(narrow_clauses(&core));
     }
     for candidate in &candidates {
         if canvas::visible_width(candidate) + badge_width <= inner {
@@ -38,6 +38,15 @@ pub fn header(draft: &Draft, inner: usize, body_rows: usize, compact: bool) -> S
     }
     let last = candidates.last().expect("candidates never empty");
     fit(&finish(last, inner, compact), inner)
+}
+
+/// Labs `tui-pages` keeps initials and the verdict; the default keeps the tail.
+fn narrow_clauses(core: &str) -> Vec<String> {
+    if crate::flags::enabled("tui-pages") {
+        super::layout_degrade::candidates(core)
+    } else {
+        degraded(core)
+    }
 }
 
 /// The merged header's tail clauses, shortest first: the verdict clause

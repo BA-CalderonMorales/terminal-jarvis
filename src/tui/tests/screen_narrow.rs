@@ -15,6 +15,7 @@ fn header_keeps_the_verdict_and_drops_the_cwd_when_narrow() {
 
 #[test]
 fn at_forty_columns_whole_clauses_die_and_the_verdict_survives() {
+    let _env = crate::tui::pages_env::set(None);
     let painted = frame(Size { cols: 40, rows: 20 }, &super::tests::draft());
     let first = painted.split('\n').next().unwrap();
     assert!(
@@ -34,6 +35,16 @@ fn at_forty_columns_whole_clauses_die_and_the_verdict_survives() {
         "tagline dies too: {first}"
     );
     assert!(!first.contains('…'), "no mid-segment cut: {first}");
+}
+
+#[test]
+fn with_tui_pages_a_forty_column_header_keeps_initials_and_the_verdict() {
+    let _env = crate::tui::pages_env::set(Some("1"));
+    let painted = frame(Size { cols: 40, rows: 20 }, &super::tests::draft());
+    let first = painted.split('\n').next().unwrap();
+    assert!(first.contains("TJ · READY 1/1 ready"), "{first}");
+    assert!(!first.contains("Terminal"), "{first}");
+    assert!(crate::tui::screen::visible_width(first) <= 40, "{first}");
 }
 
 #[test]

@@ -1,0 +1,5 @@
+name = "tui-pages"
+default = false
+stage = "labs"
+description = "Show the redesigned TUI pages, grouped help and empty-picker guidance."
+since = "0.1.26"

@@ -12,6 +12,8 @@ use std::collections::BTreeSet;
 mod run;
 pub use run::{filter, listing};
 
+#[path = "picker_empty.rs"]
+mod empty;
 #[path = "picker_text.rs"]
 mod text;
 
