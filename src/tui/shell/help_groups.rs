@@ -1,6 +1,6 @@
-//! The grouped help's rows: the keys, then the command table under the groups
-//! a user thinks in. The wording is main's (`help::text`), so only the order
-//! and the grouping live here.
+//! The grouped help's layout: the keys (the tui's own key vocabulary, which
+//! has no table row) and the command groups. Groups name commands only; each
+//! command's wording comes from `help_table`, so nothing is copied here.
 
 pub type Row = (&'static str, &'static str);
 
@@ -14,56 +14,41 @@ pub const KEYS: &[Row] = &[
     ("exit / ctrl-d", "leave the command center"),
 ];
 
-pub const GROUPS: &[(&str, &[Row])] = &[
+pub const GROUPS: &[(&str, &[&str])] = &[
     (
         "Your agents",
         &[
-            ("list [filter]", "numbered fleet picker; text narrows it"),
-            ("graveyard", "retired harnesses, why, and their successor"),
-            ("show <harness>", "one harness in detail"),
-            (
-                "use <harness> | <number> | <name>",
-                "switch the active harness",
-            ),
-            ("run <harness> [args]", "open the harness ui"),
+            "list [filter]",
+            "graveyard",
+            "show <harness>",
+            "use <harness> | <number> | <name>",
+            "run <harness> [args]",
         ],
     ),
     (
         "Preview and change",
         &[
-            ("plan [harness] <cap>", "preview, don't run"),
-            ("install <harness>", "install behind the security gate"),
-            ("uninstall <harness>", "remove a harness and its binary"),
-            ("update <harness>", "update through the same gate"),
+            "plan [harness] <cap>",
+            "install <harness>",
+            "uninstall <harness>",
+            "update <harness>",
         ],
     ),
     (
         "Security and setup",
         &[
-            (
-                "gate [status|enable|disable|run]",
-                "control the optional Trivy gate",
-            ),
-            (
-                "auth | config | cache | security",
-                "inspect local setup and posture",
-            ),
-            (
-                "settings [set <flag> on|off | reset <flag>]",
-                "optional features, on or off",
-            ),
+            "gate [status|enable|disable|run]",
+            "auth | config | cache | security",
+            "settings [set <flag> on|off | reset <flag>]",
         ],
     ),
     (
         "Session",
         &[
-            (
-                "converse <turns> <a> <b> <topic...>",
-                "two agents talk; dangerous plans need --allow-dangerous",
-            ),
-            ("/debug [on|off]", "raw, verbose view"),
-            ("home | clear", "reset the frame"),
-            ("exit | quit", "leave without state changes"),
+            "converse <turns> <a> <b> <topic...>",
+            "/debug [on|off]",
+            "home | clear",
+            "exit | quit",
         ],
     ),
 ];

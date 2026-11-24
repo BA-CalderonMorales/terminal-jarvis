@@ -6,6 +6,7 @@ use crate::tui::screen::{frame, Size};
 
 #[test]
 fn header_keeps_the_verdict_and_drops_the_cwd_when_narrow() {
+    let _env = crate::tui::pages_env::set(None);
     let painted = frame(Size { cols: 60, rows: 20 }, &super::tests::draft());
     let first = painted.split('\n').next().unwrap();
     assert!(first.contains("Terminal Jarvis"), "{first}");
@@ -49,6 +50,7 @@ fn with_tui_pages_a_forty_column_header_keeps_initials_and_the_verdict() {
 
 #[test]
 fn at_sixty_columns_the_modeline_hint_degrades_to_its_primary_clause() {
+    let _env = crate::tui::pages_env::set(None);
     let painted = frame(Size { cols: 60, rows: 20 }, &super::tests::draft());
     let last = painted.split('\n').next_back().unwrap();
     assert!(
@@ -83,6 +85,7 @@ fn the_primer_drops_the_purpose_column_when_narrow() {
 
 #[test]
 fn compact_frames_keep_gate_posture_visible() {
+    let _env = crate::tui::pages_env::set(None);
     for size in [
         Size { cols: 20, rows: 10 },
         Size { cols: 60, rows: 18 },

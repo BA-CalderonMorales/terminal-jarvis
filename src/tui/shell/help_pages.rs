@@ -1,8 +1,10 @@
 //! Grouped help, shown behind the `tui-pages` Labs flag. `help::text` is the
 //! one place that chooses it. The layout: the keys come first, then the
-//! commands under their groups. A narrow frame drops the purpose column
+//! commands under their groups. Command wording is read from `help_table`, the
+//! same rows the flat help prints. A narrow frame drops the purpose column
 //! (and clips a command that is still too wide) rather than wrapping.
 
+use super::help_table;
 use crate::tui::screen::{clip_line, paint, section, Role};
 
 #[path = "help_groups.rs"]
@@ -10,8 +12,26 @@ mod groups;
 
 use groups::{GROUPS, KEYS};
 
+type Row = (&'static str, &'static str);
+
+/// Each group's command rows, in group order, with their table wording.
+/// A command the table lacks is skipped; the tests pin that none is.
+fn grouped() -> Vec<(&'static str, Vec<Row>)> {
+    GROUPS
+        .iter()
+        .map(|(title, commands)| {
+            let rows = commands
+                .iter()
+                .filter_map(|command| Some((*command, help_table::purpose(command)?)))
+                .collect();
+            (*title, rows)
+        })
+        .collect()
+}
+
 pub fn text(inner: usize) -> String {
-    let all = || GROUPS.iter().flat_map(|(_, rows)| rows.iter());
+    let groups = grouped();
+    let all = || groups.iter().flat_map(|(_, rows)| rows.iter());
     let cmd_w = all()
         .map(|(command, _)| command.chars().count())
         .max()
@@ -31,9 +51,9 @@ pub fn text(inner: usize) -> String {
     for (key, purpose) in KEYS {
         body.push_str(&grouped_row(key, purpose, key_w, wide, inner));
     }
-    for (title, rows) in GROUPS {
+    for (title, rows) in &groups {
         body.push_str(&format!("\n{}\n", section(title, Role::Accent, width)));
-        for (command, purpose) in rows.iter() {
+        for (command, purpose) in rows {
             body.push_str(&grouped_row(command, purpose, cmd_w, wide, inner));
         }
     }

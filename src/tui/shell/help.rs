@@ -14,39 +14,7 @@ pub fn text(inner: usize) -> String {
     if crate::flags::enabled("tui-pages") {
         return super::help_pages::text(inner);
     }
-    let rows = [
-        ("list [filter]", "numbered fleet picker; text narrows it"),
-        ("graveyard", "retired harnesses, why, and their successor"),
-        ("show <harness>", "one harness in detail"),
-        ("plan [harness] <cap>", "preview, don't run"),
-        (
-            "use <harness> | <number> | <name>",
-            "switch the active harness",
-        ),
-        ("run <harness> [args]", "open the harness ui"),
-        ("install <harness>", "install behind the security gate"),
-        ("uninstall <harness>", "remove a harness and its binary"),
-        ("update <harness>", "update through the same gate"),
-        (
-            "gate [status|enable|disable|run]",
-            "control the optional Trivy gate",
-        ),
-        (
-            "auth | config | cache | security",
-            "inspect local setup and posture",
-        ),
-        (
-            "settings [set <flag> on|off | reset <flag>]",
-            "optional features, on or off",
-        ),
-        ("/debug [on|off]", "raw, verbose view"),
-        (
-            "converse <turns> <a> <b> <topic...>",
-            "two agents talk; dangerous plans need --allow-dangerous",
-        ),
-        ("home | clear", "reset the frame"),
-        ("exit | quit", "leave without state changes"),
-    ];
+    let rows = super::help_table::ROWS;
     let cmd_w = rows
         .iter()
         .map(|(command, _)| command.chars().count())

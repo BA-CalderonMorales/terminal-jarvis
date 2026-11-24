@@ -12,6 +12,7 @@ mod fleet;
 mod handle;
 pub(crate) mod help;
 mod help_pages;
+mod help_table;
 mod live_nav;
 mod outcome;
 mod picker;
