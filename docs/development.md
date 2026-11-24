@@ -80,6 +80,24 @@ installation syntax, and interactive behavior can differ by operating system;
 Terminal Jarvis reports missing binaries and exposes their planned command
 instead of claiming unsupported combinations work.
 
+## Changelog
+
+A release section is generated, not hand-written. From the previous tag to the
+release commit:
+
+```bash
+python3 scripts/python/release/index.py changelog --since v0.1.25 --version 0.1.26 --date 2026-11-23 > /tmp/section.md
+python3 scripts/python/release/index.py changelog --check --version 0.1.26
+```
+
+The section groups subjects into Breaking (any `!`), Added (`feat`), Changed
+(`perf` and unknown types) and Fixed (`fix` and unpaired reverts). Types `docs`,
+`test`, `ci`, `build`, `chore`, `style` and `refactor` are dropped unless
+breaking. Merge commits are dropped, and a revert pair is removed. Each PR number
+appears once. Paste the output into `CHANGELOG.md` above the previous release.
+`--check` exits nonzero when the heading is missing, and release preflight runs
+it. The generator's unit tests run in `verify` step `[3/12]`.
+
 ## Release Artifacts
 
 Every supported platform publishes a checksummed `.tar.gz` bundle containing the
