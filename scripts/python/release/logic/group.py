@@ -18,18 +18,18 @@ def is_merge(commit: Commit) -> bool:
 
 
 def cancel_reverts(entries: List[Entry]) -> List[Entry]:
-    """Drop each revert together with the earlier commit it undoes.
+    """Drop each revert together with the commit it undoes.
 
-    A revert with no matching commit in the range stays, to be listed.
+    Entries are newest first, so a revert only cancels an older entry (a higher
+    index), and the nearest such match wins. A revert of a revert cancels the
+    revert it undoes, which restores the original. A revert with no match stays.
     """
     cancelled = set()
     for i, revert in enumerate(entries):
-        if not revert.is_revert:
+        if not revert.is_revert or i in cancelled:
             continue
-        for j, original in enumerate(entries):
-            if j in cancelled or j == i or original.is_revert:
-                continue
-            if original.full == revert.revert_of:
+        for j in range(i + 1, len(entries)):
+            if j not in cancelled and entries[j].full == revert.revert_of:
                 cancelled.update({i, j})
                 break
     return [e for k, e in enumerate(entries) if k not in cancelled]

@@ -11,6 +11,7 @@ from logic.group import group
 from logic.parse import FIELD_SEP, RECORD_SEP, Commit, parse_log
 
 VERSION = re.compile(r"^\d+\.\d+\.\d+$")
+DATE = re.compile(r"^\d{4}-\d{2}-\d{2}$")
 
 
 def validate_version(version: str) -> None:
@@ -19,6 +20,8 @@ def validate_version(version: str) -> None:
 
 
 def validate_date(date: str) -> None:
+    if not DATE.match(date):
+        raise ValueError(f"date must be YYYY-MM-DD: {date}")
     try:
         datetime.date.fromisoformat(date)
     except ValueError as error:

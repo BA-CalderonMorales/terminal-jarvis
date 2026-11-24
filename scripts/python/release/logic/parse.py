@@ -58,7 +58,8 @@ def parse_subject(raw: str) -> Entry:
     kind = match.group("type").lower()
     subject, _ = split_pr(match.group("subject"))
     if kind == REVERT_TYPE:
-        return Entry(kind, None, False, subject, pr, subject, text)
+        breaking = match.group("bang") == "!"
+        return Entry(kind, None, breaking, subject, pr, subject, text)
     return Entry(
         kind,
         match.group("scope"),

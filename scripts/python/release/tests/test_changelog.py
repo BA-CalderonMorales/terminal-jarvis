@@ -10,7 +10,12 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-from logic.changelog import build_section, commits_between, has_heading  # noqa: E402
+from logic.changelog import (  # noqa: E402
+    build_section,
+    commits_between,
+    has_heading,
+    validate_date,
+)
 from logic.cli import check  # noqa: E402
 from logic.parse import Commit  # noqa: E402
 
@@ -26,6 +31,12 @@ class SectionTests(unittest.TestCase):
     def test_empty_range_renders_placeholder(self):
         text = build_section([], "1.2.3", "2026-01-01")
         self.assertEqual(text, "## [1.2.3] - 2026-01-01\n\nNo user-facing changes.\n")
+
+    def test_date_must_be_exact_iso_shape(self):
+        validate_date("2026-11-23")
+        for bad in ("20261123", "2026-1-3"):
+            with self.assertRaises(ValueError):
+                validate_date(bad)
 
     def test_bad_date_and_version_are_rejected(self):
         with self.assertRaises(ValueError):
