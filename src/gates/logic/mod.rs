@@ -1,4 +1,5 @@
 pub mod deadline;
+pub mod flag_gate;
 pub mod heartbeat;
 pub mod interrupt;
 pub mod live;

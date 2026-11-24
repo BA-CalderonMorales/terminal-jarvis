@@ -27,3 +27,10 @@ pub fn enabled(name: &str) -> bool {
     debug_assert!(known.is_some(), "flag '{name}' is not declared in flags/");
     known.is_some_and(|entry| entry.enabled)
 }
+
+/// Whether `name` is declared in the registry `enabled` reads. Same source,
+/// so the two cannot disagree; an unreadable registry declares nothing.
+pub fn is_declared(name: &str) -> bool {
+    registry::load(&crate::context::flags_root())
+        .is_ok_and(|flags| flags.iter().any(|flag| flag.name == name))
+}

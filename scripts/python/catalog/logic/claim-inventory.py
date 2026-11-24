@@ -71,6 +71,7 @@ KIND = {
     "sunset_at": "lifecycle",
     "sunset_note": "narration",
     "sunset_replaced_by": "narration",
+    "flag": "availability",
 }
 
 # A mechanism is selected by manifest schema, capability, and support state: the

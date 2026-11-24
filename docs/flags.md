@@ -28,6 +28,12 @@ string literal: the structural test in `tests/flags/` scans `src/` for
 `flags::enabled("<literal>")` and fails when a literal is undeclared or a
 declared flag is never used.
 
+Gate data may name a flag too: `flag = "scanner-choice"` in `gates/<name>/index.toml`
+loads that gate only while the flag is on. The name must be declared, or gate
+loading fails; `flags::is_declared` checks it against the same registry that
+`enabled` reads, and a test checks every bundled gate. When promoting or
+deleting such a flag, also remove its `flag` key from the gate data.
+
 ## Toggle a flag
 
 Highest wins: environment, then the settings file, then the default.
