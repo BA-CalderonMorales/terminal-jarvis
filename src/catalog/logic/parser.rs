@@ -2,6 +2,7 @@ use std::collections::BTreeMap;
 
 #[path = "parser_comment.rs"]
 mod comment;
+pub use comment::strip as strip_comment;
 
 pub type Fields = BTreeMap<String, String>;
 

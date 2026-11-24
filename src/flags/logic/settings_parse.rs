@@ -1,5 +1,6 @@
 //! The strict `settings.toml` reader and writer. Only the `[flags]` table
-//! matters: `name = true|false`. Other tables are skipped; anything else
+//! matters: `name = true|false`. Comments start at a `#` outside quotes.
+//! Other tables are skipped; anything else
 //! malformed makes the whole file fall back to defaults (with a warning).
 
 use crate::flags::constants::fixed::SETTINGS_TABLE;
@@ -11,8 +12,8 @@ pub fn parse(data: &str) -> Result<Choices, String> {
     let mut choices = Choices::new();
     let mut table = None;
     for (index, raw) in data.lines().enumerate() {
-        let line = raw.trim();
-        if line.is_empty() || line.starts_with('#') {
+        let line = crate::catalog::parser::strip_comment(raw).trim();
+        if line.is_empty() {
             continue;
         }
         if let Some(header) = line

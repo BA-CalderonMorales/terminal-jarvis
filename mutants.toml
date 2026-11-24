@@ -40,9 +40,10 @@ exclude_re = [
   "stream\\.rs:19.*replace exit_code -> i32 with",
   # context::write_atomic renames a staged file over the destination, which
   # replaces it on unix; the AlreadyExists arm exists for windows, where rename
-  # cannot replace. The arm is unreachable on a CI runner, so its three mutants
-  # cannot be killed here. Re-anchor if the arm moves.
-  "src/context/logic/atomic\\.rs:23:.*",
+  # cannot replace. A Linux rename never reports AlreadyExists, so the guard's
+  # `false` mutant is equivalent there. The `true` and `!=` mutants are killed
+  # by the directory-destination test. Re-anchor if the guard moves.
+  "src/context/logic/atomic\\.rs:23:23: replace match guard error\\.kind\\(\\) == io::ErrorKind::AlreadyExists with false in write_atomic",
   # bounded_join's grace loop compares the clock against a 500ms deadline; `<`
   # and `<=` differ only when a child finishes exactly at that boundary, a
   # race no deterministic test can win, and the joined output is identical

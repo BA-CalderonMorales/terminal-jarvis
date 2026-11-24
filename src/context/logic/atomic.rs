@@ -30,3 +30,7 @@ pub fn write_atomic(path: &Path, contents: &str) -> io::Result<()> {
         }
     }
 }
+
+#[cfg(test)]
+#[path = "../tests/atomic.rs"]
+mod context_atomic_tests;

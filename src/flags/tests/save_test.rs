@@ -47,3 +47,16 @@ fn concurrent_saves_never_lose_a_choice() {
     }
     assert_eq!(load_choices(&home).len(), 8);
 }
+
+#[test]
+fn inline_comments_on_headers_and_values_keep_every_choice() {
+    let data = "# settings\n[flags] # mine\nwild-idea = true # try this feature\n\
+                calm-mode = false\n[other]\nnote = \"a # b\" # c\n";
+    let choices = parse_choices(data).unwrap();
+    assert_eq!(choices.len(), 2);
+    assert!(choices["wild-idea"]);
+    assert!(!choices["calm-mode"]);
+    let home = temp("inline");
+    fs::write(settings_path(&home), data).unwrap();
+    assert_eq!(load_choices(&home).len(), 2);
+}
