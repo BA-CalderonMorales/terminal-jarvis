@@ -6,6 +6,7 @@ use crate::tui::screen::{frame, Size};
 
 #[test]
 fn header_keeps_the_verdict_and_drops_the_cwd_when_narrow() {
+    let _env = crate::tui::pages_env::set(None);
     let painted = frame(Size { cols: 60, rows: 20 }, &super::tests::draft());
     let first = painted.split('\n').next().unwrap();
     assert!(first.contains("Terminal Jarvis"), "{first}");
@@ -15,6 +16,7 @@ fn header_keeps_the_verdict_and_drops_the_cwd_when_narrow() {
 
 #[test]
 fn at_forty_columns_whole_clauses_die_and_the_verdict_survives() {
+    let _env = crate::tui::pages_env::set(None);
     let painted = frame(Size { cols: 40, rows: 20 }, &super::tests::draft());
     let first = painted.split('\n').next().unwrap();
     assert!(
@@ -37,7 +39,18 @@ fn at_forty_columns_whole_clauses_die_and_the_verdict_survives() {
 }
 
 #[test]
+fn with_tui_pages_a_forty_column_header_keeps_initials_and_the_verdict() {
+    let _env = crate::tui::pages_env::set(Some("1"));
+    let painted = frame(Size { cols: 40, rows: 20 }, &super::tests::draft());
+    let first = painted.split('\n').next().unwrap();
+    assert!(first.contains("TJ · READY 1/1 ready"), "{first}");
+    assert!(!first.contains("Terminal"), "{first}");
+    assert!(crate::tui::screen::visible_width(first) <= 40, "{first}");
+}
+
+#[test]
 fn at_sixty_columns_the_modeline_hint_degrades_to_its_primary_clause() {
+    let _env = crate::tui::pages_env::set(None);
     let painted = frame(Size { cols: 60, rows: 20 }, &super::tests::draft());
     let last = painted.split('\n').next_back().unwrap();
     assert!(
@@ -72,6 +85,7 @@ fn the_primer_drops_the_purpose_column_when_narrow() {
 
 #[test]
 fn compact_frames_keep_gate_posture_visible() {
+    let _env = crate::tui::pages_env::set(None);
     for size in [
         Size { cols: 20, rows: 10 },
         Size { cols: 60, rows: 18 },

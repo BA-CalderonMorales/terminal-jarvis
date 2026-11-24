@@ -12,6 +12,9 @@ mod art;
 #[path = "logic/layout.rs"]
 mod layout;
 
+#[path = "logic/layout_degrade.rs"]
+mod layout_degrade;
+
 #[path = "logic/modeline.rs"]
 mod modeline;
 

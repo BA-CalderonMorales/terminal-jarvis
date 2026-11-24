@@ -26,6 +26,7 @@ fn geometry(cols: u8, rows: u8) -> Size {
 
 #[test]
 fn frames_hold_geometry_properties() {
+    let _env = crate::tui::pages_env::set(None);
     quickcheck::quickcheck(frames_fit_their_size as fn(u8, u8) -> bool);
 }
 

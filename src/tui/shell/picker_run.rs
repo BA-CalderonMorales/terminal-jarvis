@@ -75,7 +75,7 @@ pub fn choose(
     let mut picker = Picker::new(harnesses, active, ready, filter);
     loop {
         let size = size();
-        let rows = picker.rows(size.inner_cols());
+        let rows = super::empty::painted(&picker, size.inner_cols());
         let mut draft = state.base_draft(HINT, &rows, false);
         draft.offset = picker.offset(size.body_rows());
         draft.prompt = format!("filter> {}", picker.filter);
